@@ -1,0 +1,14 @@
+
+[ClassVersion("1.0.0"),FriendlyName("xGroup")] 
+class MSFT_xGroupResource : OMI_BaseResource
+{
+  [Key] string GroupName;
+  [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [write] string Description;
+  [write] string Members[];
+  [write] string MembersToInclude[];
+  [write] string MembersToExclude[];
+  [write,EmbeddedInstance("MSFT_Credential")] string Credential;
+};
+
+

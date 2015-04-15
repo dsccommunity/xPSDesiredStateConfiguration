@@ -1,0 +1,15 @@
+[ClassVersion("1.0.0.0"),FriendlyName("xArchive")] 
+class MSFT_xArchive : OMI_BaseResource
+{
+  [Key] string Destination;
+  [required,Description("Represnts the source path to one or more files or directories.\n")] string Path[];
+  [write,Description("Specifies values that indicate whether a compression operation emphasizes speed or compression size.\nOptimal {default} \n"), ValueMap{"Optimal", "NoCompression", "Fastest"},Values{"Optimal", "NoCompression", "Fastest"}] string CompressionLevel;
+  [write,Description("An enumerated value that describes if the Destination path points to a File or Directory. If Directory is specified then the archive file contents would be expanded to the specified path on the other hand if File is specified, an archive file would be created at the specified destination path.\nDirectory {default} \n"),ValueMap{"File", "Directory"},Values{"File", "Directory"}] string DestinationType;
+  [write,Description("An boolean value to indicate if the destination contents have to be always kept in sync with the files or directories specified in the source path.\n")] boolean MatchSource;
+  [read,Description("Specifies the local time at which the file or directory was created in datetime format.\n")] datetime CreationTime;
+  [read,Description("Specifies the attributes of the file or directory in string format.\n")] string Attributes;
+  [read,Description("Specifies the mode of the file or directory.\n")] string Mode;
+  [read,Description("Specifis the size of the file or directory in bytes.\n")] uint64 Size;        
+};
+
+

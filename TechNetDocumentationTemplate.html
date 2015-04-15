@@ -1,0 +1,460 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<body>
+    <div id="longDesc">
+
+        <div id="longDesc">
+            <span style="font-family:Calibri; font-size:medium">
+                <h1 style="font-family:Calibri Light; color:#2e74b5; font-size:large">Introduction</h1>
+                <p>
+                    The<strong> xPSDesiredStateConfiguration</strong> module is a part of the Windows PowerShell Desired State Configuration (DSC) Resource Kit, which is a collection of DSC Resources produced by the PowerShell Team. This module contains the
+                    <strong>xDscWebService , xWindowsProcess, xService, xPackage, xRemoteFile,</strong> and <strong>xGroup</strong> resources, and
+                    <strong>xFileUpload</strong> composite resource. Please see the Details section for more information on the functionalities provided by these resources.
+                </p>
+                <p>
+                    <strong>All of the resources in the DSC Resource Kit are provided AS IS, and are not supported through any Microsoft standard support program or service. The &quot;x&quot; in xPSDesiredStateConfiguration stands for experimental</strong>, which means that these resources
+                    will be <strong>fix forward</strong> and monitored by the module owner(s).
+                </p>
+                <p>Please leave comments, feature requests, and bug reports in the Q &amp; A tab for this module.</p>
+                <p>
+                    If you would like to modify <strong>xPSDesiredStateConfiguration</strong> module, feel free. When modifying, please update the module name, resource friendly name, and MOF class name (instructions below). As specified in the license, you may copy or modify
+                    this resource as long as they are used on the Windows Platform.
+                </p>
+                <p>
+                    For more information about Windows PowerShell Desired State Configuration, check out the blog posts on the
+                    <a href="http://blogs.msdn.com/b/powershell/"><span style="color:#0000ff">PowerShell Blog</span></a> (<a href="http://blogs.msdn.com/b/powershell/archive/2013/11/01/configuration-in-a-devops-world-windows-powershell-desired-state-configuration.aspx"><span style="color:#0000ff">this</span></a>
+                    is a good starting point). There are also great community resources, such as <a href="http://powershell.org/wp/tag/dsc/">
+                        <span style="color:#0000ff">PowerShell.org</span>
+                    </a>, or <a href="http://www.powershellmagazine.com/tag/dsc/">
+                        <span style="color:#0000ff">PowerShell Magazine</span>
+                    </a>. For more information on the DSC Resource Kit, check out
+                    <a href="http://go.microsoft.com/fwlink/?LinkID=389546"><span style="color:#0000ff">this blog post</span></a>.
+                </p>
+                <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Installation</h1>
+                <p>To install <strong>xPSDesiredStateConfiguration</strong> module</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>Unzip the content under $env:ProgramFiles\WindowsPowerShell\Modules folder </li>
+                </ul>
+                <p>To confirm installation:</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        Run <strong>Get-DSCResource</strong> to see that <strong>xDscWebService , xWindowsProcess, xService, xRemoteFile, xPackage, xGroup and xFileUpload</strong> are among the DSC Resources listed
+                    </li>
+                </ul>
+                <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Requirements</h1>
+                <p>
+                    This module requires the latest version of PowerShell (v4.0, which ships in Windows 8.1 or Windows Server 2012R2). To easily use PowerShell 4.0 on older operating systems,
+                    <a href="http://www.microsoft.com/en-us/download/details.aspx?id=40855"><span style="color:#0000ff">install WMF 4.0</span></a>. Please read the installation instructions that are present on both the download page and the release notes for WMF 4.0.
+                </p>
+                <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Description</h1>
+                <p>
+                    The <strong>xPSDesiredStateConfiguration </strong>module contains the <strong>
+                        xDscWebService , xWindowsProcess, xService, xPackage, xRemoteFile, xGroup, and xFileUpload
+                    </strong> DSC Resources. The xDscWebService resource allows the configuration of a OData endpoint for DSC Service to make a node a DSC Pull Server. The xWindowsProcess resource
+                    is an enhancement to the inbox WindowsProcess resource and allows you to run a process under the context of a user. (Note that the user needs to log in at least once so that his profile is present on the system.) The xService resource is also an enhancement
+                    on the inbox and allows you to create and delete a service . xRemoteFile allows to download file from HTTP or HTTPS location to local destination. It provides possibility to specify user agent and headers when sending a web request. xFileUpload is a composite
+                    resource which allows to upload file from local machine to the SMB share. xPackage resource allows installation of .msi and .exe software installations. xGroup extends the in-box Group resource with support for cross-domain account resolution and UPN names.
+                </p>
+                <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Details</h1>
+                <p><strong>xDscWebService</strong> resource has following properties:</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <strong>EndpointName</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The desired web service name
+                    </li>
+                    <li>
+                        <strong>CertificateThumbPrint</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Certificate thumbprint for creating HTTPS endpoint
+                    </li>
+                    <li>
+                        <strong>Port</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Port
+                        for web service
+                    </li>
+                    <li>
+                        <strong>PhysicalPath</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Folder location where content of web service resides
+                    </li>
+                    <li>
+                        <strong>State</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>State
+                        of the web service - Started or Stopped
+                    </li>
+                    <li>
+                        <strong>ModulePath</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Folder location where DSC Resources are stored
+                    </li>
+                    <li>
+                        <strong>ConfiguraitonPath</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Folder location where DSC Configurations are stored
+                    </li>
+                    <li>
+                        <strong>IsComplianceServer</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Should the web service endpoint expose compliance data
+                    </li>
+                    <li>
+                        <strong>Ensure</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Should
+                        the web service be created or deleted
+                    </li>
+                </ul>
+                <p>Some of the properties of the <strong>xWindowsProcess</strong> resource are enumerate below. For a complete list, please use Get-DscResource</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <strong>Path</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The full path or the process executable
+                    </li>
+                    <li>
+                        <strong>Arguments</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>This is a mandatory parameter for passing in arguments to the process executable. Specify an empty string if you don't want to pass any arguments
+                    </li>
+                    <li>
+                        <strong>Credential</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The credentials of the user under who's context you want to run the process.
+                    </li>
+                    <li>
+                        <strong>Ensure</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>An enumeration stating if the process needs to be running or stopped
+                    </li>
+                </ul>
+                <p>Some of the properties of the <strong>xService</strong> resource are enumerate below. For a complete list, please use Get-DscResource</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <strong>Name</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The name for the service
+                    </li>
+                    <li>
+                        <strong>Ensure</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent')
+                    </li>
+                    <li>
+                        <strong>Path</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The path to the service executable file. This is a requied parameter if Ensure is set to true
+                    </li>
+                </ul>
+                <p><strong>xRemoteFile</strong> resource has following properties:</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">DestinationPath:</span>Path under which downloaded file should be accessible after operation
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">Uri:</span>Uri of a file which should be downloaded
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">UserAgent:</span>User agent for the web request
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">Headers:</span>Headers of the web request
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">Credential:</span>Specifies credential of a user which has permissions to send the request
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">Ensure:</span>Says whether DestinationPath exists on the machine
+                    </li>
+                </ul>
+                <p><strong>xFileUpload</strong> resource has following properties:</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">DestinationPath:</span>Path under which file should be accessible after uploading
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">SourcePath:</span>Path to the file which should be uploaded
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">Credential:</span>PSCredential object with to access DestinationPath. Username in domain\user format.
+                    </li>
+                    <li>
+                        <span style="width:200px; float:left; font-weight:bold">CertificateThumbprint:</span>Thumbprint of the certificate which should be used for encryption/decryption
+                    </li>
+                </ul>
+                <p>&nbsp;The properties of the <strong>xPackage</strong> resource are enumerated below. For a complete list, please use Get-DscResource</p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <strong>Ensure</strong>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span>&nbsp;An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent') &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    </li>
+                    <li>
+                        <strong>Name</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The
+                            name of the package.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </span>
+                    </li>
+                    <li>
+                        <strong>Path</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            The source path for the package.
+                        </span>
+                    </li>
+                    <li>
+                        <strong>ProductId</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The product id of the package. Usually
+                            a GUID value.
+                        </span>
+                    </li>
+                    <li>
+                        <strong>Arguments</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Command line arguments passed on the installation
+                            command line.
+                        </span>
+                    </li>
+                    <li>
+                        <strong>Credential</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Credentials necessary to access the Path.</span>
+                    </li>
+                    <li>
+                        <strong>ReturnCode</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An array of return codes that are returned after a successful
+                            installation.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </span>
+                    </li>
+                    <li>
+                        <strong>LogPath</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The destination
+                            path of the log.
+                        </span>
+                    </li>
+                    <li>
+                        <strong>PackageDescription</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A text description of the package being installed.</span>
+                    </li>
+                    <li>
+                        <strong>Publisher</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Publisher's name.</span>
+                    </li>
+                    <li>
+                        <strong>InstalledOn</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date of installation.</span>
+                    </li>
+                    <li>
+                        <strong>Size</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            Size of the installation.
+                        </span>
+                    </li>
+                    <li>
+                        <strong>Version</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Version
+                            of the package.
+                        </span>
+                    </li>
+                    <li>
+                        <strong>Installed</strong>: <span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Is the package
+                            installed?
+                        </span>
+                    </li>
+                    <li>
+                        <strong>RunAsCredential</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Credentials to run under when installing the package.</span>
+                    </li>
+                    <li>
+                        <strong>InstalledCheckRegKey</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Registry key to open to check for package installation status.</span>
+                    </li>
+                    <li>
+                        <strong>InstalledCheckRegValueName</strong>: Registry value name to check for package installation status.
+                    </li>
+                    <li>
+                        <strong>InstalledCheckRegValueData</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Value to compare against the retrieved value to check for package installation.</span>
+                    </li>
+                </ul>
+
+                <p>The <strong>xGroup</strong> resource extends the in-box Group resource by supporting cross-domain account lookup where a valid trust relationship exists.  
+                In addition, limited support for UPN-formatted names are supported for identifying user, computer, and group domain-based accounts.  The properties of the xGroup 
+                resource are identical to the in-box resource and include the following: </p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>
+                        <strong>GroupName</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The name of the group for which you want to ensure a specific state
+                    </li>
+                    <li>
+                        <strong>Ensure</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>An enumeration stating if the group should be Present (default)or Absent.
+                    </li>
+                    <li>
+                        <strong>Description</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Description of the group. 
+                    </li>
+                    <li>
+                        <strong>Members</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>The members that form the group. 
+                        <ul style="list-style-type:disc; direction:ltr">
+                            <li>
+                                    <strong>Important</strong> ......................If the group already exists, the listed items in this property replaces what is in the Group.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>MembersToInclude</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>List of users to add to the group. 
+                        <ul style="list-style-type:disc; direction:ltr">
+                            <li>
+                                <strong>Important</strong> ......................This property is ignored if 'Members' is specified. 
+                            </li>
+                        </ul>    
+                    </li>
+                    <li>
+                        <strong>MembersToExclude</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>List of users you want to ensure are not members of the group. 
+                        <ul style="list-style-type:disc; direction:ltr">
+                            <li>
+                                <strong>Important</strong> ......................This property is ignored if 'Members' is specified.
+                            </li>
+                        </ul>  
+                    </li>
+                    <li>
+                        <strong>Credential</strong>: <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Indicates the credentials required to access remote resources. 
+                        <ul style="list-style-type:disc; direction:ltr">
+                            <li>
+                                <strong>Important</strong> ......................This account must have the appropriate Active Directory permissions to add all non-local accounts to the group; otherwise, an error will occur.
+                            </li>
+                        </ul>  
+                    </li>
+                </ul>
+                <p>Local accounts may be specified in one of the following ways:</p>
+                <ul style ="list-style-type:disc; direction:ltr">
+                    <li>The simple name of the account of the group or local user.</li>
+                    <li>The account name scoped to the explicit machine name; such as myserver\users or myserver\username</li>
+                    <li>The account name scoped using the explicit local machine qualifier; such as .\users or .\username</li>
+                </ul>
+                <p>Domain members may be specified using domain\name or Universal Principal Name (UPN) formatting. The following illustrates the various formats </p>
+                <ul style="list-style-type:disc; direction:ltr">
+                    <li>Domain joined machines: mydomain\myserver or myserver@mydomain.com</li>
+                    <li>Domain user accounts: mydomain\username or username@mydomain.com</li>
+                    <li>Domain group accounts: mydomain\groupname or groupname@mydomain.com</li>
+                </ul>
+
+
+                    <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Renaming Requirements</h1>
+                    <p>When making changes to these resources, we suggest the following practice:</p>
+                    <ol style="list-style-type:decimal; direction:ltr">
+                        <li>
+                            Update the following names by replacing MSFT with your company/community name and replacing the
+                            <strong>&quot;x&quot;</strong> with <strong>&quot;c&quot;</strong> (short for &quot;Community&quot;) or another prefix of your choice:
+                            <ul>
+                                <li>
+                                    <strong>Module name (ex: xPSDesiredStateConfiguration</strong> becomes <strong>
+                                        cPSDesiredStateConfiguration
+                                    </strong>)
+                                </li>
+                                <li>
+                                    <strong>Resource folder (ex: MSFT_DscWebService</strong> becomes <strong>Contoso_cDscWebService</strong>)
+                                </li>
+                                <li>
+                                    <strong>Resource Name (ex: MSFT_DscWebService</strong> becomes <strong>Contoso_cDscWebService</strong>)
+                                </li>
+                                <li>
+                                    <strong>Resource Friendly Name (ex: DscWebService</strong> becomes <strong>cDscWebService</strong>)
+                                </li>
+                                <li>
+                                    <strong>MOF class name (ex: MSFT_DscWebService</strong> becomes <strong>Contoso_cDscWebService</strong>)
+                                </li>
+                                <li>
+                                    <strong>Filename for the &lt;resource&gt;.schema.mof (ex: MSFT_DscWebService</strong>.schema.mof becomes
+                                    <strong>Contoso_cDscWebService</strong>.schema.mof)
+                                </li>
+                            </ul>
+                        </li>
+                        <li>Update module and metadata information in the module manifest </li>
+                        <li>Update any configuration that use these resources </li>
+                    </ol>
+                    <p>
+                        <em>
+                            We reserve resource and module names without prefixes (&quot;x&quot; or &quot;c&quot;) for future use (e.g. &quot;MSFT_DscWebService&quot; or &quot;DscWebService&quot;). If the next version of Windows Server ships with a &quot;DscWebService&quot; resource, we don't want to break any configurations that
+                            use any community modifications. Please keep a prefix such as &quot;c&quot; on all community modifications.
+                        </em>
+                    </p>
+                    <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Versions</h1>
+                    <p>3.0.3.4</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Multiple issues addressed 
+                            <ul>
+                                <li>Corrected output type for set- & test-targetresource functions in xWebSite, xPackage, xArchive, xGroup, xProcess, xService</li>
+                                <li>xRemoteFile modified to support creating a directory that does not exist when specified, ensuring idempotency. Also improved error messages.</li>
+                                <li>xDSCWebService updated so that Get-TargetResource returns the OData Endpoint Url correctly</li> 
+                                <li>xWindowsOptionalFeature, fixed Test-TargetResource issue requiring Ensure=True. </li><ul><strong>NOTE: this change requires the previous Ensure values of Enable and Disable to change to Present and Absent</strong></ul>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <p>3.0.2.0</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Adding following resources:
+                            <ul>
+                                <li>xGroup</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>3.0.1.0</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Adding following resources:
+                            <ul>
+                                <li>xFileUpload </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>2.0.0.0</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Adding following resources:
+                            <ul>
+                                <li>xWindowsProcess </li>
+                                <li>xService </li>
+                                <li>xRemoteFile </li>
+                                <li>xPackage </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>1.1.0.0</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Fix to remove and recreate the SSL bindings when performing a new HTTPS IIS Endpoint setup
+                        </li>
+                        <li>Fix in the resource module to consume WebSite Name parameter correctly </li>
+                    </ul>
+                    <p>1.0.0.0</p>
+                    <ul style="list-style-type:disc; direction:ltr">
+                        <li>
+                            Initial release with the following resources
+                            <ul style="list-style-type:circle">
+                                <li>DscWebService </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h1 style="margin-bottom:0pt; font-family:Calibri Light; color:#2e74b5; font-size:large">
+                        Example: Change the Name and the Workgroup Name
+                    </h1>
+                    This configuration will set a machine name and changes the workgroup it is in.
+                    <p>&nbsp;</p>
+                    <h1 style="margin-bottom:0pt; font-family:Calibri Light; color:#2e74b5; font-size:large">
+                        Example: Switch from a Workgroup to a Domain
+                    </h1>
+                    This configuration sets the machine name and joins a domain.<br>
+                    <em>Note: this requires a credential.</em>
+                    <p>&nbsp;</p>
+                    <h1 style="color:#2e74b5; font-family:Calibri Light; font-size:large">Example: Change the Name while staying on the Domain</h1>
+                    This example will change the machines name while remaining on the domain.<br>
+                    <em>Note: this requires a credential.</em>
+                    <p>&nbsp;</p>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Change the Name while staying on the Workgroup
+                    </h1>
+                    This example will change the machines name while remaining on the workgroup.
+                    <p>&nbsp;</p>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Switch from a Domain to a Workgroup
+                    </h1>
+                    This example switches the computer from a domain to a workgroup.<br>
+                    <em>Note: this requires a credential</em>.
+                    <p>&nbsp;</p>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Download file from uri. Specify headers and user agent.
+                    </h1>
+                    This configuration will download file from specific uri to DestinationPath. Web request will contain specific headers and will be sent as a specified user agent.
+                    <br>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Upload file to SMB share.
+                    </h1>
+                    This configuration will upload file from SourcePath to the remote DestinationPath. Username and password will be used to access the DestinationPath
+                    <br>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Sample1.ps1 installs a package that uses an .exe file.
+                    </h1>
+                    This configuration will install a the .exe package verifying the package using the package name.
+                    <br>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Sample1.ps2 installs a package that uses an .exe file.
+                    </h1>
+                    This configuration will install a the .exe package and verify the package using the product id and package name .
+                    <br>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Sample1.ps3 installs a package that uses an .msi file.
+                    </h1>
+                    This configuration will install a the .msi package and verify the package using the product id and package name and requires credentials to read the share and install the package.
+                    <br>
+                    <h1 style="margin-bottom:0pt; color:#2e74b5; font-family:Calibri Light; font-size:large">
+                        Example: Sample1.ps4 installs a package that uses an .exe file.
+                    </h1>
+                    This configuration will install a the .exe package and verify the package using the product id and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.<br>
+</span>
+        </div>
+
+    </div>
+</body>
+</html>
