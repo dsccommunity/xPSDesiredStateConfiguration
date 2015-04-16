@@ -111,8 +111,10 @@ function Set-TargetResource
     $eseprovider = "ESENT";
     $esedatabase = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Devices.edb";
 
-    $culture = Get-Culture
-    $language = $culture.TwoLetterISOLanguageName
+    #$culture = Get-Culture
+    #$language = $culture.TwoLetterISOLanguageName
+    # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
+    $language = 'en'
 
     $os = [System.Environment]::OSVersion.Version
     $IsBlue = $false;
@@ -161,8 +163,11 @@ function Set-TargetResource
     if ($IsBlue)
     {
         Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+        #PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+        #PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+        #ESE database is not present in current build
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
