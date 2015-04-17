@@ -17,9 +17,15 @@ class MSFT_xPackageResource : OMI_BaseResource
   [read] string Version;
   [read] boolean Installed;
   [write,EmbeddedInstance("MSFT_Credential")] string RunAsCredential;
+  [write] string FileHash;
+  [write,ValueMap{"SHA1","SHA256","SHA384","SHA512","MD5","RIPEMD160"},Values{"SHA1","SHA256","SHA384","SHA512","MD5","RIPEMD160"}] string HashAlgorithm;
+  [write] string SignerSubject;
+  [write] string SignerThumbprint;
+  [write] string ServerCertificateValidationCallback;
   [write] string InstalledCheckRegKey;
   [write] string InstalledCheckRegValueName;
   [write] string InstalledCheckRegValueData;
 };
+
 
 
