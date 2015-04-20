@@ -49,7 +49,7 @@ For a complete list of properties, please use Get-DscResource
 * **Ensure**: An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent') 
 * **Path**: The path to the service executable file. This is a requied parameter if Ensure is set to true 
 
-**xRemoteFile
+### xRemoteFile
 
 * **DestinationPath**: Path where the remote file should be downloaded.
 * **Uri**: URI of the file which should be downloaded.
