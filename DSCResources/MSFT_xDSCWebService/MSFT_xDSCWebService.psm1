@@ -84,7 +84,7 @@ function Set-TargetResource
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]                            
+        [ValidateNotNullOrEmpty()]                         
         [string]$CertificateThumbPrint,
 
         [ValidateSet("Present", "Absent")]
@@ -100,7 +100,10 @@ function Set-TargetResource
         [string]$ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
         # Is the endpoint for a DSC Compliance Server
-        [boolean] $IsComplianceServer
+        [boolean] $IsComplianceServer,
+
+        # Certificate subject to search for
+        [string]$CertificateSubject
     )
 
     # Initialize with default values        
@@ -134,6 +137,12 @@ function Set-TargetResource
         $svcFileName = "$pathPullServer\PSDSCComplianceServer.svc"
         $pswsMofFileName = "$pathPullServer\PSDSCComplianceServer.mof"
         $pswsDispatchFileName = "$pathPullServer\PSDSCComplianceServer.xml"
+    }
+
+    # If CertificateSubject is given, filter for the newest cert with that name and set CertificateThumbprint
+    if ($CertificateSubject)
+    {
+        $CertificateThumbprint = Find-CertificateThumbprintFromSubject $CertificateSubject
     }
                 
     Write-Verbose "Create the IIS endpoint"    
@@ -196,14 +205,14 @@ function Set-TargetResource
 
         $null = New-Item -path "$ModulePath" -itemType "directory" -Force
 
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ModulePath" -value $ModulePath    
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ModulePath" -value $ModulePath	
     }
 }
 
 # The Test-TargetResource cmdlet.
 function Test-TargetResource
 {
-    [OutputType([Boolean])]
+	[OutputType([Boolean])]
     param
     (
         # Prefix of the WCF SVC File
@@ -219,8 +228,8 @@ function Test-TargetResource
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]                            
-        [string]$CertificateThumbPrint = "AllowUnencryptedTraffic",
+        [ValidateNotNullOrEmpty()]                         
+        [string]$CertificateThumbprint = "AllowUnencryptedTraffic",
 
         [ValidateSet("Present", "Absent")]
         [string]$Ensure = "Present",
@@ -235,13 +244,21 @@ function Test-TargetResource
         [string]$ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
         # Is the endpoint for a DSC Compliance Server
-        [boolean] $IsComplianceServer
+        [boolean] $IsComplianceServer,
+
+        # Certificate subject to search for
+        [string]$CertificateSubject
     )
 
     $desiredConfigurationMatch = $true;
 
     $website = Get-Website -Name $EndpointName
     $stop = $true
+
+    if ($CertificateSubject)
+    {
+        $CertificateThumbprint = Find-CertificateThumbprintFromSubject $CertificateSubject
+    }
 
     Do
     {
@@ -259,6 +276,15 @@ function Test-TargetResource
         {
             $DesiredConfigurationMatch = $false
             Write-Verbose "Port for the Website $EndpointName does not match the desired state."
+            break       
+        }
+
+        Write-Verbose "Check Certificate"
+        $SSLBinding = Get-ChildItem IIS:\SSLBindings\ | ? {$_.Sites -eq 'PSDSCPullServer'}
+        if ($SSLBinding.thumbprint -ne $CertificateThumbprint)
+        {
+            $DesiredConfigurationMatch = $false
+            Write-Verbose "Certificate for the Website $EndpointName does not match the desired state."
             break       
         }
 
@@ -406,7 +432,7 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
         [String] $WebSite,
 
         # Authentication Type
-        [ValidateSet('anonymous', 'basic', 'windows')]        
+        [ValidateSet('anonymous', 'basic', 'windows')]		
         [String] $Authentication
     )
 
@@ -420,6 +446,24 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
     $appHostConfigSection = $appHostConfig.GetSection("system.webServer/security/authentication/$authenticationType", $WebSite)
     $appHostConfigSection.OverrideMode="Allow"
     $webAdminSrvMgr.CommitChanges()
+}
+
+# Helper function to filter for valid certificates that match a subject and return the newest valid
+function Find-CertificateThumbprintFromSubject
+{
+    param (
+    [string]$CertificateSubject
+    )
+    
+    $cert = Get-ChildItem Cert:\LocalMachine\my | ? {$_.Subject -eq $CertificateSubject} | ? {$_.NotBefore -lt (get-date) -and $_.NotAfter -gt (get-date)} | Sort-Object NotBefore -Descending | Select -first 1
+    if ($cert)
+    {
+        $cert.Thumbprint
+    }
+    else
+    {
+        Throw "There are no valid certificates available that match the subject `"$CertificateSubject`""
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource
