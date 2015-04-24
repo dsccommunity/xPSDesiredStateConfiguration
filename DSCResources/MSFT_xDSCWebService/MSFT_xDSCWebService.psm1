@@ -111,10 +111,12 @@ function Set-TargetResource
     $eseprovider = "ESENT";
     $esedatabase = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Devices.edb";
 
-    #$culture = Get-Culture
-    #$language = $culture.TwoLetterISOLanguageName
+    $culture = Get-Culture
+    $language = $culture.TwoLetterISOLanguageName
     # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
-    $language = 'en'
+    if (-not (Test-Path $pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
+        $language = 'en'
+    }
 
     $os = [System.Environment]::OSVersion.Version
     $IsBlue = $false;
