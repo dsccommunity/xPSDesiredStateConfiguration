@@ -221,7 +221,7 @@ function Set-TargetResource
 
         $null = New-Item -path "$ModulePath" -itemType "directory" -Force
 
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ModulePath" -value $ModulePath	
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ModulePath" -value $ModulePath
 
         $null = New-Item -path "$RegistrationKeyPath" -itemType "directory" -Force
 
@@ -248,7 +248,7 @@ function Set-TargetResource
 # The Test-TargetResource cmdlet.
 function Test-TargetResource
 {
-	[OutputType([Boolean])]
+    [OutputType([Boolean])]
     param
     (
         # Prefix of the WCF SVC File
@@ -543,7 +543,7 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
         [String] $WebSite,
 
         # Authentication Type
-        [ValidateSet('anonymous', 'basic', 'windows')]		
+        [ValidateSet('anonymous', 'basic', 'windows')]
         [String] $Authentication
     )
 
