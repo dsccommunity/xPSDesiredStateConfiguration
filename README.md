@@ -120,6 +120,15 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 ## Versions
 
+### 3.2.0.0
+
+* xArchive:
+    - Fix problems with file names containing square brackets.
+* xDSCWebService:
+    - Fix default culture issue.
+* xPackage:
+    - Security enhancements.
+
 ### 3.0.3.4
 
 * Multiple issues addressed 
