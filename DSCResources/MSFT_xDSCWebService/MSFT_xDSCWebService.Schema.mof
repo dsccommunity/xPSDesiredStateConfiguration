@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0"), FriendlyName("xDSCWebService")] 
+﻿[ClassVersion("1.0.0"), FriendlyName("xDSCWebService")] 
 class MSFT_xDSCWebService : OMI_BaseResource
 {
   [Key] string EndpointName;
@@ -11,5 +11,6 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [write] string ConfigurationPath;
   [write] boolean IsComplianceServer;
   [read] string DSCServerUrl;  
+  [write] string RegistrationKeyPath;
+  [write] boolean AcceptSelfSignedCertificates;
 };
-

@@ -1,7 +1,7 @@
-# This module file contains a utility to perform PSWS IIS Endpoint setup
+﻿# This module file contains a utility to perform PSWS IIS Endpoint setup
 # Module exports New-PSWSEndpoint function to perform the endpoint setup
 #
-#    Copyright (c) Microsoft Corporation, 2014
+#Copyright (c) Microsoft Corporation, 2014
 #
 
 # Validate supplied configuration to setup the PSWS Endpoint
@@ -41,7 +41,7 @@ function Initialize-Endpoint
     if (!(Test-Path $mof))
     {        
         throw "ERROR: $mof does not exist"  
-    }       
+    }
     
     if (!(Test-Path $asax))
     {        
@@ -248,17 +248,17 @@ function Copy-Files
     foreach ($dependentBinary in $dependentBinaries)
     {
         if (!(Test-Path $dependentBinary))
-        {                    
+        {
             throw "ERROR: $dependentBinary does not exist"  
-        }     
+        }
     }
 
     foreach ($dependentMUIFile in $dependentMUIFiles)
     {
         if (!(Test-Path $dependentMUIFile))
-        {                    
+        {
             throw "ERROR: $dependentMUIFile does not exist"  
-        }     
+        }
     }
     
     Write-Verbose "Create the bin folder for deploying custom dependent binaries required by the endpoint"
@@ -280,12 +280,12 @@ function Copy-Files
     foreach ($psFile in $psFiles)
     {
         if (!(Test-Path $psFile))
-        {                    
+        {
             throw "ERROR: $psFile does not exist"  
-        }     
+        }
         
         Copy-Item $psFile $path -Force
-    }        
+    }
     
     Copy-Item $cfgfile (Join-Path $path "web.config") -Force
     Copy-Item $svc $path -Force
@@ -371,7 +371,7 @@ function New-FirewallRule
     param ($firewallPort)
     
     Write-Verbose "Disable Inbound Firewall Notification"
-    Set-NetFirewallProfile -Profile Domain,Public,Private �NotifyOnListen False
+    Set-NetFirewallProfile -Profile Domain,Public,Private –NotifyOnListen False
     
     Write-Verbose "Add Firewall Rule for port $firewallPort"    
     $null = New-NetFirewallRule -DisplayName "Allow Port $firewallPort for PSWS" -Direction Inbound -LocalPort $firewallPort -Protocol TCP -Action Allow
@@ -426,8 +426,8 @@ function New-PSWSEndpoint
         # IIS Application Name for the Site        
         [String] $app = "PSWS",
         
-        # IIS App Pool Identity Type - must be one of LocalService, LocalSystem, NetworkService, ApplicationPoolIdentity        
-        [ValidateSet('LocalService', 'LocalSystem', 'NetworkService', 'ApplicationPoolIdentity')]        
+        # IIS App Pool Identity Type - must be one of LocalService, LocalSystem, NetworkService, ApplicationPoolIdentity
+        [ValidateSet('LocalService', 'LocalSystem', 'NetworkService', 'ApplicationPoolIdentity')]
         [String] $applicationPoolIdentityType,
         
         # WCF Service SVC file        
@@ -439,7 +439,7 @@ function New-PSWSEndpoint
         [String] $mof,
         
         # PSWS Specific Dispatch Mapping File [Optional]
-        [ValidateNotNullOrEmpty()]        
+        [ValidateNotNullOrEmpty()]
         [String] $dispatch,    
         
         # Global.asax file [Optional]
@@ -661,4 +661,3 @@ function Set-BindingRedirectSettingInWebConfig
 }
 
 Export-ModuleMember -function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig
-
