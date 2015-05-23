@@ -35,7 +35,9 @@ try
         }
         It 'Should get values from HKCU' {
                 $installValue = Get-RegistryValueIgnoreError 'CurrentUser' "Environment" "Temp" Registry64
-                $installValue | should be $env:temp
+                $installValue.length -gt 3 | should be $true
+                $envBeginning = $env:temp.substring(0,$installValue.length)
+                $installValue | should be $envBeginning
         }
 
     }
