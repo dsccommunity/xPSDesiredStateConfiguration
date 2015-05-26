@@ -188,6 +188,7 @@ Function Get-ProductEntry
     (
         [string] $Name,
         [string] $IdentifyingNumber,
+        [string] $InstalledCheckRegHive = 'LocalMachine',
         [string] $InstalledCheckRegKey,
         [string] $InstalledCheckRegValueName,
         [string] $InstalledCheckRegValueData
@@ -224,12 +225,12 @@ Function Get-ProductEntry
         #if 64bit OS, check 64bit registry view first
         if ((Get-WmiObject -Class Win32_OperatingSystem -ComputerName "localhost" -ea 0).OSArchitecture -eq '64-bit')
         {
-            $installValue = Get-RegistryValueIgnoreError LocalMachine "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry64
+            $installValue = Get-RegistryValueIgnoreError $InstalledCheckRegHive "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry64
         }
 
         if($installValue -eq $null)
         {
-            $installValue = Get-RegistryValueIgnoreError LocalMachine "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry32
+            $installValue = Get-RegistryValueIgnoreError $InstalledCheckRegHive "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry32
         }
 
         if($installValue)
@@ -276,6 +277,8 @@ function Test-TargetResource
 
         [pscredential] $RunAsCredential,
 
+        [string] $InstalledCheckRegHive = 'LocalMachine',
+
         [string] $InstalledCheckRegKey,
 
         [string] $InstalledCheckRegValueName,
@@ -294,7 +297,7 @@ function Test-TargetResource
     )
 
     $uri, $identifyingNumber = Validate-StandardArguments $Path $ProductId $Name
-    $product = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
+    $product = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegHive $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
     Trace-Message "Ensure is $Ensure"
     if($product)
     {
@@ -373,6 +376,8 @@ function Get-TargetResource
         [AllowEmptyString()]
         [string] $ProductId,
 
+        [string] $InstalledCheckRegHive = 'LocalMachine',
+
         [string] $InstalledCheckRegKey,
 
         [string] $InstalledCheckRegValueName,
@@ -395,6 +400,7 @@ function Get-TargetResource
             Name = $Name
             ProductId = $identifyingNumber
             Installed = $false
+            InstalledCheckRegHive = $InstalledCheckRegHive
             InstalledCheckRegKey = $InstalledCheckRegKey
             InstalledCheckRegValueName = $InstalledCheckRegValueName
             InstalledCheckRegValueData = $InstalledCheckRegValueData
@@ -408,6 +414,7 @@ function Get-TargetResource
             Name = $Name
             ProductId = $identifyingNumber
             Installed = $true
+            InstalledCheckRegHive = $InstalledCheckRegHive
             InstalledCheckRegKey = $InstalledCheckRegKey
             InstalledCheckRegValueName = $InstalledCheckRegValueName
             InstalledCheckRegValueData = $InstalledCheckRegValueData
@@ -567,6 +574,8 @@ function Set-TargetResource
 
         [pscredential] $RunAsCredential,
 
+        [string] $InstalledCheckRegHive = 'LocalMachine',
+
         [string] $InstalledCheckRegKey,
 
         [string] $InstalledCheckRegValueName,
@@ -587,7 +596,7 @@ function Set-TargetResource
     $ErrorActionPreference = "Stop"
 
     if((Test-TargetResource -Ensure $Ensure -Name $Name -Path $Path -ProductId $ProductId `
-        -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName `
+        -InstalledCheckRegHive $InstalledCheckRegHive -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName `
         -InstalledCheckRegValueData $InstalledCheckRegValueData))
     {
         return
@@ -914,7 +923,7 @@ function Set-TargetResource
 
     if($Ensure -eq "Present")
     {
-        $productEntry = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
+        $productEntry = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegHive $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
         if(-not $productEntry)
         {
             Throw-TerminatingError ($LocalizedData.PostValidationError -f $OrigPath)
