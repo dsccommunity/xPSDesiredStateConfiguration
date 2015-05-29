@@ -509,7 +509,7 @@ Function Get-MsiTools
         return GetPackageProperty(msi, "ProductName");
     }
 '@
-    $script:MsiTools = Add-Type -PassThru -Namespace Microsoft.Windows.DesiredStateConfiguration.PackageResource `
+    $script:MsiTools = Add-Type -PassThru -Namespace Microsoft.Windows.DesiredStateConfiguration.xPackageResource `
         -Name MsiTools -Using System.Text -MemberDefinition $sig
     return $script:MsiTools
 }
