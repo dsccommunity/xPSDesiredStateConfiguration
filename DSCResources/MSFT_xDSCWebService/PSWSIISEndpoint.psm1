@@ -371,7 +371,7 @@ function New-FirewallRule
     param ($firewallPort)
     
     Write-Verbose "Disable Inbound Firewall Notification"
-    Set-NetFirewallProfile -Profile Domain,Public,Private –NotifyOnListen False
+    Set-NetFirewallProfile -Profile Domain,Public,Private,NotifyOnListen False
     
     Write-Verbose "Add Firewall Rule for port $firewallPort"    
     $null = New-NetFirewallRule -DisplayName "Allow Port $firewallPort for PSWS" -Direction Inbound -LocalPort $firewallPort -Protocol TCP -Action Allow
