@@ -120,6 +120,11 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 ## Versions
 
+### 3.3.0.0
+
+* Add support to xPackage resource for checking different registry hives
+* Added support for new registration properties in xDscWebService resource
+
 ### 3.2.0.0
 
 * xArchive:
