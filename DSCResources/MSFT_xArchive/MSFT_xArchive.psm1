@@ -56,7 +56,7 @@ $CacheLocation = "$env:systemroot\system32\Configuration\BuiltinProvCache\MSFT_A
 
 Function Get-CacheEntry
 {
-    $key = [string]::Join($args).GetHashCode().ToString()
+    $key = [string]::Join(';', $args).GetHashCode().ToString()
     Trace-Message "Using ($key) to retrieve hash value"
     $path = Join-Path $CacheLocation $key
     if(-not (Test-Path $path))
