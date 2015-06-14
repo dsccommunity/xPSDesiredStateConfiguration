@@ -117,20 +117,16 @@ function Set-TargetResource
         [string]$ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
         # Is the endpoint for a DSC Compliance Server
-<<<<<<< HEAD
         [boolean] $IsComplianceServer,
 
         # Certificate subject to search for
-        [string]$CertificateSubject
-=======
-        [boolean]$IsComplianceServer,
+        [string]$CertificateSubject,
 
         # Location on the disk where the RegistrationKeys file is stored                    
         [string]$RegistrationKeyPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
         # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
         [boolean]$AcceptSelfSignedCertificates
->>>>>>> upstream/dev
     )
 
     # Initialize with default values     
@@ -300,20 +296,16 @@ function Test-TargetResource
         [string]$ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
         # Is the endpoint for a DSC Compliance Server
-<<<<<<< HEAD
         [boolean] $IsComplianceServer,
 
         # Certificate subject to search for
-        [string]$CertificateSubject
-=======
-        [boolean]$IsComplianceServer,
+        [string]$CertificateSubject,
 
         # Location on the disk where the RegistrationKeys file is stored                    
         [string]$RegistrationKeyPath,
 
         # Are self-signed certs being accepted for client auth.                    
         [boolean]$AcceptSelfSignedCertificates
->>>>>>> upstream/dev
     )
 
     $desiredConfigurationMatch = $true;
