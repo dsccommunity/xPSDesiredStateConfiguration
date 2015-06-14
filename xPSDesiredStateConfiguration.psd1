@@ -1,10 +1,6 @@
 @{
 # Version number of this module.
-<<<<<<< HEAD
-ModuleVersion = '3.1.3.5'
-=======
-ModuleVersion = '3.3.0.0'
->>>>>>> upstream/dev
+ModuleVersion = '3.4.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
