@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # This module file contains a utility to perform PSWS IIS Endpoint setup
 # Module exports New-PSWSEndpoint function to perform the endpoint setup
 #
@@ -663,8 +662,7 @@ function Set-BindingRedirectSettingInWebConfig
 
 Export-ModuleMember -function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig
 
-=======
-﻿# This module file contains a utility to perform PSWS IIS Endpoint setup
+# This module file contains a utility to perform PSWS IIS Endpoint setup
 # Module exports New-PSWSEndpoint function to perform the endpoint setup
 #
 #Copyright (c) Microsoft Corporation, 2014
@@ -1037,7 +1035,7 @@ function New-FirewallRule
     param ($firewallPort)
     
     Write-Verbose "Disable Inbound Firewall Notification"
-    Set-NetFirewallProfile -Profile Domain,Public,Private –NotifyOnListen False
+    Set-NetFirewallProfile -Profile Domain,Public,Private,NotifyOnListen False
     
     Write-Verbose "Add Firewall Rule for port $firewallPort"    
     $null = New-NetFirewallRule -DisplayName "Allow Port $firewallPort for PSWS" -Direction Inbound -LocalPort $firewallPort -Protocol TCP -Action Allow
@@ -1327,4 +1325,3 @@ function Set-BindingRedirectSettingInWebConfig
 }
 
 Export-ModuleMember -function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig
->>>>>>> upstream/dev
