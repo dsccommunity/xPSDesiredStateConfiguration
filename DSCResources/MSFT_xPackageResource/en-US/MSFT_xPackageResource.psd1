@@ -31,6 +31,13 @@ MachineRequiresReboot=The machine requires a reboot
 PackageDoesNotAppearInstalled=The package {0} is not installed
 PackageAppearsInstalled=The package {0} is already installed
 PostValidationError=Package from {0} was installed, but the specified ProductId and/or Name does not match package details
+CheckingFileHash=Checking file '{0}' for expected {2} hash value of {1}
+InvalidFileHash=File '{0}' does not match expected {2} hash value of {1}.
+CheckingFileSignature=Checking file '{0}' for valid digital signature.
+FileHasValidSignature=File '{0}' contains a valid digital signature. Signer Thumbprint: {1}, Subject: {2}
+InvalidFileSignature=File '{0}' does not have a valid Authenticode signature.  Status: {1}
+WrongSignerSubject=File '{0}' was not signed by expected signer subject '{1}'
+WrongSignerThumbprint=File '{0}' was not signed by expected signer certificate thumbprint '{1}'
 ###PSLOC
 
 '@

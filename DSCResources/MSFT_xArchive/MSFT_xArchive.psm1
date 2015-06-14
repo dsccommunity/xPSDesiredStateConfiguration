@@ -130,7 +130,7 @@ Function Assert-ValidStandardArgs
         Throw-InvalidArgumentException ($LocalizedData.InvalidSourcePath -f $Path) "Path"
     }
     
-    $item = Get-Item -EA Ignore $Destination
+    $item = Get-Item -ErrorAction Ignore -LiteralPath $Destination
     if($item -and $item.GetType() -eq [System.IO.FileInfo])
     {
         Throw-InvalidArgumentException ($LocalizedData.InvalidDestinationDirectory -f $Destination) "Destination"
@@ -327,7 +327,7 @@ function Test-ExpandArchive
     Trace-Message "Going for cache entries"
     $result = $true
     $cacheObj = Get-CacheEntry $Path $Destination
-    $sourceLastWriteTime = (Get-Item $Path).LastWriteTime
+    $sourceLastWriteTime = (Get-Item -LiteralPath $Path).LastWriteTime
     $cacheUpToDate = $cacheObj -and $cacheObj.SourceLastWriteTime -and $cacheObj.SourceLastWriteTime -eq $sourceLastWriteTime
     $file = $null
     try
@@ -365,7 +365,7 @@ function Test-ExpandArchive
             }
             else
             {
-                $item = Get-Item $dest -EA Ignore
+                $item = Get-Item -LiteralPath $dest -ErrorAction Ignore
                 if(-not $item)
                 {
                     $individualResult = $result = $false
@@ -455,7 +455,7 @@ function Test-ExpandArchive
 Function Ensure-Directory
 {
     param([string] $Dir)
-    $item = get-item $Dir -EA SilentlyContinue
+    $item = Get-Item -LiteralPath $Dir -ErrorAction SilentlyContinue
     if(-not $item)
     {
         Trace-Message "Folder $Dir does not exist"
@@ -537,7 +537,7 @@ function Set-ExpandArchive
     }
     
     $cacheObj = Get-CacheEntry $Path $Destination
-    $sourceLastWriteTime = (Get-Item $Path).LastWriteTime
+    $sourceLastWriteTime = (Get-Item -LiteralPath $Path).LastWriteTime
     $cacheUpToDate = $cacheObj -and $cacheObj.SourceLastWriteTime -and $cacheObj.SourceLastWriteTime -eq $sourceLastWriteTime
     $file = $null
     $nameToEntry = @{}
@@ -572,7 +572,7 @@ function Set-ExpandArchive
                 }
                 
                 $existing = Join-Path $Destination $entry.FullName
-                $item = Get-Item $existing -EA SilentlyContinue
+                $item = Get-Item -LiteralPath $existing -ErrorAction SilentlyContinue
                 if(-not $item)
                 {
                     continue
@@ -630,7 +630,7 @@ function Set-ExpandArchive
             {
                 Trace-Message "Examining $directory to see if it should be removed"
                 $existing = Join-Path $Destination $directory
-                $item = Get-Item $existing -EA SilentlyContinue
+                $item = Get-Item -LiteralPath $existing -ErrorAction SilentlyContinue
                 if($item -and $item.GetType() -eq [System.IO.DirectoryInfo] -and $item.GetFiles().Count -eq 0 -and $item.GetDirectories().Count -eq 0 `
                      -and $PSCmdlet.ShouldProcess(($LocalizedData.RemoveDirectory -f $existing), $null, $null))
                 {
@@ -654,7 +654,7 @@ function Set-ExpandArchive
                 continue
             }
             
-            $item = Get-Item $dest -EA SilentlyContinue
+            $item = Get-Item -LiteralPath $dest -ErrorAction SilentlyContinue
             if($item)
             {
                 if($item.GetType() -eq [System.IO.FileInfo])

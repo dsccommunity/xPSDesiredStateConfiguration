@@ -32,6 +32,13 @@ MachineRequiresReboot=The machine requires a reboot
 PackageDoesNotAppearInstalled=The package {0} is not installed
 PackageAppearsInstalled=The package {0} is already installed
 PostValidationError=Package from {0} was installed, but the specified ProductId and/or Name does not match package details
+CheckingFileHash=Checking file '{0}' for expected {2} hash value of {1}
+InvalidFileHash=File '{0}' does not match expected {2} hash value of {1}.
+CheckingFileSignature=Checking file '{0}' for valid digital signature.
+FileHasValidSignature=File '{0}' contains a valid digital signature. Signer Thumbprint: {1}, Subject: {2}
+InvalidFileSignature=File '{0}' does not have a valid Authenticode signature.  Status: {1}
+WrongSignerSubject=File '{0}' was not signed by expected signer subject '{1}'
+WrongSignerThumbprint=File '{0}' was not signed by expected signer certificate thumbprint '{1}'
 '@
 }
 
@@ -181,6 +188,7 @@ Function Get-ProductEntry
     (
         [string] $Name,
         [string] $IdentifyingNumber,
+        [string] $InstalledCheckRegHive = 'LocalMachine',
         [string] $InstalledCheckRegKey,
         [string] $InstalledCheckRegValueName,
         [string] $InstalledCheckRegValueData
@@ -217,12 +225,12 @@ Function Get-ProductEntry
         #if 64bit OS, check 64bit registry view first
         if ((Get-WmiObject -Class Win32_OperatingSystem -ComputerName "localhost" -ea 0).OSArchitecture -eq '64-bit')
         {
-            $installValue = Get-RegistryValueIgnoreError LocalMachine "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry64
+            $installValue = Get-RegistryValueIgnoreError $InstalledCheckRegHive "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry64
         }
 
         if($installValue -eq $null)
         {
-            $installValue = Get-RegistryValueIgnoreError LocalMachine "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry32
+            $installValue = Get-RegistryValueIgnoreError $InstalledCheckRegHive "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry32
         }
 
         if($installValue)
@@ -269,15 +277,27 @@ function Test-TargetResource
 
         [pscredential] $RunAsCredential,
 
+        [string] $InstalledCheckRegHive = 'LocalMachine',
+
         [string] $InstalledCheckRegKey,
 
         [string] $InstalledCheckRegValueName,
 
-        [string] $InstalledCheckRegValueData
+        [string] $InstalledCheckRegValueData,
+
+        [string] $FileHash,
+
+        [ValidateSet('SHA1','SHA256','SHA384','SHA512','MD5','RIPEMD160')]
+        [string] $HashAlgorithm,
+
+        [string] $SignerSubject,
+        [string] $SignerThumbprint,
+
+        [string] $ServerCertificateValidationCallback
     )
 
     $uri, $identifyingNumber = Validate-StandardArguments $Path $ProductId $Name
-    $product = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
+    $product = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegHive $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
     Trace-Message "Ensure is $Ensure"
     if($product)
     {
@@ -356,6 +376,8 @@ function Get-TargetResource
         [AllowEmptyString()]
         [string] $ProductId,
 
+        [string] $InstalledCheckRegHive = 'LocalMachine',
+
         [string] $InstalledCheckRegKey,
 
         [string] $InstalledCheckRegValueName,
@@ -378,6 +400,7 @@ function Get-TargetResource
             Name = $Name
             ProductId = $identifyingNumber
             Installed = $false
+            InstalledCheckRegHive = $InstalledCheckRegHive
             InstalledCheckRegKey = $InstalledCheckRegKey
             InstalledCheckRegValueName = $InstalledCheckRegValueName
             InstalledCheckRegValueData = $InstalledCheckRegValueData
@@ -391,6 +414,7 @@ function Get-TargetResource
             Name = $Name
             ProductId = $identifyingNumber
             Installed = $true
+            InstalledCheckRegHive = $InstalledCheckRegHive
             InstalledCheckRegKey = $InstalledCheckRegKey
             InstalledCheckRegValueName = $InstalledCheckRegValueName
             InstalledCheckRegValueData = $InstalledCheckRegValueData
@@ -492,7 +516,7 @@ Function Get-MsiTools
         return GetPackageProperty(msi, "ProductName");
     }
 '@
-    $script:MsiTools = Add-Type -PassThru -Namespace Microsoft.Windows.DesiredStateConfiguration.PackageResource `
+    $script:MsiTools = Add-Type -PassThru -Namespace Microsoft.Windows.DesiredStateConfiguration.xPackageResource `
         -Name MsiTools -Using System.Text -MemberDefinition $sig
     return $script:MsiTools
 }
@@ -550,17 +574,29 @@ function Set-TargetResource
 
         [pscredential] $RunAsCredential,
 
+        [string] $InstalledCheckRegHive = 'LocalMachine',
+
         [string] $InstalledCheckRegKey,
 
         [string] $InstalledCheckRegValueName,
 
-        [string] $InstalledCheckRegValueData
+        [string] $InstalledCheckRegValueData,
+
+        [string] $FileHash,
+
+        [ValidateSet('SHA1','SHA256','SHA384','SHA512','MD5','RIPEMD160')]
+        [string] $HashAlgorithm,
+
+        [string] $SignerSubject,
+        [string] $SignerThumbprint,
+
+        [string] $ServerCertificateValidationCallback
     )
 
     $ErrorActionPreference = "Stop"
 
     if((Test-TargetResource -Ensure $Ensure -Name $Name -Path $Path -ProductId $ProductId `
-        -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName `
+        -InstalledCheckRegHive $InstalledCheckRegHive -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName `
         -InstalledCheckRegValueData $InstalledCheckRegValueData))
     {
         return
@@ -672,10 +708,11 @@ function Set-TargetResource
                             # default value is MutualAuthRequested, which applies to https scheme
                             $request.AuthenticationLevel = [System.Net.Security.AuthenticationLevel]::None
                         }
-                        if ($scheme -eq "https")
+                        if ($scheme -eq "https" -and -not [string]::IsNullOrEmpty($ServerCertificateValidationCallback))
                         {
-                            Trace-Message "Ignoring bad certificates"
-                            $request.ServerCertificateValidationCallBack = {$true}
+                            Trace-Message "Assigning user-specified certificate verification callback"
+                            $scriptBlock = [scriptblock]::Create($ServerCertificateValidationCallback)
+                            $request.ServerCertificateValidationCallBack = $scriptBlock
                         }
                         Trace-Message "Getting the $scheme response stream"
                         $responseStream = (([System.Net.HttpWebRequest]$request).GetResponse()).GetResponseStream()
@@ -715,10 +752,15 @@ function Set-TargetResource
             }
         }
 
-        #At this point the Path ought to be valid unless it's an MSI uninstall case
-        if(-not (Test-Path -PathType Leaf $Path) -and -not ($Ensure -eq "Absent" -and $fileExtension -eq ".msi"))
+        if (-not ($Ensure -eq "Absent" -and $fileExtension -eq ".msi"))
         {
-            Throw-TerminatingError ($LocalizedData.PathDoesNotExist -f $Path)
+            #At this point the Path ought to be valid unless it's an MSI uninstall case
+            if(-not (Test-Path -PathType Leaf $Path))
+            {
+                Throw-TerminatingError ($LocalizedData.PathDoesNotExist -f $Path)
+            }
+
+            ValidateFile -Path $Path -HashAlgorithm $HashAlgorithm -FileHash $FileHash -SignerSubject $SignerSubject -SignerThumbprint $SignerThumbprint
         }
 
         $startInfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -881,7 +923,7 @@ function Set-TargetResource
 
     if($Ensure -eq "Present")
     {
-        $productEntry = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
+        $productEntry = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegHive $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
         if(-not $productEntry)
         {
             Throw-TerminatingError ($LocalizedData.PostValidationError -f $OrigPath)
@@ -1208,5 +1250,89 @@ namespace Source
             Add-Type -TypeDefinition $ProgramSource -ReferencedAssemblies "System.ServiceProcess"
 }
 
-Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
+function ValidateFile
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string] $Path,
 
+        [string] $FileHash,
+        [string] $HashAlgorithm,
+        [string] $SignerThumbprint,
+        [string] $SignerSubject
+    )
+
+    if ($FileHash)
+    {
+        ValidateFileHash -Path $Path -Hash $FileHash -Algorithm $HashAlgorithm
+    }
+
+    if ($SignerThumbprint -or $SignerSubject)
+    {
+        ValidateFileSignature -Path $Path -Thumbprint $SignerThumbprint -Subject $SignerSubject
+    }
+}
+
+function ValidateFileHash
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string] $Path,
+
+        [Parameter(Mandatory)]
+        [string] $Hash,
+
+        [string] $Algorithm
+    )
+
+    if ([string]::IsNullOrEmpty($Algorithm)) { $Algorithm = 'SHA256' }
+
+    Trace-Message ($LocalizedData.CheckingFileHash -f $Path, $Hash, $Algorithm)
+
+    $fileHash = Get-FileHash -LiteralPath $Path -Algorithm $Algorithm -ErrorAction Stop
+
+    if ($fileHash.Hash -ne $Hash)
+    {
+        throw ($LocalizedData.InvalidFileHash -f $Path, $Hash, $Algorithm)
+    }
+}
+
+function ValidateFileSignature
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string] $Path,
+
+        [string] $Thumbprint,
+
+        [string] $Subject
+    )
+
+    Trace-Message ($LocalizedData.CheckingFileSignature -f $Path)
+
+    $signature = Get-AuthenticodeSignature -LiteralPath $Path -ErrorAction Stop
+
+    if ($signature.Status -ne [System.Management.Automation.SignatureStatus]::Valid)
+    {
+        throw ($LocalizedData.InvalidFileSignature -f $Path, $signature.Status)
+    }
+    else
+    {
+        Trace-Message ($LocalizedData.FileHasValidSignature -f $Path, $signature.SignerCertificate.Thumbprint, $signature.SignerCertificate.Subject)
+    }
+
+    if ($Subject -and ($signature.SignerCertificate.Subject -notlike $Subject))
+    {
+        throw ($LocalizedData.WrongSignerSubject -f $Path, $Subject)
+    }
+
+    if ($Thumbprint -and ($signature.SignerCertificate.Thumbprint -ne $Thumbprint))
+    {
+        throw ($LocalizedData.WrongSignerThumbprint -f $Path, $Thumbprint)
+    }
+}
+
+Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
