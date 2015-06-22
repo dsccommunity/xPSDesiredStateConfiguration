@@ -11,6 +11,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ## Resources
 
+* **xArchive** creates or expands (extracts) ZIP archives.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
 * **xWindowsProcess** configures and manages Windows processes.
 * **xService** configures and manages Windows services.
@@ -18,6 +19,17 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xGroup** configures and manages local Windows groups
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share. 
+
+### xArchive
+
+The xArchive DSC Resource enables the creation or extraction of ZIP archives from / onto the local filesystem. The DSC Resource has two modes: **extraction** or **compression**. The **DestinationType** property controls the behavior of the DSC Resource.
+
+If the **DestinationType** is set to `Directory` (default), then the ZIP file specified in the **Path** property will be extracted to the path in **Destination**. If the **DestinationType** is set to `File`, then the directory specified in the **Path** property will be compressed into a new ZIP file at the path specified in the **Destination** property.
+
+* **Path**: The path of the ZIP archive, if extracting, or the source directory to compress, if compressing.
+* **Destination**: The destination of the extracted files *or* the new ZIP archive.
+* **DestinationType**: The destination can be either `File` or `Directory`.
+* **CompressionLevel**: The amount of compression that should be applied to the new ZIP archive. The value can be one of the following: `Optimal`, `Fastest`, `NoCompression`
 
 ### xDscWebService
 
