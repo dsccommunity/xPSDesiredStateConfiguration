@@ -1,8 +1,9 @@
-﻿[ClassVersion("1.0.0"), FriendlyName("xDSCWebService")] 
+﻿
+[ClassVersion("1.0.1"), FriendlyName("xDSCWebService")] 
 class MSFT_xDSCWebService : OMI_BaseResource
 {
   [Key] string EndpointName;
-  [required] string CertificateThumbPrint;
+  [write] string CertificateThumbPrint;
   [write] uint32 Port;
   [write] string PhysicalPath;
   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
@@ -10,7 +11,8 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [write] string ModulePath;
   [write] string ConfigurationPath;
   [write] boolean IsComplianceServer;
-  [read] string DSCServerUrl;  
+  [read] string DSCServerUrl;
+  [write] string CertificateSubject;
   [write] string RegistrationKeyPath;
   [write] boolean AcceptSelfSignedCertificates;
 };
