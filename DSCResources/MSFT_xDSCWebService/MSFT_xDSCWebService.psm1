@@ -164,6 +164,27 @@ function Set-TargetResource
         $pswsMofFileName = "$pathPullServer\PSDSCComplianceServer.mof"
         $pswsDispatchFileName = "$pathPullServer\PSDSCComplianceServer.xml"
     }
+
+    # check for the existance of Windows authentication, this is needed for the Compliance Server
+    Write-Verbose "Check IIS Windows Authentication"
+    if(($Ensure -eq "Present"))
+    {
+        # only important if Present, Get-WindowsFeature works under 2008 R2 and newer
+        if ((Get-WindowsFeature -name Web-Windows-Auth | Where Installed).count -eq 0)
+        {
+            # enable the feature     
+            # Checking for Windows Server 2008 R2:
+            if([Environment]::OSVersion.Version.ToString().StartsWith("6.1."))
+            {
+                Add-WindowsFeature -Name Web-Windows-Auth
+            }
+            else
+            {
+                Install-WindowsFeature -Name Web-Windows-Auth
+            }                       
+        }      
+    }
+
                 
     Write-Verbose "Create the IIS endpoint"    
     PSWSIISEndpoint\New-PSWSEndpoint -site $EndpointName `
@@ -309,6 +330,19 @@ function Test-TargetResource
             $DesiredConfigurationMatch = $false            
             Write-Verbose "The Website $EndpointName is not present"
             break       
+        }
+
+        # check for the existance of Windows authentication, this is needed for the Compliance Server        
+        if(($Ensure -eq "Present"))
+        {
+            Write-Verbose "Check IIS Windows Authentication"
+            # only important if Present, Get-WindowsFeature works under 2008 R2 and newer
+            if ((Get-WindowsFeature -name Web-Windows-Auth | Where Installed).count -eq 0)
+            {
+                $DesiredConfigurationMatch = $false
+                Write-Verbose "Required Windows authentication is not installed, does not match the desired state."
+                break                 
+            }      
         }
 
         Write-Verbose "Check Port"
