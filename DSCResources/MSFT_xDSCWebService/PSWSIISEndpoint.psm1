@@ -4,6 +4,10 @@
 #Copyright (c) Microsoft Corporation, 2014
 #
 
+# name and description for the Firewall rules. Used in multiple locations
+$FireWallRuleDisplayName = "Desired State Configuration - Pull Server Port:{0}"
+$FireWallRuleDescription = "Inbound traffic for IIS site on Port:{0} for DSC pull server. Created by DSCWebService resource"
+
 # Validate supplied configuration to setup the PSWS Endpoint
 # Function checks for the existence of PSWS Schema files, IIS config
 # Also validate presence of IIS on the target machine
@@ -61,10 +65,11 @@ function Initialize-Endpoint
     Test-IISInstall
     
     $appPool = "PSWS"
+
     
     Write-Verbose "Delete the App Pool if it exists"
     Remove-AppPool -apppool $appPool
-    
+   
     Write-Verbose "Remove the site if it already exists"
     Update-Site -siteName $site -siteAction Remove
     
@@ -77,7 +82,6 @@ function Initialize-Endpoint
     }
     
     Copy-Files -path $path -cfgfile $cfgfile -svc $svc -mof $mof -dispatch $dispatch -asax $asax -dependentBinaries $dependentBinaries -language $language -dependentMUIFiles $dependentMUIFiles -psFiles $psFiles
-    
     Update-AllSites Stop
     Update-DefaultAppPool Stop
     Update-DefaultAppPool Start
@@ -90,9 +94,9 @@ function Initialize-Endpoint
 function Test-IISInstall
 {
         Write-Verbose "Checking IIS requirements"
-        $iisVersion = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\InetStp -ErrorAction silentlycontinue).MajorVersion + (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\InetStp -ErrorAction silentlycontinue).MinorVersion
+        $iisVersion = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\InetStp -ErrorAction silentlycontinue).MajorVersion
         
-        if ($iisVersion -lt 7.0) 
+        if ($iisVersion -lt 7) 
         {
             throw "ERROR: IIS Version detected is $iisVersion , must be running higher than 7.0"            
         }        
@@ -149,14 +153,15 @@ function Update-Site
         $name = $site.Name
     }
     
-    if (Test-IISSiteExists $name)
-    {        
+    if (Test-IISSiteExists -siteName $name)
+    {
         switch ($siteAction) 
         { 
-            "Start"  {Start-Website -Name $name} 
-            "Stop"   {Stop-Website -Name $name -ErrorAction SilentlyContinue} 
-            "Remove" {Remove-Website -Name $name}
+            "Start"  {Start-Website -Name "$name"} 
+            "Stop"   {Stop-Website -Name "$name" -ErrorAction SilentlyContinue} 
+            "Remove" {Remove-Website -Name "$name"}
         }
+        Write-Verbose "p11"
     }
 }
 
@@ -166,8 +171,12 @@ function Update-Site
 function Remove-AppPool
 {
     param ($appPool)    
-    
-    Remove-WebAppPool -Name $appPool -ErrorAction SilentlyContinue
+
+    # without this tests we may get a breaking error here, despite SilentlyContinue
+    if (Test-Path "IIS:\AppPools\$appPool")
+    {
+        Remove-WebAppPool -Name $appPool -ErrorAction SilentlyContinue
+    }
 }
 
 # Perform given action(start, stop, delete) on all IIS Sites
@@ -178,7 +187,7 @@ function Update-AllSites
     
     foreach ($site in Get-Website)
     {
-        Update-Site $site $action
+        Update-Site -Site $site -siteAction $action
     }
 }
 
@@ -265,7 +274,7 @@ function Copy-Files
     $binFolderPath = Join-Path $path "bin"
     $null = New-Item -path $binFolderPath  -itemType "directory" -Force
     Copy-Item $dependentBinaries $binFolderPath -Force
-    
+
     if ($language)
     {
         $muiPath = Join-Path $binFolderPath $language
@@ -276,7 +285,7 @@ function Copy-Files
         }
         Copy-Item $dependentMUIFiles $muiPath -Force
     }
-    
+
     foreach ($psFile in $psFiles)
     {
         if (!(Test-Path $psFile))
@@ -372,9 +381,14 @@ function New-FirewallRule
     
     Write-Verbose "Disable Inbound Firewall Notification"
     Set-NetFirewallProfile -Profile Domain,Public,Private –NotifyOnListen False
+
+    $ruleDisplayName = ($($FireWallRuleDisplayName) -f $firewallPort)
+
+    # remove all existing rules with that displayName
+    Get-NetFirewallRule | Where-Object DisplayName -eq $ruleDisplayName | Remove-NetFirewallRule
     
     Write-Verbose "Add Firewall Rule for port $firewallPort"    
-    $null = New-NetFirewallRule -DisplayName "Allow Port $firewallPort for PSWS" -Direction Inbound -LocalPort $firewallPort -Protocol TCP -Action Allow
+    $null = New-NetFirewallRule -DisplayName $ruleDisplayName -Description ($($FireWallRuleDescription) -f $firewallPort) -Direction Inbound -LocalPort $firewallPort -Protocol TCP -Action Allow
 }
 
 # Enable & Clear PSWS Operational/Analytic/Debug ETW Channels
@@ -506,6 +520,59 @@ function New-PSWSEndpoint
     
     Update-AllSites start
     
+}
+
+<#
+.Synopsis
+   Removes a PowerShell WebServices IIS Endpoint
+.DESCRIPTION
+   Removes a PSWS IIS Endpoint
+.EXAMPLE
+   Remove the endpoint with the specified name
+   Remove-PSWSEndpoint -siteName PSDSCPullServer 
+#>
+function Remove-PSWSEndpoint
+{
+[CmdletBinding()]
+    param (        
+        # Unique Name of the IIS Site        
+            [String] $siteName
+        )
+                
+       # get the site to remove
+       $site = Get-Item -Path "IIS:\sites\$siteName"
+       # and the pool it is using
+       $pool = $site.applicationPool
+
+       # find out whether any other site is using this pool
+       $filter = "/system.applicationHost/sites/site/application[@applicationPool='" + $pool + "']" 
+       $apps = (Get-WebConfigurationProperty -Filter $filter -PSPath "machine/webroot/apphost" -name path).ItemXPath 
+       if ($apps.count -eq 1)
+       {
+          # if we are the only site in the pool, remove the pool as well.
+          Remove-WebAppPool -Name $pool
+       }
+
+       # get the path so we can delete the files
+       $filePath = $site.PhysicalPath
+       # get the port number for the Firewall rule
+       $bindings = (Get-WebBinding -Name $siteName).bindingInformation
+       $port = [regex]::match($bindings,':(\d+):').Groups[1].Value
+
+       # remove the actual site.
+       Remove-Website -Name $siteName
+
+       # remove the files for the site
+       If (Test-Path $filePath)
+       {
+           Get-ChildItem $filePath -Recurse | Remove-Item -Recurse
+           Remove-Item $filePath
+       }
+
+       # remove all rules with that name
+       $ruleName = ($($FireWallRuleDisplayName) -f $port)
+       Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Remove-NetFirewallRule
+
 }
 
 <#
@@ -660,4 +727,4 @@ function Set-BindingRedirectSettingInWebConfig
     }
 }
 
-Export-ModuleMember -function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig
+Export-ModuleMember -function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig, Remove-PSWSEndpoint
