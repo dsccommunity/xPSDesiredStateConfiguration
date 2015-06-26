@@ -418,7 +418,7 @@ function Enable-PSWSETW
    Creates a PSWS IIS Endpoint by consuming PSWS Schema and related dependent files
 .EXAMPLE
    New a PSWS Endpoint [@ http://Server:39689/PSWS_Win32Process] by consuming PSWS Schema Files and any dependent scripts/binaries
-   New-PSWSEndpoint -site Win32Process -path $env:HOMEDRIVE\inetpub\wwwroot\PSWS_Win32Process -cfgfile Win32Process.config -port 39689 -app Win32Process -svc PSWS.svc -mof Win32Process.mof -dispatch Win32Process.xml -dependentBinaries ConfigureProcess.ps1, Rbac.dll -psFiles Win32Process.psm1
+   New-PSWSEndpoint -site Win32Process -path $env:HOMEDRIVE\inetpub\PSWS_Win32Process -cfgfile Win32Process.config -port 39689 -app Win32Process -svc PSWS.svc -mof Win32Process.mof -dispatch Win32Process.xml -dependentBinaries ConfigureProcess.ps1, Rbac.dll -psFiles Win32Process.psm1
 #>
 function New-PSWSEndpoint
 {
@@ -428,8 +428,8 @@ function New-PSWSEndpoint
         # Unique Name of the IIS Site        
         [String] $site = "PSWS",
         
-        # Physical path for the IIS Endpoint on the machine (under inetpub/wwwroot)        
-        [String] $path = "$env:HOMEDRIVE\inetpub\wwwroot\PSWS",
+        # Physical path for the IIS Endpoint on the machine (under inetpub)        
+        [String] $path = "$env:HOMEDRIVE\inetpub\PSWS",
         
         # Web.config file        
         [String] $cfgfile = "web.config",
@@ -586,7 +586,7 @@ function Set-AppSettingsInWebconfig
 {
     param (
                 
-        # Physical path for the IIS Endpoint on the machine (possibly under inetpub/wwwroot)
+        # Physical path for the IIS Endpoint on the machine (possibly under inetpub)
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String] $path,
@@ -656,7 +656,7 @@ function Set-BindingRedirectSettingInWebConfig
 {
     param (
                 
-        # Physical path for the IIS Endpoint on the machine (possibly under inetpub/wwwroot)
+        # Physical path for the IIS Endpoint on the machine (possibly under inetpub)
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String] $path,

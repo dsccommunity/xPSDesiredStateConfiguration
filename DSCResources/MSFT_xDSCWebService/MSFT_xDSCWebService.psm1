@@ -96,8 +96,8 @@ function Set-TargetResource
         # Port number of the DSC Pull Server IIS Endpoint
         [Uint32]$Port = $( if ($IsComplianceServer) { 7070 } else { 8080 } ),
 
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub/wwwroot)                            
-        [string]$PhysicalPath = "$env:SystemDrive\inetpub\wwwroot\$EndpointName",
+        # Physical path for the IIS Endpoint on the machine (usually under inetpub)                            
+        [string]$PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(Mandatory)]
@@ -301,8 +301,8 @@ function Test-TargetResource
         # Port number of the DSC Pull Server IIS Endpoint
         [Uint32]$Port = $( if ($IsComplianceServer) { 7070 } else { 8080 } ),
 
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub/wwwroot)                            
-        [string]$PhysicalPath = "$env:SystemDrive\inetpub\wwwroot\$EndpointName",
+        # Physical path for the IIS Endpoint on the machine (usually under inetpub)                            
+        [string]$PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(Mandatory)]
