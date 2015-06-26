@@ -1,8 +1,8 @@
 ######################################################################################
 # Integration Tests for DSC Resource xDSCWebService
 # 
-# There tests will make changes to your system, even though they also try to roll
-# them back.
+# There tests will make changes to your system, we are tyring to roll them back,
+# but you never know. Best to run this on a throwaway VM.
 # Run as an elevated administrator 
 ######################################################################################
 
@@ -63,14 +63,14 @@ Describe "xDSCWebService" {
                 xDscWebService PSDSCPullServer
                 {
                     EndpointName            = “TestPSDSCPullServer”
-                    Port                    = 8081
+                    Port                    = 21001
                     CertificateThumbPrint   = “AllowUnencryptedTraffic”
                 }
 
                 xDscWebService PSDSCComplianceServer
                 {
                     EndpointName            = “TestPSDSCComplianceServer”
-                    Port                    = 9081
+                    Port                    = 21002
                     CertificateThumbPrint   = “AllowUnencryptedTraffic”
                     IsComplianceServer      = $true
                 }
@@ -88,11 +88,11 @@ Describe "xDSCWebService" {
             (Test-Path "$env:SystemDrive\inetpub\TestPSDSCPullServer\web.config") | should be $true
 
             $FireWallRuleDisplayName = "Desired State Configuration - Pull Server Port:{0}"
-            $ruleName = ($($FireWallRuleDisplayName) -f "8081")
+            $ruleName = ($($FireWallRuleDisplayName) -f "21001")
             (Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Measure-Object).count | should be 1
 
             # we also expect an XML document with certain strings at a certain URI
-            (Verify-DSCPullServer "http" "localhost" "8081") | should match "Action|Module"
+            (Verify-DSCPullServer "http" "localhost" "21001") | should match "Action|Module"
 
         }
 
@@ -135,6 +135,39 @@ Describe "xDSCWebService" {
 
         }
 
+        It 'CreatingSitesWithFTP' -test {
+        {
+            # create a new FTP site on IIS
+            If (!(Test-Path IIS:\Sites\DummyFTPSite))
+            {
+                New-WebFtpSite -Name "DummyFTPSite" -Port "21000"
+                # stop the site, we don't want it, it is just here to check whether setup works
+                (get-Website -Name "DummyFTPSite").ftpserver.stop()
+                # to delete the site:
+                # & $env:systemroot\System32\inetsrv\appcmd.exe delete site "DummyFTPSite"
+                # but because we are rolling back, we don't have to
+            }
+
+            # define the configuration
+            configuration CreatingSitesWithFTP
+            {
+                Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+
+                xDscWebService PSDSCPullServer2
+                {
+                    EndpointName            = “TestPSDSCPullServer2”
+                    Port                    = 21003
+                    CertificateThumbPrint   = “AllowUnencryptedTraffic”
+                }
+            }
+
+            # execute the configuration into a temp location
+            CreatingSitesWithFTP -OutputPath $env:temp\$($tempName)_CreatingSitesWithFTP
+            # run the configuration, it should not throw any errors
+            Start-DscConfiguration -Path $env:temp\$($tempName)_CreatingSitesWithFTP -Wait -Verbose -ErrorAction Stop -Force}  | should not throw
+
+        }
+
     }
     finally
     {
@@ -145,8 +178,13 @@ Describe "xDSCWebService" {
         # remove possible web files
         Remove-WebRoot -filePath "$env:SystemDrive\inetpub\TestPSDSCPullServer"
         Remove-WebRoot -filePath "$env:SystemDrive\inetpub\TestPSDSCComplianceServer"
+        Remove-WebRoot -filePath "$env:SystemDrive\inetpub\TestPSDSCPullServer2"
 
         # remove the generated MoF files
         Get-ChildItem $env:temp -Filter $tempName* | Remove-item -Recurse
+
+        # remove all firewall rules starting with port 21*
+        Get-NetFirewallRule | Where-Object DisplayName -match "^Desired State Configuration - Pull Server Port:21" | Remove-NetFirewallRule
+
     } 
 }
