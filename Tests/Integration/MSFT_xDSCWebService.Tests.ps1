@@ -31,6 +31,8 @@ Describe "xDSCWebService" {
         # before doing our changes, create a backup of the current config        
         Backup-WebConfiguration -Name $tempName
 
+        # we need to set the PSModulePath once more to get this to work in AppVevor to find our resources
+        [System.Environment]::SetEnvironmentVariable('PSModulePath',$env:PSModulePath,[System.EnvironmentVariableTarget]::Machine)
 
         It 'Installing Service' -test {
         {
