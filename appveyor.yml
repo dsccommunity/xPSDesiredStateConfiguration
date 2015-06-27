@@ -1,7 +1,8 @@
 install: 
     - cinst -y pester
     - git clone https://github.com/PowerShell/DscResource.Tests
-    - whoami /groups
+    - ps: $psversiontable
+    - ps: test-wsman
 
 build: false
 
