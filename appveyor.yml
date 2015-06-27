@@ -4,6 +4,7 @@ install:
     - ps: winrm quickconfig -quiet
     - ps: test-wsman
     - ps: $env:PsModulePath
+    - Robocopy C:\projects\xpsdesiredstateconfiguration C:\Users\appveyor\Documents\WindowsPowerShell\Modules\xpsdesiredstateconfiguration /S /NDL /NFL
 
 build: false
 
