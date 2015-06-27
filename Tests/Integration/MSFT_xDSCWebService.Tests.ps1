@@ -8,20 +8,6 @@
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-$modPath = $here -replace "\\xPSDesiredStateConfiguration\\Tests\\Integration",""
-
-if (($env:PsModulePath).IndexOf($modPath) -eq -1)
-{
-    $env:PsModulePath = $env:PsModulePath + ";" + $modPath
-}
-
-# hacking APPVEYOR:
-if (($env:PsModulePath).IndexOf("C:\projects") -eq -1)
-{
-    $env:PsModulePath = $env:PsModulePath + ";C:\projects"
-}
-
-
 # create a unique name that we use for our temp files and folders
 [string]$tempName = "xDSCWebServiceTests_" + (Get-Date).ToString("yyyyMMdd_HHmmss")
 
@@ -42,6 +28,8 @@ Describe "xDSCWebService" {
 
     try
     {
+
+
         # before doing our changes, create a backup of the current config        
         Backup-WebConfiguration -Name $tempName
 
@@ -69,15 +57,11 @@ Describe "xDSCWebService" {
 
         It 'Creating Sites' -test {
         {
-
-            # we need to set the PSModulePath once more to get this to work in AppVevor to find our resources
-            [System.Environment]::SetEnvironmentVariable('PSModulePath',$env:PSModulePath,[System.EnvironmentVariableTarget]::Machine)
-
             # define the configuration
             configuration CreatingSites
             {
                 Import-DSCResource -ModuleName xPSDesiredStateConfiguration
-
+                
                 xDscWebService PSDSCPullServer
                 {
                     EndpointName            = “TestPSDSCPullServer”

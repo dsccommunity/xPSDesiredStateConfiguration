@@ -1,3 +1,6 @@
+environment:
+  PsModulePath: C:\windows\system32\WindowsPowerShell\v1.0\Modules\;C:\Program Files\WindowsPowerShell\Modules;C:\Projects
+
 install: 
     - cinst -y pester
     - git clone https://github.com/PowerShell/DscResource.Tests
