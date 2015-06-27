@@ -3,6 +3,7 @@ install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: winrm quickconfig -quiet
     - ps: test-wsman
+    - ps: $env:PsModulePath
 
 build: false
 
