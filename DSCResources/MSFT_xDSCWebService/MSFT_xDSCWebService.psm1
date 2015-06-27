@@ -185,12 +185,13 @@ function Set-TargetResource
         }      
     }
 
+    # ============ Absent block to remove existing site =========
     if(($Ensure -eq "Absent"))
     {
          $website = Get-Website -Name $EndpointName
          if($website -ne $null)
          {
-            # there is a web site, but there shouldn't be
+            # there is a web site, but there shouldn't be one
             Write-Verbose "Removing web site $EndpointName"
             PSWSIISEndpoint\Remove-PSWSEndpoint -SiteName $EndpointName
          }
@@ -198,6 +199,7 @@ function Set-TargetResource
          # we are done here, all stuff below is for 'Present'
          return 
     }
+    # ===========================================================
 
                 
     Write-Verbose "Create the IIS endpoint"    

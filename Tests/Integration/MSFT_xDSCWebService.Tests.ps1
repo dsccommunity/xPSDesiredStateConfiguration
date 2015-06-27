@@ -143,9 +143,6 @@ Describe "xDSCWebService" {
                 New-WebFtpSite -Name "DummyFTPSite" -Port "21000"
                 # stop the site, we don't want it, it is just here to check whether setup works
                 (get-Website -Name "DummyFTPSite").ftpserver.stop()
-                # to delete the site:
-                # & $env:systemroot\System32\inetsrv\appcmd.exe delete site "DummyFTPSite"
-                # but because we are rolling back, we don't have to
             }
 
             # define the configuration

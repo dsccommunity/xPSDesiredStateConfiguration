@@ -72,6 +72,12 @@ function Initialize-Endpoint
    
     Write-Verbose "Remove the site if it already exists"
     Update-Site -siteName $site -siteAction Remove
+
+    # check for existing binding, there should be no binding with the same port
+    if ((Get-WebBinding | where bindingInformation -eq "*:$($port):").count -gt 0)
+    {
+        throw "ERROR: Port $port is already used, please review existing sites and change the port to be used." 
+    }
     
     if ($removeSiteFiles)
     {
@@ -82,10 +88,7 @@ function Initialize-Endpoint
     }
     
     Copy-Files -path $path -cfgfile $cfgfile -svc $svc -mof $mof -dispatch $dispatch -asax $asax -dependentBinaries $dependentBinaries -language $language -dependentMUIFiles $dependentMUIFiles -psFiles $psFiles
-    Update-AllSites Stop
-    Update-DefaultAppPool Stop
-    Update-DefaultAppPool Start
-    
+   
     New-IISWebSite -site $site -path $path -port $port -app $app -apppool $appPool -applicationPoolIdentityType $applicationPoolIdentityType -certificateThumbPrint $certificateThumbPrint
 }
 
@@ -176,32 +179,6 @@ function Remove-AppPool
     if (Test-Path "IIS:\AppPools\$appPool")
     {
         Remove-WebAppPool -Name $appPool -ErrorAction SilentlyContinue
-    }
-}
-
-# Perform given action(start, stop, delete) on all IIS Sites
-#
-function Update-AllSites
-{
-    param ($action)    
-    
-    foreach ($site in Get-Website)
-    {
-        Update-Site -Site $site -siteAction $action
-    }
-}
-
-# Perform given action(start, stop) on the default app pool
-#
-function Update-DefaultAppPool
-{
-    param ($action) 
-    
-    switch ($action) 
-    { 
-        "Start"  {Start-WebAppPool -Name "DefaultAppPool"} 
-        "Stop"   {Stop-WebAppPool -Name "DefaultAppPool"} 
-        "Remove" {Remove-WebAppPool -Name "DefaultAppPool"}
     }
 }
 
@@ -516,15 +493,12 @@ function New-PSWSEndpoint
     if ($EnablePSWSETW)
     {
         Enable-PSWSETW
-    }
-    
-    Update-AllSites start
-    
+    }       
 }
 
 <#
 .Synopsis
-   Removes a PowerShell WebServices IIS Endpoint
+   Removes a DSC WebServices IIS Endpoint
 .DESCRIPTION
    Removes a PSWS IIS Endpoint
 .EXAMPLE
@@ -544,6 +518,26 @@ function Remove-PSWSEndpoint
        # and the pool it is using
        $pool = $site.applicationPool
 
+       # get the path so we can delete the files
+       $filePath = $site.PhysicalPath
+       # get the port number for the Firewall rule
+       $bindings = (Get-WebBinding -Name $siteName).bindingInformation
+       $port = [regex]::match($bindings,':(\d+):').Groups[1].Value     
+
+       # remove the actual site.
+       Remove-Website -Name $siteName
+       # there may be running requests, wait a little
+       # I had an issue where the files were still in use
+       # when I tried to delete them
+       Start-Sleep -Milliseconds 200  
+
+       # remove the files for the site
+       If (Test-Path $filePath)
+       {
+           Get-ChildItem $filePath -Recurse | Remove-Item -Recurse
+           Remove-Item $filePath
+       }
+
        # find out whether any other site is using this pool
        $filter = "/system.applicationHost/sites/site/application[@applicationPool='" + $pool + "']" 
        $apps = (Get-WebConfigurationProperty -Filter $filter -PSPath "machine/webroot/apphost" -name path).ItemXPath 
@@ -553,21 +547,6 @@ function Remove-PSWSEndpoint
           Remove-WebAppPool -Name $pool
        }
 
-       # get the path so we can delete the files
-       $filePath = $site.PhysicalPath
-       # get the port number for the Firewall rule
-       $bindings = (Get-WebBinding -Name $siteName).bindingInformation
-       $port = [regex]::match($bindings,':(\d+):').Groups[1].Value
-
-       # remove the actual site.
-       Remove-Website -Name $siteName
-
-       # remove the files for the site
-       If (Test-Path $filePath)
-       {
-           Get-ChildItem $filePath -Recurse | Remove-Item -Recurse
-           Remove-Item $filePath
-       }
 
        # remove all rules with that name
        $ruleName = ($($FireWallRuleDisplayName) -f $port)
