@@ -15,6 +15,13 @@ if (($env:PsModulePath).IndexOf($modPath) -eq -1)
     $env:PsModulePath = $env:PsModulePath + ";" + $modPath
 }
 
+# hacking APPVEYOR:
+if (($env:PsModulePath).IndexOf("C:\projects") -eq -1)
+{
+    $env:PsModulePath = $env:PsModulePath + ";C:\projects"
+}
+
+
 # create a unique name that we use for our temp files and folders
 [string]$tempName = "xDSCWebServiceTests_" + (Get-Date).ToString("yyyyMMdd_HHmmss")
 
