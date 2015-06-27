@@ -8,6 +8,13 @@
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 
+$modPath = $here -replace "\\xPSDesiredStateConfiguration\\Tests\\Integration",""
+
+if (($env:PsModulePath).IndexOf($modPath) -eq -1)
+{
+    $env:PsModulePath = $env:PsModulePath + ";" + $modPath
+}
+
 # create a unique name that we use for our temp files and folders
 [string]$tempName = "xDSCWebServiceTests_" + (Get-Date).ToString("yyyyMMdd_HHmmss")
 
@@ -57,7 +64,7 @@ Describe "xDSCWebService" {
         {
 
             # we need to set the PSModulePath once more to get this to work in AppVevor to find our resources
-            [System.Environment]::SetEnvironmentVariable('PSModulePath',$env:PSModulePath,[System.EnvironmentVariableTarget]::Machine)
+            [System.Environment]::SetEnvironmentVariable('PSModulePath',$env:PSModulePath,[System.EnvironmentVariableTarget]::User)
 
             # define the configuration
             configuration CreatingSites
