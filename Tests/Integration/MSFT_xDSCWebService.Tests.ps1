@@ -64,7 +64,7 @@ Describe "xDSCWebService" {
         {
 
             # we need to set the PSModulePath once more to get this to work in AppVevor to find our resources
-            [System.Environment]::SetEnvironmentVariable('PSModulePath',$env:PSModulePath,[System.EnvironmentVariableTarget]::User)
+            [System.Environment]::SetEnvironmentVariable('PSModulePath',$env:PSModulePath,[System.EnvironmentVariableTarget]::Machine)
 
             # define the configuration
             configuration CreatingSites
