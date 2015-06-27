@@ -1,10 +1,6 @@
 install: 
     - cinst -y pester
     - git clone https://github.com/PowerShell/DscResource.Tests
-    - ps: winrm quickconfig -quiet
-    - ps: test-wsman
-    - ps: $env:PsModulePath
-    - ps: Get-ChildItem C:\projects -include xPSDesiredStateConfiguration -Recurse | copy-item -Destination C:\Users\appveyor\Documents\WindowsPowerShell\Modules -Recurse -force
 
 build: false
 
