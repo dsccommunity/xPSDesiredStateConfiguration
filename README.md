@@ -132,6 +132,10 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 ## Versions
 
+### Unreleased
+
+* Added logging inner exception messages in xArchive and xPackage resources
+
 ### 3.3.0.0
 
 * Add support to xPackage resource for checking different registry hives
