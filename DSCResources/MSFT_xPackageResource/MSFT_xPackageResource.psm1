@@ -85,7 +85,7 @@ Function Throw-TerminatingError
     )
 
     $exception = new-object "System.InvalidOperationException" $Message,$ErrorRecord.Exception
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception,"MachineStateIncorrect","InvalidOperation",$null
+    $errorRecord = New-Object System.Management.Automation.ErrorRecord ($exception.ToString()),"MachineStateIncorrect","InvalidOperation",$null
     throw $errorRecord
 }
 
