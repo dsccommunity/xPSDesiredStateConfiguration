@@ -134,7 +134,12 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 ### Unreleased
 
+### 3.4.0.0
+
 * Added logging inner exception messages in xArchive and xPackage resources
+* Fixed hash calculation in Get-CacheEntry
+* Fixed issue with PSDSCComplianceServer returning HTTP Error 401.2
+
 
 ### 3.3.0.0
 
