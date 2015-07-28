@@ -27,7 +27,7 @@ configuration Sample_xDscWebService
             Ensure                  = "Present"
             EndpointName            = "PSDSCPullServer"
             Port                    = 8080
-            PhysicalPath            = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer"
+            PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCPullServer"
             CertificateThumbPrint   = $certificateThumbPrint         
             ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
             ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"            
@@ -40,7 +40,7 @@ configuration Sample_xDscWebService
             Ensure                  = "Present"
             EndpointName            = "PSDSCComplianceServer"
             Port                    = 9080
-            PhysicalPath            = "$env:SystemDrive\inetpub\wwwroot\PSDSCComplianceServer"
+            PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCComplianceServer"
             CertificateThumbPrint   = "AllowUnencryptedTraffic"
             State                   = "Started"
             IsComplianceServer      = $true

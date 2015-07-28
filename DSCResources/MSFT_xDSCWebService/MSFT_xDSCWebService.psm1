@@ -96,8 +96,8 @@ function Set-TargetResource
         # Port number of the DSC Pull Server IIS Endpoint
         [Uint32]$Port = $( if ($IsComplianceServer) { 7070 } else { 8080 } ),
 
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub/wwwroot)                            
-        [string]$PhysicalPath = "$env:SystemDrive\inetpub\wwwroot\$EndpointName",
+        # Physical path for the IIS Endpoint on the machine (usually under inetpub)                            
+        [string]$PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(Mandatory)]
@@ -165,10 +165,10 @@ function Set-TargetResource
         $pswsDispatchFileName = "$pathPullServer\PSDSCComplianceServer.xml"
     }
 
-    # check for the existance of Windows authentication, this is needed for the Compliance Server
-    Write-Verbose "Check IIS Windows Authentication"
+    # check for the existance of Windows authentication, this is needed for the Compliance Server    
     if(($Ensure -eq "Present"))
     {
+        Write-Verbose "Check IIS Windows Authentication"
         # only important if Present, Get-WindowsFeature works under 2008 R2 and newer
         if ((Get-WindowsFeature -name Web-Windows-Auth | Where Installed).count -eq 0)
         {
@@ -184,6 +184,22 @@ function Set-TargetResource
             }                       
         }      
     }
+
+    # ============ Absent block to remove existing site =========
+    if(($Ensure -eq "Absent"))
+    {
+         $website = Get-Website -Name $EndpointName
+         if($website -ne $null)
+         {
+            # there is a web site, but there shouldn't be one
+            Write-Verbose "Removing web site $EndpointName"
+            PSWSIISEndpoint\Remove-PSWSEndpoint -SiteName $EndpointName
+         }
+
+         # we are done here, all stuff below is for 'Present'
+         return 
+    }
+    # ===========================================================
 
                 
     Write-Verbose "Create the IIS endpoint"    
@@ -287,8 +303,8 @@ function Test-TargetResource
         # Port number of the DSC Pull Server IIS Endpoint
         [Uint32]$Port = $( if ($IsComplianceServer) { 7070 } else { 8080 } ),
 
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub/wwwroot)                            
-        [string]$PhysicalPath = "$env:SystemDrive\inetpub\wwwroot\$EndpointName",
+        # Physical path for the IIS Endpoint on the machine (usually under inetpub)                            
+        [string]$PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(Mandatory)]
@@ -325,12 +341,25 @@ function Test-TargetResource
     Do
     {
         Write-Verbose "Check Ensure"
-        if(($Ensure -eq "Present" -and $website -eq $null) -or ($Ensure -eq "Absent" -and $website -ne $null))
+        if(($Ensure -eq "Present" -and $website -eq $null))
         {
             $DesiredConfigurationMatch = $false            
             Write-Verbose "The Website $EndpointName is not present"
             break       
         }
+        if(($Ensure -eq "Absent" -and $website -ne $null))
+        {
+            $DesiredConfigurationMatch = $false            
+            Write-Verbose "The Website $EndpointName is present but should not be"
+            break       
+        }
+        if(($Ensure -eq "Absent" -and $website -eq $null))
+        {
+            $DesiredConfigurationMatch = $true            
+            Write-Verbose "The Website $EndpointName is not present as requested"
+            break       
+        }
+        # the other case is: Ensure and exist, we continue with more checks
 
         # check for the existance of Windows authentication, this is needed for the Compliance Server        
         if(($Ensure -eq "Present"))
