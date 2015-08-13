@@ -135,7 +135,7 @@ function Test-TargetResource
                 $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
                 if($service -ne $null)
                 {
-                    throw "The service to create already exists"
+                    Write-Verbose -Message "The service to create already exists"
                 }
                 else
                 {
@@ -156,35 +156,33 @@ function Test-TargetResource
             }
         }
     }
-    else
+    
+    $svc=GetServiceResource $Name
+
+    if($PSBoundParameters.ContainsKey("StartupType") -or $PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
     {
+        $svcWmi = GetWMIService $Name
 
-        $svc=GetServiceResource $Name
+        $getUserNameAndPasswordArgs=@{}
+        if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)}
+        if($PSBoundParameters.ContainsKey("Credential")) {$null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)}
 
-        if($PSBoundParameters.ContainsKey("StartupType") -or $PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
+        $userName,$password=GetUserNameAndPassword @getUserNameAndPasswordArgs
+        if($userName -ne $null -and !(TestUserName $SvcWmi $userName))
         {
-            $svcWmi = GetWMIService $Name
-
-            $getUserNameAndPasswordArgs=@{}
-            if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)}
-            if($PSBoundParameters.ContainsKey("Credential")) {$null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)}
-
-            $userName,$password=GetUserNameAndPassword @getUserNameAndPasswordArgs
-            if($userName -ne $null -and !(TestUserName $SvcWmi $userName))
-            {
-                write-verbose ($LocalizedData.TestUserNameMismatch -f $svcWmi.Name,$svcWmi.StartName,$userName)
-                return $false
-            }
-
-            if($PSBoundParameters.ContainsKey("StartupType") -and !(TestStartupType $SvcWmi $StartupType))
-            {
-                write-verbose ($LocalizedData.TestStartupTypeMismatch -f $svcWmi.Name,$svcWmi.StartMode,$StartupType)
-                return $false
-            }
+            write-verbose ($LocalizedData.TestUserNameMismatch -f $svcWmi.Name,$svcWmi.StartName,$userName)
+            return $false
         }
 
-        return ($State -eq "Stopped" -and $svc.Status -eq "Stopped") -or ($svc.Status -eq "Running" -and $State -eq "Running")
+        if($PSBoundParameters.ContainsKey("StartupType") -and !(TestStartupType $SvcWmi $StartupType))
+        {
+            write-verbose ($LocalizedData.TestStartupTypeMismatch -f $svcWmi.Name,$svcWmi.StartMode,$StartupType)
+            return $false
+        }
     }
+
+    return ($State -eq "Stopped" -and $svc.Status -eq "Stopped") -or ($svc.Status -eq "Running" -and $State -eq "Running")
+    
 }
 
 <#
@@ -254,7 +252,7 @@ function Set-TargetResource
                 $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
                 if($service -ne $null)
                 {
-                    throw "The service to create already exists"
+                    Write-Verbose -Message "The service to create already exists"
                 }
                 else
                 {
