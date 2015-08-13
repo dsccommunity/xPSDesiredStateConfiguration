@@ -1,4 +1,4 @@
-﻿[ClassVersion("1.0.0"), FriendlyName("xDSCWebService")] 
+[ClassVersion("1.0.0"), FriendlyName("xDSCWebService")] 
 class MSFT_xDSCWebService : OMI_BaseResource
 {
   [Key] string EndpointName;
