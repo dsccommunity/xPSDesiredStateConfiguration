@@ -117,8 +117,10 @@ function Test-TargetResource
 
         [System.String[]]
         [ValidateNotNullOrEmpty()]
-        $Dependencies
+        $Dependencies,
 
+        [System.UInt32]
+        $StartupTimeout
     )
 
     ValidateStartupType $Name $StartupType $State
@@ -234,7 +236,10 @@ function Set-TargetResource
 
         [System.String[]]
         [ValidateNotNullOrEmpty()]
-        $Dependencies
+        $Dependencies,
+
+        [System.UInt32]
+        $StartupTimeout = 30000
     )
 
     ValidateStartupType $Name $StartupType $State
@@ -322,12 +327,12 @@ function Set-TargetResource
     {
          if(( $PSBoundParameters.ContainsKey("State")) -and ($State -eq "Running"))
         {
-            StartService $svc
+            StartService $svc $StartupTimeout
         }
     }
     else
     {
-        StartService $svc
+        StartService $svc $StartupTimeout
     }
 }
 
@@ -673,7 +678,10 @@ function StartService
     (
         [parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $svc
+        $svc,
+
+        [parameter(Mandatory = $true)]
+        $startupTimeout
     )
 
     if($svc.Status -eq [System.ServiceProcess.ServiceControllerStatus]::Running)
@@ -687,8 +695,8 @@ function StartService
         try
         {
             $svc.Start()
-            $twoSeconds = New-Object timespan 20000000
-            $svc.WaitForStatus("Running",$twoSeconds)
+            $timeSpan = New-Object TimeSpan ($startupTimeout * 10000)
+            $svc.WaitForStatus("Running", $timeSpan)
         }
         catch
         {

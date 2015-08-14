@@ -135,6 +135,7 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 ### Unreleased
 
 * xService idempotence - no longer throws an error when Ensure = 'Present' and service already exists
+* Added StartupTimeout to xService resource (default 30000 ms)
 
 ### 3.4.0.0
 
