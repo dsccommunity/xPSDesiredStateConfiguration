@@ -134,6 +134,8 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 ### Unreleased
 
+* xService idempotence - no longer throws an error when Ensure = 'Present' and service already exists
+
 ### 3.4.0.0
 
 * Added logging inner exception messages in xArchive and xPackage resources
