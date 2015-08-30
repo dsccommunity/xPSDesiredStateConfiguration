@@ -277,6 +277,7 @@ function Test-TargetResource
 
         [pscredential] $RunAsCredential,
 
+        [ValidateSet('LocalMachine','CurrentUser')]
         [string] $InstalledCheckRegHive = 'LocalMachine',
 
         [string] $InstalledCheckRegKey,
@@ -376,6 +377,7 @@ function Get-TargetResource
         [AllowEmptyString()]
         [string] $ProductId,
 
+        [ValidateSet('LocalMachine','CurrentUser')]
         [string] $InstalledCheckRegHive = 'LocalMachine',
 
         [string] $InstalledCheckRegKey,
@@ -574,6 +576,7 @@ function Set-TargetResource
 
         [pscredential] $RunAsCredential,
 
+        [ValidateSet('LocalMachine','CurrentUser')]
         [string] $InstalledCheckRegHive = 'LocalMachine',
 
         [string] $InstalledCheckRegKey,
