@@ -132,10 +132,13 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 ## Versions
 
-### Unreleased
+### 3.5.0.0
 
-* xService idempotence - no longer throws an error when Ensure = 'Present' and service already exists
-* Added StartupTimeout to xService resource (default 30000 ms)
+* MSFT_xPackageResource: Added ValidateSet to Get/Set/Test-TargetResource to match MSFT_xPackageResource.schema.mof
+* Fixed bug causing xService to throw error when service already exists
+* Added StartupTimeout to xService resource
+* Removed UTF8 BOM
+* Added code for pull server removal
 
 ### 3.4.0.0
 
