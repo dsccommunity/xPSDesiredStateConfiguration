@@ -68,7 +68,7 @@ For a complete list of properties, please use Get-DscResource
 * **UserAgent**: User agent for the web request.
 * **Headers**: Headers of the web request.
 * **Credential**: Specifies credential of a user which has permissions to send the request.
-* **Ensure**: Ensures that the local file is **Present** or **Absent** on the local system
+* **Ensure**: Says whether DestinationPath exists on the machine
 
 ### xPackage
 
