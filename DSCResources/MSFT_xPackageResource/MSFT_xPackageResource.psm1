@@ -39,6 +39,7 @@ FileHasValidSignature=File '{0}' contains a valid digital signature. Signer Thum
 InvalidFileSignature=File '{0}' does not have a valid Authenticode signature.  Status: {1}
 WrongSignerSubject=File '{0}' was not signed by expected signer subject '{1}'
 WrongSignerThumbprint=File '{0}' was not signed by expected signer certificate thumbprint '{1}'
+CreatingRegistryValue=Creating package registry value of {0}.
 '@
 }
 
@@ -87,6 +88,48 @@ Function Throw-TerminatingError
     $exception = new-object "System.InvalidOperationException" $Message,$ErrorRecord.Exception
     $errorRecord = New-Object System.Management.Automation.ErrorRecord ($exception.ToString()),"MachineStateIncorrect","InvalidOperation",$null
     throw $errorRecord
+}
+
+Function Set-RegistryValue
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [Microsoft.Win32.RegistryHive]
+        $RegistryHive,
+
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key,
+
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Value,
+
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Data
+    )
+
+    try
+    {
+        $baseKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
+        $subKey =  $baseKey.OpenSubKey($Key, $true) ## Opens the subkey with write access
+        if($subKey -eq $null)
+        {
+            $subKey = $baseKey.CreateSubKey($Key)
+        }
+        $subKey.SetValue($Value, $Data)
+    }
+    catch
+    {
+        $exceptionText = ($_ | Out-String).Trim()
+        Write-Verbose "Exception occured in Set-RegistryValue: $exceptionText"
+    }
 }
 
 Function Get-RegistryValueIgnoreError
@@ -286,6 +329,8 @@ function Test-TargetResource
 
         [string] $InstalledCheckRegValueData,
 
+        [boolean] $CreateCheckRegValue,
+
         [string] $FileHash,
 
         [ValidateSet('SHA1','SHA256','SHA384','SHA512','MD5','RIPEMD160')]
@@ -384,8 +429,9 @@ function Get-TargetResource
 
         [string] $InstalledCheckRegValueName,
 
-        [string] $InstalledCheckRegValueData
+        [string] $InstalledCheckRegValueData,
 
+        [boolean] $CreateCheckRegValue        
     )
 
     #If the user gave the ProductId then we derive $identifyingNumber
@@ -584,6 +630,8 @@ function Set-TargetResource
         [string] $InstalledCheckRegValueName,
 
         [string] $InstalledCheckRegValueData,
+        
+        [boolean] $CreateCheckRegValue,
 
         [string] $FileHash,
 
@@ -913,6 +961,13 @@ function Set-TargetResource
     if($Ensure -eq "Present")
     {
         $operationString = $LocalizedData.PackageInstalled
+    }
+
+    if($CreateCheckRegValue -eq $true)
+    {
+        $registryValueString = '{0}\{1}\{2}' -f $InstalledCheckRegHive, $InstalledCheckRegKey, $InstalledCheckRegValueName
+        Write-Verbose ($LocalizedData.CreatingRegistryValue -f $registryValueString)
+        Set-RegistryValue -RegistryHive $InstalledCheckRegHive -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName -Data $InstalledCheckRegValueData
     }
 
     # Check if reboot is required, if so notify CA. The MSFT_ServerManagerTasks provider is missing on client SKUs

@@ -26,6 +26,7 @@ class MSFT_xPackageResource : OMI_BaseResource
   [write] string InstalledCheckRegKey;
   [write] string InstalledCheckRegValueName;
   [write] string InstalledCheckRegValueData;
+  [write] boolean CreateCheckRegValue;
 };
 
 

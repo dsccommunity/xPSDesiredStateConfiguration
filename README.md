@@ -92,6 +92,7 @@ For a complete list, please use Get-DscResource.
 * **InstalledCheckRegKey**: Registry key to open to check for package installation status.
 * **InstalledCheckRegValueName**: Registry value name to check for package installation status. 
 * **InstalledCheckRegValueData**: Value to compare against the retrieved value to check for package installation.
+* **CreateCheckRegValue**: Creates the InstallCheckRegValueName registry value/data after successful package installation.
 
 ### xGroup
 
@@ -131,6 +132,10 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 
 
 ## Versions
+
+### Unreleased
+
+* Added CreateCheckRegValue parameter to xPackage resource
 
 ### 3.5.0.0
 
