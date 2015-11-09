@@ -100,7 +100,11 @@ function Set-TargetResource
         $Headers,
 
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $MatchSource = $true
     )
 
     # Validate Uri
@@ -154,8 +158,9 @@ function Set-TargetResource
         $DestinationPath = Join-Path $DestinationPath $uriFileName        
     }
 
-    # Remove DestinationPath from parameters as it is not parameter of Invoke-WebRequest
+    # Remove DestinationPath and MatchSource from parameters as they are not parameters of Invoke-WebRequest
     $PSBoundParameters.Remove("DestinationPath") | Out-Null;
+    $PSBoundParameters.Remove("MatchSource") | Out-Null;
     
     # Convert headers to hashtable
     $PSBoundParameters.Remove("Headers") | Out-Null;
@@ -216,7 +221,11 @@ function Test-TargetResource
         $Headers,
 
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [parameter(Mandatory = $false)]
+        [System.Boolean]
+        $MatchSource = $true
     )
 
     # Check whether DestinationPath points to existing file or directory
@@ -228,28 +237,11 @@ function Test-TargetResource
         "File" {
             Write-Debug "DestinationPath: '$DestinationPath' is existing file on the machine"
 
-            $file = Get-Item $DestinationPath
-            # Getting cache. It's cleared every time user runs Start-DscConfiguration
-            $cache = Get-Cache -DestinationPath $DestinationPath -Uri $Uri
+            if ($MatchSource) {           
+                $file = Get-Item $DestinationPath
+                # Getting cache. It's cleared every time user runs Start-DscConfiguration
+                $cache = Get-Cache -DestinationPath $DestinationPath -Uri $Uri
 
-            if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
-            {
-                Write-Debug "Cache reflects current state. No need for downloading file."
-                $fileExists = $true
-            }
-            else
-            {
-                Write-Debug "Cache is empty or it doesn't reflect current state. File will be downloaded."
-            }              
-        }
-
-        "Directory" {
-            Write-Debug "DestinationPath: '$DestinationPath' is existing directory on the machine"
-            $expectedDestinationPath = Join-Path $DestinationPath $uriFileName
-            
-            if (Test-Path $expectedDestinationPath) {
-                $file = Get-Item $expectedDestinationPath
-                $cache = Get-Cache -DestinationPath $expectedDestinationPath -Uri $Uri
                 if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
                 {
                     Write-Debug "Cache reflects current state. No need for downloading file."
@@ -258,6 +250,33 @@ function Test-TargetResource
                 else
                 {
                     Write-Debug "Cache is empty or it doesn't reflect current state. File will be downloaded."
+                }
+            } else {
+                Write-Debug "MatchSource is false. No need for downloading file."
+                $fileExists = $true 
+            }
+        }
+
+        "Directory" {
+            Write-Debug "DestinationPath: '$DestinationPath' is existing directory on the machine"
+            $expectedDestinationPath = Join-Path $DestinationPath $uriFileName
+            
+            if (Test-Path $expectedDestinationPath) {
+                if ($MatchSource) { 
+                    $file = Get-Item $expectedDestinationPath
+                    $cache = Get-Cache -DestinationPath $expectedDestinationPath -Uri $Uri
+                    if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
+                    {
+                        Write-Debug "Cache reflects current state. No need for downloading file."
+                        $fileExists = $true
+                    }
+                    else
+                    {
+                        Write-Debug "Cache is empty or it doesn't reflect current state. File will be downloaded."
+                    }
+                } else {
+                    Write-Debug "MatchSource is false. No need for downloading file."
+                    $fileExists = $true
                 }
             }    
         }

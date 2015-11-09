@@ -136,6 +136,7 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 ### Unreleased
 
 * Added CreateCheckRegValue parameter to xPackage resource
+* Added MatchSource parameter to xRemoteFile resource
 
 ### 3.5.0.0
 
