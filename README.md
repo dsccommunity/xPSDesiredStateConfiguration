@@ -68,6 +68,7 @@ For a complete list of properties, please use Get-DscResource
 * **UserAgent**: User agent for the web request.
 * **Headers**: Headers of the web request.
 * **Credential**: Specifies credential of a user which has permissions to send the request.
+* **MatchSource**: Determines whether the remote file should be re-downloaded if file in the DestinationPath was modified locally.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read only property.
 
 ### xPackage
