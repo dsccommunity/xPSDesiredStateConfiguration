@@ -250,10 +250,10 @@ function ValidatePrerequisites
 {
     Write-Verbose $LocalizedData.ValidatingPrerequisites
 
-    # check that we're running on a client SKU
+    # check that we're running on Server 2012 (or later) or on a client SKU
     $os = Get-CimInstance -ClassName  Win32_OperatingSystem
 
-    if ($os.ProductType -ne 1)
+    if (($os.ProductType -ne 1) -and ([System.Int32] $os.BuildNumber -lt 9600))
     {
         throw $LocalizedData.NotAClientSku
     }
