@@ -135,7 +135,9 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 ## Versions
 
 ### Unreleased
-
+* xService:
+    - Fixed a bug where 'Dependencies' property was not picked up and caused exception when set.
+ 
 ### 3.6.0.0
 * Added CreateCheckRegValue parameter to xPackage resource
 * Added MatchSource parameter to xRemoteFile resource

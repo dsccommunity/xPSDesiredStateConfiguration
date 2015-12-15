@@ -282,7 +282,7 @@ function Set-TargetResource
                     }
                     if($PSBoundParameters.ContainsKey("Dependencies"))
                     {
-                        $argumentsToNewService.Add("Dependencies", $Dependencies)
+                        $argumentsToNewService.Add("DependsOn", $Dependencies)
                     }
                     try
                     {
