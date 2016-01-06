@@ -1,4 +1,4 @@
-# Localized	10/30/2015 03:58 AM (GMT)	303:4.80.0411 	MSFT_xRegistryResource.strings.psd1
+# Localized    10/30/2015 03:58 AM (GMT)    303:4.80.0411     MSFT_xRegistryResource.strings.psd1
 # Localized resources for MSFT_xRegistryResource
 
 ConvertFrom-StringData @'
