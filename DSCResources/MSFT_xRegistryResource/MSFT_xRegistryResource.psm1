@@ -4,7 +4,7 @@
 DATA localizedData
 {
     # culture = "en-US"
-    ConvertFrom-StringData @'                
+    ConvertFrom-StringData @'
         ParameterValueInvalid = (ERROR) Parameter '{0}' has an invalid value '{1}' for type '{2}'
         InvalidPSDriveSpecified = (ERROR) Invalid PSDrive '{0}' specified in registry key '{1}'
         InvalidRegistryHiveSpecified = (ERROR) Invalid registry hive was specified in registry key '{0}'
@@ -22,7 +22,7 @@ DATA localizedData
         RegKeyDoesNotExist = Registry key '{0}' does not exist
         RegKeyExists = Registry key '{0}' exists
         RegValueExists = Found registry key value '{0}' with type '{1}' and data '{2}'
-        RegValueDoesNotExist = Registry key value '{0}' does not exist        
+        RegValueDoesNotExist = Registry key value '{0}' does not exist
         RegValueTypeMismatch = Registry key value '{0}' of type '{1}' does not exist
         RegValueDataMismatch = Registry key value '{0}' of type '{1}' does not contain data '{2}'
         DefaultValueDisplayName = (Default)
@@ -34,18 +34,18 @@ Import-LocalizedData LocalizedData -filename MSFT_xRegistryResource.strings.psd1
 # The Get-TargetResourceInternal cmdlet
 #--------------------------------------
 FUNCTION Get-TargetResourceInternal
-{    
-	param
-	(	
-        [parameter(Mandatory = $true)]		
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Key,
-				
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key,
+
         # Default is [String]::Empty to cater for the (Default) RegValue
-		[System.String]
-		$ValueName = [String]::Empty
-	)
+        [System.String]
+        $ValueName = [String]::Empty
+    )
 
     # Perform any required setup steps for the provider
     SetupProvider -KeyName ([ref]$Key)
@@ -54,13 +54,13 @@ FUNCTION Get-TargetResourceInternal
 
     # First check if the specified key exists
     $keyInfo = GetRegistryKey -Path $Key -ErrorAction SilentlyContinue
- 
+
     # If $keyInfo is $null, the registry key doesn't exist
     if ($keyInfo -eq $null)
     {
         Write-Verbose ($localizedData.RegKeyDoesNotExist -f $Key)
-           
-        $retVal = @{Ensure='Absent'; Key=$Key}        
+
+        $retVal = @{Ensure='Absent'; Key=$Key}
 
         return $retVal
     }
@@ -82,9 +82,9 @@ FUNCTION Get-TargetResourceInternal
     # If $ValueName is not found in the specified $Key
     if($valData -eq $null)
     {
-        Write-Verbose ($localizedData.RegValueDoesNotExist -f "$Key\$ValueName") 
+        Write-Verbose ($localizedData.RegValueDoesNotExist -f "$Key\$ValueName")
 
-        $retVal = @{Ensure='Absent'; Key=$Key; ValueName=(GetValueDisplayName -ValueName $ValueName)}        
+        $retVal = @{Ensure='Absent'; Key=$Key; ValueName=(GetValueDisplayName -ValueName $ValueName)}
 
         return $retVal
     }
@@ -93,14 +93,14 @@ FUNCTION Get-TargetResourceInternal
     $finalName = GetValueDisplayName -ValueName $ValueName
     $finalType = $keyInfo.GetValueKind($ValueName)
     $finalData = $valData
-    
+
     # Special case: For Binary type data we convert the received bytes back to a readable hex-strin
     if ($finalType -ieq "Binary")
     {
-        $finalData = ConvertByteArrayToHexString -Data $valData    
+        $finalData = ConvertByteArrayToHexString -Data $valData
     }
 
-    # Populate all config in the return object        
+    # Populate all config in the return object
     $retVal.ValueName = $finalName
     $retVal.ValueType = $finalType
     $retVal.Data =  $finalData
@@ -115,29 +115,29 @@ FUNCTION Get-TargetResourceInternal
 # The Get-TargetResource cmdlet
 #------------------------------
 FUNCTION Get-TargetResource
-{    
-	param
-	(	
+{
+    param
+    (
         [Parameter(Mandatory)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Key,
-        	        
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key,
+
         [Parameter(Mandatory)]
         [ValidateNotNull()]
         [AllowEmptyString()]
         [System.String]
-		$ValueName,
+        $ValueName,
 
         # Special-case: Used only as a boolean flag (along with ValueType) to determine if the target entity is the Default Value or the key itself.
-		[System.String[]]
-		$ValueData,
+        [System.String[]]
+        $ValueData,
 
         # Special-case: Used only as a boolean flag (along with ValueData) to determine if the target entity is the Default Value or the key itself.
-		[System.String]
-		$ValueType
-	)    
-        
+        [System.String]
+        $ValueType
+    )
+
     # If $ValueName is "" and ValueType and ValueData are both not specified, then we target the key itself (not Default Value)
     if ($ValueName -eq "" -and !$PSBoundParameters.ContainsKey("ValueType") -and !$PSBoundParameters.ContainsKey("ValueData"))
     {
@@ -146,18 +146,18 @@ FUNCTION Get-TargetResource
     else
     {
         $retVal = Get-TargetResourceInternal -Key $Key -ValueName $ValueName
-        
+
         if ($retVal.Ensure -eq 'Present')
-        {                                               
+        {
             [string[]]$retVal.ValueData += $retVal.Data
-            
+
             if ($retVal.ValueType -ieq "MultiString")
             {
                 $retVal.ValueData = $retVal.Data
             }
-        }        
-    }    
-        
+        }
+    }
+
     $retVal.Remove("Data")
 
     return $retVal
@@ -170,49 +170,49 @@ FUNCTION Get-TargetResource
 FUNCTION Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
-	param
-	(
+    param
+    (
         [Parameter(Mandatory)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Key,
-		
-        [Parameter(Mandatory)] 
-	    [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNull()]
         [AllowEmptyString()]
-		[System.String]
-		$ValueName,
-        
+        [System.String]
+        $ValueName,
+
         [ValidateSet("Present", "Absent")]
-		[System.String]
-		$Ensure = "Present",
+        [System.String]
+        $Ensure = "Present",
 
         [ValidateNotNull()]
-		[System.String[]]
-		$ValueData = @(),
+        [System.String[]]
+        $ValueData = @(),
 
         [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
-		[System.String]
-		$ValueType = "String",
-        
-		[System.Boolean]
-		$Hex = $false,
-        
-		[System.Boolean]
-		$Force = $false
-	)
+        [System.String]
+        $ValueType = "String",
+
+        [System.Boolean]
+        $Hex = $false,
+
+        [System.Boolean]
+        $Force = $false
+    )
 
     # Perform any required setup steps for the provider
     SetupProvider -KeyName ([ref]$Key)
 
-    # Query if the RegVal related parameters have been specified    
+    # Query if the RegVal related parameters have been specified
     $ValueNameSpecified = $PSBoundParameters.ContainsKey("ValueName")
-    $ValueTypeSpecified = $PSBoundParameters.ContainsKey("ValueType")    
-    $ValueDataSpecified = $PSBoundParameters.ContainsKey("ValueData") 
-    $keyCreated = $false     
+    $ValueTypeSpecified = $PSBoundParameters.ContainsKey("ValueType")
+    $ValueDataSpecified = $PSBoundParameters.ContainsKey("ValueData")
+    $keyCreated = $false
 
-    # If an empty string ValueName has been specified and no ValueType and no ValueData has been specified, 
-    # treat this case as if ValueName was not specified and target the Key itself. This is to cater the limitation 
+    # If an empty string ValueName has been specified and no ValueType and no ValueData has been specified,
+    # treat this case as if ValueName was not specified and target the Key itself. This is to cater the limitation
     # that both Key and ValueName are mandatory now and we must special-case like this to target the Key only.
     if ($ValueName -eq "" -and !$ValueTypeSpecified -and !$ValueDataSpecified)
     {
@@ -225,7 +225,7 @@ FUNCTION Set-TargetResource
     # ----------------
     # ENSURE = PRESENT
     if ($Ensure -ieq "Present")
-    {       
+    {
         # If key doesn't exist, attempt to create it
         if ($keyInfo.Ensure -ieq "Absent")
         {
@@ -243,18 +243,18 @@ FUNCTION Set-TargetResource
                     throw
                 }
             }
-        }        
-        
-        # If $ValueName, $ValueType and $ValueData are not specified, the simple existence/creation of the Regkey satisfies the Ensure=Present condition, just return        
+        }
+
+        # If $ValueName, $ValueType and $ValueData are not specified, the simple existence/creation of the Regkey satisfies the Ensure=Present condition, just return
         if (!$ValueNameSpecified -and !$ValueDataSpecified -and !$ValueTypeSpecified)
-        {            
+        {
             if (!$keyCreated)
             {
                 Write-Log ($localizedData.SetRegKeyUnchanged -f "$Key")
             }
 
             return
-        }    
+        }
 
         # If $ValueType and $ValueData are both not specified, but $ValueName is specified, check if the Value exists, if yes return with status unchanged, otherwise report input error
         if (!$ValueTypeSpecified -and !$ValueDataSpecified -and $ValueNameSpecified)
@@ -263,10 +263,10 @@ FUNCTION Set-TargetResource
 
             if ($valData -ne $null)
             {
-                Write-Log ($localizedData.SetRegValueUnchanged -f "$Key\$ValueName", (ArrayToString -Value $valData)) 
+                Write-Log ($localizedData.SetRegValueUnchanged -f "$Key\$ValueName", (ArrayToString -Value $valData))
 
                 return
-            }            
+            }
         }
 
         # Create a strongly-typed object (in accordance with the specified $ValueType)
@@ -275,13 +275,13 @@ FUNCTION Set-TargetResource
 
         # Get the appropriate display name for the specified ValueName (to handle the Default RegValue case)
         $valDisplayName = GetValueDisplayName -ValueName $ValueName
-        
+
         if ($PSCmdlet.ShouldProcess(($localizedData.SetRegValueSucceeded -f "$Key\$valDisplayName", (ArrayToString -Value $setVal), $ValueType), $null, $null))
-        {                
+        {
             try
-            {                                          
+            {
                 # Finally set the $ValueName here
-                [Microsoft.Win32.Registry]::SetValue($keyInfo.Data.Name, $ValueName, $setVal, $ValueType)                
+                [Microsoft.Win32.Registry]::SetValue($keyInfo.Data.Name, $ValueName, $setVal, $ValueType)
             }
             catch [Exception]
             {
@@ -295,7 +295,7 @@ FUNCTION Set-TargetResource
     # ---------------
     # ENSURE = ABSENT
     elseif ($Ensure -ieq "Absent")
-    {              
+    {
         # If key doesn't exist, no action is required
         if ($keyInfo.Ensure -ieq "Absent")
         {
@@ -305,15 +305,15 @@ FUNCTION Set-TargetResource
         }
 
         # If the code reaches here, the key exists
-        
+
         # If ValueName is "" and ValueType and ValueData have not been specified, target the key for removal
         if(!$ValueNameSpecified -and !$ValueTypeSpecified -and !$ValueDataSpecified)
         {
             # If this is not a Force removal and the Key contains subkeys, report no change and return
             if (!$Force -and ($keyInfo.Data.SubKeyCount -gt 0))
-            {             
+            {
                 $errorMessage = $localizedData.RemoveRegKeyTreeFailed -f "$Key"
-                
+
                 Write-Log $errorMessage
 
                 ThrowError -ExceptionName "System.InvalidOperationException" -ExceptionMessage $errorMessage -ExceptionObject $Force -ErrorId "CannotRemoveKeyTreeWithoutForceFlag" -ErrorCategory NotSpecified
@@ -324,20 +324,20 @@ FUNCTION Set-TargetResource
             if ($PSCmdlet.ShouldProcess(($localizedData.RemoveRegKeySucceeded -f $Key), $null, $null))
             {
                 try
-                {                                          
+                {
                     # Formulate hiveName and subkeyName compatible with .NET APIs
                     $hiveName = $keyInfo.Data.PSDrive.Root.Replace("_","").Replace("HKEY","")
                     $subkeyName = $keyInfo.Data.Name.Substring($keyInfo.Data.Name.IndexOf("\")+1)
 
                     # Finally remove the subkeytree
-                    [Microsoft.Win32.Registry]::$hiveName.DeleteSubKeyTree($subkeyName)             
+                    [Microsoft.Win32.Registry]::$hiveName.DeleteSubKeyTree($subkeyName)
                 }
                 catch [Exception]
                 {
                     Write-Verbose ($localizedData.RemoveRegKeyFailed -f "$Key")
 
                     throw
-                }                
+                }
             }
 
             return
@@ -347,25 +347,25 @@ FUNCTION Set-TargetResource
 
         # Get the appropriate display name for the specified ValueName (to handle the Default RegValue case)
         $valDisplayName = GetValueDisplayName -ValueName $ValueName
-    
+
         # Query the specified $ValueName
         $valData = $keyInfo.Data.GetValue($ValueName)
 
         # If $ValueName is not found in the specified $Key
         if($valData -eq $null)
         {
-            Write-Log ($localizedData.RegValueDoesNotExist -f "$Key\$valDisplayName") 
+            Write-Log ($localizedData.RegValueDoesNotExist -f "$Key\$valDisplayName")
 
             return
         }
 
         # If the control reaches here, the specified Value has been found and should be removed.
-        
+
         if ($PSCmdlet.ShouldProcess(($localizedData.RemoveRegValueSucceeded -f "$Key\$valDisplayName"), $null, $null))
-        {                                                    
+        {
             try
-            {                                          
-                # Formulate hiveName and subkeyName compatible with .NET APIs                
+            {
+                # Formulate hiveName and subkeyName compatible with .NET APIs
                 $hiveName = $keyInfo.Data.PSDrive.Root.Replace("_","").Replace("HKEY","")
                 $subkeyName = $keyInfo.Data.Name.Substring($keyInfo.Data.Name.IndexOf("\")+1)
 
@@ -390,49 +390,49 @@ FUNCTION Set-TargetResource
 #-------------------------------
 FUNCTION Test-TargetResource
 {
-	param
-	(
+    param
+    (
         [parameter(Mandatory)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Key,
-		
-		[parameter(Mandatory)]
-		[AllowEmptyString()]
-	    [ValidateNotNull()]
-		[System.String]
-		$ValueName,
-        
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key,
+
+        [parameter(Mandatory)]
+        [AllowEmptyString()]
+        [ValidateNotNull()]
+        [System.String]
+        $ValueName,
+
         [ValidateSet("Present", "Absent")]
-		[System.String]
-		$Ensure = "Present",
+        [System.String]
+        $Ensure = "Present",
 
         [ValidateNotNull()]
-		[System.String[]]
-		$ValueData = @(),
+        [System.String[]]
+        $ValueData = @(),
 
         [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
-		[System.String]
-		$ValueType = "String",
-        
-		[System.Boolean]
-		$Hex = $false,
+        [System.String]
+        $ValueType = "String",
+
+        [System.Boolean]
+        $Hex = $false,
 
         # Force is not used in Test-TargetResource but is required by DSC engine to keep parameter-sets in parity for both SET and TEST
         [System.Boolean]
-		$Force = $false
-	)
+        $Force = $false
+    )
 
     # Perform any required setup steps for the provider
     SetupProvider -KeyName ([ref]$Key)
 
     # Query if the RegVal related parameters have been specified
     $ValueNameSpecified = $PSBoundParameters.ContainsKey("ValueName")
-    $ValueTypeSpecified = $PSBoundParameters.ContainsKey("ValueType")    
+    $ValueTypeSpecified = $PSBoundParameters.ContainsKey("ValueType")
     $ValueDataSpecified = $PSBoundParameters.ContainsKey("ValueData")
 
-    # If an empty string ValueName has been specified and no ValueType and no ValueData has been specified, 
-    # treat this case as if ValueName was not specified and target the Key itself. This is to cater the limitation 
+    # If an empty string ValueName has been specified and no ValueType and no ValueData has been specified,
+    # treat this case as if ValueName was not specified and target the Key itself. This is to cater the limitation
     # that both Key and ValueName are mandatory now and we must special-case like this to target the Key only.
     if (($ValueName -eq "") -and !$ValueTypeSpecified -and !$ValueDataSpecified)
     {
@@ -440,40 +440,40 @@ FUNCTION Test-TargetResource
     }
 
     # Now, query the specified key
-    $keyInfo = Get-TargetResourceInternal -Key $Key -Verbose:$false    
+    $keyInfo = Get-TargetResourceInternal -Key $Key -Verbose:$false
 
     # ----------------
     # ENSURE = PRESENT
     if ($Ensure -ieq "Present")
-    {              
+    {
         # If key doesn't exist, the test fails
         if ($keyInfo.Ensure -ieq "Absent")
         {
             Write-Verbose ($localizedData.RegKeyDoesNotExist -f $Key)
 
             return $false
-        }        
+        }
 
-        # If $ValueName, $ValueType and $ValueData are not specified, the simple existence of the Regkey satisfies the Ensure=Present condition, test is successful        
+        # If $ValueName, $ValueType and $ValueData are not specified, the simple existence of the Regkey satisfies the Ensure=Present condition, test is successful
         if (!$ValueNameSpecified -and !$ValueDataSpecified -and !$ValueTypeSpecified)
-        {                        
+        {
             Write-Verbose ($localizedData.RegKeyExists -f $Key)
 
             return $true
-        }    
+        }
 
         # IF THE CONTROL REACHED HERE, THE KEY EXISTS AND A REGVALUE ATTRIBUTE HAS BEEN SPECIFIED
 
         # Get the appropriate display name for the specified ValueName (to handle the Default RegValue case)
         $valDisplayName = GetValueDisplayName -ValueName $ValueName
 
-        # Now query the specified Reg Value        
+        # Now query the specified Reg Value
         $valData = Get-TargetResourceInternal -Key $Key -ValueName $ValueName -Verbose:$false
-        
+
         # If the Value doesn't exist, the test has failed
         if ($valData.Ensure -ieq "Absent")
         {
-            Write-Verbose ($localizedData.RegValueDoesNotExist -f "$Key\$valDisplayName")             
+            Write-Verbose ($localizedData.RegValueDoesNotExist -f "$Key\$valDisplayName")
 
             return $false
         }
@@ -483,9 +483,9 @@ FUNCTION Test-TargetResource
         # If the $ValueType has been specified and it doesn't match the type of the found RegValue, test fails
         if ($ValueTypeSpecified -and ($ValueType -ine $valData.ValueType))
         {
-            Write-Verbose ($localizedData.RegValueTypeMismatch -f "$Key\$valDisplayName", $ValueType)             
+            Write-Verbose ($localizedData.RegValueTypeMismatch -f "$Key\$valDisplayName", $ValueType)
 
-            return $false                                
+            return $false
         }
 
         # If an explicit ValueType has not been specified, given the Value already exists in Registry, assume the ValueType to be of the existing Value
@@ -498,14 +498,14 @@ FUNCTION Test-TargetResource
         if ($ValueDataSpecified -and !(ValueDataMatches -RetrievedValue $valData -ValueType $ValueType -ValueData $ValueData))
         {
             # Since the $ValueData specified didn't match the data of the found RegValue, test failed
-            Write-Verbose ($localizedData.RegValueDataMismatch -f "$Key\$valDisplayName", $ValueType, (ArrayToString -Value $ValueData))             
+            Write-Verbose ($localizedData.RegValueDataMismatch -f "$Key\$valDisplayName", $ValueType, (ArrayToString -Value $ValueData))
 
-            return $false                    
+            return $false
         }
-                
+
         # IF THE CONTROL REACHED HERE, ALL TESTS HAVE PASSED FOR THE SPECIFIED REGISTRY VALUE AND IT COMPLETELY MATCHES, REPORT SUCCESS
 
-        Write-Verbose ($localizedData.RegValueExists -f "$Key\$valDisplayName", $valData.ValueType, (ArrayToString -Value $valData.Data))             
+        Write-Verbose ($localizedData.RegValueExists -f "$Key\$valDisplayName", $valData.ValueType, (ArrayToString -Value $valData.Data))
 
         return $true
     }
@@ -513,7 +513,7 @@ FUNCTION Test-TargetResource
     # ---------------
     # ENSURE = ABSENT
     elseif ($Ensure -ieq "Absent")
-    {       
+    {
         # If key doesn't exist, test is successful
         if ($keyInfo.Ensure -ieq "Absent")
         {
@@ -523,34 +523,34 @@ FUNCTION Test-TargetResource
         }
 
         # IF CONTROL REACHED HERE, THE SPECIFIED KEY EXISTS
-        
+
         # If $ValueName, $ValueType and $ValueData are not specified, the simple existence of the Regkey fails the test
         if (!$ValueNameSpecified -and !$ValueDataSpecified -and !$ValueTypeSpecified)
-        {                        
+        {
             Write-Verbose ($localizedData.RegKeyExists -f $Key)
 
             return $false
-        }    
+        }
 
         # IF THE CONTROL REACHED HERE, THE KEY EXISTS AND A REGVALUE ATTRIBUTE HAS BEEN SPECIFIED
 
         # Get the appropriate display name for the specified ValueName (to handle the Default RegValue case)
         $valDisplayName = GetValueDisplayName -ValueName $ValueName
 
-        # Now query the specified RegValue        
+        # Now query the specified RegValue
         $valData = Get-TargetResourceInternal -Key $Key -ValueName $ValueName -Verbose:$false
-        
+
         # If the Value doesn't exist, the test has passed
         if ($valData.Ensure -ieq "Absent")
         {
-            Write-Verbose ($localizedData.RegValueDoesNotExist -f "$Key\$valDisplayName")             
+            Write-Verbose ($localizedData.RegValueDoesNotExist -f "$Key\$valDisplayName")
 
             return $true
         }
 
         # IF THE CONTROL REACHED HERE, THE KEY EXISTS AND THE SPECIFIED (or Default) VALUE EXISTS, THUS REPORT FAILURE
 
-        Write-Verbose ($localizedData.RegValueExists -f "$Key\$valDisplayName", $valData.ValueType, (ArrayToString -Value $valData.Data))             
+        Write-Verbose ($localizedData.RegValueExists -f "$Key\$valDisplayName", $valData.ValueType, (ArrayToString -Value $valData.Data))
 
         return $false
     }
@@ -585,25 +585,25 @@ function GetRegistryKey
 # Utility to create an arbitrary registry key
 #--------------------------------------------
 FUNCTION CreateRegistryKey
-{    
-	param
-	(	
-		[parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Key
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key
     )
 
     # Trim any "\" back-slash(es) at the end of the specified RegKey
     $Key = ([string]$Key).TrimEnd('\')
 
-    # Extract the parent-key            
+    # Extract the parent-key
     $slashIndex = $Key.LastIndexOf('\')
     $parentKey = $Key.Substring(0, $slashIndex)
     $childKey = $Key.Substring($slashIndex + 1)
-        
+
     # Check if the parent-key exists, if not first create that (recurse).
-    if ((Get-TargetResourceInternal -Key $parentKey -Verbose:$false).Ensure -eq "Absent")   
+    if ((Get-TargetResourceInternal -Key $parentKey -Verbose:$false).Ensure -eq "Absent")
     {
         CreateRegistryKey -Key $parentKey | Out-Null
     }
@@ -629,13 +629,13 @@ FUNCTION CreateRegistryKey
 # Validate PSDrive specified in Registry Key
 #-------------------------------------------
 FUNCTION ValidatePSDrive
-{    
-	param
-	(	
-		[parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Key
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key
     )
 
     # Extract the PSDriveName from the specified Key
@@ -644,7 +644,7 @@ FUNCTION ValidatePSDrive
     # Query the specified PSDrive
     $psDrive = Get-PSDrive $psDriveName -ErrorAction SilentlyContinue
 
-    # Validate that the specified psdrive is a valid  
+    # Validate that the specified psdrive is a valid
     if (($psDrive -eq $null) -or ($psDrive.Provider -eq $null) -or ($psDrive.Provider.Name -ine "Registry") -or !(IsValidRegistryRoot -PSDriveRoot $psDrive.Root))
     {
         $errorMessage = $localizedData.InvalidPSDriveSpecified -f $psDriveName, $Key
@@ -657,11 +657,11 @@ FUNCTION ValidatePSDrive
 # Check if the PSDriveRoot is a valid registry root
 #--------------------------------------------------
 FUNCTION IsValidRegistryRoot
-{    
-	param
-	(					
-		[System.String]
-		$PSDriveRoot
+{
+    param
+    (
+        [System.String]
+        $PSDriveRoot
     )
 
     # List of valid registry roots
@@ -673,7 +673,7 @@ FUNCTION IsValidRegistryRoot
         $PSDriveRoot = $PSDriveRoot.Substring(0, $PSDriveRoot.IndexOf('\'))
     }
 
-    return ($validRegistryRoots -icontains $PSDriveRoot)    
+    return ($validRegistryRoots -icontains $PSDriveRoot)
 }
 
 
@@ -683,18 +683,18 @@ FUNCTION IsValidRegistryRoot
 FUNCTION Write-Log
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
-	param
-	(	
-		[parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Message
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Message
     )
 
     if ($PSCmdlet.ShouldProcess($Message, $null, $null))
     {
-        Write-Verbose $Message        
-    }    
+        Write-Verbose $Message
+    }
 }
 
 
@@ -705,20 +705,20 @@ FUNCTION ThrowError
 {
     [CmdletBinding()]
     param
-    (        
+    (
         [parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]        
+        [ValidateNotNullOrEmpty()]
+        [System.String]
         $ExceptionName,
 
         [parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
         $ExceptionMessage,
-        
- 		[System.Object]
+
+         [System.Object]
         $ExceptionObject,
-        
+
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -729,7 +729,7 @@ FUNCTION ThrowError
         [System.Management.Automation.ErrorCategory]
         $ErrorCategory
     )
-        
+
     $exception = New-Object $ExceptionName $ExceptionMessage;
     $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $ErrorId, $ErrorCategory, $ExceptionObject
     throw $errorRecord
@@ -742,23 +742,23 @@ FUNCTION ThrowError
 FUNCTION GetTypedObject
 {
     param
-	(		
-		[parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$Type,
-		
-		[System.String[]]
-		$Data,
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Type,
 
-		[ValidateNotNull()]
-		[Boolean]
-		$Hex,
+        [System.String[]]
+        $Data,
+
+        [ValidateNotNull()]
+        [Boolean]
+        $Hex,
 
         [ref] $ReturnValue
     )
 
-    $ArgumentExceptionScriptBlock = 
+    $ArgumentExceptionScriptBlock =
     {
         Param($ErrorId)
 
@@ -770,7 +770,7 @@ FUNCTION GetTypedObject
     # The the $Type specified is not a multistring then we always expect a non-array $Data. If this is not the case, throw an error and let the user know.
     if (($Type -ine "Multistring") -and ($Data -ne $null) -and ($Data.Count -gt 1))
     {
-        Invoke-Command -ScriptBlock $ArgumentExceptionScriptBlock -ArgumentList ([String]::Format("ArrayNotExpectedForType{0}", $Type))    
+        Invoke-Command -ScriptBlock $ArgumentExceptionScriptBlock -ArgumentList ([String]::Format("ArrayNotExpectedForType{0}", $Type))
     }
 
     Switch($Type)
@@ -785,7 +785,7 @@ FUNCTION GetTypedObject
                 return
             }
 
-            $ReturnValue.Value = [String]$Data[0]            
+            $ReturnValue.Value = [String]$Data[0]
         }
 
         # Case: ExpandString
@@ -794,16 +794,16 @@ FUNCTION GetTypedObject
             if (($Data -eq $null) -or ($Data.Length -eq 0))
             {
                 $ReturnValue.Value = [String]::Empty
-                
+
                 return
             }
 
-            $ReturnValue.Value = [String]$Data[0]            
+            $ReturnValue.Value = [String]$Data[0]
         }
 
         # Case: MultiString
         "MultiString"
-        {                        
+        {
             if (($Data -eq $null) -or ($Data.Length -eq 0))
             {
                 $ReturnValue.Value = [String[]]@()
@@ -819,16 +819,16 @@ FUNCTION GetTypedObject
         {
             if (($Data -eq $null) -or ($Data.Length -eq 0))
             {
-                $ReturnValue.Value = [Int32]0                
+                $ReturnValue.Value = [Int32]0
             }
             elseif ($Hex)
             {
                 $retVal = $null
                 $val = $Data[0].TrimStart("0x")
-                    
+
                 if ([Int32]::TryParse($val, "HexNumber", [System.Globalization.CultureInfo]::CurrentCulture, [ref] $retVal))
                 {
-                    $ReturnValue.Value = $retVal                    
+                    $ReturnValue.Value = $retVal
                 }
                 else
                 {
@@ -837,7 +837,7 @@ FUNCTION GetTypedObject
             }
             else
             {
-                $ReturnValue.Value = [Int32]::Parse($Data[0])                
+                $ReturnValue.Value = [Int32]::Parse($Data[0])
             }
         }
 
@@ -846,13 +846,13 @@ FUNCTION GetTypedObject
         {
             if (($Data -eq $null) -or ($Data.Length -eq 0))
             {
-                $ReturnValue.Value = [Int64]0                
+                $ReturnValue.Value = [Int64]0
             }
             elseif ($Hex)
-            {                
+            {
                 $retVal = $null
                 $val = $Data[0].TrimStart("0x")
-                    
+
                 if ([Int64]::TryParse($val, "HexNumber", [System.Globalization.CultureInfo]::CurrentCulture, [ref] $retVal))
                 {
                     $ReturnValue.Value = $retVal
@@ -860,7 +860,7 @@ FUNCTION GetTypedObject
                 else
                 {
                     Invoke-Command -ScriptBlock $ArgumentExceptionScriptBlock -ArgumentList "ValueDataNotInHexFormat"
-                }                                   
+                }
             }
             else
             {
@@ -884,14 +884,14 @@ FUNCTION GetTypedObject
             {
                 $val = $val.PadLeft($val.Length+1, "0")
             }
-            
+
             try
             {
                 $byteArray = [Byte[]]@()
 
                 for ($i = 0 ; $i -lt ($val.Length-1) ; $i = $i+2)
                 {
-                    $byteArray += [Byte]::Parse($val.Substring($i, 2), "HexNumber")                                    
+                    $byteArray += [Byte]::Parse($val.Substring($i, 2), "HexNumber")
                 }
 
                 $ReturnValue.Value = [Byte[]]$byteArray
@@ -901,7 +901,7 @@ FUNCTION GetTypedObject
                 Invoke-Command -ScriptBlock $ArgumentExceptionScriptBlock -ArgumentList "ValueDataNotInHexFormat"
             }
         }
-    }    
+    }
 }
 
 
@@ -909,13 +909,13 @@ FUNCTION GetTypedObject
 # Utility to convert an array to a string representation
 #-------------------------------------------------------
 FUNCTION ArrayToString
-{    
-	param
-	(	
-		[parameter(Mandatory = $true)]
-		[ValidateNotNull()]
-		[System.Object]
-		$Value
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.Object]
+        $Value
     )
 
     if (!$Value.GetType().IsArray)
@@ -927,13 +927,13 @@ FUNCTION ArrayToString
         return $Value[0].ToString()
     }
 
-    [System.Text.StringBuilder]$retString = "("    
+    [System.Text.StringBuilder]$retString = "("
 
     $Value | % {$retString = ($retString.ToString() + $_.ToString() + ", ")}
 
     $retString = $retString.ToString().TrimEnd(", ") + ")"
-    
-    return $retString.ToString()    
+
+    return $retString.ToString()
 }
 
 
@@ -941,13 +941,13 @@ FUNCTION ArrayToString
 # Utility to convert an array to a string representation
 #-------------------------------------------------------
 FUNCTION ConvertByteArrayToHexString
-{    
-	param
-	(	
-		[parameter(Mandatory = $true)]
-		[ValidateNotNull()]
-		[System.Object]
-		$Data
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.Object]
+        $Data
     )
 
     $retString = ""
@@ -961,17 +961,17 @@ FUNCTION ConvertByteArrayToHexString
 # Utility to handle the display name for the (Default) RegValue
 #--------------------------------------------------------------
 FUNCTION GetValueDisplayName
-{    
-	param
-	(	
-		[System.String]
-		$ValueName
+{
+    param
+    (
+        [System.String]
+        $ValueName
     )
 
     if ([String]::IsNullOrEmpty($ValueName))
     {
         return $localizedData.DefaultValueDisplayName
-    }   
+    }
 
     return $ValueName
 }
@@ -983,12 +983,12 @@ FUNCTION GetValueDisplayName
 FUNCTION MountRequiredRegistryHives
 {
     param
-	(	        
+    (
         [parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$KeyName
-    )    	
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $KeyName
+    )
 
     $psDriveNames = (Get-PSDrive).Name.ToUpperInvariant()
 
@@ -1021,9 +1021,9 @@ FUNCTION MountRequiredRegistryHives
 FUNCTION SetupProvider
 {
     param
-	(	        
-        [ValidateNotNull()]		
-		[ref] $KeyName
+    (
+        [ValidateNotNull()]
+        [ref] $KeyName
     )
 
     # Fix $KeyName if required
@@ -1031,36 +1031,36 @@ FUNCTION SetupProvider
     {
         if ($KeyName.Value.ToString().StartsWith("hkey_users","OrdinalIgnoreCase"))
         {
-	        $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_users", "HKUS:"	
+            $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_users", "HKUS:"
         }
         elseif ($KeyName.Value.ToString().StartsWith("hkey_current_config","OrdinalIgnoreCase"))
-        {            
-	        $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_current_config", "HKCC:"
+        {
+            $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_current_config", "HKCC:"
         }
         elseif ($KeyName.Value.ToString().StartsWith("hkey_classes_root","OrdinalIgnoreCase"))
-        {         
-	        $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_classes_root", "HKCR:"
+        {
+            $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_classes_root", "HKCR:"
         }
         elseif ($KeyName.Value.ToString().StartsWith("hkey_local_machine","OrdinalIgnoreCase"))
-        {         
-	        $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_local_machine", "HKLM:"
+        {
+            $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_local_machine", "HKLM:"
         }
         elseif ($KeyName.Value.ToString().StartsWith("hkey_current_user","OrdinalIgnoreCase"))
-        {         
-	        $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_current_user", "HKCU:"
+        {
+            $KeyName.Value =  $KeyName.Value.ToString() -replace "hkey_current_user", "HKCU:"
         }
         else
         {
             $errorMessage = $localizedData.InvalidRegistryHiveSpecified -f $Key
             ThrowError -ExceptionName "System.ArgumentException" -ExceptionMessage $errorMessage -ExceptionObject $KeyName -ErrorId "InvalidRegistryHive" -ErrorCategory InvalidArgument
-        }        
-    }    
+        }
+    }
 
     # Mount any required registry hives
     MountRequiredRegistryHives -KeyName $KeyName.Value.ToString()
-    
+
     # Check the target PSDrive to be a valid Registry Hive root
-    ValidatePSDrive -Key $KeyName.Value.ToString()            
+    ValidatePSDrive -Key $KeyName.Value.ToString()
 }
 
 #----------------------------------------------------------------------------------------
@@ -1068,23 +1068,23 @@ FUNCTION SetupProvider
 #----------------------------------------------------------------------------------------
 FUNCTION ValueDataMatches
 {
-	param
-	(	
-    	[parameter(Mandatory = $true)]
-		[ValidateNotNull()]
-		[System.Object]
-		$RetrievedValue,
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.Object]
+        $RetrievedValue,
 
-    	[parameter(Mandatory = $true)]
-		[ValidateNotNullOrEmpty()]
-		[System.String]
-		$ValueType,
-    	
-		[System.String[]]
-		$ValueData
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ValueType,
+
+        [System.String[]]
+        $ValueData
     )
 
-    # Convert the specified $ValueData into strongly-typed data for correct comparsion            
+    # Convert the specified $ValueData into strongly-typed data for correct comparsion
     $specifiedData = $null
     $retrievedData = $RetrievedValue.Data
 
@@ -1095,12 +1095,12 @@ FUNCTION ValueDataMatches
     {
         $specifiedData = $ValueData[0]
     }
-        
+
     # If the ValueType is not multistring, do a simple comparison
     if ($ValueType -ine "Multistring")
     {
-        return ($specifiedData -ieq $retrievedData)            
-    }        
+        return ($specifiedData -ieq $retrievedData)
+    }
 
     # IF THE CONTROL REACHES HERE, THE ValueType IS A "MultiString" and we need a size-based and element-by-element comparsion for it
 
@@ -1121,7 +1121,7 @@ FUNCTION ValueDataMatches
     }
 
     # IF THE CONTROL REACHED HERE, THE Multistring COMPARISON WAS SUCCESSFUL
-    return $true    
+    return $true
 }
 
 Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
