@@ -116,6 +116,8 @@ FUNCTION Get-TargetResourceInternal
 #------------------------------
 FUNCTION Get-TargetResource
 {
+    [CmdletBinding()]
+    [OutputType([hashtable])]
     param
     (
         [Parameter(Mandatory)]
@@ -134,6 +136,7 @@ FUNCTION Get-TargetResource
         $ValueData,
 
         # Special-case: Used only as a boolean flag (along with ValueData) to determine if the target entity is the Default Value or the key itself.
+        [ValidateSet("String", "Binary", "Dword", "Qword", "MultiString", "ExpandString")]
         [System.String]
         $ValueType
     )
@@ -191,7 +194,7 @@ FUNCTION Set-TargetResource
         [System.String[]]
         $ValueData = @(),
 
-        [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
+        [ValidateSet("String", "Binary", "Dword", "Qword", "MultiString", "ExpandString")]
         [System.String]
         $ValueType = "String",
 
@@ -390,6 +393,8 @@ FUNCTION Set-TargetResource
 #-------------------------------
 FUNCTION Test-TargetResource
 {
+    [CmdletBinding()]
+    [OutputType([bool])]
     param
     (
         [parameter(Mandatory)]
@@ -411,7 +416,7 @@ FUNCTION Test-TargetResource
         [System.String[]]
         $ValueData = @(),
 
-        [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
+        [ValidateSet("String", "Binary", "Dword", "Qword", "MultiString", "ExpandString")]
         [System.String]
         $ValueType = "String",
 
