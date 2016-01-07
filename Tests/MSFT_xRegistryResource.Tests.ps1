@@ -44,3 +44,4 @@ Describe 'MSFT_xRegistryResource' {
         $regKey.GetValue($valueName) | Should Be $valueData
     }
 }
+
