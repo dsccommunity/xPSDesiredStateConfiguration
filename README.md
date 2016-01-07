@@ -18,7 +18,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xRemoteFile** ensures the presence of remote files on a local machine.
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xGroup** configures and manages local Windows groups
-* **xFileUpload** is a composite resource which ensures that local files exist on an SMB share. 
+* **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
+* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes. 
 
 ### xArchive
 
@@ -131,13 +132,18 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 * **Credential**: PSCredential for the user with access to DestinationPath.
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
 
+### xRegistry
+
+This is a copy of the built-in Registry resource from the PSDesiredStateConfiguration module, with one small change:  it now supports
+registry keys whose names contain forward slashes.
 
 ## Versions
 
 ### Unreleased
 * xService:
-    - Fixed a bug where 'Dependencies' property was not picked up and caused exception when set.
- 
+    - Fixed a bug where 'Dependencies' property was not picked up and caused exception when set. 
+* Added xRegistry resource
+
 ### 3.6.0.0
 * Added CreateCheckRegValue parameter to xPackage resource
 * Added MatchSource parameter to xRemoteFile resource
