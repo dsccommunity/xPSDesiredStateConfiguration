@@ -45,9 +45,9 @@ try
 
     Describe 'Validates ValidatePrerequisites method' {
         
-        $fakeWindows7 = [PSCustomObject] @{ ProductType = 1; BuildNumber = 6000; }
-        $fakeServer2008R2 = [PSCustomObject] @{ ProductType = 2; BuildNumber = 6000; }
-        $fakeServer2012 = [PSCustomObject] @{ ProductType = 2; BuildNumber = 7000; }
+        $fakeWindows7 = [PSCustomObject] @{ ProductType = 1; BuildNumber = 7601; }
+        $fakeServer2008R2 = [PSCustomObject] @{ ProductType = 2; BuildNumber = 7601; }
+        $fakeServer2012 = [PSCustomObject] @{ ProductType = 2; BuildNumber = 9200; }
         $fakeWindows81 = [PSCustomObject] @{ ProductType = 1; BuildNumber = 9600; }
         $fakeServer2012R2 = [PSCustomObject] @{ ProductType = 2; BuildNumber = 9600; }
 
@@ -201,21 +201,7 @@ try
     } #end Describe Validates Test-TargetResource method
 
     Describe 'Validates "Set-TargetResource" method' {
-    <#
-    if ($Ensure -eq 'Present')
-    {
-        if ($NoWindowsUpdateCheck)
-        {
-            $feature = Dism\Enable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -LimitAccess -NoRestart
-        }
-        else
-        {
-            $feature = Dism\Enable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -NoRestart
-        }
-
-        Write-Verbose ($LocalizedData.FeatureInstalled -f $Name)
-    }
-    #>
+    
         It 'Calls "Enable-WindowsOptionalFeature" with default "NoRestart" when "Present"' {
             Mock ValidatePrerequisites -MockWith { }
             Mock Dism\Enable-WindowsOptionalFeature -ParameterFilter { $NoRestart -eq $true } -MockWith { }
