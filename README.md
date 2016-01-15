@@ -139,12 +139,12 @@ This is a copy of the built-in Registry resource from the PSDesiredStateConfigur
 registry keys whose names contain forward slashes.
 
 ### xWindowsOptionalFeature
+Note: _the xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs._
  
 * **Name**: Name of the optional Windows feature.
 * **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
-You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
-If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
-Separate feature names with a comma.
+   - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
+   - If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
 * **RemoveFilesOnDisable**: Removes the files for an optional feature without removing the feature's manifest from the image.
    - Suported values: $true, $false.
    - Default value: $false.
@@ -167,7 +167,7 @@ Separate feature names with a comma.
     - Fixed a bug where 'Dependencies' property was not picked up and caused exception when set.
 * xWindowsOptionalFeature:
     - Fixed bug where Test-TargetResource method always failed.
-    - Added support for server operating systems; Windows Server 2012 R2 and later.
+    - Added support for Windows Server 2012 (and later) SKUs.
 * Added xRegistry resource
 
 ### 3.6.0.0

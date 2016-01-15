@@ -6,7 +6,7 @@ DATA localizedData
     # culture = "en-US"
     ConvertFrom-StringData @'
         DismNotAvailable = PowerShell module Dism could not be imported.
-        NotSupportedSku = This Resource is only available for Windows Client or Server 2012 R2+.
+        NotSupportedSku = This Resource is only available for Windows Client or Server 2012 (or later).
         ElevationRequired = This Resource requires to be run as an Administrator.
         ValidatingPrerequisites = Validating prerequisites...
         CouldNotCovertFeatureState = Could not convert feature state '{0}' into Absent/Present.
@@ -182,6 +182,7 @@ function Set-TargetResource
         throw ($LocalizedData.EnsureNotSupported -f $Ensure)
     }
 
+    ## Indicate we need a restart as needed
     if ($feature.RestartNeeded)
     {
         Write-Verbose $LocalizedData.RestartNeeded
