@@ -146,20 +146,10 @@ function Set-TargetResource
 
     try
     {
-        # PrincipalContext for domain account resolution
-        $credentialPrincipalContext = $null
         # PrincipalContext for local account resolution
         $localPrincipalContext = $null
         $group = $null
         [System.Net.NetworkCredential] $networkCredential = $null
-
-        if($PSBoundParameters.ContainsKey('Credential'))
-        {
-            $networkCredential = $Credential.GetNetworkCredential();
-            $credentialPrincipalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Domain,
-                                           $networkCredential.Domain, $networkCredential.UserName, $networkCredential.Password)
-            $disposables.Add($credentialPrincipalContext) | out-null
-        }
 
         # Create local machine context.
         $localPrincipalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
@@ -226,7 +216,7 @@ function Set-TargetResource
                     $Members = [String[]]@(RemoveDuplicates -Members $Members);
 
                     # Resolve the names to actual principal objects.
-                    [System.DirectoryServices.AccountManagement.Principal[]]$membersPrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -CredentialPrincipalContext $credentialPrincipalContext -ObjectNames $Members -NetworkCredential $networkCredential -Disposables $disposables
+                    [System.DirectoryServices.AccountManagement.Principal[]]$membersPrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -ObjectNames $Members -NetworkCredential $networkCredential -Disposables $disposables
 
                     # Remove all possible duplicates.
                     [System.DirectoryServices.AccountManagement.Principal[]]$membersPrincipals = RemoveDuplicatePrincipals -Members $membersPrincipals
@@ -300,7 +290,7 @@ function Set-TargetResource
                         $MembersToInclude = [String[]]@(RemoveDuplicates -Members $MembersToInclude);
 
                         # Resolve the names to actual principal objects.
-                        $membersToIncludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -CredentialPrincipalContext $credentialPrincipalContext -ObjectNames $MembersToInclude -NetworkCredential $networkCredential -Disposables $disposables
+                        $membersToIncludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -ObjectNames $MembersToInclude -NetworkCredential $networkCredential -Disposables $disposables
 
                         # Remove all possible duplicates.
                         [System.DirectoryServices.AccountManagement.Principal[]]$membersToIncludePrincipals = RemoveDuplicatePrincipals -Members $membersToIncludePrincipals
@@ -311,7 +301,7 @@ function Set-TargetResource
                         $MembersToExclude = [String[]]@(RemoveDuplicates -Members $MembersToExclude);
 
                         # Resolve the names to actual principal objects.
-                        $membersToExcludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -CredentialPrincipalContext $credentialPrincipalContext -ObjectNames $MembersToExclude -NetworkCredential $networkCredential -Disposables $disposables
+                        $membersToExcludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -ObjectNames $MembersToExclude -NetworkCredential $networkCredential -Disposables $disposables
 
                         # Remove all possible duplicates.
                         [System.DirectoryServices.AccountManagement.Principal[]]$membersToExcludePrincipals = RemoveDuplicatePrincipals -Members $membersToExcludePrincipals
@@ -487,20 +477,10 @@ function Test-TargetResource
 
     try
     {
-        # PrincipalContext for domain account resolution
-        $credentialPrincipalContext = $null
         # PrincipalContext for local account resolution
         $localPrincipalContext = $null
         $group = $null
         [System.Net.NetworkCredential] $networkCredential = $null
-
-        if($PSBoundParameters.ContainsKey('Credential'))
-        {
-            $networkCredential = $Credential.GetNetworkCredential();
-            $credentialPrincipalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Domain,
-                                           $networkCredential.Domain, $networkCredential.UserName, $networkCredential.Password)
-            $disposables.Add($credentialPrincipalContext) | out-null
-        }
     
         # Create local machine context.
         $localPrincipalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
@@ -562,7 +542,7 @@ function Test-TargetResource
             $Members = [String[]]@(RemoveDuplicates -Members $Members);
 
             # Resolve the names to actual principal objects.
-            $membersPrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -CredentialPrincipalContext $credentialPrincipalContext -ObjectNames $Members -Credentials $Credential -Disposables $disposables
+            $membersPrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -ObjectNames $Members -Credentials $Credential -Disposables $disposables
 
             # Remove all possible duplicates.
             [System.DirectoryServices.AccountManagement.Principal[]]$membersPrincipals = RemoveDuplicatePrincipals -Members $membersPrincipals
@@ -600,7 +580,7 @@ function Test-TargetResource
                 $MembersToInclude = [String[]]@(RemoveDuplicates -Members $MembersToInclude);
 
                 # Resolve the names to actual principal objects.
-                $membersToIncludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -CredentialPrincipalContext $credentialPrincipalContext -ObjectNames $MembersToInclude -NetworkCredential $networkCredential -Disposables $disposables
+                $membersToIncludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -ObjectNames $MembersToInclude -NetworkCredential $networkCredential -Disposables $disposables
 
                 # Remove all possible duplicates.
                 [System.DirectoryServices.AccountManagement.Principal[]]$membersToIncludePrincipals = RemoveDuplicatePrincipals -Members $membersToIncludePrincipals
@@ -631,7 +611,7 @@ function Test-TargetResource
                 $MembersToExclude = [String[]]@(RemoveDuplicates -Members $MembersToExclude);
 
                 # Resolve the names to actual principal objects.
-                $membersToExcludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -CredentialPrincipalContext $credentialPrincipalContext -ObjectNames $MembersToExclude -NetworkCredential $networkCredential -Disposables $disposables
+                $membersToExcludePrincipals = ResolveNamesToPrincipals -LocalPrincipalContext $localPrincipalContext -ObjectNames $MembersToExclude -NetworkCredential $networkCredential -Disposables $disposables
 
                 # Remove all possible duplicates.
                 [System.DirectoryServices.AccountManagement.Principal[]]$membersToExcludePrincipals = RemoveDuplicatePrincipals -Members $membersToExcludePrincipals
@@ -819,8 +799,6 @@ function ResolveNamesToPrincipals
         [ValidateNotNullOrEmpty()]
         [System.DirectoryServices.AccountManagement.PrincipalContext] $LocalPrincipalContext,
 
-        [System.DirectoryServices.AccountManagement.PrincipalContext] $CredentialPrincipalContext,
-
         [ValidateNotNull()]
         [String[]] $ObjectNames,
 
@@ -886,44 +864,26 @@ function ResolveNamesToPrincipals
 
         # The account has a qualifier that is not the local machine.
         # Attempt to resolve it relative to a domain.
-        # NOTE: If no credentials are provided, an InvalidArgument error is reported.
-        if ($CredentialPrincipalContext -ne $null)
+        # NOTE: If no credentials are provided try using the computer credentials.
+        
+        # The PrincipalContext created when the account domain doesn't match the credential's domain.
+        [System.DirectoryServices.AccountManagement.PrincipalContext] $redirectPrincipalContext = $null
+        # The PrincipalContext to use to resolve the account
+        [System.DirectoryServices.AccountManagement.PrincipalContext] $domainPrincipalContext = GetPrincipalContext -Scope $scope -NetworkCredential $NetworkCredential
+        
+        $disposables.Add($domainPrincipalContext) | out-null
+        
+        Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f $objectName,$domainPrincipalcontext.Name)
+        $principal = ResolveNameToPrincipal -PrincipalContext $domainPrincipalcontext -ObjectName $userName
+
+        if ($principal -ne $null)
         {
-            # The PrincipalContext created when the account domain doesn't match the credential's domain.
-            [System.DirectoryServices.AccountManagement.PrincipalContext] $redirectPrincipalContext = $null
-            # The PrincipalContext to use to resolve the account
-            [System.DirectoryServices.AccountManagement.PrincipalContext] $domainPrincipalcontext =  $CredentialPrincipalContext
-
-            # If the account is in a domain that does not match the domain in the passed credentials, attempt to connect to the
-            # account's domain using the passed in credentials.  This means the passed in credentials must have
-            # rights in the other domain to resolve the principal.
-            if ((IsSameDomain -PrincipalContext $CredentialPrincipalContext -Domain $scope) -eq $false)
-            {
-                Write-Verbose -Message ($LocalizedData.RedirectDomain -f  $scope, $ObjectName)
-
-                $networkUser = [System.String]::Format("{0}\{1}", $NetworkCredential.Domain, $NetworkCredential.UserName)
-                # Use the new PrincipalContext for the resolve call.
-                $domainPrincipalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Domain, $scope, $networkUser, $NetworkCredential.Password)
-                # the caller will dispose the PrincipalContext when it is done with the resolved principal instance.
-                $disposables.Add($domainPrincipalContext) | out-null
-            }
-
-            Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f $objectName,$domainPrincipalcontext.Name)
-            $principal = ResolveNameToPrincipal -PrincipalContext $domainPrincipalcontext -ObjectName $userName
-
-            if ($principal -ne $null)
-            {
-                $null = $principals.Add($principal)
-                continue
-            }
-
-            # The provided name does not match any User, Group, or Computer in the defined scope.
-            ThrowInvalidArgumentError -ErrorId "PrincipalNotFound_ProvidedCredential" -ErrorMessage ($LocalizedData.CouldNotFindPrincipal -f $objectName)
+            $null = $principals.Add($principal)
+            continue
         }
 
-        # The provided name is not scoped to the local machine and no credentials were provided.
-        # This is an unsupported use case since we're running as SYSTEM and credentials are required to resolve off-box.
-        ThrowInvalidArgumentError -ErrorId "PrincipalNotFoundNoCredential" -ErrorMessage ($LocalizedData.DomainCredentialsRequired -f $objectName)
+        # The provided name does not match any User, Group, or Computer in the defined scope.
+        ThrowInvalidArgumentError -ErrorId "PrincipalNotFound_ProvidedCredential" -ErrorMessage ($LocalizedData.CouldNotFindPrincipal -f $objectName)
     }
 
     if($principals -ne $null)
@@ -1039,6 +999,32 @@ function RemoveGroupMembers
     foreach($principal in $Principals)
     {
         $null = $group.Members.Remove($principal);
+    }
+}
+
+#This could be be cached into a hasmap or something similar
+function GetPrincipalContext
+{
+    param(
+        [string]
+        $Scope,
+
+        [System.Net.NetworkCredential]
+        $NetworkCredential
+    )
+    
+    Set-StrictMode -Version Latest
+
+    if($NetworkCredential -ne $null)
+    {
+        $networkUser = [System.String]::Format("{0}\{1}", $NetworkCredential.Domain, $NetworkCredential.UserName)
+        $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, $networkUser, $NetworkCredential.Password)
+        return $principalContext
+    }
+    else
+    {
+        $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope)
+        return $principalContext
     }
 }
 
