@@ -6,7 +6,7 @@ DATA localizedData
     # culture = "en-US"
     ConvertFrom-StringData @'
         DismNotAvailable = PowerShell module Dism could not be imported.
-        NotAClientSku = This Resource is only available for Windows Client.
+        NotSupportedSku = This Resource is only available for Windows Client or Server 2012 (or later).
         ElevationRequired = This Resource requires to be run as an Administrator.
         ValidatingPrerequisites = Validating prerequisites...
         CouldNotCovertFeatureState = Could not convert feature state '{0}' into Absent/Present.
@@ -155,11 +155,11 @@ function Set-TargetResource
     {
         if ($NoWindowsUpdateCheck)
         {
-            $feature = Dism\Enable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -LimitAccess
+            $feature = Dism\Enable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -LimitAccess -NoRestart
         }
         else
         {
-            $feature = Dism\Enable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters
+            $feature = Dism\Enable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -NoRestart
         }
 
         Write-Verbose ($LocalizedData.FeatureInstalled -f $Name)
@@ -168,11 +168,11 @@ function Set-TargetResource
     {
         if ($RemoveFilesOnDisable)
         {
-            $feature = Dism\Disable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -Remove
+            $feature = Dism\Disable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -Remove -NoRestart
         }
         else
         {
-            $feature = Dism\Disable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters
+            $feature = Dism\Disable-WindowsOptionalFeature -FeatureName $Name -Online -LogLevel $DismLogLevel @PSBoundParameters -NoRestart
         }
 
         Write-Verbose ($LocalizedData.FeatureUninstalled -f $Name)
@@ -182,6 +182,7 @@ function Set-TargetResource
         throw ($LocalizedData.EnsureNotSupported -f $Ensure)
     }
 
+    ## Indicate we need a restart as needed
     if ($feature.RestartNeeded)
     {
         Write-Verbose $LocalizedData.RestartNeeded
@@ -234,12 +235,11 @@ function Test-TargetResource
     {
         $result = $Ensure -eq 'Absent'
     }
-    if (($result.State -eq 'Disabled' -and $Ensure -eq 'Absent')`
-        -or ($result.State -eq 'Enabled' -and $Ensure -eq 'Present'))
+    if (($featureState.State -eq 'Disabled' -and $Ensure -eq 'Absent')`
+        -or ($featureState.State -eq 'Enabled' -and $Ensure -eq 'Present'))
     {
         $result = $true
     }
-
     Write-Debug ($LocalizedData.TestTargetResourceEndMessage -f $Name)
     return $result
 }
@@ -250,12 +250,12 @@ function ValidatePrerequisites
 {
     Write-Verbose $LocalizedData.ValidatingPrerequisites
 
-    # check that we're running on a client SKU
-    $os = Get-CimInstance -ClassName  Win32_OperatingSystem
+    # check that we're running on Server 2012 (or later) or on a client SKU
+    $os = Get-CimInstance -ClassName Win32_OperatingSystem
 
-    if ($os.ProductType -ne 1)
+    if (($os.ProductType -ne 1) -and ([System.Int32] $os.BuildNumber -lt 9600))
     {
-        throw $LocalizedData.NotAClientSku
+        throw $LocalizedData.NotSupportedSku
     }
 
     # check that we are running elevated

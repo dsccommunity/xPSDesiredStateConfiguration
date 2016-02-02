@@ -3,7 +3,7 @@
 # xPSDesiredStateConfiguration
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
-The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource. 
+The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, **xWindowsOptionalFeature** and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource. 
 
 ## Contributing
 Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
@@ -18,7 +18,9 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xRemoteFile** ensures the presence of remote files on a local machine.
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xGroup** configures and manages local Windows groups
-* **xFileUpload** is a composite resource which ensures that local files exist on an SMB share. 
+* **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
+* **xWindowsOptionalFeature** configures optional Windows features.
+* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes. 
 
 ### xArchive
 
@@ -131,10 +133,45 @@ Domain members may be specified using domain\name or Universal Principal Name (U
 * **Credential**: PSCredential for the user with access to DestinationPath.
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
 
+### xRegistry
+
+This is a copy of the built-in Registry resource from the PSDesiredStateConfiguration module, with one small change:  it now supports
+registry keys whose names contain forward slashes.
+
+### xWindowsOptionalFeature
+Note: _the xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs._
+ 
+* **Name**: Name of the optional Windows feature.
+* **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
+   - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
+   - If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
+* **RemoveFilesOnDisable**: Removes the files for an optional feature without removing the feature's manifest from the image.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogPath**: Specifies the full path and file name to log to.
+   - If not set, the default is %WINDIR%\Logs\Dism\dism.log.
+* **Ensure**: Ensures that the feature is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **NoWindowsUpdateCheck**: Prevents DISM from contacting Windows Update (WU) when searching for the source files to restore a feature on an online image.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogLevel**: Specifies the maximum output level shown in the logs.
+   - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
+   - Default value: ErrorsOnly.
 
 ## Versions
 
 ### Unreleased
+
+### 3.7.0.0
+
+* xService:
+    - Fixed a bug where 'Dependencies' property was not picked up and caused exception when set.
+* xWindowsOptionalFeature:
+    - Fixed bug where Test-TargetResource method always failed.
+    - Added support for Windows Server 2012 (and later) SKUs.
+* Added xRegistry resource
 
 ### 3.6.0.0
 * Added CreateCheckRegValue parameter to xPackage resource

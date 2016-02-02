@@ -282,7 +282,7 @@ function Set-TargetResource
                     }
                     if($PSBoundParameters.ContainsKey("Dependencies"))
                     {
-                        $argumentsToNewService.Add("Dependencies", $Dependencies)
+                        $argumentsToNewService.Add("DependsOn", $Dependencies)
                     }
                     try
                     {
@@ -290,7 +290,7 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        Write-Log -Message ("Error creating service `"$($argumentsToNewService["Name"])`"", $_.Exception.Message)
+                        Write-Log -Message ("Error creating service `"$($argumentsToNewService["Name"])`"; Exception Message: $($_.Exception.Message)")
                         throw $_
                     }
 
