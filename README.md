@@ -164,6 +164,8 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### Unreleased
 
+### 3.7.0.0
+
 * xService:
     - Fixed a bug where 'Dependencies' property was not picked up and caused exception when set.
 * xWindowsOptionalFeature:
