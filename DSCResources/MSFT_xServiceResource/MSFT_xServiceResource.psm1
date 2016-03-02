@@ -138,9 +138,6 @@ function Test-TargetResource
                 if($service -ne $null)
                 {
                     Write-Verbose -Message "The service to create already exists"
-
-                    $SvcWmi = GetWMIService -Name $Name
-                    return ($SvcWmi.PathName -eq $Path)
                 }
                 else
                 {
@@ -166,9 +163,9 @@ function Test-TargetResource
     $svcWmi = GetWMIService -Name $Name
 
     # check the binary path
-    if(!$svc.PathName.Equals($Path))
+    if(!$svcWmi.PathName.Equals($Path))
     {
-        return $false;
+        return $false
     }
 
     # check optional parameters
