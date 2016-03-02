@@ -312,20 +312,27 @@ function Set-TargetResource
         }
     }
 
-    $svc=GetServiceResource -Name $Name
+    $svc = GetServiceResource -Name $Name
 
     $writeWritePropertiesArguments=@{Name=$svc.name; Path=$Path}
     if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeWritePropertiesArguments.Add("StartupType",$StartupType)}
     if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$writeWritePropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)}
     if($PSBoundParameters.ContainsKey("Credential")) {$null=$writeWritePropertiesArguments.Add("Credential",$Credential)}
 
-    WriteWriteProperties @writeWritePropertiesArguments
+    $requiresRestart = WriteWriteProperties @writeWritePropertiesArguments
 
     if($State -eq "Stopped")
     {
         # Ensuring service is stopped
         StopService -Svc $svc
         return
+    }
+
+    # if the service needs to be restarted then go ahead and stop it now in preparation for the next check
+    if($requiresRestart)
+    {
+        Write-Verbose -Message "Service needs to be restarted"
+        StopService -Svc $svc
     }
 
     # $State is Running, so ensuring service is started unless we are also creating the service in which case the default behavior is that the service is in the stopped state.
@@ -391,6 +398,7 @@ Writes all write properties if not already correctly set, logging errors and res
 function WriteWriteProperties
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]
@@ -416,14 +424,15 @@ function WriteWriteProperties
 
     if(!$PSBoundParameters.ContainsKey("StartupType") -and !$PSBoundParameters.ContainsKey("BuiltInAccount") -and !$PSBoundParameters.ContainsKey("Credential"))
     {
-        return
+        return $false;
     }
 
     $svcWmi = GetWMIService -Name $Name
+    $requiresRestart = $false
 
     # update binary path
     $writeBinaryArguments=@{"SvcWmi"=$svcWmi; "Path"=$Path}
-    WriteBinaryProperties @writeBinaryArguments
+    $requiresRestart = $requiresRestart -or (WriteBinaryProperties @writeBinaryArguments)
 
     # update credentials
     $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
@@ -435,6 +444,9 @@ function WriteWriteProperties
     $writeStartupArguments=@{"SvcWmi"=$svcWmi}
     if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeStartupArguments.Add("StartupType",$StartupType)}
     WriteStartupTypeProperty @writeStartupArguments
+
+    # return restart status
+    return $requiresRestart
 }
 
 <#
@@ -566,7 +578,7 @@ function WriteBinaryProperties
 
     if($SvcWmi.PathName -eq $Path)
     {
-        return $false;
+        return $false
     }
 
     $ret = $SvcWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
@@ -577,7 +589,7 @@ function WriteBinaryProperties
         ThrowInvalidArgumentError -ErrorId "ChangeBinaryPathFailed" -ErrorMessage $message
     }
 
-    return $true;
+    return $true
 }
 
 <#
