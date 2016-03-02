@@ -166,7 +166,7 @@ function Test-TargetResource
     # check the binary path
     if(!$svcWmi.PathName.Equals($Path))
     {
-        WriteVerbose -Message ($LocalizedData.TestBinaryPathMismatch -f $svcWmi.Name,$svcWmi.PathName,$Path)
+        Write-Verbose -Message ($LocalizedData.TestBinaryPathMismatch -f $svcWmi.Name,$svcWmi.PathName,$Path)
         return $false
     }
 
