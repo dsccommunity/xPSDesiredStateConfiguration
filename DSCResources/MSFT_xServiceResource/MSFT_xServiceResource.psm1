@@ -314,7 +314,7 @@ function Set-TargetResource
 
     $svc=GetServiceResource -Name $Name
 
-    $writeWritePropertiesArguments=@{Name=$svc.name}
+    $writeWritePropertiesArguments=@{Name=$svc.name; Path=$Path}
     if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeWritePropertiesArguments.Add("StartupType",$StartupType)}
     if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$writeWritePropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)}
     if($PSBoundParameters.ContainsKey("Credential")) {$null=$writeWritePropertiesArguments.Add("Credential",$Credential)}
@@ -398,6 +398,10 @@ function WriteWriteProperties
         $Name,
 
         [System.String]
+        [ValidateNotNullOrEmpty()]
+        $Path,
+
+        [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType,
 
@@ -417,12 +421,17 @@ function WriteWriteProperties
 
     $svcWmi = GetWMIService -Name $Name
 
+    # update binary path
+    $writeBinaryArguments=@{"SvcWmi"=$svcWmi; "Path"=$Path}
+    WriteBinaryProperties @writeBinaryArguments
+
+    # update credentials
     $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
     if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)}
     if($PSBoundParameters.ContainsKey("Credential")) {$null=$writeCredentialPropertiesArguments.Add("Credential",$Credential)}
-
     WriteCredentialProperties @writeCredentialPropertiesArguments
 
+    # update startup type
     $writeStartupArguments=@{"SvcWmi"=$svcWmi}
     if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeStartupArguments.Add("StartupType",$StartupType)}
     WriteStartupTypeProperty @writeStartupArguments
@@ -534,6 +543,41 @@ function WriteCredentialProperties
             ThrowInvalidArgumentError -ErrorId "ChangeCredentialFailed" -ErrorMessage $message
         }
     }
+}
+
+<#
+.Synopsis
+Writes binary path if not already correctly set, logging errors and respecting whatif
+#>
+function WriteBinaryProperties
+{
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        $SvcWmi,
+
+        [System.String]
+        [ValidateNotNullOrEmpty()]
+        $Path
+    )
+
+    if($SvcWmi.PathName -eq $Path)
+    {
+        return $false;
+    }
+
+    $ret = $SvcWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
+    if($ret.ReturnValue -ne 0)
+    {
+        $innerMessage = $LocalizedData.MethodFailed -f "Change","Win32_Service",$ret.ReturnValue
+        $message = $LocalizedData.ErrorChangingProperty -f "Binary Path",$innerMessage
+        ThrowInvalidArgumentError -ErrorId "ChangeBinaryPathFailed" -ErrorMessage $message
+    }
+
+    return $true;
 }
 
 <#
