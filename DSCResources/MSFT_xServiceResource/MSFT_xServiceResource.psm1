@@ -18,6 +18,7 @@ ErrorSettingServiceCredential=Failure setting credentials for service '{0}'. Mes
 SetCredentialWhatIf=Set Credential
 SetStartupTypeWhatIf=Set Start Type
 ErrorSettingServiceStartupType=Failure setting start type for service '{0}'. Message: '{1}'
+TestBinaryPathMismatch=Binary path for service '{0}' is '{1}'. It does not match '{2}'.
 TestUserNameMismatch=User name for service '{0}' is '{1}'. It does not match '{2}.
 TestStartupTypeMismatch=Startup type for service '{0}' is '{1}'. It does not match '{2}'.
 MethodFailed=The '{0}' method of '{1}' failed with error code: '{2}'.
@@ -165,6 +166,7 @@ function Test-TargetResource
     # check the binary path
     if(!$svcWmi.PathName.Equals($Path))
     {
+        WriteVerbose -Message ($LocalizedData.TestBinaryPathMismatch -f $svcWmi.Name,$svcWmi.PathName,$Path)
         return $false
     }
 
