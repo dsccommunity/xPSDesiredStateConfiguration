@@ -340,7 +340,7 @@ function Set-TargetResource
     # $State is Running, so ensuring service is started unless we are also creating the service in which case the default behavior is that the service is in the stopped state.
     if($Ensure -eq "Present")
     {
-        if(( $PSBoundParameters.ContainsKey("State")) -and ($State -eq "Running"))
+        if($PSBoundParameters.ContainsKey("State") -and ($State -eq "Running"))
         {
             StartService -Svc $svc -StartupTimeout $StartupTimeout
         }
