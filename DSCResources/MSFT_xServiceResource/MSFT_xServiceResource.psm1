@@ -159,12 +159,18 @@ function Test-TargetResource
         }
     }
     
-    $svc=GetServiceResource -Name $Name
+    $svc = GetServiceResource -Name $Name
+    $svcWmi = GetWMIService -Name $Name
 
+    # check the binary path
+    if(!$svc.PathName.Equals($Path))
+    {
+        return $false;
+    }
+
+    # check optional parameters
     if($PSBoundParameters.ContainsKey("StartupType") -or $PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
     {
-        $svcWmi = GetWMIService -Name $Name
-
         $getUserNameAndPasswordArgs=@{}
         if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)}
         if($PSBoundParameters.ContainsKey("Credential")) {$null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)}
@@ -183,8 +189,8 @@ function Test-TargetResource
         }
     }
 
+    # check running state
     return ($State -eq "Stopped" -and $svc.Status -eq "Stopped") -or ($svc.Status -eq "Running" -and $State -eq "Running")
-    
 }
 
 <#
@@ -325,7 +331,7 @@ function Set-TargetResource
     # $State is Running, so ensuring service is started unless we are also creating the service in which case the default behavior is that the service is in the stopped state.
     if($Ensure -eq "Present")
     {
-         if(( $PSBoundParameters.ContainsKey("State")) -and ($State -eq "Running"))
+        if(( $PSBoundParameters.ContainsKey("State")) -and ($State -eq "Running"))
         {
             StartService -Svc $svc -StartupTimeout $StartupTimeout
         }
@@ -475,7 +481,6 @@ function WriteStartupTypeProperty
     }
 }
 
-
 <#
 .Synopsis
 Writes credential properties if not already correctly set, logging errors and respecting whatif
@@ -490,7 +495,6 @@ function WriteCredentialProperties
         [ValidateNotNull()]
         $SvcWmi,
 
-
         [System.String]
         [ValidateSet("LocalSystem", "LocalService", "NetworkService")]
         $BuiltInAccount,
@@ -499,7 +503,7 @@ function WriteCredentialProperties
         $Credential
     )
 
-    if(!$PSBoundParameters.ContainsKey("Credential") -and !$PSBoundParameters.ContainsKey("BuiltInAccount") -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
+    if(!$PSBoundParameters.ContainsKey("Credential") -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
         return
     }
