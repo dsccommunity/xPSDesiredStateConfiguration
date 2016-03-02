@@ -424,11 +424,6 @@ function WriteWriteProperties
         $Credential
     )
 
-    if(!$PSBoundParameters.ContainsKey("StartupType") -and !$PSBoundParameters.ContainsKey("BuiltInAccount") -and !$PSBoundParameters.ContainsKey("Credential"))
-    {
-        return $false
-    }
-
     $svcWmi = GetWMIService -Name $Name
     $requiresRestart = $false
 
@@ -437,15 +432,35 @@ function WriteWriteProperties
     $requiresRestart = $requiresRestart -or (WriteBinaryProperties @writeBinaryArguments)
 
     # update credentials
-    $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
-    if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)}
-    if($PSBoundParameters.ContainsKey("Credential")) {$null=$writeCredentialPropertiesArguments.Add("Credential",$Credential)}
-    WriteCredentialProperties @writeCredentialPropertiesArguments
+    if($PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
+    {
+        $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
+
+        if($PSBoundParameters.ContainsKey("BuiltInAccount"))
+        {
+            $null=$writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)
+        }
+
+        if($PSBoundParameters.ContainsKey("Credential"))
+        {
+            $null=$writeCredentialPropertiesArguments.Add("Credential",$Credential)
+        }
+
+        WriteCredentialProperties @writeCredentialPropertiesArguments
+    }
 
     # update startup type
-    $writeStartupArguments=@{"SvcWmi"=$svcWmi}
-    if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeStartupArguments.Add("StartupType",$StartupType)}
-    WriteStartupTypeProperty @writeStartupArguments
+    if($PSBoundParameters.ContainsKey("StartupType"))
+    {
+        $writeStartupArguments=@{"SvcWmi"=$svcWmi}
+
+        if($PSBoundParameters.ContainsKey("StartupType"))
+        {
+            $null=$writeStartupArguments.Add("StartupType",$StartupType)
+        }
+
+        WriteStartupTypeProperty @writeStartupArguments
+    }
 
     # return restart status
     return $requiresRestart
