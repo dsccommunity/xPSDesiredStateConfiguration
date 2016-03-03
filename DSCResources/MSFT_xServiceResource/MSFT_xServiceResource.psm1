@@ -11,6 +11,7 @@ ServiceStopped=Service '{0}' stopped.
 ErrorStartingService=Failure starting service '{0}'. Message: '{1}'
 OnlyOneParameterCanBeSpecified=Only one of the following parameters can be specified: '{0}', '{1}'.
 StartServiceWhatIf=Start Service
+StopServiceWhatIf=Stop Service
 ServiceAlreadyStopped=Service '{0}' already stopped, no action required.
 ErrorStoppingService=Failure stopping service '{0}'. Message: '{1}'
 ErrorRetrievingServiceInformation=Failure retrieving information for service '{0}'. Message: '{1}'
@@ -121,7 +122,10 @@ function Test-TargetResource
         $Dependencies,
 
         [System.UInt32]
-        $StartupTimeout
+        $StartupTimeout,
+
+        [System.UInt32]
+        $TerminateTimeout
     )
 
     ValidateStartupType -Name $Name -StartupType $StartupType -State $State
@@ -247,7 +251,10 @@ function Set-TargetResource
         $Dependencies,
 
         [System.UInt32]
-        $StartupTimeout = 30000
+        $StartupTimeout = 30000,
+
+        [System.UInt32]
+        $TerminateTimeout = 30000
     )
 
     ValidateStartupType -Name $Name -StartupType $StartupType -State $State
@@ -308,7 +315,7 @@ function Set-TargetResource
         else
         {
             $svc = GetServiceResource -Name $Name
-            StopService -Svc $svc
+            StopService -Svc $svc -TerminateTimeout $TerminateTimeout
             DeleteService -Name $svc.Name
             return
         }
@@ -326,7 +333,7 @@ function Set-TargetResource
     if($State -eq "Stopped")
     {
         # Ensuring service is stopped
-        StopService -Svc $svc
+        StopService -Svc $svc -TerminateTimeout $TerminateTimeout
         return
     }
 
@@ -334,7 +341,7 @@ function Set-TargetResource
     if($requiresRestart)
     {
         Write-Verbose -Message "Service needs to be restarted"
-        StopService -Svc $svc
+        StopService -Svc $svc -TerminateTimeout $TerminateTimeout
     }
 
     # $State is Running, so ensuring service is started unless we are also creating the service in which case the default behavior is that the service is in the stopped state.
@@ -682,7 +689,10 @@ function StopService
     (
         [parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $Svc
+        $Svc,
+
+        [parameter(Mandatory = $true)]
+        $TerminateTimeout
     )
 
     if($Svc.Status -eq [System.ServiceProcess.ServiceControllerStatus]::Stopped)
@@ -691,16 +701,23 @@ function StopService
         return
     }
 
-    # Exceptions will be thrown, caught and logged by the infrastructure
-    $err=Stop-Service -Name $Svc.Name -force 2>&1
-    if($err -eq $null)
+
+    if($PSCmdlet.ShouldProcess($Svc.Name,$LocalizedData.StopServiceWhatIf))
     {
+        try
+        {
+            $Svc.Stop()
+            $timeSpan = New-Object -TypeName TimeSpan -ArgumentList ($TerminateTimeout * 10000)
+            $Svc.WaitForStatus("Stopped", $timeSpan)
+        }
+        catch
+        {
+
+            Write-Log -Message ($LocalizedData.ErrorStoppingService -f $Svc.Name,$_.Exception.Message)
+            throw
+        }
+
         Write-Log -Message ($LocalizedData.ServiceStopped -f $Svc.Name)
-    }
-    else
-    {
-        Write-Log -Message ($LocalizedData.ErrorStoppingService -f $Svc.Name,($err | Out-String))
-        throw $err
     }
 }
 
