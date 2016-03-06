@@ -253,7 +253,13 @@ function Test-TargetResource
                 }
             } else {
                 Write-Debug "MatchSource is false. No need for downloading file."
-                $fileExists = $true 
+                [System.Net.WebClient]$wc = [System.Net.WebClient]::New()
+                $wc.OpenRead($URI)
+                [Long]$bytes_total = $wc.ResponseHeaders["Content-Length"]
+                if($bytes_total -eq (Get-Item $DestinationPath).Length)
+                {
+                    $fileExists = $true
+                }
             }
         }
 
