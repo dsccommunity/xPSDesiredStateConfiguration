@@ -252,17 +252,14 @@ function Test-TargetResource
                     Write-Debug "Cache is empty or it doesn't reflect current state. File will be downloaded."
                 }
             } else {
+                Write-Debug "Destination file size is not the same as source file. File will be downloaded."
                 [System.Net.WebClient]$wc = [System.Net.WebClient]::New()
                 $wc.OpenRead($URI)
                 [Long]$bytes_total = $wc.ResponseHeaders["Content-Length"]
                 if($bytes_total -eq (Get-Item $DestinationPath).Length)
                 {
-                    Write-Debug "Destination and source file are the same size. No need for downloading file."
+                    Write-Debug "MatchSource is false. No need for downloading file."
                     $fileExists = $true
-                }
-                else
-                {
-                    Write-Debug "Destination file size is not the same as source file. File will be downloaded."
                 }
             }
         }
