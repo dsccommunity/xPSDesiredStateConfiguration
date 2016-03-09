@@ -191,8 +191,10 @@ function Set-TargetResource
     {
         $downloadedFile = Get-Item $DestinationPath
         $lastWriteTime = $downloadedFile.LastWriteTimeUtc
+        $filesize = $downloadedFile.Length
         $inputObject = @{}
         $inputObject["LastWriteTime"] = $lastWriteTime
+        $inputObject["FileSize"] = $filesize
         Update-Cache -DestinationPath $DestinationPath -Uri $Uri -InputObject $inputObject
     }     
 }
@@ -242,7 +244,7 @@ function Test-TargetResource
                 # Getting cache. It's cleared every time user runs Start-DscConfiguration
                 $cache = Get-Cache -DestinationPath $DestinationPath -Uri $Uri
 
-                if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
+                if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc) -and ($cache.FileSize -eq $file.Length))
                 {
                     Write-Debug "Cache reflects current state. No need for downloading file."
                     $fileExists = $true
