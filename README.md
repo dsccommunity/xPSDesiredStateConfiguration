@@ -164,6 +164,8 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### Unreleased
 
+* Added Pester tests to validate pullserver deployement.
+
 ### 3.7.0.0
 
 * xService:
@@ -293,3 +295,7 @@ This configuration will install a .msi package and verify the package using the 
 ### Sample1.ps4 installs a package that uses an .exe file
 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
+
+### Pester tests to validate pullserver deployement.
+
+[Pullserver Validation Tests](Examples/PullServerDeployementVerificationTest)
