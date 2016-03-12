@@ -41,7 +41,7 @@ If the **DestinationType** is set to `Directory` (default), then the ZIP file sp
 * **PhysicalPath**: Folder location where the content of the web service resides.
 * **State**: State of the web service: { Started | Stopped }
 * **ModulePath**: Folder location where DSC resources are stored. 
-* **ConfiguraitonPath**: Folder location where DSC configurations are stored. 
+* **ConfigurationPath**: Folder location where DSC configurations are stored. 
 * **IsComplianceServer**: Determines whether the web service endpoint exposes compliance data.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
 
@@ -120,7 +120,7 @@ Local accounts may be specified in one of the following ways:
 * The account name scoped to the explicit machine name (eg. myserver\users or myserver\username).
 * The account name scoped using the explicit local machine qualifier (eg. .\users or .\username).
 
-Domain members may be specified using domain\name or Universal Principal Name (UPN) formatting. The following illustrates the various formats
+Domain members may be specified using domain\name or User Principal Name (UPN) formatting. The following illustrates the various formats
 
 * Domain joined machines: mydomain\myserver or myserver@mydomain.com
 * Domain user accounts: mydomain\username or username@mydomain.com
