@@ -31,16 +31,11 @@ function CreateZipFromPSModulePath
         #package all versions of the module
         foreach($moduleVersion in $allVersions)
         {
-            $allModuleFiles = Get-ChildItem $moduleVersion.ModuleBase
             $name = $moduleVersion.Name
             $source = "$destination\$name"
-            New-Item -Path "$destination\$name" -ItemType Directory -Force -Verbose
-            foreach ($item in $allModuleFiles)
-            {
-                Copy-Item -Path $item.FullName -Recurse -Destination $source -Force
-            }
             #Create package zip
-            Compress-Archive -Path $source -DestinationPath "$source.zip" -Verbose -Force 
+            $path  = $moduleVersion.ModuleBase
+            Compress-Archive -Path "$path\*" -DestinationPath "$source.zip" -Verbose -Force 
             $version = $moduleVersion.Version.ToString()
             $newName = "$destination\$name" + "_" + "$version" + ".zip"
             # Rename the module folder to contain the version info.
@@ -95,7 +90,7 @@ function PublishModulesAndChecksum
     else
     {
         Write-Host "Copying modules to pullserver module repository skipped because the machine is not a server sku or Pull server endpoint is not deployed." -Fore Yellow
-    }	
+    }   
     
 }
 
