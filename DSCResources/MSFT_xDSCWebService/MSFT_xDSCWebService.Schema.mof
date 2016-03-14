@@ -9,6 +9,7 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [write,ValueMap{"Started","Stopped"},Values{"Started", "Stopped"}] string State;
   [write] string ModulePath;
   [write] string ConfigurationPath;
+  [write] boolean IsComplianceServer;
   [read] string DSCServerUrl;  
   [write] string RegistrationKeyPath;
   [write] boolean AcceptSelfSignedCertificates;
