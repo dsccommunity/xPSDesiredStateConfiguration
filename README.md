@@ -298,4 +298,4 @@ This configuration will install a .exe package and verify the package using the 
 
 ### Pester tests to validate pullserver deployement.
 
-[Pullserver Validation Tests](Examples/PullServerDeployementVerificationTest)
+[Pullserver Validation Tests](Examples/PullServerDeploymentVerificationTest)
