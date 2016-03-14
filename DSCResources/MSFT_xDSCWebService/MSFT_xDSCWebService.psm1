@@ -296,10 +296,7 @@ function Test-TargetResource
         [string]$ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
         # Location on the disk where the RegistrationKeys file is stored                    
-        [string]$RegistrationKeyPath,
-
-        # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
-        [boolean]$AcceptSelfSignedCertificates
+        [string]$RegistrationKeyPath
     )
 
     $desiredConfigurationMatch = $true;
@@ -388,16 +385,6 @@ function Test-TargetResource
                     break
                 }
             }
-
-            Write-Verbose "Check AcceptSelfSignedCertificates" 
-            if ($AcceptSelfSignedCertificates) 
-            { 
-                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" -ExpectedInstallationStatus $AcceptSelfSignedCertificates)) 
-                { 
-                    $DesiredConfigurationMatch = $false 
-                    break 
-                } 
-            } 
         }
         $stop = $false
     }
