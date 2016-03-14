@@ -2,8 +2,8 @@
 <#
  *
  * Once you setup your pullserver(V2), run the following set of tests on the pullserver machine to verify if the pullserver is setup properly and ready to go.
- * This test assumes default values are used during deployement for the location of web.config and pull server URL.
- * If default values are not used during deployement, please update these values in the 'BeforeAll' block accordingly.
+ * This test assumes default values are used during deployment  for the location of web.config and pull server URL.
+ * If default values are not used during deployment , please update these values in the 'BeforeAll' block accordingly.
  *
  #>
 
