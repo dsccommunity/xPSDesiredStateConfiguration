@@ -1,7 +1,7 @@
 <#
 .Synopsis
    Package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
-.DESCRIPTIO
+.DESCRIPTION
    Uses Publish-DSCModulesAndMofs cmdlet to package DSC modules into zip files with the version info. If 
    Publishes the zip modules on "$env:ProgramFiles\WindowsPowerShell\DscService\Modules"
    Publishes all mof configuration documents that present in $Source folder on "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
@@ -16,7 +16,7 @@
 
 #>
 
-# A tool to use to package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
+# Tools to use to package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
 
 function Publish-DSCModulesAndMofs
 {
