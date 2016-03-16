@@ -1,11 +1,31 @@
+<#
+.Synopsis
+   Package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
+.DESCRIPTIO
+   Uses Publish-DSCModulesAndMofs cmdlet to package DSC modules into zip files with the version info. If 
+   Publishes the zip modules on "$env:ProgramFiles\WindowsPowerShell\DscService\Modules"
+   Publishes all mof configuration documents that present in $Source folder on "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
+   Use $Force to overwrite the version of the module that exists in powershell module path with the version from $source folder
+   Use $ModuleNameList to specify the names of the modules to be published if the modules do not exist in $Source folder
+   
+.EXAMPLE
+    $moduleList = @("xWebAdministration", "xPhp")
+    Publish-DSCModulesAndMofs -Source C:\LocalDepot -ModuleNameList $moduleList
+.EXAMPLE
+    Publish-DSCModulesAndMofs -Source C:\LocalDepot -Force
+
+#>
+
 # A tool to use to package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
 
+function Publish-DSCModulesAndMofs
+{
 param(
 
 [Parameter(Mandatory=$True)]
 [string]$Source = $pwd, # The folder that contains the configuration mof documents and modules to be published on pull server. Everything in this folder will be packaged and published.
-[switch]$Force, #switch to overwrite the module if $Source is provided and a different version of the module presents in powershell module path
-[string[]]$ModuleNameList # optional parameter to package modules listed in $ListModuleNames based on powershell module path content
+[switch]$Force, #switch to overwrite the module in PSModulePath with the version provided in $Sources
+[string[]]$ModuleNameList # Package and publish the modules listed in $ModuleNameList based on powershell module path content
 
 )
 
@@ -15,6 +35,21 @@ New-Item -Path $tempFolder -ItemType Directory -Force -ErrorAction SilentlyConti
 
 #Copy the mof documents from the $Source to working dir
 Copy-Item -Path "$Source\*.mof" -Destination $tempFolder -Force -Verbose
+
+#Start Deployment!
+Write-Host "Start deployment"
+CreateZipFromPSModulePath -listModuleNames $ModuleNameList -destination $tempFolder
+CreateZipFromSource -source $Source -destination $tempFolder
+# Generate the checkSum file for all the zip and mof files.
+New-DSCCheckSum $tempFolder -Force
+# Publish mof and modules to pull server repositories
+PublishModulesAndChecksum -source $tempFolder
+PublishMofDocuments -source $tempFolder
+#Deployment is complete!
+Remove-Item -Path $tempFolder -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "End deployment"
+
+}
 
 #Package the modules using powershell module path
 function CreateZipFromPSModulePath
@@ -68,7 +103,7 @@ function CreateZipFromSource
         }              
         else
         {
-            Write-Host "Skipping module overwrite. Module with the name $name already exists. Please specify -Force to overwrite the module with the version located in $source or remove the module folder from $source."
+            Write-Host "Skipping module overwrite. Module with the name $name already exists. Please specify -Force to overwrite the module with the local version of the module located in $source or list names of the modules in ModuleNameList parameter to be packaged from powershell module pat instead and remove them from $source folder" -Fore Red
         }
         $modules+= @("$name")
     }
@@ -109,16 +144,3 @@ function PublishMofDocuments
         Write-Host "Copying configuration(s) to pullserver configuration repository skipped because the machine is not a server sku or Pull server endpoint is not deployed." -Fore Yellow
     } 
 }
-
-#Start Deployment!
-Write-Host "Start deployment"
-CreateZipFromPSModulePath -listModuleNames $ModuleNameList -destination $tempFolder
-CreateZipFromSource -source $Source -destination $tempFolder
-# Generate the checkSum file for all the zip and mof files.
-New-DSCCheckSum $tempFolder -Force
-# Publish mof and modules to pull server repositories
-PublishModulesAndChecksum -source $tempFolder
-PublishMofDocuments -source $tempFolder
-#Deployment is complete!
-Remove-Item -Path $tempFolder -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "End deployment"
