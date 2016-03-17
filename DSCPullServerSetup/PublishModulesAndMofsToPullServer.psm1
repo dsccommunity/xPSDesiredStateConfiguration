@@ -18,7 +18,7 @@
 
 # Tools to use to package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
 
-function Publish-DSCModulesAndMofs
+function Publish-DSCModuleAndMof
 {
 param(
 
@@ -144,3 +144,4 @@ function PublishMofDocuments
         Write-Host "Copying configuration(s) to pullserver configuration repository skipped because the machine is not a server sku or Pull server endpoint is not deployed." -Fore Yellow
     } 
 }
+Export-ModuleMember -Function Publish-DSCModuleAndMof
