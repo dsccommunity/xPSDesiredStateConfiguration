@@ -10,9 +10,9 @@
    
 .EXAMPLE
     $moduleList = @("xWebAdministration", "xPhp")
-    Publish-DSCModulesAndMofs -Source C:\LocalDepot -ModuleNameList $moduleList
+    Publish-DSCModuleAndMof -Source C:\LocalDepot -ModuleNameList $moduleList
 .EXAMPLE
-    Publish-DSCModulesAndMofs -Source C:\LocalDepot -Force
+    Publish-DSCModuleAndMof -Source C:\LocalDepot -Force
 
 #>
 
