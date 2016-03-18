@@ -199,8 +199,8 @@ function Set-TargetResource
     if ($IsBlue)
     {
         Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
