@@ -167,6 +167,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * Added Pester tests to validate pullserver deployement.
 * Removed Compliance Server deployment from xWebservice resource. Fixed database provider selection issue depending on OS flavor
 * Added Publish-DSCModuleAndMof cmdlet to package DSC modules and mof and publish them on DSC enterprise pull server
+* xRemoteFile resource: Added size verification in cache
 
 ### 3.7.0.0
 
