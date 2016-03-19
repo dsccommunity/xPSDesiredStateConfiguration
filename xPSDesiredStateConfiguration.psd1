@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '3.7.0.0'
+ModuleVersion = '3.8.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -30,6 +30,9 @@ FunctionsToExport = '*'
 
 # Cmdlets to export from this module
 CmdletsToExport = '*'
+
+#Root module
+RootModule = 'DSCPullServerSetup\PublishModulesAndMofsToPullServer.psm1'
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
