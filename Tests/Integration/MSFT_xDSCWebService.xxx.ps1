@@ -42,8 +42,8 @@ Describe "xDSCWebService" {
             {
                 WindowsFeature DSCServiceFeature
                 {
-                    Ensure = ìPresentî
-                    Name   = ìDSC-Serviceî
+                    Ensure = ‚ÄúPresent‚Äù
+                    Name   = ‚ÄúDSC-Service‚Äù
                 }
             }
 
@@ -64,17 +64,9 @@ Describe "xDSCWebService" {
                 
                 xDscWebService PSDSCPullServer
                 {
-                    EndpointName            = ìTestPSDSCPullServerî
+                    EndpointName            = ‚ÄúTestPSDSCPullServer‚Äù
                     Port                    = 21001
-                    CertificateThumbPrint   = ìAllowUnencryptedTrafficî
-                }
-
-                xDscWebService PSDSCComplianceServer
-                {
-                    EndpointName            = ìTestPSDSCComplianceServerî
-                    Port                    = 21002
-                    CertificateThumbPrint   = ìAllowUnencryptedTrafficî
-                    IsComplianceServer      = $true
+                    CertificateThumbPrint   = ‚ÄúAllowUnencryptedTraffic‚Äù
                 }
             }
 
@@ -108,16 +100,9 @@ Describe "xDSCWebService" {
 
                 xDscWebService PSDSCPullServer
                 {
-                    Ensure                  = ìAbsentî
-                    EndpointName            = ìTestPSDSCPullServerî
-                    CertificateThumbPrint   = ìNotUsedî
-                }
-
-                xDscWebService PSDSCComplianceServer
-                {
-                    Ensure                  = ìAbsentî
-                    EndpointName            = ìTestPSDSCComplianceServerî
-                    CertificateThumbPrint   = ìNotUsedî
+                    Ensure                  = ‚ÄúAbsent‚Äù
+                    EndpointName            = ‚ÄúTestPSDSCPullServer‚Äù
+                    CertificateThumbPrint   = ‚ÄúNotUsed‚Äù
                 }
             }
 
@@ -154,9 +139,9 @@ Describe "xDSCWebService" {
 
                 xDscWebService PSDSCPullServer2
                 {
-                    EndpointName            = ìTestPSDSCPullServer2î
+                    EndpointName            = ‚ÄúTestPSDSCPullServer2‚Äù
                     Port                    = 21003
-                    CertificateThumbPrint   = ìAllowUnencryptedTrafficî
+                    CertificateThumbPrint   = ‚ÄúAllowUnencryptedTraffic‚Äù
                 }
             }
 
@@ -176,7 +161,6 @@ Describe "xDSCWebService" {
 
         # remove possible web files
         Remove-WebRoot -filePath "$env:SystemDrive\inetpub\TestPSDSCPullServer"
-        Remove-WebRoot -filePath "$env:SystemDrive\inetpub\TestPSDSCComplianceServer"
         Remove-WebRoot -filePath "$env:SystemDrive\inetpub\TestPSDSCPullServer2"
 
         # remove the generated MoF files
