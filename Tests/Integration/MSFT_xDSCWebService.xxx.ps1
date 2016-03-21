@@ -76,7 +76,7 @@ Describe "xDSCWebService" {
             Start-DscConfiguration -Path $env:temp\$($tempName)_CreatingSites -Wait -Verbose -ErrorAction Stop -Force}  | should not throw
 
             # we now expect two sites starting with our prefix
-            (Get-ChildItem iis:\sites | Where-Object Name -match "^TestPSDSC").count | should be 2
+            (Get-ChildItem iis:\sites | Where-Object Name -match "^TestPSDSC").count | should be 1
 
             # we expect some files in the web root, using the defaults
             (Test-Path "$env:SystemDrive\inetpub\TestPSDSCPullServer\web.config") | should be $true
