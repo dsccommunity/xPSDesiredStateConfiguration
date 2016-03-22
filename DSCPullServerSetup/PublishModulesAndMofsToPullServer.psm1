@@ -2,15 +2,19 @@
 .Synopsis
    Package DSC modules and mof configuration document and publish them on enterprise DSC pull server in the required format
 .DESCRIPTION
-   Uses Publish-DSCModulesAndMofs cmdlet to package DSC modules into zip files with the version info. If 
+   Uses Publish-DSCModuleAndMof cmdlet to package DSC modules that present in $Source or in $ModuleNameList into zip files with the version info and publish them with mof configuration documents that present in $Source on Pull server. 
    Publishes the zip modules on "$env:ProgramFiles\WindowsPowerShell\DscService\Modules"
-   Publishes all mof configuration documents that present in $Source folder on "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
-   Use $Force to overwrite the version of the module that exists in powershell module path with the version from $source folder
-   Use $ModuleNameList to specify the names of the modules to be published if the modules do not exist in $Source folder
-   
+   Publishes all mof configuration documents on "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
+   Use $Force to force packaging the version that exists in $Source folder if a different version of the module exists in powershell module path
+   Use $ModuleNameList to specify the names of the modules to be published (all versions if multiple versions of the module are installed) if the modules do not exist in local folder $Source
+
+.EXAMPLE
+    Publish-DSCModuleAndMof -Source C:\LocalDepot
+       
 .EXAMPLE
     $moduleList = @("xWebAdministration", "xPhp")
     Publish-DSCModuleAndMof -Source C:\LocalDepot -ModuleNameList $moduleList
+
 .EXAMPLE
     Publish-DSCModuleAndMof -Source C:\LocalDepot -Force
 
@@ -84,7 +88,7 @@ function CreateZipFromPSModulePath
     }   
 
 }
-#Function to package modules using a given folder after installing to ps module path.
+#Function to package modules using a given folder.
 function CreateZipFromSource
 {
    param($source, $destination)
@@ -98,12 +102,28 @@ function CreateZipFromSource
         $alreadyExists = Get-Module -Name $name -ListAvailable -Verbose
         if(($alreadyExists -eq $null) -or ($Force))
         {
-            #install the modules into powershell module path and overwrite the content 
-            Copy-Item $item.FullName -Recurse -Force -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Verbose            
+            $localCopies = Get-Module $item.FullName -ListAvailable
+             foreach($localCopy in $localCopies)
+            {
+              $name = $localCopy.Name
+              $source = "$destination\$name"
+              #Create package zip
+              $path  = $localCopy.ModuleBase
+              Compress-Archive -Path "$path\*" -DestinationPath "$source.zip" -Verbose -Force 
+              $version = $localCopy.Version.ToString()
+              $newName = "$destination\$name" + "_" + "$version" + ".zip"
+              # Rename the module folder to contain the version info.
+              if(Test-Path($newName))
+              {
+                  Remove-Item $newName -Recurse -Force 
+              }
+               Rename-Item -Path "$source.zip" -NewName $newName -Force
+            
+          } 
         }              
         else
         {
-            Write-Host "Skipping module overwrite. Module with the name $name already exists. Please specify -Force to overwrite the module with the local version of the module located in $source or list names of the modules in ModuleNameList parameter to be packaged from powershell module pat instead and remove them from $source folder" -Fore Red
+            Write-Host "A different version of the module $name already exists in powershell module path. Please specify -Force to package the module from $source repository. Skipping module from local depot and packaging the version from powershell module path instead." -Fore Red
         }
         $modules+= @("$name")
     }
