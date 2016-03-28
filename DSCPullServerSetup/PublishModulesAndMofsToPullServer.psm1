@@ -33,23 +33,23 @@ function Publish-DSCModuleAndMof
     )
 
     # Create working directory
-    $TempFolder = "$pwd\temp"
-    New-Item -Path $TempFolder -ItemType Directory -Force -ErrorAction SilentlyContinue
+    $tempFolder = "$pwd\temp"
+    New-Item -Path $tempFolder -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     # Copy the mof documents from the $Source to working dir
-    Copy-Item -Path "$Source\*.mof" -Destination $TempFolder -Force -Verbose
+    Copy-Item -Path "$Source\*.mof" -Destination $tempFolder -Force -Verbose
 
     # Start Deployment!
     Log -Scope $MyInvocation -Message 'Start Deployment'
-    CreateZipFromPSModulePath -ListModuleNames $ModuleNameList -Destination $TempFolder
-    CreateZipFromSource -Source $Source -Destination $TempFolder
+    CreateZipFromPSModulePath -ListModuleNames $ModuleNameList -Destination $tempFolder
+    CreateZipFromSource -Source $Source -Destination $tempFolder
     # Generate the checkSum file for all the zip and mof files.
-    New-DSCCheckSum -Path $TempFolder -Force
+    New-DSCCheckSum -Path $tempFolder -Force
     # Publish mof and modules to pull server repositories
-    PublishModulesAndChecksum -Source $TempFolder
-    PublishMofDocuments -Source $TempFolder
+    PublishModulesAndChecksum -Source $tempFolder
+    PublishMofDocuments -Source $tempFolder
     # Deployment is complete!
-    Remove-Item -Path $TempFolder -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $tempFolder -Recurse -Force -ErrorAction SilentlyContinue
     Log -Scope $MyInvocation -Message 'End Deployment'
 
 }
@@ -65,26 +65,26 @@ function CreateZipFromPSModulePath
         Log -Scope $MyInvocation -Message "No additional modules are specified to be packaged." 
     }
     
-    foreach ($Module in $ListModuleNames)
+    foreach ($module in $ListModuleNames)
     {
-        $AllVersions = Get-Module -Name $Module -ListAvailable -Verbose        
+        $allVersions = Get-Module -Name $module -ListAvailable -Verbose        
         # Package all versions of the module
-        foreach ($ModuleVersion in $AllVersions)
+        foreach ($moduleVersion in $allVersions)
         {
-            $Name   = $ModuleVersion.Name
-            $Source = "$Destination\$Name"
+            $name   = $moduleVersion.Name
+            $source = "$Destination\$name"
             # Create package zip
-            $Path    = $ModuleVersion.ModuleBase
-            $Version = $ModuleVersion.Version.ToString()
-            Log -Scope $MyInvocation -Message "Zipping $Name ($Version)"
-            Compress-Archive -Path "$Path\*" -DestinationPath "$Source.zip" -Verbose -Force 
-            $NewName = "$Destination\$Name" + "_" + "$Version" + ".zip"
+            $path    = $moduleVersion.ModuleBase
+            $version = $moduleVersion.Version.ToString()
+            Log -Scope $MyInvocation -Message "Zipping $name ($version)"
+            Compress-Archive -Path "$path\*" -DestinationPath "$source.zip" -Verbose -Force 
+            $newName = "$Destination\$name" + "_" + "$version" + ".zip"
             # Rename the module folder to contain the version info.
-            if (Test-Path $NewName)
+            if (Test-Path $newName)
             {
-                Remove-Item $NewName -Recurse -Force 
+                Remove-Item $newName -Recurse -Force 
             }
-            Rename-Item -Path "$source.zip" -NewName $NewName -Force    
+            Rename-Item -Path "$source.zip" -NewName $newName -Force    
         } 
     }   
 
@@ -95,27 +95,27 @@ function CreateZipFromSource
 {
     param($Source, $Destination)
     # for each module under $Source folder create a zip package that has the same name as the folder. 
-    $AllModulesInSource = Get-ChildItem -Path $Source -Directory
-    $Modules = @()
+    $allModulesInSource = Get-ChildItem -Path $Source -Directory
+    $modules = @()
    
-    foreach ($Item in $AllModulesInSource)
+    foreach ($item in $allModulesInSource)
     {
-        $Name = $Item.Name
-        $AlreadyExists = Get-Module -Name $Name -ListAvailable -Verbose
-        if (($AlreadyExists -eq $null) -or ($Force))
+        $name = $Item.Name
+        $alreadyExists = Get-Module -Name $name -ListAvailable -Verbose
+        if (($alreadyExists -eq $null) -or ($Force))
         {
             # Install the modules into PowerShell module path and overwrite the content 
-            Copy-Item -Path $Item.FullName -Recurse -Force -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Verbose            
+            Copy-Item -Path $item.FullName -Recurse -Force -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Verbose            
         }              
         else
         {
-            Write-Warning "Skipping module overwrite. Module with the name $Name already exists."
+            Write-Warning "Skipping module overwrite. Module with the name $name already exists."
             Write-Warning "Please specify -Force to overwrite the module with the local version of the module located in $Source or list names of the modules in ModuleNameList parameter to be packaged from PowerShell module pat instead and remove them from $Source folder"
         }
-        $Modules += @("$Name")
+        $modules += @("$name")
     }
     # Package the module in $destination
-    CreateZipFromPSModulePath -ListModuleNames $Modules -Destination $Destination
+    CreateZipFromPSModulePath -ListModuleNames $modules -Destination $Destination
 }
 
 
@@ -124,11 +124,11 @@ function PublishModulesAndChecksum
 {
     param($Source)
     # Check if the current machine is a server sku.
-    $ModuleRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Modules"
-    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $ModuleRepository))
+    $moduleRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Modules"
+    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $moduleRepository))
     {
-        Log -Scope $MyInvocation -Message "Copying modules and checksums to [$ModuleRepository]."
-        Copy-Item -Path "$Source\*.zip*" -Destination $ModuleRepository -Force -Verbose
+        Log -Scope $MyInvocation -Message "Copying modules and checksums to [$moduleRepository]."
+        Copy-Item -Path "$Source\*.zip*" -Destination $moduleRepository -Force -Verbose
     }
     else
     {
@@ -142,11 +142,11 @@ function PublishMofDocuments
 {
    param($Source)
     # Check if the current machine is a server sku.
-    $MofRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
-    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $MofRepository))    
+    $mofRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
+    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $mofRepository))    
     {
-        Log -Scope $MyInvocation -Message "Copying mofs and checksums to [$MofRepository]."
-        Copy-Item -Path "$Source\*.mof*" -Destination $MofRepository -Force -Verbose
+        Log -Scope $MyInvocation -Message "Copying mofs and checksums to [$mofRepository]."
+        Copy-Item -Path "$Source\*.mof*" -Destination $mofRepository -Force -Verbose
     }
     else
     {
