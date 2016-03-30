@@ -164,6 +164,8 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### Unreleased
 
+### 3.9.0.0
+
 ### 3.8.0.0
 
 * Added Pester tests to validate pullserver deployement.

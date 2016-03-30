@@ -1,4 +1,4 @@
-# DSC configuration for Pull Server and Compliance Server
+# DSC configuration for Pull Server
 # Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store
 # Note: A Certificate may be generated using MakeCert.exe: http://msdn.microsoft.com/en-us/library/windows/desktop/aa386968%28v=vs.85%29.aspx
 
@@ -33,18 +33,6 @@ configuration Sample_xDscWebService
             ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"            
             State                   = "Started"
             DependsOn               = "[WindowsFeature]DSCServiceFeature"                        
-        }
-
-        xDscWebService PSDSCComplianceServer
-        {
-            Ensure                  = "Present"
-            EndpointName            = "PSDSCComplianceServer"
-            Port                    = 9080
-            PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCComplianceServer"
-            CertificateThumbPrint   = "AllowUnencryptedTraffic"
-            State                   = "Started"
-            IsComplianceServer      = $true
-            DependsOn               = @("[WindowsFeature]DSCServiceFeature","[xDSCWebService]PSDSCPullServer")
         }
     }
  }
