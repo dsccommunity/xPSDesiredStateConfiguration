@@ -166,6 +166,9 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### 3.9.0.0
 
+* Added more information how to use Publish-DSCModuleAndMof cmdlet and samples
+* Removed compliance server samples
+
 ### 3.8.0.0
 
 * Added Pester tests to validate pullserver deployement.
