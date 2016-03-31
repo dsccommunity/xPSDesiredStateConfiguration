@@ -163,6 +163,9 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 ## Versions
 
 ### Unreleased
+### 4.0.0.0
+
+* Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
 
 ### 3.9.0.0
 
