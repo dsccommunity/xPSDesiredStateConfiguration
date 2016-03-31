@@ -357,15 +357,10 @@ function New-FirewallRule
     param ($firewallPort)
     
     Write-Verbose "Disable Inbound Firewall Notification"
-    Set-NetFirewallProfile -Profile Domain,Public,Private –NotifyOnListen False
-
-    $ruleDisplayName = ($($FireWallRuleDisplayName) -f $firewallPort)
-
-    # remove all existing rules with that displayName
-    Get-NetFirewallRule | Where-Object DisplayName -eq $ruleDisplayName | Remove-NetFirewallRule
+    & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
     
-    Write-Verbose "Add Firewall Rule for port $firewallPort"    
-    $null = New-NetFirewallRule -DisplayName $ruleDisplayName -Description ($($FireWallRuleDescription) -f $firewallPort) -Direction Inbound -LocalPort $firewallPort -Protocol TCP -Action Allow
+    Write-Verbose "Add Firewall Rule for port $firewallPort"
+    & $script:netsh advfirewall firewall add rule name=PSWS_IIS_Port dir=in action=allow protocol=TCP localport=$firewallPort   
 }
 
 # Enable & Clear PSWS Operational/Analytic/Debug ETW Channels
