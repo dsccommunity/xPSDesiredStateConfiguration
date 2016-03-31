@@ -307,5 +307,6 @@ This configuration will install a .msi package and verify the package using the 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
 
 ### Pester tests to validate pullserver deployement.
+If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in Powershll or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
 
 [Pullserver Validation Tests](Examples/PullServerDeploymentVerificationTest)
