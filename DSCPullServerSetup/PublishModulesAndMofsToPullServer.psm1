@@ -165,4 +165,139 @@ Function Log
     Write-Verbose "$Date [$($Scope.MyCommand)] :: $Message"
 }
 
+
+<#
+.Synopsis
+   Deploy DSC modules and Configurations to the pullserver.
+.DESCRIPTION
+   If you have one or more DSC module that you need to publish to DSC-Pullserver. There are few steps that you need to do
+        1) Find out the module(s) location. 
+        2) Create a zip  file which contains the content of the module and name it as <ModuleName>_<Version>.zip
+        3) Create a checksum of the module
+        4) Copy module and its checksum to the pullserver module repository.
+   This module will automate steps 1-4. It will auto-detect the location of the module 
+   and figure out the right naming of the zip file and deploy your module and its checksum 
+   to the pullserver. 
+
+   This is available in ps gallary under xPSDesiredStateConfiguration module. 
+.EXAMPLE
+   Get-Module <ModuleName> | Publish-ModuleToPullServer
+#>
+function Publish-ModuleToPullServer
+{
+    [CmdletBinding()]
+    [Alias("pmp")]
+    [OutputType([void])]
+    Param
+    (
+        # Name of the module.
+        [Parameter(Mandatory=$true,
+                   ValueFromPipelineByPropertyName=$true,
+                   Position=0)]
+        $Name,
+                
+        # This is the location of the base of the module.
+        [Parameter(Mandatory=$true,
+                   ValueFromPipelineByPropertyName=$true,
+                   Position=1)]
+        $ModuleBase,
+        
+        # This is the version of the module
+        [Parameter(Mandatory=$true,
+                   ValueFromPipelineByPropertyName=$true,
+                   Position=2)]
+        $Version,
+
+        $PullServerWebConfig = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config",
+
+        $OutputFolderPath = $null
+    )
+
+    Begin
+    {
+        if (-not($OutputFolderPath))
+        {
+            if ( -not(Test-Path $PullServerWebConfig))
+            {
+                throw "Web.Config of the pullserver does not exist on the default path $PullServerWebConfig. Please provide the location of your pullserver web configuration using the parameter -PullServerWebConfig or an alternate path where you want to publish the pullserver modules to"
+            }
+            else
+            {
+                # Pull Server exist figure out the module path of the pullserver and use this value as output folder path.
+                $webConfigXml = [xml](cat $PullServerWebConfig)
+                $moduleXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ModulePath']")
+                $OutputFolderPath =  $moduleXElement.Value
+            }
+        }
+    }
+    Process
+    {
+       Write-Verbose "Name: $Name , ModuleBase : $ModuleBase ,Version: $Version"
+       $targetPath = Join-Path $OutputFolderPath "$($Name)_$($Version).zip"
+
+      if (Test-Path $targetPath)
+      {
+            Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*" -Update -Verbose
+      }
+      else
+      {
+            Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*" -Verbose
+      }
+    }
+    End
+    {
+       # Now that all the modules are published generate thier checksum.
+       New-DscChecksum -Path $OutputFolderPath
+      
+    }
+} 
+
+# Copy a mof file and its checksum to the pullserver configuration repository.
+function Publish-MOFToPullServer
+{
+    [CmdletBinding()]
+    [Alias("pcp")]
+    [OutputType([void])]
+    Param
+    (
+        # Mof file Name
+        [Parameter(Mandatory=$true,
+                   ValueFromPipelineByPropertyName=$true,
+                   Position=0)]
+        $FullName,
+       
+        $PullServerWebConfig = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
+    )
+
+    Begin
+    {
+       $webConfigXml = [xml](cat $PullServerWebConfig)
+       $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
+       $OutputFolderPath =  $configXElement.Value
+    }
+    Process
+    {
+        $fileInfo = [System.IO.FileInfo]::new($FullName)
+        if ($fileInfo.Extension -eq '.mof')
+        {
+            if (Test-Path $FullName)
+            {
+                copy $FullName $OutputFolderPath -Verbose -Force
+            }
+            else 
+            {
+                Throw "File not found at $FullName"
+            } 
+        }
+        else
+        {
+            throw "Invalid file $FullName. Only mof files can be copied to the pullserver configuration repository"
+        }       
+    }
+    End
+    {
+        New-DscChecksum -Path $OutputFolderPath -Force
+    }
+}
+
 Export-ModuleMember -Function Publish-DSCModuleAndMof
