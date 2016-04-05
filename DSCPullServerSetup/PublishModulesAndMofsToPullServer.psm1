@@ -168,18 +168,10 @@ Function Log
 
 <#
 .Synopsis
-   Deploy DSC modules and Configurations to the pullserver.
+   Deploy DSC modules to the pullserver.
 .DESCRIPTION
-   If you have one or more DSC module that you need to publish to DSC-Pullserver. There are few steps that you need to do
-        1) Find out the module(s) location. 
-        2) Create a zip  file which contains the content of the module and name it as <ModuleName>_<Version>.zip
-        3) Create a checksum of the module
-        4) Copy module and its checksum to the pullserver module repository.
-   This module will automate steps 1-4. It will auto-detect the location of the module 
-   and figure out the right naming of the zip file and deploy your module and its checksum 
-   to the pullserver. 
-
-   This is available in ps gallary under xPSDesiredStateConfiguration module. 
+   Publish DSC module using Module Info object as an input. 
+   The cmdlet will figure out the location of the module repository using web.config of the pullserver.
 .EXAMPLE
    Get-Module <ModuleName> | Publish-ModuleToPullServer
 #>
@@ -252,7 +244,14 @@ function Publish-ModuleToPullServer
     }
 } 
 
-# Copy a mof file and its checksum to the pullserver configuration repository.
+<#
+.Synopsis
+   Deploy DSC Configuration document to the pullserver.
+.DESCRIPTION
+   Publish Mof file to the pullserver. It takes File Info object as pipeline input. It also auto detects the location of the configuration repository using the web.config of the pullserver.
+.EXAMPLE
+   Dir <path>\*.mof | Publish-MOFToPullServer
+#>
 function Publish-MOFToPullServer
 {
     [CmdletBinding()]
@@ -300,4 +299,4 @@ function Publish-MOFToPullServer
     }
 }
 
-Export-ModuleMember -Function Publish-DSCModuleAndMof
+Export-ModuleMember -Function Publish-*
