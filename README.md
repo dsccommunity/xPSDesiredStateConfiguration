@@ -159,9 +159,21 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
    - Default value: ErrorsOnly.
 
+## Functions
+
+### Publish-ModuleToPullServer
+    Publishes a 'ModuleInfo' object(s) to the pullserver module repository or user provided path. It accepts its input from a pipeline so it can be used in conjunction with Get-Module as Get-Module <ModuleName> | Publish-Module
+
+### Publish-MOFToPullServer
+    Publishes a 'FileInfo' object(s) to the pullserver configuration repository. Its accepts FileInfo input from a pipeline so it can be used in conjunction with Get-ChildItem .*.mof | Publish-MOFToPullServer
+
 ## Versions
 
 ### Unreleased
+
+* **Publish-ModuleToPullServer**
+* **Publish-MOFToPullServer**
+
 ### 4.0.0.0
 
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
