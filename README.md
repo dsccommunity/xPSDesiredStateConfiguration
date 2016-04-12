@@ -42,7 +42,6 @@ If the **DestinationType** is set to `Directory` (default), then the ZIP file sp
 * **State**: State of the web service: { Started | Stopped }
 * **ModulePath**: Folder location where DSC resources are stored. 
 * **ConfigurationPath**: Folder location where DSC configurations are stored. 
-* **IsComplianceServer**: Determines whether the web service endpoint exposes compliance data.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
 
 ### xWindowsProcess
