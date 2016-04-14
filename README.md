@@ -173,6 +173,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 * **Publish-ModuleToPullServer**
 * **Publish-MOFToPullServer**
+* xPackage: Fixes bug where CreateCheckRegValue was not being removed when removing packages
 
 ### 4.0.0.0
 
