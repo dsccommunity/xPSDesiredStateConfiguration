@@ -12,9 +12,9 @@ configuration Sample_xDscWebService
             [ValidateNotNullOrEmpty()] 
             [string] $certificateThumbPrint,
 
-            [Parameter(Mandatory)]
+            [Parameter(HelpMessage='This should be a string with enough entropy (randomness) to protect the registration of clients to the pull server.  We will use new GUID by default.')]
             [ValidateNotNullOrEmpty()]
-            [string] $RegistrationKey 
+            [string] $RegistrationKey = ([guid]::NewGuid()).Guid
      ) 
 
 
