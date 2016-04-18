@@ -36,7 +36,7 @@ If the **DestinationType** is set to `Directory` (default), then the ZIP file sp
 ### xDscWebService
 
 * **EndpointName**: The desired web service name. 
-* **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint.
+* **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
 * **Port**: Port for web service.
 * **PhysicalPath**: Folder location where the content of the web service resides.
 * **State**: State of the web service: { Started | Stopped }
