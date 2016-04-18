@@ -2,6 +2,7 @@
 class MSFT_xDSCWebService : OMI_BaseResource
 {
   [Key] string EndpointName;
+  // Can take the value "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
   [required] string CertificateThumbPrint;
   [write] uint32 Port;
   [write] string PhysicalPath;
