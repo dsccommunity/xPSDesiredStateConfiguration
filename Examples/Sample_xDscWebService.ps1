@@ -9,7 +9,7 @@ configuration Sample_xDscWebService
     ( 
             [string[]]$NodeName = 'localhost', 
 
-            # Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint (Recommended only for test purpose)
+            [Parameter(HelpMessage='Use AllowUnencryptedTraffic for setting up a non SSL based endpoint (Recommended only for test purpose)')]
             [ValidateNotNullOrEmpty()] 
             [string] $certificateThumbPrint,
 
