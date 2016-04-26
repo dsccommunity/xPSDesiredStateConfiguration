@@ -1,5 +1,5 @@
 # DSC configuration for Pull Server
-# Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store
+# Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store for SSL
 # Prerequisite: $RegistrationKey value generated using ([guid]::NewGuid()).Guid
 # Note: A Certificate may be generated using MakeCert.exe: http://msdn.microsoft.com/en-us/library/windows/desktop/aa386968%28v=vs.85%29.aspx
 
@@ -9,6 +9,7 @@ configuration Sample_xDscWebService
     ( 
             [string[]]$NodeName = 'localhost', 
 
+            [Parameter(HelpMessage='Use AllowUnencryptedTraffic for setting up a non SSL based endpoint (Recommended only for test purpose)')]
             [ValidateNotNullOrEmpty()] 
             [string] $certificateThumbPrint,
 
