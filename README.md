@@ -64,12 +64,15 @@ For a complete list of properties, please use Get-DscResource
 
 ### xRemoteFile
 
-* **DestinationPath**: Path where the remote file should be downloaded.
-* **Uri**: URI of the file which should be downloaded.
-* **UserAgent**: User agent for the web request.
-* **Headers**: Headers of the web request.
-* **Credential**: Specifies credential of a user which has permissions to send the request.
-* **MatchSource**: Determines whether the remote file should be re-downloaded if file in the DestinationPath was modified locally.
+* **DestinationPath**: Path where the remote file should be downloaded. Required.
+* **Uri**: URI of the file which should be downloaded. Required.
+* **UserAgent**: User agent for the web request. Optional.
+* **Headers**: Headers of the web request. Optional.
+* **Credential**: Specifies credential of a user which has permissions to send the request. Optional.
+* **MatchSource**: Determines whether the remote file should be re-downloaded if file in the DestinationPath was modified locally. Optional.
+* **TimeoutSec**: Specifies how long the request can be pending before it times out. Optional.
+* **ProxyUri**: Uses a proxy server for the request, rather than connecting directly to the Internet resource. Optional.
+* **ProxyCredential**: Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter. Optional.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read only property.
 
 ### xPackage
@@ -171,6 +174,20 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### Unreleased
 
+* xRemoteFile: Added parameters:
+                - TimeoutSec
+                - ProxyURI
+                - ProxyCredential
+               Added unit tests.
+               Corrected Style Guidelines issues.
+               Added Localization support.
+               URI parameter supports File://.
+               Get-TargetResource returns URI parameter.
+               Fixed logging of error message reported when download fails.
+* Examples: Fixed missing newline at end of PullServerSetupTests.ps1.
+* xFileUpload: Added PSSA rule suppression attribute.
+* xPackageResource: Removed hardcoded ComputerName 'localhost' parameter from Get-WMIObject to eliminate PSSA rule violation. The parameter is not required.
+* Added .gitignore to prevent DSCResource.Tests from being commited to repo.
 * **Publish-ModuleToPullServer**
 * **Publish-MOFToPullServer**
 
