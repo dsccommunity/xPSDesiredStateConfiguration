@@ -65,7 +65,7 @@ For a complete list of properties, please use Get-DscResource
 ### xRemoteFile
 
 * **DestinationPath**: Path where the remote file should be downloaded. Required.
-* **Uri**: URI of the file which should be downloaded. Required.
+* **Uri**: URI of the file which should be downloaded. It must be a HTTP, HTTPS or FILE resource. Required.
 * **UserAgent**: User agent for the web request. Optional.
 * **Headers**: Headers of the web request. Optional.
 * **Credential**: Specifies credential of a user which has permissions to send the request. Optional.
