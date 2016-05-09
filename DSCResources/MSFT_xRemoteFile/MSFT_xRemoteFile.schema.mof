@@ -9,7 +9,7 @@ class MSFT_xRemoteFile : OMI_BaseResource
     [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to send the request.")] String Credential;
     [Write, Description("A boolean value to indicate whether the remote file should be re-downloaded if the file in the DestinationPath was modified locally.")] Boolean MatchSource;
     [Write, Description("Specifies how long the request can be pending before it times out.")] Uint32 TimeoutSec;
-    [Write, Description("Uses a proxy server for the request, rather than connecting directly to the Internet resource.")] String ProxyUri;
+    [Write, Description("Uses a proxy server for the request, rather than connecting directly to the Internet resource.")] String Proxy;
     [Write, EmbeddedInstance("MSFT_Credential"), Description("Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter.")] String ProxyCredential;
     [Read, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}, Description("Says whether DestinationPath exists on the machine")] String Ensure;
 };

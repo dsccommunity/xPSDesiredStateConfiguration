@@ -126,7 +126,7 @@ function Set-TargetResource
         $TimeoutSec,
 
         [System.String]
-        $ProxyUri,
+        $Proxy,
 
         [System.Management.Automation.PSCredential]
         $ProxyCredential
@@ -283,7 +283,7 @@ function Test-TargetResource
         $TimeoutSec,
 
         [System.String]
-        $ProxyUri,
+        $Proxy,
 
         [System.Management.Automation.PSCredential]
         $ProxyCredential

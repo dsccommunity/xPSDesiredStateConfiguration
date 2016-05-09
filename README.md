@@ -71,7 +71,7 @@ For a complete list of properties, please use Get-DscResource
 * **Credential**: Specifies credential of a user which has permissions to send the request. Optional.
 * **MatchSource**: Determines whether the remote file should be re-downloaded if file in the DestinationPath was modified locally. Optional.
 * **TimeoutSec**: Specifies how long the request can be pending before it times out. Optional.
-* **ProxyUri**: Uses a proxy server for the request, rather than connecting directly to the Internet resource. Optional.
+* **Proxy**: Uses a proxy server for the request, rather than connecting directly to the Internet resource. Optional.
 * **ProxyCredential**: Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter. Optional.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read only property.
 
@@ -176,7 +176,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 * xRemoteFile: Added parameters:
                 - TimeoutSec
-                - ProxyURI
+                - Proxy
                 - ProxyCredential
                Added unit tests.
                Corrected Style Guidelines issues.
