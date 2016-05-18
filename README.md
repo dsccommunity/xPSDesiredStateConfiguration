@@ -171,6 +171,8 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### Unreleased
 
+### 3.10.0.0
+
 * **Publish-ModuleToPullServer**
 * **Publish-MOFToPullServer**
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
