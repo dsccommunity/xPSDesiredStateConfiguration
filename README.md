@@ -36,7 +36,7 @@ If the **DestinationType** is set to `Directory` (default), then the ZIP file sp
 ### xDscWebService
 
 * **EndpointName**: The desired web service name. 
-* **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint.
+* **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
 * **Port**: Port for web service.
 * **PhysicalPath**: Folder location where the content of the web service resides.
 * **State**: State of the web service: { Started | Stopped }
@@ -171,13 +171,16 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### Unreleased
 
-* **Publish-ModuleToPullServer**
-* **Publish-MOFToPullServer**
-* xPackage: Fixes bug where CreateCheckRegValue was not being removed when removing packages
+* xPackage: Fixes bug where CreateCheckRegValue was not being removed when uninstalling packages
 
 ### 4.0.0.0
 
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
+
+### 3.10.0.0
+
+* **Publish-ModuleToPullServer**
+* **Publish-MOFToPullServer**
 
 ### 3.9.0.0
 
