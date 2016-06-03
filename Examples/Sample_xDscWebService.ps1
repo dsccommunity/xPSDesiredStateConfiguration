@@ -1,50 +1,55 @@
-# DSC configuration for Pull Server and Compliance Server
-# Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store
+# DSC configuration for Pull Server
+# Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store for SSL
+# Prerequisite: $RegistrationKey value generated using ([guid]::NewGuid()).Guid
 # Note: A Certificate may be generated using MakeCert.exe: http://msdn.microsoft.com/en-us/library/windows/desktop/aa386968%28v=vs.85%29.aspx
 
-configuration Sample_xDscWebService
-{
-    param 
-    (
-        [string[]]$NodeName = 'localhost',
+configuration Sample_xDscWebService 
+{ 
+    param  
+    ( 
+            [string[]]$NodeName = 'localhost', 
 
-        [ValidateNotNullOrEmpty()]
-        [string] $certificateThumbPrint
-    )
+            [Parameter(HelpMessage='Use AllowUnencryptedTraffic for setting up a non SSL based endpoint (Recommended only for test purpose)')]
+            [ValidateNotNullOrEmpty()] 
+            [string] $certificateThumbPrint,
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+            [Parameter(HelpMessage='This should be a string with enough entropy (randomness) to protect the registration of clients to the pull server.  We will use new GUID by default.')]
+            [ValidateNotNullOrEmpty()]
+            [string] $RegistrationKey = ([guid]::NewGuid()).Guid
+     ) 
 
-    Node $NodeName
-    {
-        WindowsFeature DSCServiceFeature
+
+     Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+     Import-DSCResource -ModuleName PSDesiredStateConfiguration 
+
+     Node $NodeName 
+     { 
+         WindowsFeature DSCServiceFeature 
+         { 
+             Ensure = "Present" 
+             Name   = "DSC-Service"             
+         } 
+
+
+         xDscWebService PSDSCPullServer 
+         { 
+             Ensure                  = "Present" 
+             EndpointName            = "PSDSCPullServer" 
+             Port                    = 8080 
+             PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCPullServer" 
+             CertificateThumbPrint   = $certificateThumbPrint          
+             ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules" 
+             ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"             
+             State                   = "Started" 
+             DependsOn               = "[WindowsFeature]DSCServiceFeature"                         
+         } 
+
+        File RegistrationKeyFile
         {
-            Ensure = "Present"
-            Name   = "DSC-Service"            
-        }
-
-        xDscWebService PSDSCPullServer
-        {
-            Ensure                  = "Present"
-            EndpointName            = "PSDSCPullServer"
-            Port                    = 8080
-            PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCPullServer"
-            CertificateThumbPrint   = $certificateThumbPrint         
-            ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
-            ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"            
-            State                   = "Started"
-            DependsOn               = "[WindowsFeature]DSCServiceFeature"                        
-        }
-
-        xDscWebService PSDSCComplianceServer
-        {
-            Ensure                  = "Present"
-            EndpointName            = "PSDSCComplianceServer"
-            Port                    = 9080
-            PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCComplianceServer"
-            CertificateThumbPrint   = "AllowUnencryptedTraffic"
-            State                   = "Started"
-            IsComplianceServer      = $true
-            DependsOn               = @("[WindowsFeature]DSCServiceFeature","[xDSCWebService]PSDSCPullServer")
+            Ensure          ='Present'
+            Type            = 'File'
+            DestinationPath = "$env:ProgramFiles\WindowsPowerShell\DscService\RegistrationKeys.txt"
+            Contents        = $RegistrationKey
         }
     }
- }
+}

@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '3.7.0.0'
+ModuleVersion = '3.10.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -31,6 +31,9 @@ FunctionsToExport = '*'
 # Cmdlets to export from this module
 CmdletsToExport = '*'
 
+#Root module
+RootModule = 'DSCPullServerSetup\PublishModulesAndMofsToPullServer.psm1'
+
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
 
@@ -49,7 +52,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = '* **Publish-ModuleToPullServer**
+* **Publish-MOFToPullServer**
+* Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
+
+'
 
     } # End of PSData hashtable
 

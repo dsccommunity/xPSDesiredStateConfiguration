@@ -36,13 +36,12 @@ If the **DestinationType** is set to `Directory` (default), then the ZIP file sp
 ### xDscWebService
 
 * **EndpointName**: The desired web service name. 
-* **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint.
+* **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
 * **Port**: Port for web service.
 * **PhysicalPath**: Folder location where the content of the web service resides.
 * **State**: State of the web service: { Started | Stopped }
 * **ModulePath**: Folder location where DSC resources are stored. 
 * **ConfigurationPath**: Folder location where DSC configurations are stored. 
-* **IsComplianceServer**: Determines whether the web service endpoint exposes compliance data.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
 
 ### xWindowsProcess
@@ -160,9 +159,35 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
    - Default value: ErrorsOnly.
 
+## Functions
+
+### Publish-ModuleToPullServer
+    Publishes a 'ModuleInfo' object(s) to the pullserver module repository or user provided path. It accepts its input from a pipeline so it can be used in conjunction with Get-Module as Get-Module <ModuleName> | Publish-Module
+
+### Publish-MOFToPullServer
+    Publishes a 'FileInfo' object(s) to the pullserver configuration repository. Its accepts FileInfo input from a pipeline so it can be used in conjunction with Get-ChildItem .*.mof | Publish-MOFToPullServer
+
 ## Versions
 
 ### Unreleased
+
+### 3.10.0.0
+
+* **Publish-ModuleToPullServer**
+* **Publish-MOFToPullServer**
+* Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
+
+### 3.9.0.0
+
+* Added more information how to use Publish-DSCModuleAndMof cmdlet and samples
+* Removed compliance server samples
+
+### 3.8.0.0
+
+* Added Pester tests to validate pullserver deployement.
+* Removed Compliance Server deployment from xWebservice resource. Fixed database provider selection issue depending on OS flavor
+* Added Publish-DSCModuleAndMof cmdlet to package DSC modules and mof and publish them on DSC enterprise pull server
+* xRemoteFile resource: Added size verification in cache
 
 ### 3.7.0.0
 
@@ -293,3 +318,8 @@ This configuration will install a .msi package and verify the package using the 
 ### Sample1.ps4 installs a package that uses an .exe file
 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
+
+### Validate pullserver deployement.
+If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in Powershll or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
+
+[Pullserver Validation Pester Tests](Examples/PullServerDeploymentVerificationTest)

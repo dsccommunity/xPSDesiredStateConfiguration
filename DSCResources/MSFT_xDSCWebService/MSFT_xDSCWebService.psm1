@@ -199,8 +199,8 @@ function Set-TargetResource
     if ($IsBlue)
     {
         Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
@@ -226,9 +226,9 @@ function Set-TargetResource
 
     Write-Verbose "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
 
-    # Create the application data directory calculated above        
+    # Create the application data directory calculated above
     $null = New-Item -path $rootDataPath -itemType "directory" -Force
-                
+
     $repository = Join-Path $rootDataPath "Devices.mdb"
     Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
 
@@ -298,7 +298,7 @@ function Test-TargetResource
         # Location on the disk where the RegistrationKeys file is stored                    
         [string]$RegistrationKeyPath,
 
-        # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
+        # Are self-signed certs being accepted for client auth.
         [boolean]$AcceptSelfSignedCertificates
     )
 
@@ -389,15 +389,15 @@ function Test-TargetResource
                 }
             }
 
-            Write-Verbose "Check AcceptSelfSignedCertificates" 
-            if ($AcceptSelfSignedCertificates) 
-            { 
-                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" -ExpectedInstallationStatus $AcceptSelfSignedCertificates)) 
-                { 
-                    $DesiredConfigurationMatch = $false 
-                    break 
-                } 
-            } 
+            Write-Verbose "Check AcceptSelfSignedCertificates"
+            if ($AcceptSelfSignedCertificates)
+            {
+                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" -ExpectedInstallationStatus $AcceptSelfSignedCertificates))
+                {
+                    $DesiredConfigurationMatch = $false
+                    break
+                }
+            }
         }
         $stop = $false
     }
