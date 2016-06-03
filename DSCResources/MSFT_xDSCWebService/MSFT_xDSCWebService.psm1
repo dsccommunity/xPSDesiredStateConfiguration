@@ -229,9 +229,6 @@ function Set-TargetResource
     # Create the application data directory calculated above
     $null = New-Item -path $rootDataPath -itemType "directory" -Force
 
-    $repository = Join-Path $rootDataPath "Devices.mdb"
-    Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
-
     $null = New-Item -path "$ConfigurationPath" -itemType "directory" -Force
 
     PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ConfigurationPath" -value $ConfigurationPath
