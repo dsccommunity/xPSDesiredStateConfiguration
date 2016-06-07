@@ -134,7 +134,7 @@ FUNCTION Get-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Name		
+        $Name       
     )
         
     $retVal = GetItemProperty $EnvVarRegPathMachine -Name $Name -Expand:$false -ErrorAction SilentlyContinue
@@ -154,7 +154,7 @@ FUNCTION Get-TargetResource
 function Set-EnvVar
 {
     param
-    (		
+    (       
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -193,7 +193,7 @@ function Set-EnvVar
 function Remove-EnvVar
 {
     param
-    (		
+    (       
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -239,7 +239,7 @@ FUNCTION Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
     param
-    (		
+    (       
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -477,7 +477,7 @@ FUNCTION Set-TargetResource
 FUNCTION Test-TargetResource
 {
     param
-    (		
+    (       
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -628,7 +628,7 @@ FUNCTION Write-Log
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
     param
-    (	
+    (   
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -648,14 +648,14 @@ FUNCTION Write-Log
 FUNCTION FindPath
 {    
     param
-    (				
+    (               
         [System.String]
         $ExistingPaths,
         
         [System.String]
         $QueryPaths,
 
-        [parameter(Mandatory = $true)]		
+        [parameter(Mandatory = $true)]      
         [ValidateSet("Any", "All")]
         [System.String]
         $FindCriteria
