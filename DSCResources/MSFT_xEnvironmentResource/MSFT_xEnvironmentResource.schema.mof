@@ -1,4 +1,4 @@
-﻿
+
 [ClassVersion("1.0.0"), FriendlyName("xEnvironment")] 
 class MSFT_xEnvironmentResource : OMI_BaseResource
 {
