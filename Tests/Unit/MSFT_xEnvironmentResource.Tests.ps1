@@ -1,5 +1,10 @@
 ﻿# These tests must be run with elevated access
 
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName 'MSFT_xEnvironmentResource' `
+    -DSCResourceName 'xEnvironment' `
+    -TestType Unit
+
 InModuleScope 'MSFT_xEnvironmentResource' {
     function Get-EnvironmentVariable
     {
