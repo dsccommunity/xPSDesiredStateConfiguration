@@ -20,7 +20,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroup** configures and manages local Windows groups
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xWindowsOptionalFeature** configures optional Windows features.
-* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes. 
+* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
+* **xEnvironment** configures and manages environment variables.
 
 ### xArchive
 
@@ -158,6 +159,19 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * **LogLevel**: Specifies the maximum output level shown in the logs.
    - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
    - Default value: ErrorsOnly.
+
+### xEnvironment
+
+* **Name**: Indicates the name of the environment variable for which you want to ensure a specific state.
+* **Value**: The value to assign to the environment variable.
+   - Supported values: Non-null strings
+   - Default Value: [String]::Empty
+* **Ensure**: Ensures that the feature is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **Path**: Defines the environment variable that is being configured. Set this property to $true if the variable is the Path variable; otherwise, set it to $false. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value.
+   - Suported values: $true, $false.
+   - Default value: $false.
 
 ## Functions
 
