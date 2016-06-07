@@ -184,13 +184,20 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 ## Versions
 
 ### Unreleased
+### 3.11.0.0
+* Updated xWebService resource to not deploy Devices.mdb if esent provider is used
+* Fixed $script:netsh parameter initialization in xWebService resource that was causing CIM exception when EnableFirewall flag was specified.
 
-* **Publish-ModuleToPullServer**
-* **Publish-MOFToPullServer**
+* xPackage: Fixes bug where CreateCheckRegValue was not being removed when uninstalling packages
 
 ### 4.0.0.0
 
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
+
+### 3.10.0.0
+
+* **Publish-ModuleToPullServer**
+* **Publish-MOFToPullServer**
 
 ### 3.9.0.0
 

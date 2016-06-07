@@ -40,6 +40,7 @@ InvalidFileSignature=File '{0}' does not have a valid Authenticode signature.  S
 WrongSignerSubject=File '{0}' was not signed by expected signer subject '{1}'
 WrongSignerThumbprint=File '{0}' was not signed by expected signer certificate thumbprint '{1}'
 CreatingRegistryValue=Creating package registry value of {0}.
+RemovingRegistryValue=Removing package registry value of {0}.
 '@
 }
 
@@ -129,6 +130,39 @@ Function Set-RegistryValue
     {
         $exceptionText = ($_ | Out-String).Trim()
         Write-Verbose "Exception occured in Set-RegistryValue: $exceptionText"
+    }
+}
+
+Function Remove-RegistryValue
+{
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [Microsoft.Win32.RegistryHive]
+        $RegistryHive,
+
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Key,
+
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Value
+    )
+
+    try
+    {
+        $baseKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
+        $subKey =  $baseKey.OpenSubKey($Key, $true) ## Opens the subkey with write access
+        $subKey.DeleteValue($Value)
+    }
+    catch
+    {
+        $exceptionText = ($_ | Out-String).Trim()
+        Write-Verbose "Exception occured in Remove-RegistryValue: $exceptionText"
     }
 }
 
@@ -966,8 +1000,16 @@ function Set-TargetResource
     if($CreateCheckRegValue -eq $true)
     {
         $registryValueString = '{0}\{1}\{2}' -f $InstalledCheckRegHive, $InstalledCheckRegKey, $InstalledCheckRegValueName
-        Write-Verbose ($LocalizedData.CreatingRegistryValue -f $registryValueString)
-        Set-RegistryValue -RegistryHive $InstalledCheckRegHive -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName -Data $InstalledCheckRegValueData
+        if($Ensure -eq 'Present')
+        {
+            Write-Verbose ($LocalizedData.CreatingRegistryValue -f $registryValueString)
+            Set-RegistryValue -RegistryHive $InstalledCheckRegHive -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName -Data $InstalledCheckRegValueData
+        }
+        else
+        {
+            Write-Verbose ($LocalizedData.RemovingRegistryValue -f $registryValueString)
+            Remove-RegistryValue -RegistryHive $InstalledCheckRegHive -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName
+        }
     }
 
     # Check if reboot is required, if so notify CA. The MSFT_ServerManagerTasks provider is missing on client SKUs
@@ -978,7 +1020,7 @@ function Set-TargetResource
         Write-Verbose $LocalizedData.MachineRequiresReboot
         $global:DSCMachineStatus = 1
     }
-
+    
     if($Ensure -eq "Present")
     {
         $productEntry = Get-ProductEntry $Name $identifyingNumber $InstalledCheckRegHive $InstalledCheckRegKey $InstalledCheckRegValueName $InstalledCheckRegValueData
