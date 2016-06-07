@@ -173,6 +173,8 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 ### 3.11.0.0
 * Updated xWebService resource to not deploy Devices.mdb if esent provider is used
 * Fixed $script:netsh parameter initialization in xWebService resource that was causing CIM exception when EnableFirewall flag was specified.
+* xService:
+    - Fixed a bug where, despite no state specified in the config, the resource test returns false if the service is not running
 
 ### 3.10.0.0
 
