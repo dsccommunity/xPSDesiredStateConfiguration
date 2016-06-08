@@ -14,9 +14,9 @@
         Add-Type -AssemblyName System.DirectoryServices.AccountManagement 
         $directoryServicesMachineContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine)
         $credentialsAreValid = $directoryServicesMachineContext.ValidateCredentials($user, $password)
-   		                
+                        
         $directoryServicesMachineContext.Dispose()
-	    $directoryServicesMachineContext = $null
+        $directoryServicesMachineContext = $null
                 
         if(-not $credentialsAreValid)
         {

@@ -8,7 +8,7 @@ function Get-IsWin8orAbove
     [CmdletBinding()]
     param ()
 
-	$operatingSystemVersion = (Get-CimInstance -Class Win32_OperatingSystem).Version
+    $operatingSystemVersion = (Get-CimInstance -Class Win32_OperatingSystem).Version
 
     # For Win 7 OS
     if ($operatingSystemVersion -like '6.1*')
