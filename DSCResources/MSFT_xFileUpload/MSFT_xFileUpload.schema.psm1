@@ -17,6 +17,8 @@ Configuration xFileUpload
     .NOTES
     #>
 
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+
     param (
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]

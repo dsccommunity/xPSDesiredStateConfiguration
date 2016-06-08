@@ -300,7 +300,7 @@ Function Get-ProductEntry
         $installValue = $null
 
         #if 64bit OS, check 64bit registry view first
-        if ((Get-WmiObject -Class Win32_OperatingSystem -ComputerName "localhost" -ea 0).OSArchitecture -eq '64-bit')
+        if ((Get-WmiObject -Class Win32_OperatingSystem -ea 0).OSArchitecture -eq '64-bit')
         {
             $installValue = Get-RegistryValueIgnoreError $InstalledCheckRegHive "$InstalledCheckRegKey" "$InstalledCheckRegValueName" Registry64
         }
