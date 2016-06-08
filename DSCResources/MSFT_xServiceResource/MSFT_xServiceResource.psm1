@@ -20,6 +20,7 @@ SetStartupTypeWhatIf=Set Start Type
 ErrorSettingServiceStartupType=Failure setting start type for service '{0}'. Message: '{1}'
 TestUserNameMismatch=User name for service '{0}' is '{1}'. It does not match '{2}.
 TestStartupTypeMismatch=Startup type for service '{0}' is '{1}'. It does not match '{2}'.
+TestStateMismatch=State of service '{0}' is '{1}'. It does not match '{2}'.
 MethodFailed=The '{0}' method of '{1}' failed with error code: '{2}'.
 ErrorChangingProperty=Failed to change '{0}' property. Message: '{1}'
 ErrorSetingLogOnAsServiceRightsForUser=Error granting '{0}' the right to log on as a service. Message: '{1}'.
@@ -183,8 +184,13 @@ function Test-TargetResource
         }
     }
 
-    return ($State -eq "Stopped" -and $svc.Status -eq "Stopped") -or ($svc.Status -eq "Running" -and $State -eq "Running")
+    if($PSBoundParameters.ContainsKey("State") -and ($State -ne $svc.Status))
+    {
+        Write-Verbose -Message ($LocalizedData.TestStateMismatch -f $svcWmi.Name,$svc.Status,$State)
+        return $false
+    }
     
+    return $true
 }
 
 <#

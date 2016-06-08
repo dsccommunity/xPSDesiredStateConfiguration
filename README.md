@@ -3,7 +3,7 @@
 # xPSDesiredStateConfiguration
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
-The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, **xWindowsOptionalFeature** and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource. 
+The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, **xWindowsOptionalFeature** and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource.
 
 ## Contributing
 Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
@@ -20,7 +20,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroup** configures and manages local Windows groups
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xWindowsOptionalFeature** configures optional Windows features.
-* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes. 
+* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
+* **xEnvironment** configures and manages environment variables.
 
 ### xArchive
 
@@ -35,23 +36,23 @@ If the **DestinationType** is set to `Directory` (default), then the ZIP file sp
 
 ### xDscWebService
 
-* **EndpointName**: The desired web service name. 
+* **EndpointName**: The desired web service name.
 * **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
 * **Port**: Port for web service.
 * **PhysicalPath**: Folder location where the content of the web service resides.
 * **State**: State of the web service: { Started | Stopped }
-* **ModulePath**: Folder location where DSC resources are stored. 
-* **ConfigurationPath**: Folder location where DSC configurations are stored. 
+* **ModulePath**: Folder location where DSC resources are stored.
+* **ConfigurationPath**: Folder location where DSC configurations are stored.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
 
 ### xWindowsProcess
 
 For a complete list of properties, please use Get-DscResource
 
-* **Path**: The full path or the process executable 
-* **Arguments**: This is a mandatory parameter for passing arguments to the process executable. 
+* **Path**: The full path or the process executable
+* **Arguments**: This is a mandatory parameter for passing arguments to the process executable.
 Specify an empty string if you don't want to pass any arguments.
-* **Credential**: The credentials of the user under whose context you want to run the process. 
+* **Credential**: The credentials of the user under whose context you want to run the process.
 * **Ensure**: Ensures that the process is running or stopped: { Present | Absent }
 
 ### xService
@@ -59,17 +60,20 @@ Specify an empty string if you don't want to pass any arguments.
 For a complete list of properties, please use Get-DscResource
 
 * **Name**: The name for the service.
-* **Ensure**: An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent') 
-* **Path**: The path to the service executable file. This is a requied parameter if Ensure is set to true 
+* **Ensure**: An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent')
+* **Path**: The path to the service executable file. This is a requied parameter if Ensure is set to true
 
 ### xRemoteFile
 
-* **DestinationPath**: Path where the remote file should be downloaded.
-* **Uri**: URI of the file which should be downloaded.
-* **UserAgent**: User agent for the web request.
-* **Headers**: Headers of the web request.
-* **Credential**: Specifies credential of a user which has permissions to send the request.
-* **MatchSource**: Determines whether the remote file should be re-downloaded if file in the DestinationPath was modified locally.
+* **DestinationPath**: Path where the remote file should be downloaded. Required.
+* **Uri**: URI of the file which should be downloaded. It must be a HTTP, HTTPS or FILE resource. Required.
+* **UserAgent**: User agent for the web request. Optional.
+* **Headers**: Headers of the web request. Optional.
+* **Credential**: Specifies credential of a user which has permissions to send the request. Optional.
+* **MatchSource**: Determines whether the remote file should be re-downloaded if file in the DestinationPath was modified locally. Optional.
+* **TimeoutSec**: Specifies how long the request can be pending before it times out. Optional.
+* **Proxy**: Uses a proxy server for the request, rather than connecting directly to the Internet resource. Should be the URI of a network proxy server (e.g 'http://10.20.30.1'). Optional.
+* **ProxyCredential**: Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter. Optional.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read only property.
 
 ### xPackage
@@ -82,7 +86,7 @@ For a complete list, please use Get-DscResource.
 * **ProductId**: The product ID of the package (usually a GUID).
 * **Arguments**: Command line arguments passed on the installation command line.
 * **Credential**: PSCredential needed to access Path.
-* **ReturnCode**: An array of return codes that are returned after a successful installation. 
+* **ReturnCode**: An array of return codes that are returned after a successful installation.
 * **LogPath**: The destination path of the log.
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
@@ -92,7 +96,7 @@ For a complete list, please use Get-DscResource.
 * **Installed**: Is the package installed?
 * **RunAsCredential**: Credentials to use when installing the package.
 * **InstalledCheckRegKey**: Registry key to open to check for package installation status.
-* **InstalledCheckRegValueName**: Registry value name to check for package installation status. 
+* **InstalledCheckRegValueName**: Registry value name to check for package installation status.
 * **InstalledCheckRegValueData**: Value to compare against the retrieved value to check for package installation.
 * **CreateCheckRegValue**: Creates the InstallCheckRegValueName registry value/data after successful package installation.
 
@@ -105,13 +109,13 @@ In addition, limited support for UPN-formatted names are supported for identifyi
 * **Ensure**: Ensures that the group is **Present** or **Absent**.
 * **Description**: Description of the group.
 * **Members**: The members that form the group.
-Note: If the group already exists, the listed items in this property replaces what is in the group. 
-* **MembersToInclude**: List of users to add to the group. 
-Note: This property is ignored if 'Members' is specified. 
-* **MembersToExclude**: List of users you want to ensure are not members of the group. 
-Note: This property is ignored if 'Members' is specified. 
-* **Credential**: Indicates the credentials required to access remote resources. 
-Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur. 
+Note: If the group already exists, the listed items in this property replaces what is in the group.
+* **MembersToInclude**: List of users to add to the group.
+Note: This property is ignored if 'Members' is specified.
+* **MembersToExclude**: List of users you want to ensure are not members of the group.
+Note: This property is ignored if 'Members' is specified.
+* **Credential**: Indicates the credentials required to access remote resources.
+Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
 
 Local accounts may be specified in one of the following ways:
 
@@ -139,7 +143,7 @@ registry keys whose names contain forward slashes.
 
 ### xWindowsOptionalFeature
 Note: _the xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs._
- 
+
 * **Name**: Name of the optional Windows feature.
 * **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
    - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
@@ -159,6 +163,19 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
    - Default value: ErrorsOnly.
 
+### xEnvironment
+
+* **Name**: Indicates the name of the environment variable for which you want to ensure a specific state.
+* **Value**: The value to assign to the environment variable.
+   - Supported values: Non-null strings
+   - Default Value: [String]::Empty
+* **Ensure**: Ensures that the feature is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **Path**: Defines the environment variable that is being configured. Set this property to $true if the variable is the Path variable; otherwise, set it to $false. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value.
+   - Suported values: $true, $false.
+   - Default value: $false.
+
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -170,14 +187,28 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 ## Versions
 
 ### Unreleased
-### 3.11.0.0
+
+* xRemoteFile: Added parameters:
+                - TimeoutSec
+                - Proxy
+                - ProxyCredential
+               Added unit tests.
+               Corrected Style Guidelines issues.
+               Added Localization support.
+               URI parameter supports File://.
+               Get-TargetResource returns URI parameter.
+               Fixed logging of error message reported when download fails.
+               Added new example Sample_xRemoteFileUsingProxy.ps1.
+* Examples: Fixed missing newline at end of PullServerSetupTests.ps1.
+* xFileUpload: Added PSSA rule suppression attribute.
+* xPackageResource: Removed hardcoded ComputerName 'localhost' parameter from Get-WMIObject to eliminate PSSA rule violation. The parameter is not required.
+* Added .gitignore to prevent DSCResource.Tests from being commited to repo.
+* Updated AppVeyor.yml to use WMF 5 build OS so that latest test methods work.
 * Updated xWebService resource to not deploy Devices.mdb if esent provider is used
 * Fixed $script:netsh parameter initialization in xWebService resource that was causing CIM exception when EnableFirewall flag was specified.
-
+* xService:
+    - Fixed a bug where, despite no state specified in the config, the resource test returns false if the service is not running
 * xPackage: Fixes bug where CreateCheckRegValue was not being removed when uninstalling packages
-
-### 4.0.0.0
-
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
 
 ### 3.10.0.0
@@ -241,9 +272,9 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### 3.0.3.4
 
-* Multiple issues addressed 
+* Multiple issues addressed
     - Corrected output type for Set- and Test-TargetResource functions in xWebSite, xPackage, xArchive, xGroup, xProcess, xService
-    - xRemoteFile modified to support creating a directory that does not exist when specified, ensuring idempotency. 
+    - xRemoteFile modified to support creating a directory that does not exist when specified, ensuring idempotency.
     Also improved error messages.
     - xDSCWebService updated so that Get-TargetResource returns the OData Endpoint URL correctly.
     - In xWindowsOptionalFeature, fixed Test-TargetResource issue requiring Ensure = True.
@@ -251,17 +282,17 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 
 ### 3.0.2.0
 
-* Adding following resources: 
+* Adding following resources:
     * xGroup
 
 ### 3.0.1.0
 
-* Adding following resources: 
+* Adding following resources:
     * xFileUpload
 
 ### 2.0.0.0
 
-* Adding following resources: 
+* Adding following resources:
     * xWindowsProcess
     * xService
     * xRemoteFile
@@ -278,11 +309,11 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
     * DscWebService
 
 ## Examples
-### Change the name and the workgroup name 
+### Change the name and the workgroup name
 
 This configuration will set a machine name and change its workgroup.
 
-### Switch from a workgroup to a domain 
+### Switch from a workgroup to a domain
 
 This configuration sets the machine name and joins a domain.
 Note: this requires a credential.
@@ -292,11 +323,11 @@ Note: this requires a credential.
 This example will change the machines name while remaining on the domain.
 Note: this requires a credential.
 
-### Change the name while staying on the workgroup 
+### Change the name while staying on the workgroup
 
 This example will change a machine's name while remaining on the workgroup.
 
-### Switch from a domain to a workgroup 
+### Switch from a domain to a workgroup
 
 This example switches the computer from a domain to a workgroup.
 Note: this requires a credential.
@@ -308,20 +339,20 @@ The web request will contain specific headers and will be sent using a specified
 
 ### Upload file to an SMB share
 
-This configuration will upload a file from SourcePath to the remote DestinationPath. 
+This configuration will upload a file from SourcePath to the remote DestinationPath.
 Username and password will be used to access the DestinationPath.
 
 ### Sample1.ps1 installs a package that uses an .exe file
 
-This configuration will install a .exe package, verifying the package using the package name. 
+This configuration will install a .exe package, verifying the package using the package name.
 
 ### Sample1.ps2 installs a package that uses an .exe file
 
 This configuration will install a .exe package and verify the package using the product ID and package name.
 
-### Sample1.ps3 installs a package that uses an .msi file. 
+### Sample1.ps3 installs a package that uses an .msi file.
 
-This configuration will install a .msi package and verify the package using the product ID and package name and requires credentials to read the share and install the package.   
+This configuration will install a .msi package and verify the package using the product ID and package name and requires credentials to read the share and install the package.
 
 ### Sample1.ps4 installs a package that uses an .exe file
 
