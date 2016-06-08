@@ -1,8 +1,6 @@
 ﻿<#
     .SYNOPSIS
-    Returns false if the OS is windows 7 and true otherwise.
-    
-    aka: IsWin8orAbove   
+    Returns false if the OS is windows 7 and true otherwise.  
 #>
 function Get-IsWin8orAbove
 {
@@ -24,9 +22,7 @@ function Get-IsWin8orAbove
 <#
     .SYNOPSIS
     Checks if the computer is running a Windows Server operating system.
-    To be used in should run methods.
-
-    aka: RunOnServerSkuOnly, IsServerSKU
+    To be used in 'should run' methods.
 #>
 function Get-IsServerSKU
 {
@@ -52,38 +48,7 @@ function Get-IsServerSKU
 
 <#
     .SYNOPSIS
-    Checks if the computer is running a Windows Client operating system.
-    Common helper to use to run a function or a test case on client sku.
-
-    aka: RunOnClientSkuOnly
-#>
-function Get-IsClientSKU
-{
-    [OutputType([System.Boolean])]
-    [CmdletBinding()]
-    param (
-        [String]
-        $TargetComputerName
-    )
-
-    if ($TargetComputerName)
-    {
-        $operatingSystem = Get-CimInstance -ClassName  Win32_OperatingSystem -ComputerName $TargetComputerName
-    }
-    else
-    {
-        $operatingSystem = Get-CimInstance -ClassName  Win32_OperatingSystem
-    }
-
-    # We should not run this test on server skus
-    return $operatingSystem.ProductType -eq 1
-}
-
-<#
-    .SYNOPSIS
     Checks if the computer is running Windows Server 2008 R2 Server Core.
-
-    aka: IsServer2008R2Core
 #>
 function Get-IsServer2008R2Core
 {
@@ -110,8 +75,6 @@ function Get-IsServer2008R2Core
 <#
     .SYNOPSIS
     Checks if the computer is running Windows Server 2012 Server Core.
-
-    aka: IsServer2012Core
 #>
 function Get-IsServer2012Core
 {
@@ -141,8 +104,6 @@ function Get-IsServer2012Core
 <#
     .SYNOPSIS
     Checks if the computer is running Windows Server 2012 Server Core or Windows Server 2008 R2 Server Core.
-
-    aka: IsWMFServerCore
 #>
 function Get-IsWMFServerCore
 {
@@ -155,78 +116,30 @@ function Get-IsWMFServerCore
 
 <#
     .SYNOPSIS
-    Checks if the computer is running Windows Server 2008 R2 without the Server Core option.
-
-    aka: IsServer2008
+    Checks if result of Get-Target resource is not null, can be converted to a hashtable, and none of its required properties are null.'
+    Uses Pester.
 #>
-function Get-IsServer2008R2NotCore
+function Test-GetTargetResourceResultNotNull 
 {
-    [OutputType([System.Boolean])]
     [CmdletBinding()]
-    param ()
+    param (
+        $GetTargetResourceResult
+    )
 
-    $datacenterServerCore = 12
-    $standardServerCore = 13
-    $enterpriseServerCore = 14
+    $getTargetResourceResultProperties = @('Name', 'DisplayName', 'Ensure', 'IncludeAllSubFeature')
 
-    $operatingSystem = Get-CimInstance -Class Win32_OperatingSystem
-    if ($operatingSystem.Version.StartsWith('6.1.'))
+    $getTargetResourceResultHashtable = $GetTargetResourceResult -as [Hashtable]
+
+    $getTargetResourceResultHashtable | Should Not Be $null
+
+    foreach ($property in $getTargetResourceResultProperties)
     {
-        if (($operatingSystem.OperatingSystemSKU -ne $datacenterServerCore) -and ($operatingSystem.OperatingSystemSKU -ne $standardServerCore) -and ($operatingSystem.OperatingSystemSKU -ne $enterpriseServerCore))
-        {
-            return $true
-        }
+        $getTargetResourceResultHashtable[$property] | Should Not Be $null
     }
-
-    return $false
-}
-
-<#
-    .SYNOPSIS
-    Checks if the computer is running Windows Server 2012 without the Server Core option.
-
-    aka: IsServer2012
-#>
-function Get-IsServer2012NotCore
-{
-    [OutputType([System.Boolean])]
-    [CmdletBinding()]
-    param ()
-
-    $operatingSystem = Get-CimInstance -Class Win32_OperatingSystem
-    if ($operatingSystem.Version.StartsWith('6.2.'))
-    {
-        $hasKey = Test-Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Server\ServerLevels" 
-        if (-not $hasKey) 
-        { 
-            return $false
-        }
-
-        $extendedKey = Get-Item "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Server\ServerLevels" 
-        if (($extendedKey.GetValue("ServerCoreExtended") -ne 0) -and ($extendedKey.GetValue("ServerCore") -ne 1)) 
-        {
-            return $true 
-        }
-    }
-
-    return $false
-}
-
-<#
-    .SYNOPSIS
-    Checks if the computer is running Windows Server 2012 or Windows Server 2008 R2 Server without the Server Core option.
-
-    aka: IsWMFServer
-#>
-function Get-IsWMFServerNotCore
-{
-    [OutputType([System.Boolean])]
-    [CmdletBinding()]
-    param ()
-
-    return (Get-IsServer2012NotCore) -or (Get-IsServer2008R2NotCore)
 }
 
 Export-ModuleMember -Function `
     Get-IsWin8OrAbove, `
-    Get-IsServerSKU
+    Get-IsServerSKU, `
+    Get-IsWMFServerCore, `
+    Test-GetTargetResourceResultNotNull

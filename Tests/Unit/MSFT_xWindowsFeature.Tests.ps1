@@ -1,3 +1,6 @@
+# These tests use a mock server module. They will fail on an actual server.
+# All tests that require a credential will be skipped
+
 Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xWindowsFeature' `
@@ -6,570 +9,194 @@ Initialize-TestEnvironment `
 
 InModuleScope 'MSFT_xWindowsFeature' {
     Describe 'xWindowsFeature Unit Tests' {
+        Mock -CommandName ValidatePrerequisites -MockWith {}
+
         BeforeAll {
             Import-Module $PSScriptRoot\MSFT_xWindowsFeature.TestHelper.psm1 -Force
             Import-Module $PSScriptRoot\MockServerManager -Force
 
-            $script:isWin8orAbove = Get-IsWin8orAbove
-            $script:runOnServerSkuOnly = Get-IsServerSKU
-            $script:runOnClientSkuOnly = Get-IsClientSKU
-            $script:isWMFServerCore = Get-IsWMFServerCore
-            $script:isWMFServerNotCore = Get-IsWMFServerNotCore
+            $script:testWindowsFeatureName = "Test1"
+            $script:skipCredentialTests = $true
         }
 
-        AfterAll {
-            Remove-Module MockServerManager
+        AfterAll {}
+
+        BeforeEach {
+            Remove-WindowsFeature $script:testWindowsFeatureName -ErrorAction Ignore
         }
 
-        It 'Get-TargetResource Without Credentials' -Skip:(-not $script:runOnServerSkuOnly) {
-            try
-            {  
-                # Telnet Client is avaliable on only DSC supported SKU's. 
-                GetTargetResourceExecutionHelper "Subtest1"
-            }
-            catch
+        AfterEach {
+            Remove-WindowsFeature $script:testWindowsFeatureName -ErrorAction Ignore
+        }
+
+        It 'Get-TargetResource without credential' {
+            $getTargetResourceResult = Get-TargetResource -Name $script:testWindowsFeatureName
+            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+        }
+
+        It 'Get-TargetResource with credential' -Skip:($script:skipCredentialTests) {
+            $credential = $null
+
+            $getTargetResourceResult = Get-TargetResource -Name $script:testWindowsFeatureName -Credential $credential
+            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+        }
+
+        It 'Get-TargetResource subfeatures installed' {
+            Add-WindowsFeature -Name $script:testWindowsFeatureName -IncludeAllSubFeature
+
+            $getTargetResourceResult = Get-TargetResource $script:testWindowsFeatureName
+            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+
+            $getTargetResourceResult["IncludeAllSubFeature"] | Should Be $true
+        }
+
+        It 'Get-TargetResource subfeatures not installed' {
+            Add-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $getTargetResourceResult = Get-TargetResource $script:testWindowsFeatureName
+            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+
+            $getTargetResourceResult["IncludeAllSubFeature"] | Should Be $false
+        }
+
+        It 'Set-TargetResource without credential and ensure present' {
+            $ensureValue = "Present"
+
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue
+
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $true
+        }
+
+        It 'Set-TargetResource with credential and ensure present' -Skip:($script:skipCredentialTests) {
+            $ensureValue = "Present"
+            $credential = $null
+            
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential
+         
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $true
+        }
+
+        It 'Set-TargetResource without credential and ensure absent' {
+            $ensureValue = "Absent"
+
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue
+
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $false
+        }
+
+        It 'Set-TargetResource with credential and ensure absent' -Skip:($script:skipCredentialTests) {
+            $ensureValue = "Absent"
+            $credential = $null
+
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -IncludeAllSubFeature -Credential $credential
+
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $false
+        }
+
+        It 'Set-TargetResource with default ensure value' {
+            Set-TargetResource -Name $script:testWindowsFeatureName
+
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $true
+        }
+
+        It 'Set-TargetResource without credential and ensure present and subfeatures installed' {
+            $ensureValue = "Present"
+
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -IncludeAllSubFeature
+         
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed  | Should Be $true
+
+            foreach ($subfeatureName in $windowsFeature.Subfeatures)
             {
-                Log -Error "Failed to execute Get-TargetResource with credentials.   Actual Error is: $($($_.Exception).Message)" -Exception $_
+                $subfeature = Get-WindowsFeature -Name $subfeatureName
+                $subfeature.Installed | Should Be $true
             }
         }
 
-        It 'Get-TargetResource With Credentials' -Skip:(-not ($script:runOnServerSkuOnly -and $script:isWin8orAbove)) {
-            try
-            {  
-                $credential = LocalAdminCredentialGenerator
-                # Telnet Client is avaliable on only DSC supported SKU's.
-                GetTargetResourceExecutionHelper "Test1" $credential
-            }
-            catch
+        It 'Set-TargetResource without credential and ensure absent and subfeatures not installed' {
+            $ensureValue = "Absent"
+
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue
+         
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $false
+
+            foreach ($subfeatureName in $windowsFeature.Subfeatures)
             {
-                # If the remote process cannot be created then AccessDenied is thrown. This issue does not repro when tried manually.
-                if ($null -eq $_ -or $null -eq $_.FullyQualifiedErrorId -or $_.FullyQualifiedErrorId.Contains("AccessDenied") -eq $false)
-                {
-                    Log -Error "Failed to execute Get-TargetResource with credentials.   Actual Error is: $($($_.Exception).Message)" -Exception $_
-                }
+                $subfeature = Get-WindowsFeature -Name $subfeatureName
+                $subfeature.Installed | Should Be $false
             }
         }
 
-        It 'Get-TargetResource All SubFeatures Installed' -Skip:(-not $script:runOnServerSkuOnly) {
-            $windowsFeatureName = "Test1"
-            Remove-WindowsFeature $windowsFeatureName -ErrorAction Ignore
-            Add-WindowsFeature -Name $windowsFeatureName -IncludeAllSubFeature
+        It 'Set-TargetResource with credential and ensure present and subfeatures installed' -Skip:($script:skipCredentialTests) {
+            $ensureValue = "Present"
+            $credential = $null
 
-            $getResultAsHasTable = GetTargetResourceExecutionHelper $windowsFeatureName
-            if ($true -ne $getResultAsHasTable["IncludeAllSubFeature"])
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential -IncludeAllSubFeature
+         
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
+
+            $windowsFeature.Installed | Should Be $true
+
+            foreach ($subfeatureName in $windowsFeature.Subfeatures)
             {
-                Log -Error "Failed to detect all subfeatures being installed."
+                $subfeature = Get-WindowsFeature -Name $subfeatureName
+                $subfeature.Installed | Should Be $true
             }
         }
 
-        It 'Set-TargetResource Without Credentials Ensure Present' -Skip:(-not $script:runOnServerSkuOnly) {
-            try
-            {  
-                $windowsFeatureName = "Test1"
-                Remove-WindowsFeature $windowsFeatureName -ErrorAction Ignore
+        It 'Set-TargetResource with credential and ensure absent and subfeatures not installed' -Skip:($script:skipCredentialTests) { 
+            $ensureValue = "Absent"
+            $credential = $null
+
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential -IncludeAllSubFeature
          
-                $ensureValue = "Present"
+            $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
 
-                Set-TargetResource -Name $windowsFeatureName -Ensure $ensureValue
+            $windowsFeature.Installed | Should Be $false
 
-                $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
-
-                if (-not $windowsFeature.Installed)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-            }
-            catch
+            foreach ($subfeatureName in $windowsFeature.Subfeatures)
             {
-                Log -Error "Failed to execute Set-TargetResource without credentials.  Actual Error is: $($($_.Exception).Message)" -Exception $_
+                $subfeature = Get-WindowsFeature -Name $subfeatureName
+                $subfeature.Installed | Should Be $false
             }
         }
 
-        It 'Set-TargetResource With Default Ensure Value' -Skip:(-not $script:runOnServerSkuOnly) {
-            try
-            {  
-                $Name = "Test1"
-                Remove-WindowsFeature $Name -ErrorAction Ignore
-         
-                Set-TargetResource -Name $Name
+        It 'Test-TargetResource ensure present and feature installed and subfeatures installed' {
+            Add-WindowsFeature $script:testWindowsFeatureName -IncludeAllSubFeature
 
-                $feature = Get-WindowsFeature -Name $Name
+            $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName -Ensure "Present" -IncludeAllSubFeature
 
-                if ($feature.Installed -eq $false)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-            }
-            catch
-            {
-                Log -Error "Failed to execute Set-TargetResource without credentials.   Actual Error is: $($($_.Exception).Message)" -Exception $_
-            }
+            $testTargetResourceResult | Should Be $true
         }
 
-    It TestSetTargetResourceCmdletWithOutCredentialsEnsureAbsent -Skip:(-not $runOnServerSkuOnly) {
-            try
-            {  
-                $Name = "Test1"
-                Remove-WindowsFeature $Name -ErrorAction Ignore
-         
-                $Ensure = "Absent"
+        It 'Test-TargetResource ensure present and feature installed and subfeatures not installed' {
+            Add-WindowsFeature $script:testWindowsFeatureName
+            
+            $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName -Ensure "Present"
+            
+            $testTargetResourceResult | Should Be $true
+        }
 
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure
+        It 'Test-TargetResource ensure absent and feature installed' {
+            Add-WindowsFeature $script:testWindowsFeatureName
 
-                $feature = Get-WindowsFeature -Name $Name
+            $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName -Ensure "Absent"
 
-                if($feature.Installed -eq $true)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-            }
-            catch
-            {
-                Log -Error "Failed to execute Set-TargetResource without credentials.  Actual Error : $($($_.Exception).Message)" -Exception $_
-            }
+            $testTargetResourceResult | Should Be $false
+        }
     }
-
-    It TestSetTargetResourceCmdletWithCredentialsEnsurePresent -Skip:(-not ($runOnServerSkuOnly -and $isWin8orAbove)) {
-            try
-            {  
-                $Name = "Test1"
-
-                $Ensure = "Present"
-                $credential = LocalAdminCredentialGenerator ;
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure -Credential $credential
-         
-                $feature = Get-WindowsFeature -Name $Name
-
-                if($feature.Installed -eq $false)
-                {
-                    throw "Failed to execute Set-TargetResource with credentials. I.e, failed to install role through Set-TargetResource"
-                }
-            }
-            catch
-            {
-                # If the remote process cannot be created then AccessDenied is thrown. This issue does not repro when tried manually.
-                if($null -eq $_ -or $null -eq $_.FullyQualifiedErrorId -or $_.FullyQualifiedErrorId.Contains("AccessDenied") -eq $false)
-                {
-                    $msg=$_.Exception.Message
-                    Log -Error "Failed to execute Set-TargetResource with credentials. Error is : $msg "  -Exception $_
-                }
-            }
-    }    
-
-    It TestSetTargetResourceCmdletWithCredentialsEnsureAbsent -Skip:(-not ($runOnServerSkuOnly -and $isWin8orAbove)) {
-            try
-            {  
-                # Telnet Client is avaliable on only DSC supported SKU's. 
-                $Name = "Test1"
-
-                $Ensure = "Absent"
-
-                $credential = LocalAdminCredentialGenerator ;
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure -IncludeAllSubFeature -Credential $credential
-
-                $feature = Get-WindowsFeature -Name $Name
-
-                if($feature.Installed -eq $true)
-                {
-                    throw "Failed to execute Set-TargetResource with credentials. I.e, failed to install role through Set-TargetResource"
-                }
-            }
-            catch
-            {
-                $msg=$_.Exception.Message
-                Log -Error "Failed to execute Set-TargetResource with credentials. Error is : $msg "  -Exception $_
-            }
-    }
-
-    It TestTestTargetResourceWhenFeatureAndItsSubFeaturesAreInstalledAndEnSureISPresent -Skip:(-not $runOnServerSkuOnly) {
-            $featureName = "Test1"
-
-            Remove-WindowsFeature $featureName -ErrorAction Ignore
-         
-            Add-WindowsFeature $featureName -IncludeAllSubFeature
-            $testResult = MSFT_RoleResource\Test-TargetResource $featureName "Present" -IncludeAllSubFeature ;
-            if($testResult -eq $false)
-            {
-                Log -Error "Failed to detect the feaure and its subfeatures being installed successfully"
-            }
-    }
-
-    It TestTestTargetResourceWhenFeatureWithOutAnySubFeaturesIsInstalledAndEnSureISPresent -Skip:(-not $runOnServerSkuOnly) {
-            $featureName = "Test1"
-            Remove-WindowsFeature $featureName -ErrorAction Ignore
-         
-            Add-WindowsFeature $featureName -IncludeAllSubFeature
-            $testResult = MSFT_RoleResource\Test-TargetResource $featureName "Present" -IncludeAllSubFeature ;
-            if($testResult -eq $false)
-            {
-                Log -Error "Failed to detect the feaure and its subfeatures being installed successfully"
-            }
-    }
-
-    It TestTestTargetResourceWhenIsInstalledAndEnSureIsAbsent -Skip:(-not $runOnServerSkuOnly) {
-            $featureName = "Test1"
-            Remove-WindowsFeature $featureName -ErrorAction Ignore
-         
-            MSFT_RoleResource\Set-TargetResource -Name $featureName -Ensure "Present" ;
-
-            $getWindowsFeatureResult = Get-WindowsFeature $featureName
-
-            if($getWindowsFeatureResult -eq $null)
-            {
-                Log -Error "Failed to install featue: Web-Server using Role resource."
-            }
-
-            $testResult = MSFT_RoleResource\Test-TargetResource -Name $featureName -Ensure "Present" ;
-
-            if($testResult -eq $false)
-            {
-                Log -Error "Failed to detect that Web-Server is installed by Test-TargetResource."
-            }
-    }
-
-    It DRTWindowsFeatureClientSKU -Skip:(-not $runOnClientSkuOnly) {
-            Log -message "Dummy test case for Integration and Feature WFs till bug#221259 is fixed."
-    }
-
-    It TestGetTargetResourceCmdletForVerbose -Skip:(-not ($runOnServerSkuOnly -and $isWin8orAbove)) {
-            try
-            {  
-                $Name = "Test1"
-
-                $ExpectedVerboseCount = 0
-
-         
-                # Capture the verbose messages using PowerShell APIs. Check for the count
-                $ps = [PowerShell]::Create()
-                $ps.AddCommand("import-module").AddParameter("Name",$Script:ProviderPath).Invoke()
-                $ps.AddCommand("import-module").AddParameter("Name","servermanager").Invoke()
-                $ps.Commands.Clear()
-                $null = $ps.AddCommand("Get-TargetResource").Addparameter("Name",$Name).AddParameter("Verbose").Invoke()
-                $verboseCount = $ps.Streams.Verbose.Count
-
-                if($verboseCount -ne $ExpectedVerboseCount) { throw "Actaul verbose message count $VerboseCount does not match expected verbose message $ExpectedVerboseCount"}
-            }
-            catch
-            {
-                $msg=$_.Exception.Message
-                Log -Error $msg  -Exception $_
-            }
-            Finally
-            {
-                $ps.Dispose()
-            }
-    }
-
-    It TestTestTargetResourceCmdletForVerboseEnsurePresent -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServerCore)) {
-            try
-            {  
-                $Name = "Test1"
-                $Ensure = "Present"
-                            
-                $ExpectedVerboseCount = 0
-
-                # Remove the feature incase it is present and then test
-                Remove-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
-
-                # Capture the verbose messages using PowerShell APIs. Check for the count
-                $ps = [PowerShell]::Create()
-                $ps.AddCommand("import-module").AddParameter("Name",$Script:ProviderPath).Invoke()
-                $ps.Commands.Clear()
-                $null = $ps.AddCommand("Test-TargetResource").Addparameter("Name",$Name).AddParameter("Ensure",$Ensure).AddParameter("Verbose").Invoke()
-                $verboseCount = $ps.Streams.Verbose.Count
-
-                if($verboseCount -ne $ExpectedVerboseCount) { throw "Actaul verbose message count $VerboseCount does not match expected verbose message $ExpectedVerboseCount"}
-            }
-            catch
-            {
-                $msg=$_.Exception.Message
-                    Log -Error $msg  -Exception $_
-            }
-            Finally
-            {
-                $ps.Dispose()
-            }
-    }
-
-    It TestTestTargetResourceCmdletForVerboseEnsureAbsent -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServerCore)) {
-            try
-            {  
-                $Name = "Test1"
-                $Ensure = "Absent"
-
-                $ExpectedVerboseCount = 0
-
-                # Add the feature and then test
-                Add-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
-
-                # Capture the verbose messages using PowerShell APIs. Check for the count
-                $ps = [PowerShell]::Create()
-                $ps.AddCommand("import-module").AddParameter("Name",$Script:ProviderPath).Invoke()
-                $ps.Commands.Clear()
-                $null = $ps.AddCommand("Test-TargetResource").Addparameter("Name",$Name).AddParameter("Ensure",$Ensure).AddParameter("Verbose").Invoke()
-                $verboseCount = $ps.Streams.Verbose.Count
-
-                if($verboseCount -ne $ExpectedVerboseCount) { throw "Actaul verbose message count $VerboseCount does not match expected verbose message $ExpectedVerboseCount"}
-            }
-            catch
-            {
-                $msg=$_.Exception.Message    
-                Log -Error $msg  -Exception $_
-            }
-            Finally
-            {
-                $ps.Dispose()
-                # Since the test added the feature, it should remove it as well
-                Remove-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
-            }
-    }
-
-    It TestSetTargetResourceCmdletForVerboseEnsurePresent -Skip:(-not $runOnServerSkuOnly) {
-            try
-            {  
-                $Name = "SubTest1"
-                $Ensure = "Present"
-
-                $ExpectedVerboseCount = 7
-
-                $isR2Sp1 = IsWinServer2008R2SP1;
-                if($isR2Sp1)
-                {
-                $ExpectedVerboseCount = 6
-                }
-                else
-                {
-                    $isR2Sp1ServerCore = IsWinServer2008R2SP1ServerCore;
-                    if($isR2Sp1ServerCore)
-                    {
-                        $ExpectedVerboseCount = 7
-                    }
-                }
-
-                # Remove the feature
-                Remove-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
-
-                # Capture the verbose messages using PowerShell APIs. Check for the count
-                $ps = [PowerShell]::Create()
-                $ps.AddCommand("import-module").AddParameter("Name",$Script:ProviderPath).Invoke()
-                $ps.Commands.Clear()
-                $null = $ps.AddCommand("Set-TargetResource").Addparameter("Name","SubTest1").AddParameter("Ensure",$Ensure).AddParameter("Verbose").Invoke()
-                $verboseCount = $ps.Streams.Verbose.Count
-
-            # If the Machine is in a Reboot pending state, we get an additional verbose message indicating that the machine needs to be restarted.
-            # the number of verbose messages could vary between 4 - 7 depending on the scenario.
-            if($VerboseCount -gt $ExpectedVerboseCount) 
-            { 
-                throw "Actaul verbose message count $VerboseCount does not match expected verbose message $ExpectedVerboseCount"
-            }
-            }
-            catch
-            {
-                $msg=$_.Exception.Message
-                Log -Error $msg  -Exception $_
-            }
-            Finally
-            {
-                $ps.Dispose()
-                # Since the test is adding the feature, remove it as well
-                Remove-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
-            }
-    }
-
-    It TestSetTargetResourceCmdletForVerboseEnsureAbsent -Skip:(-not $runOnServerSkuOnly) {
-            try
-            {  
-                $Name = "SubTest1"
-                $Ensure = "Absent"
-
-                $ExpectedVerboseCount = 7
-
-                $isR2Sp1 = IsWinServer2008R2SP1;
-                if($isR2Sp1)
-                {
-                $ExpectedVerboseCount = 6
-                }
-                else
-                {
-                    $isR2Sp1ServerCore = IsWinServer2008R2SP1ServerCore;
-                    if($isR2Sp1ServerCore)
-                    {
-                        $ExpectedVerboseCount = 7
-                    }
-                }
-
-                Add-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
-
-                # Capture the verbose messages using PowerShell APIs. Check for the count
-                $ps = [PowerShell]::Create()
-                $ps.AddCommand("import-module").AddParameter("Name",$Script:ProviderPath).Invoke()
-                $ps.Commands.Clear()
-                $null = $ps.AddCommand("Set-TargetResource").Addparameter("Name",$Name).AddParameter("Ensure",$Ensure).AddParameter("Verbose").Invoke()
-                $verboseCount = $ps.Streams.Verbose.Count
-
-                # If the Machine is in a Reboot pending state, we get an additional verbose message indicating that the machine needs to be restarted.
-                # the number of verbose messages could vary between 4 - 7 depending on the scenario.
-                if($VerboseCount -gt $ExpectedVerboseCount) 
-                { 
-                    throw "Actaul verbose message count $VerboseCount does not match expected verbose message $ExpectedVerboseCount"
-                }
-            }
-            catch
-            {
-                $msg=$_.Exception.Message
-                Log -Error $msg -Exception $_
-            }
-            Finally
-            {
-                $ps.Dispose()
-            }
-    }
-
-   It TestSetTargetResourceCmdletWithOutCredentialsEnsurePresentAndSubFeaturesAreAdded -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServer -and -not($isWMFServerCore))) {
-            try
-            {  
-                $Name = "Test1"
-
-                $Ensure = "Present"
-
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure -IncludeAllSubFeature
-         
-                $feature = Get-WindowsFeature -Name $Name
-
-                if($feature.Installed -eq $false)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-
-                foreach($currentSubFeature in $feature.SubFeatures)
-                {
-                    $feature = Get-WindowsFeature -Name $currentSubFeature
-
-                    if($feature.Installed -eq $false)
-                    {
-                        throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install subfeatures of a role through Set-TargetResource"
-                    }
-                }
-            }
-            catch
-            {
-                Log -Error "Failed to execute Set-TargetResource without credentials.  Actual Error is: $($($_.Exception).Message)" -Exception $_
-            }
-    }
-
-    It TestSetTargetResourceCmdletWithOutCredentialsEnsureAbsentAndSubFeaturesAreRemoved -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServer -and -not($isWMFServerCore))) {
-            try
-            {  
-                $Name = "Test1"
-
-                $Ensure = "Absent"
-
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure -IncludeAllSubFeature
-         
-                $feature = Get-WindowsFeature -Name $Name
-
-                if($feature.Installed -eq $true)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-
-                foreach($currentSubFeature in $feature[0].SubFeatures)
-                {
-                    $feature = Get-WindowsFeature -Name $currentSubFeature
-
-                    if($feature.Installed -eq $true)
-                    {
-                        throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install subfeatures of a role through Set-TargetResource"
-                    }
-                }
-            }
-            catch
-            {
-                Log -Error "Failed to execute Set-TargetResource without credentials. Actual Error is: $($($_.Exception).Message)" -Exception $_
-            }
-    }
-
-    It TestGetTargetResourceCmdletWhenNotAllSubFeaturesAreInstalled -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServer -and -not($isWMFServerCore))) {
-            $featureName = "Test1"
-
-            Remove-WindowsFeature $featureName -ErrorAction Ignore
-            Add-WindowsFeature -Name $featureName
-
-            # SNMP-Servicehas one subfeatures (i.e.,SNMP-WMI-Provider).
-            # In this scenario, we are not installing any subfeatures.
-            # Hence we expect Get-TargetResource to report IncludeAllSubFeature to be $false.
-            $getResultAsHasTable = GetTargetResourceExecutionHelper $featureName  ;
-            if($true -eq $getResultAsHasTable["IncludeAllSubFeature"])
-            {
-                Log -Error "Failed to detect that not all subfeatures are being installed."
-            }
-    }
-    
-    It TestSetTargetResourceCmdletWithCredentialsEnsurePresentSubFeaturesAreAdded -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServer -and -not($isWMFServerCore))) {
-            try
-            {  
-                $Name = "Test1"
-
-
-                $Ensure = "Present"
-                $credential = LocalAdminCredentialGenerator ;
-
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure -IncludeAllSubFeature -Credential $credential
-         
-                $feature = Get-WindowsFeature -Name $Name
-
-                if($feature.Installed -eq $false)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-
-                foreach($currentSubFeature in $feature[0].SubFeatures)
-                {
-                    $feature = Get-WindowsFeature -Name $currentSubFeature
-
-                    if($feature.Installed -eq $false)
-                    {
-                        throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install subfeatures of a role through Set-TargetResource"
-                    }
-                }
-            }
-            catch
-            {
-                Log -Error "Failed to execute Set-TargetResource without credentials.  Actual Error is: $($($_.Exception).Message)" -Exception $_
-            }
-    }
-
-    It TestSetTargetResourceCmdletWithCredentialsEnsureAbsentAndSubFeaturesAreRemoved -Skip:(-not ($runOnServerSkuOnly -and -not $isWMFServer -and -not($isWMFServerCore))) {
-            try
-            {  
-                $Name = "Test1"
-
-                $Ensure = "Absent"
-                $credential = LocalAdminCredentialGenerator ;
-
-                MSFT_RoleResource\Set-TargetResource -Name $Name -Ensure $Ensure -IncludeAllSubFeature -Credential $credential
-         
-                $feature = Get-WindowsFeature -Name $Name
-
-                if($feature.Installed -eq $true)
-                {
-                    throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install role through Set-TargetResource"
-                }
-
-                foreach($currentSubFeature in $feature[0].SubFeatures)
-                {
-                    $feature = Get-WindowsFeature -Name $currentSubFeature
-
-                    if($feature.Installed -eq $true)
-                    {
-                        throw "Failed to execute Set-TargetResource without credentials. I.e, failed to install subfeatures of a role through Set-TargetResource"
-                    }
-                }
-            }
-            catch
-            {
-                Log -Error "Failed to execute Set-TargetResource without credentials.  Actual Error is: $($($_.Exception).Message)" -Exception $_
-            }
-    }
-}
 }
