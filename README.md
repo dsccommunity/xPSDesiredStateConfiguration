@@ -184,7 +184,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
                URI parameter supports File://.
                Get-TargetResource returns URI parameter.
                Fixed logging of error message reported when download fails.
-               Added new example Sample_xRemoteFileUsingProxy.ps1
+               Added new example Sample_xRemoteFileUsingProxy.ps1.
 * Examples: Fixed missing newline at end of PullServerSetupTests.ps1.
 * xFileUpload: Added PSSA rule suppression attribute.
 * xPackageResource: Removed hardcoded ComputerName 'localhost' parameter from Get-WMIObject to eliminate PSSA rule violation. The parameter is not required.
