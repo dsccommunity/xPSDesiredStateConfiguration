@@ -114,32 +114,7 @@ function Get-IsWMFServerCore
     return (Get-IsServer2012Core) -or (Get-IsServer2008R2Core)
 }
 
-<#
-    .SYNOPSIS
-    Checks if result of Get-Target resource is not null, can be converted to a hashtable, and none of its required properties are null.'
-    Uses Pester.
-#>
-function Test-GetTargetResourceResultNotNull 
-{
-    [CmdletBinding()]
-    param (
-        $GetTargetResourceResult
-    )
-
-    $getTargetResourceResultProperties = @('Name', 'DisplayName', 'Ensure', 'IncludeAllSubFeature')
-
-    $getTargetResourceResultHashtable = $GetTargetResourceResult -as [Hashtable]
-
-    $getTargetResourceResultHashtable | Should Not Be $null
-
-    foreach ($property in $getTargetResourceResultProperties)
-    {
-        $getTargetResourceResultHashtable[$property] | Should Not Be $null
-    }
-}
-
 Export-ModuleMember -Function `
     Get-IsWin8OrAbove, `
     Get-IsServerSKU, `
-    Get-IsWMFServerCore, `
-    Test-GetTargetResourceResultNotNull
+    Get-IsWMFServerCore

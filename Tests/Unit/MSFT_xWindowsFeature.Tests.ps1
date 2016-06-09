@@ -13,7 +13,10 @@ InModuleScope 'MSFT_xWindowsFeature' {
 
         BeforeAll {
             Import-Module $PSScriptRoot\MSFT_xWindowsFeature.TestHelper.psm1 -Force
+            Import-Module $PSScriptRoot\CommonTestHelper.psm1 -Force
             Import-Module $PSScriptRoot\MockServerManager -Force
+
+            $script:getTargetResourceResultProperties = @('Name', 'DisplayName', 'Ensure', 'IncludeAllSubFeature')
 
             $script:testWindowsFeatureName = "Test1"
             $script:skipCredentialTests = $true
@@ -31,21 +34,21 @@ InModuleScope 'MSFT_xWindowsFeature' {
 
         It 'Get-TargetResource without credential' {
             $getTargetResourceResult = Get-TargetResource -Name $script:testWindowsFeatureName
-            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+            Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $script:getTargetResourceResultProperties
         }
 
         It 'Get-TargetResource with credential' -Skip:($script:skipCredentialTests) {
             $credential = $null
 
             $getTargetResourceResult = Get-TargetResource -Name $script:testWindowsFeatureName -Credential $credential
-            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+            Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $script:getTargetResourceResultProperties
         }
 
         It 'Get-TargetResource subfeatures installed' {
             Add-WindowsFeature -Name $script:testWindowsFeatureName -IncludeAllSubFeature
 
             $getTargetResourceResult = Get-TargetResource $script:testWindowsFeatureName
-            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+            Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $script:getTargetResourceResultProperties
 
             $getTargetResourceResult["IncludeAllSubFeature"] | Should Be $true
         }
@@ -54,7 +57,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
             Add-WindowsFeature -Name $script:testWindowsFeatureName
 
             $getTargetResourceResult = Get-TargetResource $script:testWindowsFeatureName
-            Test-GetTargetResourceResultNotNull $getTargetResourceResult
+            Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $script:getTargetResourceResultProperties
 
             $getTargetResourceResult["IncludeAllSubFeature"] | Should Be $false
         }

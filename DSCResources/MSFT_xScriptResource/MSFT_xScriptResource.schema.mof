@@ -1,0 +1,11 @@
+#pragma namespace("\\\\.\\root\\microsoft\\windows\\DesiredStateConfiguration")
+
+[ClassVersion("1.0.0"),FriendlyName("xScript")] 
+class MSFT_xScriptResource : OMI_BaseResource
+{
+  [Key] string GetScript;
+  [Key] string SetScript;
+  [Key] string TestScript;
+  [write,EmbeddedInstance("MSFT_Credential")] string Credential;
+  [Read] string Result;
+};

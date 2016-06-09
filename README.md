@@ -23,6 +23,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
+* **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
 
 ### xArchive
 
@@ -188,7 +189,13 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Default value: $false.
 * **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
 * **Source**: Indicates the location of the source file to use for installation, if necessary.
-   
+
+## xScript
+* **GetScript**: Provides a block of Windows PowerShell script that runs when you invoke the Get-DscConfiguration cmdlet. This block must return a hash table.
+* **SetScript**: Provides a block of Windows PowerShell script. When you invoke the Start-DscConfiguration cmdlet, the TestScript block runs first. If the TestScript block returns $false, the SetScript block will run. If the TestScript block returns $true, the SetScript block will not run.
+* **TestScript**: Provides a block of Windows PowerShell script. When you invoke the Start-DscConfiguration cmdlet, this block runs. If it returns $false, the SetScript block will run. If it returns $true, the SetScript block will not run. The TestScript block also runs when you invoke the Test-DscConfiguration cmdlet. However, in this case, the SetScript block will not run, no matter what value the TestScript block returns. The TestScript block must return True if the actual configuration matches the current desired state configuration, and False if it does not match. (The current desired state configuration is the last configuration enacted on the node that is using DSC.)
+* **Credential**: Indicates the credentials to use for running this script, if credentials are required.
+
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -225,6 +232,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
 * Added the xEnvironment resource
 * Added the xWindowsFeature resource
+* Added the xScript resource
 
 ### 3.10.0.0
 
