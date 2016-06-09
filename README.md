@@ -22,6 +22,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xWindowsOptionalFeature** configures optional Windows features.
 * **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
 * **xEnvironment** configures and manages environment variables.
+* **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 
 ### xArchive
 
@@ -176,6 +177,18 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: $true, $false.
    - Default value: $false.
 
+## xWindowsFeature
+* **Name**: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
+* **Credential**: Indicates the credentials to use to add or remove the role or feature.
+* **Ensure**: Ensures that the feature is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property.
+    - Suported values: $true, $false.
+   - Default value: $false.
+* **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
+* **Source**: Indicates the location of the source file to use for installation, if necessary.
+   
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -210,6 +223,8 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
     - Fixed a bug where, despite no state specified in the config, the resource test returns false if the service is not running
 * xPackage: Fixes bug where CreateCheckRegValue was not being removed when uninstalling packages
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
+* Added the xEnvironment resource
+* Added the xWindowsFeature resource
 
 ### 3.10.0.0
 
