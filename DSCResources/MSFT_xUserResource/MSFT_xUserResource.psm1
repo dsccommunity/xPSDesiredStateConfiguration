@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams", "")] # To be removed when username/password changed to a credential
+param ()
+
 # A global variable that contains localized messages.
 data LocalizedData
 {
