@@ -25,6 +25,7 @@ Import-LocalizedData  LocalizedData -filename MSFT_xScriptResource.strings.psd1
 # gathered from the GetScript execution.
 function Get-TargetResource 
 {
+    [OutputType([Hashtable])]
     [CmdletBinding()]
      param 
      (         
@@ -155,6 +156,7 @@ function Set-TargetResource
 # or else false should be returned.
 function Test-TargetResource 
 {
+    [OutputType([Boolean])]
     param 
     (       
         [parameter(Mandatory = $true)]
