@@ -171,9 +171,8 @@ function Set-TargetResource
         [string]
         $Source,
 
-        [parameter()]
-        [switch]
-        $IncludeAllSubFeature,
+        [System.Boolean]
+        $IncludeAllSubFeature = $false,
 
         [Parameter(Mandatory=$false)]
         [System.Management.Automation.PSCredential]
@@ -333,9 +332,8 @@ function Test-TargetResource
         [string]
         $Source,
 
-        [parameter()]
-        [switch]
-        $IncludeAllSubFeature,
+        [System.Boolean]
+        $IncludeAllSubFeature = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]

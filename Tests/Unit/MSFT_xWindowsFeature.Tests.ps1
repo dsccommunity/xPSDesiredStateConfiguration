@@ -94,7 +94,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
             $ensureValue = "Absent"
             $credential = $null
 
-            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -IncludeAllSubFeature -Credential $credential
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -IncludeAllSubFeature $true -Credential $credential
 
             $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
 
@@ -112,7 +112,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
         It 'Set-TargetResource without credential and ensure present and subfeatures installed' {
             $ensureValue = "Present"
 
-            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -IncludeAllSubFeature
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -IncludeAllSubFeature $true
          
             $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
 
@@ -145,7 +145,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
             $ensureValue = "Present"
             $credential = $null
 
-            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential -IncludeAllSubFeature
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential -IncludeAllSubFeature $true
          
             $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
 
@@ -162,7 +162,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
             $ensureValue = "Absent"
             $credential = $null
 
-            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential -IncludeAllSubFeature
+            Set-TargetResource -Name $script:testWindowsFeatureName -Ensure $ensureValue -Credential $credential -IncludeAllSubFeature $true
          
             $windowsFeature = Get-WindowsFeature -Name $script:testWindowsFeatureName
 
@@ -178,7 +178,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
         It 'Test-TargetResource ensure present and feature installed and subfeatures installed' {
             Add-WindowsFeature $script:testWindowsFeatureName -IncludeAllSubFeature
 
-            $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName -Ensure "Present" -IncludeAllSubFeature
+            $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName -Ensure "Present" -IncludeAllSubFeature $true
 
             $testTargetResourceResult | Should Be $true
         }
