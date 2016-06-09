@@ -44,7 +44,7 @@ InModuleScope 'MSFT_xScriptResource' {
             $getTargetResourceResult = Get-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript -Credential $credential
 
             Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
-	    }
+        }
 
         It 'Get-TargetResource with invalid result format from Get-Script' {
             $getScript = "'$true'"
@@ -74,7 +74,7 @@ InModuleScope 'MSFT_xScriptResource' {
             $getTargetResourceResultProperties = @('ExecutionPolicy', 'Date')
                  
             { Set-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript } | Should Not Throw
-	    }
+        }
 
         It 'Set-TargetResource with credential' -Skip:$script:skipAllCredentialTests {
             $credential = $null
@@ -86,7 +86,7 @@ InModuleScope 'MSFT_xScriptResource' {
             $getTargetResourceResultProperties = @('ExecutionPolicy', 'Date')
                  
             { Set-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript -Credential $credential } | Should Not Throw
-	    }
+        }
 
         It 'Set-TargetResource with invalid command in Set-Script' {
             $getScript = "fakeGetScript"
@@ -96,7 +96,7 @@ InModuleScope 'MSFT_xScriptResource' {
             $getTargetResourceResultProperties = @('ExecutionPolicy', 'Date')
                  
             { Set-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript } | Should Throw
-	    }
+        }
 
         It 'Test-TargetResource without credential' {
             $getScript = "fakeGetScript"
@@ -106,7 +106,7 @@ InModuleScope 'MSFT_xScriptResource' {
             $testTargetResourceResult = Test-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript
 
             $testTargetResourceResult | Should Be $true
-	    }
+        }
 
         It 'Test-TargetResource with credential' -Skip:$script:skipAllCredentialTests {
             $credential = $null
@@ -118,7 +118,7 @@ InModuleScope 'MSFT_xScriptResource' {
             $testTargetResourceResult = Test-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript -Credential $credential
 
             $testTargetResourceResult | Should Be $true
-	    }
+        }
 
         It 'Test-TargetResource with invalid command in Test-Script' {
             $getScript = "fakeGetScript"
@@ -126,6 +126,6 @@ InModuleScope 'MSFT_xScriptResource' {
             $testScript = "NonexistentCommand"
 
             { Test-TargetResource -GetScript $getScript -SetScript $setScript -TestScript $testScript } | Should Throw
-	    }
+        }
     }
 }
