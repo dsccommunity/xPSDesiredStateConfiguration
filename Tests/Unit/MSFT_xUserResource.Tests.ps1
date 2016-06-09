@@ -1,4 +1,6 @@
 #To run these tests, the currently logged on user must have rights to create a user
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param()
 
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
@@ -17,7 +19,10 @@ InModuleScope 'MSFT_xUserResource' {
             $testUserPassword = "StrongOne7."
             $testUserDescription = "Some Description"
 
-            New-User -UserName $testUserName -Password $testUserPassword -Description $testUserDescription
+            $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+            $testCredential = New-Object PSCredential ($testUserName, $secureTestPassword)
+
+            New-User -Credential $testCredential -Description $testUserDescription
 
             try
             {
@@ -56,7 +61,10 @@ InModuleScope 'MSFT_xUserResource' {
             $testUserPassword = "StrongOne7."
             $testUserDescription = "Some Description"
 
-            New-User -UserName $testUserName -Password $testUserPassword -Description $testUserDescription
+            $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+            $testCredential = New-Object PSCredential ($testUserName, $secureTestPassword)
+
+            New-User -Credential $testCredential -Description $testUserDescription
 
             try
             {
@@ -74,7 +82,10 @@ InModuleScope 'MSFT_xUserResource' {
             $testUserPassword = "StrongOne7."
             $testUserDescription = "Some Description"
 
-            New-User -UserName $testUserName -Password $testUserPassword -Description $testUserDescription
+            $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+            $testCredential = New-Object PSCredential ($testUserName, $secureTestPassword)
+
+            New-User -Credential $testCredential -Description $testUserDescription
 
             try
             {
@@ -98,7 +109,10 @@ InModuleScope 'MSFT_xUserResource' {
             $testUserPassword = "StrongOne7."
             $testUserDescription = "Some Description"
 
-            New-User -UserName $testUserName -Password $testUserPassword -Description $testUserDescription
+            $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+            $testCredential = New-Object PSCredential ($testUserName, $secureTestPassword)
+
+            New-User -Credential $testCredential -Description $testUserDescription
 
             try
             {
@@ -116,7 +130,10 @@ InModuleScope 'MSFT_xUserResource' {
             $testUserPassword = "StrongOne7."
             $testUserDescription = "Some Description"
 
-            New-User -UserName $testUserName -Password $testUserPassword -Description $testUserDescription
+            $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+            $testCredential = New-Object PSCredential ($testUserName, $secureTestPassword)
+
+            New-User -Credential $testCredential -Description $testUserDescription
 
             try
             {

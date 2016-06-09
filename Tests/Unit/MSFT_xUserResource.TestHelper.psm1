@@ -5,11 +5,8 @@
     .DESCRIPTION
     This function creates a user on the local or remote machine.
 
-    .PARAMETER UserName
-    The name of the user to create.
-
-    .PARAMETER Password
-    The password to set for the user account.
+    .PARAMETER Credential
+    The credential containing the username and password to use to create the account.
 
     .PARAMETER Description
     The optional description to set on the user account.
@@ -25,12 +22,9 @@ function New-User
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [string]
-        $UserName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Password,
+        [PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
 
         [string]
         $Description,
@@ -56,11 +50,8 @@ function New-User
     .DESCRIPTION
     This function creates a user on the local or remote machine running a full server.
 
-    .PARAMETER UserName
-    The name of the user to create.
-
-    .PARAMETER Password
-    The password to set for the user account.
+    .PARAMETER Credential
+    The credential containing the username and password to use to create the account.
 
     .PARAMETER Description
     The optional description to set on the user account.
@@ -76,12 +67,9 @@ function New-UserOnFullSKU
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [string]
-        $UserName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Password,
+        [PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
 
         [string]
         $Description,
@@ -92,12 +80,15 @@ function New-UserOnFullSKU
 
     Set-StrictMode -Version Latest
 
+    $userName = $Credential.UserName
+    $password = $Credential.GetNetworkCredential().Password
+
     # Remove user if it already exists.
-    Remove-User $UserName $ComputerName
+    Remove-User $userName $ComputerName
 
     $adComputerEntry = [ADSI] "WinNT://$ComputerName"
-    $adUserEntry = $adComputerEntry.Create("User", $UserName)
-    $null = $adUserEntry.SetPassword($Password)
+    $adUserEntry = $adComputerEntry.Create("User", $userName)
+    $null = $adUserEntry.SetPassword($password)
 
     if ($PSBoundParameters.ContainsKey("Description"))
     {
@@ -114,11 +105,8 @@ function New-UserOnFullSKU
     .DESCRIPTION
     This function creates a user on the local machine running a Nano server.
 
-    .PARAMETER UserName
-    The name of the user to create.
-
-    .PARAMETER Password
-    The password to set for the user account.
+    .PARAMETER Credential
+    The credential containing the username and password to use to create the account.
 
     .PARAMETER Description
     The optional description to set on the user account.
@@ -131,12 +119,9 @@ function New-UserOnNanoServer
 
     param (
         [Parameter(Mandatory = $true)]
-        [string]
-        $UserName,
-
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Password,
+        [PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential,
 
         [string]
         $Description,
@@ -155,15 +140,17 @@ function New-UserOnNanoServer
         }
     }
 
-    # Remove user if it already exists.
-    Remove-LocalUser -Name $UserName -ErrorAction SilentlyContinue
+    $userName = $Credential.UserName
+    $securePassword = $Credential.GetNetworkCredential().SecurePassword
 
-    $SecurePassword = ConvertTo-SecureString -String $Password -AsPlainText -Force
-    New-LocalUser -Name $UserName -Password $SecurePassword
+    # Remove user if it already exists.
+    Remove-LocalUser -Name $userName -ErrorAction SilentlyContinue
+
+    New-LocalUser -Name $userName -Password $securePassword
 
     if ($PSBoundParameters.ContainsKey("Description"))
     {
-        Set-LocalUser -Name $UserName -Description $Description
+        Set-LocalUser -Name $userName -Description $Description
     }
 }
 
