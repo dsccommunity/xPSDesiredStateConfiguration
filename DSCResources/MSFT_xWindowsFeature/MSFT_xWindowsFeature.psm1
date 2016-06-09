@@ -33,6 +33,7 @@ Import-LocalizedData  LocalizedData -filename MSFT_xWindowsFeature.strings.psd1
 # It gives the feature info of the requested role/feature on the target machine.
 function Get-TargetResource
 {
+     [OutputType([Hashtable])]
      param
      (
         [parameter(Mandatory = $true)]
@@ -315,6 +316,7 @@ function Set-TargetResource
 # The Test-TargetResource cmdlet is used to validate if the role or feature is in a state as expected in the instance document.
 function Test-TargetResource
 {
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]

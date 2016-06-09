@@ -129,6 +129,7 @@ function SetEnvironmentVariable
 #------------------------------
 FUNCTION Get-TargetResource
 {    
+    [OutputType([Hashtable])]
     param
     (
         [parameter(Mandatory = $true)]
@@ -476,6 +477,7 @@ FUNCTION Set-TargetResource
 #-------------------------------
 FUNCTION Test-TargetResource
 {
+    [OutputType([System.Boolean])]
     param
     (       
         [parameter(Mandatory = $true)]
