@@ -1,4 +1,4 @@
-<#
+﻿<#
     .SYNOPSIS
     Tests that the Get-TargetResource method of a DSC Resource is not null, can be converted to a hashtable, and has the correct properties.
     Uses Pester.
