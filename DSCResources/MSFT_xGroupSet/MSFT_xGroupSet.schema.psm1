@@ -1,4 +1,4 @@
-﻿Import-Module "$PSScriptRoot\..\ResourceSetHelper.psm1" -Force
+﻿Import-Module "$PSScriptRoot\..\ResourceSetHelper.psm1"
 
 Configuration xGroupSet
 {
