@@ -30,7 +30,7 @@ MultipleMatches = There could be a possible multiple matches exception while try
 
 Import-LocalizedData LocalizedData -FileName MSFT_xUserResource.strings.psd1
 
-Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1" -Force
+Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1"
 
 if (-not (Test-IsNanoServer))
 {
