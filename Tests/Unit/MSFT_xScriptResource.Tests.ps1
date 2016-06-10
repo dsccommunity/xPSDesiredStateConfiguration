@@ -8,7 +8,7 @@ $TestEnvironment = Initialize-TestEnvironment `
 InModuleScope 'MSFT_xScriptResource' {
     Describe 'xScript Unit Tests' {
         BeforeAll {
-            Import-Module "$PSScriptRoot\CommonTestHelper.psm1"
+            Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 
             $script:skipAllCredentialTests = $true
 
