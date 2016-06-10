@@ -3,10 +3,10 @@ param ()
 
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'xGroupSet' `
+    -DSCResourceName 'MSFT_xGroupSet' `
     -TestType Integration 
 
-Describe "xGroupSet Tests" {
+Describe "xGroupSet Integration Tests" {
     BeforeAll {
         Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
         Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
