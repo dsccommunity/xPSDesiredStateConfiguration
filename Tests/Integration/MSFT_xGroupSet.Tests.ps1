@@ -1,41 +1,11 @@
-﻿# Warning: These tests will create temporary administrators on the machine on which they are run
-
-Describe "xGroupSet Tests" {
-
+﻿Describe "xGroupSet Tests" {
     BeforeAll {
-        Import-Module "$PSScriptRoot\MSFT_xGroupResource.TestHelper.psm1"
-        
-        <#
-        $script:testAdministratorUserName = "xMUser6789"
-        $script:testAdministratorPassword = "StrongOne7."
-
-        
-        try
-        {
-            net user /add $script:testAdministratorUserName $script:TestPasswd
-            net localgroup administrators $script:testAdministratorUserName /add
-        }
-        catch
-        {
-            throw "Failed to create local administrator ($script:testAdministratorUserName) for testing. Error message: $_"
-        }
-        #>
+        Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
+        Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
+        Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force        
     }
 
-    AfterAll {
-        <#
-        try
-        {
-            net user $script:testAdministratorUserName /DELETE
-        }
-        catch
-        {
-            throw "Failed to delete local administrator ($script:testAdministratorUserName) created for testing. Error message: $_"
-        }
-        #>
-    }
-
-    It "Create an xGroupSet" -Pending {
+    It "Create a xGroupSet" {
         $configurationName = "CreateTestGroup"
         $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
 
@@ -59,7 +29,7 @@ Describe "xGroupSet Tests" {
         {
             Configuration $configurationName
             {
-                Import-DscResource -Name xGroupSet -ModuleName xPSDesiredStateConfiguration
+                Import-DscResource -ModuleName xPSDesiredStateConfiguration
                 
                 xGroupSet GroupSet1
                 {
@@ -105,7 +75,7 @@ Describe "xGroupSet Tests" {
         }
     } 
 
-    It "Remove an xGroupSet" -Pending {
+    It "Remove a xGroupSet" {
         $configurationName = "CreateTestGroup"
         $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
 
@@ -135,7 +105,7 @@ Describe "xGroupSet Tests" {
         {
             Configuration $configurationName
             {
-                Import-DscResource -Name xGroupSet -ModuleName xPSDesiredStateConfiguration
+                Import-DscResource -ModuleName xPSDesiredStateConfiguration
                 
                 xGroupSet GroupSet1
                 {
@@ -165,7 +135,6 @@ Describe "xGroupSet Tests" {
                     $groupEntry | Should Be $null
                 }
             }
-                
         }
         finally
         {

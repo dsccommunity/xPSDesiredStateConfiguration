@@ -10,7 +10,7 @@ $TestEnvironment = Initialize-TestEnvironment `
 InModuleScope 'MSFT_xUserResource' {
     Describe 'xUser Unit Tests' {
         BeforeAll {
-            Import-Module "$PSScriptRoot\CommonTestHelper.psm1" -Force
+            Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
             Import-Module "$PSScriptRoot\MSFT_xUserResource.TestHelper.psm1" -Force
         }
 

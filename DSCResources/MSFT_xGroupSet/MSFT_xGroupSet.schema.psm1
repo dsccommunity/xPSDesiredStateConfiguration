@@ -1,4 +1,4 @@
-﻿Import-Module "$PSScriptRoot\..\ResourceSetHelper.psm1"
+﻿Import-Module "$PSScriptRoot\..\ResourceSetHelper.psm1" -Force
 
 Configuration xGroupSet
 {
@@ -32,7 +32,7 @@ Configuration xGroupSet
     [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
     
     # Build xGroup resource string
-    [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParamName] -KeyParameterName $keyParamName -CommonParameters $commonParameters -ResourceName $resourceName
+    [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
 
     $configScript = [ScriptBlock]::Create($resourceString)
     . $configScript

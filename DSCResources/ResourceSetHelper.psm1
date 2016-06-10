@@ -34,7 +34,7 @@ function New-ResourceCommonParameterString
             $parameterValue = $Parameters[$parameterName]
             if ($null -ne $parameterValue)
             {
-                if ($value -is [System.String])
+                if ($parameterValue -is [System.String])
                 {
                     $stringBuilder.AppendFormat('{0} = "{1}"', $parameterName, $parameterValue) | Out-Null
                     $stringBuilder.AppendLine() | Out-Null

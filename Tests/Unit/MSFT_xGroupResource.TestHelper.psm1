@@ -1,4 +1,6 @@
-﻿<#
+﻿Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
+
+<#
     .SYNOPSIS
     Tests if a local user group exists.
 
