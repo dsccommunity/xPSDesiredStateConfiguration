@@ -57,8 +57,8 @@ function New-LocalUserGroup
     param (
         [Parameter(Mandatory = $true)]
         [String]
-        $GroupName, 
-        
+        $GroupName,
+
         [String]
         $Description
     )
@@ -89,15 +89,15 @@ function New-LocalUserGroupOnFullSKU
     param (
         [Parameter(Mandatory = $true)]
         [String]
-        $GroupName, 
-        
+        $GroupName,
+
         [Parameter(Mandatory = $true)]
         [String]
         $Description
     )
 
     $computer = [ADSI]"WinNT://$env:ComputerName,Computer"
-    
+
     if (-not (Test-LocalGroupExists $GroupName))
     {
         $group = $computer.Create("Group", $GroupName)
@@ -123,8 +123,8 @@ function New-LocalUserGroupOnNanoServer
     param (
         [Parameter(Mandatory = $true)]
         [String]
-        $GroupName, 
-        
+        $GroupName,
+
         [Parameter(Mandatory = $true)]
         [String]
         $Description
@@ -179,7 +179,7 @@ function Remove-LocalUserGroupOnFullSKU
     )
 
     $computer = [ADSI]"WinNT://$Env:COMPUTERNAME,Computer"
-    
+
     if (Test-LocalGroupExists $GroupName)
     {
         $group = $computer.Delete("Group", $GroupName)

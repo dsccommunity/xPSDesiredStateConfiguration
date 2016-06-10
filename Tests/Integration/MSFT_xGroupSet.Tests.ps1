@@ -2,7 +2,7 @@
     BeforeAll {
         Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
         Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
-        Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force        
+        Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
     }
 
     It "Create a xGroupSet" {
@@ -30,7 +30,7 @@
             Configuration $configurationName
             {
                 Import-DscResource -ModuleName xPSDesiredStateConfiguration
-                
+
                 xGroupSet GroupSet1
                 {
                     GroupName = $groupNames
@@ -42,7 +42,7 @@
             & $configurationName -OutputPath $configurationPath
 
             Start-DscConfiguration -Path  $configurationPath -Wait -Force -Verbose
-            
+
             if (Test-IsNanoServer)
             {
                 foreach ($groupName in $groupNames)
@@ -73,7 +73,7 @@
                 Remove-Item -Path $configurationPath -Recurse -Force
             }
         }
-    } 
+    }
 
     It "Remove a xGroupSet" {
         $configurationName = "CreateTestGroup"
@@ -106,7 +106,7 @@
             Configuration $configurationName
             {
                 Import-DscResource -ModuleName xPSDesiredStateConfiguration
-                
+
                 xGroupSet GroupSet1
                 {
                     GroupName = $groupNames
@@ -147,5 +147,5 @@
                 Remove-Item -Path $configurationPath -Recurse -Force
             }
         }
-    } 
+    }
 }

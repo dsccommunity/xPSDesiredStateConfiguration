@@ -30,7 +30,7 @@ Configuration xGroupSet
 
     # Build common parameters for all xGroup resource nodes
     [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
-    
+
     # Build xGroup resource string
     [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
 

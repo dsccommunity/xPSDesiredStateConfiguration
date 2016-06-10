@@ -25,7 +25,7 @@ function Test-GetTargetResourceResult
 
     $getTargetResourceResultHashtable | Should Not Be $null
 
-    foreach ($property in $GetTargetResourceResultProperties) 
+    foreach ($property in $GetTargetResourceResultProperties)
     {
         $getTargetResourceResultHashtable[$property] | Should Not Be $null
     }
