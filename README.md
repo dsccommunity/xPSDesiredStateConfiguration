@@ -24,6 +24,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
+* **xUser** provides a mechanism to manage local user accounts on the target node.
 
 ### xArchive
 
@@ -185,7 +186,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Supported values: Present, Absent.
    - Default Value: Present.
 * **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property.
-    - Suported values: $true, $false.
+   - Suported values: $true, $false.
    - Default value: $false.
 * **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
 * **Source**: Indicates the location of the source file to use for installation, if necessary.
@@ -195,6 +196,27 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * **SetScript**: Provides a block of Windows PowerShell script. When you invoke the Start-DscConfiguration cmdlet, the TestScript block runs first. If the TestScript block returns $false, the SetScript block will run. If the TestScript block returns $true, the SetScript block will not run.
 * **TestScript**: Provides a block of Windows PowerShell script. When you invoke the Start-DscConfiguration cmdlet, this block runs. If it returns $false, the SetScript block will run. If it returns $true, the SetScript block will not run. The TestScript block also runs when you invoke the Test-DscConfiguration cmdlet. However, in this case, the SetScript block will not run, no matter what value the TestScript block returns. The TestScript block must return True if the actual configuration matches the current desired state configuration, and False if it does not match. (The current desired state configuration is the last configuration enacted on the node that is using DSC.)
 * **Credential**: Indicates the credentials to use for running this script, if credentials are required.
+
+## xUser
+* **UserName**: Indicates the account name for which you want to ensure a specific state.
+* **Description**: Indicates the description you want to use for the user account.
+* **Disabled**: Indicates if the account is enabled. Set this property to $true to ensure that this account is disabled, and set it to $false to ensure that it is enabled.
+   - Suported values: $true, $false
+   - Default value: $false
+* **Ensure**: Ensures that the feature is present or absent.
+   - Supported values: Present, Absent
+   - Default Value: Present
+* **FullName**: Represents a string with the full name you want to use for the user account.
+* **Password**: Indicates the password you want to use for this account.
+* **PasswordChangeNotAllowed**: Indicates if the user can change the password. Set this property to $true to ensure that the user cannot change the password, and set it to $false to allow the user to change the password.
+   - Suported values: $true, $false
+   - Default value: $false
+* **PasswordChangeRequired**: Indicates if the user must change the password at the next sign in. Set this property to $true if the user must change the password.
+   - Suported values: $true, $false
+   - Default value: $true
+* **PasswordNeverExpires**: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
+   - Suported values: $true, $false
+   - Default value: $false
 
 ## Functions
 
@@ -233,6 +255,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * Added the xEnvironment resource
 * Added the xWindowsFeature resource
 * Added the xScript resource
+* Added the xUser resource
 
 ### 3.10.0.0
 
