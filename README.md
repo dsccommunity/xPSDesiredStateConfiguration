@@ -218,6 +218,17 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: $true, $false
    - Default value: $false
 
+## xProcessSet
+* **Path**: Defines the path to each process in the set.
+
+These parameters will be the same for each process in the set. Please refer to the xWindowsProcess section above for more details on these parameters:
+* **Credential**: The credentials of the user under whose context you want to run the process.
+* **Ensure**: Ensures that the process is running or stopped: { Present | Absent }
+* **StandardOutputPath**: The path to write the standard output stream to.
+* **StandardErrorPath**: The path to write the standard error stream to.
+* **StandardInputPath**: The path to receive standard input from.
+* **WorkingDirectory**: The directory to run the processes under.
+   
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -256,6 +267,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * Added the xWindowsFeature resource
 * Added the xScript resource
 * Added the xUser resource
+* Added the xProcessSet resource
 
 ### 3.10.0.0
 
