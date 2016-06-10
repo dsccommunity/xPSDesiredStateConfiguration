@@ -1,4 +1,7 @@
-﻿Describe "xGroupSet Tests" {
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param ()
+
+Describe "xGroupSet Tests" {
     BeforeAll {
         Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
         Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
