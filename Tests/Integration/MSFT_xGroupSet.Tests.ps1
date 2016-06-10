@@ -1,6 +1,11 @@
 ﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param ()
 
+$TestEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName 'xPSDesiredStateConfiguration' `
+    -DSCResourceName 'xGroupSet' `
+    -TestType Integration 
+
 Describe "xGroupSet Tests" {
     BeforeAll {
         Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
