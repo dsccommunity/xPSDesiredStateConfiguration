@@ -1,4 +1,6 @@
-﻿<#
+﻿Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
+
+<#
     .SYNOPSIS
     Creates a user account.
 
@@ -33,7 +35,7 @@ function New-User
         $ComputerName = $env:COMPUTERNAME
     )
 
-    if (Get-IsNanoServer)
+    if (Test-IsNanoServer)
     {
         New-UserOnNanoServer @PSBoundParameters
     }
@@ -182,7 +184,7 @@ function Remove-User
         $ComputerName = $env:COMPUTERNAME
     )
 
-    if (Get-IsNanoServer)
+    if (Test-IsNanoServer)
     {
         Remove-UserOnNanoServer @PSBoundParameters
     }
@@ -293,7 +295,7 @@ function Test-User
         $ComputerName = $env:COMPUTERNAME
     )
 
-    if (Get-IsNanoServer)
+    if (Test-IsNanoServer)
     {
         Test-UserOnNanoServer @PSBoundParameters
     }

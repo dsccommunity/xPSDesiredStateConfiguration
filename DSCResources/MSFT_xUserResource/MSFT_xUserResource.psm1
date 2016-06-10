@@ -30,14 +30,9 @@ MultipleMatches = There could be a possible multiple matches exception while try
 
 Import-LocalizedData LocalizedData -FileName MSFT_xUserResource.strings.psd1
 
-function Get-IsNanoServer {
-    [CmdletBinding()]
-    param ()
+Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1" -Force
 
-    return $PSVersionTable.PSEdition -ieq 'Core'
-}
-
-if (-not (Get-IsNanoServer))
+if (-not (Test-IsNanoServer))
 {
     Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement'
 }
@@ -57,7 +52,7 @@ function Get-TargetResource
         $UserName
     )
 
-    if (Get-IsNanoServer)
+    if (Test-IsNanoServer)
     {
         Get-TargetResourceOnNanoServer @PSBoundParameters
     }
@@ -108,7 +103,7 @@ function Set-TargetResource
         $PasswordChangeNotAllowed
     )
 
-    if (Get-IsNanoServer)
+    if (Test-IsNanoServer)
     {
         Set-TargetResourceOnNanoServer @PSBoundParameters
     }
@@ -159,7 +154,7 @@ function Test-TargetResource
         $PasswordChangeNotAllowed
     )
 
-    if (Get-IsNanoServer)
+    if (Test-IsNanoServer)
     {
         Test-TargetResourceOnNanoServer @PSBoundParameters
     }
@@ -1147,6 +1142,4 @@ function ValidateCredentialsOnNanoServer
     return [Microsoft.Windows.DesiredStateConfiguration.NanoServer.UserResource.CredentialsValidationTool]::ValidateCredentials($UserName, $Password)
 }
 
-Export-ModuleMember -Function `
-    *-TargetResource, `
-    Get-IsNanoServer
+Export-ModuleMember -Function *-TargetResource
