@@ -1,7 +1,7 @@
 ﻿$TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xServiceSet' `
-    -TestType Integration 
+    -TestType Integration
 
 Describe "xServiceSet Integration Tests" {
     BeforeAll {
@@ -64,8 +64,8 @@ Describe "xServiceSet Integration Tests" {
                 Remove-Item -Path $configurationPath -Recurse -Force
             }
         }
-    } 
-    
+    }
+
     It "Uses a set of services that depends on a file" {
         $configurationName = "UsingDependsOn"
         $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
@@ -76,7 +76,7 @@ Describe "xServiceSet Integration Tests" {
             Configuration $configurationName
             {
                 Import-DscResource -ModuleName xPSDesiredStateConfiguration
-                    
+
                 File TestDirectory
                 {
                     DestinationPath = $testDirectory
@@ -109,12 +109,12 @@ Describe "xServiceSet Integration Tests" {
         {
             if (Test-Path -Path $testDirectory)
             {
-                Remove-Item -Path @($testDirectory) -Recurse -Force 
+                Remove-Item -Path @($testDirectory) -Recurse -Force
             }
 
             if (Test-Path -Path $configurationPath)
             {
-                Remove-Item -Path @($configurationPath) -Recurse -Force 
+                Remove-Item -Path @($configurationPath) -Recurse -Force
             }
         }
     }

@@ -47,7 +47,7 @@
 
         protected override void OnStart(string[] args)
         {
-            if(args.Length == 1 && args[0] == "FailToStop") 
+            if(args.Length == 1 && args[0] == "FailToStop")
             {
                 this.failToStop=true;
                 return;
@@ -77,7 +77,7 @@
                 this.failToStop = false;
                 throw new Exception("Will fail to stop");
             }
-           
+
             if (this.fileName == null) { return; }
             using (StreamWriter writer = File.AppendText(this.fileName))
             {
@@ -94,7 +94,7 @@
         {
             base.OnContinue();
         }
-       
+
 
         protected override void Dispose(bool disposing)
         {
@@ -114,9 +114,9 @@
         static void Main()
         {
             ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[] 
-            { 
-                new TestService() 
+            ServicesToRun = new ServiceBase[]
+            {
+                new TestService()
             };
             ServiceBase.Run(ServicesToRun);
         }

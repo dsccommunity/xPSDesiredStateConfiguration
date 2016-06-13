@@ -64,7 +64,7 @@ function New-TestService
 
     $configurationName = "TestServiceConfig"
     $configurationPath = Join-Path -Path (Get-Location) -ChildPath $ServiceName
-    
+
     Configuration $configurationName
     {
         Import-DscResource -ModuleName xPSDesiredStateConfiguration
@@ -80,7 +80,7 @@ function New-TestService
             State = 'Stopped'
             Ensure = 'Present'
         }
-    } 
+    }
 
     & $configurationName -OutputPath $configurationPath
 
@@ -195,8 +195,8 @@ function Get-InstallUtilPath
     if ($env:Processor_Architecture -ieq 'amd64')
     {
         $frameworkName = "Framework64"
-    } 
-    else 
+    }
+    else
     {
         $frameworkName = "Framework"
     }
