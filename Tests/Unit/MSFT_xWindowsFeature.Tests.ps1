@@ -13,7 +13,7 @@ InModuleScope 'MSFT_xWindowsFeature' {
 
         BeforeAll {
             Import-Module $PSScriptRoot\MSFT_xWindowsFeature.TestHelper.psm1 -Force
-            Import-Module $PSScriptRoot\CommonTestHelper.psm1 -Force
+            Import-Module $PSScriptRoot\..\CommonTestHelper.psm1 -Force
             Import-Module $PSScriptRoot\MockServerManager -Force
 
             $script:getTargetResourceResultProperties = @('Name', 'DisplayName', 'Ensure', 'IncludeAllSubFeature')
