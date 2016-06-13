@@ -25,6 +25,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
 * **xUser** provides a mechanism to manage local user accounts on the target node.
+* **xGroupSet** configures multiple xGroups with common settings but different names. 
 
 ### xArchive
 
@@ -218,6 +219,21 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: $true, $false
    - Default value: $false
 
+## xGroupSet
+* **GroupName**: Defines the names of the groups in the set.
+
+These parameters will be the same for each group in the set. Please refer to the xGroup section above for more details on these parameters:
+* **Ensure**: Ensures that the group specified is **Present** or **Absent**.
+* **Description**: Description of the group.
+* **Members**: The members that form the group.
+Note: If the group already exists, the listed items in this property replaces what is in the group.
+* **MembersToInclude**: List of users to add to the group.
+Note: This property is ignored if 'Members' is specified.
+* **MembersToExclude**: List of users you want to ensure are not members of the group.
+Note: This property is ignored if 'Members' is specified.
+* **Credential**: Indicates the credentials required to access remote resources.
+Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
+
 ## xProcessSet
 * **Path**: Defines the path to each process in the set.
 
@@ -228,7 +244,7 @@ These parameters will be the same for each process in the set. Please refer to t
 * **StandardErrorPath**: The path to write the standard error stream to.
 * **StandardInputPath**: The path to receive standard input from.
 * **WorkingDirectory**: The directory to run the processes under.
-   
+
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -267,6 +283,7 @@ These parameters will be the same for each process in the set. Please refer to t
 * Added the xWindowsFeature resource
 * Added the xScript resource
 * Added the xUser resource
+* Added the xGroupSet resource
 * Added the xProcessSet resource
 
 ### 3.10.0.0
