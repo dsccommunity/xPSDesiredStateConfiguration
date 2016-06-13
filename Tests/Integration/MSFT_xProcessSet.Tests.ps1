@@ -18,10 +18,12 @@ Describe "xProcessSet Integration Tests" {
         Copy-Item "$env:WinDir\system32\cmd.exe" $script:cmdProcess2FullPath -Force -ErrorAction SilentlyContinue
     }
 
-    AfterAll {
+    AfterEach {
         Stop-ProcessByName -ProcessName $script:cmdProcess1ShortName
         Stop-ProcessByName -ProcessName $script:cmdProcess2ShortName
+    }
 
+    AfterAll {
         Remove-Item $script:cmdProcess1FullPath -ErrorAction SilentlyContinue
         Remove-Item $script:cmdProcess2FullPath -ErrorAction SilentlyContinue
     }
@@ -59,7 +61,7 @@ Describe "xProcessSet Integration Tests" {
         }
         finally
         {
-            if (Test-Path -path $configurationPath)
+            if (Test-Path -Path $configurationPath)
             {
                 Remove-Item -Path $configurationPath -Recurse -Force
             }
