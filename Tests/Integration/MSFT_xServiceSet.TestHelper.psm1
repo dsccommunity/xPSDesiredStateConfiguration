@@ -1,21 +1,4 @@
-﻿$currentDirectory = Split-Path $MyInvocation.MyCommand.Path
-
-function CreateChangeServicePropertiesCo
-{
-    Configuration ChangeServiceProperties
-    {
-        Import-DscResource -Name ServiceSet -ModuleName PSDesiredStateConfiguration
-        ServiceSet svc1
-        {
-            Name = @($testServiceName)
-            Ensure = "Present"
-            State = "Running"
-            StartupType = "Automatic"
-        }
-    }
-}
-
-<#
+﻿<#
     .SYNOPSIS
     Creates a new service for testing.
 
@@ -84,7 +67,7 @@ function New-TestService
     
     Configuration $configurationName
     {
-        Import-DscResource -ModuleName PSDesiredStateConfiguration
+        Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
         xService Service1
         {
@@ -103,6 +86,7 @@ function New-TestService
 
     Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
 }
+
 <#
     .SYNOPSIS
     Creates a service binary file.
@@ -168,7 +152,17 @@ function New-ServiceBinary
     Add-Type $fileText -OutputAssembly $ServiceExecutablePath -OutputType WindowsApplication -ReferencedAssemblies "System.ServiceProcess", "System.Configuration.Install"
 }
 
-function Remove-Service
+<#
+    .SYNOPSIS
+    Removes a service.
+
+    .PARAMETER ServiceName
+    The name of the service to remove.
+
+    .PARAMETER ServiceExecutablePath
+    The path to the executable of the service to remove.
+#>
+function Remove-TestService
 {
     [CmdletBinding()]
     param (
@@ -209,3 +203,7 @@ function Get-InstallUtilPath
 
     return Join-Path (Resolve-Path "$env:WinDir\Microsoft.Net\$frameworkName\v4*") "installUtil.exe"
 }
+
+Export-ModuleMember -Function `
+    New-TestService, `
+    Remove-TestService

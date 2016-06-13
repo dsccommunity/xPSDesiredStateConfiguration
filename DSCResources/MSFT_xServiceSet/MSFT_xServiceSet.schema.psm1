@@ -30,12 +30,12 @@ Configuration xServiceSet
         $Credential
     )  
     
-    $commonParameters = @("StartupType", "BuiltInAccount", "State", "Ensure", "Credential")
+    $commonParameterNames = @("StartupType", "BuiltInAccount", "State", "Ensure", "Credential")
     $keyParameterName = "Name"
     $resourceName = "xService"
 
     # Build common parameters for all xService resource nodes
-    [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParamName -CommonParameters $optionalParameters -Parameters $PSBoundParameters
+    [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
     
     # Build xService resource string
     [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
