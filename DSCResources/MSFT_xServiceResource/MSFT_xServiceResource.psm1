@@ -8,7 +8,7 @@ CannotStopServiceSetToStartAutomatically=Cannot stop a service and set it to sta
 ServiceAlreadyStarted=Service '{0}' already started, no action required.
 ServiceStarted=Service '{0}' started.
 ServiceStopped=Service '{0}' stopped.
-ErrorStartingService=Failure starting service '{0}'. Message: '{1}'
+ErrorStartingService=Failure starting service '{0}'. Please check the path '{1}' provided for the service. Message: '{2}'
 OnlyOneParameterCanBeSpecified=Only one of the following parameters can be specified: '{0}', '{1}'.
 StartServiceWhatIf=Start Service
 ServiceAlreadyStopped=Service '{0}' already stopped, no action required.
@@ -23,7 +23,7 @@ TestStartupTypeMismatch=Startup type for service '{0}' is '{1}'. It does not mat
 TestStateMismatch=State of service '{0}' is '{1}'. It does not match '{2}'.
 MethodFailed=The '{0}' method of '{1}' failed with error code: '{2}'.
 ErrorChangingProperty=Failed to change '{0}' property. Message: '{1}'
-ErrorSetingLogOnAsServiceRightsForUser=Error granting '{0}' the right to log on as a service. Message: '{1}'.
+ErrorSettingLogOnAsServiceRightsForUser=Error granting '{0}' the right to log on as a service. Message: '{1}'.
 CannotOpenPolicyErrorMessage=Cannot open policy manager
 UserNameTooLongErrorMessage=User name is too long
 CannotLookupNamesErrorMessage=Failed to lookup user name
@@ -31,10 +31,18 @@ CannotOpenAccountErrorMessage=Failed to open policy for user
 CannotCreateAccountAccessErrorMessage=Failed to create policy for user
 CannotGetAccountAccessErrorMessage=Failed to get user policy rights
 CannotSetAccountAccessErrorMessage=Failed to set user policy rights
+BinaryPathNotSpecified=Specify the path to the executable when trying to create a new service		
+ServiceAlreadyExists=The service '{0}' to create already exists		
+ServiceExistsSamePath=The service '{0}' to create already exists with path '{1}'		
+ServiceNotExists=The service '{0}' does not exist. Specify the path to the executable to create a new service		
+ErrorDeletingService=Error in deleting service '{0}'		
+ServiceDeletedSuccessfully=Service '{0}' Deleted Successfully		
+TryDeleteAgain=Wait for 2 milliseconds for a service to get deleted		
+WritePropertiesIgnored=Service '{0}' already exists. Write properties such as Status, DisplayName, Description, Dependencies will be ignored for existing services.
 "@
 }
 
-#Import-LocalizedData  LocalizedData -filename MSFT_ServiceResource.strings.psd1
+Import-LocalizedData  LocalizedData -filename MSFT_xServiceResource.strings.psd1
 
 <#
 .Synopsis
@@ -45,7 +53,6 @@ function Get-TargetResource
     [OutputType([System.Collections.Hashtable])]
     param
     (
-
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -98,11 +105,11 @@ function Test-TargetResource
 
         [System.String]
         [ValidateSet("Running", "Stopped")]
-        $State="Running",
+        $State = "Running",
 
         [System.String]
         [ValidateSet("Present", "Absent")]
-        $Ensure="Present",
+        $Ensure = "Present",
 
         [System.String]
         [ValidateNotNullOrEmpty()]
@@ -125,44 +132,22 @@ function Test-TargetResource
     )
 
     ValidateStartupType -Name $Name -StartupType $StartupType -State $State
-    if($PSBoundParameters.ContainsKey("Ensure"))
-    {
-        if($Ensure -eq "Present")
-        {
-            if(!($PSBoundParameters.ContainsKey("Path")))
-            {
-                ThrowInvalidArgumentError -ErrorId "BinaryPathNotSpecified" -ErrorMessage "Specify the path to the executable when trying to create a new service"
-            }
-            else
-            {
-                $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
-                if($service -ne $null)
-                {
-                    Write-Verbose -Message "The service to create already exists"
-                }
-                else
-                {
-                    return $false
-                }
-            }
-        }
-        else
-        {
-            $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
-            if($service -ne $null)
-            {
-                return $false
-            }
-            else
-            {
-                return $true
-            }
-        }
-    }
-    
-    $svc=GetServiceResource -Name $Name
 
-    if($PSBoundParameters.ContainsKey("StartupType") -or $PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
+    $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
+
+    if ($Ensure -eq 'Absent')
+    {
+        return -not $serviceExists
+    }
+
+    if (-not $serviceExists)
+    {
+        return $false
+    }
+
+    $svc = Get-TargetResource -Name $Name
+
+    if ($PSBoundParameters.ContainsKey("StartupType") -or $PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
     {
         $svcWmi = GetWMIService -Name $Name
 
@@ -250,69 +235,76 @@ function Set-TargetResource
 
     ValidateStartupType -Name $Name -StartupType $StartupType -State $State
 
-    if($PSBoundParameters.ContainsKey("Ensure"))
+    if ($Ensure -eq "Absent")
     {
-        if($Ensure -eq "Present")
-        {
-            if(!($PSBoundParameters.ContainsKey("Path")))
-            {
-                ThrowInvalidArgumentError -ErrorId "BinaryPathNotSpecified" -ErrorMessage "Specify the path to the executable when trying to create a new service"
-            }
-            else
-            {
-                $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
-                if($service -ne $null)
-                {
-                    Write-Verbose -Message "The service to create already exists"
-                }
-                else
-                {
-                    $argumentsToNewService = @{}
-                    $argumentsToNewService.Add("Name", $Name)
-                    $argumentsToNewService.Add("BinaryPathName", $Path)
-                    if($PSBoundParameters.ContainsKey("Credential"))
-                    {
-                        $argumentsToNewService.Add("Credential", $Credential)
-                    }
-                    if($PSBoundParameters.ContainsKey("StartupType"))
-                    {
-                        $argumentsToNewService.Add("StartupType", $StartupType)
-                    }
-                    if($PSBoundParameters.ContainsKey("DisplayName"))
-                    {
-                        $argumentsToNewService.Add("DisplayName", $DisplayName)
-                    }
-                    if($PSBoundParameters.ContainsKey("Description"))
-                    {
-                        $argumentsToNewService.Add("Description", $Description)
-                    }
-                    if($PSBoundParameters.ContainsKey("Dependencies"))
-                    {
-                        $argumentsToNewService.Add("DependsOn", $Dependencies)
-                    }
-                    try
-                    {
-                        New-Service @argumentsToNewService
-                    }
-                    catch
-                    {
-                        Write-Log -Message ("Error creating service `"$($argumentsToNewService["Name"])`"; Exception Message: $($_.Exception.Message)")
-                        throw $_
-                    }
+        $svc = Get-TargetResource $Name
+        StopService $svc
+        DeleteService $svc.Name
+        return
+    }
 
-                }
-            }
-        }
-        else
+    $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
+    $serviceIsNew = $false
+
+    if ($PSBoundParameters.ContainsKey("Path") -and $serviceExists)
+    {
+        if (Compare-ServicePath -Name $Name -Path $Path)
         {
-            $svc = GetServiceResource -Name $Name
-            StopService -Svc $svc
-            DeleteService -Name $svc.Name
-            return
+            # Why is this throwing an error? Aren't there other properties that can be updated?
+            ThrowInvalidArgumentError "ServiceExistsSamePath" ($LocalizedData.ServiceExistsSamePath -f $Name, $Path)
         }
+
+        ThrowInvalidArgumentError "ServiceAlreadyExists" ($LocalizedData.ServiceAlreadyExists -f $Name)
+        # New PR for updating path goes here
+    }
+    elseif ($PSBoundParameters.ContainsKey("Path") -and -not $serviceExists)
+    {
+        $argumentsToNewService = @{}
+        $argumentsToNewService.Add("Name", $Name)
+        $argumentsToNewService.Add("BinaryPathName", $Path)
+        if($PSBoundParameters.ContainsKey("Credential"))
+        {
+            $argumentsToNewService.Add("Credential", $Credential)
+        }
+        if($PSBoundParameters.ContainsKey("StartupType"))
+        {
+            $argumentsToNewService.Add("StartupType", $StartupType)
+        }
+        if($PSBoundParameters.ContainsKey("DisplayName"))
+        {
+            $argumentsToNewService.Add("DisplayName", $DisplayName)
+        }
+        if($PSBoundParameters.ContainsKey("Description"))
+        {
+            $argumentsToNewService.Add("Description", $Description)
+        }
+        if($PSBoundParameters.ContainsKey("Dependencies"))
+        {
+            $argumentsToNewService.Add("DependsOn", $Dependencies)
+        }
+
+        try
+        {
+            New-Service @argumentsToNewService
+            $serviceIsNew = $true
+        }
+        catch
+        {
+            Write-Log -Message ("Error creating service `"$($argumentsToNewService["Name"])`"; Exception Message: $($_.Exception.Message)")
+            throw $_
+        }
+    }
+    elseif (-not $PSBoundParameters.ContainsKey("Path") -and -not $serviceExists)
+    {
+       throw $LocalizedData.ServiceNotExists -f $Name
     }
 
     $svc=GetServiceResource -Name $Name
+
+    if (-not $serviceIsNew)
+    {
+       Write-Verbose ($LocalizedData.WritePropertiesIgnored -f $Name) 
+    }
 
     $writeWritePropertiesArguments=@{Name=$svc.name}
     if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeWritePropertiesArguments.Add("StartupType",$StartupType)}
@@ -321,24 +313,17 @@ function Set-TargetResource
 
     WriteWriteProperties @writeWritePropertiesArguments
 
-    if($State -eq "Stopped")
+    if ($State -eq "Stopped")
     {
-        # Ensuring service is stopped
-        StopService -Svc $svc
+        # Ensure service is stopped
+        StopService $svc
         return
     }
 
-    # $State is Running, so ensuring service is started unless we are also creating the service in which case the default behavior is that the service is in the stopped state.
-    if($Ensure -eq "Present")
+    # Default state of a newly created service is 'stopped'. If $State = Running, ensure service is started.
+    if ($State -eq "Running")
     {
-         if(( $PSBoundParameters.ContainsKey("State")) -and ($State -eq "Running"))
-        {
-            StartService -Svc $svc -StartupTimeout $StartupTimeout
-        }
-    }
-    else
-    {
-        StartService -Svc $svc -StartupTimeout $StartupTimeout
+       StartService $svc
     }
 }
 
@@ -443,7 +428,7 @@ function GetWMIService
 
     try
     {
-        return New-Object -TypeName System.Management.ManagementObject -ArgumentList "Win32_Service.Name='$Name'"
+        return Get-CimInstance -ClassName Win32_Service -Filter "Name='$Name'"
     }
     catch
     {
@@ -505,7 +490,7 @@ function WriteCredentialProperties
         $Credential
     )
 
-    if(!$PSBoundParameters.ContainsKey("Credential") -and !$PSBoundParameters.ContainsKey("BuiltInAccount") -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
+    if(!$PSBoundParameters.ContainsKey("Credential") -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
         return
     }
@@ -528,7 +513,7 @@ function WriteCredentialProperties
             SetLogOnAsServicePolicy $userName
         }
 
-        $ret = $SvcWmi.Change($null,$null,$null,$null,$null,$null,$userName,$password)
+        $ret = Invoke-CimMethod -InputObject $SvcWmi -MethodName Change -Arguments @{StartName=$userName;StartPassword=$password}
         if($ret.ReturnValue -ne 0)
         {
             $innerMessage = $LocalizedData.MethodFailed -f "Change","Win32_Service",$ret.ReturnValue
@@ -639,35 +624,34 @@ Deletes a service
 #>
 function DeleteService
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+	    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [parameter(Mandatory = $true)]
         [ValidateNotNull()]
         $Name
     )
-
+    
     $err = & "sc.exe" "delete" "$Name"
-
-    #Wait for 2 seconds for a service to get deleted
     for($i = 1; $i -lt 1000; $i++)
     {
-        if((Get-Service -Name $Name -ErrorAction SilentlyContinue) -eq $null)
+        if(-not (Test-ServiceExists -Name $Name))
         {
             $serviceDeletedSuccessfully = $true
             break
         }
+        #try again after 2 millisecs if the service is not deleted.
+        Write-Verbose ($LocalizedData.TryDeleteAgain)
         Start-Sleep .002
     }
-    if(!$serviceDeletedSuccessfully)
+    if (-not $serviceDeletedSuccessfully)
     {
-        Write-Log -Message ("Error in deleting service `"$Name`"")
-        throw "Could not delete service `"$Name`""
+        Write-Log ($LocalizedData.ErrorDeletingService -f $Name)
+        throw $LocalizedData.ErrorDeletingService -f $Name
     }
     else
     {
-        Write-Log -Message ("Successfully deleted service `"$Name`"")
-        Write-Verbose -Message "Successfully deleted service"
+        Write-Log ($LocalizedData.ServiceDeletedSuccessfully -f $Name)
     }
 }
 
@@ -706,9 +690,9 @@ function StartService
         }
         catch
         {
-
-            Write-Log -Message ($LocalizedData.ErrorStartingService -f $Svc.Name,$_.Exception.Message)
-            throw
+            $servicePath = (Get-CimInstance -Class win32_service | where {$_.Name -eq $Name}).PathName
+            $message = $LocalizedData.ErrorStartingService -f $svc.Name,$servicePath,$_.Exception.Message
+            ThrowInvalidArgumentError "ErrorStartingService" $message
         }
 
         Write-Log -Message ($LocalizedData.ServiceStarted -f $Svc.Name)
@@ -756,6 +740,63 @@ function ThrowInvalidArgumentError
     $exception = New-Object -TypeName System.ArgumentException -ArgumentList $ErrorMessage;
     $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList $exception, $ErrorId, $errorCategory, $null
     throw $errorRecord
+}
+
+<#
+    .SYNOPSIS
+    Tests if a service with the given name exists
+
+    .PARAMETER Name
+    The name of the service to test for.
+#>
+function Test-ServiceExists
+{
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Name
+    )
+
+    $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
+    return $null -ne $service
+}
+
+<#
+    .SYNOPSIS
+    Compares a path to the existing service path. 
+    Returns true when the given path is same as the existing service path.
+
+    .PARAMETER Name
+    The name of the existing service for which to check the path.
+
+    .PARAMETER Path
+    The path to check against.
+#>
+function Compare-ServicePath
+{
+    [OutputType([Boolean)]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Path
+    )
+    
+    $existingServicePath = (Get-CimInstance -Class win32_service | Where-Object {$_.Name -eq $Name}).PathName
+    $stringCompareResult = [String]::Compare($Path, $existingServicePath, [System.Globalization.CultureInfo]::CurrentUICulture)
+
+    return $stringCompareResult -eq 0
 }
 
 <#
@@ -1161,8 +1202,8 @@ function SetLogOnAsServicePolicy([string]$UserName)
     }
     catch
     {
-        $message = $LocalizedData.ErrorSetingLogOnAsServiceRightsForUser -f $UserName,$_.Exception.Message
-        ThrowInvalidArgumentError -ErrorId "ErrorSetingLogOnAsServiceRightsForUser" -ErrorMessage $message
+        $message = $LocalizedData.ErrorSettingLogOnAsServiceRightsForUser -f $UserName,$_.Exception.Message
+        ThrowInvalidArgumentError -ErrorId "ErrorSettingLogOnAsServiceRightsForUser" -ErrorMessage $message
     }
 }
 
