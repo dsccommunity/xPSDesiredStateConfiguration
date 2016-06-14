@@ -26,6 +26,7 @@ Describe "xWindowsOptionalFeatureSet Integration Tests" {
                     Name = @($validFeatureName1, $validFeatureName2)
                     Ensure = "Present"
                     LogPath = $logPath
+                    NoWindowsUpdateCheck = $true
                 }
             }
 
