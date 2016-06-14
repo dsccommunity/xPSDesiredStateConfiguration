@@ -26,6 +26,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
 * **xUser** provides a mechanism to manage local user accounts on the target node.
 * **xGroupSet** configures multiple xGroups with common settings but different names. 
+* **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 
 ### xArchive
 
@@ -233,7 +234,22 @@ Note: This property is ignored if 'Members' is specified.
 Note: This property is ignored if 'Members' is specified.
 * **Credential**: Indicates the credentials required to access remote resources.
 Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
-   
+
+## xProcessSet
+Note: All processes in a process set will run without arguments.
+
+* **Path**: Defines the path to each process in the set.
+
+These parameters will be the same for each process in the set. Please refer to the xWindowsProcess section above for more details on these parameters:
+* **Credential**: The credentials of the user under whose context you want to run the process.
+* **Ensure**: Ensures that the process is running or stopped.
+   - Supported values: Present, Absent
+   - Default Value: Present
+* **StandardOutputPath**: The path to write the standard output stream to.
+* **StandardErrorPath**: The path to write the standard error stream to.
+* **StandardInputPath**: The path to receive standard input from.
+* **WorkingDirectory**: The directory to run the processes under.
+
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -273,6 +289,7 @@ Note: This account must have the appropriate Active Directory permissions to add
 * Added the xScript resource
 * Added the xUser resource
 * Added the xGroupSet resource
+* Added the xProcessSet resource
 
 ### 3.10.0.0
 
