@@ -24,8 +24,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
-* **xUser** provides a mechanism to manage local user accounts on the target node.
-* **xGroupSet** configures multiple xGroups with common settings but different names.
+* **xGroupSet** configures multiple xGroups with common settings but different names. 
+* **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
 
 ### xArchive
@@ -235,6 +235,21 @@ Note: This property is ignored if 'Members' is specified.
 * **Credential**: Indicates the credentials required to access remote resources.
 Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
 
+## xProcessSet
+Note: All processes in a process set will run without arguments.
+
+* **Path**: Defines the path to each process in the set.
+
+These parameters will be the same for each process in the set. Please refer to the xWindowsProcess section above for more details on these parameters:
+* **Credential**: The credentials of the user under whose context you want to run the process.
+* **Ensure**: Ensures that the process is running or stopped.
+   - Supported values: Present, Absent
+   - Default Value: Present
+* **StandardOutputPath**: The path to write the standard output stream to.
+* **StandardErrorPath**: The path to write the standard error stream to.
+* **StandardInputPath**: The path to receive standard input from.
+* **WorkingDirectory**: The directory to run the processes under.
+
 ## xServiceSet
 Note: xServiceSet should not be used to create services. Please use xService instead.
 
@@ -292,6 +307,7 @@ These parameters will be the same for each service in the set. Please refer to t
 * Added the xScript resource
 * Added the xUser resource
 * Added the xGroupSet resource
+* Added the xProcessSet resource
 * Added the xServiceSet resource
 
 ### 3.10.0.0
