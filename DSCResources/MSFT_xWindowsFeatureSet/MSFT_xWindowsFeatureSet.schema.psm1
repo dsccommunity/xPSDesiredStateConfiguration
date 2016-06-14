@@ -31,14 +31,14 @@ Configuration xWindowsFeatureSet
 
     $commonParameterNames = @("Ensure", "Source", "IncludeAllSubFeature", "Credential", "LogPath")
     $keyParameterName = "Name"
-    $resourceName = "WindowsFeature"
+    $resourceName = "xWindowsFeature"
 
     # Build common parameters for all xWindowsFeature resource nodes
-    [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParamName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
+    [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
     
     # Build xWindowsFeature resource string
     [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
 
-    $configurationScript = [scriptblock]::Create($resourceString)
+    $configurationScript = [ScriptBlock]::Create($resourceString)
     . $configurationScript
 }
