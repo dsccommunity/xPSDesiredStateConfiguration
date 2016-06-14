@@ -35,7 +35,7 @@ Configuration xWindowsFeatureSet
 
     # Build common parameters for all xWindowsFeature resource nodes
     [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
-    
+
     # Build xWindowsFeature resource string
     [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
 
