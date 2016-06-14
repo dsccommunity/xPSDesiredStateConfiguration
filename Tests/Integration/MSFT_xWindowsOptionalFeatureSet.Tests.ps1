@@ -35,12 +35,12 @@ Describe "xWindowsOptionalFeatureSet Integration Tests" {
             { Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose } | Should Not Throw
 
             $windowsOptionalFeature1 = Dism\Get-WindowsOptionalFeature -Online -FeatureName $validFeatureName1
-            
+
             $windowsOptionalFeature1 | Should Not Be $null
             $windowsOptionalFeature1.State -eq 'Enabled' -or $windowsOptionalFeature1.State -eq 'EnablePending' | Should Be $true
 
             $windowsOptionalFeature2 = Dism\Get-WindowsOptionalFeature -Online -FeatureName $validFeatureName2
-            
+
             $windowsOptionalFeature2 | Should Not Be $null
             $windowsOptionalFeature2.State -eq 'Enabled' -or $windowsOptionalFeature2.State -eq 'EnablePending' | Should Be $true
         }
@@ -65,7 +65,7 @@ Describe "xWindowsOptionalFeatureSet Integration Tests" {
                 Remove-Item -Path $configurationPath -Recurse -Force
             }
         }
-    } 
+    }
 
     It "Install an incorrect Windows optional feature" {
         $configurationName = "InstallIncorrectWindowsFeature"
@@ -90,7 +90,7 @@ Describe "xWindowsOptionalFeatureSet Integration Tests" {
 
             # This should not work. LCM is expected to print errors, but the call to this function itself should not throw errors.
             { Start-DscConfiguration -Path $configurationPath -Wait -Force -ErrorAction SilentlyContinue } | Should Not Throw
-                
+
             Test-Path -Path $logPath | Should Be $true
         }
         finally
@@ -105,5 +105,5 @@ Describe "xWindowsOptionalFeatureSet Integration Tests" {
                 Remove-Item -Path $configurationPath -Recurse -Force
             }
         }
-    } 
+    }
 }

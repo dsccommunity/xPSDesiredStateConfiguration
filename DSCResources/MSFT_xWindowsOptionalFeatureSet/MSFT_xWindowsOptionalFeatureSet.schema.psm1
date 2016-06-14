@@ -32,14 +32,14 @@ Configuration xWindowsOptionalFeatureSet
         [System.String]
         $LogLevel
     )
-    
+
     $commonParameterNames = @("Ensure", "Source", "RemoveFilesOnDisable", "LogPath", "NoWindowsUpdateCheck", "LogLevel")
     $keyParameterName = "Name"
     $resourceName = "xWindowsOptionalFeature"
 
     # Build common parameters for all xWindowsOptionalFeature resource nodes
     [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
-    
+
     # Build xWindowsOptionalFeature resource string
     [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
 
