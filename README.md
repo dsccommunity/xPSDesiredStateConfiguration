@@ -27,6 +27,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroupSet** configures multiple xGroups with common settings but different names. 
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
+* **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
+* **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
 
 ### xArchive
 
@@ -181,7 +183,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: $true, $false.
    - Default value: $false.
 
-## xWindowsFeature
+### xWindowsFeature
 * **Name**: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
 * **Credential**: Indicates the credentials to use to add or remove the role or feature.
 * **Ensure**: Ensures that the feature is present or absent.
@@ -193,13 +195,13 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
 * **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
 * **Source**: Indicates the location of the source file to use for installation, if necessary.
 
-## xScript
+### xScript
 * **GetScript**: Provides a block of Windows PowerShell script that runs when you invoke the Get-DscConfiguration cmdlet. This block must return a hash table.
 * **SetScript**: Provides a block of Windows PowerShell script. When you invoke the Start-DscConfiguration cmdlet, the TestScript block runs first. If the TestScript block returns $false, the SetScript block will run. If the TestScript block returns $true, the SetScript block will not run.
 * **TestScript**: Provides a block of Windows PowerShell script. When you invoke the Start-DscConfiguration cmdlet, this block runs. If it returns $false, the SetScript block will run. If it returns $true, the SetScript block will not run. The TestScript block also runs when you invoke the Test-DscConfiguration cmdlet. However, in this case, the SetScript block will not run, no matter what value the TestScript block returns. The TestScript block must return True if the actual configuration matches the current desired state configuration, and False if it does not match. (The current desired state configuration is the last configuration enacted on the node that is using DSC.)
 * **Credential**: Indicates the credentials to use for running this script, if credentials are required.
 
-## xUser
+### xUser
 * **UserName**: Indicates the account name for which you want to ensure a specific state.
 * **Description**: Indicates the description you want to use for the user account.
 * **Disabled**: Indicates if the account is enabled. Set this property to $true to ensure that this account is disabled, and set it to $false to ensure that it is enabled.
@@ -220,7 +222,7 @@ Note: _the xWindowsOptionalFeature is only supported on Windows client or Window
    - Suported values: $true, $false
    - Default value: $false
 
-## xGroupSet
+### xGroupSet
 * **GroupName**: Defines the names of the groups in the set.
 
 These parameters will be the same for each group in the set. Please refer to the xGroup section above for more details on these parameters:
@@ -235,7 +237,7 @@ Note: This property is ignored if 'Members' is specified.
 * **Credential**: Indicates the credentials required to access remote resources.
 Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
 
-## xProcessSet
+### xProcessSet
 Note: All processes in a process set will run without arguments.
 
 * **Path**: Defines the path to each process in the set.
@@ -250,7 +252,7 @@ These parameters will be the same for each process in the set. Please refer to t
 * **StandardInputPath**: The path to receive standard input from.
 * **WorkingDirectory**: The directory to run the processes under.
 
-## xServiceSet
+### xServiceSet
 Note: xServiceSet should not be used to create services. Please use xService instead.
 
 * **Name**: Defines the names of the services in the set.
@@ -267,6 +269,44 @@ These parameters will be the same for each service in the set. Please refer to t
    - Suported values: Present, Absent
    - Default value: Present
 * **Credential**: Indicates credentials for the account that the service will run under. This property and the BuiltinAccount property cannot be used together.
+
+### xWindowsFeatureSet
+* **Name**: Defines the names of the Windows features in the set.
+
+These parameters will be the same for each Windows feature in the set. Please refer to the xWindowsFeature section above for more details on these parameters:
+* **Ensure**: Ensures that the set of features is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **Credential**: Indicates the credentials to use to add or remove the role or feature.
+* **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures matches the state of the Ensure property.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
+* **Source**: Indicates the location of the source file to use for installation, if necessary.
+
+### xWindowsOptionalFeatureSet
+Note: xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs.
+
+* **Name**: Defines the names of the Windows optional features in the set.
+
+These parameters will be the same for each Windows optional feature in the set. Please refer to the xWindowsOptionalFeature section above for more details on these parameters:
+* **Ensure**: Ensures that the set of features is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
+   - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
+   - If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
+* **RemoveFilesOnDisable**: Removes the files for an optional feature without removing the feature's manifest from the image.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogPath**: Specifies the full path and file name to log to.
+   - If not set, the default is %WINDIR%\Logs\Dism\dism.log.
+* **NoWindowsUpdateCheck**: Prevents DISM from contacting Windows Update (WU) when searching for the source files to restore a feature on an online image.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogLevel**: Specifies the maximum output level shown in the logs.
+   - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
+   - Default value: ErrorsOnly.
 
 ## Functions
 
@@ -309,6 +349,8 @@ These parameters will be the same for each service in the set. Please refer to t
 * Added the xGroupSet resource
 * Added the xProcessSet resource
 * Added the xServiceSet resource
+* Added the xWindowsFeatureSet resource
+* Added the xWindowsOptionalFeatureSet resource
 
 ### 3.10.0.0
 
