@@ -2,14 +2,14 @@
 class MSFT_xDSCWebService : OMI_BaseResource
 {
   [Key] string EndpointName;
-  [required] string CertificateThumbPrint;
+  [required, Description("Can take the value AllowUnencryptedTraffic for setting up a non SSL based endpoint")]
+  string CertificateThumbPrint;
   [write] uint32 Port;
   [write] string PhysicalPath;
   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
   [write,ValueMap{"Started","Stopped"},Values{"Started", "Stopped"}] string State;
   [write] string ModulePath;
   [write] string ConfigurationPath;
-  [write] boolean IsComplianceServer;
   [read] string DSCServerUrl;  
   [write] string RegistrationKeyPath;
   [write] boolean AcceptSelfSignedCertificates;

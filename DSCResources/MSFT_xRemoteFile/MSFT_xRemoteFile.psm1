@@ -1,19 +1,27 @@
-data localizedData
+$moduleRoot = Split-Path `
+    -Path $MyInvocation.MyCommand.Path `
+    -Parent
+
+#region LocalizedData
+$Culture = 'en-us'
+if (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath $PSUICulture))
 {
-    # culture="en-US"
-    ConvertFrom-StringData @'
-InvalidWebUriError=Specified URI is not valid: "{0}". Only http and https paths are accepted.
-InvalidDestinationPathSchemeError=Specified DestinationPath is not valid: "{0}". DestinationPath should be absolute path.
-DestinationPathIsUncError=Specified DestinationPath is not valid: "{0}". DestinationPath should be local path instead of UNC path.
-DestinationPathHasInvalidCharactersError=Specified DestinationPath is not valid: "{0}". DestinationPath should be contains following characters: * ? " < > |
-DestinationPathEndsWithInvalidCharacterError=Specified DestinationPath is not valid: "{0}". DestinationPath should not end with / or \\
-'@
+    $Culture = $PSUICulture
 }
+Import-LocalizedData `
+    -BindingVariable LocalizedData `
+    -Filename MSFT_xRemoteFile.psd1 `
+    -BaseDirectory $moduleRoot `
+    -UICulture $Culture
+#endregion
 
 # Path where cache will be stored. It's cleared whenever LCM gets new configuration.
 $script:cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\MSFT_xRemoteFile"
 
-# The Get-TargetResource function is used to fetch the status of file specified in DestinationPath on the target machine.
+<#
+.Synopsis
+The Get-TargetResource function is used to fetch the status of file specified in DestinationPath on the target machine.
+#>
 function Get-TargetResource
 {
     [CmdletBinding()]
@@ -29,55 +37,63 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Uri
-    )    
-    
+    )
+
     # Check whether DestinationPath is existing file
-    $fileExists = $false
+    $ensure = "Absent"
     $pathItemType = Get-PathItemType -path $DestinationPath
     switch($pathItemType)
     {
-        "File" {
-            Write-Verbose "DestinationPath: '$DestinationPath' is existing file on the machine"
-            $fileExists = $true
+        "File"
+        {
+            Write-Verbose -Message $($LocalizedData.DestinationPathIsExistingFile `
+                -f ${DestinationPath})
+            $ensure = "Present"
         }
 
-        "Directory" {
-            Write-Verbose "DestinationPath: '$DestinationPath' is existing directory on the machine"
-            
+        "Directory"
+        {
+            Write-Verbose -Message $($LocalizedData.DestinationPathIsExistingPath `
+                -f ${DestinationPath})
+
             # If it's existing directory, let's check whether expectedDestinationPath exists
             $uriFileName = Split-Path $Uri -Leaf
             $expectedDestinationPath = Join-Path $DestinationPath $uriFileName
-            if (Test-Path $expectedDestinationPath) {
-                Write-Verbose "File $uriFileName exists in DestinationPath"
-                $fileExists = $true
+            if (Test-Path $expectedDestinationPath)
+            {
+                Write-Verbose -Message $($LocalizedData.FileExistsInDestinationPath `
+                    -f ${uriFileName})
+                $ensure = "Present"
             }
         }
 
-        "Other" {
-            Write-Verbose "DestinationPath: '$DestinationPath' has unknown type: '$pathItemType'"
+        "Other"
+        {
+            Write-Verbose -Message  $($LocalizedData.DestinationPathUnknownType `
+                -f ${DestinationPath},${pathItemType})
         }
 
-        "NotExists" {
-            Write-Verbose "DestinationPath: '$DestinationPath' doesn't exist on the machine"
+        "NotExists"
+        {
+            Write-Verbose -Message  $($LocalizedData.DestinationPathDoesNotExist `
+                -f ${DestinationPath})
         }
-    }
-    
-    $ensure = "Absent"
-    if ($fileExists)
-    {
-        $ensure = "Present"
     }
 
     $returnValue = @{
         DestinationPath = $DestinationPath
-        Ensure = $ensure    
+        Uri = $Uri
+        Ensure = $ensure
     }
 
     $returnValue
 }
 
-# The Set-TargetResource function is used to download file found under Uri location to DestinationPath
-# Additional parameters can be specified to configure web request
+<#
+.Synopsis
+The Set-TargetResource function is used to download file found under Uri location to DestinationPath
+Additional parameters can be specified to configure web request
+#>
 function Set-TargetResource
 {
     [CmdletBinding()]
@@ -91,7 +107,7 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Uri,        
+        $Uri,
 
         [System.String]
         $UserAgent,
@@ -104,100 +120,136 @@ function Set-TargetResource
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $MatchSource = $true
+        $MatchSource = $true,
+
+        [Uint32]
+        $TimeoutSec,
+
+        [System.String]
+        $Proxy,
+
+        [System.Management.Automation.PSCredential]
+        $ProxyCredential
     )
 
     # Validate Uri
-    if (!(Check-UriScheme -uri $Uri -scheme "http") -and !(Check-UriScheme -uri $Uri -scheme "https"))
+    if (-not (Test-UriScheme -uri $Uri -scheme "http|https|file"))
     {
-        $errorId = "UriValidationFailure"; 
-        $errorMessage = $($LocalizedData.InvalidWebUriError) -f ${Uri} 
-        Throw-InvalidDataException -errorId $errorId -errorMessage $errorMessage
+        $errorMessage = $($LocalizedData.InvalidWebUriError) `
+            -f ${Uri}
+        New-InvalidDataException `
+            -errorId "UriValidationFailure" `
+            -errorMessage $errorMessage
     }
 
     # Validate DestinationPath scheme
-    if (!(Check-UriScheme -uri $DestinationPath -scheme "file"))
+    if (-not (Test-UriScheme -uri $DestinationPath -scheme "file"))
     {
-        $errorMessage = $($LocalizedData.InvalidDestinationPathSchemeError) -f ${DestinationPath} 
-        Throw-InvalidDataException -errorId "DestinationPathSchemeValidationFailure" -errorMessage $errorMessage
+        $errorMessage = $($LocalizedData.InvalidDestinationPathSchemeError `
+            -f ${DestinationPath})
+        New-InvalidDataException `
+            -errorId "DestinationPathSchemeValidationFailure" `
+            -errorMessage $errorMessage
     }
 
     # Validate DestinationPath is not UNC path
     if ($DestinationPath.StartsWith("\\"))
     { 
-        $errorMessage = $($LocalizedData.DestinationPathIsUncError) -f ${DestinationPath} 
-        Throw-InvalidDataException -errorId "DestinationPathIsUncFailure" -errorMessage $errorMessage
+        $errorMessage = $($LocalizedData.DestinationPathIsUncError `
+            -f ${DestinationPath})
+        New-InvalidDataException `
+            -errorId "DestinationPathIsUncFailure" `
+            -errorMessage $errorMessage
     }
 
     # Validate DestinationPath does not contain invalid characters
-    $invalidCharacters = '*','?','"','<','>','|'
-    $invalidCharacters | % { 
+    @('*','?','"','<','>','|') | % { 
         if ($DestinationPath.Contains($_) ){
-            $errorMessage = $($LocalizedData.DestinationPathHasInvalidCharactersError) -f ${DestinationPath} 
-            Throw-InvalidDataException -errorId "DestinationPathHasInvalidCharactersError" -errorMessage $errorMessage
+            $errorMessage = $($LocalizedData.DestinationPathHasInvalidCharactersError `
+                -f ${DestinationPath})
+            New-InvalidDataException `
+                -errorId "DestinationPathHasInvalidCharactersError" `
+                -errorMessage $errorMessage
         }
     }
 
     # Validate DestinationPath does not end with / or \ (Invoke-WebRequest requirement)
     if ($DestinationPath.EndsWith('/') -or $DestinationPath.EndsWith('\')){
-        $errorMessage = $($LocalizedData.DestinationPathEndsWithInvalidCharacterError) -f ${DestinationPath} 
-        Throw-InvalidDataException -errorId "DestinationPathEndsWithInvalidCharacterError" -errorMessage $errorMessage
+        $errorMessage = $($LocalizedData.DestinationPathEndsWithInvalidCharacterError `
+            -f ${DestinationPath})
+        New-InvalidDataException `
+            -errorId "DestinationPathEndsWithInvalidCharacterError" `
+            -errorMessage $errorMessage
     }
 
     # Check whether DestinationPath's parent directory exists. Create if it doesn't.
     $destinationPathParent = Split-Path $DestinationPath -Parent
-    if (!(Test-Path $destinationPathParent))
+    if (-not (Test-Path $destinationPathParent))
     {
-        New-Item -Type Directory -Path $destinationPathParent -Force
+        $null = New-Item -ItemType Directory -Path $destinationPathParent -Force
     }
-    
+
     # Check whether DestinationPath's leaf is an existing folder
     $uriFileName = Split-Path $Uri -Leaf
     if (Test-Path $DestinationPath -PathType Container)
     {
-        $DestinationPath = Join-Path $DestinationPath $uriFileName        
+        $DestinationPath = Join-Path $DestinationPath $uriFileName
     }
 
     # Remove DestinationPath and MatchSource from parameters as they are not parameters of Invoke-WebRequest
-    $PSBoundParameters.Remove("DestinationPath") | Out-Null;
-    $PSBoundParameters.Remove("MatchSource") | Out-Null;
-    
+    $null = $PSBoundParameters.Remove("DestinationPath")
+    $null = $PSBoundParameters.Remove("MatchSource")
+
     # Convert headers to hashtable
-    $PSBoundParameters.Remove("Headers") | Out-Null;
+    $null = $PSBoundParameters.Remove("Headers")
     $headersHashtable = $null
 
     if ($Headers -ne $null)
     {
         $headersHashtable = Convert-KeyValuePairArrayToHashtable -array $Headers
-    }    
+    }
 
     # Invoke web request
     try
     {
-        Write-Verbose "Downloading $Uri to $DestinationPath"
+        Write-Verbose -Message $($LocalizedData.DownloadingURI `
+            -f ${DestinationPath},${URI})
         Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -outFile $DestinationPath
     }
     catch [System.OutOfMemoryException]
     {
-        throw "Received OutOfMemoryException. Possible cause is the requested file being too big. $_"
+        $errorMessage = $($LocalizedData.DownloadOutOfMemoryException `
+            -f $_)
+        New-InvalidDataException `
+            -errorId "SystemOutOfMemoryException" `
+            -errorMessage $errorMessage
     }
     catch [System.Exception]
     {
-        throw "Invoking web request failed with error $($_.Exception.Response.StatusCode.Value__): $($_.Exception.Response.StatusDescription)"
+        $errorMessage = $($LocalizedData.DownloadException `
+            -f $_)
+        New-InvalidDataException `
+            -errorId "SystemException" `
+            -errorMessage $errorMessage
     }
-    
+
     # Update cache
-    if (Test-Path $DestinationPath)
+    if (Test-Path -Path $DestinationPath)
     {
-        $downloadedFile = Get-Item $DestinationPath
+        $downloadedFile = Get-Item -Path $DestinationPath
         $lastWriteTime = $downloadedFile.LastWriteTimeUtc
+        $filesize = $downloadedFile.Length
         $inputObject = @{}
         $inputObject["LastWriteTime"] = $lastWriteTime
+        $inputObject["FileSize"] = $filesize
         Update-Cache -DestinationPath $DestinationPath -Uri $Uri -InputObject $inputObject
-    }     
+    }
 }
 
-# The Test-TargetResource function is used to validate if the DestinationPath exists on the machine.
+<#
+.Synopsis
+The Test-TargetResource function is used to validate if the DestinationPath exists on the machine.
+#>
 function Test-TargetResource
 {
     [CmdletBinding()]
@@ -212,7 +264,7 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Uri,        
+        $Uri,
 
         [System.String]
         $UserAgent,
@@ -225,68 +277,94 @@ function Test-TargetResource
 
         [parameter(Mandatory = $false)]
         [System.Boolean]
-        $MatchSource = $true
+        $MatchSource = $true,
+
+        [Uint32]
+        $TimeoutSec,
+
+        [System.String]
+        $Proxy,
+
+        [System.Management.Automation.PSCredential]
+        $ProxyCredential
     )
 
     # Check whether DestinationPath points to existing file or directory
     $fileExists = $false
     $uriFileName = Split-Path $Uri -Leaf
-    $pathItemType = Get-PathItemType -path $DestinationPath
+    $pathItemType = Get-PathItemType -Path $DestinationPath
     switch($pathItemType)
     {
-        "File" {
-            Write-Debug "DestinationPath: '$DestinationPath' is existing file on the machine"
+        "File"
+        {
+            Write-Verbose -Message $($LocalizedData.DestinationPathIsExistingFile `
+                -f ${DestinationPath})
 
-            if ($MatchSource) {           
-                $file = Get-Item $DestinationPath
+            if ($MatchSource) {
+                $file = Get-Item -Path $DestinationPath
                 # Getting cache. It's cleared every time user runs Start-DscConfiguration
                 $cache = Get-Cache -DestinationPath $DestinationPath -Uri $Uri
 
-                if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
+                if ($cache -ne $null `
+                    -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc) `
+                    -and ($cache.FileSize -eq $file.Length))
                 {
-                    Write-Debug "Cache reflects current state. No need for downloading file."
+                    Write-Verbose -Message $($LocalizedData.CacheReflectsCurrentState)
                     $fileExists = $true
                 }
                 else
                 {
-                    Write-Debug "Cache is empty or it doesn't reflect current state. File will be downloaded."
+                    Write-Verbose -Message $($LocalizedData.CacheIsEmptyOrNotMatchCurrentState)
                 }
-            } else {
-                Write-Debug "MatchSource is false. No need for downloading file."
-                $fileExists = $true 
+            }
+            else
+            {
+                Write-Verbose -Message $($LocalizedData.MatchSourceFalse)
+                $fileExists = $true
             }
         }
 
-        "Directory" {
-            Write-Debug "DestinationPath: '$DestinationPath' is existing directory on the machine"
-            $expectedDestinationPath = Join-Path $DestinationPath $uriFileName
-            
-            if (Test-Path $expectedDestinationPath) {
-                if ($MatchSource) { 
-                    $file = Get-Item $expectedDestinationPath
+        "Directory"
+        {
+            Write-Verbose -Message $($LocalizedData.DestinationPathIsExistingPath `
+                -f ${DestinationPath})
+
+            $expectedDestinationPath = Join-Path -Path $DestinationPath -ChildPath $uriFileName
+
+            if (Test-Path -Path $expectedDestinationPath)
+            {
+                if ($MatchSource)
+                {
+                    $file = Get-Item -Path $expectedDestinationPath
                     $cache = Get-Cache -DestinationPath $expectedDestinationPath -Uri $Uri
                     if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
                     {
-                        Write-Debug "Cache reflects current state. No need for downloading file."
+                        Write-Verbose -Message $($LocalizedData.CacheReflectsCurrentState)
                         $fileExists = $true
                     }
                     else
                     {
-                        Write-Debug "Cache is empty or it doesn't reflect current state. File will be downloaded."
+                        Write-Verbose -Message $($LocalizedData.CacheIsEmptyOrNotMatchCurrentState)
                     }
-                } else {
-                    Write-Debug "MatchSource is false. No need for downloading file."
+                }
+                else
+                {
+                    Write-Verbose -Message $($LocalizedData.MatchSourceFalse)
                     $fileExists = $true
                 }
-            }    
+            }
         }
 
-        "Other" {
-            Write-Debug "DestinationPath: '$DestinationPath' has unknown type: '$pathItemType'"
+        "Other"
+        {
+            Write-Verbose -Message  $($LocalizedData.DestinationPathUnknownType `
+                -f ${DestinationPath},${pathItemType})
         }
 
-        "NotExists" {
-            Write-Debug "DestinationPath: '$DestinationPath' doesn't exist on the machine"
+        "NotExists"
+        {
+            Write-Verbose -Message  $($LocalizedData.DestinationPathDoesNotExist `
+                -f ${DestinationPath})
         }
     }
 
@@ -295,43 +373,60 @@ function Test-TargetResource
     $result
 }
 
-# Throws terminating error of category InvalidData with specified errorId and errorMessage
-function Throw-InvalidDataException
+<#
+.Synopsis
+Throws terminating error of category InvalidData with specified errorId and errorMessage
+#>
+function New-InvalidDataException
 {
     param(
         [parameter(Mandatory = $true)]
-        [System.String] 
+        [System.String]
         $errorId,
+
         [parameter(Mandatory = $true)]
         [System.String]
         $errorMessage
     )
     
     $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
-    $exception = New-Object System.InvalidOperationException $errorMessage 
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+    $exception = New-Object `
+        -TypeName System.InvalidOperationException `
+        -ArgumentList $errorMessage 
+    $errorRecord = New-Object `
+        -TypeName System.Management.Automation.ErrorRecord `
+        -ArgumentList $exception, $errorId, $errorCategory, $null
     throw $errorRecord
 }
 
-# Checks whether given URI represents specific scheme
-# Most common schemes: file, http, https, ftp
-# We can also specify logical expressions like: [http|https]
-function Check-UriScheme
+<#
+.Synopsis
+Checks whether given URI represents specific scheme
+.Description
+Most common schemes: file, http, https, ftp
+We can also specify logical expressions like: [http|https]
+#>
+function Test-UriScheme
 {
     param (
         [parameter(Mandatory = $true)]
         [System.String]
         $uri,
+
         [parameter(Mandatory = $true)]
         [System.String]
         $scheme
     )
-    $newUri = $uri -as [System.URI]  
+    $newUri = $uri -as [System.URI]
     $newUri.AbsoluteURI -ne $null -and $newUri.Scheme -match $scheme
 }
 
-# Gets type of the item which path points to. 
-# Returns: File, Directory, Other or NotExists
+<#
+.Synopsis
+Gets type of the item which path points to. 
+.Outputs
+File, Directory, Other or NotExists
+#>
 function Get-PathItemType
 {
     param (
@@ -343,10 +438,10 @@ function Get-PathItemType
     $type = $null
 
     # Check whether path exists
-    if (Test-Path $path) 
+    if (Test-Path $path)
     {
         # Check type of the path
-        $pathItem = Get-Item $path
+        $pathItem = Get-Item -Path $path
         $pathItemType = $pathItem.GetType().Name
         if ($pathItemType -eq "FileInfo")
         {
@@ -361,7 +456,7 @@ function Get-PathItemType
             $type = "Other"
         }
     }
-    else 
+    else
     {
         $type = "NotExists"
     }
@@ -369,7 +464,10 @@ function Get-PathItemType
     return $type
 }
 
-# Converts CimInstance array of type KeyValuePair to hashtable
+<#
+.Synopsis
+Converts CimInstance array of type KeyValuePair to hashtable
+#>
 function Convert-KeyValuePairArrayToHashtable
 {
     param (
@@ -387,7 +485,10 @@ function Convert-KeyValuePairArrayToHashtable
     return $hashtable
 }
 
-# Gets cache for specific DestinationPath and Uri
+<#
+.Synopsis
+Gets cache for specific DestinationPath and Uri
+#>
 function Get-Cache
 {
     param (
@@ -404,24 +505,32 @@ function Get-Cache
 
     $cacheContent = $null
     $key = Get-CacheKey -DestinationPath $DestinationPath -Uri $Uri
-    $path = Join-Path $script:cacheLocation $key
-    
-    Write-Debug "Looking for path $path"
-    if(!(Test-Path $path))
+    $path = Join-Path -Path $script:cacheLocation -ChildPath $key
+
+    Write-Verbose -Message $($LocalizedData.CacheLookingForPath `
+        -f ${Path})
+
+    if(-not (Test-Path -Path $path))
     {
-        Write-Debug "No cache found for DestinationPath = $DestinationPath and Uri = $Uri. CacheKey = $key"
+        Write-Verbose -Message $($LocalizedData.CacheNotFoundForPath `
+            -f ${DestinationPath},${Uri},${Key})
+
         $cacheContent = $null
     }
     else
     {
-        $cacheContent = Import-CliXml $path
-        Write-Debug "Found cache for DestinationPath = $DestinationPath and Uri = $Uri. CacheKey = $key"
+        $cacheContent = Import-CliXml -Path $path
+        Write-Verbose -Message $($LocalizedData.CacheFoundForPath `
+            -f ${DestinationPath},${Uri},${Key})
     }
 
     return $cacheContent
 }
 
-# Creates or updates cache for specific DestinationPath and Uri
+<#
+.Synopsis
+Creates or updates cache for specific DestinationPath and Uri
+#>
 function Update-Cache
 {
     param (
@@ -441,18 +550,23 @@ function Update-Cache
     )
 
     $key = Get-CacheKey -DestinationPath $DestinationPath -Uri $Uri
-    $path = Join-Path $script:cacheLocation $key
-    
-    if(-not (Test-Path $script:cacheLocation))
+    $path = Join-Path -Path $script:cacheLocation -ChildPath $key
+
+    if(-not (Test-Path -Path $script:cacheLocation))
     {
-        mkdir $script:cacheLocation | Out-Null
+        $null = New-Item -ItemType Directory -Path $script:cacheLocation
     }
 
-    Write-Debug "Updating cache for DestinationPath = $DestinationPath and Uri = $Uri. CacheKey = $key"
+    Write-Verbose -Message $($LocalizedData.UpdatingCache `
+        -f ${DestinationPath},${Uri},${Key})
+
     Export-CliXml -Path $path -InputObject $InputObject -Force
 }
 
-# Returns cache key for given parameters
+<#
+.Synopsis
+Returns cache key for given parameters
+#>
 function Get-CacheKey
 {
     param (
@@ -466,11 +580,7 @@ function Get-CacheKey
         [System.String]
         $Uri
     )
-    $key = [string]::Join("", @($DestinationPath, $Uri)).GetHashCode().ToString()
-    return $key
+    return [string]::Join("", @($DestinationPath, $Uri)).GetHashCode().ToString()
 }
 
 Export-ModuleMember -Function *-TargetResource
-
-
-

@@ -23,12 +23,5 @@ configuration Sample_xDscWebService
             EndpointName            = "PSDSCPullServer"
             CertificateThumbPrint   = "notNeededForRemoval"                              
         }
-
-        xDscWebService PSDSCComplianceServer
-        {
-            Ensure                  = "Absent"
-            EndpointName            = "PSDSCComplianceServer"
-            CertificateThumbPrint   = "notNeededForRemoval"
-        }
     }
  }

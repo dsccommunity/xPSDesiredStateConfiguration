@@ -434,7 +434,10 @@ function Set-TargetResource
     {
         foreach ($disposable in $disposables)
         {
-            $disposable.Dispose()
+            if ($null -ne $disposable)
+            {
+                $disposable.Dispose()
+            }
         }
     }
 }
@@ -824,12 +827,16 @@ function ResolveNamesToPrincipals
         [ValidateNotNull()]
         [String[]] $ObjectNames,
 
-        [ValidateNotNull()]
         [System.Collections.ArrayList] $Disposables,
 
         [System.Net.NetworkCredential]
         $NetworkCredential
     )
+
+    if ($null -eq $Disposables) # ValidateNotNull on the parameter does not work if the list contains a $null element
+    {
+        throw "Disposables cannot be null."
+    }
 
     Set-StrictMode -Version Latest
 

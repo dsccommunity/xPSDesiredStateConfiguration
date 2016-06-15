@@ -1,0 +1,9 @@
+
+[ClassVersion("1.0.0"), FriendlyName("xEnvironment")] 
+class MSFT_xEnvironmentResource : OMI_BaseResource
+{
+  [Key] string Name;
+  [write] string Value;
+  [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [Write] boolean Path;
+};
