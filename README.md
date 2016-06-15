@@ -28,6 +28,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
+* **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
 
 ### xArchive
 
@@ -283,6 +284,30 @@ These parameters will be the same for each Windows feature in the set. Please re
 * **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
 * **Source**: Indicates the location of the source file to use for installation, if necessary.
 
+### xWindowsOptionalFeatureSet
+Note: xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs.
+
+* **Name**: Defines the names of the Windows optional features in the set.
+
+These parameters will be the same for each Windows optional feature in the set. Please refer to the xWindowsOptionalFeature section above for more details on these parameters:
+* **Ensure**: Ensures that the set of features is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
+   - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
+   - If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
+* **RemoveFilesOnDisable**: Removes the files for an optional feature without removing the feature's manifest from the image.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogPath**: Specifies the full path and file name to log to.
+   - If not set, the default is %WINDIR%\Logs\Dism\dism.log.
+* **NoWindowsUpdateCheck**: Prevents DISM from contacting Windows Update (WU) when searching for the source files to restore a feature on an online image.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogLevel**: Specifies the maximum output level shown in the logs.
+   - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
+   - Default value: ErrorsOnly.
+
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -325,6 +350,7 @@ These parameters will be the same for each Windows feature in the set. Please re
 * Added the xProcessSet resource
 * Added the xServiceSet resource
 * Added the xWindowsFeatureSet resource
+* Added the xWindowsOptionalFeatureSet resource
 
 ### 3.10.0.0
 
