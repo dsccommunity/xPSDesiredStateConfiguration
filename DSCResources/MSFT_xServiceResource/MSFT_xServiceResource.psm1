@@ -11,6 +11,7 @@ ServiceStopped=Service '{0}' stopped.
 ErrorStartingService=Failure starting service '{0}'. Message: '{1}'
 OnlyOneParameterCanBeSpecified=Only one of the following parameters can be specified: '{0}', '{1}'.
 StartServiceWhatIf=Start Service
+StopServiceWhatIf=Stop Service
 ServiceAlreadyStopped=Service '{0}' already stopped, no action required.
 ErrorStoppingService=Failure stopping service '{0}'. Message: '{1}'
 ErrorRetrievingServiceInformation=Failure retrieving information for service '{0}'. Message: '{1}'
@@ -18,6 +19,7 @@ ErrorSettingServiceCredential=Failure setting credentials for service '{0}'. Mes
 SetCredentialWhatIf=Set Credential
 SetStartupTypeWhatIf=Set Start Type
 ErrorSettingServiceStartupType=Failure setting start type for service '{0}'. Message: '{1}'
+TestBinaryPathMismatch=Binary path for service '{0}' is '{1}'. It does not match '{2}'.
 TestUserNameMismatch=User name for service '{0}' is '{1}'. It does not match '{2}.
 TestStartupTypeMismatch=Startup type for service '{0}' is '{1}'. It does not match '{2}'.
 TestStateMismatch=State of service '{0}' is '{1}'. It does not match '{2}'.
@@ -83,7 +85,7 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $Name,
-        
+
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType,
@@ -121,7 +123,10 @@ function Test-TargetResource
         $Dependencies,
 
         [System.UInt32]
-        $StartupTimeout
+        $StartupTimeout,
+
+        [System.UInt32]
+        $TerminateTimeout
     )
 
     ValidateStartupType -Name $Name -StartupType $StartupType -State $State
@@ -159,13 +164,20 @@ function Test-TargetResource
             }
         }
     }
-    
-    $svc=GetServiceResource -Name $Name
 
+    $svc = GetServiceResource -Name $Name
+    $svcWmi = GetWMIService -Name $Name
+
+    # check the binary path
+    if(!$svcWmi.PathName.Equals($Path))
+    {
+        Write-Verbose -Message ($LocalizedData.TestBinaryPathMismatch -f $svcWmi.Name,$svcWmi.PathName,$Path)
+        return $false
+    }
+
+    # check optional parameters
     if($PSBoundParameters.ContainsKey("StartupType") -or $PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
     {
-        $svcWmi = GetWMIService -Name $Name
-
         $getUserNameAndPasswordArgs=@{}
         if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)}
         if($PSBoundParameters.ContainsKey("Credential")) {$null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)}
@@ -189,7 +201,7 @@ function Test-TargetResource
         Write-Verbose -Message ($LocalizedData.TestStateMismatch -f $svcWmi.Name,$svc.Status,$State)
         return $false
     }
-    
+
     return $true
 }
 
@@ -245,7 +257,10 @@ function Set-TargetResource
         $Dependencies,
 
         [System.UInt32]
-        $StartupTimeout = 30000
+        $StartupTimeout = 30000,
+
+        [System.UInt32]
+        $TerminateTimeout = 30000
     )
 
     ValidateStartupType -Name $Name -StartupType $StartupType -State $State
@@ -306,32 +321,39 @@ function Set-TargetResource
         else
         {
             $svc = GetServiceResource -Name $Name
-            StopService -Svc $svc
+            StopService -Svc $svc -TerminateTimeout $TerminateTimeout
             DeleteService -Name $svc.Name
             return
         }
     }
 
-    $svc=GetServiceResource -Name $Name
+    $svc = GetServiceResource -Name $Name
 
-    $writeWritePropertiesArguments=@{Name=$svc.name}
+    $writeWritePropertiesArguments=@{Name=$svc.name; Path=$Path}
     if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeWritePropertiesArguments.Add("StartupType",$StartupType)}
     if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$writeWritePropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)}
     if($PSBoundParameters.ContainsKey("Credential")) {$null=$writeWritePropertiesArguments.Add("Credential",$Credential)}
 
-    WriteWriteProperties @writeWritePropertiesArguments
+    $requiresRestart = WriteWriteProperties @writeWritePropertiesArguments
 
     if($State -eq "Stopped")
     {
         # Ensuring service is stopped
-        StopService -Svc $svc
+        StopService -Svc $svc -TerminateTimeout $TerminateTimeout
         return
+    }
+
+    # if the service needs to be restarted then go ahead and stop it now in preparation for the next check
+    if($requiresRestart)
+    {
+        Write-Verbose -Message "Service needs to be restarted"
+        StopService -Svc $svc -TerminateTimeout $TerminateTimeout
     }
 
     # $State is Running, so ensuring service is started unless we are also creating the service in which case the default behavior is that the service is in the stopped state.
     if($Ensure -eq "Present")
     {
-         if(( $PSBoundParameters.ContainsKey("State")) -and ($State -eq "Running"))
+        if($PSBoundParameters.ContainsKey("State") -and ($State -eq "Running"))
         {
             StartService -Svc $svc -StartupTimeout $StartupTimeout
         }
@@ -391,11 +413,16 @@ Writes all write properties if not already correctly set, logging errors and res
 function WriteWriteProperties
 {
     [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]
         [ValidateNotNull()]
         $Name,
+
+        [System.String]
+        [ValidateNotNullOrEmpty()]
+        $Path,
 
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
@@ -410,22 +437,46 @@ function WriteWriteProperties
         $Credential
     )
 
-    if(!$PSBoundParameters.ContainsKey("StartupType") -and !$PSBoundParameters.ContainsKey("BuiltInAccount") -and !$PSBoundParameters.ContainsKey("Credential"))
+    $svcWmi = GetWMIService -Name $Name
+    $requiresRestart = $false
+
+    # update binary path
+    $writeBinaryArguments=@{"SvcWmi"=$svcWmi; "Path"=$Path}
+    $requiresRestart = $requiresRestart -or (WriteBinaryProperties @writeBinaryArguments)
+
+    # update credentials
+    if($PSBoundParameters.ContainsKey("BuiltInAccount") -or $PSBoundParameters.ContainsKey("Credential"))
     {
-        return
+        $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
+
+        if($PSBoundParameters.ContainsKey("BuiltInAccount"))
+        {
+            $null=$writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)
+        }
+
+        if($PSBoundParameters.ContainsKey("Credential"))
+        {
+            $null=$writeCredentialPropertiesArguments.Add("Credential",$Credential)
+        }
+
+        WriteCredentialProperties @writeCredentialPropertiesArguments
     }
 
-    $svcWmi = GetWMIService -Name $Name
+    # update startup type
+    if($PSBoundParameters.ContainsKey("StartupType"))
+    {
+        $writeStartupArguments=@{"SvcWmi"=$svcWmi}
 
-    $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
-    if($PSBoundParameters.ContainsKey("BuiltInAccount")) {$null=$writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)}
-    if($PSBoundParameters.ContainsKey("Credential")) {$null=$writeCredentialPropertiesArguments.Add("Credential",$Credential)}
+        if($PSBoundParameters.ContainsKey("StartupType"))
+        {
+            $null=$writeStartupArguments.Add("StartupType",$StartupType)
+        }
 
-    WriteCredentialProperties @writeCredentialPropertiesArguments
+        WriteStartupTypeProperty @writeStartupArguments
+    }
 
-    $writeStartupArguments=@{"SvcWmi"=$svcWmi}
-    if($PSBoundParameters.ContainsKey("StartupType")) {$null=$writeStartupArguments.Add("StartupType",$StartupType)}
-    WriteStartupTypeProperty @writeStartupArguments
+    # return restart status
+    return $requiresRestart
 }
 
 <#
@@ -481,7 +532,6 @@ function WriteStartupTypeProperty
     }
 }
 
-
 <#
 .Synopsis
 Writes credential properties if not already correctly set, logging errors and respecting whatif
@@ -496,7 +546,6 @@ function WriteCredentialProperties
         [ValidateNotNull()]
         $SvcWmi,
 
-
         [System.String]
         [ValidateSet("LocalSystem", "LocalService", "NetworkService")]
         $BuiltInAccount,
@@ -505,7 +554,7 @@ function WriteCredentialProperties
         $Credential
     )
 
-    if(!$PSBoundParameters.ContainsKey("Credential") -and !$PSBoundParameters.ContainsKey("BuiltInAccount") -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
+    if(!$PSBoundParameters.ContainsKey("Credential") -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
         return
     }
@@ -536,6 +585,41 @@ function WriteCredentialProperties
             ThrowInvalidArgumentError -ErrorId "ChangeCredentialFailed" -ErrorMessage $message
         }
     }
+}
+
+<#
+.Synopsis
+Writes binary path if not already correctly set, logging errors and respecting whatif
+#>
+function WriteBinaryProperties
+{
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        $SvcWmi,
+
+        [System.String]
+        [ValidateNotNullOrEmpty()]
+        $Path
+    )
+
+    if($SvcWmi.PathName -eq $Path)
+    {
+        return $false
+    }
+
+    $ret = $SvcWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
+    if($ret.ReturnValue -ne 0)
+    {
+        $innerMessage = $LocalizedData.MethodFailed -f "Change","Win32_Service",$ret.ReturnValue
+        $message = $LocalizedData.ErrorChangingProperty -f "Binary Path",$innerMessage
+        ThrowInvalidArgumentError -ErrorId "ChangeBinaryPathFailed" -ErrorMessage $message
+    }
+
+    return $true
 }
 
 <#
@@ -611,7 +695,10 @@ function StopService
     (
         [parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $Svc
+        $Svc,
+
+        [parameter(Mandatory = $true)]
+        $TerminateTimeout
     )
 
     if($Svc.Status -eq [System.ServiceProcess.ServiceControllerStatus]::Stopped)
@@ -620,16 +707,23 @@ function StopService
         return
     }
 
-    # Exceptions will be thrown, caught and logged by the infrastructure
-    $err=Stop-Service -Name $Svc.Name -force 2>&1
-    if($err -eq $null)
+
+    if($PSCmdlet.ShouldProcess($Svc.Name,$LocalizedData.StopServiceWhatIf))
     {
+        try
+        {
+            $Svc.Stop()
+            $timeSpan = New-Object -TypeName TimeSpan -ArgumentList ($TerminateTimeout * 10000)
+            $Svc.WaitForStatus("Stopped", $timeSpan)
+        }
+        catch
+        {
+
+            Write-Log -Message ($LocalizedData.ErrorStoppingService -f $Svc.Name,$_.Exception.Message)
+            throw
+        }
+
         Write-Log -Message ($LocalizedData.ServiceStopped -f $Svc.Name)
-    }
-    else
-    {
-        Write-Log -Message ($LocalizedData.ErrorStoppingService -f $Svc.Name,($err | Out-String))
-        throw $err
     }
 }
 
@@ -1184,4 +1278,3 @@ function Write-Log
 }
 
 Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
-
