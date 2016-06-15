@@ -1,5 +1,5 @@
 
-[ClassVersion("1.0.0"),FriendlyName("xService")] 
+[ClassVersion("1.0.0"),FriendlyName("xService")]
 class MSFT_xServiceResource : OMI_BaseResource
 {
   [key] string Name;
@@ -13,7 +13,6 @@ class MSFT_xServiceResource : OMI_BaseResource
   [write] string Path;
   [write] string Dependencies[];
   [write] uint32 StartupTimeout;
+  [write] uint32 TerminateTimeout;
   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
 };
-
-

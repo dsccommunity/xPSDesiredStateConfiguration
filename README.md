@@ -27,6 +27,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroupSet** configures multiple xGroups with common settings but different names. 
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
+* **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
 
 ### xArchive
@@ -269,6 +270,20 @@ These parameters will be the same for each service in the set. Please refer to t
    - Default value: Present
 * **Credential**: Indicates credentials for the account that the service will run under. This property and the BuiltinAccount property cannot be used together.
 
+### xWindowsFeatureSet
+* **Name**: Defines the names of the Windows features in the set.
+
+These parameters will be the same for each Windows feature in the set. Please refer to the xWindowsFeature section above for more details on these parameters:
+* **Ensure**: Ensures that the set of features is present or absent.
+   - Supported values: Present, Absent.
+   - Default Value: Present.
+* **Credential**: Indicates the credentials to use to add or remove the role or feature.
+* **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures matches the state of the Ensure property.
+   - Suported values: $true, $false.
+   - Default value: $false.
+* **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
+* **Source**: Indicates the location of the source file to use for installation, if necessary.
+
 ### xWindowsOptionalFeatureSet
 Note: xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs.
 
@@ -334,6 +349,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * Added the xGroupSet resource
 * Added the xProcessSet resource
 * Added the xServiceSet resource
+* Added the xWindowsFeatureSet resource
 * Added the xWindowsOptionalFeatureSet resource
 
 ### 3.10.0.0
