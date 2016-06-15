@@ -14,6 +14,8 @@ Describe "xServiceSet Integration Tests" {
         $script:testServiceDependsOn = "winrm"
         $script:testServiceExecutablePath = Join-Path -Path (Get-Location) -ChildPath "DscTestService.exe"
 
+        Stop-Service $script:testServiceName -ErrorAction SilentlyContinue
+
         New-TestService `
             -ServiceName $script:testServiceName `
             -ServiceCodePath $script:testServiceCodePath `
