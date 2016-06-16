@@ -5,10 +5,10 @@
 
 Describe "xServiceSet Integration Tests" {
     BeforeAll {
-        Import-Module "$PSScriptRoot\MSFT_xServiceSet.TestHelper.psm1"
+        Import-Module "$PSScriptRoot\..\MSFT_xServiceResource.TestHelper.psm1"
 
         $script:testServiceName = "DscTestService"
-        $script:testServiceCodePath = "$PSScriptRoot\DscTestService.cs"
+        $script:testServiceCodePath = "$PSScriptRoot\..\DscTestService.cs"
         $script:testServiceDisplayName = "DSC test service display name"
         $script:testServiceDescription = "This is DSC test service used for testing ServiceSet composite resource"
         $script:testServiceDependsOn = "winrm"
@@ -29,7 +29,71 @@ Describe "xServiceSet Integration Tests" {
         Remove-TestService -ServiceName $script:testServiceName -ServiceExecutablePath $script:testServiceExecutablePath
     }
 
-    It "Changes the properties a set of services" -Pending { # This test requires several updates to xService. Will remove pending flag when those updates are complete.
+    BeforeEach {
+        $configurationName = 'SetUpService'
+        $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
+
+        try
+        {
+            Configuration $configurationName {
+                Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
+                xService Service1
+                {
+                    Name = $script:testServiceName
+                    DisplayName = $script:testServiceDisplayName
+                    Description = $script:testServiceDescription
+                    Path = $script:testServiceExecutablePath
+                    Dependencies = $script:testServiceDependsOn
+                    BuiltInAccount = 'LocalSystem'
+                    State = 'Stopped'
+                    StartupType = 'Manual'
+                }
+            }
+
+            & $configurationName -OutputPath $configurationPath
+
+            Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
+        }
+        finally
+        {
+            if (Test-Path -path $configurationPath)
+            {
+                Remove-Item -Path $configurationPath -Recurse -Force
+            }
+        }
+    }
+
+    AfterEach {
+        $configurationName = 'CleanUpService'
+        $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
+
+        try
+        {
+            Configuration $configurationName {
+                Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
+                xService Service1
+                {
+                    Name = $script:testServiceName
+                    Ensure = 'Absent'
+                }
+            }
+
+            & $configurationName -OutputPath $configurationPath
+
+            Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
+        }
+        finally
+        {
+            if (Test-Path -path $configurationPath)
+            {
+                Remove-Item -Path $configurationPath -Recurse -Force
+            }
+        }
+    }
+
+    It "Changes the properties a set of services" {
         $configurationName = "ChangeServiceProperties"
         $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
 
@@ -45,7 +109,6 @@ Describe "xServiceSet Integration Tests" {
                     Ensure = "Present"
                     State = "Running"
                     StartupType = "Automatic"
-                    BuiltInAccount = "LocalService"
                 }
             }
 
@@ -53,11 +116,10 @@ Describe "xServiceSet Integration Tests" {
 
             Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
 
-            $testService = (Get-WmiObject -Class win32_service | Where-Object {$_.Name -eq $script:testServiceName})
+            $testService = (Get-CimInstance -Class win32_service | Where-Object {$_.Name -eq $script:testServiceName})
             $testService | Should Not Be $null
             $testService.State | Should Be "Running"
             $testService.StartMode | Should Be "Auto"
-            $testService.StartName.Contains("LocalService") | Should Be $true
         }
         finally
         {
@@ -77,6 +139,7 @@ Describe "xServiceSet Integration Tests" {
         {
             Configuration $configurationName
             {
+                Import-DscResource -ModuleName PSDesiredStateConfiguration
                 Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
                 File TestDirectory

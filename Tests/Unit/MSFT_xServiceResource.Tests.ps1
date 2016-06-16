@@ -1,18 +1,21 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param ()
+
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xServiceResource' `
     -TestType Unit
 
 InModuleScope 'MSFT_xServiceResource' {
-
     Describe 'xService Unit Tests' {
         BeforeAll {
-            Import-Module "$PSScriptRoot\MSFT_xServiceResource.TestHelper.psm1" -Force
+            Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
+            Import-Module "$PSScriptRoot\..\MSFT_xServiceResource.TestHelper.psm1" -Force
 
-            $global:ServiceLocalizedData = $local:ServiceLocalizedData
+            $script:getTargetResourceResultProperties = @('Name', 'StartupType', 'DisplayName', 'Description', 'State', 'Path', 'Dependencies')
 
             $script:testServiceName = "DscTestService"
-            $script:testServiceCodePath = "$PSScriptRoot\DscTestService.cs"
+            $script:testServiceCodePath = "$PSScriptRoot\..\DscTestService.cs"
             $script:testServiceDisplayName = "DSC test service display name"
             $script:testServiceDescription = "This is DSC test service used for testing ServiceSet composite resource"
             $script:testServiceDependsOn = "winrm"
@@ -30,317 +33,300 @@ InModuleScope 'MSFT_xServiceResource' {
         }
 
         AfterAll {
-            Remove-TestService -Name $script:testServiceName -ServiceExecutablePath $script:testServiceExecutablePath
+            Remove-TestService -ServiceName $script:testServiceName -ServiceExecutablePath $script:testServiceExecutablePath
         }
 
         BeforeEach {
-            # Create new service DSCTestServiceName
             Set-TargetResource `
                 -Name $script:testServiceName `
-                -DisplayName $global:testServiceDisplayName `
+                -DisplayName $script:testServiceDisplayName `
                 -Description $script:testServiceDescription `
                 -Path $script:testServiceExecutablePath `
                 -Dependencies $script:testServiceDependsOn `
                 -BuiltInAccount 'LocalSystem' `
                 -State 'Stopped' `
                 -StartupType 'Manual'
-
-            SetServiceCredentialBuiltIn -name $dscTestServiceName -userName "LocalSystem" -userPassword ""
         }
 
         AfterEach {
-            Invoke-Remotely {
-                #Delete service DSCTestServiceName
-                Set-TargetResource -Name $dscTestServiceName -Ensure Absent
-            }
+            Set-TargetResource -Name $script:testServiceName -Ensure 'Absent'
         }
     
-        It 'Get-TargetResource' -Pending {
-            $getTargetResourceResult = Get-TargetResource $script:testServiceName
+        Context 'Get-TargetResource' {
+            It 'Should return the correct hashtable properties' {
+                $getTargetResourceResult = Get-TargetResource -Name $script:testServiceName
 
-            $getTargetResourceResult.Name | Should Be $script:testServiceName
-            $getTargetResourceResult.StartupType | Should Be 'Manual'
-            $getTargetResourceResult.DisplayName | Should Be $script:testServiceDisplayName
-            $getTargetResourceResult.Description | Should Be $script:testServiceDescription
-            $getTargetResourceResult.State | Should Be 'Stopped'
-            $getTargetResourceResult.Path.IndexOf($script:testServiceName, [System.StringComparison]::OrdinalIgnoreCase)  | Should Not Be -1
-            $getTargetResourceResult.Dependencies | Should Be $script:testServiceDependsOn
-        }
-    
-        It 'Set-TargetResource' -Pending {
-            Set-TargetResource -Name $script:testServiceName
-            $getTargetResourceResult = Get-TargetResource $script:testServiceName
-            $getTargetResourceResult.State | Should Be 'Running'
+                Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $script:getTargetResourceResultProperties
 
-            Set-TargetResource -Name $script:testServiceName -State 'Stopped'
-            $getTargetResourceResult = Get-TargetResource $script:testServiceName
-            $getTargetResourceResult.State | Should Be 'Stopped'
-        }
-    
-        It 'SimpleTestService' -Pending {
-            Invoke-Remotely {
-                SetServiceState $dscTestServiceName "Running"
-                $r = MSFT_ServiceResource\Test-TargetResource $dscTestServiceName
-                AssertEquals $r  $True "Test Running True"
-                $r = MSFT_ServiceResource\Test-TargetResource $dscTestServiceName -State Stopped
-                AssertEquals $r  $False "Test Stopped False"
-                stop-service $dscTestServiceName
-                $r = MSFT_ServiceResource\Test-TargetResource $dscTestServiceName
-                AssertEquals $r  $False "Test Running False"
-                $r = MSFT_ServiceResource\Test-TargetResource $dscTestServiceName -State Stopped
-                AssertEquals $r  $True "Test Stopped True"
+                $getTargetResourceResult.Name | Should Be $script:testServiceName
+                $getTargetResourceResult.StartupType | Should Be 'Manual'
+                $getTargetResourceResult.DisplayName | Should Be $script:testServiceDisplayName
+                $getTargetResourceResult.Description | Should Be $script:testServiceDescription
+                $getTargetResourceResult.State | Should Be 'Stopped'
+                $getTargetResourceResult.Path.IndexOf($script:testServiceName, [System.StringComparison]::OrdinalIgnoreCase)  | Should Not Be -1
+                $getTargetResourceResult.Dependencies | Should Be $script:testServiceDependsOn
             }
-        }
-    
-        It 'TestServiceNotSameStartType' -Pending {
-            Invoke-Remotely {
-                SetServiceState $dscTestServiceName "Running"
-                $r = MSFT_ServiceResource\Test-TargetResource $dscTestServiceName -BuiltInAccount NetworkService
-                AssertEquals $r  $False "Test Present False because it is not NetworkService"
-                $r = MSFT_ServiceResource\Test-TargetResource $dscTestServiceName -StartupType Automatic
-                AssertEquals $r  $False "Test Present False because it is not disabled"
-            }
-        }
-    
-        It 'SetAlreadyStarted' -Pending {
-            Invoke-Remotely {
-                SetServiceState $dscTestServiceName "Running"
-                $verboseFileName=join-path $script:serviceTestPath '\..\verboseOutput.txt'
-                del $verboseFileName -ErrorAction SilentlyContinue
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -Verbose 4> $verboseFileName
-                $actual=(Get-Content $verboseFileName -Raw).Trim().Replace("`r`n", "").Replace("`n", "")
-                $expected = $ServiceLocalizedData.WritePropertiesIgnored -f $dscTestServiceName + $ServiceLocalizedData.ServiceAlreadyStarted -f $dscTestServiceName
-                AssertEquals $actual $expected "verbose"
-            }
-        }
-    
-        It 'SetAlreadyStopped' -Pending {
-            Invoke-Remotely {
-                SetServiceState $dscTestServiceName "Stopped"
-                $verboseFileName=join-path $script:serviceTestPath '\..\verboseOutput.txt'
-                del $verboseFileName -ErrorAction SilentlyContinue
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -Verbose 4> $verboseFileName
-                $actual=(Get-Content $verboseFileName -Raw).Trim().Replace("`r`n", "").Replace("`n", "")
-                $expected = $ServiceLocalizedData.WritePropertiesIgnored -f $dscTestServiceName + $ServiceLocalizedData.ServiceAlreadyStopped -f $dscTestServiceName
-                AssertEquals $actual  $expected "verbose"
-            }
-        }
-    
-        It 'InvalidStartupType' -Pending {
-            Invoke-Remotely {
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName
 
-                $thrown=$false
+            It 'Should throw with an invalid service name'{
+                { Get-TargetResource -Name "NotAService" } | Should Throw
+            }
+        }
+
+        Context 'Set-TargetResource' {
+    
+            It 'Should set the correct state' {
+                Set-TargetResource -Name $script:testServiceName
+                $getTargetResourceResult = Get-TargetResource $script:testServiceName
+                $getTargetResourceResult.State | Should Be 'Running'
+
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped'
+                $getTargetResourceResult = Get-TargetResource $script:testServiceName
+                $getTargetResourceResult.State | Should Be 'Stopped'
+            }
+
+            It 'Should provide correct verbose output when setting State to Running with the service already started' {
+                Set-TargetResource -Name $script:testServiceName
+
+                $verboseFilePath = Join-Path -Path (Get-Location) -ChildPath 'SetTargetResourceRunningTestVerboseOutput.txt'
+
+                if (Test-Path $verboseFilePath)
+                {
+                    Remove-Item $verboseFilePath -ErrorAction SilentlyContinue
+                }
+
                 try
                 {
-                    MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -StartupType Automatic
+                    Set-TargetResource -Name $script:testServiceName -Verbose 4> $verboseFilePath
+
+                    $actualVerboseOutput = (Get-Content -Path $verboseFilePath -Raw).Trim().Replace("`r`n", "").Replace("`n", "")
+                    $expectedVerboseOutputWritePropertiesIgnored = $serviceLocalizedData.WritePropertiesIgnored -f $script:testServiceName
+                    $expectedVerboseOutputServiceAlreadyStarted = $serviceLocalizedData.ServiceAlreadyStarted -f $script:testServiceName
+
+                    $actualVerboseOutput.Contains($expectedVerboseOutputWritePropertiesIgnored) | Should Be $true
+                    $actualVerboseOutput.Contains($expectedVerboseOutputServiceAlreadyStarted) | Should Be $true
                 }
-                catch
+                finally
                 {
-                    $thrown=$true
+                    if (Test-Path $verboseFilePath)
+                    {
+                        Remove-Item $verboseFilePath -ErrorAction SilentlyContinue
+                    }
+                }
+            }
+    
+            It 'Should provide correct verbose output when setting State to Stopped with the service already stopped' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped'
+
+                $verboseFilePath = Join-Path -Path (Get-Location) -ChildPath 'SetTargetResourceStoppedTestVerboseOutput.txt'
+
+                if (Test-Path $verboseFilePath)
+                {
+                    Remove-Item $verboseFilePath -ErrorAction SilentlyContinue
                 }
 
-                Assert $thrown "Cannot set to automatic and stop"
-
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped
-
-                $thrown=$false
                 try
                 {
-                    MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -StartupType Disabled
+                    Set-TargetResource -Name $script:testServiceName -State 'Stopped' -Verbose 4> $verboseFilePath
+
+                    $actualVerboseOutput = (Get-Content -Path $verboseFilePath -Raw).Trim().Replace("`r`n", "").Replace("`n", "")
+                    $expectedVerboseOutputWritePropertiesIgnored = $serviceLocalizedData.WritePropertiesIgnored -f $script:testServiceName
+                    $expectedVerboseOutputServiceAlreadyStopped = $serviceLocalizedData.ServiceAlreadyStopped -f $script:testServiceName
+
+                    $actualVerboseOutput.Contains($expectedVerboseOutputWritePropertiesIgnored) | Should Be $true
+                    $actualVerboseOutput.Contains($expectedVerboseOutputServiceAlreadyStopped) | Should Be $true
                 }
-                catch
+                finally
                 {
-                    $thrown=$true
+                    if (Test-Path $verboseFilePath)
+                    {
+                        Remove-Item $verboseFilePath -ErrorAction SilentlyContinue
+                    }
+                }
+            }
+    
+            It 'Should throw when setting State to Stopped and StartupType to Automatic' {
+                Set-TargetResource -Name $script:testServiceName
+                { Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Automatic' } | Should Throw
+            }
+
+            It 'Should throw when setting State to Running and StartupType to Disabled' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped'
+                { Set-TargetResource -Name $script:testServiceName -StartupType 'Disabled' } | Should Throw
+            }
+    
+            It 'Should throw when both BuiltInAccount and Credential specified' {
+                $testUsername = 'username'
+                $testPassword = 'password'
+                $secureTestPassword = ConvertTo-SecureString $testPassword  -AsPlainText -Force
+
+                $testCredential = New-Object System.Management.Automation.PSCredential ($testUsername, $secureTestPassword)
+                { Set-TargetResource -Name $script:testServiceName -BuiltInAccount 'LocalService' -Credential $testCredential } | Should Throw
+            }
+    
+            It 'Should correctly change StartupType' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Disabled'
+                $getTargetResourceResult = Get-TargetResource -Name $script:testServiceName
+                $getTargetResourceResult.StartupType | Should Be "Disabled"
+
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Manual'
+                $getTargetResourceResult = Get-TargetResource -Name $script:testServiceName
+                $getTargetResourceResult.StartupType | Should Be "Manual"
+            }
+    
+            It 'Should correctly change BuiltInAccount' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'NetworkService'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'NetworkService'
+                $testTargetResourceResult | Should Be $true
+
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'LocalService'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'LocalService'
+                $testTargetResourceResult | Should Be $true
+
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'LocalSystem'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'LocalSystem'
+                $testTargetResourceResult | Should Be $true
+            }
+    
+            It 'Should throw when trying to set an invalid credential' {
+                $testUsername = 'username'
+                $testPassword = 'password'
+                $secureTestPassword = ConvertTo-SecureString $testPassword  -AsPlainText -Force
+
+                $testCredential = New-Object System.Management.Automation.PSCredential ($testUsername, $secureTestPassword)
+                
+                { Set-TargetResource -Name $script:testServiceName -State 'Stopped' -Credential $testCredential } | Should Throw
+            }
+
+            It 'Should output correct description and not start a stopped service when WhatIf is specified' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped'
+
+                $transcriptPath = Join-Path -Path (Get-Location) -ChildPath 'WhatIfTestTranscript.txt'
+                if (Test-Path $transcriptPath)
+                {
+                    Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+                    Remove-Item $transcriptPath
                 }
 
-                Assert $thrown "Cannot disable and start"
-            }
-        }
-    
-        It 'ConflictBetweenBuiltInAndCredentials' -Pending {
-            Invoke-Remotely {
-                $thrown=$false
                 try
                 {
-                    $creds=New-Object System.Management.Automation.PSCredential "a",(ConvertTo-SecureString "b" -AsPlainText -Force)
-                    MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -BuiltInAccount LocalService -Credential $creds
+                    Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+                    
+                    Start-Transcript -Path $transcriptPath
+                    Set-TargetResource -Name $script:testServiceName -WhatIf
+                    Stop-Transcript
+
+                    Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+
+                    $transcriptContent = Get-Content -Path $transcriptPath -Raw
+                    $transcriptContent | Should Not Be $null
+
+                    $expectedTranscriptMessage = $LocalizedData.StartServiceWhatIf -f $script:testServiceName
+
+                    $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "") 
+                    $transcriptContent.Contains($expectedTranscriptMessage) | Should Be $true
+
+                    $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped'
+                    $testTargetResourceResult | Should Be $true
                 }
-                catch
+                finally
                 {
-                    $thrown=$true
+                    if (Test-Path $transcriptPath)
+                    {
+                        Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+                        Remove-Item $transcriptPath
+                    }
+                }
+            }
+    
+            It 'Should output correct description and not stop a started service when WhatIf is specified' {
+                Set-TargetResource -Name $script:testServiceName
+
+                $transcriptPath = Join-Path -Path (Get-Location) -ChildPath 'WhatIfTestTranscript.txt'
+                if (Test-Path $transcriptPath)
+                {
+                    Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+                    Remove-Item $transcriptPath
                 }
 
-                Assert $thrown "Cannot specify creds and builtin"
-            }
-        }
-    
-        It 'ChangeStartupType' -Pending {
-            Invoke-Remotely {
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -StartupType Disabled
-                $r=MSFT_ServiceResource\Get-TargetResource  $dscTestServiceName
-                AssertEquals $r.StartupType "Disabled" "Disabled successfully"
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -StartupType Manual
-                $r=MSFT_ServiceResource\Get-TargetResource  $dscTestServiceName
-                AssertEquals $r.StartupType "Manual" "Set to Manual successfully"
-            }
-        }
-    
-        It 'ChangeBuiltInAccount' -Pending {
-            Invoke-Remotely {
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -BuiltInAccount NetworkService
-                $r=MSFT_ServiceResource\Get-TargetResource  $dscTestServiceName
-                Assert (MSFT_ServiceResource\Test-TargetResource  $dscTestServiceName -State Stopped -BuiltInAccount NetworkService) "BuiltInAccount set"
-
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -BuiltInAccount  LocalService
-                $r=MSFT_ServiceResource\Get-TargetResource  $dscTestServiceName
-                Assert (MSFT_ServiceResource\Test-TargetResource  $dscTestServiceName -State Stopped -BuiltInAccount LocalService) "LocalSystem set"
-
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -BuiltInAccount  LocalSystem
-                $r=MSFT_ServiceResource\Get-TargetResource  $dscTestServiceName
-                Assert (MSFT_ServiceResource\Test-TargetResource  $dscTestServiceName -State Stopped -BuiltInAccount LocalSystem) "LocalSystem set"
-            }
-        }
-    
-        It 'ChangeInvalidCredentials' -Pending {
-            Invoke-Remotely {
-                $creds=New-Object System.Management.Automation.PSCredential "NotAUser",(ConvertTo-SecureString "NotAPassword" -AsPlainText -Force)
-                $thrown=$false
                 try
                 {
-                    MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -Credential $creds
+                    Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+                    
+                    Start-Transcript -Path $transcriptPath
+                    Set-TargetResource -Name $script:testServiceName -State 'Stopped' -WhatIf
+                    Stop-Transcript
+
+                    Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+
+                    $transcriptContent = Get-Content -Path $transcriptPath -Raw
+                    $transcriptContent | Should Not Be $null
+
+                    $expectedTranscriptMessage = $LocalizedData.StopServiceWhatIf -f $script:testServiceName
+
+                    $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "") 
+                    $transcriptContent.Contains($expectedTranscriptMessage) | Should Be $true
+
+                    $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName
+                    $testTargetResourceResult | Should Be $true
                 }
-                catch
+                finally
                 {
-                    $thrown=$true
+                    if (Test-Path $transcriptPath)
+                    {
+                        Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+                        Remove-Item $transcriptPath
+                    }
                 }
-                Assert $thrown "Invalid creds"
+            }
+
+            It 'Should throw with invalid service name' {
+                { Set-TargetResource -Name "NotAService" } | Should Throw
+            }
+
+            It 'Should throw when trying to start a disabled service' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Disabled'
+                { Set-TargetResource -Name $script:testServiceName } | Should Throw
             }
         }
     
-        It 'TestWhatifServiceStart' -Skip:(-not $script:shouldRun -or (-not (IsEnUS))) {
-            Invoke-Remotely {
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped
-                $script = "MSFT_ServiceResource\Set-TargetResource {0} -Whatif" -f $dscTestServiceName
-                TestWhatif $script $ServiceLocalizedData.StartServiceWhatIf
+        Context 'Test-TargetResource' {
+            It 'Should return correct value based on State' {
+                Set-TargetResource -Name $script:testServiceName
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName
+                $testTargetResourceResult | Should Be $true
 
-                $script = "MSFT_ServiceResource\Set-TargetResource {0} -State Stopped -Whatif" -f $dscTestServiceName
-                TestWhatif $script ($ServiceLocalizedData.ServiceAlreadySttopped -f $dscTestServiceName)
-                Assert (MSFT_ServiceResource\Test-TargetResource $dscTestServiceName -State Stopped) "Service is still stopped"
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped'
+                $testTargetResourceResult | Should Be $false
+
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName
+                $testTargetResourceResult | Should Be $false
+
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped'
+                $testTargetResourceResult | Should Be $true
+            }
+    
+            It 'Should return false with different StartType' {
+                Set-TargetResource -Name $script:testServiceName
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -StartupType 'Automatic'
+                $testTargetResourceResult | Should Be $false
+            }
+
+            It 'Should return false with different BuiltInAccount' {
+                Set-TargetResource -Name $script:testServiceName
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -BuiltInAccount NetworkService
+                $testTargetResourceResult | Should Be $false
+            }
+
+            It 'Should return false with invalid service name' {
+                Test-TargetResource -Name "NotAService" | Should Be $false
             }
         }
     
-        It 'TestWhatifServiceStop' -Skip:(-not $script:shouldRun -or (-not (IsEnUS))) {
-            Invoke-Remotely {
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName
-                $script = "MSFT_ServiceResource\Set-TargetResource {0} -State Stopped -Whatif" -f $dscTestServiceName
-                TestWhatif $script "Stop-Service"
-
-                $script = "MSFT_ServiceResource\Set-TargetResource {0} -State Running -Whatif" -f $dscTestServiceName
-                TestWhatif $script ($ServiceLocalizedData.ServiceAlreadyStarted -f $dscTestServiceName)
-                Assert (MSFT_ServiceResource\Test-TargetResource $dscTestServiceName) "Service is still started"
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped
-            }
-        }
-    
-        It 'GetTestAndSetInvalidService' -Pending {
-            Invoke-Remotely {
-                $thrown=$false
-                try
-                {
-                    MSFT_ServiceResource\Get-TargetResource "NotAService"
-                }
-                catch
-                {
-                    $thrown=$true
-                }
-                Assert $thrown "Invalid Service Name in Get"
-
-                $thrown=$false
-                try
-                {
-                    MSFT_ServiceResource\Set-TargetResource "NotAService"
-                }
-                catch
-                {
-                    $thrown=$true
-                }
-                Assert $thrown "Invalid Service Name in Set"
-
-                $result = MSFT_ServiceResource\Test-TargetResource "NotAService"
-        
-                Assert !$result "Invalid output from Test"
-            }
-        }
-    
-        It 'StartDisabledService' -Pending {
-            Invoke-Remotely {
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -StartupType Disabled
-                $thrown=$false
-                try
-                {
-                    MSFT_ServiceResource\Set-TargetResource $dscTestServiceName
-                }
-                catch
-                {
-                    $thrown=$true
-                }
-                Assert $thrown "Start Disabled service"
-
-                MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -StartupType Manual
-            }
-        }
-
-        # This test case verifies something meaningful, but with functionality that no longer exists
-        # TestCase StopServiceThatCantBeStopped -tags @("DRT") { 
-            # MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped
-            # MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Running -Arguments "FailToStop"
-            # $thrown=$false
-            # try
-            # {
-                # MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped
-            # }
-            # catch
-            # {
-                # $thrown=$true
-            # }
-            # Assert $thrown "Stop Service that can't be stopped"
-
-            # # After a service refuses to Stop once the Stop method will not be called again.
-            # # The system caches the result and refuses to stop the service.
-            # # The service can only be stopped through the process.
-            # Get-Process "DscTestService*" | Stop-Process -Force
-        # }
-    
-        It 'WriteInvalidStartupProperty' -Pending {
-            Invoke-Remotely {
-                $svcWmi = new-object management.managementobject "Win32_Service.Name='$dscTestServiceName'"
-                $thrown=$false
-                try
-                {
-                    WriteStartupTypeProperty $svcWmi "NotAStartupValue"
-                }
-                catch
-                {
-                    $thrown=$true
-                }
-                Assert $thrown "write invalid startup property"
-            }
-        }
-    
-        It 'SetNonExistentUser' -Pending {
-            Invoke-Remotely {
-                $thrown=$false
-                try
-                {
-                    $cred = new-object pscredential "non existent user",(ConvertTo-SecureString "non existent password" -AsPlainText -Force)
-                    MSFT_ServiceResource\Set-TargetResource $dscTestServiceName -State Stopped -Credential $cred
-                }
-                catch
-                {
-                    $thrown=$true
-                }
-                Assert $thrown "Should not be able to set to start as non existing credential"
+        Context 'Set-ServiceStartupType' {
+            It 'Should throw with invalid StartupType' {
+                $win32ServiceObject = Get-Win32ServiceObject -Name $script:testServiceName
+                { Set-ServiceStartupType -Win32ServiceObject $win32ServiceObject -StartupType "NotAStartupValue" } | Should Throw
             }
         }
     }

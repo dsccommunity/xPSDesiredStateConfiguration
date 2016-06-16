@@ -66,9 +66,18 @@ Specify an empty string if you don't want to pass any arguments.
 
 For a complete list of properties, please use Get-DscResource
 
-* **Name**: The name for the service.
+* **Name**: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
 * **Ensure**: An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent')
-* **Path**: The path to the service executable file. This is a requied parameter if Ensure is set to true
+* **Path**: The path to the service executable file
+* **StartupType**: Indicates the startup type for the service. The values that are allowed for this property are: Automatic, Disabled, and Manual
+* **BuiltInAccount**: Indicates the sign-in account to use for the service. The values that are allowed for this property are: LocalService, LocalSystem, and NetworkService.
+* **Credential**: The credential to run the service under.
+* **State**: Indicates the state you want to ensure for the service.
+* **DisplayName**: The display name of the service.
+* **Description**: The description of the service.
+* **Dependencies**: An array of strings indicating the names of the dependencies of the service.
+* **StartupTimeout**: The time to wait for the service to start in milliseconds.
+* **TerminateTimeout**: The time to wait for the service to stop in milliseconds.
 
 ### xRemoteFile
 
@@ -351,6 +360,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * Added the xServiceSet resource
 * Added the xWindowsFeatureSet resource
 * Added the xWindowsOptionalFeatureSet resource
+* Merged the in-box Service resource with xService and added tests for xService
 
 ### 3.10.0.0
 

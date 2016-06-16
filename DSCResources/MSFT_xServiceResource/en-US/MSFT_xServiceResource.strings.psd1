@@ -11,6 +11,7 @@ ServiceStopped=Service '{0}' stopped.
 ErrorStartingService=Failure starting service '{0}'. Please check the path '{1}' provided for the service. Message: '{2}'
 OnlyOneParameterCanBeSpecified=Only one of the following parameters can be specified: '{0}', '{1}'.
 StartServiceWhatIf=Start Service
+StopServiceWhatIf=Stop Service
 ServiceAlreadyStopped=Service '{0}' already stopped, no action required.
 ErrorStoppingService=Failure stopping service '{0}'. Message: '{1}'
 ErrorRetrievingServiceInformation=Failure retrieving information for service '{0}'. Message: '{1}'
@@ -18,8 +19,10 @@ ErrorSettingServiceCredential=Failure setting credentials for service '{0}'. Mes
 SetCredentialWhatIf=Set Credential
 SetStartupTypeWhatIf=Set Start Type
 ErrorSettingServiceStartupType=Failure setting start type for service '{0}'. Message: '{1}'
+TestBinaryPathMismatch=Binary path for service '{0}' is '{1}'. It does not match '{2}'.
 TestUserNameMismatch=User name for service '{0}' is '{1}'. It does not match '{2}'.
 TestStartupTypeMismatch=Startup type for service '{0}' is '{1}'. It does not match '{2}'.
+TestStateMismatch=State of service '{0}' is '{1}'. It does not match '{2}'.
 MethodFailed=The '{0}' method of '{1}' failed with error code: '{2}'.
 ErrorChangingProperty=Failed to change '{0}' property. Message: '{1}'
 ErrorSettingLogOnAsServiceRightsForUser=Error granting '{0}' the right to log on as a service. Message: '{1}'.
@@ -36,7 +39,7 @@ ServiceExistsSamePath=The service '{0}' to create already exists with path '{1}'
 ServiceNotExists=The service '{0}' does not exist. Specify the path to the executable to create a new service
 ErrorDeletingService=Error in deleting service '{0}'
 ServiceDeletedSuccessfully=Service '{0}' Deleted Successfully
-TryDeleteAgain=Wait for 2 seconds for a service to get deleted
+TryDeleteAgain=Wait for 2 milliseconds for a service to get deleted
 WritePropertiesIgnored=Service '{0}' already exists. Write properties such as Status, DisplayName, Description, Dependencies will be ignored for existing services.
 ###PSLOC
 

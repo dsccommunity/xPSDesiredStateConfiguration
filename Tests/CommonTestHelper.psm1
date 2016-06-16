@@ -488,8 +488,79 @@ function Test-UserOnNanoServer
     Remove-LocalUser -Name $UserName
 }
 
+<#
+    .SYNOPSIS
+    Waits for a script block to return true.
+
+    .PARAMETER ScriptBlock
+    The ScriptBlock to wait. Should return a result of $true when complete.
+
+    .PARAMETER TimeoutSeconds
+    The number of seconds to wait for the ScriptBlock to return true.
+#>
+function Wait-ScriptBlockReturnTrue
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [ScriptBlock]
+        $ScriptBlock,
+
+        [Int]
+        $TimeoutSeconds = 5
+    )
+
+    $startTime = [DateTime]::Now
+
+    $invokeScriptBlockResult = $false
+    while (-not $invokeScriptBlockResult -and (([DateTime]::Now - $startTime).TotalSeconds -lt $TimeoutSeconds))
+    {
+        $invokeScriptBlockResult = $ScriptBlock.Invoke()
+        Start-Sleep -Seconds 1
+    }
+
+    return $invokeScriptBlockResult
+}
+
+<#
+    .SYNOPSIS
+    Tests if a file is currently locked.
+
+    .PARAMETER Path
+    The path to the file to test.
+#>
+function Test-IsFileLocked
+{
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Path
+    )
+
+    if (-not (Test-Path $Path))
+    {
+        return $false
+    }
+
+    try
+    {
+        $content = Get-Content -Path $Path
+        return $false
+    }
+    catch
+    {
+        return $true
+    }
+}
+
 Export-ModuleMember -Function `
     Test-GetTargetResourceResult, `
     New-User, `
     Remove-User, `
-    Test-User
+    Test-User, `
+    Wait-ScriptBlockReturnTrue, `
+    Test-IsFileLocked
