@@ -5,6 +5,8 @@
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
 The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, **xWindowsOptionalFeature** and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource.
 
+**This module is currently in the process of becoming one of our first experimental High Quality Resource Modules (HQRMs). The plan for updating this module is available [here](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/HighQualityResourceModulePlan.md). Any comments or questions about this process/plan can be submitted under issue [#160](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/160).**
+
 ## Contributing
 Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
