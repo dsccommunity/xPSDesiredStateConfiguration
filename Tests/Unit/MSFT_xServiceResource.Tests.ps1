@@ -51,7 +51,7 @@ InModuleScope 'MSFT_xServiceResource' {
         AfterEach {
             Set-TargetResource -Name $script:testServiceName -Ensure 'Absent'
         }
-    
+
         Context 'Get-TargetResource' {
             It 'Should return the correct hashtable properties' {
                 $getTargetResourceResult = Get-TargetResource -Name $script:testServiceName
@@ -73,7 +73,7 @@ InModuleScope 'MSFT_xServiceResource' {
         }
 
         Context 'Set-TargetResource' {
-    
+
             It 'Should set the correct state' {
                 Set-TargetResource -Name $script:testServiceName
                 $getTargetResourceResult = Get-TargetResource $script:testServiceName
@@ -113,7 +113,7 @@ InModuleScope 'MSFT_xServiceResource' {
                     }
                 }
             }
-    
+
             It 'Should provide correct verbose output when setting State to Stopped with the service already stopped' {
                 Set-TargetResource -Name $script:testServiceName -State 'Stopped'
 
@@ -143,7 +143,7 @@ InModuleScope 'MSFT_xServiceResource' {
                     }
                 }
             }
-    
+
             It 'Should throw when setting State to Stopped and StartupType to Automatic' {
                 Set-TargetResource -Name $script:testServiceName
                 { Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Automatic' } | Should Throw
@@ -153,7 +153,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 Set-TargetResource -Name $script:testServiceName -State 'Stopped'
                 { Set-TargetResource -Name $script:testServiceName -StartupType 'Disabled' } | Should Throw
             }
-    
+
             It 'Should throw when both BuiltInAccount and Credential specified' {
                 $testUsername = 'username'
                 $testPassword = 'password'
@@ -162,7 +162,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 $testCredential = New-Object System.Management.Automation.PSCredential ($testUsername, $secureTestPassword)
                 { Set-TargetResource -Name $script:testServiceName -BuiltInAccount 'LocalService' -Credential $testCredential } | Should Throw
             }
-    
+
             It 'Should correctly change StartupType' {
                 Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Disabled'
                 $getTargetResourceResult = Get-TargetResource -Name $script:testServiceName
@@ -172,7 +172,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 $getTargetResourceResult = Get-TargetResource -Name $script:testServiceName
                 $getTargetResourceResult.StartupType | Should Be "Manual"
             }
-    
+
             It 'Should correctly change BuiltInAccount' {
                 Set-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'NetworkService'
                 $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'NetworkService'
@@ -186,14 +186,14 @@ InModuleScope 'MSFT_xServiceResource' {
                 $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped' -BuiltInAccount 'LocalSystem'
                 $testTargetResourceResult | Should Be $true
             }
-    
+
             It 'Should throw when trying to set an invalid credential' {
                 $testUsername = 'username'
                 $testPassword = 'password'
                 $secureTestPassword = ConvertTo-SecureString $testPassword  -AsPlainText -Force
 
                 $testCredential = New-Object System.Management.Automation.PSCredential ($testUsername, $secureTestPassword)
-                
+
                 { Set-TargetResource -Name $script:testServiceName -State 'Stopped' -Credential $testCredential } | Should Throw
             }
 
@@ -210,7 +210,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 try
                 {
                     Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
-                    
+
                     Start-Transcript -Path $transcriptPath
                     Set-TargetResource -Name $script:testServiceName -WhatIf
                     Stop-Transcript
@@ -222,7 +222,7 @@ InModuleScope 'MSFT_xServiceResource' {
 
                     $expectedTranscriptMessage = $LocalizedData.StartServiceWhatIf -f $script:testServiceName
 
-                    $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "") 
+                    $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "")
                     $transcriptContent.Contains($expectedTranscriptMessage) | Should Be $true
 
                     $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped'
@@ -237,7 +237,7 @@ InModuleScope 'MSFT_xServiceResource' {
                     }
                 }
             }
-    
+
             It 'Should output correct description and not stop a started service when WhatIf is specified' {
                 Set-TargetResource -Name $script:testServiceName
 
@@ -251,7 +251,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 try
                 {
                     Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
-                    
+
                     Start-Transcript -Path $transcriptPath
                     Set-TargetResource -Name $script:testServiceName -State 'Stopped' -WhatIf
                     Stop-Transcript
@@ -263,7 +263,7 @@ InModuleScope 'MSFT_xServiceResource' {
 
                     $expectedTranscriptMessage = $LocalizedData.StopServiceWhatIf -f $script:testServiceName
 
-                    $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "") 
+                    $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "")
                     $transcriptContent.Contains($expectedTranscriptMessage) | Should Be $true
 
                     $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName
@@ -288,7 +288,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 { Set-TargetResource -Name $script:testServiceName } | Should Throw
             }
         }
-    
+
         Context 'Test-TargetResource' {
             It 'Should return correct value based on State' {
                 Set-TargetResource -Name $script:testServiceName
@@ -305,7 +305,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped'
                 $testTargetResourceResult | Should Be $true
             }
-    
+
             It 'Should return false with different StartType' {
                 Set-TargetResource -Name $script:testServiceName
                 $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -StartupType 'Automatic'
@@ -322,7 +322,7 @@ InModuleScope 'MSFT_xServiceResource' {
                 Test-TargetResource -Name "NotAService" | Should Be $false
             }
         }
-    
+
         Context 'Set-ServiceStartupType' {
             It 'Should throw with invalid StartupType' {
                 $win32ServiceObject = Get-Win32ServiceObject -Name $script:testServiceName
