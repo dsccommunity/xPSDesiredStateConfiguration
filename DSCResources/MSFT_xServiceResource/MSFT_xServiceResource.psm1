@@ -63,15 +63,15 @@ function Get-TargetResource
 
     $builtInAccount = $null
 
-    if ($win32ServiceObject.StartName -ieq "LocalSystem")
+    if ($win32ServiceObject.StartName -ieq "LocalSystem") 
     {
         $builtInAccount ="LocalSystem"
     }
-    elseif ($win32ServiceObject.StartName -ieq "NT Authority\NetworkService")
+    elseif ($win32ServiceObject.StartName -ieq "NT Authority\NetworkService") 
     {
         $builtInAccount = "NetworkService"
     }
-    elseif ($win32ServiceObject.StartName -ieq "NT Authority\LocalService")
+    elseif ($win32ServiceObject.StartName -ieq "NT Authority\LocalService") 
     {
         $builtInAccount = "LocalService"
     }
@@ -109,27 +109,27 @@ function Test-TargetResource
         [ValidateSet("Automatic", "Manual", "Disabled")]
         [String]
         $StartupType,
-
+        
         [ValidateSet("LocalSystem", "LocalService", "NetworkService")]
         [String]
         $BuiltInAccount,
-
+        
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         $Credential,
-
+   
         [ValidateSet("Running", "Stopped")]
         [String]
         $State = "Running",
-
+       
         [ValidateSet("Present", "Absent")]
         [String]
         $Ensure = "Present",
-
+  
         [ValidateNotNullOrEmpty()]
         [String]
         $Path,
-
+ 
         [ValidateNotNullOrEmpty()]
         [String]
         $DisplayName,
@@ -142,14 +142,14 @@ function Test-TargetResource
         [String[]]
         $Dependencies,
 
-        [int]
+        [uint32]
         $StartupTimeout = 30000,
 
-        [int]
+        [uint32]
         $TerminateTimeout = 30000
     )
 
-    if ($PSBoundParameters.ContainsKey('StartupType'))
+    if ($PSBoundParameters.ContainsKey('StartupType')) 
     {
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     }
@@ -215,7 +215,7 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [String]
         $Name,
-
+ 
         [ValidateSet("Automatic", "Manual", "Disabled")]
         [String]
         $StartupType,
@@ -227,7 +227,7 @@ function Set-TargetResource
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         $Credential,
-
+ 
         [ValidateSet("Running", "Stopped")]
         [String]
         $State = "Running",
@@ -239,7 +239,7 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [String]
         $Path,
-
+  
         [ValidateNotNullOrEmpty()]
         [String]
         $DisplayName,
@@ -247,19 +247,19 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [String]
         $Description,
-
+        
         [ValidateNotNullOrEmpty()]
         [String[]]
         $Dependencies,
 
-        [int]
+        [uint32]
         $StartupTimeout = 30000,
 
-        [int]
+        [uint32]
         $TerminateTimeout = 30000
     )
 
-    if ($PSBoundParameters.ContainsKey('StartupType'))
+    if ($PSBoundParameters.ContainsKey('StartupType')) 
     {
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     }
@@ -327,29 +327,29 @@ function Set-TargetResource
 
     if (-not $serviceIsNew)
     {
-       Write-Verbose -Message ($LocalizedData.WritePropertiesIgnored -f $Name)
+       Write-Verbose -Message ($LocalizedData.WritePropertiesIgnored -f $Name) 
     }
 
     $writeWritePropertiesArguments = @{
         Name = $Name
     }
 
-    if ($PSBoundParameters.ContainsKey('Path'))
+    if ($PSBoundParameters.ContainsKey('Path')) 
     {
         $writeWritePropertiesArguments['Path'] = $Path
     }
-
-    if ($PSBoundParameters.ContainsKey('StartupType'))
+    
+    if ($PSBoundParameters.ContainsKey('StartupType')) 
     {
         $writeWritePropertiesArguments['StartupType'] = $StartupType
     }
-
-    if ($PSBoundParameters.ContainsKey('BuiltInAccount'))
+    
+    if ($PSBoundParameters.ContainsKey('BuiltInAccount')) 
     {
         $writeWritePropertiesArguments['BuiltInAccount'] = $BuiltInAccount
     }
-
-    if ($PSBoundParameters.ContainsKey('Credential'))
+    
+    if ($PSBoundParameters.ContainsKey('Credential')) 
     {
         $writeWritePropertiesArguments['Credential'] = $Credential
     }
@@ -401,7 +401,7 @@ function Test-StartupType
         [ValidateSet("Automatic", "Manual", "Disabled")]
         [String]
         $StartupType,
-
+        
         [ValidateSet("Running", "Stopped")]
         [String]
         $State = "Running"
@@ -725,7 +725,7 @@ function Stop-ServiceResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [int]
+        [uint32]
         $TerminateTimeout
     )
 
@@ -768,7 +768,7 @@ function DeleteService
         [ValidateNotNull()]
         $Name
     )
-
+    
     $err = & "sc.exe" "delete" "$Name"
     for($i = 1; $i -lt 1000; $i++)
     {
@@ -813,7 +813,7 @@ function Start-ServiceResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [int]
+        [uint32]
         $StartupTimeout
     )
 
@@ -911,7 +911,7 @@ function Test-ServiceExists
 
 <#
     .SYNOPSIS
-    Compares a path to the existing service path.
+    Compares a path to the existing service path. 
     Returns true when the given path is same as the existing service path.
 
     .PARAMETER Name
@@ -936,7 +936,7 @@ function Compare-ServicePath
         [String]
         $Path
     )
-
+    
     $existingServicePath = (Get-CimInstance -Class win32_service | Where-Object {$_.Name -eq $Name}).PathName
     $stringCompareResult = [String]::Compare($Path, $existingServicePath, [System.Globalization.CultureInfo]::CurrentUICulture)
 
