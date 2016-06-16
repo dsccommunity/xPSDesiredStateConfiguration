@@ -1,4 +1,6 @@
 # PSDesiredStateConfiguration High Quality Resource Module Plan
+Any comments or questions about this plan can be submitted under issue [#160](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/160)
+
 ## Goals 
   1. Port the appropriate in-box DSC Resources to the open-source xPSDesiredStateConfiguration resource module. 
   2. Make the open-source xPSDesiredStateConfiuration resource module a **High Quality Resource Module (HQRM)** to present to the community for feedback.
