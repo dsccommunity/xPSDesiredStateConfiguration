@@ -37,12 +37,12 @@ The PSDesiredStateConfiguration High Quality Resource Module will consist of the
   - [x] WindowsFeatureSet
   - [x] WindowsOptionalFeatureSet
 - [ ] [2. Merge In-Box & Open-Source Resources](#merge-in-box-and-open-source-resources) 
-  - [ ] Archive
+  - [ ] Archive (In Progress)
   - [ ] Group
   - [ ] Package
   - [ ] Process
   - [ ] Registry
-  - [ ] Service (In Progress) ([Open PR](https://github.com/PowerShell/xPSDesiredStateConfiguration/pull/159))
+  - [x] Service
   - [ ] WindowsOptionalFeature
 - [ ] [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources) 
 - [ ] [4. Update the Resource Module to a High Quality Resource Module](#update-the-resource-module-to-a-high-quality-resource-module)
