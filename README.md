@@ -16,7 +16,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ## Resources
 
-* **xArchive** creates or expands (extracts) ZIP archives.
+* **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
 * **xWindowsProcess** configures and manages Windows processes.
 * **xService** configures and manages Windows services.
@@ -37,14 +37,20 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 ### xArchive
 
-The xArchive DSC Resource enables the creation or extraction of ZIP archives from / onto the local filesystem. The DSC Resource has two modes: **extraction** or **compression**. The **DestinationType** property controls the behavior of the DSC Resource.
-
-If the **DestinationType** is set to `Directory` (default), then the ZIP file specified in the **Path** property will be extracted to the path in **Destination**. If the **DestinationType** is set to `File`, then the directory specified in the **Path** property will be compressed into a new ZIP file at the path specified in the **Destination** property.
-
-* **Path**: The path of the ZIP archive, if extracting, or the source directory to compress, if compressing.
-* **Destination**: The destination of the extracted files *or* the new ZIP archive.
-* **DestinationType**: The destination can be either `File` or `Directory`.
-* **CompressionLevel**: The amount of compression that should be applied to the new ZIP archive. The value can be one of the following: `Optimal`, `Fastest`, `NoCompression`
+* **Destination**: (Key) Specifies the location where you want to ensure the archive contents are extracted.
+* **Path**: (Key) Specifies the source path of the archive file.
+* **Ensure**: = Determines whether to check if the content of the archive exists at the Destination. Set this property to Present to ensure the contents exist. Set it to Absent to ensure they do not exist.
+   - Supported values: Present, Absent
+   - Default Value: Present
+* **Validate**: Uses the Checksum property to determine if the archive matches the signature. If Validate is false, only the file or directory name is used for comparison. If you specify Checksum without Validate, the configuration will fail. If you specify Validate without Checksum, a SHA-256 checksum is used by default.
+   - Supported values: true, false
+   - Default Value: false
+* **Checksum**: = Defines the type to use when determining whether two files are the same. If you specify Checksum without Validate, the configuration will fail.
+   - Suported values: CreatedDate, ModifiedDate, SHA-1, SHA-256, SHA-512
+   - Default value: SHA-256
+* **Force**: Setting Force to true with override certain file operations (such as overwriting a file or deleting a directory that is not empty) that would normally result in an error.
+   - Supported values: true, false
+   - Default Value: false
 
 ### xDscWebService
 
@@ -366,6 +372,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * Added the xWindowsFeatureSet resource
 * Added the xWindowsOptionalFeatureSet resource
 * Merged the in-box Service resource with xService and added tests for xService
+* Merged the in-box Archive resource with xArchive and added tests for xArchive
 
 ### 3.10.0.0
 
