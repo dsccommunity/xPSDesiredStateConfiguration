@@ -157,7 +157,6 @@ function Get-CacheEntry
     else
     {
         # ErrorAction seems to have no affect on this exception, (see: https://microsoft.visualstudio.com/web/wi.aspx?pcguid=cb55739e-4afe-46a3-970f-1b49d8ee7564&id=1185735)
-        # Using a try/catch to work around the issue.
         try
         {
             $cacheEntry = Import-CliXml -Path $cacheEntryPath
