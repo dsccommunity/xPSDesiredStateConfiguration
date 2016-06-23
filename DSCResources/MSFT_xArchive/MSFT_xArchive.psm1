@@ -1262,7 +1262,7 @@ function Get-TargetResource
 
         [Boolean] $Validate = $false,
 
-        [ValidateSet('', 'SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
+        [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
         [String] $Checksum,
 
         [PSCredential] $Credential
