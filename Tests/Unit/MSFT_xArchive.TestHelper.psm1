@@ -84,7 +84,7 @@ function New-ZipFileFromHashtable
     New-Item -Path $expandedZipPath -ItemType Directory | Out-Null
 
     ConvertTo-FileStructure -ParentPath $expandedZipPath -ZipFileStructure $ZipFileStructure
-    
+
     $compressedZipPath = Join-Path -Path $ParentPath -ChildPath "$Name.zip"
     [System.IO.Compression.ZipFile]::CreateFromDirectory($expandedZipPath, $compressedZipPath, 'NoCompression', $false)
     return $compressedZipPath
@@ -100,7 +100,7 @@ function New-ZipFileFromHashtable
 
     .PARAMETER DestinationPath
         The path the to destination file to test.
-    
+
     .PARAMETER CheckLastWriteTime
         Indicates that the last write times should match.
 
@@ -129,13 +129,13 @@ function Test-FileStructuresMatch
 
         [Switch] $CheckContents
     )
-    
+
     $sourcePathLength = $SourcePath.Length
     $destinationPathLength = $DestinationPath.Length
 
     $destinationContents = @{}
     $destinationChildItems = Get-ChildItem -Path $DestinationPath -Recurse
-    
+
     foreach ($destinationChildItem in $destinationChildItems)
     {
         $destinationContents[$destinationChildItem.FullName.Substring($destinationPathLength)] = $destinationChildItem
@@ -148,21 +148,21 @@ function Test-FileStructuresMatch
         $sourceChildItemName = $sourceChildItem.FullName.Substring($sourcePathLength)
         $destinationChildItem = $destinationContents[$sourceChildItemName]
 
-        $destinationChildItem | Should Not Be $null     
+        $destinationChildItem | Should Not Be $null
         $destinationChildItem.GetType() | Should Be $sourceChildItem.GetType()
-        
+
         if ($destinationChildItem.GetType() -eq [System.IO.FileInfo])
         {
             if ($CheckLastWriteTime)
             {
                 $sourceChildItem.LastWriteTime | Should Be $destinationChildItem.LastWriteTime
             }
-            
+
             if ($CheckCreationTime)
             {
                 $sourceChildItem.CreationTime | Should Be $destinationChildItem.CreationTime
             }
-            
+
             if ($CheckContents)
             {
                 $sourceStream = $null
@@ -172,14 +172,14 @@ function Test-FileStructuresMatch
                 {
                     $sourceStream = $sourceChildItem.Open()
                     $destinationStream = $destinationChildItem.Open()
-                    
+
                     $sourceFileContents = $sourceStream.Read()
                     $destinationFileContents = $destinationStream.Read()
-                    
+
                     $sourceFileContentsLength = $sourceFileContents.Length
 
                     $destinationFileContents.Length | Should Be $sourceFileContentsLength
-                    
+
                     for ($fileIndex = 0; $fileIndex -lt $sourceFileContentsLength; $fileIndex++)
                     {
                         $sourceFileContents[$fileIndex] | Should Be $destinationFileContents[$fileIndex]
@@ -191,7 +191,7 @@ function Test-FileStructuresMatch
                     {
                         $sourceStream.Dispose()
                     }
-                    
+
                     if ($null -ne $destinationStream)
                     {
                         $destinationStream.Dispose()

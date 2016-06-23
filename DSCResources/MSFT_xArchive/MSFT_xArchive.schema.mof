@@ -1,4 +1,4 @@
-[ClassVersion("1.0.0.0"),FriendlyName("xArchive")] 
+[ClassVersion("1.0.0.0"),FriendlyName("xArchive")]
 class MSFT_xArchive : OMI_BaseResource
 {
   [Key] string Destination;
@@ -7,5 +7,5 @@ class MSFT_xArchive : OMI_BaseResource
   [write] boolean Validate;
   [write,ValueMap{"SHA-1", "SHA-256", "SHA-512", "CreatedDate", "ModifiedDate"},Values{"SHA-1", "SHA-256", "SHA-512", "CreatedDate", "ModifiedDate"}] string Checksum;
   [write] boolean Force;
-  [write,EmbeddedInstance("MSFT_Credential")] string Credential;        
+  [write,EmbeddedInstance("MSFT_Credential")] string Credential;
 };

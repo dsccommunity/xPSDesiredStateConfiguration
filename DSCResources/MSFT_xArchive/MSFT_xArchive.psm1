@@ -162,7 +162,7 @@ function Get-CacheEntry
             $cacheEntry = Import-CliXml -Path $cacheEntryPath
             Write-Verbose -Message ($LocalizedData.CacheValueFoundReturning -f $cacheEntry)
         }
-        catch [System.Xml.XmlException] 
+        catch [System.Xml.XmlException]
         {
             Write-Verbose -Message ($LocalizedData.CacheCorrupt)
         }
@@ -210,7 +210,7 @@ function Set-CacheEntry
     {
         New-Item -Path $script:cacheLocation -ItemType Directory | Out-Null
     }
-    
+
     Export-CliXml -Path $cacheEntryPath -InputObject $InputObject
 }
 
@@ -237,10 +237,10 @@ function Throw-InvalidArgumentException
         [ValidateNotNullOrEmpty()]
         [String] $ArgumentName
     )
-    
+
     $argumentException = New-Object -TypeName 'ArgumentException' -ArgumentList @( $Message, $ArgumentName )
     $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @( $argumentException, $ArgumentName, 'InvalidArgument', $null)
-    
+
     throw $errorRecord
 }
 
@@ -265,7 +265,7 @@ function Throw-TerminatingError
 
         [System.Management.Automation.ErrorRecord] $ErrorRecord
     )
-    
+
     if ($null -eq $ErrorRecord)
     {
         $invalidOperationException = New-Object -TypeName 'InvalidOperationException' -ArgumentList @( $Message, $ErrorRecord.Exception)
@@ -298,7 +298,7 @@ function Assert-PathArgumentValid
     )
 
     $ErrorActionPreference = 'Stop'
-    
+
     if (-not (Test-Path -Path $Path -PathType Leaf))
     {
         Throw-InvalidArgumentException -Message ($LocalizedData.InvalidSourcePath -f $Path) -ArgumentName 'Path'
@@ -324,7 +324,7 @@ function Assert-DestinationArgumentValid
     )
 
     $ErrorActionPreference = 'Stop'
-    
+
     $destinationFileInfo = Get-Item -LiteralPath $Destination -ErrorAction Ignore
     if ($null -ne $destinationFileInfo -and $destinationFileInfo.GetType() -eq [System.IO.FileInfo])
     {
@@ -354,7 +354,7 @@ function Assert-ValidateAndChecksumArgumentsValid
     )
 
     $ErrorActionPreference = 'Stop'
-    
+
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         Throw-InvalidArgumentException -Message ($LocalizedData.InvalidChecksumArgsMessage -f $Checksum) -ArgumentName 'Checksum'
@@ -392,7 +392,7 @@ function Test-FileHashMatchesArchiveEntryHash
         [ValidateNotNullOrEmpty()]
         [String] $HashAlgorithmName
     )
-    
+
     $existingFileStream = $null
     $fileHash = $null
 
@@ -413,7 +413,7 @@ function Test-FileHashMatchesArchiveEntryHash
             $existingFileStream.Dispose()
         }
     }
-    
+
     $archiveEntryHash = $ArchiveEntry.Checksum
 
     return ($fileHash.Algorithm -eq $archiveEntryHash.Algorithm) -and ($fileHash.Hash -eq $archiveEntryHash.Hash)
@@ -440,7 +440,7 @@ function Get-RelevantChecksumTimestamp
 
         [String] $Checksum
     )
-    
+
     if ($Checksum -ieq 'CreatedDate')
     {
         return $FileSystemObject.CreationTime
@@ -480,7 +480,7 @@ function Update-Cache
 
         [String] $SourceLastWriteTime
     )
-    
+
     Write-Verbose -Message ($LocalizedData.InUpdateCache)
 
     $cacheEntries = New-Object -TypeName 'System.Collections.ArrayList'
@@ -506,7 +506,7 @@ function Update-Cache
                 }
             }
         }
-        
+
         $cacheEntry = @{
             FullName = $archiveEntry.FullName
             LastWriteTime = $archiveEntry.LastWriteTime
@@ -516,7 +516,7 @@ function Update-Cache
         Write-Verbose -Message  ($LoalizedData.AddingEntryFullNameAsACacheEntry -f $archiveEntry.FullName)
         $cacheEntries.Add($cacheEntry) | Out-Null
     }
-    
+
     Write-Verbose -Message ($LocalizedData.UpdatingCacheObject)
 
     if ($null -eq $CacheEntryToUpdate)
@@ -531,7 +531,7 @@ function Update-Cache
     Write-Verbose -Message ($LocalizedData.PlacedNewCacheEntry)
 }
 
-<# 
+<#
     .SYNOPSIS
         Creates a PSDrive to a net share with the given credential.
 
@@ -549,7 +549,7 @@ function Mount-NetworkPath
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Path,
-        
+
         [PSCredential] $Credential
     )
 
@@ -558,7 +558,7 @@ function Mount-NetworkPath
     # Mount the drive only if not accessible
     if (Test-Path -Path $Path -ErrorAction Ignore)
     {
-        Write-Verbose -Message  ($LocalizedData.PathPathIsAlreadyAccessiableNoMountNeeded -f $Path)  
+        Write-Verbose -Message  ($LocalizedData.PathPathIsAlreadyAccessiableNoMountNeeded -f $Path)
     }
     else
     {
@@ -576,7 +576,7 @@ function Mount-NetworkPath
             }
         }
 
-        $newPSDriveArgs = @{ 
+        $newPSDriveArgs = @{
             Name = [Guid]::NewGuid()
             PSProvider = 'FileSystem'
             Root = $Path
@@ -587,14 +587,14 @@ function Mount-NetworkPath
         try
         {
             Write-Verbose -Message ($LocalizedData.CreatePSDriveWithPathPath -f $Path)
-            $psDrive = New-PSDrive @newPSDriveArgs 
+            $psDrive = New-PSDrive @newPSDriveArgs
         }
         catch
         {
             Write-Verbose -Message ($LocalizedData.CannotAccessPathPathWithGivenCredential -f $Path)
             Throw-TerminatingError -Message ($LocalizedData.ErrorOpeningArchiveFile -f $Path) -ErrorRecord $_
         }
-    }  
+    }
 
     return $psDrive
 }
@@ -607,22 +607,22 @@ function Test-TargetResource
     (
         [ValidateSet('Present', 'Absent')]
         [String] $Ensure = 'Present',
-        
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Path,
-        
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Destination,
-        
+
         [Boolean] $Validate = $false,
-        
+
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
         [String] $Checksum = 'SHA-256',
 
         [Boolean] $Force = $false,
-        
+
         [PSCredential] $Credential
     )
 
@@ -634,12 +634,12 @@ function Test-TargetResource
     try
     {
         $ErrorActionPreference = 'Stop'
-    
+
         Write-Verbose -Message ($LocalizedData.AboutToValidateStandardArguments)
-        
+
         Assert-PathArgumentValid -Path $Path
         Assert-DestinationArgumentValid -Destination $Destination
-        
+
         if ($PSBoundParameters.ContainsKey('Checksum'))
         {
             Assert-ValidateAndChecksumArgumentsValid -Validate $Validate -Checksum $Checksum
@@ -672,16 +672,16 @@ function Test-TargetResource
             {
                 Write-Verbose -Message ($LocalizedData.AboutToOpenTheZipFile)
                 $archiveEntries, $null, $fileHandle = Open-ZipFile -Path $Path
-            
+
                 Write-Verbose -Message ($LocalizedData.UpdatingCache)
                 Update-Cache -CacheEntryToUpdate $cacheEntry -ArchiveEntries $archiveEntries -Checksum $Checksum -SourceLastWriteTime $sourceLastWriteTime
                 $cacheEntry = Get-CacheEntry -Path $Path -Destination $Destination
-                
+
                 Write-Verbose -Message ($LocalizedData.CacheUpdatedWithEntries -f $cacheEntry.Entries.Length)
             }
 
             $archiveEntries = $cacheEntry.Entries
-        
+
             foreach ($archiveEntry in $archiveEntries)
             {
                 $individualResult = $true
@@ -708,7 +708,7 @@ function Test-TargetResource
                     {
                         $individualResult = $result = $false
                     }
-                
+
                     if (-not $Validate)
                     {
                         Write-Verbose -Message ($LocalizedData.InTestTargetResourceDestExistsNotUsingChecksumsContinuing -f $archiveEntryDestinationPath)
@@ -749,7 +749,7 @@ function Test-TargetResource
                             else
                             {
                                 $archiveEntryTimestamp = Get-RelevantChecksumTimestamp -FileSystemObject $archiveEntryDestinationFileInfo -Checksum $Checksum
-                                
+
                                 if (-not $archiveEntryTimestamp.Equals($archiveEntryTimestamp.LastWriteTime.DateTime))
                                 {
                                     $individualResult = $result = $false
@@ -760,7 +760,7 @@ function Test-TargetResource
                                 }
                             }
                         }
-                    
+
                         if (-not $individualResult -and $Ensure -eq 'Present')
                         {
                             Write-Verbose ($LocalizedData.DestHasIncorrectHashvalue -f $archiveEntryDestinationPath)
@@ -780,7 +780,7 @@ function Test-TargetResource
                 $fileHandle.Dispose()
             }
         }
-    
+
         Set-CacheEntry -InputObject $cacheObj -path $Path -destination $Destination
         $result = $result -eq ('Present' -eq $Ensure)
     }
@@ -803,7 +803,7 @@ function Test-TargetResource
 
     .PARAMETER Path
         The path at which to create the new directory
-#>   
+#>
 function New-Directory
 {
     [CmdletBinding()]
@@ -873,12 +873,12 @@ function Open-ZipFile
     {
         $zipFileHandle = [System.IO.Compression.ZipFile]::OpenRead($Path)
         $archiveEntries = $zipFileHandle.Entries
-    }    
+    }
     catch
     {
         Throw-TerminatingError ($LocalizedData.ErrorOpeningArchiveFile -f $Path) $_
     }
-    
+
     $archiveEntryNameHashtable = @{}
 
     foreach ($archiveEntry in $archiveEntries)
@@ -889,7 +889,7 @@ function Open-ZipFile
     return $archiveEntries, $archiveEntryNameHashtable, $zipFileHandle
 }
 
-function Set-TargetResource 
+function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
@@ -897,21 +897,21 @@ function Set-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Path,
-        
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Destination,
-        
+
         [ValidateSet('Present', 'Absent')]
         [String] $Ensure = 'Present',
-        
+
         [Boolean] $Validate = $false,
-        
+
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
         [String] $Checksum,
-        
+
         [Boolean] $Force = $false,
-        
+
         [PSCredential] $Credential
     )
 
@@ -925,10 +925,10 @@ function Set-TargetResource
         $ErrorActionPreference = 'Stop'
 
         Write-Verbose -Message ($LocalizedData.AboutToValidateStandardArguments)
-        
+
         Assert-PathArgumentValid -Path $Path
         Assert-DestinationArgumentValid -Destination $Destination
-        
+
         if ($PSBoundParameters.ContainsKey('Checksum'))
         {
             Assert-ValidateAndChecksumArgumentsValid -Validate $Validate -Checksum $Checksum
@@ -939,17 +939,17 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message $LocalizedData.ConfigurationStarted
-        
+
         if (-not (Test-Path -Path $Destination))
         {
             New-Item -Path $Destination -ItemType Directory | Out-Null
         }
-        
+
         $cacheEntry = Get-CacheEntry -Path $Path -Destination $Destination
         $sourceLastWriteTime = (Get-Item -LiteralPath $Path).LastWriteTime
 
         $cacheUpToDate = $null -ne $cacheEntry -and $null -ne $cacheEntry.SourceLastWriteTime -and $cacheEntry.SourceLastWriteTime -eq $sourceLastWriteTime
-        
+
         $zipFileHandle = $null
         $archiveEntryNameHashtable = @{}
 
@@ -981,19 +981,19 @@ function Set-TargetResource
             foreach ($archiveEntry in $archiveEntries)
             {
                 $parentDirectory = Split-Path -Path $archiveEntry.FullName
-                
-                while (-not [String]::IsNullOrEmpty($parentDirectory)) 
+
+                while (-not [String]::IsNullOrEmpty($parentDirectory))
                 {
                     $directories.Add($parentDirectory) | Out-Null
                     $parentDirectory = Split-Path -Path $parentDirectory
                 }
-                
+
                 if ($archiveEntry.FullName.EndsWith('\'))
                 {
                     $directories.Add($archiveEntry.FullName) | Out-Null
                     continue
                 }
-                
+
                 $archiveEntryDestinationPath = Join-Path -Path $Destination -ChildPath $archiveEntry.FullName
 
                 $fileInfoAtDestinationPath = Get-Item -LiteralPath $archiveEntryDestinationPath -ErrorAction SilentlyContinue
@@ -1001,21 +1001,21 @@ function Set-TargetResource
                 {
                     continue
                 }
-                
+
                 # Possible for a folder to have been replaced by a directory of the same name, in which case we must leave it alone
                 $fileTypeAtDestinationPath = $fileInfoAtDestinationPath.GetType()
                 if ($fileTypeAtDestinationPath -ne [System.IO.FileInfo])
                 {
                     continue
                 }
-                
+
                 if (-not $Checksum -and $PSCmdlet.ShouldProcess(($LocalizedData.RemoveFile -f $archiveEntryDestinationPath), $null, $null))
                 {
                     Write-Verbose -Message ($LocalizedData.RemovingDir -f $archiveEntryDestinationPath)
                     Remove-Item -Path $archiveEntryDestinationPath
                     continue
                 }
-                
+
                 if (Test-ChecksumIsSha -Checksum $Checksum)
                 {
                     if ((Test-FileHashMatchesArchiveEntryHash -FilePath $archiveEntryDestinationPath -ArchiveEntry $archiveEntry -HashAlgorithmName $Checksum) -and $PSCmdlet.ShouldProcess(($LocalizedData.RemoveFile -f $archiveEntryDestinationPath), $null, $null))
@@ -1042,8 +1042,8 @@ function Set-TargetResource
                     }
                 }
             }
-            
-            <# 
+
+            <#
                 Hashset was useful for dropping dupes in an efficient manner, but it can mess with ordering.
                 Sort according to current culture (directory names can be localized, obviously).
                 Reverse so we hit children before parents.
@@ -1066,24 +1066,24 @@ function Set-TargetResource
                     Remove-Item -Path $fileInfoAtDestinationPath
                 }
             }
-            
+
             Write-Verbose ($LocalizedData.PackageUninstalled -f $Path, $Destination)
             Write-Verbose $LocalizedData.ConfigurationFinished
             return
         }
-        
+
         New-Directory -Path $Destination
 
         foreach ($archiveEntry in $archiveEntries)
         {
             $archiveEntryDestinationPath = Join-Path -Path $Destination -ChildPath $archiveEntry.FullName
 
-            if ($archiveEntryDestinationPath.EndsWith('\')) 
+            if ($archiveEntryDestinationPath.EndsWith('\'))
             {
                 New-Directory -Path $archiveEntryDestinationPath.TrimEnd("\")
                 continue
             }
-            
+
             $fileInfoAtDestinationPath = Get-Item -LiteralPath $archiveEntryDestinationPath -ErrorAction SilentlyContinue
             if ($null -ne $fileInfoAtDestinationPath)
             {
@@ -1093,7 +1093,7 @@ function Set-TargetResource
                     {
                         continue
                     }
-                    
+
                     if (Test-ChecksumIsSha -Checksum $Checksum)
                     {
                         if ($fileInfoAtDestinationPath.LastWriteTime.Equals($archiveEntry.ExistingTimestamp))
@@ -1103,7 +1103,7 @@ function Set-TargetResource
                         else
                         {
                             $fileHashMatchesArchiveEntryHash = Test-FileHashMatchesArchiveEntryHash -FilePath $archiveEntryDestinationPath -ArchiveEntry $archiveEntry -HashAlgorithmName $Checksum
-                            
+
                             if ($fileHashMatchesArchiveEntryHash)
                             {
                                 Write-Verbose -Message ($LocalizedData.FoundfatdestwheregoingtoplaceoneandhashmatchedContinuing -f $archiveEntryDestinationPath)
@@ -1165,7 +1165,7 @@ function Set-TargetResource
                     }
                 }
             }
-            
+
             $archiveEntryDestinationParentPath = Split-Path -Path $archiveEntryDestinationPath
             if (-not (Test-Path $archiveEntryDestinationParentPath) -and $PSCmdlet.ShouldProcess(($LocalizedData.MakeDirectory -f $archiveEntryDestinationParentPath), $null, $null))
             {
@@ -1178,7 +1178,7 @@ function Set-TargetResource
                 #>
                 New-Item -Path $archiveEntryDestinationParentPath -ItemType Directory | Out-Null
             }
-            
+
             try
             {
                 if ($PSCmdlet.ShouldProcess(($LocalizedData.UnzipFile -f $archiveEntryDestinationPath), $null, $null))
@@ -1206,18 +1206,18 @@ function Set-TargetResource
                         {
                             $archiveFileSourceStream.Dispose()
                         }
-                    
+
                         if ($null -ne $archiveFileDestinationStream)
                         {
                             $archiveFileDestinationStream.Dispose()
                         }
                     }
-                
+
                     $newArchiveFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $archiveEntryDestinationPath )
-                    
+
                     $updatedTimestamp = $archiveEntry.LastWriteTime.DateTime
                     $archiveEntry.ExistingItemTimestamp = $updatedTimestamp
-                    
+
                     Set-ItemProperty -Path $archiveEntryDestinationPath -Name 'LastWriteTime' -Value $updatedTimestamp
                     Set-ItemProperty -Path $archiveEntryDestinationPath -Name 'LastAccessTime' -Value $updatedTimestamp
                     Set-ItemProperty -Path $archiveEntryDestinationPath -Name 'CreationTime' -Value $updatedTimestamp
@@ -1230,7 +1230,7 @@ function Set-TargetResource
                     $zipFileHandle.Dispose()
                 }
             }
-    
+
             Set-CacheEntry -InputObject $archiveEntry -Path $Path -Destination $Destination
             Write-Verbose -Message ($LocalizedData.PackageInstalled -f $Path, $Destination)
             Write-Verbose -Message $LocalizedData.ConfigurationFinished
@@ -1255,33 +1255,33 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Path,
-        
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String] $Destination,
-        
+
         [Boolean] $Validate = $false,
-        
+
         [ValidateSet('', 'SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
         [String] $Checksum,
-        
+
         [PSCredential] $Credential
     )
-    
+
     if ($null -eq $Credential)
     {
         $PSBoundParameters.Remove('Credential')
     }
 
     $testTargetResourceResult = Test-TargetResource @PSBoundParameters
-    
+
     $ensureValue = 'Absent'
-    
+
     if ($testTargetResourceResult)
     {
         $ensureValue = 'Present'
     }
-    
+
     @{
         Ensure = $ensureValue
         Path = $Path
