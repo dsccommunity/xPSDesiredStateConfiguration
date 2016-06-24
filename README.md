@@ -354,6 +354,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * Fixed $script:netsh parameter initialization in xWebService resource that was causing CIM exception when EnableFirewall flag was specified.
 * xService:
     - Fixed a bug where, despite no state specified in the config, the resource test returns false if the service is not running
+    - Fixed bug in which Automatice StartupType did not match the 'Auto' StartMode in Test-TargetResource.
 * xPackage: Fixes bug where CreateCheckRegValue was not being removed when uninstalling packages
 * Replaced New-NetFirewallRule cmdlets with netsh as this cmdlet is not available by default on some downlevel OS such as Windows 2012 R2 Core.
 * Added the xEnvironment resource

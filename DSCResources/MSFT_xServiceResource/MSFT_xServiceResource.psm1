@@ -425,6 +425,13 @@ function Test-StartupType
     }
 }
 
+<#
+    .SYNOPSIS
+        Converts the StartupType string to the correct StartMode string returned in the Win32 service object.
+
+    .PARAMETER StartupType
+        The StartupType to convert.
+#>
 function ConvertTo-StartModeString
 {
     [OutputType([String])]
