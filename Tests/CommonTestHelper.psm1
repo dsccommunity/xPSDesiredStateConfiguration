@@ -14,20 +14,18 @@
 function Test-GetTargetResourceResult
 {
     [CmdletBinding()]
-    param (
-        $GetTargetResourceResult,
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [Hashtable] $GetTargetResourceResult,
 
-        [string[]]
-        $GetTargetResourceResultProperties
+        [String[]] $GetTargetResourceResultProperties
     )
-
-    $getTargetResourceResultHashtable = $GetTargetResourceResult -as [Hashtable]
-
-    $getTargetResourceResultHashtable | Should Not Be $null
 
     foreach ($property in $GetTargetResourceResultProperties)
     {
-        $getTargetResourceResultHashtable[$property] | Should Not Be $null
+        $GetTargetResourceResult[$property] | Should Not Be $null
     }
 }
 
