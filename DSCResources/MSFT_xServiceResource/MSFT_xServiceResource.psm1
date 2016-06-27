@@ -190,7 +190,7 @@ function Test-TargetResource
             return $false
         }
 
-        if ($PSBoundParameters.ContainsKey("StartupType") -and $SvcWmi.StartMode -ine $StartupType)
+        if ($PSBoundParameters.ContainsKey("StartupType") -and $SvcWmi.StartMode -ine (ConvertTo-StartModeString -StartupType $StartupType))
         {
             Write-Verbose -Message ($LocalizedData.TestStartupTypeMismatch -f $svcWmi.Name,$svcWmi.StartMode,$StartupType)
             return $false
@@ -422,6 +422,34 @@ function Test-StartupType
             # State = Running conflicts with Disabled
             ThrowInvalidArgumentError -ErrorId "CannotStartAndDisable" -ErrorMessage ($LocalizedData.CannotStartAndDisable -f $Name)
         }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Converts the StartupType string to the correct StartMode string returned in the Win32 service object.
+
+    .PARAMETER StartupType
+        The StartupType to convert.
+#>
+function ConvertTo-StartModeString
+{
+    [OutputType([String])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Automatic', 'Manual', 'Disabled')]
+        [String] $StartupType
+    )
+
+    if ($StartupType -eq 'Automatic')
+    {
+        return 'Auto'
+    }
+    else
+    {
+        return $StartupType
     }
 }
 

@@ -1,6 +1,8 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param ()
 
+Import-Module "$PSScriptRoot\..\..\DSCResource.Tests\TestHelper.psm1" -Force
+
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xServiceResource' `
@@ -303,6 +305,24 @@ InModuleScope 'MSFT_xServiceResource' {
                 $testTargetResourceResult | Should Be $false
 
                 $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped'
+                $testTargetResourceResult | Should Be $true
+            }
+
+            It 'Should return true with the Automatic StartupType' {
+                Set-TargetResource -Name $script:testServiceName -StartupType 'Automatic'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -StartupType 'Automatic'
+                $testTargetResourceResult | Should Be $true
+            }
+
+            It 'Should return true with the Manual StartupType' {
+                Set-TargetResource -Name $script:testServiceName -StartupType 'Manual'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -StartupType 'Manual'
+                $testTargetResourceResult | Should Be $true
+            }
+
+            It 'Should return true with the Disabled StartupType' {
+                Set-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Disabled'
+                $testTargetResourceResult = Test-TargetResource -Name $script:testServiceName -State 'Stopped' -StartupType 'Disabled'
                 $testTargetResourceResult | Should Be $true
             }
 
