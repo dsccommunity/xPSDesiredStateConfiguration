@@ -106,7 +106,7 @@ Describe "xGroupSet Integration Tests" {
         # Create test groups
         foreach($groupName in $groupNames)
         {
-            New-LocalUserGroup -GroupName $groupName -Description $testUserDescription
+            New-Group -GroupName $groupName -Description $testUserDescription
         }
 
         try
