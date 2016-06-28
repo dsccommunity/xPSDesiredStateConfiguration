@@ -23,7 +23,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should return hashtable with correct values when group has members' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -101,7 +101,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should not remove an existing group when Ensure is Present' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -119,7 +119,7 @@ InModuleScope 'MSFT_xGroupResource' {
                     New-Group -GroupName $testGroupName -Description $testDescription -MemberUserNames @( $testUserName1, $testUserName2 )
 
                     $setTargetResourceResult = Set-TargetResource $testGroupName -Ensure 'Present'
-            
+
                     Test-GroupExists -GroupName $testGroupName | Should Be $true
                 }
                 finally
@@ -133,7 +133,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should not throw when only one member of the group specified in MembersToInclude' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -163,7 +163,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should remove an existing group when Ensure is Absent' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -191,7 +191,7 @@ InModuleScope 'MSFT_xGroupResource' {
                     Remove-Group -GroupName $testGroupName
                 }
             }
-        
+
             <#
                 Verify that test group can be created with a domain user and credential
                 and that creating a group without a credential does not throw any errors
@@ -200,7 +200,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should correctly create a group with a domain user and credential' -Skip:$script:skipTestsWithCredentials {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -255,7 +255,7 @@ InModuleScope 'MSFT_xGroupResource' {
             <#
                 Verify that a group can be created with a domain user and credential
                 and that a user account from a trusted domain can be resolved and added.
-            
+
                 This test creates a group and adds the following users as domain\username:
                     - a domain local administrator user from a primary domain
                     - a domain user from the domain with a two-way trust
@@ -271,14 +271,14 @@ InModuleScope 'MSFT_xGroupResource' {
 
                 $membersToInclude = @( $primaryDomainAccount['DomainUserName'], $twoWayTrustDomainAccount['DomainUserName'] )
                 $primaryDomainAccountCredential = $primaryDomainAccount['Credential']
-                
+
                 try
                 {
                     Set-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential -Description $testDescription
 
                     $testTargetResourceResult = Test-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential
                     $testTargetResourceResult | Should Be $true
-                    
+
                     $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $primaryDomainAccountCredential
                     $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
@@ -300,7 +300,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 account can be added using the user's UPN name.
 
                 This test creates a group and adds the following users using their UPN name:
-                    - a domain local administrator user from a primary domain 
+                    - a domain local administrator user from a primary domain
                     - a domain user from the domain with a two-way trust
 
                 The credential for the domain local administrator user is used to resolve all user accounts.
@@ -321,7 +321,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     $testTargetResourceResult = Test-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential
                     $testTargetResourceResult | Should Be $true
-                    
+
                     $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $primaryDomainAccountCredential
                     $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
@@ -370,14 +370,14 @@ InModuleScope 'MSFT_xGroupResource' {
                 $twoWayTrustDomainAccount = '?'
 
                 $membersToInclude = @( $primaryDomainAccount['DomainUserName'], $twoWayTrustDomainAccount['DomainUserName'] )
-                
+
                 try
                 {
                     { Set-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Description $testDescription } | Should Not Throw
 
                     $testTargetResourceResult = Test-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude
                     $testTargetResourceResult | Should Be $true
-                    
+
                     $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
                     $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
@@ -415,13 +415,13 @@ InModuleScope 'MSFT_xGroupResource' {
                 try
                 {
                     New-User -Credential $testCredential1 -Description $testDescription
-                    
+
                     {
                         Set-TargetResource `
                             -GroupName $testGroupName `
                             -MembersToInclude @($testUserName1, $domainUserName) `
                             -Credential $invalidDomainUserCredential `
-                            -Description $testDescription 
+                            -Description $testDescription
                     } | Should Throw
                 }
                 finally
@@ -430,7 +430,7 @@ InModuleScope 'MSFT_xGroupResource' {
                     Remove-User -UserName $testUserName1
                 }
             }
-    
+
             # Verify that test group cannot be created with invalid user info (cannot resolve user) when using domain trust
             It 'Should not create a group with an invalid domain user without a credential' -Skip:$script:skipTestsWithCredentials {
                 $testGroupName = 'LocalTestGroup'
@@ -448,14 +448,14 @@ InModuleScope 'MSFT_xGroupResource' {
                 try
                 {
                     New-User -Credential $testCredential1 -Description $testDescription
-                    
+
                     {
                         Set-TargetResource `
                             -GroupName $testGroupName `
                             -MembersToInclude $membersToInclude `
                             -Credential $primaryDomainAccountCredential `
                             -Description $testDescription `
-                            -MembersToInclude @($testUserName1, $invalidDomainUserName) 
+                            -MembersToInclude @($testUserName1, $invalidDomainUserName)
                     } | Should Throw
                 }
                 finally
@@ -504,7 +504,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should return true for existing group with matching Members' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -536,7 +536,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
                 $testUserName3 = 'LocalTestUser3'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -570,7 +570,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should return true for existing group with one matching MemberToInclude' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -601,7 +601,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should return true for existing group with matching MembersToInclude' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -633,7 +633,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
                 $testUserName3 = 'LocalTestUser3'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -669,7 +669,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testUserName2 = 'LocalTestUser2'
                 $testUserName3 = 'LocalTestUser3'
                 $testUserName4 = 'LocalTestUser4'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 
@@ -708,7 +708,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testUserName2 = 'LocalTestUser2'
                 $testUserName3 = 'LocalTestUser3'
                 $testUserName4 = 'LocalTestUser4'
-            
+
                 $testDescription = 'Some Description'
                 $testUserPassword = 'StrongOne7.'
 

@@ -5,7 +5,7 @@
         The types PrincipalContext, Principal, and DirectoryEntry are used througout the code and
         all are disposable. However, in many cases, disposing the object immediately causes
         subsequent operations to fail or duplicate dispose calls to occur.
-        
+
         To simplify management of these disposables, each public entry point defines a $disposables
         ArrayList variable and passes it to secondary functions that may need to create disposable
         objects. The public entry point is then required to dispose the contents of the list in a
@@ -50,7 +50,7 @@
         DirectoryEntry and enumerating its child members. The returned DirectoryEntry instances are
         then resolved to Principal objects using a PrincipalContext appropriate for the target
         domain.
-        
+
         See Resolve-GroupMembersToPrincipals for more details.
 
     Handling Stale Group Members
@@ -221,9 +221,9 @@ function Test-TargetResource
 
     .PARAMETER GroupName
         The name of the xGroup resource to retrieve.
-        
+
     .PARAMETER Credential
-        The credential to use to retrieve the xGroup resource. 
+        The credential to use to retrieve the xGroup resource.
 #>
 function Get-TargetResourceOnFullSKU
 {
@@ -250,7 +250,7 @@ function Get-TargetResourceOnFullSKU
     try
     {
         $group = Get-Group -GroupName $GroupName -PrincipalContexts $principalContexts -Disposables $disposables
-        
+
         if ($null -ne $group)
         {
             $disposables.Add($group) | Out-Null
@@ -286,7 +286,7 @@ function Get-TargetResourceOnFullSKU
 
     .PARAMETER GroupName
         The name of the group for which you want to ensure a specific state.
-        
+
     .PARAMETER Ensure
         Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
         not exist. Setting it to 'Present' (the default value) ensures that the group exists.
@@ -329,7 +329,7 @@ function Set-TargetResourceOnFullSKU
         [String]
         $Ensure = 'Present',
 
-        [String] 
+        [String]
         $Description,
 
         [ValidateNotNull()]
@@ -430,7 +430,7 @@ function Set-TargetResourceOnFullSKU
                             -MemberNames $Members `
                             -PrincipalContexts $principalContexts `
                             -Disposables $disposables `
-                            -Credential $Credential 
+                            -Credential $Credential
 
                         if ($membersAsPrincipals.Length -gt 0)
                         {
@@ -571,7 +571,7 @@ function Set-TargetResourceOnFullSKU
 
     .PARAMETER GroupName
         The name of the group for which you want to ensure a specific state.
-        
+
     .PARAMETER Ensure
         Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
         not exist. Setting it to 'Present' (the default value) ensures that the group exists.
@@ -615,7 +615,7 @@ function Test-TargetResourceOnFullSKU
         [String]
         $Ensure = 'Present',
 
-        [String] 
+        [String]
         $Description,
 
         [ValidateNotNull()]
@@ -643,13 +643,13 @@ function Test-TargetResourceOnFullSKU
     try
     {
         $group = Get-Group -GroupName $GroupName -PrincipalContexts $principalContexts -Disposables  $disposables
-        
+
         if ($null -eq $group)
         {
             Write-Verbose -Message ($LocalizedData.GroupDoesNotExist -f $GroupName)
             return ($Ensure -eq 'Absent')
         }
-        
+
         $disposables.Add($group) | Out-Null
         Write-Verbose -Message ($LocalizedData.GroupExists -f $GroupName)
 
@@ -788,7 +788,7 @@ function Test-TargetResourceOnFullSKU
 
     .PARAMETER GroupName
         The name of the xGroup resource to retrieve.
-        
+
     .PARAMETER Credential
         The credential to use to retrieve the xGroup resource.
 #>
@@ -846,7 +846,7 @@ function Get-TargetResourceOnNanoServer
 
     .PARAMETER GroupName
         The name of the group for which you want to ensure a specific state.
-        
+
     .PARAMETER Ensure
         Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
         not exist. Setting it to 'Present' (the default value) ensures that the group exists.
@@ -889,7 +889,7 @@ function Set-TargetResourceOnNanoServer
         [String]
         $Ensure = 'Present',
 
-        [String] 
+        [String]
         $Description,
 
         [ValidateNotNull()]
@@ -910,7 +910,7 @@ function Set-TargetResourceOnNanoServer
     Set-StrictMode -Version 'Latest'
 
     Assert-GroupNameValid -GroupName $GroupName
-    
+
     $groupOriginallyExists = $false
 
     try
@@ -938,14 +938,14 @@ function Set-TargetResourceOnNanoServer
             New-LocalGroup -Name $GroupName
             Write-Verbose -Message ($LocalizedData.GroupCreated -f $GroupName)
         }
-    
+
         # Set the group properties.
-        
+
         if ($PSBoundParameters.ContainsKey('Description') -and ((-not $groupExists) -or ($Description -ne $group.Description)))
         {
             Set-LocalGroup -Name $GroupName -Description $Description
         }
-        
+
         <#
             Group members can be updated in two ways:
             1. Supplying the Members parameter - this causes the membership to be replaced with the members defined in Members.
@@ -954,7 +954,7 @@ function Set-TargetResourceOnNanoServer
                 If Members is mutually exclusive with MembersToInclude and MembersToExclude
                 If Members is not defined then MembersToInclude or MembersToExclude must contain at least one entry.
         #>
-        
+
         if ($PSBoundParameters.ContainsKey('Members'))
         {
             if ($PSBoundParameters.ContainsKey('MembersToInclude'))
@@ -966,10 +966,10 @@ function Set-TargetResourceOnNanoServer
             {
                 New-InvalidArgumentException -ArgumentName 'MembersToExclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude')
             }
-        
+
             # Remove duplicate names as strings.
             $Members = @( Remove-DuplicateMembers -Members $Members )
-        
+
             if ($Members.Length -gt 0)
             {
                 # Get current members
@@ -992,12 +992,12 @@ function Set-TargetResourceOnNanoServer
             {
                 $MembersToInclude = @( Remove-DuplicateMembers -Members $MembersToInclude )
             }
-       
+
             if ($PSBoundParameters.ContainsKey('MembersToExclude'))
             {
                 $MembersToExclude = @( Remove-DuplicateMembers -Members $MembersToExclude )
             }
-       
+
             if ($PSBoundParameters.ContainsKey('MembersToInclude') -and $PSBoundParameters.ContainsKey('MembersToExclude'))
             {
                 # Both MembersToInclude and MembersToExlude were provided. Check if they have common principals.
@@ -1017,7 +1017,7 @@ function Set-TargetResourceOnNanoServer
                     New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeAreEmpty)
                 }
             }
-            
+
             if ($PSBoundParameters.ContainsKey('MembersToInclude'))
             {
                 foreach ($includedMember in $MembersToInclude)
@@ -1035,7 +1035,7 @@ function Set-TargetResourceOnNanoServer
                     }
                 }
             }
-       
+
             if ($PSBoundParameters.ContainsKey('MembersToExclude'))
             {
                 foreach($excludedMember in $MembersToExclude)
@@ -1078,7 +1078,7 @@ function Set-TargetResourceOnNanoServer
 
     .PARAMETER GroupName
         The name of the group for which you want to ensure a specific state.
-        
+
     .PARAMETER Ensure
         Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
         not exist. Setting it to 'Present' (the default value) ensures that the group exists.
@@ -1122,7 +1122,7 @@ function Test-TargetResourceOnNanoServer
         [String]
         $Ensure = 'Present',
 
-        [String] 
+        [String]
         $Description,
 
         [ValidateNotNull()]
@@ -1154,7 +1154,7 @@ function Test-TargetResourceOnNanoServer
         {
             # A group with the provided name does not exist.
             Write-Verbose -Message ($LocalizedData.GroupDoesNotExist -f $GroupName)
-        
+
             return ($Ensure -eq 'Absent')
         }
 
@@ -1170,13 +1170,13 @@ function Test-TargetResourceOnNanoServer
         Write-Verbose -Message ($LocalizedData.PropertyMismatch -f 'Ensure', 'Absent', 'Present')
         return $false
     }
-    
+
     if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $group.Description)
     {
         Write-Verbose -Message ($LocalizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
         return $false
     }
-    
+
     if ($PSBoundParameters.ContainsKey('Members'))
     {
         Write-Verbose 'Testing Members...'
@@ -1190,19 +1190,19 @@ function Test-TargetResourceOnNanoServer
         {
             New-InvalidArgumentException -ArgumentName 'MembersToExclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude')
         }
-    
+
         # Remove duplicate names as strings.
         $expectedMembers = @( Remove-DuplicateMembers -Members $Members )
 
         # Get current members
         $groupMembers = Get-MembersOnNanoServer -Group $group
-        
+
         if ($expectedMembers.Length -ne $groupMembers.Length)
         {
             Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembers.Length, $groupMembers.Length)
             return $false
         }
-    
+
         # Compare two members lists.
         foreach ($expectedMember in $expectedMembers)
         {
@@ -1221,7 +1221,7 @@ function Test-TargetResourceOnNanoServer
         if ($PSBoundParameters.ContainsKey('MembersToInclude'))
         {
             $MembersToInclude = @( Remove-DuplicateMembers -Members $MembersToInclude )
-    
+
             # Compare two members lists.
             foreach ($memberToInclude in $MembersToInclude)
             {
@@ -1232,11 +1232,11 @@ function Test-TargetResourceOnNanoServer
                 }
             }
         }
-    
+
         if ($PSBoundParameters.ContainsKey('MembersToExclude'))
         {
             $MembersToExclude = @( Remove-DuplicateMembers -Members $MembersToExclude )
-    
+
             # Compare two members lists.
             foreach ($memberToExclude in $MembersToExclude)
             {
@@ -1370,7 +1370,7 @@ function Get-MembersOnFullSKU
         $Disposables,
 
         [System.Net.NetworkCredential]
-        $Credential 
+        $Credential
     )
 
     Set-StrictMode -Version 'Latest'
@@ -1587,7 +1587,7 @@ function ConvertTo-Principals
         [System.Net.NetworkCredential]
         $Credential
     )
-    
+
     Set-StrictMode -Version 'Latest'
 
     $principals = @()
@@ -1675,7 +1675,7 @@ function ConvertTo-Principal
         [System.Net.NetworkCredential]
         $Credential
     )
-    
+
     Set-StrictMode -Version 'Latest'
 
     # The scope of the the object name when in the form of scope\name, UPN, or DN
@@ -1702,7 +1702,7 @@ function ConvertTo-Principal
         #>
 
         Write-Verbose -Message ($LocalizedData.ResolvingDomainAccountWithTrust -f $MemberName)
-        
+
         $identityValue = $MemberName
     }
 
@@ -1811,7 +1811,7 @@ function Get-PrincipalContext
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNull()] 
+        [ValidateNotNull()]
         [Hashtable]
         [AllowEmptyCollection()]
         $PrincipalContexts,
@@ -1827,7 +1827,7 @@ function Get-PrincipalContext
         [String]
         $Scope,
 
-        [System.Net.NetworkCredential] 
+        [System.Net.NetworkCredential]
         $Credential
     )
 
@@ -1880,7 +1880,7 @@ function Get-PrincipalContext
 <#
     .SYNOPSIS
         Adds the given members to the given group if the members are not already in the group.
-        
+
         Returns true if the members were added and false if all the given members were already
         present.
 
@@ -1926,7 +1926,7 @@ function Add-GroupMembers
 <#
     .SYNOPSIS
         Removes the given members from the given group if the members are in the group.
-        
+
         Returns true if the members were removed and false if none of the given members were in the
         group.
 
@@ -2075,7 +2075,7 @@ function Split-MemberName
         [String]
         $MemberName
     )
-    
+
     Set-StrictMode -Version 'latest'
 
     # Assume no scope is defined or $FullName is a DistinguishedName
@@ -2087,7 +2087,7 @@ function Split-MemberName
     if ($separatorIndex -ne -1)
     {
         $scope = $MemberName.Substring(0, $separatorIndex)
-        
+
         if (Test-IsLocalMachine -Scope $scope)
         {
             $scope = $env:computerName
@@ -2121,7 +2121,7 @@ function Split-MemberName
 
         $startScopeIndex = $separatorIndex + $distinguishedNamePrefix.Length
         $endScopeIndex = $MemberName.IndexOf(',', $startScopeIndex)
-        
+
         if ($endScopeIndex -gt $startScopeIndex)
         {
             $scopeLength = $endScopeIndex - $separatorScopeIndex - $distinguishedNamePrefix.Length
@@ -2152,9 +2152,9 @@ function Remove-Disposables
         [AllowEmptyCollection()]
         $Disposables
     )
-    
+
     Set-StrictMode -Version 'latest'
-    
+
     foreach ($disposable in $Disposables)
     {
         if ($disposable -is [System.IDisposable])
@@ -2167,7 +2167,7 @@ function Remove-Disposables
 <#
     .SYNOPSIS
         Retrieves a local Windows group.
-    
+
     .PARAMETER GroupName
         The name of the group to retrieve.
 

@@ -89,7 +89,7 @@ function Test-GroupExistsOnFullSKU
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] 
+        [String]
         $GroupName,
 
         [ValidateNotNullOrEmpty()]
@@ -377,7 +377,7 @@ function New-GroupOnNanoServer
         The name of the user group to delete.
 
     .PARAMETER ComputerName
-        The optional name of the computer to update. 
+        The optional name of the computer to update.
         The default value is the local machine.
 #>
 function Remove-Group
@@ -413,7 +413,7 @@ function Remove-Group
         The name of the local user group to delete.
 
     .PARAMETER ComputerName
-        The optional name of the computer to update. 
+        The optional name of the computer to update.
         The default value is the local machine.
 #>
 function Remove-GroupOnFullSKU
