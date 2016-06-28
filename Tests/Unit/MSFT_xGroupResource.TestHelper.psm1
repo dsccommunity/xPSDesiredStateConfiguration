@@ -28,7 +28,8 @@ function Test-GroupExists
         $GroupName,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     if (Test-IsNanoServer)
@@ -88,10 +89,12 @@ function Test-GroupExistsOnFullSKU
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String] 
+        $GroupName,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -133,10 +136,12 @@ function Test-GroupExistsOnNanoServer
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -198,14 +203,18 @@ function New-Group
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
-        [String] $Description,
+        [String]
+        $Description,
 
-        [String[]] $MemberUserNames,
+        [String[]]
+        $MemberUserNames,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -249,14 +258,18 @@ function New-GroupOnFullSKU
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
-        [String] $Description,
+        [String]
+        $Description,
 
-        [String[]] $MemberUserNames,
+        [String[]]
+        $MemberUserNames,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -314,14 +327,18 @@ function New-GroupOnNanoServer
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
-        [String] $Description,
+        [String]
+        $Description,
 
-        [String[]] $MemberUserNames,
+        [String[]]
+        $MemberUserNames,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -370,10 +387,12 @@ function Remove-Group
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     if (Test-IsNanoServer)
@@ -404,10 +423,12 @@ function Remove-GroupOnFullSKU
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'
@@ -438,10 +459,12 @@ function Remove-GroupOnNanoServer
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $GroupName,
+        [String]
+        $GroupName,
 
         [ValidateNotNullOrEmpty()]
-        [String] $ComputerName = $env:computerName
+        [String]
+        $ComputerName = $env:computerName
     )
 
     Set-StrictMode -Version 'Latest'

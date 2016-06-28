@@ -216,71 +216,6 @@ function Set-CacheEntry
 
 <#
     .SYNOPSIS
-        Throws an invalid argument exception
-
-    .PARAMETER Message
-        The message explaining why this error is being thrown
-
-    .PARAMETER ArgumentName
-        The name of the invalid argument that is causing this error to be thrown
-#>
-function Throw-InvalidArgumentException
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String] $Message,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String] $ArgumentName
-    )
-
-    $argumentException = New-Object -TypeName 'ArgumentException' -ArgumentList @( $Message, $ArgumentName )
-    $errorRecord = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @( $argumentException, $ArgumentName, 'InvalidArgument', $null)
-
-    throw $errorRecord
-}
-
-<#
-    .SYNOPSIS
-        Throws an terminating error exception
-
-    .PARAMETER Message
-        The message explaining why this error is being thrown
-
-    .PARAMETER ErrorRecord
-        The error record containing the exception that is causing this terminating error
-#>
-function Throw-TerminatingError
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String] $Message,
-
-        [System.Management.Automation.ErrorRecord] $ErrorRecord
-    )
-
-    if ($null -eq $ErrorRecord)
-    {
-        $invalidOperationException = New-Object -TypeName 'InvalidOperationException' -ArgumentList @( $Message, $ErrorRecord.Exception)
-    }
-    else
-    {
-        $invalidOperationException = New-Object -TypeName 'InvalidOperationException' -ArgumentList @( $Message )
-    }
-
-    $errorRecordToThrow = New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @( $invalidOperationException.ToString(), 'MachineStateIncorrect', 'InvalidOperation' ,$null)
-    throw $errorRecordToThrow
-}
-
-<#
-    .SYNOPSIS
         Tests if the Path argument to the Archive resource is valid.
         Throws an error if Path is not valid.
 
@@ -301,7 +236,7 @@ function Assert-PathArgumentValid
 
     if (-not (Test-Path -Path $Path -PathType Leaf))
     {
-        Throw-InvalidArgumentException -Message ($LocalizedData.InvalidSourcePath -f $Path) -ArgumentName 'Path'
+        New-InvalidArgumentException -Message ($LocalizedData.InvalidSourcePath -f $Path) -ArgumentName 'Path'
     }
 }
 
@@ -328,7 +263,7 @@ function Assert-DestinationArgumentValid
     $destinationFileInfo = Get-Item -LiteralPath $Destination -ErrorAction Ignore
     if ($null -ne $destinationFileInfo -and $destinationFileInfo.GetType() -eq [System.IO.FileInfo])
     {
-        Throw-InvalidArgumentException -Message ($LocalizedData.InvalidDestinationDirectory -f $Destination) -ArgumentName 'Destination'
+        New-InvalidArgumentException -Message ($LocalizedData.InvalidDestinationDirectory -f $Destination) -ArgumentName 'Destination'
     }
 }
 
@@ -357,7 +292,7 @@ function Assert-ValidateAndChecksumArgumentsValid
 
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
-        Throw-InvalidArgumentException -Message ($LocalizedData.InvalidChecksumArgsMessage -f $Checksum) -ArgumentName 'Checksum'
+        New-InvalidArgumentException -Message ($LocalizedData.InvalidChecksumArgsMessage -f $Checksum) -ArgumentName 'Checksum'
     }
 }
 
@@ -404,7 +339,7 @@ function Test-FileHashMatchesArchiveEntryHash
     }
     catch
     {
-        Throw-TerminatingError -Message ($LocalizedData.ErrorOpeningExistingFile -f $FilePath) -ErrorRecord $_
+        New-InvalidOperationException -Message ($LocalizedData.ErrorOpeningExistingFile -f $FilePath) -ErrorRecord $_
     }
     finally
     {
@@ -568,7 +503,7 @@ function Mount-NetworkPath
             if ($lastBackslashIndex -eq -1)
             {
                 Write-Verbose -Message ($LocalizedData.PathPathIsNotAValidateNetPath -f $Path)
-                Throw-TerminatingError ($LocalizedData.InvalidNetSourcePath -f $Path)
+                New-InvalidOperationException ($LocalizedData.InvalidNetSourcePath -f $Path)
             }
             else
             {
@@ -592,7 +527,7 @@ function Mount-NetworkPath
         catch
         {
             Write-Verbose -Message ($LocalizedData.CannotAccessPathPathWithGivenCredential -f $Path)
-            Throw-TerminatingError -Message ($LocalizedData.ErrorOpeningArchiveFile -f $Path) -ErrorRecord $_
+            New-InvalidOperationException -Message ($LocalizedData.ErrorOpeningArchiveFile -f $Path) -ErrorRecord $_
         }
     }
 
@@ -837,7 +772,7 @@ function New-Directory
             }
             else
             {
-                Throw-TerminatingError ($LocalizedData.ItemExistsButIsWrongType -f $Path)
+                New-InvalidOperationException ($LocalizedData.ItemExistsButIsWrongType -f $Path)
             }
         }
     }
@@ -876,7 +811,7 @@ function Open-ZipFile
     }
     catch
     {
-        Throw-TerminatingError ($LocalizedData.ErrorOpeningArchiveFile -f $Path) $_
+        New-InvalidOperationException ($LocalizedData.ErrorOpeningArchiveFile -f $Path) $_
     }
 
     $archiveEntryNameHashtable = @{}
@@ -1120,7 +1055,7 @@ function Set-TargetResource
                                 else
                                 {
                                     Write-Verbose -Message ($LocalizedData.FoundFileAtdDestWhereWeWereGoingToPlaceOneAndDoesNotMatchTheSourceButForceWasNotSpecifiedErroring -f $archiveEntryDestinationPath)
-                                    Throw-TerminatingError ($LocalizedData.ItemExistsButIsIncorrect -f $archiveEntryDestinationPath)
+                                    New-InvalidOperationException ($LocalizedData.ItemExistsButIsIncorrect -f $archiveEntryDestinationPath)
                                 }
                             }
                         }
@@ -1142,7 +1077,7 @@ function Set-TargetResource
                             else
                             {
                                 Write-Verbose -Message ($LocalizedData.FoundaAFileAtDestAndTimestampChecksumDoesNotMatchTheSourceButForceWasNotSpecifiedErroring -f $archiveEntryDestinationPath, $Checksum)
-                                Throw-TerminatingError ($LocalizedData.ItemExistsButIsIncorrect -f $archiveEntryDestinationPath)
+                                New-InvalidOperationException ($LocalizedData.ItemExistsButIsIncorrect -f $archiveEntryDestinationPath)
                             }
                         }
                     }
@@ -1161,7 +1096,7 @@ function Set-TargetResource
                     else
                     {
                         Write-Verbose -Message ($LocalizedData.FoundDirectoryAtDestWhereAFileShouldBeAndForceWasNotSpecifiedErroring -f $archiveEntryDestinationPath)
-                        Throw-TerminatingError ($LocalizedData.ItemExistsButIsWrongType -f $archiveEntryDestinationPath)
+                        New-InvalidOperationException ($LocalizedData.ItemExistsButIsWrongType -f $archiveEntryDestinationPath)
                     }
                 }
             }
@@ -1198,7 +1133,7 @@ function Set-TargetResource
                     }
                     catch
                     {
-                        Throw-TerminatingError ($LocalizedData.ErrorCopyingToOutstream -f $archiveEntryDestinationPath) $_
+                        New-InvalidOperationException ($LocalizedData.ErrorCopyingToOutstream -f $archiveEntryDestinationPath) $_
                     }
                     finally
                     {

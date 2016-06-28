@@ -1,4 +1,4 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
 Import-Module "$PSScriptRoot\..\..\DSCResource.Tests\TestHelper.psm1" -Force
@@ -234,7 +234,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     $testTargetResourceResult | Should Be $true
 
-                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
                     $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
                     Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargerResourceResultProperties
@@ -256,9 +256,9 @@ InModuleScope 'MSFT_xGroupResource' {
                 Verify that a group can be created with a domain user and credential
                 and that a user account from a trusted domain can be resolved and added.
             
-                This test creates a group and adds the following users:
-                    - a domain local administrator user from a primary domain as domain\username
-                    - a domain user from the domain with a two-way trust as domain\username
+                This test creates a group and adds the following users as domain\username:
+                    - a domain local administrator user from a primary domain
+                    - a domain user from the domain with a two-way trust
 
                 The credential for the domain local administrator user is used to resolve all user accounts.
             #>
@@ -279,7 +279,7 @@ InModuleScope 'MSFT_xGroupResource' {
                     $testTargetResourceResult = Test-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential
                     $testTargetResourceResult | Should Be $true
                     
-                    getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $primaryDomainAccountCredential
                     $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
                     Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargerResourceResultProperties
@@ -295,254 +295,173 @@ InModuleScope 'MSFT_xGroupResource' {
                 }
             }
 
+            <#
+                Verify that a group can be created with domain user and credential and a user
+                account can be added using the user's UPN name.
+
+                This test creates a group and adds the following users using their UPN name:
+                    - a domain local administrator user from a primary domain 
+                    - a domain user from the domain with a two-way trust
+
+                The credential for the domain local administrator user is used to resolve all user accounts.
+            #>
             It 'Should create a group with a domain user and credential and add a user by UPN name' -Skip:$script:skipTestsWithCredentials {
-                #
-                # Verify that a group can be created with domain user and credentials
-                # and a user accounts can be added using the user's UPN name
-                #
-                # This test creates the group LocalGroupWithTrustedDomain and adds the following users
-                # DomainLocalAdmin user from primary domain using the UPN name
-                # DomainUser from the domain with a 2-way trust using the UPN name
-                # The credentials for the DomainLocalAdmin account are used to resolve all user accounts.
+                $testGroupName = 'LocalTestGroup'
+                $testDescription = 'Some Description'
 
-                $groupName = "LocalGroupWithUpnNames"
-                $groupDescription = "Group with user from a trusted domain"
-                [bool] $passed = $false
+                $primaryDomainAccount = '?'
+                $twoWayTrustDomainAccount = '?'
 
-                # Ensure the group doesn't exist
-                Remove-Group -GroupName $groupName
+                $membersToInclude = @( $primaryDomainAccount['UpnName'], $twoWayTrustDomainAccount['UpnName'] )
+                $primaryDomainAccountCredential = $primaryDomainAccount['Credential']
 
                 try
                 {
-                    # domain local admin of primary domain
-                    $primaryAccount = DomainAccountGenerator -domain "Primary" -user "DomainLocalAdmin"
-                    # a domain user from the 2-way trust domain
-                    $twoAccount = DomainAccountGenerator -domain "TrustedTwo" -user "DomainUser"
+                    Set-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential -Description $testDescription
 
-                    $membersToInclude = @( $primaryAccount["UpnName"], $twoAccount["UpnName"])
-                    $credential = $primaryAccount["Credential"]
+                    $testTargetResourceResult = Test-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential
+                    $testTargetResourceResult | Should Be $true
+                    
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $primaryDomainAccountCredential
+                    $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
-                    # Create test group with credentials
-                    MSFT_GroupResource\Set-TargetResource -GroupName $groupName -MembersToInclude $membersToInclude -Credential $credential -Description $groupDescription
+                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargerResourceResultProperties
 
-                    # Test group created with credentials
-                    $result = MSFT_GroupResource\Test-TargetResource -GroupName $groupName -MembersToInclude $membersToInclude -Credential $credential
-
-                    if ($result -ne $true)
-                    {
-                        throw "Set target resource group with credentials: Test-TargetResource failed."
-                    }
-
-                    # Get group information.
-                    $result = MSFT_GroupResource\Get-TargetResource -GroupName $groupName
-                    $resultHashTable = $result -as [hashtable]
-
-                    if ($resultHashTable -eq $null)
-                    {
-                        throw "Get target resource group with credentials failed."
-                    }
-
-                    $resultHashTable
-
-                    AssertEquals $groupName $resultHashTable["GroupName"] "Get-TargetResource: Group name. $groupName expected."  
-                    AssertEquals "Present" $resultHashTable["Ensure"] "Get-TargetResource: Ensure. 'Present' expected." 
-                    AssertEquals  $groupDescription $resultHashTable["Description"] "Get-TargetResource: Description. $groupDescription expected"
-                    $expectedLength = $membersToInclude.Length
-                    AssertEquals $expectedLength $resultHashTable["Members"].Count "Get-TargetResource: Members.Count. $expectedLength expected"
-                    $passed = $true
+                    $getTargetResourceResult['GroupName']       | Should Be $testGroupName
+                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
+                    $getTargetResourceResult['Description']     | Should Be $testDescription
+                    $getTargetResourceResult['Members'].Count   | Should Be $membersToInclude.Length
                 }
                 finally
                 {
-                    if ($passed -eq $true)
-                    {
-                        # Remove the group if the test passed; otherwise,
-                        # leave the group to enable debugging
-                        Remove-Group -GroupName $groupName
-                    }
+                    Remove-Group -GroupName $testGroupName
                 }
             }
 
             It 'Should not create a group with a credential and an invalid domain user' -Skip:$script:skipTestsWithCredentials {
-                Invoke-Remotely {
-                    #
-                    # Verify that a group can be created with domain user and credentials
-                    # and a user accounts can be added using the user's UPN name
-                    #
-                    # This test creates the group LocalGroupWithTrustedDomain and adds the following users
-                    # DomainLocalAdmin user from primary domain using the UPN name
-                    # DomainUser from the domain with a 2-way trust using the UPN name
-                    # The credentials for the DomainLocalAdmin account are used to resolve all user accounts.
+                $testGroupName = 'LocalTestGroup'
+                $testDescription = 'Some Description'
 
-                    $groupName = "TestGroup"
-                    $groupDescription = "Group should not exist"
-                    [bool] $passed = $false
+                $primaryDomainAccount = '?'
+                $invalidDomainAccountUserName = 'invaliduser@' + $primaryAccount['DomainName']
 
-                    # Ensure the group doesn't exist
-                    Remove-Group -GroupName $groupName
+                $membersToInclude = @( $primaryDomainAccount['UpnName'], $invalidDomainAccountUserName )
+                $primaryDomainAccountCredential = $primaryDomainAccount['Credential']
 
-                    # domain local admin of primary domain
-                    $primaryAccount = DomainAccountGenerator -domain "Primary" -user "DomainLocalAdmin"
-                    # a domain user from the 2-way trust domain
-                    $twoAccount = "invaliduser@" + $primaryAccount["DomainName"]
+                { Set-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Credential $primaryDomainAccountCredential -Description $testDescription } | Should Throw
 
-                    $membersToInclude = @( $primaryAccount["UpnName"], $twoAccount)
-                    $credential = $primaryAccount["Credential"]
-
-                    try
-                    {
-                        MSFT_GroupResource\Set-TargetResource -GroupName $groupName -MembersToInclude $membersToInclude -Credential $credential -Description $groupDescription
-                        #   -Credential $cred
-                    }
-                    catch
-                    {
-                        $errorRecord = $_
-                    }
-
-                    if (($errorRecord -eq $null) -or ($errorRecord.FullyQualifiedErrorId -notmatch "PrincipalNotFound_ProvidedCredential"))
-                    {
-                        throw "Set target with invalid names: Did not throw 'PrincipalNotFound_ProvidedCredential' error."
-                    }
-
-                    $groupExists = Test-Group $groupName
-
-                    AssertEquals $false $groupExists "Set-TargetResource: Group.Exists. $groupName should not have been created." 
-                }
+                Test-GroupExists -GroupName $groupName | Should Be $false
             }
 
+            <#
+                Verify that a group can be created with domain user but no credential and a user account from a trusted domain can be resolved and added.
+
+                This test creates a group and adds the following users as domain\username:
+                    - a domain local administrator user from a primary domain
+                    - a domain user from the domain with a two-way trust
+
+                The domain trust is used to resolve all user accounts.
+            #>
             It 'Should create a group with a domain user but no credential' -Skip:$script:skipTestsWithCredentials {
-                Invoke-Remotely {
+                $testGroupName = 'LocalTestGroup'
+                $testDescription = 'Some Description'
 
-                    #
-                    # Verify that a group can be created with domain user but no credentials
-                    # and a user account from a trusted domain can be resolved and added.
-                    #
-                    # This test creates the group LocalGroupWithTrustedDomainButNoCredentials and adds the following users
-                    # DomainLocalAdmin user from primary domain as domain\username
-                    # DomainUser from the domain with a 2-way trust as domain\username
-                    # Since no credentials are provided, the domain trust is used to resolve all user accounts.
+                $primaryDomainAccount = '?'
+                $twoWayTrustDomainAccount = '?'
 
-                    $groupName = "LocalGroupWithTrustedDomainButNoCredentials"
-                    $groupDescription = "Group with user from a trusted domain without credentials"
-                    [bool] $passed = $false
+                $membersToInclude = @( $primaryDomainAccount['DomainUserName'], $twoWayTrustDomainAccount['DomainUserName'] )
+                
+                try
+                {
+                    { Set-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude -Description $testDescription } | Should Not Throw
 
-                    try
-                    {
-                        # domain local admin of primary domain
-                        $primaryAccount = DomainAccountGenerator -domain "Primary" -user "DomainLocalAdmin"
-                        # a domain user from the 2-way trust domain
-                        $twoAccount = DomainAccountGenerator -domain "TrustedTwo" -user "DomainUser"
+                    $testTargetResourceResult = Test-TargetResource -GroupName $testGroupName -MembersToInclude $membersToInclude
+                    $testTargetResourceResult | Should Be $true
+                    
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
+                    $getTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
 
-                        $membersToInclude = @($primaryAccount["DomainUserName"], $twoAccount["DomainUserName"])
-                        $credential = $null
+                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargerResourceResultProperties
 
-                        # Create test group without credentials
-                        AssertNoError { MSFT_GroupResource\Set-TargetResource -GroupName $groupName -MembersToInclude $membersToInclude -Description $groupDescription } `
-                            "Set target failed to add local users to a local group without credentials"
-
-                        # Test group created without credentials
-                        $result = MSFT_GroupResource\Test-TargetResource -GroupName $groupName -MembersToInclude $membersToInclude
-
-                        if ($result -ne $true)
-                        {
-                            throw "Set target resource group with credentials: Test-TargetResource failed."
-                        }
-
-                        # Get group information.
-                        $result = MSFT_GroupResource\Get-TargetResource -GroupName $groupName
-                        $resultHashTable = $result -as [hashtable]
-
-                        if ($resultHashTable -eq $null)
-                        {
-                            throw "Get target resource group without credentials failed."
-                        }
-
-                        $resultHashTable
-
-                        AssertEquals $groupName $resultHashTable["GroupName"] "Get-TargetResource: Group name. $groupName expected."  
-                        AssertEquals "Present" $resultHashTable["Ensure"] "Get-TargetResource: Ensure. 'Present' expected." 
-                        $expectedLength = $membersToInclude.Length
-                        AssertEquals $expectedLength $resultHashTable["Members"].Count "Get-TargetResource: Members.Count. $expectedLength expected"
-                        $passed = $true
-                    }
-                    finally
-                    {
-                        if ($passed -eq $true)
-                        {
-                            # Remove the group if the test passed; otherwise,
-                            # leave the group to enable debugging
-                            Remove-Group -GroupName $groupName
-                        }
-                    }
+                    $getTargetResourceResult['GroupName']       | Should Be $testGroupName
+                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
+                    $getTargetResourceResult['Description']     | Should Be $testDescription
+                    $getTargetResourceResult['Members'].Count   | Should Be $membersToInclude.Length
+                }
+                finally
+                {
+                    Remove-Group -GroupName $testGroupName
                 }
             }
 
+            # Verify that test group cannot be created with an invalid credential
             It 'Should not create a group with an invalid credential' -Skip:$script:skipTestsWithCredentials {
+                $testGroupName = 'LocalTestGroup'
+                $testDescription = 'Some Description'
 
-                Invoke-Remotely {
+                $testUserName1 = 'LocalTestUser1'
+                $testUserPassword = 'StrongOne7.'
 
-                    #
-                    # Verify that test group cannot be created with invalid credentials
-                    #
+                $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
 
-                    $TestUserName1 = "LocalTestUser51"
-                    $TestDescription = "Test User Description"
-                    $TestGroupName = "LocalTestGroupInvalidCredential"
+                # Domain user with invalid password
+                $domainUserName = '?'
+                $invalidDomainUserPassword = '?' + 'invalidstring'
+                $secureInvalidDomainUserPassword = ConvertTo-SecureString -String $invalidDomainUserPassword -AsPlainText -Force
 
-                    try
+                $invalidDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @($domainUserName, $invalidDomainUserPassword)
+
+                try
+                {
+                    New-User -Credential $testCredential1 -Description $testDescription
+                    
                     {
-                        # Local users
-                        New-User -UserName $TestUserName1 -Password "StrongOne7." -Description $TestDescription
-
-                        # Domain user with invalid password
-                        $username = (DomainLocalAdminUserGenerator)
-                        $invalidpassword = ((DomainLocalAdminPasswordGenerator)+"randomstring") | ConvertTo-SecureString -AsPlainText -Force
-
-                        $invalidcred = New-Object System.Management.Automation.PSCredential($username, $invalidpassword)
-
-                        # Create test group with invalid credentials
-                        AssertFullyQualifiedErrorIdEquals { MSFT_GroupResource\Set-TargetResource -GroupName $TestGroupName -MembersToInclude @($TestUserName1, $username) `
-                            -Credential $invalidcred -Description $TestDescription } `
-                            -expectedFullyQualifiedErrorId 'PrincipalNotFound'
-                    }
-                    finally
-                    {
-                        Remove-Group -GroupName $TestGroupName
-                        Remove-User -UserName $TestUserName1
-                    }
+                        Set-TargetResource `
+                            -GroupName $testGroupName `
+                            -MembersToInclude @($testUserName1, $domainUserName) `
+                            -Credential $invalidDomainUserCredential `
+                            -Description $testDescription 
+                    } | Should Throw
+                }
+                finally
+                {
+                    Remove-Group -GroupName $testGroupName
+                    Remove-User -UserName $testUserName1
                 }
             }
     
+            # Verify that test group cannot be created with invalid user info (cannot resolve user) when using domain trust
             It 'Should not create a group with an invalid domain user without a credential' -Skip:$script:skipTestsWithCredentials {
+                $testGroupName = 'LocalTestGroup'
+                $testDescription = 'Some Description'
 
-                Invoke-Remotely {
+                $testUserName1 = 'LocalTestUser1'
+                $testUserPassword = 'StrongOne7.'
 
-                    #
-                    # Verify that test group cannot be created with invalid user info (cannot resolve user) when
-                    # no credentials is passed and we are using domain trust
-                    #
+                $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
 
-                    $TestUserName1 = "LocalTestUser51"
-                    $TestDescription = "Test User/Group Description"
-                    $TestGroupName = "LocalTestGroupInvalidDomainUser"
+                # Domain user with invalid username
+                $invalidDomainUserName = '?' + 'invalidstring'
 
-                    try
+                try
+                {
+                    New-User -Credential $testCredential1 -Description $testDescription
+                    
                     {
-                        # Local users
-                        New-User -UserName $TestUserName1 -Password "StrongOne7." -Description $TestDescription
-
-                        # Domain user with invalid username
-                        $username = (DomainLocalAdminUserGenerator)+"randomstring"
-
-                        # Create test group with invalid credentials
-                        AssertFullyQualifiedErrorIdEquals { MSFT_GroupResource\Set-TargetResource -GroupName $TestGroupName -MembersToInclude @($TestUserName1, $username) `
-                            -Description $TestDescription } `
-                            -expectedFullyQualifiedErrorId 'PrincipalNotFound_ProvidedCredential'
-                    }
-                    finally
-                    {
-                        Remove-Group -GroupName $TestGroupName
-                        Remove-User -UserName $TestUserName1
-                    }
+                        Set-TargetResource `
+                            -GroupName $testGroupName `
+                            -MembersToInclude $membersToInclude `
+                            -Credential $primaryDomainAccountCredential `
+                            -Description $testDescription `
+                            -MembersToInclude @($testUserName1, $invalidDomainUserName) 
+                    } | Should Throw
+                }
+                finally
+                {
+                    Remove-Group -GroupName $testGroupName
+                    Remove-User -UserName $testUserName1
                 }
             }
         }
@@ -632,6 +551,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 {
                     New-User -Credential $testCredential1 -Description $testDescription
                     New-User -Credential $testCredential2 -Description $testDescription
+                    New-User -Credential $testCredential3 -Description $testDescription
 
                     New-Group -GroupName $testGroupName -Description $testDescription -MemberUserNames @( $testUserName1, $testUserName2 )
 
