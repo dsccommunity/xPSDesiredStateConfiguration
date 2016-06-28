@@ -22,7 +22,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xService** configures and manages Windows services.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
 * **xPackage** manages the installation of .msi and .exe packages.
-* **xGroup** configures and manages local Windows groups
+* **xGroup** provides a mechanism to manage local groups on the target node.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xWindowsOptionalFeature** configures optional Windows features.
 * **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
@@ -39,13 +39,13 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 * **Destination**: (Key) Specifies the location where you want to ensure the archive contents are extracted.
 * **Path**: (Key) Specifies the source path of the archive file.
-* **Ensure**: = Determines whether to check if the content of the archive exists at the Destination. Set this property to Present to ensure the contents exist. Set it to Absent to ensure they do not exist.
+* **Ensure**: Determines whether to check if the content of the archive exists at the Destination. Set this property to Present to ensure the contents exist. Set it to Absent to ensure they do not exist.
    - Supported values: Present, Absent
    - Default Value: Present
 * **Validate**: Uses the Checksum property to determine if the archive matches the signature. If Validate is false, only the file or directory name is used for comparison. If you specify Checksum without Validate, the configuration will fail. If you specify Validate without Checksum, a SHA-256 checksum is used by default.
    - Supported values: true, false
    - Default Value: false
-* **Checksum**: = Defines the type to use when determining whether two files are the same. If you specify Checksum without Validate, the configuration will fail.
+* **Checksum**: Defines the type to use when determining whether two files are the same. If you specify Checksum without Validate, the configuration will fail.
    - Suported values: CreatedDate, ModifiedDate, SHA-1, SHA-256, SHA-512
    - Default value: SHA-256
 * **Force**: Setting Force to true with override certain file operations (such as overwriting a file or deleting a directory that is not empty) that would normally result in an error.
@@ -129,20 +129,15 @@ For a complete list, please use Get-DscResource.
 
 ### xGroup
 
-This resource extends PowerShell 4.0 Group resource by supporting cross-domain account lookup where a valid trust relationship exists.
-In addition, limited support for UPN-formatted names are supported for identifying user, computer, and group domain-based accounts.
-
-* **GroupName**: The name of the group.
-* **Ensure**: Ensures that the group is **Present** or **Absent**.
-* **Description**: Description of the group.
-* **Members**: The members that form the group.
-Note: If the group already exists, the listed items in this property replaces what is in the group.
-* **MembersToInclude**: List of users to add to the group.
-Note: This property is ignored if 'Members' is specified.
-* **MembersToExclude**: List of users you want to ensure are not members of the group.
-Note: This property is ignored if 'Members' is specified.
-* **Credential**: Indicates the credentials required to access remote resources.
-Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
+* **GroupName**: (Key) The name of the group for which you want to ensure a specific state.
+* **Ensure**: Indicates if the group exists. Set this property to "Absent" to ensure that the group does not exist. Setting it to "Present" (the default value) ensures that the group exists.
+   - Supported values: Present, Absent
+   - Default Value: Present
+* **Description**: The description of the group.
+* **Members**: Use this property to replace the current group membership with the specified members. The value of this property is an array of strings of the form Domain\UserName. If you set this property in a configuration, do not use either the MembersToExclude or MembersToInclude property. Doing so will generate an error. Note: If the group already exists, the listed items in this property replaces what is in the group.
+* **MembersToInclude**: Use this property to add members to the existing membership of the group. The value of this property is an array of strings of the form Domain\UserName. If you set this property in a configuration, do not use the Members property. Doing so will generate an error. Note: This property is ignored if 'Members' is specified.
+* **MembersToExclude**: Use this property to remove members from the existing membership of the group. The value of this property is an array of strings of the form Domain\UserName. If you set this property in a configuration, do not use the Members property. Doing so will generate an error. Note: This property is ignored if 'Members' is specified.
+* **Credential**: The credentials required to access remote resources. Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group; otherwise, an error will occur.
 
 Local accounts may be specified in one of the following ways:
 
@@ -373,6 +368,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * Added the xWindowsOptionalFeatureSet resource
 * Merged the in-box Service resource with xService and added tests for xService
 * Merged the in-box Archive resource with xArchive and added tests for xArchive
+* Merged the in-box Group resource with xGroup and added tests for xGroup
 
 ### 3.10.0.0
 
