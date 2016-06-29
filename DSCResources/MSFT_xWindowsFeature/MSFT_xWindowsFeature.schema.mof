@@ -1,0 +1,16 @@
+#pragma namespace("\\\\.\\root\\microsoft\\windows\\DesiredStateConfiguration")
+
+[ClassVersion("1.0.0"), FriendlyName("xWindowsFeature")] 
+class MSFT_xWindowsFeature : OMI_BaseResource
+{
+  [Key] string Name;
+  [write,Description("An enumerated value that describes if the role or feature is expected to be installed on not on the machine.\nPresent {default}  \nAbsent   \n"),ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [Read] string DisplayName;
+  [write] string Source;
+  [write] boolean IncludeAllSubFeature;
+  [write] string LogPath;
+  [write,EmbeddedInstance("MSFT_Credential")] string Credential;
+};
+
+
+

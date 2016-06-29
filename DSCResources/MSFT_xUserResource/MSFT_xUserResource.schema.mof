@@ -1,0 +1,13 @@
+[ClassVersion("1.0.0"), FriendlyName("xUser")]
+class MSFT_xUserResource : OMI_BaseResource
+{
+  [Key] string UserName;
+  [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [write] string FullName;
+  [write] string Description;
+  [write,EmbeddedInstance("MSFT_Credential")] string Password;
+  [write] boolean Disabled;
+  [write] boolean PasswordNeverExpires;
+  [write] boolean PasswordChangeRequired;
+  [write] boolean PasswordChangeNotAllowed;
+};
