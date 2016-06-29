@@ -1,5 +1,5 @@
 
-[ClassVersion("1.0.0"),FriendlyName("xGroup")] 
+[ClassVersion("1.0.0"),FriendlyName("xGroup")]
 class MSFT_xGroupResource : OMI_BaseResource
 {
   [Key] string GroupName;
@@ -10,5 +10,3 @@ class MSFT_xGroupResource : OMI_BaseResource
   [write] string MembersToExclude[];
   [write,EmbeddedInstance("MSFT_Credential")] string Credential;
 };
-
-

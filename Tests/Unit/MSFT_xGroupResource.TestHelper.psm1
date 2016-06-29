@@ -2,20 +2,44 @@
 
 <#
     .SYNOPSIS
-    Tests if a local user group exists.
+        Determines if a Windows group exists.
+
+    .DESCRIPTION
+        This function determines if a Windows group exists on a local or remote machine.
 
     .PARAMETER GroupName
-    The name of the local user group to test for.
+        The name of the group to test.
+
+    .PARAMETER ComputerName
+        The optional name of the computer to check.
+        The default value is the local machine.
+
+    .NOTES
+        For remote machines, the currently logged on user must have rights to enumerate groups.
 #>
-function Test-LocalGroupExists
+function Test-GroupExists
 {
     [OutputType([Boolean])]
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
-        $GroupName
+        $GroupName,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
     )
+
+    if (Test-IsNanoServer)
+    {
+        return Test-GroupExistsOnNanoServer @PSBoundParameters
+    }
+    else
+    {
+        return Test-GroupExistsOnFullSKU @PSBoundParameters
+    }
 
     if (Test-IsNanoServer)
     {
@@ -43,171 +67,423 @@ function Test-LocalGroupExists
 
 <#
     .SYNOPSIS
-    Creates a new local user group.
+        Determines if a Windows group exists.
+
+    .DESCRIPTION
+        This function determines if a Windows group exists on a local or remote machine.
 
     .PARAMETER GroupName
-    The name of the local user group to create.
+        The name of the group to test.
+
+    .PARAMETER ComputerName
+        The optional name of the computer to check. Omit to check for the group on the local machine.
+
+    .NOTES
+        For remote machines, the currently logged on user must have rights to enumerate groups.
+#>
+function Test-GroupExistsOnFullSKU
+{
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
+    )
+
+    Set-StrictMode -Version 'Latest'
+
+    $adsiComputerEntry = [ADSI] "WinNT://$ComputerName"
+
+    if ($null -ne $adsiComputerEntry.Children)
+    {
+        foreach ($adsiComputerEntryChild in $adsiComputerEntry.Children)
+        {
+            if ($adsiComputerEntryChild.Path -like "WinNT://*$ComputerName/$GroupName")
+            {
+                return $true
+            }
+        }
+    }
+
+    return $false
+}
+
+<#
+    .SYNOPSIS
+        Determines if a Windows group exists.
+
+    .DESCRIPTION
+        This function determines if a Windows group exists on a local or remote machine.
+
+    .PARAMETER GroupName
+        The name of the group to test.
+
+    .PARAMETER ComputerName
+        This parameter should not be used on NanoServer.
+#>
+function Test-GroupExistsOnNanoServer
+{
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
+    )
+
+    Set-StrictMode -Version 'Latest'
+
+    if ($PSBoundParameters.ContainsKey('ComputerName'))
+    {
+        if (-not (Test-IsLocalMachine -Scope $ComputerName))
+        {
+            throw 'Do not specify ComputerName when running on NanoServer unless it is the local machine.'
+        }
+    }
+
+    try
+    {
+        Get-LocalGroup -Name $GroupName -ErrorAction Stop | Out-Null
+        return $true
+    }
+    catch [System.Exception]
+    {
+        if ($_.CategoryInfo.ToString().Contains('GroupNotFoundException'))
+        {
+            return $false
+        }
+        else
+        {
+            throw $_.Exception
+        }
+    }
+
+    return $false
+}
+
+<#
+    .SYNOPSIS
+        Creates a Windows group
+
+    .DESCRIPTION
+        This function creates a Windows group on the local or remote machine.
+
+    .PARAMETER GroupName
+        The name of the group to create
 
     .PARAMETER Description
-    The description of the local user group to create.
+        The optional description to set for the group.
+
+    .PARAMETER MemberUserNames
+        The usernames of the optional members to add to the group.
+
+    .PARAMETER ComputerName
+        The optional name of the computer to update. Omit to create the group on the local machine.
+
+    .NOTES
+        For remote machines, the currently logged on user must have rights to create a group.
 #>
-function New-LocalUserGroup
+function New-Group
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $GroupName,
 
         [String]
-        $Description
+        $Description,
+
+        [String[]]
+        $MemberUserNames,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
+    )
+
+    Set-StrictMode -Version 'Latest'
+
+    if (Test-IsNanoServer)
+    {
+        New-GroupOnNanoServer @PSBoundParameters
+    }
+    else
+    {
+        New-GroupOnFullSKU @PSBoundParameters
+    }
+}
+
+<#
+    .SYNOPSIS
+        Creates a Windows group on a full server
+
+    .DESCRIPTION
+        This function creates a Windows group on the local or remote full server machine.
+
+    .PARAMETER GroupName
+        The name of the group to create
+
+    .PARAMETER Description
+        The optional description to set for the group.
+
+    .PARAMETER MemberUserNames
+        The usernames of the optional members to add to the group.
+
+    .PARAMETER ComputerName
+        The optional name of the computer to update. Omit to create the group on the local machine.
+
+    .NOTES
+        For remote machines, the currently logged on user must have rights to create a group.
+#>
+function New-GroupOnFullSKU
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [String]
+        $Description,
+
+        [String[]]
+        $MemberUserNames,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
+    )
+
+    Set-StrictMode -Version 'Latest'
+
+    $adsiComputerEntry = [ADSI] "WinNT://$ComputerName"
+
+    if (Test-GroupExists -GroupName $GroupName)
+    {
+        Remove-Group -GroupName $GroupName -ComputerName $ComputerName
+    }
+
+    $adsiGroupEntry = $adsiComputerEntry.Create('Group', $GroupName)
+
+    if ($PSBoundParameters.ContainsKey('Description'))
+    {
+        $adsiGroupEntry.Put('Description', $Description) | Out-Null
+    }
+
+    $adsiGroupEntry.SetInfo() | Out-Null
+
+    if ($PSBoundParameters.ContainsKey("MemberUserNames"))
+    {
+        $adsiGroupEntry = [ADSI]"WinNT://$ComputerName/$GroupName,group"
+
+        foreach ($memberUserName in $MemberUserNames)
+        {
+            $adsiGroupEntry.Add("WinNT://$ComputerName/$memberUserName") | Out-Null
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Creates a Windows group on a Nano server
+
+    .DESCRIPTION
+        This function creates a Windows group on the local Nano server machine.
+
+    .PARAMETER GroupName
+        The name of the group to create
+
+    .PARAMETER Description
+        The optional description to set for the group.
+
+    .PARAMETER MemberUserNames
+        The usernames of the optional members to add to the group.
+
+    .PARAMETER ComputerName
+        This parameter should not be used on a Nano server.
+#>
+function New-GroupOnNanoServer
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [String]
+        $Description,
+
+        [String[]]
+        $MemberUserNames,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
+    )
+
+    Set-StrictMode -Version 'Latest'
+
+    if ($PSBoundParameters.ContainsKey('ComputerName'))
+    {
+        if (-not (Test-IsLocalMachine -Scope $ComputerName))
+        {
+            throw 'Do not specify ComputerName when running on NanoServer unless it is the local machine.'
+        }
+    }
+
+    if (Test-GroupExists -GroupName $GroupName)
+    {
+        Remove-LocalGroup -Name $GroupName -ErrorAction SilentlyContinue
+    }
+
+    New-LocalGroup -Name $GroupName
+
+    if ($PSBoundParameters.ContainsKey('Description'))
+    {
+        Set-LocalGroup -Name $GroupName -Description $Description
+    }
+
+    if ($PSBoundParameters.ContainsKey('MemberUserNames'))
+    {
+        Add-LocalGroupMember -Name $GroupName -Member $Members
+    }
+}
+
+<#
+    .SYNOPSIS
+        Deletes a user group.
+
+    .PARAMETER GroupName
+        The name of the user group to delete.
+
+    .PARAMETER ComputerName
+        The optional name of the computer to update.
+        The default value is the local machine.
+#>
+function Remove-Group
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ComputerName = $env:computerName
     )
 
     if (Test-IsNanoServer)
     {
-        New-LocalUserGroupOnNanoServer @PSBoundParameters
+        Remove-GroupOnNanoServer @PSBoundParameters
     }
     else
     {
-        New-LocalUserGroupOnFullSKU @PSBoundParameters
+        Remove-GroupOnFullSKU @PSBoundParameters
     }
 }
 
 <#
     .SYNOPSIS
-    Creates a new local user group on a full server.
+        Deletes a local user group on a full server.
 
     .PARAMETER GroupName
-    The name of the local user group to create.
+        The name of the local user group to delete.
 
-    .PARAMETER Description
-    The description of the local user group to create.
+    .PARAMETER ComputerName
+        The optional name of the computer to update.
+        The default value is the local machine.
 #>
-function New-LocalUserGroupOnFullSKU
+function Remove-GroupOnFullSKU
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $GroupName,
 
-        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
-        $Description
+        $ComputerName = $env:computerName
     )
 
-    $computer = [ADSI]"WinNT://$env:ComputerName,Computer"
+    Set-StrictMode -Version 'Latest'
 
-    if (-not (Test-LocalGroupExists $GroupName))
+    $adsiComputerEntry = [ADSI]"WinNT://$ComputerName"
+
+    if (Test-GroupExists -GroupName $GroupName)
     {
-        $group = $computer.Create("Group", $GroupName)
-        $group.SetInfo()
-        $group.Description = $Description
-        $group.SetInfo()
+        $adsiComputerEntry.Delete('Group', $GroupName) | Out-Null
     }
 }
 
 <#
     .SYNOPSIS
-    Creates a new local user group on a Nano server.
+        Deletes a local user group on a Nano server.
 
     .PARAMETER GroupName
-    The name of the local user group to create.
+        The name of the local user group to delete.
 
-    .PARAMETER Description
-    The description of the local user group to create.
+    .PARAMETER ComputerName
+        This parameter should not be used on NanoServer.
+        The default value is the local machine.
 #>
-function New-LocalUserGroupOnNanoServer
+function Remove-GroupOnNanoServer
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
         $GroupName,
 
-        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [String]
-        $Description
+        $ComputerName = $env:computerName
     )
 
-    if (-not (Test-LocalGroupExists $GroupName))
+    Set-StrictMode -Version 'Latest'
+
+    if ($PSBoundParameters.ContainsKey('ComputerName'))
     {
-        New-LocalGroup -Name $GroupName -Description $Description
+        if (-not (Test-IsLocalMachine -Scope $ComputerName))
+        {
+            throw 'Do not specify ComputerName when running on NanoServer unless it is the local machine.'
+        }
     }
-}
 
-<#
-    .SYNOPSIS
-    Deletes a local user group.
-
-    .PARAMETER GroupName
-    The name of the local user group to delete.
-#>
-function Remove-LocalUserGroup
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $GroupName
-    )
-
-    if (Test-IsNanoServer)
-    {
-        Remove-LocalUserGroupOnNanoServer @PSBoundParameters
-    }
-    else
-    {
-        Remove-LocalUserGroupOnFullSKU @PSBoundParameters
-    }
-}
-
-<#
-    .SYNOPSIS
-    Deletes a local user group on a full server.
-
-    .PARAMETER GroupName
-    The name of the local user group to delete.
-#>
-function Remove-LocalUserGroupOnFullSKU
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $GroupName
-    )
-
-    $computer = [ADSI]"WinNT://$Env:COMPUTERNAME,Computer"
-
-    if (Test-LocalGroupExists $GroupName)
-    {
-        $group = $computer.Delete("Group", $GroupName)
-    }
-}
-
-<#
-    .SYNOPSIS
-    Deletes a local user group on a Nano server.
-
-    .PARAMETER GroupName
-    The name of the local user group to delete.
-#>
-function Remove-LocalUserGroupOnNanoServer
-{
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $GroupName
-    )
-
-    if (Test-LocalGroupExists $GroupName)
+    if (Test-GroupExists -GroupName $GroupName)
     {
         Remove-LocalGroup -Name $GroupName
     }
 }
 
 Export-ModuleMember -Function `
-    New-LocalUserGroup, `
-    Remove-LocalUserGroup
+    New-Group, `
+    Remove-Group, `
+    Test-GroupExists
