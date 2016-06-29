@@ -335,6 +335,8 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+### 3.11.0.0
+
 * xRemoteFile: Added parameters:
                 - TimeoutSec
                 - Proxy
