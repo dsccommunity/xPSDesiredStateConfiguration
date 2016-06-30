@@ -335,6 +335,8 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+### 1.13.0.0
+
 * Removed localization for now so that resources can run on non-English systems.
 
 ### 3.11.0.0
