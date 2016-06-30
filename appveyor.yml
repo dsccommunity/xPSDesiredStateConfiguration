@@ -14,7 +14,8 @@ install:
     while($retries -lt 10 -and !$installed)
     {
         Write-Verbose -message "Attempting to install Pester, attempt # $retries"
-        @(find-module 'Pester' -Repository PSGallery -ErrorAction SilentlyContinue) | Install-Module -force
+        $pesterModule = @(find-module 'Pester' -Repository PSGallery -ErrorAction SilentlyContinue)
+        Install-Module -InputObject $pesterModule -Force
         $installed = ($LASTEXITCODE -eq 0)
         $retries++
     }
