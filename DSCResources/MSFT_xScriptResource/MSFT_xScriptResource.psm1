@@ -17,7 +17,8 @@ ExecutingScriptMessage=Executing Script: {0}
 '@
 }
 
-Import-LocalizedData  LocalizedData -filename MSFT_xScriptResource.strings.psd1
+# Commented-out until more languages are supported
+# Import-LocalizedData  LocalizedData -filename MSFT_xScriptResource.strings.psd1
 
 # The Get-TargetResource cmdlet is used to fetch the desired state of the DSC managed node through a powershell script.
 # This cmdlet executes the user supplied script (i.e., the script is responsible for validating the desired state of the 

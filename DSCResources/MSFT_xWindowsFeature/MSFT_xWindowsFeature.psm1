@@ -27,7 +27,8 @@ InstallSuccess=Successfully installed the feature {0}.
 '@
 }
 
-Import-LocalizedData  LocalizedData -filename MSFT_xWindowsFeature.strings.psd1
+# Commented-out until more languages are supported
+# Import-LocalizedData  LocalizedData -filename MSFT_xWindowsFeature.strings.psd1
 
 # The Get-TargetResource cmdlet is used to fetch the status of role or feature on the target machine.
 # It gives the feature info of the requested role/feature on the target machine.

@@ -28,7 +28,9 @@ DATA localizedData
         DefaultValueDisplayName = (Default)
 '@
 }
-Import-LocalizedData LocalizedData -filename MSFT_xRegistryResource.strings.psd1
+
+# Commented-out until more languages are supported
+# Import-LocalizedData LocalizedData -filename MSFT_xRegistryResource.strings.psd1
 
 #--------------------------------------
 # The Get-TargetResourceInternal cmdlet

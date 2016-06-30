@@ -44,7 +44,8 @@ WritePropertiesIgnored=Service '{0}' already exists. Write properties such as St
 "@
 }
 
-Import-LocalizedData LocalizedData -FileName 'MSFT_xServiceResource.strings.psd1'
+# Commented-out until more languages are supported
+# Import-LocalizedData LocalizedData -FileName 'MSFT_xServiceResource.strings.psd1'
 
 function Get-TargetResource
 {
