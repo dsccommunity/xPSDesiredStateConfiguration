@@ -98,7 +98,8 @@ UnableToResolveAccount = Unable to resolve account '{0}'. Failed with message: {
 '@
 }
 
-Import-LocalizedData -BindingVariable 'LocalizedData' -FileName 'MSFT_xGroupResource.strings.psd1'
+# Commented-out until more languages are supported
+# Import-LocalizedData -BindingVariable 'LocalizedData' -FileName 'MSFT_xGroupResource.strings.psd1'
 
 Import-Module -Name "$PSScriptRoot\..\CommonResourceHelper.psm1"
 

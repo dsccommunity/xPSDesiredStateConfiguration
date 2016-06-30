@@ -22,7 +22,8 @@ FailureWaitingForProcessesToStop="Failed to wait for processes to stop"
 '@
 }
 
-Import-LocalizedData  LocalizedData -filename MSFT_xProcessResource.strings.psd1
+# Commented-out until more languages are supported
+# Import-LocalizedData  LocalizedData -filename MSFT_xProcessResource.strings.psd1
 
 function ExtractArguments($functionBoundParameters,[string[]]$argumentNames,[string[]]$newArgumentNames)
 {
