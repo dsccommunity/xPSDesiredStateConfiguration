@@ -4,6 +4,11 @@
 os: WMF 5
 version: 3.11.{build}.0
 install:
+    - git clone https://github.com/PowerShell/DscResource.Tests
+    - ps: Push-Location
+    - cd DscResource.Tests
+    - ps: Import-Module .\TestHelper.psm1 -force
+    - ps: Pop-Location
     - ps: |
         Get-PackageProvider -Name nuget -ForceBootstrap -Force 
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
@@ -18,12 +23,6 @@ install:
             $installed = ($LASTEXITCODE -eq 0)
             $retries++
         }
-    
-  - git clone https://github.com/PowerShell/DscResource.Tests
-  - ps: Push-Location
-  - cd DscResource.Tests
-  - ps: Import-Module .\TestHelper.psm1 -force
-  - ps: Pop-Location
 
 #---------------------------------#
 #      build configuration        #
