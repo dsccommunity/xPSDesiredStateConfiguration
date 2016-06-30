@@ -12,7 +12,7 @@ install:
     - ps: |
         Get-PackageProvider -Name nuget -ForceBootstrap -Force 
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-        (Get-date).AddHours(3).AddMinutes(-5) | Export-Clixml -Path .\BuildTimeout.xml
+        (Get-date).AddHours(3).AddMinutes(-5) | Export-Clixml -Path ..\BuildTimeout.xml
         $installed = $false
         $retries = 1
         while($retries -lt 10 -and !$installed)
