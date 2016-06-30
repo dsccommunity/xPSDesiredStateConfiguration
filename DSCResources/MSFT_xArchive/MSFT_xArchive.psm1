@@ -73,7 +73,8 @@ InSetTargetResourceDestExistsAndTheSelectedTimestampChecksumMatchedWillLeaveIt =
 '@
 }
 
-Import-LocalizedData LocalizedData -FileName 'MSFT_xArchive.strings.psd1'
+# Commented-out until more languages are supported
+# Import-LocalizedData LocalizedData -FileName 'MSFT_xArchive.strings.psd1'
 
 Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1"
 

@@ -28,7 +28,8 @@ MultipleMatches = There could be a possible multiple matches exception while try
 '@
 }
 
-Import-LocalizedData LocalizedData -FileName MSFT_xUserResource.strings.psd1
+# Commented-out until more languages are supported
+# Import-LocalizedData LocalizedData -FileName MSFT_xUserResource.strings.psd1
 
 Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1"
 

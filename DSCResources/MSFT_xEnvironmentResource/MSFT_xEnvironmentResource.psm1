@@ -20,7 +20,8 @@ DATA localizedData
         EnvVarRemoved = (REMOVE) Environment variable '{0}'
 '@
 }
-Import-LocalizedData  LocalizedData -filename MSFT_xEnvironmentResource.strings.psd1
+# Commented-out until more languages are supported
+# Import-LocalizedData  LocalizedData -filename MSFT_xEnvironmentResource.strings.psd1
 
  
 #-------------------------------------
