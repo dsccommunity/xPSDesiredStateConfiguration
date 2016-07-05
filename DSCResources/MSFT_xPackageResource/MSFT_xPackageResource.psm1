@@ -54,7 +54,7 @@ Function Trace-Message
     }
 }
 
-$CacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\MSFT_PackageResource"
+$CacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\MSFT_xPackageResource"
 
 Function Throw-InvalidArgumentException
 {
