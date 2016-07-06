@@ -337,6 +337,8 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 * xGroup: Fix Verbose output in Get-MembersAsPrincipals function.
           Fix bug when credential parameter passed does not contain local or domain context.
+* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
+* Updated appveyor.yml to use the default image.
 
 ### 3.12.0.0
 
