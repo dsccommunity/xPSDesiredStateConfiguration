@@ -970,7 +970,7 @@ Function Get-InstalledById
     .SYNOPSIS
         Mimics a simple http/https server.
 #>
-function Serve-Binary
+function New-MockFileServer
 {
     [CmdletBinding()]
     param
@@ -978,65 +978,66 @@ function Serve-Binary
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
-        $FileName
+        $FilePath
     )
 
-    if (-not (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
+    if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
     {
-        New-NetFirewallRule -DisplayName “UnitTestRule” -Direction Inbound -Program "$PSHome\powershell.exe" -Authentication NotRequired -Action Allow
+        New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
     }
 
     netsh advfirewall set allprofiles state off
 
-    Start-Job -ArgumentList $FileName -ScriptBlock {
+    Start-Job -ArgumentList @( $FilePath ) -ScriptBlock {
         
         # Create certificate
-        $cert = Get-ChildItem -Recurse Cert:\LocalMachine\My |Where-Object{$_.EnhancedKeyUsageList.FriendlyName -eq 'Server Authentication'}
+        $certificate = Get-ChildItem -Path 'Cert:\LocalMachine\My' -Recurse | Where-Object { $_.EnhancedKeyUsageList.FriendlyName -eq 'Server Authentication' }
 
-        if ($cert.count -gt 1)
+        if ($certificate.Count -gt 1)
         {
-            # just use the first one
-            $cert = $cert[0]
+            # Just use the first one
+            $certificate = $certificate[0]
         }
-        elseif ($cert.count -eq 0)
+        elseif ($certificate.count -eq 0)
         {
-            # create a self-signed one
-            $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My -DnsName $env:COMPUTERNAME
+            # Create a self-signed one
+            $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName $env:computerName
         }
-        $hash = $cert.Thumbprint
 
-        # use net shell command to directly bind certificate to designated testing port
+        $hash = $certificate.Thumbprint
+
+        # Use net shell command to directly bind certificate to designated testing port
         netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
 
-        # start listening endpoints
-        $httpListener = New-Object System.Net.HttpListener
-        $httpListener.Prefixes.Add([uri]"https://localhost:1243/")
-        $httpListener.Prefixes.Add([uri]"http://localhost:1242")
+        # Start listening endpoints
+        $httpListener = New-Object -TypeName 'System.Net.HttpListener'
+        $httpListener.Prefixes.Add([Uri]'https://localhost:1243/')
+        $httpListener.Prefixes.Add([Uri]'http://localhost:1242')
         $httpListener.AuthenticationSchemes = [System.Net.AuthenticationSchemes]::Negotiate
         $httpListener.Start()
 
-        # create a pipe to flag http/https client
-        $pipe = New-Object System.IO.Pipes.NamedPipeClientStream("\\.\pipe\dsctest1")
+        # Create a pipe to flag http/https client
+        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest1' )
         $pipe.Connect()
         $pipe.Dispose()
         
-        # prepare binary buffer for http/https response
-        $fileInfo = New-Object System.IO.FileInfo $args[0]
-        $numBytes = $fileInfo.Length;
-        $fileStream = New-Object System.IO.FileStream $args[0], 'Open'
-        $binaryReader = New-Object System.IO.BinaryReader $fileStream
-        [byte[]] $buf = $binaryReader.ReadBytes($numBytes)
+        # Prepare binary buffer for http/https response
+        $fileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $args[0] )
+        $numBytes = $fileInfo.Length
+        $fileStream = New-Object -TypeName 'System.IO.FileStream' -ArgumentList @(  $args[0], 'Open' )
+        $binaryReader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList @( $fileStream )
+        [Byte[]] $buf = $binaryReader.ReadBytes($numBytes)
         $fileStream.Close()
 
-        # send response
+        # Send response
         $response = ($httpListener.GetContext()).Response
-        $response.ContentType = "application/octet-stream"
+        $response.ContentType = 'application/octet-stream'
         $response.ContentLength64 = $buf.Length
         $response.OutputStream.Write($buf, 0, $buf.Length)
         $response.OutputStream.Flush()
 
-        # wait for client to finish downloading
-        $pipe = New-Object System.IO.Pipes.NamedPipeServerStream("\\.\pipe\dsctest2")
+        # Wait for client to finish downloading
+        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest2' )
         $pipe.WaitForConnection()
         $pipe.Dispose()
 
@@ -1044,9 +1045,9 @@ function Serve-Binary
         $httpListener.Stop()
         $httpListener.Close()
 
-        # close pipe
+        # Close pipe
     
-        # use net shell command to clean up the certificate binding
+        # Use net shell command to clean up the certificate binding
         netsh http delete sslcert ipport=0.0.0.0:1243
     }
 
@@ -1667,4 +1668,5 @@ function New-TestMsi
 Export-ModuleMember -Function `
     New-TestMsi, `
     Clear-xPackageCache, `
-    Test-PackageInstalled
+    Test-PackageInstalled, `
+    New-MockFileServer
