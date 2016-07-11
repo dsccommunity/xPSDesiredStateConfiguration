@@ -1,15 +1,28 @@
-$testEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xPackageResource' `
-    -TestType 'Unit'
+Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
 
-InModuleScope 'MSFT_xPackageResource' {
-    Describe 'MSFT_xPackageResource Unit Tests' {
+$script:dscResourceModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'MSFT_xPackageResource'
+$script:testType = 'Unit'
+
+Initialize-DscResourceUnitTest `
+    -DscResourceModuleName $script:dscResourceModuleName `
+    -DscResourceName $script:dscResourceName `
+    -TestType $script:testType `
+| Out-Null
+
+InModuleScope "$script:dscResourceName" {
+    Describe "$script:dscResourceName $script:testType Tests" {
         BeforeAll {
-            Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
             Import-Module "$PSScriptRoot\MSFT_xPackageResource.TestHelper.psm1" -Force
 
+            $script:skipHttpsTest = $true
+
             $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xPackageResourceTests'
+
+            if (Test-Path -Path $script:testDirectoryPath)
+            {
+                Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+            }
 
             New-Item -Path $script:testDirectoryPath -ItemType 'Directory' | Out-Null
 
@@ -20,6 +33,9 @@ InModuleScope 'MSFT_xPackageResource' {
             $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
 
             New-TestMsi -DestinationPath $script:msiLocation | Out-Null
+
+            $script:testExecutablePath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestExecutable.exe'
+            New-TestExecutable -DestinationPath $script:testExecutablePath | Out-Null
 
             Clear-xPackageCache | Out-Null
         }
@@ -40,7 +56,10 @@ InModuleScope 'MSFT_xPackageResource' {
         }
 
         AfterAll {
-            Remove-Item -Path $script:testDirectoryPath -Recurse | Out-Null
+            if (Test-Path -Path $script:testDirectoryPath)
+            {
+                Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+            }
 
             Clear-xPackageCache | Out-Null
 
@@ -92,7 +111,7 @@ InModuleScope 'MSFT_xPackageResource' {
             }
 
             It 'Should return correct value when package is present' {
-                Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId -Name ([string]::Empty)
+                Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
             
                 Clear-xPackageCache
 
@@ -194,10 +213,10 @@ InModuleScope 'MSFT_xPackageResource' {
                 $pipe.Dispose()
             }
 
-            It 'Should correctly install and remove a package from a HTTPS URL' -Pending {
+            It 'Should correctly install and remove a package from a HTTPS URL' -Skip:$script:skipHttpsTest {
                 $baseUrl = 'https://localhost:1243/'
                 $msiUrl = "$baseUrl" + "package.msi"
-                New-MockFileServer -FilePath $script:msiLocation
+                New-MockFileServer -FilePath $script:msiLocation -Https
 
                 # Test pipe connection as testing server readiness
                 $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest1' )
@@ -219,6 +238,12 @@ InModuleScope 'MSFT_xPackageResource' {
 
             It 'Should write to the specified log path' {
                 $logPath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestMsiLog.txt'
+
+                if (Test-Path -Path $logPath)
+                {
+                    Remove-Item -Path $logPath -Force
+                }
+
                 Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -Name $script:packageName -LogPath $logPath -ProductId ([string]::Empty)
 
                 Test-Path -Path $logPath | Should Be $true 
@@ -226,150 +251,26 @@ InModuleScope 'MSFT_xPackageResource' {
             }
         }
 
-        Context 'Test-TargetResource' {
-            It 'TestLocalSetupExeInstall' -Pending {
-                # $exePath = Get-SetupExe
-                # $res = Test-TargetResource -Ensure "Present" -Path $exePath -Name $PackageName -Verbose
-                # if($res)
-                # {
-                    # throw "Erroneously believe EXE is installed when it is not"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Absent" -Path $exePath -Name $PackageName -Verbose
-                # if(-not $res)
-                # {
-                    # throw "Erroneously believe EXE is installed when it is not"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Present" -Path $exePath -ProductId $PackageId -Verbose
-                # if($res)
-                # {
-                    # throw "Erroneously believe EXE is installed when it is not when queried by ID"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Absent" -Path $exePath -ProductId $PackageId -Verbose
-                # if(-not $res)
-                # {
-                    # throw "Erroneously believe EXE is installed when it is not when queried by ID"
-                # }
-        
-                # $logPath = "$PSScriptRoot\TestLocalSetupExeInstall.log"
-                # Set-TargetResource -Ensure "Present" -Path $exePath -ProductId $PackageId -Arguments "DUMMYFLAG=MYEXEVALUE" -LogPath $logPath -Verbose
-        
-                # $res = Test-TargetResource -Ensure "Present" -Path $exePath -Name $PackageName -Verbose
-                # if(-not $res)
-                # {
-                    # throw "Erroneously believe EXE is missing when it is not"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Absent" -Path $exePath -Name $PackageName -Verbose
-                # if($res)
-                # {
-                    # throw "Erroneously believe EXE is missing when it is not"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Present" -Path $exePath -ProductId $PackageId -Verbose
-                # if(-not $res)
-                # {
-                    # throw "Erroneously believe EXE is missing when it is not when queried by ID"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Absent" -Path $exePath -ProductId $PackageId -Verbose
-                # if($res)
-                # {
-                    # throw "Erroneously believe EXE is missing when it is not when queried by ID"
-                # }
-        
-                # $content = Get-Content $logPath
-                # if(-not $content -or -not $content.Contains("DUMMYFLAG=MYEXEVALUE"))
-                # {
-                    # throw "Process output not appropriately captured - the expected data was not present"
-                # }
-        
-                # #Unit tests can be run on x86 Client SKU
-                # $item = Get-Item -EA Ignore HKLM:\SOFTWARE\DSCTest
-                # if(-not $item)
-                # {
-                    # $item = Get-Item HKLM:\SOFTWARE\Wow6432Node\DSCTest
-                # }
-        
-                # $debugEntry = $item.GetValue("DebugEntry")
-                # if($debugEntry -ne "DUMMYFLAG=MYEXEVALUE")
-                # {
-                    # throw "The registry key created by the package does not have the flag set appropriately. The provider likely did not pass the arguments correctly"
-                # }
-            }
-    
-            It 'TestMSIOverUncPath' -Pending {
-                # $share = Share-ScriptFolder
-                # $shareName = $share.Name
-                # $sharePath = "\\localhost\$shareName"
-                # $uncMsiPath = Join-Path $sharePath $MsiName
-        
-                # $res = Test-TargetResource -Ensure "Present" -Path $uncMsiPath -Name $PackageName -Verbose
-                # if($res)
-                # {
-                    # throw "Erroneously belive package already exists when accessed over UNC"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Absent" -Path $uncMsiPath -Name $PackageName -Verbose
-                # if(-not $res)
-                # {
-                    # throw "Erroneously belive package already exists when accessed over UNC (Ensure=Absent case)"
-                # }
-        
-                # Set-TargetResource -Ensure "Present" -Path $uncMsiPath -Name $PackageName -Verbose
-                # if(-not (Is-NameInstalled $PackageName))
-                # {
-                    # throw "Failed to install the package"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Present" -Path $uncMsiPath -Name $PackageName -Verbose
-                # if(-not $res)
-                # {
-                    # throw "Erroneously belive package is missing when accessed over UNC"
-                # }
-        
-                # $res = Test-TargetResource -Ensure "Absent" -Path $uncMsiPath -Name $PackageName -Verbose
-                # if($res)
-                # {
-                    # throw "Erroneously belive package is missing when accessed over UNC (Ensure=Absent case)"
-                # }
-            }
-        }
-
         Context 'Get-MsiTools' {
             It 'Should add MSI tools in the Microsoft.Windows.DesiredStateConfiguration.xPackageResource namespace' {
                 $addTypeResult = @{ Namespace = 'Mock not called' }
-                Mock Add-Type { $addTypeResult['Namespace'] = $Namespace }
+                Mock -CommandName 'Add-Type' -MockWith { $addTypeResult['Namespace'] = $Namespace }
+
+                $msiTools = Get-MsiTools
                 
-                Get-MsiTools | Out-Null
+                if (([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type)
+                {
+                    Assert-MockCalled -CommandName 'Add-Type' -Times 0
 
-                $addTypeResult['Namespace'] | Should Be 'Microsoft.Windows.DesiredStateConfiguration.xPackageResource'
-            }
-        }
+                    $msiTools | Should Be ([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type
+                }
+                else
+                {
+                    Assert-MockCalled -CommandName 'Add-Type' -Times 1
 
-        Context 'Get-RegistryValueIgnoreError' {
-            It 'Should retrieve the correct value from the HKLM registry' {
-                $registryValue = Get-RegistryValueIgnoreError `
-                    -RegistryHive 'LocalMachine' `
-                    -Key 'SOFTWARE\Microsoft\Windows\CurrentVersion' `
-                    -Value 'ProgramFilesDir' `
-                    -RegistryView 'Registry64'
-
-                $registryValue | Should Be $env:programFiles
-            }
-
-            It 'Should retrieve the correct value from the HKCU registry' {
-                $registryValue = Get-RegistryValueIgnoreError `
-                    -RegistryHive 'CurrentUser' `
-                    -Key 'Environment' `
-                    -Value 'Temp' `
-                    -RegistryView 'Registry64'
-                
-                # Comparing $installValue with $env:temp may fail if the username is longer than 8 characters
-                $registryValue.Length -gt 3 | Should Be $true
-                $registryValue | Should Match $env:username
+                    $addTypeResult['Namespace'] | Should Be 'Microsoft.Windows.DesiredStateConfiguration.xPackageResource'
+                    $msiTools | Should Be $null
+                }
             }
         }
     }

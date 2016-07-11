@@ -555,10 +555,58 @@ function Test-IsFileLocked
     }
 }
 
+<#
+    .SYNOPSIS
+        Initializes a DSC Resource unit test.
+#>
+function Initialize-DscResourceUnitTest
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $DscResourceModuleName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $DscResourceName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Unit', 'Integration')]
+        [String]
+        $TestType
+    )
+
+    if ((-not (Test-Path -Path "$PSScriptRoot\..\DSCResource.Tests")) -or (-not (Test-Path -Path "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1")))
+    {
+        Push-Location "$PSScriptRoot\.."
+        git clone https://github.com/PowerShell/DscResource.Tests.git --quiet
+        Pop-Location
+    }
+    else
+    {
+        Push-Location "$PSScriptRoot\..\DSCResource.Tests"
+        git pull origin master --quiet
+        Pop-Location
+    }
+
+    Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1" -Force
+
+    Initialize-TestEnvironment `
+        -DSCModuleName $DscResourceModuleName `
+        -DSCResourceName $DscResourceName `
+        -TestType $TestType `
+    | Out-Null
+}
+
 Export-ModuleMember -Function `
     Test-GetTargetResourceResult, `
     New-User, `
     Remove-User, `
     Test-User, `
     Wait-ScriptBlockReturnTrue, `
-    Test-IsFileLocked
+    Test-IsFileLocked, `
+    Initialize-DscResourceUnitTest
