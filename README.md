@@ -105,8 +105,6 @@ For a complete list of properties, please use Get-DscResource
 
 ### xPackage
 
-For a complete list, please use Get-DscResource.
-
 * **Ensure**: Ensures that the package is **Present** or **Absent**.
 * **Name**: The name of the package.
 * **Path**: The source path of the package.
@@ -115,17 +113,20 @@ For a complete list, please use Get-DscResource.
 * **Credential**: PSCredential needed to access Path.
 * **ReturnCode**: An array of return codes that are returned after a successful installation.
 * **LogPath**: The destination path of the log.
+* **FileHash**: The hash that should match the hash of the package file.
+* **HashAlgorithm**: The algorithm to use to get the hash of the package file.
+    - Supported values: SHA1, SHA256, SHA384, SHA512, MD5, RIPEMD160
+* **SignerSubject**: The certificate subject that should match that of the package file's signing certificate.
+* **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
+* **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
+
+Read-Only Properties:  
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
 * **InstalledOn**: Date of installation.
 * **Size**: Size of the installation.
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
-* **RunAsCredential**: Credentials to use when installing the package.
-* **InstalledCheckRegKey**: Registry key to open to check for package installation status.
-* **InstalledCheckRegValueName**: Registry value name to check for package installation status.
-* **InstalledCheckRegValueData**: Value to compare against the retrieved value to check for package installation.
-* **CreateCheckRegValue**: Creates the InstallCheckRegValueName registry value/data after successful package installation.
 
 ### xGroup
 
