@@ -263,7 +263,7 @@ function Test-TargetResource
 
         # Return codes 1641 and 3010 indicate success when a restart is requested per installation
         [ValidateNotNullOrEmpty()]
-        [Int[]]
+        [UInt32[]]
         $ReturnCode = @( 0, 1641, 3010 ),
 
         [String]
@@ -621,7 +621,7 @@ function Set-TargetResource
 
         # Return codes 1641 and 3010 indicate success when a restart is requested per installation
         [ValidateNotNullOrEmpty()]
-        [Int[]]
+        [UInt32[]]
         $ReturnCode = @( 0, 1641, 3010 ),
 
         [String]
