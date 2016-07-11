@@ -339,6 +339,7 @@ These parameters will be the same for each Windows optional feature in the set. 
           Fix bug when credential parameter passed does not contain local or domain context.
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 * Updated appveyor.yml to use the default image.
+* Merged xPackage with in-box Package resource and added tests.
 
 ### 3.12.0.0
 
