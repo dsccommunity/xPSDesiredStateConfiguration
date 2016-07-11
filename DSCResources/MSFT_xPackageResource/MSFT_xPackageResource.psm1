@@ -261,11 +261,29 @@ function Test-TargetResource
         [PSCredential]
         $Credential,
 
+        # Return codes 1641 and 3010 indicate success when a restart is requested per installation
+        [ValidateNotNullOrEmpty()]
         [Int[]]
-        $ReturnCode,
+        $ReturnCode = @( 0, 1641, 3010 ),
 
         [String]
-        $LogPath
+        $LogPath,
+
+        [String]
+        $FileHash,
+
+        [ValidateSet('SHA1', 'SHA256', 'SHA384', 'SHA512', 'MD5', 'RIPEMD160')]
+        [String]
+        $HashAlgorithm,
+
+        [String]
+        $SignerSubject,
+
+        [String]
+        $SignerThumbprint,
+
+        [String]
+        $ServerCertificateValidationCallback
     )
 
     Assert-PathExtensionValid -Path $Path
@@ -608,9 +626,6 @@ function Set-TargetResource
 
         [String]
         $LogPath,
-        
-        [Boolean]
-        $CreateCheckRegValue,
 
         [String]
         $FileHash,
