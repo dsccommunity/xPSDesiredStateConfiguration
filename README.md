@@ -29,7 +29,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
-* **xGroupSet** configures multiple xGroups with common settings but different names. 
+* **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
@@ -334,6 +334,11 @@ These parameters will be the same for each Windows optional feature in the set. 
 ## Versions
 
 ### Unreleased
+
+* xGroup: Fix Verbose output in Get-MembersAsPrincipals function.
+          Fix bug when credential parameter passed does not contain local or domain context.
+* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
+* Updated appveyor.yml to use the default image.
 
 ### 3.12.0.0
 
