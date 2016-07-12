@@ -1518,7 +1518,7 @@ function Get-MembersAsPrincipals
         # The account is domain qualified - credential required to resolve it.
         elseif ($null -ne $Credential -or $null -ne $principalContext)
         {
-            Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f  $scope, $accountName)
+            Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f  $accountName, $scope)
         }
         else
         {
@@ -1858,7 +1858,14 @@ function Get-PrincipalContext
     elseif ($null -ne $Credential)
     {
         # Create a PrincipalContext targeting $Scope using the network credentials that were passed in.
-        $principalContextName = "$($Credential.Domain)\$($Credential.UserName)"
+        if ($Credential.Domain)
+        {
+            $principalContextName = "$($Credential.Domain)\$($Credential.UserName)"
+        }
+        else
+        {
+            $principalContextName = $Credential.UserName
+        }
         $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, $principalContextName, $Credential.Password )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
