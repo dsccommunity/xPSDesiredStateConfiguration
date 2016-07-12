@@ -45,7 +45,7 @@ InModuleScope "$script:dscResourceName" {
 
             if (Test-PackageInstalled -Name $script:packageName)
             {
-                Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$PackageId", '/passive') -Wait | Out-Null
+                Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
                 Start-Sleep -Seconds 1 | Out-Null
             }
         
@@ -65,7 +65,7 @@ InModuleScope "$script:dscResourceName" {
 
             if (Test-PackageInstalled -Name $script:packageName)
             {
-                Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$PackageId", '/passive') -Wait | Out-Null
+                Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
                 Start-Sleep -Seconds 1 | Out-Null
             }
         
@@ -115,10 +115,7 @@ InModuleScope "$script:dscResourceName" {
             
                 Clear-xPackageCache
 
-                if (-not (Test-PackageInstalled -Name $script:packageName))
-                {
-                    throw 'Failed to install the package'
-                }
+                Test-PackageInstalled -Name $script:packageName | Should Be $true
         
                 $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Present' `
