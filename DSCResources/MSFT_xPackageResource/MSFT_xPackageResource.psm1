@@ -346,7 +346,8 @@ function Test-TargetResource
 function Get-LocalizedRegistryKeyValue
 {
     [CmdletBinding()]
-    param(
+    param
+    (
         [Object]
         $RegistryKey,
 

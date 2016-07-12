@@ -44,13 +44,13 @@ try
             BeforeEach {
                 Clear-xPackageCache | Out-Null
 
-                if (Test-PackageInstalled -Name $script:packageName)
+                if (Test-PackageInstalledByName -Name $script:packageName)
                 {
                     Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
                     Start-Sleep -Seconds 1 | Out-Null
                 }
         
-                if (Test-PackageInstalled -Name $script:packageName)
+                if (Test-PackageInstalledByName -Name $script:packageName)
                 {
                     throw 'Package could not be removed.'
                 }
@@ -64,13 +64,13 @@ try
 
                 Clear-xPackageCache | Out-Null
 
-                if (Test-PackageInstalled -Name $script:packageName)
+                if (Test-PackageInstalledByName -Name $script:packageName)
                 {
                     Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
                     Start-Sleep -Seconds 1 | Out-Null
                 }
         
-                if (Test-PackageInstalled -Name $script:packageName)
+                if (Test-PackageInstalledByName -Name $script:packageName)
                 {
                     throw 'Test output will not be valid - package could not be removed.'
                 }
@@ -116,7 +116,7 @@ try
             
                     Clear-xPackageCache
 
-                    Test-PackageInstalled -Name $script:packageName | Should Be $true
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $true
         
                     $testTargetResourceResult = Test-TargetResource `
                             -Ensure 'Present' `
@@ -156,7 +156,7 @@ try
                 It 'Should correctly install and remove a package' {
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
 
-                    Test-PackageInstalled -Name $script:packageName | Should Be $true
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $true
         
                     $getTargetResourceResult = Get-TargetResource -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
                 
@@ -173,7 +173,7 @@ try
         
                     Set-TargetResource -Ensure 'Absent' -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
                 
-                    Test-PackageInstalled -Name $script:packageName | Should Be $false
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $false
                 }
 
                 It 'Should throw with incorrect product id' {
@@ -201,10 +201,10 @@ try
                     { Set-TargetResource -Ensure 'Present' -Path $baseUrl -Name $script:packageName -ProductId $script:packageId } | Should Throw
 
                     Set-TargetResource -Ensure 'Present' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalled -Name $script:packageName | Should Be $true
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $true
 
                     Set-TargetResource -Ensure 'Absent' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalled -Name $script:packageName | Should Be $false
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $false
 
                     $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest2' )
                     $pipe.Connect()
@@ -224,10 +224,10 @@ try
                     { Set-TargetResource -Ensure 'Present' -Path $baseUrl -Name $script:packageName -ProductId $script:packageId } | Should Throw
 
                     Set-TargetResource -Ensure 'Present' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalled -Name $script:packageName | Should Be $true
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $true
 
                     Set-TargetResource -Ensure 'Absent' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalled -Name $script:packageName | Should Be $false
+                    Test-PackageInstalledByName -Name $script:packageName | Should Be $false
 
                     $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest2' )
                     $pipe.Connect()

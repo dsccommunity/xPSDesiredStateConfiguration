@@ -17,24 +17,34 @@ function Clear-xPackageCache
     .SYNOPSIS
         Tests if the package with the given name is installed.
 
-    .PARAMETER
+    .PARAMETER Name
         The name of the package to test for.
 #>
-function Test-PackageInstalled
+function Test-PackageInstalledByName
 {
     [OutputType([Boolean])]
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
         [String]
         $Name
     )
 
-    $packageWithName = Get-CimInstance -ClassName 'Win32_Product' -ErrorAction 'SilentlyContinue' | Where-Object { $_.Name -ieq $Name }
+    $uninstallRegistryKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+    $uninstallRegistryKeyWow64 = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
 
-    return $null -ne $packageWithName
+    $productEntry = $null
+
+    foreach ($registryKeyEntry in (Get-ChildItem -Path @( $uninstallRegistryKey, $uninstallRegistryKeyWow64) -ErrorAction 'Ignore' ))
+    {
+        if ($Name -eq (Get-LocalizedRegistryKeyValue -RegistryKey $registryKeyEntry -ValueName 'DisplayName'))
+        {
+            $productEntry = $registryKeyEntry
+            break
+        }
+    }
+
+    return ($null -ne $productEntry)
 }
 
 <#
@@ -743,9 +753,43 @@ function New-TestMsi
     Set-Content -Path $DestinationPath -Value $msiContentInBytes -Encoding 'Byte' | Out-Null
 }
 
+<#
+    .SYNOPSIS
+        Retrieves a localized registry key value.
+
+    .PARAMETER RegistryKey
+        The registry key to retrieve the value from.
+
+    .PARAMETER ValueName
+        The name of the value to retrieve.
+#>
+function Get-LocalizedRegistryKeyValue
+{
+    [CmdletBinding()]
+    param
+    (
+        [Object]
+        $RegistryKey,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ValueName
+    )
+
+    $localizedRegistryKeyValue = $RegistryKey.GetValue('{0}_Localized' -f $ValueName)
+    
+    if ($null -eq $localizedRegistryKeyValue)
+    {
+        $localizedRegistryKeyValue = $RegistryKey.GetValue($ValueName)
+    }
+
+    return $localizedRegistryKeyValue
+}
+
 Export-ModuleMember -Function `
     New-TestMsi, `
     Clear-xPackageCache, `
-    Test-PackageInstalled, `
     New-MockFileServer, `
-    New-TestExecutable
+    New-TestExecutable, `
+    Test-PackageInstalledByName
