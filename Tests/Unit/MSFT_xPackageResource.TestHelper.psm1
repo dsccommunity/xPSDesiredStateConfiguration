@@ -32,7 +32,7 @@ function Test-PackageInstalled
         $Name
     )
 
-    $packageWithName = Get-CimInstance -ClassName 'Win32_Product' | Where-Object { $_.Name -ieq $Name }
+    $packageWithName = Get-CimInstance -ClassName 'Win32_Product' -ErrorAction 'SilentlyContinue' | Where-Object { $_.Name -ieq $Name }
 
     return $null -ne $packageWithName
 }
