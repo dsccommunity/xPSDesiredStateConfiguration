@@ -501,7 +501,7 @@ function Set-TargetResourceOnFullSKU
                         }
                     }
 
-                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Length -eq 0)
+                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Length -gt 0)
                     {
                         if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToExcludeAsPrincipals)
                         {
@@ -509,7 +509,7 @@ function Set-TargetResourceOnFullSKU
                         }
                     }
 
-                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Length -eq 0)
+                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Length -gt 0)
                     {
                         if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersToIncludeAsPrincipals)
                         {
@@ -1518,7 +1518,7 @@ function Get-MembersAsPrincipals
         # The account is domain qualified - credential required to resolve it.
         elseif ($null -ne $Credential -or $null -ne $principalContext)
         {
-            Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f  $accountName, $scope)
+            Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f  $scope, $accountName)
         }
         else
         {
@@ -1858,14 +1858,7 @@ function Get-PrincipalContext
     elseif ($null -ne $Credential)
     {
         # Create a PrincipalContext targeting $Scope using the network credentials that were passed in.
-        if ($Credential.Domain)
-        {
-            $principalContextName = "$($Credential.Domain)\$($Credential.UserName)"
-        }
-        else
-        {
-            $principalContextName = $Credential.UserName
-        }
+        $principalContextName = "$($Credential.Domain)\$($Credential.UserName)"
         $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, $principalContextName, $Credential.Password )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
