@@ -98,6 +98,119 @@ InModuleScope 'MSFT_xGroupResource' {
         }
 
         Context 'Set-TargetResource' {
+            It 'Should create a group with 2 users using Members' {
+                $testUserName1 = 'LocalTestUser1'
+                $testUserName2 = 'LocalTestUser2'
+
+                $testDescription = 'Some Description'
+                $testUserPassword = 'StrongOne7.'
+
+                $testGroupName = 'LocalTestGroup'
+
+                $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+
+                try
+                {
+                    New-User -Credential $testCredential1 -Description $testDescription
+                    New-User -Credential $testCredential2 -Description $testDescription
+
+                    $setTargetResourceResult = Set-TargetResource $testGroupName -Ensure 'Present' -Members @( $testUserName1, $testUserName2 ) -Description $testDescription
+
+                    Test-GroupExists -GroupName $testGroupName | Should Be $true
+
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+
+                    $getTargetResourceResult['GroupName']       | Should Be $testGroupName
+                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
+                    $getTargetResourceResult['Description']     | Should Be $testDescription
+                    $getTargetResourceResult['Members'].Count   | Should Be 2
+                }
+                finally
+                {
+                    Remove-User -UserName $testUserName1
+                    Remove-User -UserName $testUserName2
+                    Remove-Group -GroupName $testGroupName
+                }
+            }
+
+            It 'Should create a group with 2 users using MembersToInclude' {
+                $testUserName1 = 'LocalTestUser1'
+                $testUserName2 = 'LocalTestUser2'
+
+                $testDescription = 'Some Description'
+                $testUserPassword = 'StrongOne7.'
+
+                $testGroupName = 'LocalTestGroup'
+
+                $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+
+                try
+                {
+                    New-User -Credential $testCredential1 -Description $testDescription
+                    New-User -Credential $testCredential2 -Description $testDescription
+
+                    $setTargetResourceResult = Set-TargetResource $testGroupName -Ensure 'Present' -MembersToInclude @( $testUserName1, $testUserName2 ) -Description $testDescription
+
+                    Test-GroupExists -GroupName $testGroupName | Should Be $true
+
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+
+                    $getTargetResourceResult['GroupName']       | Should Be $testGroupName
+                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
+                    $getTargetResourceResult['Description']     | Should Be $testDescription
+                    $getTargetResourceResult['Members'].Count   | Should Be 2
+                }
+                finally
+                {
+                    Remove-User -UserName $testUserName1
+                    Remove-User -UserName $testUserName2
+                    Remove-Group -GroupName $testGroupName
+                }
+            }
+
+            It 'Should remove a member from a group with MembersToExclude' {
+                $testUserName1 = 'LocalTestUser1'
+                $testUserName2 = 'LocalTestUser2'
+
+                $testDescription = 'Some Description'
+                $testUserPassword = 'StrongOne7.'
+
+                $testGroupName = 'LocalTestGroup'
+
+                $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+
+                try
+                {
+                    New-User -Credential $testCredential1 -Description $testDescription
+                    New-User -Credential $testCredential2 -Description $testDescription
+
+                    New-Group -GroupName $testGroupName -Description $testDescription -MemberUserNames @( $testUserName1, $testUserName2 )
+
+                    $setTargetResourceResult = Set-TargetResource $testGroupName -Ensure 'Present' -MembersToExclude @( $testUserName2 ) -Description $testDescription
+
+                    Test-GroupExists -GroupName $testGroupName | Should Be $true
+
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+
+                    $getTargetResourceResult['GroupName']       | Should Be $testGroupName
+                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
+                    $getTargetResourceResult['Description']     | Should Be $testDescription
+                    $getTargetResourceResult['Members'].Count   | Should Be 1
+                }
+                finally
+                {
+                    Remove-User -UserName $testUserName1
+                    Remove-User -UserName $testUserName2
+                    Remove-Group -GroupName $testGroupName
+                }
+            }
+
             It 'Should not remove an existing group when Ensure is Present' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
