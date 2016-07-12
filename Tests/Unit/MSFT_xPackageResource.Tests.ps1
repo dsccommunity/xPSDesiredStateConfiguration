@@ -11,7 +11,7 @@ Initialize-DscResourceUnitTest `
 | Out-Null
 
 InModuleScope 'MSFT_xPackageResource' {
-    Describe 'MSFT_xPackageResource Unit Tests" {
+    Describe 'MSFT_xPackageResource Unit Tests' {
         BeforeAll {
             Import-Module "$PSScriptRoot\MSFT_xPackageResource.TestHelper.psm1" -Force
 
