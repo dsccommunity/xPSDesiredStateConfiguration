@@ -557,10 +557,20 @@ function Test-IsFileLocked
 
 <#
     .SYNOPSIS
-        Initializes a DSC Resource unit test.
+        Enters a DSC Resource test environment.
+
+    .PARAMETER DscResourceModuleName
+        The name of the module that contains the DSC Resource to test.
+
+    .PARAMETER DscResourceName
+        The name of the DSC resource to test.
+
+    .PARAMETER TestType
+        Specifies whether the test environment will run a Unit test or an Integration test.
 #>
-function Initialize-DscResourceUnitTest
+function Enter-DscResourceTestEnvironment
 {
+    [OutputType([PSObject])]
     [CmdletBinding()]
     param
     (
@@ -588,18 +598,48 @@ function Initialize-DscResourceUnitTest
     }
     else
     {
-        Push-Location "$PSScriptRoot\..\DSCResource.Tests"
-        git pull origin master --quiet
-        Pop-Location
+        $gitInstalled = $null -ne (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue')
+
+        if ($gitInstalled)
+        {
+            Push-Location "$PSScriptRoot\..\DSCResource.Tests"
+            git pull origin master --quiet
+            Pop-Location
+        }
+        else
+        {
+            Write-Verbose -Message "Git not installed. Leaving current DSCResource.Tests as is."
+        }
     }
 
     Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1" -Force
 
-    Initialize-TestEnvironment `
+    return Initialize-TestEnvironment `
         -DSCModuleName $DscResourceModuleName `
         -DSCResourceName $DscResourceName `
-        -TestType $TestType `
-    | Out-Null
+        -TestType $TestType
+}
+
+<#
+    .SYNOPSIS
+        Exits the specified DSC Resource test environment.
+
+    .PARAMETER TestEnvironment
+        The test environment to exit.
+#>
+function Exit-DscResourceTestEnvironment
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [PSObject]$TestEnvironment
+    )
+
+    Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1"
+
+    Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
 Export-ModuleMember -Function `
@@ -609,4 +649,5 @@ Export-ModuleMember -Function `
     Test-User, `
     Wait-ScriptBlockReturnTrue, `
     Test-IsFileLocked, `
-    Initialize-DscResourceUnitTest
+    Enter-DscResourceTestEnvironment, `
+    Exit-DscResourceTestEnvironment

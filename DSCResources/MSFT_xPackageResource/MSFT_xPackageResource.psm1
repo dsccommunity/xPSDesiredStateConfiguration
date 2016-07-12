@@ -925,7 +925,7 @@ function Set-TargetResource
             }
         }
 
-        Write-Verbose -Message ($LocalizedData.StartingwithstartInfoFileNamestartInfoArguments -f $startInfo.FileName, $startInfo.Arguments)
+        Write-Verbose -Message ($LocalizedData.StartingWithStartInfoFileNameStartInfoArguments -f $startInfo.FileName, $startInfo.Arguments)
 
         if ($PSCmdlet.ShouldProcess(($LocalizedData.StartingProcessMessage -f $startInfo.FileName, $startInfo.Arguments), $null, $null))
         {
@@ -1014,7 +1014,7 @@ function Set-TargetResource
         missing on some client SKUs (worked on both Server and Client Skus in Windows 10).
     #>
 
-    $serverFeatureData = Invoke-CimMethod -Name 'GetServerFeature' -Namespace 'root\microsoft\windows\servermanager' -Class 'MSFT_ServerManagerTasks' -ErrorAction 'Ignore'
+    $serverFeatureData = Invoke-CimMethod -Name 'GetServerFeature' -Namespace 'root\microsoft\windows\servermanager' -Class 'MSFT_ServerManagerTasks' -Arguments @{ BatchSize = 256 } -ErrorAction 'Ignore'
     $registryData = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction 'Ignore'
 
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $registryData -or $exitcode -eq 3010 -or $exitcode -eq 1641)
