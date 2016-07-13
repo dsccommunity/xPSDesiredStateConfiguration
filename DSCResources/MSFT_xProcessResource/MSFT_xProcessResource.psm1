@@ -2,38 +2,54 @@ data LocalizedData
 {
     # culture="en-US"
     ConvertFrom-StringData @'
-FileNotFound=File not found in the environment path.
-AbsolutePathOrFileName=Absolute path or file name expected.
-InvalidArgument=Invalid argument: '{0}' with value: '{1}'.
-InvalidArgumentAndMessage={0} {1}
-ProcessStarted=Process matching path '{0}' started
-ProcessesStopped=Proceses matching path '{0}' with Ids '({1})' stopped.
-ProcessAlreadyStarted=Process matching path '{0}' found running and no action required.
-ProcessAlreadyStopped=Process matching path '{0}' not found running and no action required.
-ErrorStopping=Failure stopping processes matching path '{0}' with IDs '({1})'. Message: {2}.
-ErrorStarting=Failure starting process matching path '{0}'. Message: {1}.
-StartingProcessWhatif=Start-Process
-ProcessNotFound=Process matching path '{0}' not found
-PathShouldBeAbsolute="The path should be absolute"
-PathShouldExist="The path should exist"
-ParameterShouldNotBeSpecified="Parameter {0} should not be specified."
-FailureWaitingForProcessesToStart="Failed to wait for processes to start"
-FailureWaitingForProcessesToStop="Failed to wait for processes to stop"
+FileNotFound = File not found in the environment path.
+AbsolutePathOrFileName = Absolute path or file name expected.
+InvalidArgument = Invalid argument: '{0}' with value: '{1}'.
+InvalidArgumentAndMessage = {0} {1}
+ProcessStarted = Process matching path '{0}' started
+ProcessesStopped = Proceses matching path '{0}' with Ids '({1})' stopped.
+ProcessAlreadyStarted = Process matching path '{0}' found running and no action required.
+ProcessAlreadyStopped = Process matching path '{0}' not found running and no action required.
+ErrorStopping = Failure stopping processes matching path '{0}' with IDs '({1})'. Message: {2}.
+ErrorStarting = Failure starting process matching path '{0}'. Message: {1}.
+StartingProcessWhatif = Start-Process
+ProcessNotFound = Process matching path '{0}' not found
+PathShouldBeAbsolute = The path should be absolute
+PathShouldExist = The path should exist
+ParameterShouldNotBeSpecified = Parameter {0} should not be specified.
+FailureWaitingForProcessesToStart = Failed to wait for processes to start
+FailureWaitingForProcessesToStop = Failed to wait for processes to stop
+ErrorParametersNotSupportedWithCredential = Can't specify StandardOutputPath, StandardInputPath or WorkingDirectory when trying to run a process under a user context.
+VerboseInProcessHandle = In process handle {0}
+ErrorRunAsCredentialParameterNotSupported = The PsDscRunAsCredential parameter is not supported by the Process resource. To start the process with user '{0}', add the Credential parameter.
+ErrorCredentialParameterNotSupportedWithRunAsCredential = The PsDscRunAsCredential parameter is not supported by the Process resource, and cannot be used with the Credential parameter. To start the process with user '{0}', use only the Credential parameter, not the PsDscRunAsCredential parameter.
 '@
 }
 
-# Commented-out until more languages are supported
-# Import-LocalizedData  LocalizedData -filename MSFT_xProcessResource.strings.psd1
+# Commented out until more languages are supported
+# Import-LocalizedData  LocalizedData -filename MSFT_ProcessResource.strings.psd1
 
-function ExtractArguments($functionBoundParameters,[string[]]$argumentNames,[string[]]$newArgumentNames)
+function Convert-ArgumentNames
 {
+    [CmdletBinding()]
+    param
+    (
+        $functionBoundParameters,
+
+        [String[]]
+        $argumentNames,
+
+        [String[]]
+        $newArgumentNames
+    )
+
     $returnValue=@{}
     for($i=0;$i -lt $argumentNames.Count;$i++)
     {
         $argumentName=$argumentNames[$i]
 
         if($newArgumentNames -eq $null)
-        {
+        {   
             $newArgumentName=$argumentName
         }
         else
@@ -50,29 +66,39 @@ function ExtractArguments($functionBoundParameters,[string[]]$argumentNames,[str
     return $returnValue
 }
 
+function IsRunFromLocalSystemUser()
+{
+    (New-Object Security.Principal.WindowsPrincipal ( [Security.Principal.WindowsIdentity]::GetCurrent())).Identity.IsSystem
+}
+
 function Get-TargetResource
 {
-    [OutputType([System.Collections.Hashtable])]
+    [OutputType([Hashtable])]
+    [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Path,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [System.String]
+        [String]
         $Arguments,
 
         [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
+        [PSCredential]
         $Credential
     )
-
-    $Path=(ResolvePath $Path)
+    
+    $Path = Expand-Path -Path $Path
     $PSBoundParameters["Path"] = $Path
-    $getArguments = ExtractArguments $PSBoundParameters ("Path","Arguments","Credential")
+
+    $getArguments = @{
+
+    }
+
     $processes = @(GetWin32_Process @getArguments)
 
     if($processes.Count -eq 0)
@@ -102,7 +128,6 @@ function Get-TargetResource
         }
     }
 }
-
 
 function Set-TargetResource
 {
@@ -154,7 +179,7 @@ function Set-TargetResource
            $processIds=$processes.ProcessId
 
            $err=Stop-Process -Id $processIds -force 2>&1
-
+           
            if($err -eq $null)
            {
                Write-Log ($LocalizedData.ProcessesStopped -f $Path,($processIds -join ","))
@@ -196,39 +221,38 @@ function Set-TargetResource
 
             if($PSCmdlet.ShouldProcess($Path,$LocalizedData.StartingProcessWhatif))
             {
-                if($PSBoundParameters.ContainsKey("Credential"))
+                #
+                # Start-Process calls .net Process.Start()
+                # If -Credential is present Process.Start() uses win32 api CreateProcessWithLogonW http://msdn.microsoft.com/en-us/library/0w4h05yb(v=vs.110).aspx
+                # CreateProcessWithLogonW cannot be called as LocalSystem user.
+                # Details http://msdn.microsoft.com/en-us/library/windows/desktop/ms682431(v=vs.85).aspx (section Remarks/Windows XP with SP2 and Windows Server 2003)
+                #
+                # In this case we call another api.
+                #
+                if($PSBoundParameters.ContainsKey("Credential") -and (IsRunFromLocalSystemUser))
                 {
-                    $argumentError = $false
-                    try
+                    if($PSBoundParameters.ContainsKey("StandardOutputPath") -or $PSBoundParameters.ContainsKey("StandardInputPath") -or $PSBoundParameters.ContainsKey("WorkingDirectory"))
                     {
-                        if($PSBoundParameters.ContainsKey("StandardOutputPath") -or $PSBoundParameters.ContainsKey("StandardInputPath") -or $PSBoundParameters.ContainsKey("WorkingDirectory"))
+                        $exception = New-Object System.ArgumentException $LocalizedData.ErrorParametersNotSupportedWithCredential
+                        $err = New-Object System.Management.Automation.ErrorRecord $exception, "InvalidCombinationOfArguments", InvalidArgument, $null
+                    }
+                    else 
+                    {
+                        $Domain, $UserName = Get-DomainAndUserName $Credential
+                        try
                         {
-                            $argumentError = $true
-                            $errorMessage = "Can't specify StandardOutptPath, StandardInputPath or WorkingDirectory when trying to run a process under a user context"
-                            throw $errorMessage
+                            #
+                            # Internally we use win32 api LogonUser() with dwLogonType == LOGON32_LOGON_NETWORK_CLEARTEXT. 
+                            # It grants process ability for second-hop.
+                            #
+                            Import-DscNativeMethods
+                            [PSDesiredStateConfiguration.NativeMethods]::CreateProcessAsUser( "$Path $Arguments", $Domain, $UserName, $Credential.Password, $false, [ref] $null )
                         }
-                        else
+                        catch
                         {
-                            CallPInvoke
-                            [Source.NativeMethods]::CreateProcessAsUser(("$Path "+$Arguments), $Credential.GetNetworkCredential().Domain, $Credential.GetNetworkCredential().UserName, $Credential.GetNetworkCredential().Password)
+                            throw  New-Object System.Management.Automation.ErrorRecord $_.Exception, "Win32Exception", OperationStopped, $null
                         }
                     }
-                    catch
-                    {
-                        $exception = New-Object System.ArgumentException $_;
-                        if($argumentError)
-                        {
-                            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidArgument
-                            $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception,"Invalid combination of arguments", $errorCategory, $null
-                        }
-                        else
-                        {
-                            $errorCategory = [System.Management.Automation.ErrorCategory]::OperationStopped
-                            $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, "Win32Exception", $errorCategory, $null
-                        }
-                        $err = $errorRecord
-                    }
-
                 }
                 else
                 {
@@ -262,7 +286,6 @@ function Set-TargetResource
 
 function Test-TargetResource
 {
-    [OutputType([System.Boolean])]
     param
     (
         [parameter(Mandatory = $true)]
@@ -296,6 +319,23 @@ function Test-TargetResource
         $WorkingDirectory
     )
 
+    if($PsDscContext.RunAsUser)
+    {
+	    if($PSBoundParameters.ContainsKey("Credential"))
+	    {
+	        $exception = New-Object System.ArgumentException ($LocalizedData.ErrorCredentialParameterNotSupportedWithRunAsCredential -f $PsDscContext.RunAsUser)
+            $err = New-Object System.Management.Automation.ErrorRecord $exception, "InvalidArgument", InvalidArgument, $null
+	    }
+	    else
+	    {
+	        $exception = New-Object System.ArgumentException ($LocalizedData.ErrorRunAsCredentialParameterNotSupported -f $PsDscContext.RunAsUser)
+            $err = New-Object System.Management.Automation.ErrorRecord $exception, "InvalidCombinationOfArguments", InvalidArgument, $null
+	    }
+
+	    Write-Log ($LocalizedData.ErrorStarting -f $Path,($err | Out-String))
+        throw $err
+    }    
+
     $Path=ResolvePath $Path
     $PSBoundParameters["Path"] = $Path
     $getArguments = ExtractArguments $PSBoundParameters ("Path","Arguments","Credential")
@@ -312,30 +352,35 @@ function Test-TargetResource
     }
 }
 
-function GetWin32ProcessOwner
+<#
+    .SYNOPSIS
+        Retrieves the owner of a Win32_Process.
+
+    .PARAMETER Process
+        The Win32_Process to retrieve the owner of.
+
+    .NOTES
+        If the process was killed by the time this function is called, this function will throw a
+        WMIMethodException with the message "Not found".
+#>
+function Get-Win32ProcessOwner
 {
+    [OutputType([String])]
+    [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $process
+        $Process
     )
 
-    # if the process was killed by the time this is called, GetOwner
-    # will throw a WMIMethodException "Not found"
-    try
+    $owner = Invoke-CimMethod -InputObject $Process -MethodName 'GetOwner' -ErrorAction 'SilentlyContinue'
+    
+    if ($null -ne $owner.Domain)
     {
-        $owner = $process.GetOwner()
+        return $owner.Domain + '\' + $owner.User
     }
-    catch
-    {
-    }
-
-    if($owner.Domain -ne $null)
-    {
-        return $owner.Domain + "\" + $owner.User
-    }
-    else
+    else                
     {
         return $owner.User
     }
@@ -368,140 +413,150 @@ function WaitForProcessCount
         $getArguments = ExtractArguments $PSBoundParameters ("Path","Arguments","Credential")
         $value = @(GetWin32_Process @getArguments).Count -eq $waitCount
     } while(!$value -and ([DateTime]::Now - $start).TotalMilliseconds -lt 2000)
-
+    
     return $value
 }
 
-function GetWin32_Process
+<#
+        If there are many processes it is faster to perform a Get-WmiObject in order to get
+        Win32_Process objects for all processes.
+    #>
+<#
+            If there are less processes than the threshold, building a Win32_Process for each matching result of get-process is faster
+        #>
+function Get-Win32Process
 {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
-
-        [parameter(Mandatory = $true)]
+        
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Path,
 
-        [System.String]
+        [String]
         $Arguments,
 
         [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
+        [PSCredential]
         $Credential,
 
-        $useWmiObjectCount=8
+        [ValidateRange(0, [Int]::MaxValue)]
+        [Int]
+        $UseGetCimInstanceThreshold = 8
     )
 
+    $processName = [IO.Path]::GetFileNameWithoutExtension($Path)
 
+    $getProcessResult = @( Get-Process -Name $processName -ErrorAction 'SilentlyContinue' )
 
-    $fileName = [io.path]::GetFileNameWithoutExtension($Path)
+    $processes = @()
 
-    $gpsProcesses = @(get-process -Name $fileName -ErrorAction SilentlyContinue)
-
-    if($gpsProcesses.Count -ge $useWmiObjectCount)
+    if ($getProcessResult.Count -ge $UseGetWmiObjectThreshold)
     {
-        # if there are many processes it is faster to perform a Get-WmiObject
-        # in order to get Win32_Process objects for all processes
-        Write-Verbose "When gpsprocess.count is greater than usewmiobjectcount"
-        $Path=WQLEscape $Path
-        $filter = "ExecutablePath = '$Path'"
-        $processes = Get-WmiObject Win32_Process -Filter $filter
+        
+        $escapedPathForWqlFilter = ConvertTo-EscapedStringForWqlFilter -FilterString $Path
+        $wqlFilter = "ExecutablePath = '$escapedPathForWqlFilter'"
+
+        $processes = Get-CimInstance -ClassName 'Win32_Process' -Filter $wqlFilter
     }
     else
     {
-        # if there are few processes, building a Win32_Process for
-        # each matching result of get-process is faster
-        $processes = foreach($gpsProcess in $gpsProcesses)
+        foreach ($process in $getProcessResult)
         {
-            if(!($gpsProcess.Path -ieq $Path))
+            if ($process.Path -ieq $Path)
             {
-                continue
-            }
-
-            try
-            {
-                Write-Verbose "in process handle, $($gpsProcess.Id)"
-                [wmi]"Win32_Process.Handle='$($gpsProcess.Id)'"
-            }
-            catch
-            {
-                #ignore if could not retrieve process
+                Write-Verbose -Message ($LocalizedData.VerboseInProcessHandle -f $process.Id)
+                $processes += Get-CimInstance -ClassName 'Win32_Process' -Filter "ProcessId = $($process.Id)" -ErrorAction 'SilentlyContinue'
             }
         }
     }
 
-    if($PSBoundParameters.ContainsKey('Credential'))
+    if ($PSBoundParameters.ContainsKey('Credential'))
     {
-        # Since there are credentials we need to call the GetOwner method in each process to search for matches
-        $processes = $processes | where { (GetWin32ProcessOwner $_) -eq $Credential.UserName }
+        $Domain, $UserName = Get-DomainAndUserName $Credential
 
+        $processes = Where-Object -InputObject $processes -FilterScript { (Get-Win32ProcessOwner -Process $_) -eq "$Domain\$UserName" }
     }
 
-    if($Arguments -eq $null) {$Arguments = ""}
-    $processes = $processes | where { (GetProcessArgumentsFromCommandLine $_.CommandLine) -eq $Arguments }
+    if ($null -eq $Arguments)
+    {
+        $Arguments = [String]::Empty
+    }
+
+    $processes = Where-Object -InputObject $processes -FilterScript { (Get-ArgumentsFromCommandLineInput $_.CommandLine) -eq $Arguments }
 
     return $processes
 }
 
 <#
-.Synopsis
-   Strips the Arguments part of a commandLine. In "c:\temp\a.exe X Y Z" the Arguments part is "X Y Z".
+    .SYNOPSIS
+        Retrieves the 'arguments' part of command line input.
+
+    .PARAMETER CommandLineInput
+        The command line input to retrieve the arguments from.
+
+    .EXAMPLE
+        Get-ArgumentsFromCommandLineInput -CommandLineInput 'C:\temp\a.exe X Y Z'
+        Returns 'X Y Z'.
 #>
-function GetProcessArgumentsFromCommandLine
+function Get-ArgumentsFromCommandLineInput
 {
+    [OutputType([String])]
+    [CmdletBinding()]
     param
     (
-        [System.String]
-        $commandLine
+        [String]
+        $CommandLineInput
     )
 
-    if($commandLine -eq $null)
+    if ([String]::IsNullOrWhitespace($CommandLineInput))
     {
-        return ""
+        return [String]::Empty
     }
+    
+    $CommandLineInput = $CommandLineInput.Trim()
 
-    $commandLine=$commandLine.Trim()
-
-    if($commandLine.Length -eq 0)
+    if ($CommandLineInput.StartsWith('"'))
     {
-        return ""
-    }
-
-    if($commandLine[0] -eq '"')
-    {
-        $charToLookfor=[char]'"'
+        $endOfCommandChar = [Char]'"'
     }
     else
     {
-        $charToLookfor=[char]' '
+        $endOfCommandChar = [Char]' '
     }
 
-    $endofCommand=$commandLine.IndexOf($charToLookfor ,1)
-    if($endofCommand -eq -1)
+    $endofCommandIndex = $CommandLineInput.IndexOf($endOfCommandChar, 1)
+    if ($endofCommandIndex -eq -1)
     {
-        return ""
+        return [String]::Empty
     }
 
-    return $commandLine.Substring($endofCommand+1).Trim()
+    return $CommandLineInput.Substring($endofCommandIndex + 1).Trim()
 }
 
 <#
-.Synopsis
-   Escapes a string to be used in a WQL filter as the one passed to get-wmiobject
+    .SYNOPSIS
+        Converts a string to an escaped string to be used in a WQL filter such as the one passed in
+        the Filter parameter of Get-WmiObject.
+
+    .PARAMETER FilterString
+        The string to convert.
 #>
-function WQLEscape
+function ConvertTo-EscapedStringForWqlFilter
 {
+    [OutputType([String])]
+    [CmdletBinding()]
     param
     (
-
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
-        $query
+        [String]
+        $FilterString
     )
 
-    return $query.Replace("\","\\").Replace('"','\"').Replace("'","\'")
+    return $FilterString.Replace("\","\\").Replace('"','\"').Replace("'","\'")
 }
 
 function ThrowInvalidArgumentError
@@ -509,7 +564,7 @@ function ThrowInvalidArgumentError
     [CmdletBinding()]
     param
     (
-
+        
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -527,71 +582,81 @@ function ThrowInvalidArgumentError
     throw $errorRecord
 }
 
-function ResolvePath
+<#
+    .SYNOPSIS
+        Expands a shortened path into a full, rooted path.
+
+    .PARAMETER Path
+        The shortened path to expand.
+#>
+function Expand-Path
 {
+    [OutputType([String])]
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Path
     )
 
     $Path = [Environment]::ExpandEnvironmentVariables($Path)
 
-    if(IsRootedPath $Path)
+    if (Test-IsRootedPath -Path $Path)
     {
-        if(!(Test-Path $Path -PathType Leaf))
+        if (-not (Test-Path -Path $Path -PathType 'Leaf'))
         {
-            ThrowInvalidArgumentError "CannotFindRootedPath" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f "Path",$Path), $LocalizedData.FileNotFound)
+            New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $LocalizedData.FileNotFound)
         }
 
         return $Path
     }
 
-    if([string]::IsNullOrEmpty($env:Path))
+    if ([String]::IsNullOrEmpty($env:Path))
     {
-        ThrowInvalidArgumentError "EmptyEnvironmentPath" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f "Path",$Path), $LocalizedData.FileNotFound)
+        New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $LocalizedData.FileNotFound)
     }
 
-    # This will block relative paths. The statement is only true id $Path contains a plain file name.
-    # Checking a relative path against segments of the $env:Path does not make sense
-    if((Split-Path $Path -Leaf) -ne $Path)
+    <#
+        This will block relative paths. The statement is only true when $Path contains a plain file name.
+        Checking a relative path against segments of $env:Path does not make sense.
+    #>
+    if ((Split-Path -Path $Path -Leaf) -ne $Path)
     {
-        ThrowInvalidArgumentError "NotAbsolutePathOrFileName" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f "Path",$Path), $LocalizedData.AbsolutePathOrFileName)
+        New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $LocalizedData.AbsolutePathOrFileName)
     }
 
-    foreach($rawSegment in $env:Path.Split(";"))
+    foreach ($rawEnvPathSegment in $env:Path.Split(';'))
     {
-        $segment = [Environment]::ExpandEnvironmentVariables($rawSegment)
+        $envPathSegment = [Environment]::ExpandEnvironmentVariables($rawEnvPathSegment)
 
-        # if an exception causes $segmentedRooted not to be set, we will consider it $false
-        $segmentRooted = $false
+        # If an exception causes $envPathSegmentRooted not to be set, we will consider it $false
+        $envPathSegmentRooted = $false
+        
+        <#
+            If the whole path passed through [IO.Path]::IsPathRooted with no exceptions, it does not have
+            invalid characters, so the segment has no invalid characters and will not throw as well.
+        #>
         try
         {
-            # If the whole path passed through [IO.Path]::IsPathRooted with no exceptions, it does not have
-            # invalid characters, so segment has no invalid characters and will not throw as well
-            $segmentRooted=[IO.Path]::IsPathRooted($segment)
+            $envPathSegmentRooted = [IO.Path]::IsPathRooted($envPathSegment)
         }
         catch {}
-
-        if(!$segmentRooted)
+        
+        if ($envPathSegmentRooted)
         {
-            continue
-        }
-
-        $candidate = join-path $segment $Path
-
-        if(Test-Path $candidate -PathType Leaf)
-        {
-            return $candidate
+            $fullPathCandidate = Join-Path -Path $envPathSegment -ChildPath $Path
+        
+            if (Test-Path -Path $fullPathCandidate -PathType 'Leaf')
+            {
+                return $fullPathCandidate
+            }
         }
     }
 
-    ThrowInvalidArgumentError "CannotFindRelativePath" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f "Path",$Path), $LocalizedData.FileNotFound)
+    New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $LocalizedData.FileNotFound)
 }
-
 
 function AssertAbsolutePath
 {
@@ -610,16 +675,16 @@ function AssertAbsolutePath
 
     Process
     {
-        if(!$ParentBoundParameters.ContainsKey($ParameterName))
+        if(!$ParentBoundParameters.ContainsKey($ParameterName)) 
         {
             return
         }
 
         $path=$ParentBoundParameters[$ParameterName]
-
+        
         if(!(IsRootedPath $Path))
         {
-            ThrowInvalidArgumentError "PathShouldBeAbsolute" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $ParameterName,$Path),
+            ThrowInvalidArgumentError "PathShouldBeAbsolute" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $ParameterName,$Path), 
                 $LocalizedData.PathShouldBeAbsolute)
         }
 
@@ -630,7 +695,7 @@ function AssertAbsolutePath
 
         if(!(Test-Path $Path))
         {
-            ThrowInvalidArgumentError "PathShouldExist" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $ParameterName,$Path),
+            ThrowInvalidArgumentError "PathShouldExist" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $ParameterName,$Path), 
                 $LocalizedData.PathShouldExist)
         }
     }
@@ -650,20 +715,29 @@ function AssertParameterIsNotSpecified
 
     Process
     {
-        if($ParentBoundParameters.ContainsKey($ParameterName))
+        if($ParentBoundParameters.ContainsKey($ParameterName)) 
         {
             ThrowInvalidArgumentError "ParameterShouldNotBeSpecified" ($LocalizedData.ParameterShouldNotBeSpecified -f $ParameterName)
         }
     }
 }
 
-function IsRootedPath
+<#
+    .SYNOPSIS
+        Tests is the given path is rooted.
+
+    .PARAMETER Path
+        The path to test.
+#>
+function Test-IsRootedPath
 {
+    [OutputType([Boolean])]
+    [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Path
     )
 
@@ -673,319 +747,9 @@ function IsRootedPath
     }
     catch
     {
-        # if the Path has invalid characters like >, <, etc, we cannot determine if it is rooted so we do not go on
-        ThrowInvalidArgumentError "CannotGetIsPathRooted" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f "Path",$Path), $_.Exception.Message)
+        # If the Path has invalid characters like >, <, etc, we cannot determine if it is rooted so we do not go on
+        New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $_.Exception.Message)
     }
 }
 
-function Write-Log
-{
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param
-    (
-        [parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Message
-    )
-
-    if ($PSCmdlet.ShouldProcess($Message, $null, $null))
-    {
-        Write-Verbose $Message
-    }
-}
-
-function CallPInvoke
-{
-$script:ProgramSource = @"
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Security;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Security.Principal;
-using System.ComponentModel;
-using System.IO;
-
-namespace Source
-{
-    [SuppressUnmanagedCodeSecurity]
-    public static class NativeMethods
-    {
-        //The following structs and enums are used by the various Win32 API's that are used in the code below
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct STARTUPINFO
-        {
-            public Int32 cb;
-            public string lpReserved;
-            public string lpDesktop;
-            public string lpTitle;
-            public Int32 dwX;
-            public Int32 dwY;
-            public Int32 dwXSize;
-            public Int32 dwXCountChars;
-            public Int32 dwYCountChars;
-            public Int32 dwFillAttribute;
-            public Int32 dwFlags;
-            public Int16 wShowWindow;
-            public Int16 cbReserved2;
-            public IntPtr lpReserved2;
-            public IntPtr hStdInput;
-            public IntPtr hStdOutput;
-            public IntPtr hStdError;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PROCESS_INFORMATION
-        {
-            public IntPtr hProcess;
-            public IntPtr hThread;
-            public Int32 dwProcessID;
-            public Int32 dwThreadID;
-        }
-
-        [Flags]
-        public enum LogonType
-        {
-            LOGON32_LOGON_INTERACTIVE = 2,
-            LOGON32_LOGON_NETWORK = 3,
-            LOGON32_LOGON_BATCH = 4,
-            LOGON32_LOGON_SERVICE = 5,
-            LOGON32_LOGON_UNLOCK = 7,
-            LOGON32_LOGON_NETWORK_CLEARTEXT = 8,
-            LOGON32_LOGON_NEW_CREDENTIALS = 9
-        }
-
-        [Flags]
-        public enum LogonProvider
-        {
-            LOGON32_PROVIDER_DEFAULT = 0,
-            LOGON32_PROVIDER_WINNT35,
-            LOGON32_PROVIDER_WINNT40,
-            LOGON32_PROVIDER_WINNT50
-        }
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SECURITY_ATTRIBUTES
-        {
-            public Int32 Length;
-            public IntPtr lpSecurityDescriptor;
-            public bool bInheritHandle;
-        }
-
-        public enum SECURITY_IMPERSONATION_LEVEL
-        {
-            SecurityAnonymous,
-            SecurityIdentification,
-            SecurityImpersonation,
-            SecurityDelegation
-        }
-
-        public enum TOKEN_TYPE
-        {
-            TokenPrimary = 1,
-            TokenImpersonation
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        internal struct TokPriv1Luid
-        {
-            public int Count;
-            public long Luid;
-            public int Attr;
-        }
-
-        public const int GENERIC_ALL_ACCESS = 0x10000000;
-        public const int CREATE_NO_WINDOW = 0x08000000;
-        internal const int SE_PRIVILEGE_ENABLED = 0x00000002;
-        internal const int TOKEN_QUERY = 0x00000008;
-        internal const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
-        internal const string SE_INCRASE_QUOTA = "SeIncreaseQuotaPrivilege";
-
-        [DllImport("kernel32.dll",
-              EntryPoint = "CloseHandle", SetLastError = true,
-              CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool CloseHandle(IntPtr handle);
-
-        [DllImport("advapi32.dll",
-              EntryPoint = "CreateProcessAsUser", SetLastError = true,
-              CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool CreateProcessAsUser(
-            IntPtr hToken,
-            string lpApplicationName,
-            string lpCommandLine,
-            ref SECURITY_ATTRIBUTES lpProcessAttributes,
-            ref SECURITY_ATTRIBUTES lpThreadAttributes,
-            bool bInheritHandle,
-            Int32 dwCreationFlags,
-            IntPtr lpEnvrionment,
-            string lpCurrentDirectory,
-            ref STARTUPINFO lpStartupInfo,
-            ref PROCESS_INFORMATION lpProcessInformation
-            );
-
-        [DllImport("advapi32.dll", EntryPoint = "DuplicateTokenEx")]
-        public static extern bool DuplicateTokenEx(
-            IntPtr hExistingToken,
-            Int32 dwDesiredAccess,
-            ref SECURITY_ATTRIBUTES lpThreadAttributes,
-            Int32 ImpersonationLevel,
-            Int32 dwTokenType,
-            ref IntPtr phNewToken
-            );
-
-        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern Boolean LogonUser(
-            String lpszUserName,
-            String lpszDomain,
-            String lpszPassword,
-            LogonType dwLogonType,
-            LogonProvider dwLogonProvider,
-            out IntPtr phToken
-            );
-
-        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern bool AdjustTokenPrivileges(
-            IntPtr htok,
-            bool disall,
-            ref TokPriv1Luid newst,
-            int len,
-            IntPtr prev,
-            IntPtr relen
-            );
-
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr GetCurrentProcess();
-
-        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern bool OpenProcessToken(
-            IntPtr h,
-            int acc,
-            ref IntPtr phtok
-            );
-
-        [DllImport("advapi32.dll", SetLastError = true)]
-        internal static extern bool LookupPrivilegeValue(
-            string host,
-            string name,
-            ref long pluid
-            );
-
-        public static void CreateProcessAsUser(string strCommand, string strDomain, string strName, string strPassword)
-        {
-            var hToken = IntPtr.Zero;
-            var hDupedToken = IntPtr.Zero;
-            TokPriv1Luid tp;
-            var pi = new PROCESS_INFORMATION();
-            var sa = new SECURITY_ATTRIBUTES();
-            sa.Length = Marshal.SizeOf(sa);
-            Boolean bResult = false;
-            try
-            {
-                bResult = LogonUser(
-                    strName,
-                    strDomain,
-                    strPassword,
-                    LogonType.LOGON32_LOGON_BATCH,
-                    LogonProvider.LOGON32_PROVIDER_DEFAULT,
-                    out hToken
-                    );
-                if (!bResult)
-                {
-                    throw new Win32Exception("The user could not be logged on. Ensure that the user has an existing profile on the machine and that correct credentials are provided. Logon error #" + Marshal.GetLastWin32Error().ToString());
-                }
-                IntPtr hproc = GetCurrentProcess();
-                IntPtr htok = IntPtr.Zero;
-                bResult = OpenProcessToken(
-                        hproc,
-                        TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
-                        ref htok
-                    );
-                if(!bResult)
-                {
-                    throw new Win32Exception("Open process token error #" + Marshal.GetLastWin32Error().ToString());
-                }
-                tp.Count = 1;
-                tp.Luid = 0;
-                tp.Attr = SE_PRIVILEGE_ENABLED;
-                bResult = LookupPrivilegeValue(
-                    null,
-                    SE_INCRASE_QUOTA,
-                    ref tp.Luid
-                    );
-                if(!bResult)
-                {
-                    throw new Win32Exception("Error in looking up privilege of the process. This should not happen if DSC is running as LocalSystem Lookup privilege error #" + Marshal.GetLastWin32Error().ToString());
-                }
-                bResult = AdjustTokenPrivileges(
-                    htok,
-                    false,
-                    ref tp,
-                    0,
-                    IntPtr.Zero,
-                    IntPtr.Zero
-                    );
-                if(!bResult)
-                {
-                    throw new Win32Exception("Token elevation error #" + Marshal.GetLastWin32Error().ToString());
-                }
-
-                bResult = DuplicateTokenEx(
-                    hToken,
-                    GENERIC_ALL_ACCESS,
-                    ref sa,
-                    (int)SECURITY_IMPERSONATION_LEVEL.SecurityIdentification,
-                    (int)TOKEN_TYPE.TokenPrimary,
-                    ref hDupedToken
-                    );
-                if(!bResult)
-                {
-                    throw new Win32Exception("Duplicate Token error #" + Marshal.GetLastWin32Error().ToString());
-                }
-                var si = new STARTUPINFO();
-                si.cb = Marshal.SizeOf(si);
-                si.lpDesktop = "";
-                bResult = CreateProcessAsUser(
-                    hDupedToken,
-                    null,
-                    strCommand,
-                    ref sa,
-                    ref sa,
-                    false,
-                    0,
-                    IntPtr.Zero,
-                    null,
-                    ref si,
-                    ref pi
-                    );
-                if(!bResult)
-                {
-                    throw new Win32Exception("The process could not be created. Create process as user error #" + Marshal.GetLastWin32Error().ToString());
-                }
-            }
-            finally
-            {
-                if (pi.hThread != IntPtr.Zero)
-                {
-                    CloseHandle(pi.hThread);
-                }
-                if (pi.hProcess != IntPtr.Zero)
-                {
-                    CloseHandle(pi.hProcess);
-                }
-                 if (hDupedToken != IntPtr.Zero)
-                {
-                    CloseHandle(hDupedToken);
-                }
-            }
-        }
-    }
-}
-
-"@
-            Add-Type -TypeDefinition $ProgramSource -ReferencedAssemblies "System.ServiceProcess"
-}
-
-Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
-
+Export-ModuleMember -Function *-TargetResource

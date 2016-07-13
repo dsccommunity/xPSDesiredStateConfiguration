@@ -84,6 +84,58 @@ function New-InvalidOperationException
     throw $errorRecordToThrow
 }
 
+<#
+# The goal of this function is to get domain and username from PSCredential 
+# without calling GetNetworkCredential() method. 
+# Call to GetNetworkCredential() expose password as a plain text in memory.
+#>
+function Get-DomainAndUserName([PSCredential]$Credential)
+{
+    #
+    # Supported formats: DOMAIN\username, username@domain
+    #
+    $wrongFormat = $false
+    if ($Credential.UserName.Contains('\')) 
+    {
+        $segments = $Credential.UserName.Split('\')
+        if ($segments.Length -gt 2)
+        {
+            # i.e. domain\user\foo
+            $wrongFormat = $true
+        } else {
+            $Domain = $segments[0]
+            $UserName = $segments[1]
+        }
+    } 
+    elseif ($Credential.UserName.Contains('@')) 
+    {
+        $segments = $Credential.UserName.Split('@')
+        if ($segments.Length -gt 2)
+        {
+            # i.e. user@domain@foo
+            $wrongFormat = $true
+        } else {
+            $UserName = $segments[0]
+            $Domain = $segments[1]
+        }
+    }
+    else 
+    {
+        # support for default domain (localhost)
+        return @( $env:COMPUTERNAME, $Credential.UserName )
+    }
+
+    if ($wrongFormat) 
+    {
+        $message = $LocalizedData.ErrorInvalidUserName -f $Credential.UserName
+        Write-Verbose $message
+        $exception = New-Object System.ArgumentException $message
+        throw New-Object System.Management.Automation.ErrorRecord $exception, "InvalidUserName", InvalidArgument, $null  
+    }
+
+    return @( $Domain, $UserName )
+}
+
 Export-ModuleMember -Function `
     Test-IsNanoServer, `
     Throw-InvalidArgumentException, `
