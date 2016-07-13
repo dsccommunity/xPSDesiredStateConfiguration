@@ -341,6 +341,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 * Updated appveyor.yml to use the default image.
 * Merged xPackage with in-box Package resource and added tests.
+* xGroup: Fixed logic bug in MembersToInclude and MembersToExclude
 
 ### 3.12.0.0
 
