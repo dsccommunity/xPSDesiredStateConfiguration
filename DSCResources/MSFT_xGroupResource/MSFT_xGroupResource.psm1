@@ -501,7 +501,7 @@ function Set-TargetResourceOnFullSKU
                         }
                     }
 
-                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Length -eq 0)
+                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Length -gt 0)
                     {
                         if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToExcludeAsPrincipals)
                         {
@@ -509,7 +509,7 @@ function Set-TargetResourceOnFullSKU
                         }
                     }
 
-                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Length -eq 0)
+                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Length -gt 0)
                     {
                         if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersToIncludeAsPrincipals)
                         {

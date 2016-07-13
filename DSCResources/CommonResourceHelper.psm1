@@ -138,5 +138,5 @@ function Get-DomainAndUserName([PSCredential]$Credential)
 
 Export-ModuleMember -Function `
     Test-IsNanoServer, `
-    Throw-InvalidArgumentException, `
-    Throw-TerminatingError
+    New-InvalidArgumentException, `
+    New-InvalidOperationException
