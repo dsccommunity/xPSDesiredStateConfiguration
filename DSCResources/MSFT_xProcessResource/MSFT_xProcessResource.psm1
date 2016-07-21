@@ -29,46 +29,99 @@ ErrorCredentialParameterNotSupportedWithRunAsCredential = The PsDscRunAsCredenti
 # Commented out until more languages are supported
 # Import-LocalizedData  LocalizedData -filename MSFT_ProcessResource.strings.psd1
 
-function Convert-ArgumentNames
+Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1"
+
+<#
+    .SYNOPSIS
+        Tests if the current user is from the local system.
+#>
+function Test-IsRunFromLocalSystemUser
 {
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param ()
+
+
+    $currentUser = (New-Object -TypeName 'Security.Principal.WindowsPrincipal' -ArgumentList @( [Security.Principal.WindowsIdentity]::GetCurrent() ))
+
+    return $currenUser.Identity.IsSystem
+}
+
+<#
+    .SYNOPSIS
+        Splits a credential into a username and domain wihtout calling GetNetworkCredential.
+        Calls to GetNetworkCredential expose the password as plain text in memory.
+
+    .PARAMETER Credential
+        The credential to pull the username and domain out of.
+
+    .NOTES
+        Supported formats: DOMAIN\username, username@domain
+#>
+function Split-Credential
+{
+    [OutputType([Hashtable])]
     [CmdletBinding()]
     param
     (
-        $functionBoundParameters,
-
-        [String[]]
-        $argumentNames,
-
-        [String[]]
-        $newArgumentNames
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [PSCredential]
+        $Credential
     )
 
-    $returnValue=@{}
-    for($i=0;$i -lt $argumentNames.Count;$i++)
-    {
-        $argumentName=$argumentNames[$i]
+    $wrongFormat = $false
 
-        if($newArgumentNames -eq $null)
-        {   
-            $newArgumentName=$argumentName
+    if ($Credential.UserName.Contains('\')) 
+    {
+        $credentialSegments = $Credential.UserName.Split('\')
+        
+        if ($credentialSegments.Length -gt 2)
+        {
+            # i.e. domain\user\foo
+            $wrongFormat = $true
+        } 
+        else
+        {
+            $domain = $credentialSegments[0]
+            $userName = $credentialSegments[1]
+        }
+    } 
+    elseif ($Credential.UserName.Contains('@')) 
+    {
+        $credentialSegments = $Credential.UserName.Split('@')
+
+        if ($credentialSegments.Length -gt 2)
+        {
+            # i.e. user@domain@foo
+            $wrongFormat = $true
         }
         else
         {
-            $newArgumentName=$newArgumentNames[$i]
-        }
-
-        if($functionBoundParameters.ContainsKey($argumentName))
-        {
-            $null=$returnValue.Add($newArgumentName,$functionBoundParameters[$argumentName])
+            $UserName = $credentialSegments[0]
+            $Domain = $credentialSegments[1]
         }
     }
+    else 
+    {
+        # support for default domain (localhost)
+        $domain = $env:computerName
+        $userName = $Credential.UserName
+    }
 
-    return $returnValue
-}
+    if ($wrongFormat) 
+    {
+        $message = $LocalizedData.ErrorInvalidUserName -f $Credential.UserName
+        
+        Write-Verbose -Message $message
 
-function IsRunFromLocalSystemUser()
-{
-    (New-Object Security.Principal.WindowsPrincipal ( [Security.Principal.WindowsIdentity]::GetCurrent())).Identity.IsSystem
+        New-InvalidArgumentException -ArgumentName 'Credential' -Message $message
+    }
+
+    return @{
+        Domain = $domain
+        UserName = $userName
+    }
 }
 
 function Get-TargetResource
@@ -93,262 +146,323 @@ function Get-TargetResource
     )
     
     $Path = Expand-Path -Path $Path
-    $PSBoundParameters["Path"] = $Path
 
-    $getArguments = @{
-
+    $getWin32ProcessArguments = @{
+        Path = $Path
+        Arguments = $Arguments
     }
 
-    $processes = @(GetWin32_Process @getArguments)
+    if ($null -ne $Credential)
+    {
+        $getWin32ProcessArguments['Credential'] = $Credential
+    }
 
-    if($processes.Count -eq 0)
+    $win32Processes = @( Get-Win32Process @getWin32ProcessArguments )
+
+    if ($win32Processes.Count -eq 0)
     {
         return @{
-            Path=$Path
-            Arguments=$Arguments
-            Ensure='Absent'
+            Path = $Path
+            Arguments = $Arguments
+            Ensure ='Absent'
         }
     }
 
-    foreach($process in $processes)
+    foreach ($win32Process in $win32Processes)
     {
-        # in case the process was killed between GetWin32_Process and this point, we should
-        # ignore errors which will generate empty entries in the return
-        $gpsProcess = (get-process -id $process.ProcessId -ErrorAction Ignore)
+        $getProcessResult = Get-Process -ID $win32Process.ProcessId -ErrorAction 'Ignore'
 
-        @{
-            Path=$process.Path
-            Arguments=(GetProcessArgumentsFromCommandLine $process.CommandLine)
-            PagedMemorySize=$gpsProcess.PagedMemorySize64
-            NonPagedMemorySize=$gpsProcess.NonpagedSystemMemorySize64
-            VirtualMemorySize=$gpsProcess.VirtualMemorySize64
-            HandleCount=$gpsProcess.HandleCount
-            Ensure='Present'
-            ProcessId=$process.ProcessId
+        return @{
+            Path = $win32Process.Path
+            Arguments = (Get-ArgumentsFromCommandLineInput -CommandLineInput $win32Process.CommandLine)
+            PagedMemorySize = $getProcessResult.PagedMemorySize64
+            NonPagedMemorySize = $getProcessResult.NonpagedSystemMemorySize64
+            VirtualMemorySize = $getProcessResult.VirtualMemorySize64
+            HandleCount = $getProcessResult.HandleCount
+            Ensure = 'Present'
+            ProcessId = $win32Process.ProcessId
         }
     }
 }
 
 function Set-TargetResource
 {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Path,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [System.String]
+        [String]
         $Arguments,
 
         [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
+        [PSCredential]
         $Credential,
 
-        [System.String]
-        [ValidateSet("Present", "Absent")]
-        $Ensure="Present",
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
 
-        [System.String]
+        [String]
         $StandardOutputPath,
 
-        [System.String]
+        [String]
         $StandardErrorPath,
 
-        [System.String]
+        [String]
         $StandardInputPath,
 
-        [System.String]
+        [String]
         $WorkingDirectory
     )
 
-    $Path=ResolvePath $Path
-    $PSBoundParameters["Path"] = $Path
-    $getArguments = ExtractArguments $PSBoundParameters ("Path","Arguments","Credential")
-    $processes = @(GetWin32_Process @getArguments)
-
-    if($Ensure -eq 'Absent')
+    if ($null -ne $PsDscContext.RunAsUser)
     {
-        "StandardOutputPath","StandardErrorPath","StandardInputPath","WorkingDirectory" | AssertParameterIsNotSpecified $PSBoundParameters
+        New-InvalidArgumentException -ArgumentName 'PsDscRunAsCredential' -Message ($LocalizedData.ErrorRunAsCredentialParameterNotSupported -f $PsDscContext.RunAsUser)
+    } 
 
-        if ($processes.Count -gt 0)
+    $Path = Expand-Path -Path $Path
+
+    $getWin32ProcessArguments = @{
+        Path = $Path
+        Arguments = $Arguments
+    }
+
+    if ($null -ne $Credential)
+    {
+        $getWin32ProcessArguments['Credential'] = $Credential
+    }
+
+    $win32Processes = @( Get-Win32Process @getWin32ProcessArguments )
+
+    if ($Ensure -eq 'Absent')
+    {
+        Assert-HashtableDoesNotContainKey -Hashtable $PSBoundParameters -Key @( 'StandardOutputPath', 'StandardErrorPath', 'StandardInputPath', 'WorkingDirectory' )
+
+        if ($win32Processes.Count -gt 0)
         {
-           $processIds=$processes.ProcessId
+           $processIds = $win32Processes.ProcessId
 
-           $err=Stop-Process -Id $processIds -force 2>&1
+           $stopProcessError = Stop-Process -Id $processIds -Force 2>&1
            
-           if($err -eq $null)
+           if ($null -eq $stopProcessError)
            {
-               Write-Log ($LocalizedData.ProcessesStopped -f $Path,($processIds -join ","))
+               Write-Verbose -Message ($LocalizedData.ProcessesStopped -f $Path, ($processIds -join ','))
            }
            else
            {
-               Write-Log ($LocalizedData.ErrorStopping -f $Path,($processIds -join ","),($err | out-string))
-               throw $err
+               Write-Verbose -Message ($LocalizedData.ErrorStopping -f $Path, ($processIds -join ','), ($stopProcessError | Out-String))
+               throw $stopProcessError
            }
 
            # Before returning from Set-TargetResource we have to ensure a subsequent Test-TargetResource is going to work
-           if (!(WaitForProcessCount @getArguments -waitCount 0))
+           if (-not (Wait-ProcessCount -ProcessSettings $getWin32ProcessArguments -ProcessCount 0))
            {
-                $message = $LocalizedData.ErrorStopping -f $Path,($processIds -join ","),$LocalizedData.FailureWaitingForProcessesToStop
-                Write-Log $message
-                ThrowInvalidArgumentError "FailureWaitingForProcessesToStop" $message
+                $message = $LocalizedData.ErrorStopping -f $Path, ($processIds -join ','), $LocalizedData.FailureWaitingForProcessesToStop
+                
+                Write-Verbose -Message $message
+
+                New-InvalidOperationException -Message $message
            }
         }
         else
         {
-            Write-Log ($LocalizedData.ProcessAlreadyStopped -f $Path)
+            Write-Verbose -Message ($LocalizedData.ProcessAlreadyStopped -f $Path)
         }
     }
     else
     {
-        "StandardInputPath","WorkingDirectory" |  AssertAbsolutePath $PSBoundParameters -Exist
-        "StandardOutputPath","StandardErrorPath" | AssertAbsolutePath $PSBoundParameters
+        $shouldBeRootedPathArguments = @( 'StandardInputPath', 'WorkingDirectory', 'StandardOutputPath', 'StandardErrorPath' )
 
-        if ($processes.Count -eq 0)
+        foreach ($shouldBeRootedPathArgument in $shouldBeRootedPathArguments)
         {
-            $startArguments = ExtractArguments $PSBoundParameters `
-                 ("Path",     "Arguments",    "Credential", "StandardOutputPath",     "StandardErrorPath",     "StandardInputPath", "WorkingDirectory") `
-                 ("FilePath", "ArgumentList", "Credential",  "RedirectStandardOutput", "RedirectStandardError", "RedirectStandardInput", "WorkingDirectory")
-
-            if([string]::IsNullOrEmpty($Arguments))
+            if ($null -ne $PSBoundParameters[$shouldBeRootedPathArgument])
             {
-                $null=$startArguments.Remove("ArgumentList")
+                Assert-PathArgumentRooted -PathArgumentName $shouldBeRootedPathArgument -PathArgument $PSBoundParameters[$shouldBeRootedPathArgument]
+            }
+        }
+
+        $shouldExistPathArguments = @( 'StandardInputPath', 'WorkingDirectory' )
+
+        foreach ($shouldExistPathArgument in $shouldExistPathArguments)
+        {
+            if ($null -ne $PSBoundParameters[$shouldExistPathArgument])
+            {
+                Assert-PathArgumentExists -PathArgumentName $shouldExistPathArgument -PathArgument $PSBoundParameters[$shouldExistPathArgument]
+            }
+        }
+
+        if ($win32Processes.Count -eq 0)
+        {
+            $startProcessArguments = @{
+                FilePath = $Path
             }
 
-            if($PSCmdlet.ShouldProcess($Path,$LocalizedData.StartingProcessWhatif))
+            $startProcessOptionalArgumentMap = @{
+                Credential = 'Credential'
+                RedirectStandardOutput = 'StandardOutputPath'
+                RedirectStandardError = 'StandardErrorPath'
+                RedirectStandardInput = 'StandardInputPath'
+                WorkingDirectory = 'WorkingDirectory'
+            }
+
+            foreach ($startProcessOptionalArgumentName in $startProcessOptionalArgumentMap.Keys)
             {
-                #
-                # Start-Process calls .net Process.Start()
-                # If -Credential is present Process.Start() uses win32 api CreateProcessWithLogonW http://msdn.microsoft.com/en-us/library/0w4h05yb(v=vs.110).aspx
-                # CreateProcessWithLogonW cannot be called as LocalSystem user.
-                # Details http://msdn.microsoft.com/en-us/library/windows/desktop/ms682431(v=vs.85).aspx (section Remarks/Windows XP with SP2 and Windows Server 2003)
-                #
-                # In this case we call another api.
-                #
-                if($PSBoundParameters.ContainsKey("Credential") -and (IsRunFromLocalSystemUser))
+                if ($null -ne $PSBoundParameters[$startProcessOptionalArgumentMap[$startProcessOptionalArgumentName]])
                 {
-                    if($PSBoundParameters.ContainsKey("StandardOutputPath") -or $PSBoundParameters.ContainsKey("StandardInputPath") -or $PSBoundParameters.ContainsKey("WorkingDirectory"))
+                    $startProcessArguments[$startProcessOptionalArgumentName] = $PSBoundParameters[$startProcessOptionalArgumentMap[$startProcessOptionalArgumentName]]
+                }
+            }
+
+            if (-not [String]::IsNullOrEmpty($Arguments))
+            {
+                $startProcessArguments['ArgumentList'] = $Arguments
+            }
+
+            if ($PSCmdlet.ShouldProcess($Path, $LocalizedData.StartingProcessWhatif))
+            {
+                <#
+                    Start-Process calls .net Process.Start()
+                    If -Credential is present Process.Start() uses win32 api CreateProcessWithLogonW http://msdn.microsoft.com/en-us/library/0w4h05yb(v=vs.110).aspx
+                    CreateProcessWithLogonW cannot be called as LocalSystem user.
+                    Details http://msdn.microsoft.com/en-us/library/windows/desktop/ms682431(v=vs.85).aspx (section Remarks/Windows XP with SP2 and Windows Server 2003)
+                
+                    In this case we call another api.
+                #>
+                if ($PSBoundParameters.ContainsKey('Credential') -and (Test-IsRunFromLocalSystemUser))
+                {
+                    if ($PSBoundParameters.ContainsKey('StandardOutputPath'))
                     {
-                        $exception = New-Object System.ArgumentException $LocalizedData.ErrorParametersNotSupportedWithCredential
-                        $err = New-Object System.Management.Automation.ErrorRecord $exception, "InvalidCombinationOfArguments", InvalidArgument, $null
+                        New-InvalidArgumentException -ArgumentName 'StandardOutputPath' -Message $LocalizedData.ErrorParametersNotSupportedWithCredential
                     }
-                    else 
+                    
+                    if ($PSBoundParameters.ContainsKey('StandardInputPath'))
                     {
-                        $Domain, $UserName = Get-DomainAndUserName $Credential
-                        try
-                        {
-                            #
-                            # Internally we use win32 api LogonUser() with dwLogonType == LOGON32_LOGON_NETWORK_CLEARTEXT. 
-                            # It grants process ability for second-hop.
-                            #
-                            Import-DscNativeMethods
-                            [PSDesiredStateConfiguration.NativeMethods]::CreateProcessAsUser( "$Path $Arguments", $Domain, $UserName, $Credential.Password, $false, [ref] $null )
-                        }
-                        catch
-                        {
-                            throw  New-Object System.Management.Automation.ErrorRecord $_.Exception, "Win32Exception", OperationStopped, $null
-                        }
+                        New-InvalidArgumentException -ArgumentName 'StandardInputPath' -Message $LocalizedData.ErrorParametersNotSupportedWithCredential
+                    }
+                    
+                    if ($PSBoundParameters.ContainsKey('WorkingDirectory'))
+                    {
+                        New-InvalidArgumentException -ArgumentName 'WorkingDirectory' -Message $LocalizedData.ErrorParametersNotSupportedWithCredential
+                    }
+
+                    $splitCredentialResult = Split-Credential $Credential
+                    try
+                    {
+                        <#
+                            Internally we use win32 api LogonUser() with dwLogonType == LOGON32_LOGON_NETWORK_CLEARTEXT. 
+                            It grants process ability for second-hop.
+                        #>
+                        Import-DscNativeMethods
+
+                        [PSDesiredStateConfiguration.NativeMethods]::CreateProcessAsUser( "$Path $Arguments", $domain, $userName, $Credential.Password, $false, [Ref]$null )
+                    }
+                    catch
+                    {
+                        throw (New-Object -TypeName 'System.Management.Automation.ErrorRecord' -ArgumentList @( $_.Exception, 'Win32Exception', 'OperationStopped', $null ))
                     }
                 }
                 else
                 {
-                    $err=Start-Process @startArguments 2>&1
+                    $startProcessError = Start-Process @startProcessArguments 2>&1
                 }
-                if($err -eq $null)
+
+                if ($null -eq $startProcessError)
                 {
-                    Write-Log ($LocalizedData.ProcessStarted -f $Path)
+                    Write-Verbose -Message ($LocalizedData.ProcessStarted -f $Path)
                 }
                 else
                 {
-                    Write-Log ($LocalizedData.ErrorStarting -f $Path,($err | Out-String))
-                    throw $err
+                    Write-Verbose -Message ($LocalizedData.ErrorStarting -f $Path, ($startProcessError | Out-String))
+                    throw $startProcessError
                 }
 
                 # Before returning from Set-TargetResource we have to ensure a subsequent Test-TargetResource is going to work
-                if (!(WaitForProcessCount @getArguments -waitCount 1))
+                if (-not (Wait-ProcessCount -ProcessSettings $getWin32ProcessArguments -ProcessCount 1))
                 {
-                    $message = $LocalizedData.ErrorStarting -f $Path,$LocalizedData.FailureWaitingForProcessesToStart
-                    Write-Log $message
-                    ThrowInvalidArgumentError "FailureWaitingForProcessesToStart" $message
+                    $message = $LocalizedData.ErrorStarting -f $Path, $LocalizedData.FailureWaitingForProcessesToStart
+                    
+                    Write-Verbose -Message $message
+                    
+                    New-InvalidOperationException -Message $message
                 }
             }
         }
         else
         {
-            Write-Log ($LocalizedData.ProcessAlreadyStarted -f $Path)
+            Write-Verbose -Message ($LocalizedData.ProcessAlreadyStarted -f $Path)
         }
     }
 }
 
 function Test-TargetResource
 {
+    [OutputType([Boolean])]
+    [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Path,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [System.String]
+        [String]
         $Arguments,
 
         [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
+        [PSCredential]
         $Credential,
 
-        [System.String]
-        [ValidateSet("Present", "Absent")]
-        $Ensure="Present",
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
 
-        [System.String]
+        [String]
         $StandardOutputPath,
 
-        [System.String]
+        [String]
         $StandardErrorPath,
 
-        [System.String]
+        [String]
         $StandardInputPath,
 
-        [System.String]
+        [String]
         $WorkingDirectory
     )
 
-    if($PsDscContext.RunAsUser)
+    if ($null -ne $PsDscContext.RunAsUser)
     {
-	    if($PSBoundParameters.ContainsKey("Credential"))
-	    {
-	        $exception = New-Object System.ArgumentException ($LocalizedData.ErrorCredentialParameterNotSupportedWithRunAsCredential -f $PsDscContext.RunAsUser)
-            $err = New-Object System.Management.Automation.ErrorRecord $exception, "InvalidArgument", InvalidArgument, $null
-	    }
-	    else
-	    {
-	        $exception = New-Object System.ArgumentException ($LocalizedData.ErrorRunAsCredentialParameterNotSupported -f $PsDscContext.RunAsUser)
-            $err = New-Object System.Management.Automation.ErrorRecord $exception, "InvalidCombinationOfArguments", InvalidArgument, $null
-	    }
-
-	    Write-Log ($LocalizedData.ErrorStarting -f $Path,($err | Out-String))
-        throw $err
+        New-InvalidArgumentException -ArgumentName 'PsDscRunAsCredential' -Message ($LocalizedData.ErrorRunAsCredentialParameterNotSupported -f $PsDscContext.RunAsUser)
     }    
 
-    $Path=ResolvePath $Path
-    $PSBoundParameters["Path"] = $Path
-    $getArguments = ExtractArguments $PSBoundParameters ("Path","Arguments","Credential")
-    $processes = @(GetWin32_Process @getArguments)
+    $Path = Expand-Path -Path $Path
 
+    $getWin32ProcessArguments = @{
+        Path = $Path
+        Arguments = $Arguments
+    }
 
-    if($Ensure -eq 'Absent')
+    if ($null -ne $Credential)
     {
-        return ($processes.Count -eq 0)
+        $getWin32ProcessArguments['Credential'] = $Credential
+    }
+
+    $win32Processes = @( Get-Win32Process @getWin32ProcessArguments )
+
+    if ($Ensure -eq 'Absent')
+    {
+        return ($win32Processes.Count -eq 0)
     }
     else
     {
-        return ($processes.Count -gt 0)
+        return ($win32Processes.Count -gt 0)
     }
 }
 
@@ -386,50 +500,68 @@ function Get-Win32ProcessOwner
     }
 }
 
-function WaitForProcessCount
+<#
+    .SYNOPSIS
+        Waits for the given number of processes with the given settings to be running.
+
+    .PARAMETER ProcessSettings
+        The settings of the running process(s) to get the count of.
+
+    .PARAMETER ProcessCount
+        The number of processes running to wait for.
+#>
+function Wait-ProcessCount
 {
-    [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([Boolean])]
+    [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
+        [Hashtable]
+        $ProcessSettings,
 
-        [System.String]
-        $Arguments,
-
-        [ValidateNotNullOrEmpty()]
-        [System.Management.Automation.PSCredential]
-        $Credential,
-
-        [parameter(Mandatory=$true)]
-        $waitCount
+        [Parameter(Mandatory = $true)]
+        [ValidateRange(0, [Int]::MaxValue)]
+        [Int]
+        $ProcessCount
     )
 
-    $start = [DateTime]::Now
+    $startTime = [DateTime]::Now
+
     do
     {
-        $getArguments = ExtractArguments $PSBoundParameters ("Path","Arguments","Credential")
-        $value = @(GetWin32_Process @getArguments).Count -eq $waitCount
-    } while(!$value -and ([DateTime]::Now - $start).TotalMilliseconds -lt 2000)
+        $actualProcessCount = @( Get-Win32Process @ProcessSettings ).Count
+    } while ($actualProcessCount -ne $ProcessCount -and ([DateTime]::Now - $startTime).TotalMilliseconds -lt 2000)
     
-    return $value
+    return $actualProcessCount -eq $ProcessCount
 }
 
 <#
-        If there are many processes it is faster to perform a Get-WmiObject in order to get
-        Win32_Process objects for all processes.
-    #>
-<#
-            If there are less processes than the threshold, building a Win32_Process for each matching result of get-process is faster
-        #>
+    .SYNOPSIS
+        Retrieves any Win32_Process objects that match the given path, arguments, and credential.
+
+    .PARAMETER Path
+        The path that should match the retrieved process.
+
+    .PARAMETER Arguments
+        The arguments that should match the retrieved process.
+
+    .PARAMETER Credential
+        The credential whose user name should match the owner of the process.
+
+    .PARAMETER UseGetCimInstanceThreshold
+        If the number of processes returned by the Get-Process method is greater than or equal to
+        this value, this function will retrieve all processes at the executable path. This will
+        help the function execute faster. Otherwise, this function will retrieve each Win32_Process
+        objects with the product ids returned from Get-Process.
+#>
 function Get-Win32Process
 {
+    [OutputType([Object[]])]
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
-        
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
@@ -453,7 +585,7 @@ function Get-Win32Process
 
     $processes = @()
 
-    if ($getProcessResult.Count -ge $UseGetWmiObjectThreshold)
+    if ($getProcessResult.Count -ge $UseGetCimInstanceThreshold)
     {
         
         $escapedPathForWqlFilter = ConvertTo-EscapedStringForWqlFilter -FilterString $Path
@@ -475,9 +607,9 @@ function Get-Win32Process
 
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
-        $Domain, $UserName = Get-DomainAndUserName $Credential
+        $splitCredentialResult = Split-Credenital -Credential $Credential
 
-        $processes = Where-Object -InputObject $processes -FilterScript { (Get-Win32ProcessOwner -Process $_) -eq "$Domain\$UserName" }
+        $processes = Where-Object -InputObject $processes -FilterScript { (Get-Win32ProcessOwner -Process $_) -eq "$($splitCredentialResult.Domain)\$($splitCredentialResult.UserName)" }
     }
 
     if ($null -eq $Arguments)
@@ -485,7 +617,7 @@ function Get-Win32Process
         $Arguments = [String]::Empty
     }
 
-    $processes = Where-Object -InputObject $processes -FilterScript { (Get-ArgumentsFromCommandLineInput $_.CommandLine) -eq $Arguments }
+    $processes = Where-Object -InputObject $processes -FilterScript { (Get-ArgumentsFromCommandLineInput -CommandLineInput ($_.CommandLine)) -eq $Arguments }
 
     return $processes
 }
@@ -559,29 +691,6 @@ function ConvertTo-EscapedStringForWqlFilter
     return $FilterString.Replace("\","\\").Replace('"','\"').Replace("'","\'")
 }
 
-function ThrowInvalidArgumentError
-{
-    [CmdletBinding()]
-    param
-    (
-        
-        [parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $errorId,
-
-        [parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $errorMessage
-    )
-
-    $errorCategory=[System.Management.Automation.ErrorCategory]::InvalidArgument
-    $exception = New-Object System.ArgumentException $errorMessage;
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-    throw $errorRecord
-}
-
 <#
     .SYNOPSIS
         Expands a shortened path into a full, rooted path.
@@ -603,7 +712,7 @@ function Expand-Path
 
     $Path = [Environment]::ExpandEnvironmentVariables($Path)
 
-    if (Test-IsRootedPath -Path $Path)
+    if ([IO.Path]::IsPathRooted($Path))
     {
         if (-not (Test-Path -Path $Path -PathType 'Leaf'))
         {
@@ -611,6 +720,10 @@ function Expand-Path
         }
 
         return $Path
+    }
+    else
+    {
+        New-InvalidArgumentException -ArgumentName 'Path'
     }
 
     if ([String]::IsNullOrEmpty($env:Path))
@@ -658,97 +771,97 @@ function Expand-Path
     New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $LocalizedData.FileNotFound)
 }
 
-function AssertAbsolutePath
+<#
+    .SYNOPSIS
+        Throws an error if the given path argument is not rooted.
+
+    .PARAMETER PathArgumentName
+        The name of the path argument that should be rooted.
+
+    .PARAMETER PathArgument
+        The path arguments that should be rooted.
+#>
+function Assert-PathArgumentRooted
 {
     [CmdletBinding()]
     param
     (
-        $ParentBoundParameters,
-
-        [System.String]
-        [Parameter (ValueFromPipeline=$true)]
-        $ParameterName,
-
-        [switch]
-        $Exist
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [Hashtable]
+        $PathArguments
     )
-
-    Process
+    
+    foreach ($pathArgumentName in $PathArguments.Keys)
     {
-        if(!$ParentBoundParameters.ContainsKey($ParameterName)) 
+        if (-not ([IO.Path]::IsPathRooted($PathArguments[$pathArgumentName])))
         {
-            return
-        }
-
-        $path=$ParentBoundParameters[$ParameterName]
-        
-        if(!(IsRootedPath $Path))
-        {
-            ThrowInvalidArgumentError "PathShouldBeAbsolute" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $ParameterName,$Path), 
-                $LocalizedData.PathShouldBeAbsolute)
-        }
-
-        if(!$Exist.IsPresent)
-        {
-            return
-        }
-
-        if(!(Test-Path $Path))
-        {
-            ThrowInvalidArgumentError "PathShouldExist" ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $ParameterName,$Path), 
-                $LocalizedData.PathShouldExist)
-        }
-    }
-}
-
-function AssertParameterIsNotSpecified
-{
-    [CmdletBinding()]
-    param
-    (
-        $ParentBoundParameters,
-
-        [System.String]
-        [Parameter (ValueFromPipeline=$true)]
-        $ParameterName
-    )
-
-    Process
-    {
-        if($ParentBoundParameters.ContainsKey($ParameterName)) 
-        {
-            ThrowInvalidArgumentError "ParameterShouldNotBeSpecified" ($LocalizedData.ParameterShouldNotBeSpecified -f $ParameterName)
+            New-InvalidArgumentException -ArgumentName $pathArgumentName -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $pathArgumentName, $PathArguments[$pathArgumentName]), $LocalizedData.PathShouldBeAbsolute)
         }
     }
 }
 
 <#
     .SYNOPSIS
-        Tests is the given path is rooted.
+        Throws an error if the given path argument does not exist.
 
-    .PARAMETER Path
-        The path to test.
+    .PARAMETER PathArgumentName
+        The name of the path argument that should exist.
+
+    .PARAMETER PathArgument
+        The path argument that should exist.
 #>
-function Test-IsRootedPath
+function Assert-PathArgumentExists
 {
-    [OutputType([Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
-        $Path
+        $PathArgumentName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $PathArgument
     )
 
-    try
+    if (-not (Test-Path -Path $PathArgument))
     {
-        return [IO.Path]::IsPathRooted($Path)
+        New-InvalidArgumentException -ArgumentName $PathArgumentName -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $PathArgumentName, $PathArgument), $LocalizedData.PathShouldExist)
     }
-    catch
+}
+
+<#
+    .SYNOPSIS
+        Throws an exception if the given hashtable contains the given key(s).
+
+    .PARAMETER Hashtable
+        The hashtable to check the keys of.
+
+    .PARAMETER Key
+        The key(s) that should not be in the hashtable.
+#>
+function Assert-HashtableDoesNotContainKey
+{
+    [CmdletBinding()]
+    param
+    (
+        [Hashtable]
+        $Hashtable,
+
+        [Parameter(Mandatory = $true)]
+        [String[]]
+        $Key
+    )
+
+    foreach ($keyName in $Key)
     {
-        # If the Path has invalid characters like >, <, etc, we cannot determine if it is rooted so we do not go on
-        New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f 'Path', $Path), $_.Exception.Message)
+        if ($Hashtable.ContainsKey($keyName)) 
+        {
+            New-InvalidArgumentException -ArgumentName $keyName -Message ($LocalizedData.ParameterShouldNotBeSpecified -f $keyName)
+        }
     }
 }
 

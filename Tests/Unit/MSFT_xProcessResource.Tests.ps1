@@ -19,7 +19,7 @@ try
             }
 
             AfterAll {
-                Stop-ProcessByName $script:cmdProcessShortName
+                Stop-ProcessByName -ProcessName $script:cmdProcessShortName
 
                 if (Test-Path -Path $script:cmdProcessFullPath)
                 {
@@ -32,7 +32,21 @@ try
             }
 
             Context 'Get-TargetResource' {
-                It 'Should return the correct properties' -Pending {
+                It 'Should return the correct properties for a process that is absent' {
+                    $processArguments = 'TestGetProperties'
+
+                    $getTargetResourceResult = Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
+                    $getTargetResourceProperties = @( 'Arguments', 'Ensure', 'Path' )
+
+                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceProperties
+
+                    $getTargetResourceResult.Arguments | Should Be $processArguments
+                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Path -icontains $script:cmdProcessFullPath | Should Be $true
+                    $getTargetResourceResult.Count | Should Be 3
+                } 
+
+                It 'Should return the correct properties for a process that is present' {
                     $processArguments = 'TestGetProperties'
 
                     Set-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
@@ -40,7 +54,7 @@ try
                     $getTargetResourceResult = Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
                     $getTargetResourceProperties = @( 'VirtualMemorySize', 'Arguments', 'Ensure', 'PagedMemorySize', 'Path', 'NonPagedMemorySize', 'HandleCount', 'ProcessId' )
 
-                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceProperties $getTargetResourceProperties
+                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceProperties
 
                     $getTargetResourceResult.VirtualMemorySize -le 0 | Should Be $false
                     $getTargetResourceResult.Arguments | Should Be $processArguments
@@ -52,10 +66,45 @@ try
                     $getTargetResourceResult.ProcessId -le 0 | Should Be $false
                     $getTargetResourceResult.Count | Should Be 8
                 }
+
+                It 'Should return correct Ensure value based on Arguments parameter with multiple processes' {
+                    $actualArguments = 'TestProcessResourceWithArguments'
+
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments $actualArguments
+
+                    $processes = @( Get-TargetResource -Path $script:cmdProcessFullPath -Arguments '')
+ 
+                    $processes.Count | Should Be 1
+                    $processes[0].Ensure | Should Be 'Absent'
+
+                    $processes = @( Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $actualArguments)
+ 
+                    $processes.Count | Should Be 1
+                    $processes[0].Ensure | Should Be 'Present'
+
+                    $processes = @( Get-TargetResource -Path $script:cmdProcessFullPath -Arguments 'NotOrginalArguments')
+ 
+                    $processes.Count | Should Be 1
+                    $processes[0].Ensure | Should Be 'Absent'
+
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments ''
+ 
+                    $processes = @( Get-TargetResource -Path $script:cmdProcessFullPath -Arguments '')
+ 
+                    $processes.Count | Should Be 1
+                    $processes[0].Ensure | Should Be 'Present'
+                    $processes[0].Arguments.Length | Should Be 0
+ 
+                    $processes = @( Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $actualArguments)
+ 
+                    $processes.Count | Should Be 1
+                    $processes[0].Ensure | Should Be 'Present'
+                    $processes[0].Arguments | Should Be $actualArguments
+                }
             }
 
             Context 'Set-TargetResource' {
-                It 'Should start and stop a process with no arguments' -Pending  {
+                It 'Should start and stop a process with no arguments' {
                     Test-TargetResource -Path $script:cmdProcessFullPath -Arguments '' | Should Be $false
  
                     Set-TargetResource -Path $script:cmdProcessFullPath -Arguments ''
@@ -238,220 +287,213 @@ try
             }
 
             Context 'Test-TargetResource' {
-                It 'TestTestWithDirectoryArguments' -Pending {
-                    Invoke-Remotely {
-                        $exePath = $script:cmdProcessFullPath
-                        $exists = MSFT_ProcessResource\Test-TargetResource $exePath -WorkingDirectory "something" -StandardOutputPath "something" `
-                         -StandardErrorPath "something" -StandardInputPath "something" -Arguments ""
-                        Assert !$exists "there should be no process"
-                    }
+                It 'Should return correct value based on Arguments' {
+                    $actualArguments = 'TestProcessResourceWithArguments'
+
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments $actualArguments
+ 
+                    Test-TargetResource -Path $script:cmdProcessFullPath -Arguments '' | Should Be $false
+ 
+                    Test-TargetResource -Path $script:cmdProcessFullPath -Arguments 'NotTheOriginalArguments' | Should Be $false
+ 
+                    Test-TargetResource -Path $script:cmdProcessFullPath -Arguments $actualArguments | Should Be $true
+                }
+
+                It 'Should return false for absent process with directory arguments' {
+                    $testTargetResourceResult = Test-TargetResource `
+                        -Path $script:cmdProcessFullPath `
+                        -WorkingDirectory 'something' `
+                        -StandardOutputPath 'something' `
+                        -StandardErrorPath 'something' `
+                        -StandardInputPath 'something' `
+                        -Arguments ''
+                        
+                    $testTargetResourceResult | Should Be $false
                 }
             }
+            
+            <#
+                SPLIT into 3
 
-        
-    
- 
-        <#
-            SPLIT into 3
+                .Synopsis
+                Tests a process with an argument.
+                .DESCRIPTION
+                - Starts a process with an argument
+                - Ensures Test with "" as Arguments is false
+                - Ensures Test with the wrong arguments is false
+                - Ensures Test with no Arguments key is true
+                - Ensures Test with the right Arguments key is true
+                - Ensures Get with no arguments key is 1 Present
+                - Ensures Get with "" as Arguments is 1 Absent
 
-            .Synopsis
-            Tests a process with an argument.
-            .DESCRIPTION
-            - Starts a process with an argument
-            - Ensures Test with "" as Arguments is false
-            - Ensures Test with the wrong arguments is false
-            - Ensures Test with no Arguments key is true
-            - Ensures Test with the right Arguments key is true
-            - Ensures Get with no arguments key is 1 Present
-            - Ensures Get with "" as Arguments is 1 Absent
-
-            - Starts process with no arguments
-            - Ensures Get with no arguments key is 2
-            - Ensures Get with null arguments is 1 Present with no Arguments
-            - Ensures Get with argument is 1 Present with the Arguments
-            - Set All process to be absent
-            - Ensure none are left
-        #>
-        It 'TestGetSetProcessResourceWithArguments' -Pending {
-            Invoke-Remotely {
-                $exePath = $script:cmdProcessFullPath
- 
-                if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
-                {
-                    throw "before set, there should be no process"
-                }
- 
-                MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments"
- 
-                if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
-                {
-                    throw "after set, cannot find process with no arguments"
-                }
- 
-                if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "NotTheOriginalArguments")
-                {
-                    throw "after set, cannot find process with arguments that were not the ones we set"
-                }
- 
-                if(!(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments"))
-                {
-                    throw "after set, there should be a process if we specify arguments"
-                }
- 
-                $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "")
- 
-                if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Absent')
-                {
-                    throw "there should be no process without arguments"
-                }
- 
-                MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments ""
- 
-                $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "")
-                if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Present')
-                {
-                    throw "there should be only one process present with no argument"
-                }
- 
-                if($processes[0].Arguments.length -ne 0)
-                {
-                    throw "there should no arguments in the process"
-                }
- 
-                $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments")
-        
-                if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Present')
-                {
-                    throw "there should be only one process present with TestGetSetProcessResourceWithArguments as argument"
-                }
- 
-                if($processes[0].Arguments -ne 'TestGetSetProcessResourceWithArguments')
-                {
-                    throw "the argument should be TestGetSetProcessResourceWithArguments"
-                }
- 
-                MSFT_ProcessResource\Set-TargetResource -Path $exePath -Ensure Absent -Arguments ""
- 
-                if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
-                {
-                    throw "after set absent, there should be no process"
-                }
-            }
-        }
-
-        Context 'WQLEscape' {
-            It 'TestWQLEscape' -Pending {
-                WQLEscape "a'`"\b" | Should Be "a\'\`"\\b"
-            }
-        }
- 
-        Context 'Get-ProcessArgumentsFromCommandLine' {
-            It 'TestGetProcessArgumentsFromCommandLine' -Pending {
-                $testCases=(("c    a   ","a"),('"c b d" e  ',"e"),("    a b","b"), (" abc ",""))
-                foreach($testCase in $testCases)
-                {
-                    $test=$testCase[0]
-                    $expected=$testCase[1]
-                    $actual = GetProcessArgumentsFromCommandLine $test
-
-                    $actual | Should Be $expected
-                }
-            }
-        }
-
-        
-
-        
-    
-        
-
-        #
-        # Tests for Get-DomainAndUserName function.
-        #
-        Context 'Get-DomainAndUserName' {
-            It 'TestDomainUserNameParseAt' -Pending {
+                - Starts process with no arguments
+                - Ensures Get with no arguments key is 2
+                - Ensures Get with null arguments is 1 Present with no Arguments
+                - Ensures Get with argument is 1 Present with the Arguments
+                - Set All process to be absent
+                - Ensure none are left
+            #>
+            It 'TestGetSetProcessResourceWithArguments' -Pending {
                 Invoke-Remotely {
-                    $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                        "user@domain", 
-                        ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                    ) )
-                    Assert ($Domain -eq "domain")  "wrong domain $Domain"
-                    Assert ($UserName -eq "user") "wrong user $UserName"
-                }
-            }
-    
-            It 'TestDomainUserNameParseSlash' -Pending {
-                Invoke-Remotely {
-                    $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                        "domain\user", 
-                        ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                    ) )
-                    Assert ($Domain -eq "domain")  "wrong domain $Domain"
-                    Assert ($UserName -eq "user") "wrong user $UserName"
-                }
-            }
-    
-            It 'TestDomainUserNameParseImplicitDomain' -Pending {
-                Invoke-Remotely {
-                    $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                        "localuser", 
-                        ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                    ) )
-                    Assert ($Domain -eq $env:COMPUTERNAME) "wrong domain $Domain"
-                    Assert ($UserName -eq "localuser") "wrong user $UserName"
-                }
-            }
-    
-            Context 'TestDomainUserNameParseSlashFail.Context' {
-    
-                BeforeEach {
-                    Invoke-Remotely {
-                        $script:originalErrorActionPreference = $ErrorActionPreference
-                        $global:ErrorActionPreference = 'Stop'
+                    $exePath = $script:cmdProcessFullPath
+ 
+                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
+                    {
+                        throw "before set, there should be no process"
+                    }
+ 
+                    MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments"
+ 
+                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
+                    {
+                        throw "after set, cannot find process with no arguments"
+                    }
+ 
+                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "NotTheOriginalArguments")
+                    {
+                        throw "after set, cannot find process with arguments that were not the ones we set"
+                    }
+ 
+                    if(!(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments"))
+                    {
+                        throw "after set, there should be a process if we specify arguments"
+                    }
+ 
+                    $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "")
+ 
+                    if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Absent')
+                    {
+                        throw "there should be no process without arguments"
+                    }
+ 
+                    MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments ""
+ 
+                    $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "")
+                    if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Present')
+                    {
+                        throw "there should be only one process present with no argument"
+                    }
+ 
+                    if($processes[0].Arguments.length -ne 0)
+                    {
+                        throw "there should no arguments in the process"
+                    }
+ 
+                    $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments")
+        
+                    if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Present')
+                    {
+                        throw "there should be only one process present with TestGetSetProcessResourceWithArguments as argument"
+                    }
+ 
+                    if($processes[0].Arguments -ne 'TestGetSetProcessResourceWithArguments')
+                    {
+                        throw "the argument should be TestGetSetProcessResourceWithArguments"
+                    }
+ 
+                    MSFT_ProcessResource\Set-TargetResource -Path $exePath -Ensure Absent -Arguments ""
+ 
+                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
+                    {
+                        throw "after set absent, there should be no process"
                     }
                 }
+            }
 
-                AfterEach {
-                    Invoke-Remotely {
-                        $global:ErrorActionPreference = $script:originalErrorActionPreference
+            Context 'WQLEscape' {
+                It 'TestWQLEscape' -Pending {
+                    WQLEscape "a'`"\b" | Should Be "a\'\`"\\b"
+                }
+            }
+ 
+            Context 'Get-ProcessArgumentsFromCommandLine' {
+                It 'TestGetProcessArgumentsFromCommandLine' -Pending {
+                    $testCases=(("c    a   ","a"),('"c b d" e  ',"e"),("    a b","b"), (" abc ",""))
+                    foreach($testCase in $testCases)
+                    {
+                        $test=$testCase[0]
+                        $expected=$testCase[1]
+                        $actual = GetProcessArgumentsFromCommandLine $test
+
+                        $actual | Should Be $expected
                     }
                 }
+            }
 
-                It 'TestDomainUserNameParseSlashFail'  {
+            Context 'Get-DomainAndUserName' {
+                It 'TestDomainUserNameParseAt' -Pending {
                     Invoke-Remotely {
-                        try
-                        {
-                            $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                                "domain\user\foo", 
-                                ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                            ) )
-                        } 
-                        catch 
-                        {
-                            $exceptionThrown = $true
-                            Assert ($_.Exception -is [System.ArgumentException]) "Exception of type $($_.Exception.GetType().ToString()) was not expected"
-                        }
-                        Assert ($exceptionThrown) "no exception thrown"
+                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
+                            "user@domain", 
+                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
+                        ) )
+                        Assert ($Domain -eq "domain")  "wrong domain $Domain"
+                        Assert ($UserName -eq "user") "wrong user $UserName"
                     }
                 }
     
-                It 'TestDomainUserNameParseAtFail'  {
+                It 'TestDomainUserNameParseSlash' -Pending {
                     Invoke-Remotely {
-                        try
-                        {
-                            $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                                "domain@user@foo", 
-                                ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                            ) )
-                        } 
-                        catch 
-                        {
-                            $exceptionThrown = $true
-                            Assert ($_.Exception -is [System.ArgumentException]) "Exception of type $($_.Exception.GetType().ToString()) was not expected"
-                        }
-                        Assert ($exceptionThrown) "no exception thrown"
-                        }
+                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
+                            "domain\user", 
+                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
+                        ) )
+                        Assert ($Domain -eq "domain")  "wrong domain $Domain"
+                        Assert ($UserName -eq "user") "wrong user $UserName"
                     }
+                }
+    
+                It 'TestDomainUserNameParseImplicitDomain' -Pending {
+                    Invoke-Remotely {
+                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
+                            "localuser", 
+                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
+                        ) )
+                        Assert ($Domain -eq $env:COMPUTERNAME) "wrong domain $Domain"
+                        Assert ($UserName -eq "localuser") "wrong user $UserName"
+                    }
+                }
+    
+                It 'TestDomainUserNameParseSlashFail' -Pending {
+                    $originalErrorActionPreference = $global:ErrorActionPreference
+                    $global:ErrorActionPreference = 'Stop'
+
+                    try
+                    {
+                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
+                            "domain\user\foo", 
+                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
+                        ) )
+                    } 
+                    catch 
+                    {
+                        $exceptionThrown = $true
+                        Assert ($_.Exception -is [System.ArgumentException]) "Exception of type $($_.Exception.GetType().ToString()) was not expected"
+                    }
+                    Assert ($exceptionThrown) "no exception thrown"
+
+                    $global:ErrorActionPreference = $script:originalErrorActionPreference
+                }
+    
+                It 'TestDomainUserNameParseAtFail' -Pending {
+                    $originalErrorActionPreference = $global:ErrorActionPreference
+                    $global:ErrorActionPreference = 'Stop'
+
+                    try
+                    {
+                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
+                            "domain@user@foo", 
+                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
+                        ) )
+                    } 
+                    catch 
+                    {
+                        $exceptionThrown = $true
+                        Assert ($_.Exception -is [System.ArgumentException]) "Exception of type $($_.Exception.GetType().ToString()) was not expected"
+                    }
+                    Assert ($exceptionThrown) "no exception thrown"
+
+                    $global:ErrorActionPreference = $script:originalErrorActionPreference
                 }
             }
         }
