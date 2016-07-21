@@ -363,10 +363,18 @@ function Set-TargetResourceOnFullSKU
 
         if ($Ensure -eq 'Present')
         {
+            $actualMembersAsPrincipals = $null
+
             if ($groupOriginallyExists)
             {
                 $disposables.Add($group) | Out-Null
                 $whatIfShouldProcess = $pscmdlet.ShouldProcess(($LocalizedData.GroupWithName -f $GroupName), $LocalizedData.SetOperation)
+
+                $actualMembersAsPrincipals = Get-MembersAsPrincipals `
+                    -Group $group `
+                    -PrincipalContexts $principalContexts `
+                    -Disposables $disposables `
+                    -Credential $Credential
             }
             else
             {
@@ -435,12 +443,45 @@ function Set-TargetResourceOnFullSKU
 
                         if ($membersAsPrincipals.Length -gt 0)
                         {
-                            $group.Members.Clear()
-
-                            # Set the members of the group
-                            if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersAsPrincipals)
+                            if ($null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Length -gt 0)
                             {
-                                $saveChanges = $true
+                                $membersToAdd = @()
+                                $membersToRemove = @()
+
+                                foreach ($membersAsPrincipal in $membersAsPrincipals)
+                                {
+                                    if ($actualMembersAsPrincipals -notcontains $membersAsPrincipal)
+                                    {
+                                        $membersToAdd += $membersAsPrincipal
+                                    }
+                                }
+
+                                foreach ($actualMembersAsPrincipal in $actualMembersAsPrincipals)
+                                {
+                                    if ($membersAsPrincipals -notcontains $actualMembersAsPrincipal)
+                                    {
+                                        $membersToRemove += $actualMembersAsPrincipal
+                                    }
+                                }
+
+                                # Set the members of the group
+                                if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersToAdd)
+                                {
+                                    $saveChanges = $true
+                                }
+
+                                if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToRemove)
+                                {
+                                    $saveChanges = $true
+                                }
+                            }
+                            else
+                            {
+                                # Set the members of the group
+                                if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersAsPrincipals)
+                                {
+                                    $saveChanges = $true
+                                }
                             }
                         }
                         else
