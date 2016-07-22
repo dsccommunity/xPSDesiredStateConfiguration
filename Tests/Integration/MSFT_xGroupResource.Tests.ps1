@@ -3,119 +3,105 @@
 Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xGroupResource' `
-    -TestType Unit `
+    -TestType Integration `
     | Out-Null
 
-InModuleScope 'MSFT_xGroupResource' {
-    Describe 'xGroup Integration Tests'  {
-        BeforeAll {
-            Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
-            Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
-            Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
-        }
+Describe 'xGroup Integration Tests'  {
+    BeforeAll {
+        Import-Module "$PSScriptRoot\..\Unit\MSFT_xGroupResource.TestHelper.psm1" -Force
+        Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
+        Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
+    }
 
-        It 'Should create an empty group' {
-            $configurationName = 'CreateEmptyGroup'
-            $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
+    It 'Should create an empty group' {
+        $configurationName = 'CreateEmptyGroup'
+        $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
 
-            $resourceName = 'EmptyGroup'
-            $groupName = 'Empty'
+        $resourceName = 'EmptyGroup'
+        $groupName = 'Empty'
 
-            try
-            {
-                Configuration $configurationName 
-                { 
-                    param ()
+        try
+        {
+            Configuration $configurationName 
+            { 
+                param ()
 
-                    Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
+                Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
 
-                    xGroup $resourceName
-                    {
-                        Ensure = 'Present'
-                        GroupName = $groupName
-                    }
-                }
-
-                & $configurationName -OutputPath $configurationPath
-
-                Start-DscConfiguration -Path $configurationPath -Wait -Verbose -Force
-
-                if (Test-IsNanoServer)
+                xGroup $resourceName
                 {
-                    $localGroup = Get-LocalGroup -Name $groupName -ErrorAction 'SilentlyContinue'
-                    $localGroup | Should Not Be $null
-                }
-                else
-                {
-                    Test-GroupExists -GroupName $groupName | Should Be $true
-
-                    $getTargetResourceResult = Get-TargetResource -GroupName $groupName
-
-                    $getTargetResourceResult['GroupName']       | Should Be $groupName
-                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
-                    $getTargetResourceResult['Members'].Count   | Should Be 0
+                    Ensure = 'Present'
+                    GroupName = $groupName
                 }
             }
-            finally
-            {
-                Remove-Group -GroupName $groupName
 
-                if (Test-Path $configurationPath)
-                {
-                    Remove-Item -Path $configurationPath -Recurse -Force
-                }
+            & $configurationName -OutputPath $configurationPath
+
+            Start-DscConfiguration -Path $configurationPath -Wait -Verbose -Force
+
+            if (Test-IsNanoServer)
+            {
+                $localGroup = Get-LocalGroup -Name $groupName -ErrorAction 'SilentlyContinue'
+                $localGroup | Should Not Be $null
+            }
+            else
+            {
+                Test-GroupExists -GroupName $groupName | Should Be $true
             }
         }
+        finally
+        {
+            Remove-Group -GroupName $groupName
 
-        It 'Should create an Administrators group with the built-in Administrator' {
-            $configurationName = 'CreateAdministratorsGroup'
-            $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
-
-            $resourceName = 'AdministratorsGroup'
-            $groupName = 'Administrators'
-            $builtInAdministratorUsername = 'Administrator'
-
-            try
+            if (Test-Path $configurationPath)
             {
-                Configuration $configurationName 
-                { 
-                    param ()
+                Remove-Item -Path $configurationPath -Recurse -Force
+            }
+        }
+    }
 
-                    Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
+    It 'Should create an Administrators group with the built-in Administrator' {
+        $configurationName = 'CreateAdministratorsGroup'
+        $configurationPath = Join-Path -Path (Get-Location) -ChildPath $configurationName
 
-                    xGroup $resourceName
-                    {
-                        GroupName = $groupName
-                        MembersToInclude = $builtInAdministratorUsername
-                    }
-                }
+        $resourceName = 'AdministratorsGroup'
+        $groupName = 'Administrators'
+        $builtInAdministratorUsername = 'Administrator'
 
-                & $configurationName -OutputPath $configurationPath
+        try
+        {
+            Configuration $configurationName 
+            { 
+                param ()
 
-                Start-DscConfiguration -Path $configurationPath -Wait -Verbose -Force
+                Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
 
-                if (Test-IsNanoServer)
+                xGroup $resourceName
                 {
-                    $localGroup = Get-LocalGroup -Name $groupName -ErrorAction 'SilentlyContinue'
-                    $localGroup | Should Not Be $null
-                }
-                else
-                {
-                    Test-GroupExists -GroupName $groupName | Should Be $true
-
-                    $getTargetResourceResult = Get-TargetResource -GroupName $groupName
-
-                    $getTargetResourceResult['GroupName']           | Should Be $groupName
-                    $getTargetResourceResult['Ensure']              | Should Be 'Present'
-                    $getTargetResourceResult['Members'].Count -gt 0 | Should Be $true
+                    GroupName = $groupName
+                    MembersToInclude = $builtInAdministratorUsername
                 }
             }
-            finally
+
+            & $configurationName -OutputPath $configurationPath
+
+            Start-DscConfiguration -Path $configurationPath -Wait -Verbose -Force
+
+            if (Test-IsNanoServer)
             {
-                if (Test-Path $configurationPath)
-                {
-                    Remove-Item -Path $configurationPath -Recurse -Force
-                }
+                $localGroup = Get-LocalGroup -Name $groupName -ErrorAction 'SilentlyContinue'
+                $localGroup | Should Not Be $null
+            }
+            else
+            {
+                Test-GroupExists -GroupName $groupName | Should Be $true
+            }
+        }
+        finally
+        {
+            if (Test-Path $configurationPath)
+            {
+                Remove-Item -Path $configurationPath -Recurse -Force
             }
         }
     }
