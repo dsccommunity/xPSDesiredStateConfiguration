@@ -679,11 +679,6 @@ function Test-TargetResourceOnFullSKU
 
     Assert-GroupNameValid -GroupName $GroupName
 
-    if ($PSBoundParameters.ContainsKey('Members'))
-    {
-        $Members = @( $Members )
-    }
-
     $principalContexts = @{}
     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
