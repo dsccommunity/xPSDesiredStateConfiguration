@@ -3,7 +3,7 @@
 Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xGroupResource' `
-    -TestType Integration `
+    -TestType Unit `
     | Out-Null
 
 InModuleScope 'MSFT_xGroupResource' {
