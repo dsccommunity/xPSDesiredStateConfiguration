@@ -441,9 +441,9 @@ function Set-TargetResourceOnFullSKU
                             -Disposables $disposables `
                             -Credential $Credential
 
-                        if ($membersAsPrincipals.Length -gt 0)
+                        if ($membersAsPrincipals.Count -gt 0)
                         {
-                            if ($null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Length -gt 0)
+                            if ($null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -gt 0)
                             {
                                 $membersToAdd = @()
                                 $membersToRemove = @()
@@ -536,13 +536,13 @@ function Set-TargetResourceOnFullSKU
                             }
                         }
 
-                        if ($membersToIncludeAsPrincipals.Length -eq 0 -and $membersToExcludeAsPrincipals.Length -eq 0)
+                        if ($membersToIncludeAsPrincipals.Count -eq 0 -and $membersToExcludeAsPrincipals.Count -eq 0)
                         {
                             New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeAreEmpty)
                         }
                     }
 
-                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Length -gt 0)
+                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Count -gt 0)
                     {
                         if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToExcludeAsPrincipals)
                         {
@@ -550,7 +550,7 @@ function Set-TargetResourceOnFullSKU
                         }
                     }
 
-                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Length -gt 0)
+                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Count -gt 0)
                     {
                         if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersToIncludeAsPrincipals)
                         {
@@ -679,6 +679,11 @@ function Test-TargetResourceOnFullSKU
 
     Assert-GroupNameValid -GroupName $GroupName
 
+    if ($PSBoundParameters.ContainsKey('Members'))
+    {
+        $Members = @( $Members )
+    }
+
     $principalContexts = @{}
     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
@@ -690,6 +695,15 @@ function Test-TargetResourceOnFullSKU
         {
             Write-Verbose -Message ($LocalizedData.GroupDoesNotExist -f $GroupName)
             return ($Ensure -eq 'Absent')
+        }
+
+        if ($null -ne $group.Members)
+        {
+            $actualGroupMembers = @($group.Members)
+        }
+        else
+        {
+            $actualGroupMembers = $null
         }
 
         $disposables.Add($group) | Out-Null
@@ -727,7 +741,7 @@ function Test-TargetResourceOnFullSKU
 
             if ($Members.Count -eq 0)
             {
-                return ($group.Members.Count -eq 0)
+                return ($null -eq $actualGroupMembers -or $actualGroupMembers.Count -eq 0)
             }
             else
             {
@@ -735,15 +749,15 @@ function Test-TargetResourceOnFullSKU
                 $Members = @( Remove-DuplicateMembers -Members $Members )
 
                 # Resolve the names to actual principal objects.
-                $expectedMembersAsPrincipals = ConvertTo-Principals `
+                $expectedMembersAsPrincipals = @( ConvertTo-Principals `
                     -MemberNames $Members `
                     -PrincipalContexts $principalContexts `
                     -Disposables $disposables `
-                    -Credential $Credential
+                    -Credential $Credential )
 
-                if ($expectedMembersAsPrincipals.Length -ne $group.Members.Count)
+                if (($null -eq $expectedMembersAsPrincipals -xor $null -eq $actualGroupMembers) -or (($null -ne $expectedMembersAsPrincipals -and $null -ne $actualGroupMembers) -and $expectedMembersAsPrincipals.Count -ne $actualGroupMembers.Count))
                 {
-                    Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembersAsPrincipals.Length, $group.Members.Count)
+                    Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembersAsPrincipals.Count, $actualGroupMembers.Count)
                     return $false
                 }
 
@@ -764,7 +778,7 @@ function Test-TargetResourceOnFullSKU
                 }
             }
         }
-        else
+        elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
             $actualMembersAsPrincipals = Get-MembersAsPrincipals `
                 -Group $group `
@@ -1012,7 +1026,7 @@ function Set-TargetResourceOnNanoServer
             # Remove duplicate names as strings.
             $Members = @( Remove-DuplicateMembers -Members $Members )
 
-            if ($Members.Length -gt 0)
+            if ($Members.Count -gt 0)
             {
                 # Get current members
                 $groupMembers = Get-MembersOnNanoServer -Group $group
@@ -1054,7 +1068,7 @@ function Set-TargetResourceOnNanoServer
                     }
                 }
 
-                if ($MembersToInclude.Length -eq 0 -and $MembersToExclude.Length -eq 0)
+                if ($MembersToInclude.Count -eq 0 -and $MembersToExclude.Count -eq 0)
                 {
                     New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeAreEmpty)
                 }
@@ -1221,8 +1235,6 @@ function Test-TargetResourceOnNanoServer
 
     if ($PSBoundParameters.ContainsKey('Members'))
     {
-        Write-Verbose 'Testing Members...'
-
         if ($PSBoundParameters.ContainsKey('MembersToInclude'))
         {
             New-InvalidArgumentException -ArgumentName 'MembersToInclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude')
@@ -1239,9 +1251,9 @@ function Test-TargetResourceOnNanoServer
         # Get current members
         $groupMembers = Get-MembersOnNanoServer -Group $group
 
-        if ($expectedMembers.Length -ne $groupMembers.Length)
+        if ($expectedMembers.Count -ne $groupMembers.Count)
         {
-            Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembers.Length, $groupMembers.Length)
+            Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembers.Count, $groupMembers.Count)
             return $false
         }
 
@@ -2259,7 +2271,16 @@ function Get-Group
         -Disposables $Disposables `
         -Scope $env:computerName
 
-    return [System.DirectoryServices.AccountManagement.GroupPrincipal]::FindByIdentity($principalContext, $GroupName)
+    try
+    {
+        $group = [System.DirectoryServices.AccountManagement.GroupPrincipal]::FindByIdentity($principalContext, $GroupName)
+    }
+    catch
+    {
+        $group = $null 
+    }
+
+    return $group
 }
 
 <#
