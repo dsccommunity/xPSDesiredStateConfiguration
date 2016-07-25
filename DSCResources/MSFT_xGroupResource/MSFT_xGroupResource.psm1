@@ -370,11 +370,11 @@ function Set-TargetResourceOnFullSKU
                 $disposables.Add($group) | Out-Null
                 $whatIfShouldProcess = $pscmdlet.ShouldProcess(($LocalizedData.GroupWithName -f $GroupName), $LocalizedData.SetOperation)
 
-                $actualMembersAsPrincipals = Get-MembersAsPrincipals `
+                $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
                     -Group $group `
                     -PrincipalContexts $principalContexts `
                     -Disposables $disposables `
-                    -Credential $Credential
+                    -Credential $Credential )
             }
             else
             {
@@ -750,17 +750,17 @@ function Test-TargetResourceOnFullSKU
                     -Disposables $disposables `
                     -Credential $Credential )
 
-                if (($null -eq $expectedMembersAsPrincipals -xor $null -eq $actualGroupMembers) -or (($null -ne $expectedMembersAsPrincipals -and $null -ne $actualGroupMembers) -and $expectedMembersAsPrincipals.Count -ne $actualGroupMembers.Count))
+                if ($expectedMembersAsPrincipals.Count -ne $actualGroupMembers.Count)
                 {
                     Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembersAsPrincipals.Count, $actualGroupMembers.Count)
                     return $false
                 }
 
-                $actualMembersAsPrincipals = Get-MembersAsPrincipals `
+                $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
                     -Group $group `
                     -PrincipalContexts $principalContexts `
                     -Disposables $disposables `
-                    -Credential $Credential
+                    -Credential $Credential )
 
                 # Compare the two member lists.
                 foreach ($expectedMemberAsPrincipal in $expectedMembersAsPrincipals)
@@ -775,11 +775,11 @@ function Test-TargetResourceOnFullSKU
         }
         elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
-            $actualMembersAsPrincipals = Get-MembersAsPrincipals `
+            $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
                 -Group $group `
                 -PrincipalContexts $principalContexts `
                 -Disposables $disposables `
-                -Credential $Credential
+                -Credential $Credential )
 
             if ($PSBoundParameters.ContainsKey('MembersToInclude'))
             {
@@ -1426,7 +1426,7 @@ function Get-MembersOnFullSKU
 
     $members = New-Object -TypeName 'System.Collections.ArrayList'
 
-    $membersAsPrincipals = Get-MembersAsPrincipals -Group $Group -PrincipalContexts $PrincipalContexts -Disposables  $Disposables -Credential $Credential
+    $membersAsPrincipals = @( Get-MembersAsPrincipals -Group $Group -PrincipalContexts $PrincipalContexts -Disposables  $Disposables -Credential $Credential )
 
     foreach ($membersAsPrincipal in $membersAsPrincipals)
     {
@@ -2300,7 +2300,10 @@ function Assert-GroupNameValid
 
     if ($GroupName.IndexOfAny($invalidCharacters) -ne -1)
     {
-        ThrowInvalidArgumentError -ErrorId 'GroupNameHasInvalidCharacter' -ErrorMessage ($LocalizedData.InvalidGroupName -f $GroupName, [String]::Join(' ', $invalidCharacters))
+        New-InvalidArgumentException `
+            -ArgumentName 'GroupNameHasInvalidCharacter' `
+            -Message ($LocalizedData.InvalidGroupName `
+                -f $GroupName, [String]::Join(' ', $invalidCharacters))
     }
 
     $nameContainsOnlyWhitspaceOrDots = $true
@@ -2317,7 +2320,10 @@ function Assert-GroupNameValid
 
     if ($nameContainsOnlyWhitspaceOrDots)
     {
-        ThrowInvalidArgumentError -ErrorId 'GroupNameHasOnlyWhiteSpacesAndDots' -ErrorMessage ($LocalizedData.InvalidGroupName -f $GroupName, [String]::Join(' ', $invalidCharacters))
+        New-InvalidArgumentException `
+            -ErrorId 'GroupNameHasOnlyWhiteSpacesAndDots' `
+            -Message ($LocalizedData.InvalidGroupName `
+                -f $GroupName, [String]::Join(' ', $invalidCharacters))
     }
 }
 

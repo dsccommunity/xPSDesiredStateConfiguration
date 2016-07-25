@@ -345,6 +345,9 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed logic bug in MembersToInclude and MembersToExclude.
     * Fixed bug when trying to include the built-in Administrator in Members.
     * Fixed bug where Test-TargetResource would check for members when none specified.
+    * Fix bug in Test-TargetResourceOnFullSKU function when group being set to a single member.
+    * Fix bug in Set-TargetResourceOnFullSKU function when group being set to a single member.
+    * Fix bugs in Assert-GroupNameValid to throw correct exception.
 
 ### 3.12.0.0
 
