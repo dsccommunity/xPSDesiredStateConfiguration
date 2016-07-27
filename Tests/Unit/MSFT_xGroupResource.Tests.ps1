@@ -98,6 +98,27 @@ InModuleScope 'MSFT_xGroupResource' {
         }
 
         Context 'Set-TargetResource' {
+            It 'Should create an empty group' {
+                $testGroupName = 'LocalTestGroup'
+
+                try
+                {
+                    $setTargetResourceResult = Set-TargetResource -GroupName $testGroupName -Ensure 'Present'
+
+                    Test-GroupExists -GroupName $testGroupName | Should Be $true
+
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
+
+                    $getTargetResourceResult['GroupName']       | Should Be $testGroupName
+                    $getTargetResourceResult['Ensure']          | Should Be 'Present'
+                    $getTargetResourceResult['Members'].Count   | Should Be 0
+                }
+                finally
+                {
+                    Remove-Group -GroupName $testGroupName
+                }
+            }
+
             It 'Should create a group with 2 users using Members' {
                 $testUserName1 = 'LocalTestUser1'
                 $testUserName2 = 'LocalTestUser2'
@@ -120,7 +141,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     Test-GroupExists -GroupName $testGroupName | Should Be $true
 
-                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
 
                     $getTargetResourceResult['GroupName']       | Should Be $testGroupName
                     $getTargetResourceResult['Ensure']          | Should Be 'Present'
@@ -157,7 +178,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     Test-GroupExists -GroupName $testGroupName | Should Be $true
 
-                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
 
                     $getTargetResourceResult['GroupName']       | Should Be $testGroupName
                     $getTargetResourceResult['Ensure']          | Should Be 'Present'
@@ -196,7 +217,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     Test-GroupExists -GroupName $testGroupName | Should Be $true
 
-                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
 
                     $getTargetResourceResult['GroupName']       | Should Be $testGroupName
                     $getTargetResourceResult['Ensure']          | Should Be 'Present'
