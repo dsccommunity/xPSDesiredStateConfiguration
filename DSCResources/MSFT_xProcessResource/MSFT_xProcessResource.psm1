@@ -28,7 +28,7 @@ ErrorCredentialParameterNotSupportedWithRunAsCredential = The PsDscRunAsCredenti
 }
 
 # Commented out until more languages are supported
-# Import-LocalizedData  LocalizedData -filename MSFT_ProcessResource.strings.psd1
+# Import-LocalizedData  LocalizedData -filename MSFT_xProcessResource.strings.psd1
 
 Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1"
 
