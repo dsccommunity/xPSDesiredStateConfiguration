@@ -40,8 +40,8 @@ The PSDesiredStateConfiguration High Quality Resource Module will consist of the
   - [x] Archive
   - [x] Group
   - [x] Package
-  - [ ] Process (In Progress)
-  - [ ] Registry
+  - [X] Process 
+  - [ ] Registry (In Progress)
   - [x] Service
   - [ ] WindowsOptionalFeature
 - [ ] [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources) 
