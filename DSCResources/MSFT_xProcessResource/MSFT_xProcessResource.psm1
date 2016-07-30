@@ -13,6 +13,7 @@ ProcessAlreadyStopped = Process matching path '{0}' not found running and no act
 ErrorStopping = Failure stopping processes matching path '{0}' with IDs '({1})'. Message: {2}.
 ErrorStarting = Failure starting process matching path '{0}'. Message: {1}.
 StartingProcessWhatif = Start-Process
+StoppingProcessWhatIf = Stop-Process
 ProcessNotFound = Process matching path '{0}' not found
 PathShouldBeAbsolute = The path should be absolute
 PathShouldExist = The path should exist
@@ -244,7 +245,7 @@ function Set-TargetResource
     {
         Assert-HashtableDoesNotContainKey -Hashtable $PSBoundParameters -Key @( 'StandardOutputPath', 'StandardErrorPath', 'StandardInputPath', 'WorkingDirectory' )
 
-        if ($win32Processes.Count -gt 0)
+        if ($win32Processes.Count -gt 0 -and $PSCmdlet.ShouldProcess($Path, $LocalizedData.StoppingProcessWhatif))
         {
            $processIds = $win32Processes.ProcessId
 
@@ -281,7 +282,7 @@ function Set-TargetResource
 
         foreach ($shouldBeRootedPathArgument in $shouldBeRootedPathArguments)
         {
-            if ($null -ne $PSBoundParameters[$shouldBeRootedPathArgument])
+            if (-not [String]::IsNullOrEmpty($PSBoundParameters[$shouldBeRootedPathArgument]))
             {
                 Assert-PathArgumentRooted -PathArgumentName $shouldBeRootedPathArgument -PathArgument $PSBoundParameters[$shouldBeRootedPathArgument]
             }
@@ -291,7 +292,7 @@ function Set-TargetResource
 
         foreach ($shouldExistPathArgument in $shouldExistPathArguments)
         {
-            if ($null -ne $PSBoundParameters[$shouldExistPathArgument])
+            if (-not [String]::IsNullOrEmpty($PSBoundParameters[$shouldExistPathArgument]))
             {
                 Assert-PathArgumentExists -PathArgumentName $shouldExistPathArgument -PathArgument $PSBoundParameters[$shouldExistPathArgument]
             }
@@ -313,7 +314,7 @@ function Set-TargetResource
 
             foreach ($startProcessOptionalArgumentName in $startProcessOptionalArgumentMap.Keys)
             {
-                if ($null -ne $PSBoundParameters[$startProcessOptionalArgumentMap[$startProcessOptionalArgumentName]])
+                if (-not [String]::IsNullOrEmpty($PSBoundParameters[$startProcessOptionalArgumentMap[$startProcessOptionalArgumentName]]))
                 {
                     $startProcessArguments[$startProcessOptionalArgumentName] = $PSBoundParameters[$startProcessOptionalArgumentMap[$startProcessOptionalArgumentName]]
                 }
@@ -617,9 +618,17 @@ function Get-Win32Process
         $Arguments = [String]::Empty
     }
 
-    $processes = Where-Object -InputObject $processes -FilterScript { (Get-ArgumentsFromCommandLineInput -CommandLineInput ($_.CommandLine)) -eq $Arguments }
+    $processesWithMatchingArguments = @()
 
-    return $processes
+    foreach ($process in $processes)
+    {
+        if ((Get-ArgumentsFromCommandLineInput -CommandLineInput ($process.CommandLine)) -eq $Arguments)
+        {
+            $processesWithMatchingArguments += $process
+        }
+    }
+
+    return $processesWithMatchingArguments
 }
 
 <#
@@ -788,16 +797,18 @@ function Assert-PathArgumentRooted
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Hashtable]
-        $PathArguments
+        [String]
+        $PathArgumentName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $PathArgument
     )
     
-    foreach ($pathArgumentName in $PathArguments.Keys)
+    if (-not ([IO.Path]::IsPathRooted($PathArgument)))
     {
-        if (-not ([IO.Path]::IsPathRooted($PathArguments[$pathArgumentName])))
-        {
-            New-InvalidArgumentException -ArgumentName $pathArgumentName -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $pathArgumentName, $PathArguments[$pathArgumentName]), $LocalizedData.PathShouldBeAbsolute)
-        }
+        New-InvalidArgumentException -ArgumentName $PathArgumentName -Message ($LocalizedData.InvalidArgumentAndMessage -f ($LocalizedData.InvalidArgument -f $PathArgumentName, $PathArgument), $LocalizedData.PathShouldBeAbsolute)
     }
 }
 

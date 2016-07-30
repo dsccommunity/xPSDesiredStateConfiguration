@@ -1,4 +1,4 @@
-Import-Module -Name "$PSScriptRoot\..\CommonTestHelper.psm1"
+Import-Module -Name "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -16,6 +16,17 @@ try
                 $script:cmdProcessFullName = 'ProcessTest.exe'
                 $script:cmdProcessFullPath = "$env:winDir\system32\ProcessTest.exe"
                 Copy-Item -Path "$env:winDir\system32\cmd.exe" -Destination $script:cmdProcessFullPath -ErrorAction 'SilentlyContinue' -Force
+
+                $script:processTestFolder = Join-Path -Path (Get-Location) -ChildPath 'ProcessTestFolder'
+
+                if (Test-Path -Path $script:processTestFolder)
+                {
+                    Remove-Item -Path $script:processTestFolder -Recurse -Force
+                }
+
+                New-Item -Path $script:processTestFolder -ItemType 'Directory' | Out-Null
+
+                Push-Location -Path $script:processTestFolder
             }
 
             AfterAll {
@@ -25,6 +36,13 @@ try
                 {
                     Remove-Item -Path $script:cmdProcessFullPath -ErrorAction 'SilentlyContinue' -Force
                 }
+
+                Pop-Location
+
+                if (Test-Path -Path $script:processTestFolder)
+                {
+                    Remove-Item -Path $script:processTestFolder -Recurse -Force
+                }
             }
 
             BeforeEach {
@@ -32,7 +50,7 @@ try
             }
 
             Context 'Get-TargetResource' {
-                It 'Should return the correct properties for a process that is absent' {
+                It 'Should return the correct properties for a process that is absent with Arguments' {
                     $processArguments = 'TestGetProperties'
 
                     $getTargetResourceResult = Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
@@ -46,8 +64,43 @@ try
                     $getTargetResourceResult.Count | Should Be 3
                 } 
 
-                It 'Should return the correct properties for a process that is present' {
+                It 'Should return the correct properties for a process that is absent without Arguments' {
+                    $processArguments = ''
+
+                    $getTargetResourceResult = Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
+                    $getTargetResourceProperties = @( 'Arguments', 'Ensure', 'Path' )
+
+                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceProperties
+
+                    $getTargetResourceResult.Arguments | Should Be $processArguments
+                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Path -icontains $script:cmdProcessFullPath | Should Be $true
+                    $getTargetResourceResult.Count | Should Be 3
+                } 
+
+                It 'Should return the correct properties for a process that is present with Arguments' {
                     $processArguments = 'TestGetProperties'
+
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
+
+                    $getTargetResourceResult = Get-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
+                    $getTargetResourceProperties = @( 'VirtualMemorySize', 'Arguments', 'Ensure', 'PagedMemorySize', 'Path', 'NonPagedMemorySize', 'HandleCount', 'ProcessId' )
+
+                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceProperties
+
+                    $getTargetResourceResult.VirtualMemorySize -le 0 | Should Be $false
+                    $getTargetResourceResult.Arguments | Should Be $processArguments
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.PagedMemorySize -le 0 | Should Be $false
+                    $getTargetResourceResult.Path.IndexOf("ProcessTest.exe",[Stringcomparison]::OrdinalIgnoreCase) -le 0 | Should Be $false
+                    $getTargetResourceResult.NonPagedMemorySize -le 0 | Should Be $false
+                    $getTargetResourceResult.HandleCount -le 0 | Should Be $false
+                    $getTargetResourceResult.ProcessId -le 0 | Should Be $false
+                    $getTargetResourceResult.Count | Should Be 8
+                }
+
+                It 'Should return the correct properties for a process that is present without Arguments' {
+                    $processArguments = ''
 
                     Set-TargetResource -Path $script:cmdProcessFullPath -Arguments $processArguments
 
@@ -116,172 +169,194 @@ try
                     Test-TargetResource -Path $script:cmdProcessFullPath -Arguments '' | Should Be $false
                 }
 
-                It 'Should have correct output with WhatIf is specified' -Pending {
-                    $script = "MSFT_ProcessResource\Set-TargetResource -Path {0} -Whatif -Arguments ''" -f $script:cmdProcessFullPath
-                    TestWhatif $script $script:cmdProcessFullPath
+                It 'Should have correct output for absent process with WhatIf specified and default Ensure' {
+                    $setTargetResourceParameters = @{
+                        Path = $script:cmdProcessFullPath
+                        Arguments = ''
+                    }
 
-                    $script = "MSFT_ProcessResource\Set-TargetResource -Path {0} -Ensure Absent -Whatif -Arguments ''" -f $script:cmdProcessFullPath
-                    TestWhatif $script $script:cmdProcessFullPath
+                    $expectedWhatIfOutput = @( $LocalizedData.StartingProcessWhatif, $script:cmdProcessFullPath )
+
+                    Test-SetTargetResourceWithWhatIf -Parameters $setTargetResourceParameters -ExpectedOutput $expectedWhatIfOutput
+
+                    if ($setTargetResourceParameters.ContainsKey('WhatIf'))
+                    {
+                        $setTargetResourceParameters.Remove('WhatIf')
+                    }
+
+                    $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                    $testTargetResourceResult | Should Be $false
                 }
 
-                It 'TestWhatifStop' -Pending {
-                    Invoke-Remotely {
-                        $exePath = $script:cmdProcessFullPath
+                It 'Should have no output for absent process with WhatIf specified and Ensure Absent' {
+                    $setTargetResourceParameters = @{
+                        Ensure = 'Absent'
+                        Path = $script:cmdProcessFullPath
+                        Arguments = ''
+                    }
 
-                        if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments '')
+                    Test-SetTargetResourceWithWhatIf -Parameters $setTargetResourceParameters -ExpectedOutput ''
+                }
+
+                It 'Should have correct output for existing process with WhatIf specified and Ensure Absent' {
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments ''
+
+                    $setTargetResourceParameters = @{
+                        Ensure = 'Absent'
+                        Path = $script:cmdProcessFullPath
+                        Arguments = ''
+                    }
+
+                    $expectedWhatIfOutput = @( $LocalizedData.StoppingProcessWhatif, $script:cmdProcessFullPath )
+
+                    Test-SetTargetResourceWithWhatIf -Parameters $setTargetResourceParameters -ExpectedOutput $expectedWhatIfOutput
+
+                    if ($setTargetResourceParameters.ContainsKey('WhatIf'))
+                    {
+                        $setTargetResourceParameters.Remove('WhatIf')
+                    }
+
+                    $testTargetResourceResult = Test-TargetResource @setTargetResourceParameters
+                    $testTargetResourceResult | Should Be $false
+                }
+
+                It 'Should have no output for existing process with WhatIf specified and default Ensure' {
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments ''
+
+                    $setTargetResourceParameters = @{
+                        Path = $script:cmdProcessFullPath
+                        Arguments = ''
+                    }
+
+                    Test-SetTargetResourceWithWhatIf -Parameters $setTargetResourceParameters -ExpectedOutput ''
+                }
+
+                It 'Should provide correct error output to the specified error and output streams when using invalid input from the specified input stream' {
+                    $errorPath = Join-Path -Path (Get-Location) -ChildPath 'TestStreamsError.txt'
+                    $outputPath = Join-Path -Path (Get-Location) -ChildPath 'TestStreamsOutput.txt'
+                    $inputPath = Join-Path -Path (Get-Location) -ChildPath 'TestStreamsInput.txt'
+
+                    $workingDirectoryPath = Join-Path -Path (Get-Location) -ChildPath 'TestWorkingDirectory'
+
+                    foreach ($path in @( $errorPath, $outputPath, $inputPath, $workingDirectoryPath ))
+                    {
+                        if (Test-Path -Path $path)
                         {
-                            throw "before set, there should be no process"
+                            Remove-Item -Path $path -Recurse -Force
                         }
+                    }
 
-                        MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments ''
+                    New-Item -Path $workingDirectoryPath -ItemType 'Directory' | Out-Null
 
-                        $script = "MSFT_ProcessResource\Set-TargetResource -Path {0} -Ensure Absent -Whatif -Arguments ''" -f $exePath
-                        TestWhatif $script $exePath
+                    $inputFileText = "ECHO Testing ProcessTest.exe `
+                        dir volumeSyntaxError:\ ` 
+                        set /p waitforinput=Press [y/n]?: "
+ 
+                    Out-File -FilePath $inputPath -InputObject $inputFileText -Encoding 'ASCII'
+ 
+                    Set-TargetResource -Path $script:cmdProcessFullPath -WorkingDirectory $workingDirectoryPath -StandardOutputPath $outputPath -StandardErrorPath $errorPath -StandardInputPath $inputPath -Arguments ''
+ 
+                    Wait-ScriptBlockReturnTrue -ScriptBlock { (Get-TargetResource -Path $script:cmdProcessFullPath -Arguments '').Ensure -ieq 'Absent' } -TimeoutSeconds 10
 
-                        $script = "MSFT_ProcessResource\Set-TargetResource -Path {0} -Whatif -Arguments ''" -f $exePath
-                        TestWhatif $script $exePath
-        
-                        MSFT_ProcessResource\Set-TargetResource -Path $exePath -Ensure "Absent" -Arguments ''
+                    Wait-ScriptBlockReturnTrue -ScriptBlock { Test-IsFileLocked -Path $errorPath } -TimeoutSeconds 2
+
+                    $errorFileContent = Get-Content -Path $errorPath -Raw
+                    $errorFileContent | Should Not Be $null
+
+                    Wait-ScriptBlockReturnTrue -ScriptBlock { Test-IsFileLocked -Path $outputPath } -TimeoutSeconds 2
+
+                    $outputFileContent = Get-Content -Path $outputPath -Raw
+                    $outputFileContent | Should Not Be $null
+
+                    if ((Get-Culture).Name -ieq 'en-us')
+                    {
+                        $errorFileContent.Contains('The filename, directory name, or volume label syntax is incorrect.') | Should Be $true
+                        $outputFileContent.Contains('Press [y/n]?:') | Should Be $true
+                        $outputFileContent.ToLower().Contains($workingDirectoryPath.ToLower()) | Should Be $true
+                    }
+                    else
+                    {
+                        $errorFileContent.Length -gt 0 | Should Be $true
+                        $outputFileContent.Length -gt 0 | Should Be $true
                     }
                 }
 
-                <#
-                    .Synopsis
-                    tests input, output and error streams are hooked up as well as the working directory
-                #>
-                It 'TestStreamsAndWorkingDirectory' -Pending {
-                    Invoke-Remotely {
-                        $exePath = $script:cmdProcessFullPath
- 
-                        if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
-                        {
-                            throw "before set, there should be no process"
-                        }
- 
-                        $errorPath="$PWD\TestStreamsError.txt"
-                        $outputPath="$PWD\TestStreamsOutput.txt"
-                        $inputPath="$PWD\TestStreamsInput.txt"
+                It 'Should throw when trying to specify streams or working directory with Ensure Absent' {
+                    $invalidPropertiesWithAbsent = @( 'StandardOutputPath', 'StandardErrorPath', 'StandardInputPath', 'WorkingDirectory' )
 
-                        Remove-Item $errorPath -Force -ErrorAction SilentlyContinue
-                        Remove-Item $outputPath -Force -ErrorAction SilentlyContinue
- 
-            "ECHO Testing ProcessTest.exe `
-            dir volumeSyntaxError:\ ` 
-            set /p waitforinput=Press [y/n]?: " | out-file $inputPath -Encoding ascii
- 
-                        MSFT_ProcessResource\Set-TargetResource -Path $exePath -WorkingDirectory $processTestPath -StandardOutputPath $outputPath -StandardErrorPath $errorPath -StandardInputPath $inputPath -Arguments ""
- 
-                        if(!(TryForAWhile ([scriptblock]::create("(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments '').Ensure -eq 'Absent'"))))
-                        {
-                            throw "process did not terminate"
+                    foreach ($invalidPropertyWithAbsent in $invalidPropertiesWithAbsent)
+                    {
+                        $setTargetResourceArguments = @{
+                            Path = $script:cmdProcessFullPath
+                            Ensure = 'Absent'
+                            Arguments = ''
+                            $invalidPropertyWithAbsent = 'Something'
                         }
 
-                        # Race condition exists for retrieving contents of the process error stream file
-                        Start-Sleep -Seconds 2 
-
-                        $errorFile=get-content $errorPath -Raw
-                        $outputFile=get-content $outputPath -Raw
-
-                        if((Get-Culture).Name -ieq 'en-us')
-                        {
-                            Assert ($errorFile.Contains("The filename, directory name, or volume label syntax is incorrect.")) "no stdErr string in file"
-                            Assert ($outputFile.Contains("Press [y/n]?:")) "no stdOut string in file"
-                            Assert ($outputFile.ToLower().Contains($processTestPath.ToLower())) "working directory: $processTestPath, not in output file"
-                        }
-                        else
-                        {
-                            Assert  ($errorFile.Length -gt 0) "no stdErr string in file"
-                            Assert  ($outputFile.Length -gt 0) "no stdOut string in file"
-                        }
+                        { Set-TargetResource @setTargetResourceArguments } | Should Throw ($LocalizedData.ParameterShouldNotBeSpecified -f $invalidPropertyWithAbsent)
                     }
                 }
 
-                It 'TestCannotWritePropertiesWithAbsent' -Pending {
-                    Invoke-Remotely {
-                        $exePath = $script:cmdProcessFullPath
+                It 'Should throw when passing a relative path to stream or working directory parameters' {
+                    $invalidRelativePath = '..\RelativePath'
+                    $pathParameters = @( 'StandardOutputPath', 'StandardErrorPath', 'StandardInputPath', 'WorkingDirectory' )
 
-                         foreach($writeProperty in "StandardOutputPath","StandardErrorPath","StandardInputPath","WorkingDirectory")
-                         {
-                            $args=@{Path=$exePath;Ensure="Absent";Arguments=""}
-                            $null=$args.Add($writeProperty,"anything")
-                            $thrown = $false
-                            try
-                            {
-                                MSFT_ProcessResource\Set-TargetResource @args
-                            }
-                            catch
-                            {
-                                $thrown = $true
-                            }
-                            Assert $thrown ("{0} cannot be set when using Absent" -f $writeProperty)
-                         }
-                     }
-                }
-
-                It 'TestCannotUseInvalidPath' -Pending {
-                    Invoke-Remotely {
-                        $exePath = $script:cmdProcessFullPath
-                        $relativePath = "..\ExistingFile.txt"
-                        "something" > $relativePath
-
-                        $nonExistingPath = "$processTestPath\IDoNotExist.Really.I.Do.Not"
-                        del $nonExistingPath -ErrorAction SilentlyContinue  
-
-                        foreach($writeProperty in "StandardOutputPath","StandardErrorPath","StandardInputPath","WorkingDirectory")
-                        {
-                            $args=@{Path=$exePath;Ensure="Present";Arguments=""}
-                            $null=$args.Add($writeProperty,$relativePath)
-                            $thrown = $false
-                            try
-                            {
-                                MSFT_ProcessResource\Set-TargetResource @args
-                            }
-                            catch
-                            {
-                                $thrown = $true
-                            }
-                            Assert $thrown ("{0} cannot be set to relative path" -f $writeProperty)
+                    foreach($pathParameter in $pathParameters)
+                    {
+                        $setTargetResourceParameters = @{
+                            Path = $script:cmdProcessFullPath
+                            Ensure = 'Present'
+                            Arguments = ''
+                            $pathParameter = $invalidRelativePath
                         }
-
-
-                        foreach($writeProperty in "StandardInputPath","WorkingDirectory")
-                        {
-                            $args=@{Path=$exePath;Ensure="Present";Arguments=""}
-                            $args[$writeProperty] = $nonExistingPath
-                            $thrown = $false
-                            try
-                            {
-                                MSFT_ProcessResource\Set-TargetResource @args
-                            }
-                            catch
-                            {
-                                $thrown = $true
-                            }
-                            Assert $thrown ("{0} cannot be set to nonexisting path" -f $writeProperty)
-                        }
-
-                        foreach($writeProperty in "StandardOutputPath","StandardErrorPath")
-                        {
-                            # Paths that need not exist so no exception should be thrown
-                            $args=@{Path=$exePath;Ensure="Present";Arguments=""}
-                            $null=$args.Add($writeProperty,$nonExistingPath)
-                            MSFT_ProcessResource\Set-TargetResource @args
-                            get-process ProcessTest | stop-process
-                            del $nonExistingPath -ErrorAction SilentlyContinue
-                        }
+                            
+                        { Set-TargetResource @setTargetResourceParameters } | Should Throw $LocalizedData.PathShouldBeAbsolute
                     }
                 }
 
-                It 'TestGetWmiObject' -Pending {
-                    Invoke-Remotely {
-                        $exePath = $script:cmdProcessFullPath
-                        MSFT_ProcessResource\Set-TargetResource $exePath -Arguments ""
-                        MSFT_ProcessResource\Set-TargetResource $exePath -Arguments "abc"
-                        $r=@(GetWin32_Process $exePath -useWmiObjectCount 0)
-                        AssertEquals $r.Count 1 "get-wmiobject with filter"
-                        $a=@(GetWin32_Process $exePath -useWmiObjectCount 5)
-                        AssertEquals $a.Count 1 "through get-process"
-                        MSFT_ProcessResource\Set-TargetResource $exePath -Ensure Absent -Arguments ""
+                It 'Should throw when providing a nonexistent path for StandardInputPath or WorkingDirectory' {
+                    $invalidNonexistentPath = Join-Path -Path (Get-Location) -ChildPath 'NonexistentPath'
+
+                    if (Test-Path -Path $invalidNonexistentPath)
+                    {
+                        Remove-Item -Path $invalidNonexistentPath -Recurse -Force
+                    }
+
+                    $pathMustExistParameters = @( 'StandardInputPath', 'WorkingDirectory' )
+
+                    foreach ($pathMustExistParameter in $pathMustExistParameters)
+                    {
+                        $setTargetResourceParameters = @{
+                            Path = $script:cmdProcessFullPath
+                            Ensure = 'Present'
+                            Arguments = ''
+                            $pathMustExistParameter = $invalidNonexistentPath
+                        }
+
+                        { Set-TargetResource @setTargetResourceParameters } | Should Throw $LocalizedData.PathShouldExist
+                    }
+                }
+
+                It 'Should not throw when providing a nonexistent path for StandardOutputPath or StandardErrorPath' {
+                    $invalidNonexistentPath = Join-Path -Path (Get-Location) -ChildPath 'NonexistentPath'
+
+                    if (Test-Path -Path $invalidNonexistentPath)
+                    {
+                        Remove-Item -Path $invalidNonexistentPath -Recurse -Force
+                    }
+
+                    $pathNotNeedExistParameters = @( 'StandardOutputPath', 'StandardErrorPath' )
+
+                    foreach ($pathNotNeedExistParameter in $pathNotNeedExistParameters)
+                    {
+                        $setTargetResourceParameters = @{
+                            Path = $script:cmdProcessFullPath
+                            Ensure = 'Present'
+                            Arguments = ''
+                            $pathNotNeedExistParameter = $invalidNonexistentPath
+                        }
+
+                        { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
                     }
                 }
             }
@@ -295,7 +370,7 @@ try
                     Test-TargetResource -Path $script:cmdProcessFullPath -Arguments '' | Should Be $false
  
                     Test-TargetResource -Path $script:cmdProcessFullPath -Arguments 'NotTheOriginalArguments' | Should Be $false
- 
+
                     Test-TargetResource -Path $script:cmdProcessFullPath -Arguments $actualArguments | Should Be $true
                 }
 
@@ -310,190 +385,100 @@ try
                         
                     $testTargetResourceResult | Should Be $false
                 }
+
             }
-            
-            <#
-                SPLIT into 3
 
-                .Synopsis
-                Tests a process with an argument.
-                .DESCRIPTION
-                - Starts a process with an argument
-                - Ensures Test with "" as Arguments is false
-                - Ensures Test with the wrong arguments is false
-                - Ensures Test with no Arguments key is true
-                - Ensures Test with the right Arguments key is true
-                - Ensures Get with no arguments key is 1 Present
-                - Ensures Get with "" as Arguments is 1 Absent
+            Context 'Get-Win32Process' {
+                It 'Should only return one process when arguments were changed for that process' {
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments ''
+                    Set-TargetResource -Path $script:cmdProcessFullPath -Arguments 'abc'
 
-                - Starts process with no arguments
-                - Ensures Get with no arguments key is 2
-                - Ensures Get with null arguments is 1 Present with no Arguments
-                - Ensures Get with argument is 1 Present with the Arguments
-                - Set All process to be absent
-                - Ensure none are left
-            #>
-            It 'TestGetSetProcessResourceWithArguments' -Pending {
-                Invoke-Remotely {
-                    $exePath = $script:cmdProcessFullPath
- 
-                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
+                    $processes = @( Get-Win32Process -Path $script:cmdProcessFullPath -UseGetCimInstanceThreshold 0 )
+                    $processes.Count | Should Be 1
+
+                    $processes = @( Get-Win32Process -Path $script:cmdProcessFullPath -UseGetCimInstanceThreshold 5 )
+                    $processes.Count | Should Be 1
+                }
+            }
+
+            Context 'Get-ArgumentsFromCommandLineInput' {
+                It 'Should retrieve expected arguments from command line input' {
+                    $testCases = @( @{
+                            CommandLineInput = "c    a   "
+                            ExpectedArguments = "a"
+                        },
+                        @{
+                            CommandLineInput = '"c b d" e  '
+                            ExpectedArguments = "e"
+                        },
+                        @{
+                            CommandLineInput = "    a b"
+                            ExpectedArguments = "b"
+                        },
+                        @{
+                            CommandLineInput = " abc "
+                            ExpectedArguments = ""
+                        }
+                    )
+
+                    foreach ($testCase in $testCases)
                     {
-                        throw "before set, there should be no process"
-                    }
- 
-                    MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments"
- 
-                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
-                    {
-                        throw "after set, cannot find process with no arguments"
-                    }
- 
-                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "NotTheOriginalArguments")
-                    {
-                        throw "after set, cannot find process with arguments that were not the ones we set"
-                    }
- 
-                    if(!(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments"))
-                    {
-                        throw "after set, there should be a process if we specify arguments"
-                    }
- 
-                    $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "")
- 
-                    if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Absent')
-                    {
-                        throw "there should be no process without arguments"
-                    }
- 
-                    MSFT_ProcessResource\Set-TargetResource -Path $exePath -Arguments ""
- 
-                    $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "")
-                    if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Present')
-                    {
-                        throw "there should be only one process present with no argument"
-                    }
- 
-                    if($processes[0].Arguments.length -ne 0)
-                    {
-                        throw "there should no arguments in the process"
-                    }
- 
-                    $processes = @(MSFT_ProcessResource\Get-TargetResource -Path $exePath -Arguments "TestGetSetProcessResourceWithArguments")
-        
-                    if($processes.Count -ne 1 -or $processes[0].Ensure -ne 'Present')
-                    {
-                        throw "there should be only one process present with TestGetSetProcessResourceWithArguments as argument"
-                    }
- 
-                    if($processes[0].Arguments -ne 'TestGetSetProcessResourceWithArguments')
-                    {
-                        throw "the argument should be TestGetSetProcessResourceWithArguments"
-                    }
- 
-                    MSFT_ProcessResource\Set-TargetResource -Path $exePath -Ensure Absent -Arguments ""
- 
-                    if(MSFT_ProcessResource\Test-TargetResource -Path $exePath -Arguments "")
-                    {
-                        throw "after set absent, there should be no process"
+                        $commandLineInput = $testCase.CommandLineInput
+                        $expectedArguments = $testCase.ExpectedArguments
+                        $actualArguments = Get-ArgumentsFromCommandLineInput -CommandLineInput $commandLineInput
+
+                        $actualArguments | Should Be $expectedArguments
                     }
                 }
             }
 
-            Context 'WQLEscape' {
-                It 'TestWQLEscape' -Pending {
-                    WQLEscape "a'`"\b" | Should Be "a\'\`"\\b"
-                }
-            }
- 
-            Context 'Get-ProcessArgumentsFromCommandLine' {
-                It 'TestGetProcessArgumentsFromCommandLine' -Pending {
-                    $testCases=(("c    a   ","a"),('"c b d" e  ',"e"),("    a b","b"), (" abc ",""))
-                    foreach($testCase in $testCases)
-                    {
-                        $test=$testCase[0]
-                        $expected=$testCase[1]
-                        $actual = GetProcessArgumentsFromCommandLine $test
+            Context 'Split-Credential' {
+                It 'Should return correct domain and username with @ seperator' {
+                    $testUsername = 'user@domain'
+                    $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
+                    $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
 
-                        $actual | Should Be $expected
-                    }
-                }
-            }
+                    $splitCredentialResult = Split-Credential -Credential $testCredential
 
-            Context 'Get-DomainAndUserName' {
-                It 'TestDomainUserNameParseAt' -Pending {
-                    Invoke-Remotely {
-                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                            "user@domain", 
-                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                        ) )
-                        Assert ($Domain -eq "domain")  "wrong domain $Domain"
-                        Assert ($UserName -eq "user") "wrong user $UserName"
-                    }
+                    $splitCredentialResult.Domain | Should Be 'domain'
+                    $splitCredentialResult.Username | Should Be 'user'
                 }
     
-                It 'TestDomainUserNameParseSlash' -Pending {
-                    Invoke-Remotely {
-                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                            "domain\user", 
-                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                        ) )
-                        Assert ($Domain -eq "domain")  "wrong domain $Domain"
-                        Assert ($UserName -eq "user") "wrong user $UserName"
-                    }
+                It 'Should return correct domain and username with \ seperator' {
+                    $testUsername = 'domain\user'
+                    $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
+                    $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
+
+                    $splitCredentialResult = Split-Credential -Credential $testCredential
+
+                    $splitCredentialResult.Domain | Should Be 'domain'
+                    $splitCredentialResult.Username | Should Be 'user'
                 }
     
-                It 'TestDomainUserNameParseImplicitDomain' -Pending {
-                    Invoke-Remotely {
-                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                            "localuser", 
-                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                        ) )
-                        Assert ($Domain -eq $env:COMPUTERNAME) "wrong domain $Domain"
-                        Assert ($UserName -eq "localuser") "wrong user $UserName"
-                    }
+                It 'Should return correct domain and username with a local user' {
+                    $testUsername = 'localuser'
+                    $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
+                    $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
+
+                    $splitCredentialResult = Split-Credential -Credential $testCredential
+
+                    $splitCredentialResult.Username | Should Be 'localuser'
                 }
     
-                It 'TestDomainUserNameParseSlashFail' -Pending {
-                    $originalErrorActionPreference = $global:ErrorActionPreference
-                    $global:ErrorActionPreference = 'Stop'
-
-                    try
-                    {
-                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                            "domain\user\foo", 
-                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                        ) )
-                    } 
-                    catch 
-                    {
-                        $exceptionThrown = $true
-                        Assert ($_.Exception -is [System.ArgumentException]) "Exception of type $($_.Exception.GetType().ToString()) was not expected"
-                    }
-                    Assert ($exceptionThrown) "no exception thrown"
-
-                    $global:ErrorActionPreference = $script:originalErrorActionPreference
+                It 'Should throw when more than one \ in username' {
+                    $testUsername = 'user\domain\foo'
+                    $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
+                    $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
+                    
+                    { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should Throw
                 }
     
-                It 'TestDomainUserNameParseAtFail' -Pending {
-                    $originalErrorActionPreference = $global:ErrorActionPreference
-                    $global:ErrorActionPreference = 'Stop'
-
-                    try
-                    {
-                        $Domain, $UserName = Get-DomainAndUserName ([System.Management.Automation.PSCredential]::new( 
-                            "domain@user@foo", 
-                            ("dummy" | ConvertTo-SecureString -asPlainText -Force) 
-                        ) )
-                    } 
-                    catch 
-                    {
-                        $exceptionThrown = $true
-                        Assert ($_.Exception -is [System.ArgumentException]) "Exception of type $($_.Exception.GetType().ToString()) was not expected"
-                    }
-                    Assert ($exceptionThrown) "no exception thrown"
-
-                    $global:ErrorActionPreference = $script:originalErrorActionPreference
+                It 'Should throw when more than one @ in username' {
+                    $testUsername = 'user@domain@foo'
+                    $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
+                    $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
+                    
+                    { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should Throw
                 }
             }
         }
