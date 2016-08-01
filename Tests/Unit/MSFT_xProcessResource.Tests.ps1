@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param ()
+
 Import-Module -Name "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
