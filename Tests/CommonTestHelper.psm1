@@ -557,6 +557,90 @@ function Test-IsFileLocked
 
 <#
     .SYNOPSIS
+        Tests that calling the Set-TargetResource cmdlet with the WhatIf parameter specified produces output that contains all the given expected output.
+        If empty or null expected output is specified, this cmdlet will check that there was no output from Set-TargetResource with WhatIf specified.
+        Uses Pester.
+
+    .PARAMETER Parameters
+        The parameters to pass to Set-TargetResource.
+        These parameters do not need to contain that WhatIf parameter, but if they do, 
+        this function will run Set-TargetResource with WhatIf = $true no matter what is in the Parameters Hashtable.
+
+    .PARAMETER ExpectedOutput
+        The output expected to be in the output from running WhatIf with the Set-TargetResource cmdlet.
+        If this parameter is empty or null, this cmdlet will check that there was no output from Set-TargetResource with WhatIf specified.    
+#>
+function Test-SetTargetResourceWithWhatIf
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Hashtable]
+        $Parameters,
+     
+        [String[]]
+        $ExpectedOutput
+    )
+
+    $transcriptPath = Join-Path -Path (Get-Location) -ChildPath 'WhatIfTestTranscript.txt'
+    if (Test-Path -Path $transcriptPath)
+    {
+        Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)} -TimeoutSeconds 10
+        Remove-Item -Path $transcriptPath -Force
+    }
+
+    $Parameters['WhatIf'] = $true
+
+    try
+    {
+        Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+
+        Start-Transcript -Path $transcriptPath
+        Set-TargetResource @Parameters
+        Stop-Transcript
+
+        Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
+
+        $transcriptContent = Get-Content -Path $transcriptPath -Raw
+        $transcriptContent | Should Not Be $null
+
+        $regexString = '\*+[^\*]*\*+'
+
+        # Removing transcript diagnostic logging at top and bottom of file
+        $selectedString = Select-String -InputObject $transcriptContent -Pattern $regexString -AllMatches
+
+        foreach ($match in $selectedString.Matches)
+        {
+            $transcriptContent = $transcriptContent.Replace($match.Captures, '')
+        }
+
+        $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "")
+
+        if ($null -eq $ExpectedOutput -or $ExpectedOutput.Count -eq 0)
+        {
+            [String]::IsNullOrEmpty($transcriptContent) | Should Be $true
+        }
+        else
+        {
+            foreach ($expectedOutputPiece in $ExpectedOutput)
+            {
+                $transcriptContent.Contains($expectedOutputPiece) | Should Be $true
+            }
+        }
+    }
+    finally
+    {
+        if (Test-Path -Path $transcriptPath)
+        {
+            Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)} -TimeoutSeconds 10
+            Remove-Item -Path $transcriptPath -Force
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Enters a DSC Resource test environment.
 
     .PARAMETER DscResourceModuleName
@@ -649,5 +733,6 @@ Export-ModuleMember -Function `
     Test-User, `
     Wait-ScriptBlockReturnTrue, `
     Test-IsFileLocked, `
+    Test-SetTargetResourceWithWhatIf, `
     Enter-DscResourceTestEnvironment, `
     Exit-DscResourceTestEnvironment
