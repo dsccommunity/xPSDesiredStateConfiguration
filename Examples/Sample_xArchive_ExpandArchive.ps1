@@ -5,7 +5,7 @@ Configuration Sample_xArchive_ExpandArchive
     ( 
         [parameter(mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [string[]] $Path,
+        [string] $Path,
 
         [parameter (mandatory=$true)]
         [ValidateNotNullOrEmpty()]
