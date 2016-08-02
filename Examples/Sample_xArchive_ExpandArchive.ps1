@@ -9,16 +9,7 @@ Configuration Sample_xArchive_ExpandArchive
 
         [parameter (mandatory=$true)]
         [ValidateNotNullOrEmpty()]
-        [string] $Destination,
-
-        [parameter (mandatory=$false)]
-        [ValidateSet("Optimal","NoCompression","Fastest")]
-        [string]
-        $CompressionLevel = "Optimal",
-
-        [parameter (mandatory=$false)]
-        [boolean]
-        $MatchSource = $false
+        [string] $Destination
     ) 
 
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
