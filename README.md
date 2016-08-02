@@ -348,6 +348,8 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fix bug in Test-TargetResourceOnFullSKU function when group being set to a single member.
     * Fix bug in Set-TargetResourceOnFullSKU function when group being set to a single member.
     * Fix bugs in Assert-GroupNameValid to throw correct exception.
+* xService
+    * Updated xService resource to allow empty string for Description parameter.
 * Merged xProcess with in-box Process resource and added tests.
 
 ### 3.12.0.0
