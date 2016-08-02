@@ -28,9 +28,6 @@ Configuration Sample_xArchive_ExpandArchive
         {
             Path = $Path
             Destination = $Destination
-            CompressionLevel = $CompressionLevel
-            DestinationType="Directory"
-            MatchSource=$MatchSource
         }
     }
 }
