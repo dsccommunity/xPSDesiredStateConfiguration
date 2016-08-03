@@ -63,6 +63,7 @@ Redirectingpackagepathtocachefilelocation = Redirecting package path to cache fi
 ThebinaryisanEXE = The binary is an EXE
 Userhasrequestedloggingneedtoattacheventhandlerstotheprocess = User has requested logging, need to attach event handlers to the process
 StartingwithstartInfoFileNamestartInfoArguments = Starting {0} with {1}
+ProvideParameterForRegistryCheck = "Please provide the {0} parameter in order to check for installation status from a registry key."
 '@
 }
 
@@ -178,13 +179,87 @@ function Convert-PathToUri
 
 <#
     .SYNOPSIS
+        Retrieves a value from a registry without throwing errors.
+
+    .PARAMETER Key
+        The key of the registry to get the value from.
+
+    .PARAMETER Value
+        The name of the value to retrieve.
+
+    .PARAMETER RegistryHive
+        The registry hive to retrieve the value from.
+
+    .PARAMETER RegistyView
+        The registry view to retrieve the value from.
+#>
+function Get-RegistryValueWithErrorsIgnored
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Key,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Value,
+
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryHive]
+        $RegistryHive,
+
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryView]
+        $RegistryView
+    )
+
+    $registryValue = $null
+
+    try
+    {
+        $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, $RegistryView)
+        $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key)
+        
+        if ($null -ne $subRegistryKey)
+        {
+            $registryValue = $subRegistryKey.GetValue($Value)
+        }
+    }
+    catch
+    {
+        $exceptionText = ($_ | Out-String).Trim()
+        Write-Verbose -Message "An exception occured while attempting to retrieve a registry value: $exceptionText"
+    }
+
+    return $registryValue
+}
+
+<#
+    .SYNOPSIS
         Retrieves the product entry for the package with the given name and/or identifying number.
 
     .PARAMETER Name
         The name of the product entry to retrieve.
 
+    .PARAMETER CreateCheckRegValue
+        Indicates whether or not to retrieve the package installation status from a registry.
+
     .PARAMETER IdentifyingNumber
         The identifying number of the product entry to retrieve.
+
+    .PARAMETER InstalledCheckRegHive
+        The registry hive to check for package installation status.
+
+    .PARAMETER InstalledCheckRegKey
+        The registry key to open to check for package installation status.
+
+    .PARAMETER InstalledCheckRegValueName
+        The registry value name to check for package installation status.
+
+    .PARAMETER InstalledCheckRegValueData
+        The value to compare against the retrieved registry value to check for package installation.
 #>
 function Get-ProductEntry
 {
@@ -195,7 +270,23 @@ function Get-ProductEntry
         $Name,
 
         [String]
-        $IdentifyingNumber
+        $IdentifyingNumber,
+
+        [Switch]
+        $CreateCheckRegValue,
+
+        [ValidateSet('LocalMachine', 'CurrentUser')]
+        [String]
+        $InstalledCheckRegHive = 'LocalMachine',
+
+        [String]
+        $InstalledCheckRegKey,
+
+        [String]
+        $InstalledCheckRegValueName,
+
+        [String]
+        $InstalledCheckRegValueData
     )
 
     $uninstallRegistryKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
@@ -223,6 +314,37 @@ function Get-ProductEntry
             {
                 $productEntry = $registryKeyEntry
                 break
+            }
+        }
+    }
+
+    if ($null -eq $productEntry)
+    {
+        if ($CreateCheckRegValue)
+        {
+            $installValue = $null
+            
+            $win32OperatingSystem = Get-CimInstance -ClassName 'Win32_OperatingSystem' -ErrorAction 'SilentlyContinue'
+
+            # If 64-bit OS, check 64-bit registry view first
+            if ($win32OperatingSystem.OSArchitecture -ieq '64-bit')
+            {
+                $installValue = Get-RegistryValueWithErrorsIgnored -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName -RegistryHive $InstalledCheckRegHive -RegistryView 'Registry64'
+            }
+
+            if ($null -eq $installValue)
+            {
+                $installValue = Get-RegistryValueWithErrorsIgnored -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName -RegistryHive $InstalledCheckRegHive -RegistryView 'Registry32'
+            }
+
+            if ($null -ne $installValue)
+            {
+                if ($InstalledCheckRegValueData -and $installValue -eq $InstalledCheckRegValueData)
+                {
+                    $productEntry = @{
+                        Installed = $true
+                    }
+                }
             }
         }
     }
@@ -283,7 +405,23 @@ function Test-TargetResource
         $SignerThumbprint,
 
         [String]
-        $ServerCertificateValidationCallback
+        $ServerCertificateValidationCallback,
+
+        [Boolean]
+        $CreateCheckRegValue = $false,
+
+        [ValidateSet('LocalMachine','CurrentUser')]
+        [String]
+        $InstalledCheckRegHive = 'LocalMachine',
+
+        [String]
+        $InstalledCheckRegKey,
+
+        [String]
+        $InstalledCheckRegValueName,
+
+        [String]
+        $InstalledCheckRegValueData
     )
 
     Assert-PathExtensionValid -Path $Path
@@ -294,7 +432,30 @@ function Test-TargetResource
         $identifyingNumber = Convert-ProductIdToIdentifyingNumber -ProductId $ProductId
     }
 
-    $productEntry = Get-ProductEntry -Name $Name -IdentifyingNumber $identifyingNumber
+    $getProductEntryParameters = @{
+        Name = $Name
+        IdentifyingNumber = $identifyingNumber
+    }
+
+    $checkRegistryValueParameters = @{
+        CreateCheckRegValue = $CreateCheckRegValue
+        InstalledCheckRegHive = $InstalledCheckRegHive
+        InstalledCheckRegKey = $InstalledCheckRegKey
+        InstalledCheckRegValueName = $InstalledCheckRegValueName
+        InstalledCheckRegValueData = $InstalledCheckRegValueData
+    }
+
+    if ($CreateCheckRegValue)
+    {
+        Assert-RegistryParametersValid -InstalledCheckRegHive $InstalledCheckRegHive -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName
+
+        foreach ($parameterName in $checkRegistryValueParameters.Keys)
+        {
+            $getProductEntryParameters[$parameterName] = $checkRegistryValueParameters[$parameterName]
+        }
+    }
+
+    $productEntry = Get-ProductEntry @getProductEntryParameters
 
     Write-Verbose -Message ($LocalizedData.EnsureIsEnsure -f $Ensure)
 
@@ -311,8 +472,15 @@ function Test-TargetResource
 
     if ($null -ne $productEntry)
     {
-        $displayName = Get-LocalizedRegistryKeyValue -RegistryKey $productEntry -ValueName 'DisplayName'
-        Write-Verbose -Message ($LocalizedData.PackageAppearsInstalled -f $displayName)
+        if ($CreateCheckRegValue)
+        {
+            Write-Verbose -Message ($LocalizedData.PackageAppearsInstalled -f $Name)
+        }
+        else
+        {
+            $displayName = Get-LocalizedRegistryKeyValue -RegistryKey $productEntry -ValueName 'DisplayName'
+            Write-Verbose -Message ($LocalizedData.PackageAppearsInstalled -f $displayName)
+        }
     }
     else
     {   
@@ -386,7 +554,23 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
         [String]
-        $ProductId        
+        $ProductId,
+
+        [Boolean]
+        $CreateCheckRegValue = $false,
+
+        [ValidateSet('LocalMachine','CurrentUser')]
+        [String]
+        $InstalledCheckRegHive = 'LocalMachine',
+
+        [String]
+        $InstalledCheckRegKey,
+
+        [String]
+        $InstalledCheckRegValueName,
+
+        [String]
+        $InstalledCheckRegValueData        
     )
 
     Assert-PathExtensionValid -Path $Path
@@ -397,7 +581,30 @@ function Get-TargetResource
         $identifyingNumber = Convert-ProductIdToIdentifyingNumber -ProductId $ProductId
     }
 
-    $productEntry = Get-ProductEntry -Name $Name -IdentifyingNumber $identifyingNumber
+    $getProductEntryParameters = @{
+        Name = $Name
+        IdentifyingNumber = $identifyingNumber
+    }
+
+    $checkRegistryValueParameters = @{
+        CreateCheckRegValue = $CreateCheckRegValue
+        InstalledCheckRegHive = $InstalledCheckRegHive
+        InstalledCheckRegKey = $InstalledCheckRegKey
+        InstalledCheckRegValueName = $InstalledCheckRegValueName
+        InstalledCheckRegValueData = $InstalledCheckRegValueData
+    }
+
+    if ($CreateCheckRegValue)
+    {
+        Assert-RegistryParametersValid -InstalledCheckRegHive $InstalledCheckRegHive -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName
+
+        foreach ($parameterName in $checkRegistryValueParameters.Keys)
+        {
+            $getProductEntryParameters[$parameterName] = $checkRegistryValueParameters[$parameterName]
+        }
+    }
+
+    $productEntry = Get-ProductEntry @getProductEntryParameters
 
     if ($null -eq $productEntry)
     {
@@ -406,6 +613,15 @@ function Get-TargetResource
             Name = $Name
             ProductId = $identifyingNumber
             Installed = $false
+        }
+    }
+    elseif ($CreateCheckRegValue)
+    {
+        return @{
+            Ensure = 'Present'
+            Name = $Name
+            ProductId = $identifyingNumber
+            Installed = $true
         }
     }
 
@@ -590,6 +806,48 @@ function Get-MsiProductCode
     return $productCode
 }
 
+<#
+    .SYNOPSIS
+        Asserts that the InstalledCheckRegKey, InstalledCheckRegValueName, and
+        InstalledCheckRegValueData parameter required for retrieving package installation status
+        from a registry are not null or empty.
+
+    .PARAMETER InstalledCheckRegKey
+        The InstalledCheckRegKey parameter to check.
+
+    .PARAMETER InstalledCheckRegValueName
+        The InstalledCheckRegValueName parameter to check.
+
+    .PARAMETER InstalledCheckRegValueData
+        The InstalledCheckRegValueData parameter to check.
+
+    .NOTES
+        This could be done with parameter validation.
+        It is implemented this way to provide a clearer error message.
+#>
+function Assert-RegistryParametersValid {
+    [CmdletBinding()]
+    param
+    (
+        [String]
+        $InstalledCheckRegKey,
+
+        [String]
+        $InstalledCheckRegValueName,
+
+        [String]
+        $InstalledCheckRegValueData
+    )
+
+    foreach ($parameter in $PSBoundParameters.Keys)
+    {
+        if ([String]::IsNullOrEmpty($PSBoundParameters[$parameter]))
+        {
+            New-InvalidArgumentException -ArgumentName $parameter -Message ($LocalizedData.ProvideParameterForRegistryCheck -f $parameter) "Please provide the $parameter parameter in order to check for installation status from a registry key."
+        }
+    }
+}
+
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
@@ -642,12 +900,28 @@ function Set-TargetResource
         $SignerThumbprint,
 
         [String]
-        $ServerCertificateValidationCallback
+        $ServerCertificateValidationCallback,
+
+        [Boolean]
+        $CreateCheckRegValue = $false,
+
+        [ValidateSet('LocalMachine','CurrentUser')]
+        [String]
+        $InstalledCheckRegHive = 'LocalMachine',
+
+        [String]
+        $InstalledCheckRegKey,
+
+        [String]
+        $InstalledCheckRegValueName,
+
+        [String]
+        $InstalledCheckRegValueData
     )
 
     $ErrorActionPreference = 'Stop'
 
-    if (Test-TargetResource -Ensure $Ensure -Name $Name -Path $Path -ProductId $ProductId)
+    if (Test-TargetResource @PSBoundParameters)
     {
         return
     }
@@ -1010,6 +1284,21 @@ function Set-TargetResource
         $operationMessageString = $LocalizedData.PackageInstalled
     }
 
+    if ($CreateCheckRegValue)
+    {
+        $registryValueString = '{0}\{1}\{2}' -f $InstalledCheckRegHive, $InstalledCheckRegKey, $InstalledCheckRegValueName
+        if ($Ensure -eq 'Present')
+        {
+            Write-Verbose -Message ($LocalizedData.CreatingRegistryValue -f $registryValueString)
+            Set-RegistryValue -RegistryHive $InstalledCheckRegHive -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName -Data $InstalledCheckRegValueData
+        }
+        else
+        {
+            Write-Verbose ($LocalizedData.RemovingRegistryValue -f $registryValueString)
+            Remove-RegistryValue -RegistryHive $InstalledCheckRegHive -Key $InstalledCheckRegKey -Value $InstalledCheckRegValueName
+        }
+    }
+
     <#
         Check if a reboot is required, if so notify CA. The MSFT_ServerManagerTasks provider is
         missing on some client SKUs (worked on both Server and Client Skus in Windows 10).
@@ -1026,7 +1315,28 @@ function Set-TargetResource
     
     if ($Ensure -eq 'Present')
     {
-        $productEntry = Get-ProductEntry -Name $Name -IdentifyingNumber $identifyingNumber
+        $getProductEntryParameters = @{
+            Name = $Name
+            IdentifyingNumber = $identifyingNumber
+        }
+
+        $checkRegistryValueParameters = @{
+            CreateCheckRegValue = $CreateCheckRegValue
+            InstalledCheckRegHive = $InstalledCheckRegHive
+            InstalledCheckRegKey = $InstalledCheckRegKey
+            InstalledCheckRegValueName = $InstalledCheckRegValueName
+            InstalledCheckRegValueData = $InstalledCheckRegValueData
+        }
+
+        if ($CreateCheckRegValue)
+        {
+            foreach ($parameterName in $checkRegistryValueParameters.Keys)
+            {
+                $getProductEntryParameters[$parameterName] = $checkRegistryValueParameters[$parameterName]
+            }
+        }
+
+        $productEntry = Get-ProductEntry @getProductEntryParameters
 
         if (-not $productEntry)
         {
