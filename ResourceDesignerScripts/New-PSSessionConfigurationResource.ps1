@@ -1,4 +1,4 @@
-ipmo xDSCResourceDesigner
+Import-Module -Name 'xDSCResourceDesigner'
 
 $resProperties = @{
     Name          = New-xDscResourceProperty -Description 'Name of the PS Remoting Endpoint' `
