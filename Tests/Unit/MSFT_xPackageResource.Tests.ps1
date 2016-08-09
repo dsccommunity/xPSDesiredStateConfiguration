@@ -87,7 +87,7 @@ try
                     Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
                 }
 
-                It 'Should return only basic properties for present package with registry check parameters specified and CreateCheckRegValue true' {
+                It 'Should return basic and registry properties for present package with registry check parameters specified and CreateCheckRegValue true' {
                     $packageParameters = @{
                         Path = $script:msiLocation
                         Name = $script:packageName
@@ -106,7 +106,7 @@ try
                         Clear-xPackageCache
                     
                         $getTargetResourceResult = Get-TargetResource @packageParameters
-                        $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'ProductId', 'Installed' )
+                        $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'ProductId', 'Installed', 'CreateCheckRegValue', 'InstalledCheckRegHive', 'InstalledCheckRegKey', 'InstalledCheckRegValueName', 'InstalledCheckRegValueData' )
 
                         Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
                     }
@@ -117,7 +117,7 @@ try
                     }
                 }
 
-                It 'Should return full properties for present package with registry check parameters specified and CreateCheckRegValue false' {
+                It 'Should return full package properties for present package with registry check parameters specified and CreateCheckRegValue false' {
                     $packageParameters = @{
                         Path = $script:msiLocation
                         Name = $script:packageName
@@ -132,12 +132,12 @@ try
                     Clear-xPackageCache
                     
                     $getTargetResourceResult = Get-TargetResource @packageParameters
-                    $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'ProductId', 'Installed' )
+                    $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'ProductId', 'Installed', 'Path', 'InstalledOn', 'Size', 'Version', 'PackageDescription', 'Publisher' )
 
                     Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
                 }
 
-                It 'Should return full properties for present package without registry check parameters specified' {
+                It 'Should return full package properties for present package without registry check parameters specified' {
                     $packageParameters = @{
                         Path = $script:msiLocation
                         Name = $script:packageName
