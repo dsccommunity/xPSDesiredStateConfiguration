@@ -63,7 +63,10 @@ Redirectingpackagepathtocachefilelocation = Redirecting package path to cache fi
 ThebinaryisanEXE = The binary is an EXE
 Userhasrequestedloggingneedtoattacheventhandlerstotheprocess = User has requested logging, need to attach event handlers to the process
 StartingwithstartInfoFileNamestartInfoArguments = Starting {0} with {1}
-ProvideParameterForRegistryCheck = "Please provide the {0} parameter in order to check for installation status from a registry key."
+ProvideParameterForRegistryCheck = Please provide the {0} parameter in order to check for installation status from a registry key.
+ErrorSettingRegistryValue = An error occured while attempting to set the registry key {0} value {1} to {2}
+ErrorRemovingRegistryValue = An error occured while attempting to remove the registry key {0} value {1}
+ExeCouldNotBeUninstalled = The .exe file found at {0} could not be uninstalled. The uninstall functionality may not be implemented in this .exe file.
 '@
 }
 
@@ -133,7 +136,7 @@ function Convert-ProductIdToIdentifyingNumber
     }
     catch
     {
-        New-InvalidArgumentException -ArgumentName 'ProductId' -Messsage ($LocalizedData.InvalidIdentifyingNumber -f $ProductId)
+        New-InvalidArgumentException -ArgumentName 'ProductId' -Message ($LocalizedData.InvalidIdentifyingNumber -f $ProductId)
     }
 }
 
@@ -447,12 +450,8 @@ function Test-TargetResource
 
     if ($CreateCheckRegValue)
     {
-        Assert-RegistryParametersValid -InstalledCheckRegHive $InstalledCheckRegHive -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName
-
-        foreach ($parameterName in $checkRegistryValueParameters.Keys)
-        {
-            $getProductEntryParameters[$parameterName] = $checkRegistryValueParameters[$parameterName]
-        }
+        Assert-RegistryParametersValid -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName -InstalledCheckRegValueData $InstalledCheckRegValueData
+        $getProductEntryParameters += $checkRegistryValueParameters
     }
 
     $productEntry = Get-ProductEntry @getProductEntryParameters
@@ -580,6 +579,12 @@ function Get-TargetResource
     {
         $identifyingNumber = Convert-ProductIdToIdentifyingNumber -ProductId $ProductId
     }
+    else
+    {
+        $identifyingNumber = $ProductId
+    }
+
+    $packageResourceResult = @{}
 
     $getProductEntryParameters = @{
         Name = $Name
@@ -596,40 +601,44 @@ function Get-TargetResource
 
     if ($CreateCheckRegValue)
     {
-        Assert-RegistryParametersValid -InstalledCheckRegHive $InstalledCheckRegHive -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName
+        Assert-RegistryParametersValid -InstalledCheckRegKey $InstalledCheckRegKey -InstalledCheckRegValueName $InstalledCheckRegValueName -InstalledCheckRegValueData $InstalledCheckRegValueData
 
-        foreach ($parameterName in $checkRegistryValueParameters.Keys)
-        {
-            $getProductEntryParameters[$parameterName] = $checkRegistryValueParameters[$parameterName]
-        }
+        $getProductEntryParameters += $checkRegistryValueParameters
+        $packageResourceResult += $checkRegistryValueParameters
     }
 
     $productEntry = Get-ProductEntry @getProductEntryParameters
 
     if ($null -eq $productEntry)
     {
-        return @{
+        $packageResourceResult += @{
             Ensure = 'Absent'
             Name = $Name
             ProductId = $identifyingNumber
+            Path = $Path
             Installed = $false
         }
+
+        return $packageResourceResult
     }
     elseif ($CreateCheckRegValue)
     {
-        return @{
+        $packageResourceResult += @{
             Ensure = 'Present'
             Name = $Name
             ProductId = $identifyingNumber
+            Path = $Path
             Installed = $true
         }
+
+        return $packageResourceResult
     }
 
     <#
         Identifying number can still be null here (e.g. remote MSI with Name specified, local EXE).
         If the user gave a product ID just pass it through, otherwise get it from the product.
     #>
-    if ($null -eq $identifyingNumber)
+    if ($null -eq $identifyingNumber -and $null -ne $productEntry.Name)
     {
         $identifyingNumber = Split-Path -Path $productEntry.Name -Leaf 
     }
@@ -663,7 +672,7 @@ function Get-TargetResource
 
     $displayName = Get-LocalizedRegistryKeyValue -RegistryKey $productEntry -ValueName 'DisplayName'
 
-    return @{
+    $packageResourceResult += @{
         Ensure = 'Present'
         Name = $displayName
         Path = $Path
@@ -675,6 +684,8 @@ function Get-TargetResource
         PackageDescription = $comments
         Publisher = $publisher
     }
+
+    return $packageResourceResult
 }
 
 <#
@@ -825,7 +836,8 @@ function Get-MsiProductCode
         This could be done with parameter validation.
         It is implemented this way to provide a clearer error message.
 #>
-function Assert-RegistryParametersValid {
+function Assert-RegistryParametersValid
+{
     [CmdletBinding()]
     param
     (
@@ -843,8 +855,114 @@ function Assert-RegistryParametersValid {
     {
         if ([String]::IsNullOrEmpty($PSBoundParameters[$parameter]))
         {
-            New-InvalidArgumentException -ArgumentName $parameter -Message ($LocalizedData.ProvideParameterForRegistryCheck -f $parameter) "Please provide the $parameter parameter in order to check for installation status from a registry key."
+            New-InvalidArgumentException -ArgumentName $parameter -Message ($LocalizedData.ProvideParameterForRegistryCheck -f $parameter)
         }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Sets the value of a registry key to the specified data.
+
+    .PARAMETER Key
+        The registry key that contains the value to set.
+
+    .PARAMETER Value
+        The value name of the registry key value to set.
+
+    .PARAMETER RegistryHive
+        The registry hive that contains the registry key to set.
+
+    .PARAMETER Data
+        The data to set the registry key value to.
+#>
+function Set-RegistryValue
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Key,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Value,
+
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryHive]
+        $RegistryHive,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Data
+    )
+
+    try
+    {
+        $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
+
+        # Opens the subkey with write access
+        $subRegistryKey = $baseRegistryKey.OpenSubKey($Key, $true)
+
+        if ($null -eq $subRegistryKey)
+        {
+            Write-Verbose "Key: '$Key'"
+            $subRegistryKey = $baseRegistryKey.CreateSubKey($Key)
+        }
+
+        $subRegistryKey.SetValue($Value, $Data)
+        $subRegistryKey.Close()
+    }
+    catch
+    {
+        New-InvalidOperationException -Message ($LocalizedData.ErrorSettingRegistryValue -f $Key, $Value, $Data) -ErrorRecord $_
+    }
+}
+
+<#
+    .SYNOPSIS
+        Removes the specified value of a registry key.
+
+    .PARAMETER Key
+        The registry key that contains the value to remove.
+
+    .PARAMETER Value
+        The value name of the registry key value to remove.
+
+    .PARAMETER RegistryHive
+        The registry hive that contains the registry key to remove.
+#>
+function Remove-RegistryValue
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Key,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Value,
+
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryHive]
+        $RegistryHive
+    )
+
+    try
+    {
+        $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
+        
+        $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key, $true)
+        $subRegistryKey.DeleteValue($Value)
+        $subRegistryKey.Close()
+    }
+    catch
+    {
+        New-InvalidOperationException -Message ($LocalizedData.ErrorRemovingRegistryValue -f $Key, $Value) -ErrorRecord $_
     }
 }
 
@@ -932,6 +1050,10 @@ function Set-TargetResource
     if (-not [String]::IsNullOrEmpty($ProductId))
     {
         $identifyingNumber = Convert-ProductIdToIdentifyingNumber -ProductId $ProductId
+    }
+    else
+    {
+        $identifyingNumber = $ProductId
     }
 
     $productEntry = Get-ProductEntry -Name $Name -IdentifyingNumber $identifyingNumber
@@ -1181,18 +1303,24 @@ function Set-TargetResource
             {
                 # Absent case
                 $startInfo.FileName = "$env:winDir\system32\msiexec.exe"
-
-                $id = Split-Path -Path $productEntry.Name -Leaf      
-                $startInfo.Arguments = ('/x{0} /quiet' -f $id)
-
-                # Never let msiexec restart automatically. DSC should handle reboot requests.
-                $startInfo.Arguments += ' /norestart'
+                
+                # We may have used the Name earlier, now we need the actual ID
+                if ($null -eq $productEntry.Name)
+                {
+                    $id = $Path
+                }
+                else
+                {
+                    $id = Split-Path -Path $productEntry.Name -Leaf
+                }
+                
+                $startInfo.Arguments = "/x $id /quiet /norestart"
                 
                 if ($LogPath)
                 {
                     $startInfo.Arguments += ' /log "{0}"' -f $LogPath
                 }
-                
+
                 if ($Arguments)
                 {
                     $startInfo.Arguments += "$Arguments"
@@ -1250,9 +1378,17 @@ function Set-TargetResource
                 Remove-Event -SourceIdentifier $errLogPath
             }
 
-            if(-not ($ReturnCode -contains $exitCode))
+            if (-not ($ReturnCode -contains $exitCode))
             {
-                New-InvalidOperationException ($LocalizedData.UnexpectedReturnCode -f $exitCode.ToString())
+                # Some .exe files do not support uninstall
+                if ($Ensure -eq 'Absent' -and $fileExtension -eq '.exe' -and $exitCode -eq '1620')
+                {
+                    Write-Warning -Message ($LocalizedData.ExeCouldNotBeUninstalled -f $Path)
+                }
+                else
+                {
+                    New-InvalidOperationException ($LocalizedData.UnexpectedReturnCode -f $exitCode.ToString())
+                }
             }
         }
     }
@@ -1330,15 +1466,12 @@ function Set-TargetResource
 
         if ($CreateCheckRegValue)
         {
-            foreach ($parameterName in $checkRegistryValueParameters.Keys)
-            {
-                $getProductEntryParameters[$parameterName] = $checkRegistryValueParameters[$parameterName]
-            }
+            $getProductEntryParameters += $checkRegistryValueParameters
         }
 
         $productEntry = Get-ProductEntry @getProductEntryParameters
 
-        if (-not $productEntry)
+        if ($null -eq $productEntry)
         {
             New-InvalidOperationException -Message ($LocalizedData.PostValidationError -f $originalPath)
         }
