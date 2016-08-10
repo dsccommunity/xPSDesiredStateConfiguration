@@ -20,7 +20,9 @@ class MSFT_xPackageResource : OMI_BaseResource
   [write] string SignerSubject;
   [write] string SignerThumbprint;
   [write] string ServerCertificateValidationCallback;
+  [write,ValueMap{"LocalMachine","CurrentUser"},Values{"LocalMachine","CurrentUser"}] string InstalledCheckRegHive;
+  [write] string InstalledCheckRegKey;
+  [write] string InstalledCheckRegValueName;
+  [write] string InstalledCheckRegValueData;
+  [write] boolean CreateCheckRegValue;
 };
-
-
-
