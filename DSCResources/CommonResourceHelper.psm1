@@ -86,5 +86,5 @@ function New-InvalidOperationException
 
 Export-ModuleMember -Function `
     Test-IsNanoServer, `
-    Throw-InvalidArgumentException, `
-    Throw-TerminatingError
+    New-InvalidArgumentException, `
+    New-InvalidOperationException

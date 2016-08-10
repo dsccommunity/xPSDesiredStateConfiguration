@@ -135,7 +135,7 @@ function Test-TargetResource
         [String]
         $DisplayName,
 
-        [ValidateNotNullOrEmpty()]
+        [ValidateNotNull()]
         [String]
         $Description,
 
@@ -245,7 +245,7 @@ function Set-TargetResource
         [String]
         $DisplayName,
 
-        [ValidateNotNullOrEmpty()]
+        [ValidateNotNull()]
         [String]
         $Description,
         

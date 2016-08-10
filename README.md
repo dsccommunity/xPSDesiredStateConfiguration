@@ -29,7 +29,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
-* **xGroupSet** configures multiple xGroups with common settings but different names. 
+* **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
@@ -105,8 +105,6 @@ For a complete list of properties, please use Get-DscResource
 
 ### xPackage
 
-For a complete list, please use Get-DscResource.
-
 * **Ensure**: Ensures that the package is **Present** or **Absent**.
 * **Name**: The name of the package.
 * **Path**: The source path of the package.
@@ -115,17 +113,20 @@ For a complete list, please use Get-DscResource.
 * **Credential**: PSCredential needed to access Path.
 * **ReturnCode**: An array of return codes that are returned after a successful installation.
 * **LogPath**: The destination path of the log.
+* **FileHash**: The hash that should match the hash of the package file.
+* **HashAlgorithm**: The algorithm to use to get the hash of the package file.
+    - Supported values: SHA1, SHA256, SHA384, SHA512, MD5, RIPEMD160
+* **SignerSubject**: The certificate subject that should match that of the package file's signing certificate.
+* **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
+* **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
+
+Read-Only Properties:  
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
 * **InstalledOn**: Date of installation.
 * **Size**: Size of the installation.
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
-* **RunAsCredential**: Credentials to use when installing the package.
-* **InstalledCheckRegKey**: Registry key to open to check for package installation status.
-* **InstalledCheckRegValueName**: Registry value name to check for package installation status.
-* **InstalledCheckRegValueData**: Value to compare against the retrieved value to check for package installation.
-* **CreateCheckRegValue**: Creates the InstallCheckRegValueName registry value/data after successful package installation.
 
 ### xGroup
 
@@ -334,6 +335,25 @@ These parameters will be the same for each Windows optional feature in the set. 
 ## Versions
 
 ### Unreleased
+
+### 3.13.0.0
+
+* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
+* Updated appveyor.yml to use the default image.
+* Merged xPackage with in-box Package resource and added tests.
+* xPackage: Re-implemented parameters for installation check from registry key value.
+* xGroup:
+    * Fixed Verbose output in Get-MembersAsPrincipals function.
+    * Fixed bug when credential parameter passed does not contain local or domain context.
+    * Fixed logic bug in MembersToInclude and MembersToExclude.
+    * Fixed bug when trying to include the built-in Administrator in Members.
+    * Fixed bug where Test-TargetResource would check for members when none specified.
+    * Fix bug in Test-TargetResourceOnFullSKU function when group being set to a single member.
+    * Fix bug in Set-TargetResourceOnFullSKU function when group being set to a single member.
+    * Fix bugs in Assert-GroupNameValid to throw correct exception.
+* xService
+    * Updated xService resource to allow empty string for Description parameter.
+* Merged xProcess with in-box Process resource and added tests.
 
 ### 3.12.0.0
 

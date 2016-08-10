@@ -39,9 +39,9 @@ The PSDesiredStateConfiguration High Quality Resource Module will consist of the
 - [ ] [2. Merge In-Box & Open-Source Resources](#merge-in-box-and-open-source-resources) 
   - [x] Archive
   - [x] Group
-  - [ ] Package (In Progress)
-  - [ ] Process
-  - [ ] Registry
+  - [x] Package
+  - [X] Process 
+  - [ ] Registry (In Progress)
   - [x] Service
   - [ ] WindowsOptionalFeature
 - [ ] [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources) 

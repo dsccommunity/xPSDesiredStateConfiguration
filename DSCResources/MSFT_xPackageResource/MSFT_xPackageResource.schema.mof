@@ -1,4 +1,3 @@
-
 [ClassVersion("1.0.0"),FriendlyName("xPackage")] 
 class MSFT_xPackageResource : OMI_BaseResource
 {
@@ -16,18 +15,14 @@ class MSFT_xPackageResource : OMI_BaseResource
   [read] uint32 Size;
   [read] string Version;
   [read] boolean Installed;
-  [write,EmbeddedInstance("MSFT_Credential")] string RunAsCredential;
   [write] string FileHash;
   [write,ValueMap{"SHA1","SHA256","SHA384","SHA512","MD5","RIPEMD160"},Values{"SHA1","SHA256","SHA384","SHA512","MD5","RIPEMD160"}] string HashAlgorithm;
   [write] string SignerSubject;
   [write] string SignerThumbprint;
   [write] string ServerCertificateValidationCallback;
-  [write,ValueMap{"LocalMachine", "CurrentUser"},Values{"LocalMachine", "CurrentUser"}] string InstalledCheckRegHive;
+  [write,ValueMap{"LocalMachine","CurrentUser"},Values{"LocalMachine","CurrentUser"}] string InstalledCheckRegHive;
   [write] string InstalledCheckRegKey;
   [write] string InstalledCheckRegValueName;
   [write] string InstalledCheckRegValueData;
   [write] boolean CreateCheckRegValue;
 };
-
-
-
