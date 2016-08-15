@@ -336,9 +336,12 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+### 3.13.0.0
+
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
 * Updated appveyor.yml to use the default image.
 * Merged xPackage with in-box Package resource and added tests.
+* xPackage: Re-implemented parameters for installation check from registry key value.
 * xGroup:
     * Fixed Verbose output in Get-MembersAsPrincipals function.
     * Fixed bug when credential parameter passed does not contain local or domain context.

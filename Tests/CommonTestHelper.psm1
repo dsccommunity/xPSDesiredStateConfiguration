@@ -696,7 +696,7 @@ function Enter-DscResourceTestEnvironment
         }
     }
 
-    Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1" -Force
+    Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1"
 
     return Initialize-TestEnvironment `
         -DSCModuleName $DscResourceModuleName `
