@@ -229,7 +229,7 @@ function Get-RegistryValueWithErrorsIgnored
     {
         $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, $RegistryView)
         $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key)
-        
+
         if ($null -ne $subRegistryKey)
         {
             $registryValue = $subRegistryKey.GetValue($Value)
@@ -331,7 +331,7 @@ function Get-ProductEntry
         if ($CreateCheckRegValue)
         {
             $installValue = $null
-            
+
             $win32OperatingSystem = Get-CimInstance -ClassName 'Win32_OperatingSystem' -ErrorAction 'SilentlyContinue'
 
             # If 64-bit OS, check 64-bit registry view first
@@ -559,9 +559,6 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
         [String]
-<<<<<<< HEAD
-        $ProductId
-=======
         $ProductId,
 
         [Boolean]
@@ -578,8 +575,7 @@ function Get-TargetResource
         $InstalledCheckRegValueName,
 
         [String]
-        $InstalledCheckRegValueData        
->>>>>>> 8d06d2b332fcf7da8daad63125af8c2997f92c61
+        $InstalledCheckRegValueData
     )
 
     Assert-PathExtensionValid -Path $Path
@@ -965,7 +961,7 @@ function Remove-RegistryValue
     try
     {
         $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
-        
+
         $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key, $true)
         $subRegistryKey.DeleteValue($Value)
         $subRegistryKey.Close()
@@ -1314,16 +1310,7 @@ function Set-TargetResource
             {
                 # Absent case
                 $startInfo.FileName = "$env:winDir\system32\msiexec.exe"
-<<<<<<< HEAD
 
-                $id = Split-Path -Path $productEntry.Name -Leaf
-                $startInfo.Arguments = ('/x{0} /quiet' -f $id)
-
-                # Never let msiexec restart automatically. DSC should handle reboot requests.
-                $startInfo.Arguments += ' /norestart'
-
-=======
-                
                 # We may have used the Name earlier, now we need the actual ID
                 if ($null -eq $productEntry.Name)
                 {
@@ -1333,10 +1320,9 @@ function Set-TargetResource
                 {
                     $id = Split-Path -Path $productEntry.Name -Leaf
                 }
-                
+
                 $startInfo.Arguments = "/x $id /quiet /norestart"
-                
->>>>>>> 8d06d2b332fcf7da8daad63125af8c2997f92c61
+
                 if ($LogPath)
                 {
                     $startInfo.Arguments += ' /log "{0}"' -f $LogPath
