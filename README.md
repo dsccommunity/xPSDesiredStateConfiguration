@@ -120,7 +120,7 @@ For a complete list of properties, please use Get-DscResource
 * **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
 
-Read-Only Properties:  
+Read-Only Properties:
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
 * **InstalledOn**: Date of installation.
@@ -354,6 +354,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * xService
     * Updated xService resource to allow empty string for Description parameter.
 * Merged xProcess with in-box Process resource and added tests.
+* Fixed PSSA issues in xPackageResource.
 
 ### 3.12.0.0
 
