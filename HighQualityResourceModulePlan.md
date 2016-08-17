@@ -46,7 +46,7 @@ The PSDesiredStateConfiguration High Quality Resource Module will consist of the
   - [ ] WindowsOptionalFeature
 - [ ] [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources) 
 - [ ] [4. Update the Resource Module to a High Quality Resource Module](#update-the-resource-module-to-a-high-quality-resource-module)
-  - [ ] 1. Fix PSSA issues per the DSC Resource Kit PSSA Rule Severity List (not yet published publicly, sorry).  
+  - [ ] 1. Fix PSSA issues per the [DSC Resource Kit PSSA Rule Severity List](https://github.com/PowerShell/DscResources/blob/master/PSSARuleSeverities.md).  
   - [ ] 2. Ensure unit tests are present for each resource with more than 70% code coverage.  
   - [ ] 3. Ensure examples run correctly, work as expected, and are documented clearly.  
   - [ ] 4. Ensure clear documentation is provided.  
