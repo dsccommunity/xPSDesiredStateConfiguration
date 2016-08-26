@@ -52,7 +52,7 @@ function Get-TargetResource
 
     Write-Verbose ($LocalizedData.GetTargetResourceStartMessage -f $Name)
 
-    Invoke-ResourcePrerequisitesValidation
+    Assert-ResourcePrerequisitesValid
 
     $result = Dism\Get-WindowsOptionalFeature -FeatureName $Name -Online
 
@@ -181,7 +181,7 @@ function Set-TargetResource
 
     Write-Verbose ($LocalizedData.SetTargetResourceStartMessage -f $Name)
 
-    Invoke-ResourcePrerequisitesValidation
+    Assert-ResourcePrerequisitesValid
 
     switch ($LogLevel)
     {
@@ -309,7 +309,7 @@ function Test-TargetResource
 
     Write-Verbose ($LocalizedData.TestTargetResourceStartMessage -f $Name)
 
-    Invoke-ResourcePrerequisitesValidation
+    Assert-ResourcePrerequisitesValid
 
     $featureState = Dism\Get-WindowsOptionalFeature -FeatureName $Name -Online
     [bool] $result = $false
@@ -331,7 +331,7 @@ function Test-TargetResource
     .SYNOPSIS
     Helper function to test if the MSFT_WindowsOptionalFeature is supported on the target machine.
 #>
-function Invoke-ResourcePrerequisitesValidation
+function Assert-ResourcePrerequisitesValid
 {
     Write-Verbose $LocalizedData.ValidatingPrerequisites
 

@@ -2,7 +2,8 @@
 
 Configuration Sample_xWindowsOptionalFeature
 {
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $LogPath
