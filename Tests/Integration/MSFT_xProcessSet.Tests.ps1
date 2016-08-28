@@ -1,6 +1,6 @@
 ﻿$TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xProcessSet' `
+    -DSCResourceName 'xProcessSet' `
     -TestType Integration
 
 Describe "xProcessSet Integration Tests" {

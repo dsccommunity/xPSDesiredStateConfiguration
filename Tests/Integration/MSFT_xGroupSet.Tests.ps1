@@ -3,8 +3,8 @@ param ()
 
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xGroupSet' `
-    -TestType Integration 
+    -DSCResourceName 'xGroupSet' `
+    -TestType Integration
 
 Describe "xGroupSet Integration Tests" {
     BeforeAll {
