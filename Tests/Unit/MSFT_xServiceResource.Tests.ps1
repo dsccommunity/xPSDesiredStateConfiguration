@@ -163,29 +163,32 @@ try
         }
 
         Describe "$DSCResourceName\Test-TargetResource" {
+            # Mocks that should be called
+            Mock `
+                -CommandName Test-ServiceExists `
+                -MockWith { $true } `
+                -Verifiable
+            Mock `
+                -CommandName Get-ServiceResource `
+                -MockWith { $script:testServiceMockRunning } `
+                -Verifiable
+            Mock `
+                -CommandName Get-Win32ServiceObject `
+                -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                -Verifiable
             Mock `
                 -CommandName Test-StartupType `
                 -Verifiable
+            Mock `
+                -CommandName Compare-ServicePath `
+                -MockWith { $true } `
+                -Verifiable
+            Mock `
+                -CommandName Test-UserName `
+                -MockWith { $true } `
+                -Verifiable
 
             Context 'Service exists and should, and all parameters match' {
-                # Mocks that should be called
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
-                Mock `
-                    -CommandName Get-ServiceResource `
-                    -MockWith { $script:testServiceMockRunning } `
-                    -Verifiable
-                Mock `
-                    -CommandName Get-Win32ServiceObject `
-                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                    -Verifiable
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
-
                 It 'Should not throw an exception' {
                     { $script:result = Test-TargetResource @script:splatServiceExistsAutomatic -Verbose } | Should Not Throw
                 }
@@ -196,13 +199,16 @@ try
 
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 2
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 2
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
                 }
             }
+
+            # TODO: complete
         }
 
         Describe "$DSCResourceName\Set-TargetResource" {

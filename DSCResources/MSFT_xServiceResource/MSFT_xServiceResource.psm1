@@ -232,7 +232,8 @@ function Test-TargetResource
         } # if
 
         $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
-        if($userName -ne $null -and !(Test-UserName -SvcWmi $SvcWmi -Username $userName))
+        if($null -ne $userName  `
+            -and -not (Test-UserName -SvcWmi $svcWmi -Username $userName))
         {
             Write-Verbose -Message ($LocalizedData.TestUserNameMismatch `
                 -f $svcWmi.Name,$svcWmi.StartName,$userName)
@@ -240,7 +241,7 @@ function Test-TargetResource
         } # if
 
         if ($PSBoundParameters.ContainsKey("DesktopInteract") `
-            -and $SvcWmi.DesktopInteract -ne $DesktopInteract)
+            -and $svcWmi.DesktopInteract -ne $DesktopInteract)
         {
             Write-Verbose -Message ($LocalizedData.TestDesktopInteractMismatch `
                 -f $svcWmi.Name,$svcWmi.DesktopInteract,$DesktopInteract)
@@ -248,7 +249,7 @@ function Test-TargetResource
         } # if
 
         if ($PSBoundParameters.ContainsKey("StartupType") `
-            -and $SvcWmi.StartMode -ine (ConvertTo-StartModeString -StartupType $StartupType))
+            -and $svcWmi.StartMode -ine (ConvertTo-StartModeString -StartupType $StartupType))
         {
             Write-Verbose -Message ($LocalizedData.TestStartupTypeMismatch `
                 -f $svcWmi.Name,$svcWmi.StartMode,$StartupType)
@@ -531,7 +532,7 @@ function Test-StartupType
             New-InvalidArgumentError `
                 -ErrorId "CannotStopServiceSetToStartAutomatically" `
                 -ErrorMessage ($LocalizedData.CannotStopServiceSetToStartAutomatically -f $Name)
-        }
+        } # if
     }
     else
     {
@@ -541,8 +542,8 @@ function Test-StartupType
             New-InvalidArgumentError `
                 -ErrorId "CannotStartAndDisable" `
                 -ErrorMessage ($LocalizedData.CannotStartAndDisable -f $Name)
-        }
-    }
+        } # if
+    } # if
 } # function Test-StartupType
 
 <#
@@ -567,7 +568,7 @@ function ConvertTo-StartModeString
     if ($StartupType -ieq 'Automatic')
     {
         return 'Auto'
-    }
+    }  # if
     return $StartupType
 } # function ConvertTo-StartModeString
 
@@ -640,7 +641,7 @@ function Write-WriteProperties
         }
 
         $requiresRestart = $requiresRestart -or (Write-BinaryProperties @writeBinaryArguments)
-    }
+    } # if
 
     # update credentials
     if($PSBoundParameters.ContainsKey("BuiltInAccount") `
@@ -650,27 +651,27 @@ function Write-WriteProperties
 
         if($PSBoundParameters.ContainsKey("BuiltInAccount"))
         {
-            $null=$writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)
-        }
+            $null = $writeCredentialPropertiesArguments.Add("BuiltInAccount",$BuiltInAccount)
+        } # if
 
         if($PSBoundParameters.ContainsKey("Credential"))
         {
-            $null=$writeCredentialPropertiesArguments.Add("Credential",$Credential)
-        }
+            $null = $writeCredentialPropertiesArguments.Add("Credential",$Credential)
+        } # if
 
         if($PSBoundParameters.ContainsKey("DesktopInteract"))
         {
-            $null=$writeCredentialPropertiesArguments.Add("DesktopInteract",$DesktopInteract)
-        }
+            $null = $writeCredentialPropertiesArguments.Add("DesktopInteract",$DesktopInteract)
+        } # if
 
         Write-CredentialProperties @writeCredentialPropertiesArguments
-    }
+    } # if
 
     # Update startup type
     if($PSBoundParameters.ContainsKey("StartupType"))
     {
         Set-ServiceStartupType -Win32ServiceObject $svcWmi -StartupType $StartupType
-    }
+    } # if
 
     # Return restart status
     return $requiresRestart
