@@ -63,7 +63,7 @@ function Get-TargetResource
         }
         return @{
             Name            = $service.Name
-            StartupType     = Resolve-StartupType -StartupType $win32ServiceObject.StartMode
+            StartupType     = ConvertTo-StartupTypeString -StartupType $win32ServiceObject.StartMode
             BuiltInAccount  = $builtInAccount
             State           = $service.Status.ToString()
             Path            = $win32ServiceObject.PathName
@@ -230,7 +230,7 @@ function Test-TargetResource
             $null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)
         }
 
-        $userName,$password=Get-UserNameAndPassword @getUserNameAndPasswordArgs
+        $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
         if($userName -ne $null -and !(Test-UserName $SvcWmi $userName))
         {
             Write-Verbose -Message ($LocalizedData.TestUserNameMismatch `
@@ -365,8 +365,6 @@ function Set-TargetResource
         [uint32]
         $TerminateTimeout = 30000
     )
-
-    Write-Verbose -Verbose "SERIOUSLY WTF?"
 
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
@@ -548,7 +546,8 @@ function Test-StartupType
 
 <#
     .SYNOPSIS
-    Converts the StartupType string to the correct StartMode string returned in the Win32 service object.
+    Converts the StartupType string to the correct StartMode string returned in the Win32
+    service object.
 
     .PARAMETER StartupType
     The StartupType to convert.
@@ -564,15 +563,35 @@ function ConvertTo-StartModeString
         [String] $StartupType
     )
 
-    if ($StartupType -eq 'Automatic')
+    if ($StartupType -ieq 'Automatic')
     {
         return 'Auto'
     }
-    else
-    {
-        return $StartupType
-    }
+    return $StartupType
 } # function ConvertTo-StartModeString
+
+<#
+    .SYNOPSIS
+    Converts the StartupType string returned in a Win32_Service object to the format
+    expected by this resource.
+
+    .PARAMETER StartupType
+    The StartupType string to convert.
+#>
+function ConvertTo-StartupTypeString
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Auto', 'Manual', 'Disabled')]
+        $StartupType
+    )
+    if ($StartupType -ieq 'Auto')
+    {
+        return "Automatic"
+    } # if
+    return $StartupType
+} # function ConvertTo-StartupTypeString
 
 <#
     .SYNOPSIS
@@ -850,7 +869,9 @@ function Write-BinaryProperties
     {
         $innerMessage = $LocalizedData.MethodFailed -f "Change","Win32_Service",$ret.ReturnValue
         $message = $LocalizedData.ErrorChangingProperty -f "Binary Path",$innerMessage
-        New-InvalidArgumentError -ErrorId "ChangeBinaryPathFailed" -ErrorMessage $message
+        New-InvalidArgumentError `
+            -ErrorId "ChangeBinaryPathFailed" `
+            -ErrorMessage $message
     }
 
     return $true
@@ -988,20 +1009,22 @@ function Remove-Service
         {
             $serviceDeletedSuccessfully = $true
             break
-        }
+        } # if
         #try again after 2 millisecs if the service is not deleted.
         Write-Verbose -Message ($LocalizedData.TryDeleteAgain)
-        Start-Sleep .002
-    }
+        Start-Sleep -Seconds .002
+    } # for
     if (-not $serviceDeletedSuccessfully)
     {
-        Write-Verbose -Message ($LocalizedData.ErrorDeletingService -f $Name)
-        throw $LocalizedData.ErrorDeletingService -f $Name
+        $errorMessage = ($LocalizedData.ErrorDeletingService -f $Name)
+        New-InvalidArgumentError `
+            -ErrorId "ErrorDeletingService" `
+            -ErrorMessage $errorMessage
     }
     else
     {
         Write-Verbose -Message ($LocalizedData.ServiceDeletedSuccessfully -f $Name)
-    }
+    } # if
 } # function Remove-Service
 
 <#
@@ -1035,7 +1058,7 @@ function Start-ServiceResource
     {
         Write-Verbose -Message ($LocalizedData.ServiceAlreadyStarted -f $service.Name)
         return
-    }
+    } # if
 
     if ($PSCmdlet.ShouldProcess($Name, $LocalizedData.StartServiceWhatIf))
     {
@@ -1053,35 +1076,15 @@ function Start-ServiceResource
             $servicePath = (Get-CimInstance -Class win32_service |
                 Where-Object {$_.Name -eq $Name}).PathName
             $errorMessage = ($LocalizedData.ErrorStartingService -f `
-                $service.Name, $servicePath,$_.Exception.Message)
-            New-InvalidArgumentError "ErrorStartingService" $errorMessage
-        }
+                $service.Name, $servicePath, $_.Exception.Message)
+            New-InvalidArgumentError `
+                -ErrorId "ErrorStartingService" `
+                -ErrorMessage $errorMessage
+        } # try
 
         Write-Verbose -Message ($LocalizedData.ServiceStarted -f $service.Name)
-    }
-} # function Start-ServiceResource
-
-<#
-    .SYNOPSIS
-    Converts the StartupType string returned in a Win32_Service object to the format
-    expected by this resource.
-
-    .PARAMETER StartupType
-    The StartupType string to convert.
-#>
-function Resolve-StartupType
-{
-    param
-    (
-        [String]
-        $StartupType
-    )
-    if ($StartupType -ieq 'Auto')
-    {
-        return "Automatic"
     } # if
-    return $StartupType
-} # function Resolve-StartupType
+} # function Start-ServiceResource
 
 <#
     .SYNOPSIS
@@ -1127,6 +1130,12 @@ function Resolve-UserName
 <#
     .SYNOPSIS
     Throws an argument error.
+
+    .PARAMETER ErrorId
+    The error id to assign to the custom exception.
+
+    .PARAMETER ErrorMessage
+    The error message to assign to the custom exception.
 #>
 function New-InvalidArgumentError
 {

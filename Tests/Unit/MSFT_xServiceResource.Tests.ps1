@@ -82,9 +82,18 @@ try
         Describe "$DSCResourceName\Get-TargetResource" {
             Context 'Service exists' {
                 # Mocks that should be called
-                Mock -CommandName Test-ServiceExists -MockWith { $true } -Verifiable
-                Mock -CommandName Get-serviceResource -MockWith { $script:testServiceMockRunning } -Verifiable
-                Mock -CommandName Get-Win32ServiceObject -MockWith { $script:testWin32ServiceMockRunningLocalSystem } -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Get-ServiceResource `
+                    -MockWith { $script:testServiceMockRunning } `
+                    -Verifiable
+                Mock `
+                    -CommandName Get-Win32ServiceObject `
+                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                    -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:service = Get-TargetResource -Name $script:testServiceName -Verbose } | Should Not Throw
@@ -106,7 +115,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-serviceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                 }
             }
@@ -144,9 +153,75 @@ try
         }
 
         Describe "$DSCResourceName\Test-StartupType" {
+            Context 'Service is stopped, startup is automatic' {
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "CannotStopServiceSetToStartAutomatically" `
+                    -ErrorMessage ($LocalizedData.CannotStopServiceSetToStartAutomatically -f $script:testServiceName)
+
+                It 'Shoult throw CannotStopServiceSetToStartAutomatically exception' {
+                    { Test-StartupType `
+                        -Name $script:testServiceName `
+                        -StartupType 'Automatic' `
+                        -State 'Stopped' } | Should Throw $errorRecord
+                }
+            }
+
+            Context 'Service is stopped, startup is not automatic' {
+                It 'Shoult not throw exception' {
+                    { Test-StartupType `
+                        -Name $script:testServiceName `
+                        -StartupType 'Disabled' `
+                        -State 'Stopped' } | Should Not Throw
+                }
+            }
+
+            Context 'Service is running, startup is disabled' {
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "CannotStartAndDisable" `
+                    -ErrorMessage ($LocalizedData.CannotStartAndDisable -f $script:testServiceName)
+
+                It 'Shoult throw CannotStartAndDisable exception' {
+                    { Test-StartupType `
+                        -Name $script:testServiceName `
+                        -StartupType 'Disabled' `
+                        -State 'Running' } | Should Throw $errorRecord
+                }
+            }
+
+            Context 'Service is running, startup is not disabled' {
+                It 'Shoult not throw exception' {
+                    { Test-StartupType `
+                        -Name $script:testServiceName `
+                        -StartupType 'Manual' `
+                        -State 'Running' } | Should Not Throw
+                }
+            }
         }
 
         Describe "$DSCResourceName\ConvertTo-StartModeString" {
+            Context "StartupType is 'Automatic'" {
+                It "Should return 'Automatic'" {
+                    ConvertTo-StartModeString -StartupType 'Automatic' | Should Be 'Auto'
+                }
+            }
+            Context "StartupType is 'Disabled'" {
+                It "Should return 'Disabled'" {
+                    ConvertTo-StartModeString -StartupType 'Disabled' | Should Be 'Disabled'
+                }
+            }
+        }
+
+        Describe "$DSCResourceName\ConvertTo-StartupTypeString" {
+            Context "StartupType is 'Auto'" {
+                It "Should return 'Automatic'" {
+                    ConvertTo-StartupTypeString -StartupType 'Auto' | Should Be 'Automatic'
+                }
+            }
+            Context "StartupType is 'Disabled'" {
+                It "Should return 'Disabled'" {
+                    ConvertTo-StartupTypeString -StartupType 'Disabled' | Should Be 'Disabled'
+                }
+            }
         }
 
         Describe "$DSCResourceName\Write-WriteProperties" {
@@ -179,16 +254,99 @@ try
         Describe "$DSCResourceName\Start-ServiceResource" {
         }
 
-        Describe "$DSCResourceName\Resolve-StartupType" {
-        }
-
         Describe "$DSCResourceName\Resolve-UserName" {
+            Context "Username is 'NetworkService'" {
+                It "Should return 'NT Authority\NetworkService'" {
+                    Resolve-UserName -Username 'NetworkService' | Should Be 'NT Authority\NetworkService'
+                }
+            }
+            Context "Username is 'LocalService'" {
+                It "Should return 'NT Authority\LocalService'" {
+                    Resolve-UserName -Username 'LocalService' | Should Be 'NT Authority\LocalService'
+                }
+            }
+            Context "Username is 'LocalSystem'" {
+                It "Should return '.\LocalSystem'" {
+                    Resolve-UserName -Username 'LocalSystem' | Should Be '.\LocalSystem'
+                }
+            }
+            Context "Username is 'Domain\svcAccount'" {
+                It "Should return 'Domain\svcAccount'" {
+                    Resolve-UserName -Username 'Domain\svcAccount' | Should Be 'Domain\svcAccount'
+                }
+            }
+            Context "Username is 'svcAccount'" {
+                It "Should return '.\svcAccount'" {
+                    Resolve-UserName -Username 'svcAccount' | Should Be '.\svcAccount'
+                }
+            }
         }
 
         Describe "$DSCResourceName\New-InvalidArgumentError" {
+            Context 'Throws exception' {
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ErrorId" `
+                    -ErrorMessage "ErrorMessage"
+
+                It 'Throws exception' {
+                    { New-InvalidArgumentError `
+                        -ErrorId "ErrorId" `
+                        -ErrorMessage "ErrorMessage"
+                    } | Should Throw $errorRecord
+                }
+            }
         }
 
         Describe "$DSCResourceName\Test-ServiceExists" {
+            Context 'Service exists' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-Service `
+                    -ParameterFilter { $Name -eq $script:testServiceName } `
+                    -MockWith { $script:testServiceMockRunning } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:result = Test-ServiceExists -Name $script:testServiceName -Verbose } | Should Not Throw
+                }
+
+                It 'Result is true' {
+                    $script:Result | Should Be $true
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled `
+                        -CommandName Get-Service `
+                        -ParameterFilter { $Name -eq $script:testServiceName } `
+                        -Exactly 1
+                }
+            }
+
+            Context 'Service does not exist' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-Service `
+                    -ParameterFilter { $Name -eq $script:testServiceName } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:result = Test-ServiceExists -Name $script:testServiceName -Verbose } | Should Not Throw
+                }
+
+                It 'Result is false' {
+                    $script:Result | Should Be $false
+                }
+
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled `
+                        -CommandName Get-Service `
+                        -ParameterFilter { $Name -eq $script:testServiceName } `
+                        -Exactly 1
+                }
+            }
         }
 
         Describe "$DSCResourceName\Compare-ServicePath" {
@@ -276,7 +434,8 @@ try
                 Mock `
                     -CommandName Get-Service `
                     -ParameterFilter { $Name -eq $script:testServiceName } `
-                    -MockWith { $script:testServiceMockRunning } -Verifiable
+                    -MockWith { $script:testServiceMockRunning } `
+                    -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:service = Get-ServiceResource -Name $script:testServiceName -Verbose } | Should Not Throw
