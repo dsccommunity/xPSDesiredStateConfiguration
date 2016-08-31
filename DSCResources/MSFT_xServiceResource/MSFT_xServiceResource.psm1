@@ -131,7 +131,7 @@ function Get-TargetResource
 function Test-TargetResource
 {
     [OutputType([Boolean])]
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -188,19 +188,19 @@ function Test-TargetResource
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
-    }
+    } # if
 
     $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
 
     if ($Ensure -eq 'Absent')
     {
         return -not $serviceExists
-    }
+    } # if
 
     if (-not $serviceExists)
     {
         return $false
-    }
+    } # if
 
     $svc = Get-TargetResource -Name $Name
     $svcWmi = Get-Win32ServiceObject -Name $Name
@@ -212,7 +212,7 @@ function Test-TargetResource
         Write-Verbose -Message ($LocalizedData.TestBinaryPathMismatch `
             -f $svcWmi.Name, $svcWmi.PathName, $Path)
         return $false
-    }
+    } # if
 
     # Check the optional parameters
     if ($PSBoundParameters.ContainsKey("StartupType") `
@@ -223,20 +223,21 @@ function Test-TargetResource
         $getUserNameAndPasswordArgs = @{}
         if($PSBoundParameters.ContainsKey("BuiltInAccount"))
         {
-            $null=$getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
-        }
+            $null = $getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
+        } # if
+
         if($PSBoundParameters.ContainsKey("Credential"))
         {
-            $null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)
-        }
+            $null = $getUserNameAndPasswordArgs.Add("Credential",$Credential)
+        } # if
 
         $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
-        if($userName -ne $null -and !(Test-UserName $SvcWmi $userName))
+        if($userName -ne $null -and !(Test-UserName -SvcWmi $SvcWmi -Username $userName))
         {
             Write-Verbose -Message ($LocalizedData.TestUserNameMismatch `
                 -f $svcWmi.Name,$svcWmi.StartName,$userName)
             return $false
-        }
+        } # if
 
         if ($PSBoundParameters.ContainsKey("DesktopInteract") `
             -and $SvcWmi.DesktopInteract -ne $DesktopInteract)
@@ -244,7 +245,7 @@ function Test-TargetResource
             Write-Verbose -Message ($LocalizedData.TestDesktopInteractMismatch `
                 -f $svcWmi.Name,$svcWmi.DesktopInteract,$DesktopInteract)
             return $false
-        }
+        } # if
 
         if ($PSBoundParameters.ContainsKey("StartupType") `
             -and $SvcWmi.StartMode -ine (ConvertTo-StartModeString -StartupType $StartupType))
@@ -252,15 +253,15 @@ function Test-TargetResource
             Write-Verbose -Message ($LocalizedData.TestStartupTypeMismatch `
                 -f $svcWmi.Name,$svcWmi.StartMode,$StartupType)
             return $false
-        }
-    }
+        } # if
+    } # if
 
     if ($State -ne $svc.State)
     {
         Write-Verbose -Message ($LocalizedData.TestStateMismatch `
             -f $svcWmi.Name, $svc.State, $State)
         return $false
-    }
+    } # if
 
     return $true
 } # function Test-TargetResource
@@ -600,7 +601,7 @@ function ConvertTo-StartupTypeString
 function Write-WriteProperties
 {
     [OutputType([System.Boolean])]
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true)]
@@ -779,11 +780,11 @@ function Write-CredentialProperties
         $DesktopInteract
     )
 
-    if(!$PSBoundParameters.ContainsKey("Credential") `
-        -and !$PSBoundParameters.ContainsKey("BuiltInAccount"))
+    if(-not $PSBoundParameters.ContainsKey("Credential") `
+        -and -not $PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
         return
-    }
+    } # if
 
     if($PSBoundParameters.ContainsKey("Credential") `
         -and $PSBoundParameters.ContainsKey("BuiltInAccount"))
@@ -792,36 +793,39 @@ function Write-CredentialProperties
             -ErrorId "OnlyCredentialOrBuiltInAccount" `
             -ErrorMessage ($LocalizedData.OnlyOneParameterCanBeSpecified `
                 -f "Credential","BuiltInAccount")
-    }
+    } # if
 
     $getUserNameAndPasswordArgs=@{}
     if($PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
-        $null=$getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
-    }
+        $null = $getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
+    } # if
+
     if($PSBoundParameters.ContainsKey("Credential"))
     {
-        $null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)
-    }
+        $null = $getUserNameAndPasswordArgs.Add("Credential",$Credential)
+    } # if
 
-    $userName,$password=Get-UserNameAndPassword @getUserNameAndPasswordArgs
+    $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
 
-    if($userName -ne $null -and !(Test-UserName $SvcWmi $userName) `
+    if($null -ne $userName `
+        -and -not (Test-UserName -SvcWmi $SvcWmi -Username $userName) `
         -and $PSCmdlet.ShouldProcess($SvcWmi.Name,$LocalizedData.SetCredentialWhatIf))
     {
         if($PSBoundParameters.ContainsKey("Credential"))
         {
             Set-LogOnAsServicePolicy $userName
-        }
+        } # if
 
         $arguments = @{
-            StartName=$userName
-            StartPassword=$password
+            StartName = $userName
+            StartPassword = $password
         }
+
         if($PSBoundParameters.ContainsKey("DesktopInteract"))
         {
             $arguments.DesktopInteract = $DesktopInteract
-        }
+        } # if
 
         $ret = Invoke-CimMethod `
             -InputObject $SvcWmi `
@@ -836,8 +840,8 @@ function Write-CredentialProperties
             New-InvalidArgumentError `
                 -ErrorId "ChangeCredentialFailed" `
                 -ErrorMessage $message
-        }
-    }
+        } # if
+    } # if
 } # function Write-CredentialProperties
 
 <#
@@ -847,7 +851,7 @@ function Write-CredentialProperties
 function Write-BinaryProperties
 {
     [OutputType([System.Boolean])]
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true)]

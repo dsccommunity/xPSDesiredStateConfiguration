@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
+
 $script:DSCModuleName      = 'xPSDesiredStateConfiguration'
 $script:DSCResourceName    = 'MSFT_xServiceResource'
 
@@ -33,6 +36,8 @@ try
         $script:testServiceStartupTypeWin32 = 'Auto'
         $script:testServiceStatus = 'Running'
         $script:testUsername = 'TestUser'
+        $script:testPassword = 'DummyPassword'
+        $script:testCredential = New-Object System.Management.Automation.PSCredential $script:testUsername, (ConvertTo-SecureString $script:testPassword -AsPlainText -Force)
 
         $script:testServiceMockRunning = @{
             Name               = $script:testServiceName
@@ -53,6 +58,17 @@ try
             DisplayName             = $script:testServiceDisplayName
             StartName               = 'LocalSystem'
             State                   = $script:testServiceStatus
+        }
+        $script:splatServiceExistsAutomatic = @{
+            Name                    = $script:testServiceName
+            StartupType             = $script:testServiceStartupType
+            BuiltInAccount          = 'LocalSystem'
+            DesktopInteract         = $true
+            State                   = $script:testServiceStatus
+            Ensure                  = 'Present'
+            Path                    = $script:testServiceExecutablePath
+            DisplayName             = $script:testServiceDisplayName
+            Description             = $script:testServiceDescription
         }
 
         function Get-InvalidArgumentError
@@ -147,6 +163,47 @@ try
         }
 
         Describe "$DSCResourceName\Test-TargetResource" {
+            Mock `
+                -CommandName Test-StartupType `
+                -Verifiable
+
+            Context 'Service exists and should, and all parameters match' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Get-ServiceResource `
+                    -MockWith { $script:testServiceMockRunning } `
+                    -Verifiable
+                Mock `
+                    -CommandName Get-Win32ServiceObject `
+                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                    -Verifiable
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:result = Test-TargetResource @script:splatServiceExistsAutomatic -Verbose } | Should Not Throw
+                }
+
+                It 'Should return true' {
+                    $script:result | Should Be $True
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                }
+            }
+
         }
 
         Describe "$DSCResourceName\Set-TargetResource" {
@@ -240,9 +297,53 @@ try
         }
 
         Describe "$DSCResourceName\Test-UserName" {
+            Context 'Username matches' {
+                It 'Should not thrown an exception' {
+                    { $script:result = Test-Username `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Username $script:testUsername } | Should Not Throw
+                }
+                It 'Should return true' {
+                    $script:result = $true
+                }
+            }
+            Context 'Username does not match' {
+                It 'Should not thrown an exception' {
+                    { $script:result = Test-Username `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Username 'mismatch' } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result = $false
+                }
+            }
         }
 
         Describe "$DSCResourceName\Get-UserNameAndPassword" {
+            Context 'Built-in account provided' {
+                $script:result = Get-UserNameAndPassword -BuiltInAccount 'LocalService'
+
+                It "Should return 'NT Authority\LocalService' and `$null" {
+                     $script:result[0] | Should Be 'NT Authority\LocalService'
+                     $script:result[1] | Should BeNullOrEmpty
+                }
+            }
+            Context 'Credential provided' {
+                $script:result = Get-UserNameAndPassword -Credential $script:testCredential
+
+                It "Should return '.\$($script:testUsername)' and '$($script:testPassword)'" {
+                     $script:result[0] | Should Be ".\$script:testUsername"
+                     $script:result[1] | Should Be $script:testPassword
+                }
+            }
+            Context 'Neither built-in account or credential provided' {
+                $script:result = Get-UserNameAndPassword
+
+                It "Should return '$null' and '$null'" {
+                     $script:result[0] | Should BeNullOrEmpty
+                     $script:result[1] | Should BeNullOrEmpty
+                }
+            }
         }
 
         Describe "$DSCResourceName\Stop-ServiceResource" {
