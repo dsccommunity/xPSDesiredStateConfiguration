@@ -360,6 +360,7 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed error calling Get-TargetResource when service does not exist.
     * Fixed bug with Get-TargetResource returning StartupType 'Auto' instead of 'Automatic'.
     * Converted to HQRM standards.
+    * Removed obfuscation of exception in Get-Win32ServiceObject function.
 
 ### 3.13.0.0
 

@@ -693,16 +693,7 @@ function Get-Win32ServiceObject
         $Name
     )
 
-    try
-    {
-        return Get-CimInstance -ClassName Win32_Service -Filter "Name='$Name'"
-    }
-    catch
-    {
-        Write-Verbose -Message ($LocalizedData.ErrorRetrievingServiceInformation `
-            -f $Name,$_.Exception.Message)
-        throw
-    }
+    return Get-CimInstance -ClassName Win32_Service -Filter "Name='$Name'"
 } # function Get-Win32ServiceObject
 
 <#
@@ -998,7 +989,7 @@ function Stop-ServiceResource
 #>
 function Remove-Service
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
         [parameter(Mandatory = $true)]
@@ -1014,16 +1005,15 @@ function Remove-Service
             $serviceDeletedSuccessfully = $true
             break
         } # if
-        #try again after 2 millisecs if the service is not deleted.
+        # try again after 2 millisecs if the service is not deleted.
         Write-Verbose -Message ($LocalizedData.TryDeleteAgain)
         Start-Sleep -Seconds .002
     } # for
     if (-not $serviceDeletedSuccessfully)
     {
-        $errorMessage = ($LocalizedData.ErrorDeletingService -f $Name)
         New-InvalidArgumentError `
             -ErrorId "ErrorDeletingService" `
-            -ErrorMessage $errorMessage
+            -ErrorMessage ($LocalizedData.ErrorDeletingService -f $Name)
     }
     else
     {

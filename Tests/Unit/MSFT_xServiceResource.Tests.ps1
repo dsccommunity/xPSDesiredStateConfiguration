@@ -203,10 +203,10 @@ try
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
                 }
             }
-
         }
 
         Describe "$DSCResourceName\Set-TargetResource" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Test-StartupType" {
@@ -282,18 +282,60 @@ try
         }
 
         Describe "$DSCResourceName\Write-WriteProperties" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Get-Win32ServiceObject" {
+            Context 'Service exists' {
+                Mock `
+                    -CommandName Get-CimInstance `
+                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:result = Get-Win32ServiceObject -Name $script:testServiceName -Verbose } | Should Not Throw
+                }
+
+                It 'Should return expected hash table' {
+                    $script:result = $script:testWin32ServiceMockRunningLocalSystem
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-CimInstance -Exactly 1
+                }
+            }
+
+            Context 'Service does not exist' {
+                Mock `
+                    -CommandName Get-CimInstance `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:result = Get-Win32ServiceObject -Name $script:testServiceName -Verbose } | Should Not Throw
+                }
+
+                It 'Should return $null' {
+                    $script:result | Should BeNullOrEmpty
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-CimInstance -Exactly 1
+                }
+            }
         }
 
         Describe "$DSCResourceName\Set-ServiceStartupType" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Write-CredentialProperties" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Write-BinaryProperties" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Test-UserName" {
@@ -347,12 +389,54 @@ try
         }
 
         Describe "$DSCResourceName\Stop-ServiceResource" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Remove-Service" {
+            # Mocks that should be called
+            Mock -CommandName 'sc.exe' -Verifiable
+            Mock -CommandName Test-ServiceExists -MockWith { $false } -Verifiable
+
+            Context 'Service is deleted successfully' {
+                # Mocks that should not be called
+                Mock -CommandName Start-Sleep
+
+                It 'Should not throw exception' {
+                    { Remove-Service -Name $script:testServiceName } | Should Not Throw
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName 'sc.exe' -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-Sleep -Exactly 0
+                }
+            }
+
+            Mock -CommandName Test-ServiceExists -MockWith { $true } -Verifiable
+
+            Context 'Service can not be deleted (takes a few seconds)' {
+                Mock -CommandName Start-Sleep -Verifiable
+
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ErrorDeletingService" `
+                    -ErrorMessage ($LocalizedData.ErrorDeletingService -f $script:testServiceName)
+
+                It 'Should throw ErrorDeletingService exception' {
+                    { Remove-Service -Name $script:testServiceName } | Should Throw $errorRecord
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName 'sc.exe' -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 999
+                    Assert-MockCalled -CommandName Start-Sleep -Exactly 999
+                }
+            }
         }
 
         Describe "$DSCResourceName\Start-ServiceResource" {
+            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Resolve-UserName" {
