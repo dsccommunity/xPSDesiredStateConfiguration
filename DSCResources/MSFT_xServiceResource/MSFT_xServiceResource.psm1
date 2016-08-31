@@ -466,7 +466,6 @@ function Set-TargetResource
 
     if ($PSBoundParameters.ContainsKey('DesktopInteract'))
     {
-        Write-Verbose -Verbose "DESKTOPINTERACTION FOR THE WINNNNNNNNNN"
         $writeWritePropertiesArguments['DesktopInteract'] = $DesktopInteract
     }
 
