@@ -77,18 +77,20 @@ Specify an empty string if you don't want to pass any arguments.
 
 For a complete list of properties, please use Get-DscResource
 
-* **Name**: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
-* **Ensure**: An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent')
-* **Path**: The path to the service executable file
-* **StartupType**: Indicates the startup type for the service. The values that are allowed for this property are: Automatic, Disabled, and Manual
-* **BuiltInAccount**: Indicates the sign-in account to use for the service. The values that are allowed for this property are: LocalService, LocalSystem, and NetworkService.
-* **Credential**: The credential to run the service under.
-* **State**: Indicates the state you want to ensure for the service.
-* **DisplayName**: The display name of the service.
-* **Description**: The description of the service.
-* **Dependencies**: An array of strings indicating the names of the dependencies of the service.
-* **StartupTimeout**: The time to wait for the service to start in milliseconds.
-* **TerminateTimeout**: The time to wait for the service to stop in milliseconds.
+* **[String] Name** _(Key)_: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
+* **[String] Ensure** _(Write)_: Ensures that the service is present or absent. Defaults to Present. { *Present* | Absent }.
+* **[String] Path** _(Write)_: The path to the service executable file.
+* **[String] StartupType** _(Write)_: Indicates the startup type for the service. { Automatic | Disabled | Manual }.
+* **[String] BuiltInAccount** _(Write)_: Indicates the sign-in account to use for the service. { LocalService | LocalSystem | NetworkService }.
+* **[PSCredential] Credential** _(Write)_: The credential to run the service under.
+* **[Boolean] DesktopInteract** _(Write)_: The service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
+* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped }.
+* **[String] DisplayName** _(Write)_: The display name of the service.
+* **[String] Description** _(Write)_: The description of the service.
+* **[String[]] Dependencies** _(Write)_: An array of strings indicating the names of the dependencies of the service.
+* **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000.
+* **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000.
+* **[String] Status** _(Read)_: The current status of the service.
 
 ### xRemoteFile
 
@@ -340,6 +342,23 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script
     * Added integration test
+* xService:
+    * Added descriptions to MOF file.
+    * Added additional details to parameters in Readme.md in a format that can be generated from the MOF.
+    * Added DesktopInteract parameter.
+    * Added standard help headers to *-TargetResource functions.
+    * Changed indent/format of all function help headers to be consistent.
+    * Fixed line length violations.
+    * Changed localization code so only a single copy of localization strings are required.
+    * Removed localization strings from inside module file.
+    * Updated unit tests to use standard test enviroment configuration and header.
+    * Recreated unit tests to be non-destructive.
+    * Created integration tests.
+    * Allowed service to be restarted immediately rather than wait for next LCM run.
+    * Changed helper function names to valid verb-noun format.
+    * Removed New-TestService function from MSFT_xServiceResource.TestHelper.psm1 because it should not be used.
+    * Fixed error calling Get-TargetResource when service does not exist.
+    * Fixed bug with Get-TargetResource returning StartupType 'Auto' instead of 'Automatic'.
 
 ### 3.13.0.0
 
