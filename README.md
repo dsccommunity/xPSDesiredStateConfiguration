@@ -359,6 +359,7 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Removed New-TestService function from MSFT_xServiceResource.TestHelper.psm1 because it should not be used.
     * Fixed error calling Get-TargetResource when service does not exist.
     * Fixed bug with Get-TargetResource returning StartupType 'Auto' instead of 'Automatic'.
+    * Converted to HQRM standards.
 
 ### 3.13.0.0
 

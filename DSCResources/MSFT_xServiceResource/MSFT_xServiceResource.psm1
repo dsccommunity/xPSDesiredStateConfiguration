@@ -19,6 +19,7 @@ else
 <#
     .SYNOPSIS
     Get the current status of a service.
+
     .PARAMETER name
     Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
 #>
@@ -85,32 +86,45 @@ function Get-TargetResource
 <#
     .SYNOPSIS
     Tests if a service needs to be created, changed or removed.
+
     .PARAMETER name
     Indicates the service name. Note that sometimes this is different from the display name.
     You can get a list ofthe services and their current state with the Get-Service cmdlet. Key.
+
     .PARAMETER Ensure
     Ensures that the service is present or absent. Optional. Defaults to Present.
+
     .PARAMETER Path
     The path to the service executable file. Optional.
+
     .PARAMETER StartupType
     Indicates the startup type for the service. Optional.
+
     .PARAMETER BuiltInAccount
     Indicates the sign-in account to use for the service. Optional.
+
     .PARAMETER Credential
     The credential to run the service under. Optional.
+
     .PARAMETER DesktopInteract
     The service can create or communicate with a window on the desktop. Must be false for services
     not running as LocalSystem. Optional. Defaults to False.
+
     .PARAMETER State
     Indicates the state you want to ensure for the service. Optional. Defaults to Running.
+
     .PARAMETER DisplayName
     The display name of the service. Optional.
+
     .PARAMETER Description
     The description of the service. Optional.
+
     .PARAMETER Dependencies
     An array of strings indicating the names of the dependencies of the service. Optional.
+
     .PARAMETER StartupTimeout
     The time to wait for the service to start in milliseconds. Optional.
+
     .PARAMETER TerminateTimeout
     The time to wait for the service to stop in milliseconds. Optional.
 #>
@@ -216,7 +230,7 @@ function Test-TargetResource
             $null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)
         }
 
-        $userName,$password=GetUserNameAndPassword @getUserNameAndPasswordArgs
+        $userName,$password=Get-UserNameAndPassword @getUserNameAndPasswordArgs
         if($userName -ne $null -and !(Test-UserName $SvcWmi $userName))
         {
             Write-Verbose -Message ($LocalizedData.TestUserNameMismatch `
@@ -254,32 +268,45 @@ function Test-TargetResource
 <#
     .SYNOPSIS
     Creates, updates or removes a service.
+
     .PARAMETER name
     Indicates the service name. Note that sometimes this is different from the display name.
     You can get a list ofthe services and their current state with the Get-Service cmdlet. Key.
+
     .PARAMETER Ensure
     Ensures that the service is present or absent. Optional. Defaults to Present.
+
     .PARAMETER Path
     The path to the service executable file. Optional.
+
     .PARAMETER StartupType
     Indicates the startup type for the service. Optional.
+
     .PARAMETER BuiltInAccount
     Indicates the sign-in account to use for the service. Optional.
+
     .PARAMETER Credential
     The credential to run the service under. Optional.
+
     .PARAMETER DesktopInteract
     The service can create or communicate with a window on the desktop. Must be false for services
     not running as LocalSystem. Optional. Defaults to False.
+
     .PARAMETER State
     Indicates the state you want to ensure for the service. Optional. Defaults to Running.
+
     .PARAMETER DisplayName
     The display name of the service. Optional.
+
     .PARAMETER Description
     The description of the service. Optional.
+
     .PARAMETER Dependencies
     An array of strings indicating the names of the dependencies of the service. Optional.
+
     .PARAMETER StartupTimeout
     The time to wait for the service to start in milliseconds. Optional.
+
     .PARAMETER TerminateTimeout
     The time to wait for the service to stop in milliseconds. Optional.
 #>
@@ -349,7 +376,7 @@ function Set-TargetResource
     if ($Ensure -eq "Absent")
     {
         Stop-ServiceResource -Name $Name -TerminateTimeout $TerminateTimeout
-        Delete-Service $Name
+        Remove-Service $Name
         return
     }
 
@@ -517,7 +544,7 @@ function Test-StartupType
                 -ErrorMessage ($LocalizedData.CannotStartAndDisable -f $Name)
         }
     }
-}
+} # function Test-StartupType
 
 <#
     .SYNOPSIS
@@ -545,7 +572,7 @@ function ConvertTo-StartModeString
     {
         return $StartupType
     }
-}
+} # function ConvertTo-StartModeString
 
 <#
     .SYNOPSIS
@@ -627,7 +654,7 @@ function Write-WriteProperties
 
     # Return restart status
     return $requiresRestart
-}
+} # function Write-WriteProperties
 
 <#
     .SYNOPSIS
@@ -656,7 +683,7 @@ function Get-Win32ServiceObject
             -f $Name,$_.Exception.Message)
         throw
     }
-}
+} # function Get-Win32ServiceObject
 
 <#
     .SYNOPSIS
@@ -706,7 +733,7 @@ function Set-ServiceStartupType
                 -ErrorMessage $errorChangingPropertyMessage
         }
     }
-}
+} # function Set-ServiceStartupType
 
 <#
     .SYNOPSIS
@@ -758,7 +785,7 @@ function Write-CredentialProperties
         $null=$getUserNameAndPasswordArgs.Add("Credential",$Credential)
     }
 
-    $userName,$password=GetUserNameAndPassword @getUserNameAndPasswordArgs
+    $userName,$password=Get-UserNameAndPassword @getUserNameAndPasswordArgs
 
     if($userName -ne $null -and !(Test-UserName $SvcWmi $userName) `
         -and $PSCmdlet.ShouldProcess($SvcWmi.Name,$LocalizedData.SetCredentialWhatIf))
@@ -792,7 +819,7 @@ function Write-CredentialProperties
                 -ErrorMessage $message
         }
     }
-}
+} # function Write-CredentialProperties
 
 <#
     .SYNOPSIS
@@ -827,7 +854,7 @@ function Write-BinaryProperties
     }
 
     return $true
-}
+} # function Write-BinaryProperties
 
 <#
     .SYNOPSIS
@@ -844,13 +871,19 @@ function Test-UserName
     )
 
     return  (Resolve-UserName -UserName $SvcWmi.StartName) -ieq $UserName
-}
+} # function Test-UserName
 
 <#
     .SYNOPSIS
-    Retrieves user name and password out of the BuiltInAccount and Credential parameters
+    Retrieves username and password out of the BuiltInAccount and Credential parameters
+
+    .PARAMETER BuiltInAccount
+    If passed the username will contain the resolved username for the built-in account.
+
+    .PARAMETER Credential
+    The Credential to extract the username from.
 #>
-function GetUserNameAndPassword
+function Get-UserNameAndPassword
 {
     param
     (
@@ -874,7 +907,7 @@ function GetUserNameAndPassword
     }
 
     return $null,$null
-}
+} # function Get-UserNameAndPassword
 
 <#
     .SYNOPSIS
@@ -929,13 +962,16 @@ function Stop-ServiceResource
 
         Write-Verbose -Message ($LocalizedData.ServiceStopped -f $service.Name)
     }
-}
+} # function Stop-ServiceResource
 
 <#
     .SYNOPSIS
     Deletes a service
+
+    .PARAMETER Name
+    The name of the service to delete.
 #>
-function Delete-Service
+function Remove-Service
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
@@ -966,7 +1002,7 @@ function Delete-Service
     {
         Write-Verbose -Message ($LocalizedData.ServiceDeletedSuccessfully -f $Name)
     }
-}
+} # function Remove-Service
 
 <#
     .SYNOPSIS
@@ -1023,26 +1059,74 @@ function Start-ServiceResource
 
         Write-Verbose -Message ($LocalizedData.ServiceStarted -f $service.Name)
     }
-}
-
-function Resolve-StartupType([string]$StartupType)
-{
-    if ($StartupType -ieq 'Auto') {return "Automatic"}
-    return $StartupType
-}
-
-function Resolve-UserName([string]$UserName)
-{
-    if ($UserName -ieq 'NetworkService') {return "NT Authority\NetworkService"}
-    if ($UserName -ieq 'LocalService') {return "NT Authority\LocalService"}
-    if ($UserName -ieq 'LocalSystem') {return ".\LocalSystem"}
-    if ($UserName.IndexOf("\") -eq -1) { return ".\" + $userName }
-    return $UserName
-}
+} # function Start-ServiceResource
 
 <#
     .SYNOPSIS
-    Throws an argument error
+    Converts the StartupType string returned in a Win32_Service object to the format
+    expected by this resource.
+
+    .PARAMETER StartupType
+    The StartupType string to convert.
+#>
+function Resolve-StartupType
+{
+    param
+    (
+        [String]
+        $StartupType
+    )
+    if ($StartupType -ieq 'Auto')
+    {
+        return "Automatic"
+    } # if
+    return $StartupType
+} # function Resolve-StartupType
+
+<#
+    .SYNOPSIS
+    Converts the username returned in a Win32_service object to the format
+    expected by this resource.
+
+    .PARAMETER UserName
+    The Username to convert.
+#>
+
+function Resolve-UserName
+{
+    param
+    (
+        [String]
+        $UserName
+    )
+    switch ($Username)
+    {
+        'NetworkService'
+        {
+            return "NT Authority\NetworkService"
+        } # 'NetworkService'
+        'LocalService'
+        {
+            return "NT Authority\LocalService"
+        } # 'LocalService'
+        'LocalSystem'
+        {
+            return ".\LocalSystem"
+        } # 'LocalSystem'
+        default
+        {
+            if ($UserName.IndexOf("\") -eq -1)
+            {
+                return ".\" + $UserName
+            } # if
+        } # default
+    } # switch
+    return $UserName
+} # function Resolve-UserName
+
+<#
+    .SYNOPSIS
+    Throws an argument error.
 #>
 function New-InvalidArgumentError
 {
@@ -1069,7 +1153,7 @@ function New-InvalidArgumentError
         -TypeName System.Management.Automation.ErrorRecord `
         -ArgumentList $exception, $ErrorId, $errorCategory, $null
     throw $errorRecord
-}
+} # function New-InvalidArgumentError
 
 <#
     .SYNOPSIS
@@ -1092,7 +1176,7 @@ function Test-ServiceExists
 
     $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
     return $null -ne $service
-}
+} # function Test-ServiceExists
 
 <#
     .SYNOPSIS
@@ -1129,7 +1213,7 @@ function Compare-ServicePath
         [System.Globalization.CultureInfo]::CurrentUICulture)
 
     return $stringCompareResult -eq 0
-}
+} # function Compare-ServicePath
 
 <#
     .SYNOPSIS
@@ -1151,23 +1235,28 @@ function Get-ServiceResource
     )
 
     $service = Get-Service -Name $Name -ErrorAction Ignore
-
     if ($null -eq $service)
     {
         New-InvalidArgumentError `
             -ErrorId "ServiceNotFound" `
             -ErrorMessage ($LocalizedData.ServiceNotFound -f $Name)
-    }
+    } # if
 
     return $service
-}
+} # function Get-ServiceResource
 
 <#
     .SYNOPSIS
     Grants log on as service right to the given user
 #>
-function Set-LogOnAsServicePolicy([string]$UserName)
+function Set-LogOnAsServicePolicy
 {
+    param
+    (
+        [String]
+        $UserName
+    )
+
     $logOnAsServiceText=@"
         namespace LogOnAsServiceHelper
         {
@@ -1515,31 +1604,31 @@ function Set-LogOnAsServicePolicy([string]$UserName)
 
     try
     {
-        $existingType=[LogOnAsServiceHelper.NativeMethods]
+        $existingType = [LogOnAsServiceHelper.NativeMethods]
     }
     catch
     {
-        $logOnAsServiceText=$logOnAsServiceText.Replace("CannotOpenPolicyErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("CannotOpenPolicyErrorMessage",`
             $LocalizedData.CannotOpenPolicyErrorMessage)
-        $logOnAsServiceText=$logOnAsServiceText.Replace("UserNameTooLongErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("UserNameTooLongErrorMessage",`
             $LocalizedData.UserNameTooLongErrorMessage)
-        $logOnAsServiceText=$logOnAsServiceText.Replace("CannotLookupNamesErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("CannotLookupNamesErrorMessage",`
             $LocalizedData.CannotLookupNamesErrorMessage)
-        $logOnAsServiceText=$logOnAsServiceText.Replace("CannotOpenAccountErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("CannotOpenAccountErrorMessage",`
             $LocalizedData.CannotOpenAccountErrorMessage)
-        $logOnAsServiceText=$logOnAsServiceText.Replace("CannotCreateAccountAccessErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("CannotCreateAccountAccessErrorMessage",`
             $LocalizedData.CannotCreateAccountAccessErrorMessage)
-        $logOnAsServiceText=$logOnAsServiceText.Replace("CannotGetAccountAccessErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("CannotGetAccountAccessErrorMessage",`
             $LocalizedData.CannotGetAccountAccessErrorMessage)
-        $logOnAsServiceText=$logOnAsServiceText.Replace("CannotSetAccountAccessErrorMessage",`
+        $logOnAsServiceText = $logOnAsServiceText.Replace("CannotSetAccountAccessErrorMessage",`
             $LocalizedData.CannotSetAccountAccessErrorMessage)
         $null = Add-Type $logOnAsServiceText -PassThru -Debug:$false
-    }
+    } # try
 
     if($UserName.StartsWith(".\"))
     {
         $UserName = $UserName.Substring(2)
-    }
+    } # if
 
     try
     {
@@ -1550,7 +1639,7 @@ function Set-LogOnAsServicePolicy([string]$UserName)
         $message = ($LocalizedData.ErrorSettingLogOnAsServiceRightsForUser `
             -f $UserName,$_.Exception.Message)
         New-InvalidArgumentError -ErrorId "ErrorSettingLogOnAsServiceRightsForUser" -ErrorMessage $message
-    }
-}
+    } # try
+} # function Set-LogOnAsServicePolicy
 
 Export-ModuleMember -Function *-TargetResource
