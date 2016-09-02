@@ -34,20 +34,43 @@ try
         $script:testServiceExecutablePath = Join-Path -Path $ENV:Temp -ChildPath "DscTestService.exe"
         $script:testServiceStartupType = 'Automatic'
         $script:testServiceStartupTypeWin32 = 'Auto'
-        $script:testServiceStatus = 'Running'
+        $script:testServiceStatusRunning = [System.ServiceProcess.ServiceControllerStatus]::Running
+        $script:testServiceStatusStopped = [System.ServiceProcess.ServiceControllerStatus]::Stopped
         $script:testUsername = 'TestUser'
         $script:testPassword = 'DummyPassword'
         $script:testCredential = New-Object System.Management.Automation.PSCredential $script:testUsername, (ConvertTo-SecureString $script:testPassword -AsPlainText -Force)
 
-        $script:testServiceMockRunning = @{
+        $script:testServiceMockRunning = New-Object -TypeName PSObject -Property @{
             Name               = $script:testServiceName
             ServiceName        = $script:testServiceName
             DisplayName        = $script:testServiceDisplayName
             StartType          = $script:testServiceStartupType
-            Status             = $script:testServiceStatus
+            Status             = $script:testServiceStatusRunning
             ServicesDependedOn = $script:testServiceDependsOnHash
         }
-        $script:testWin32ServiceMockRunningLocalSystem = @{
+        Add-Member -InputObject  $script:testServiceMockRunning `
+            -MemberType ScriptMethod `
+            -Name Stop -Value { $global:ServiceStopped = $True }
+        Add-Member -InputObject  $script:testServiceMockRunning `
+            -MemberType ScriptMethod `
+            -Name WaitForStatus -Value { param($Status,$WaitTimeSpan) }
+
+        $script:testServiceMockStopped = New-Object -TypeName PSObject -Property @{
+            Name               = $script:testServiceName
+            ServiceName        = $script:testServiceName
+            DisplayName        = $script:testServiceDisplayName
+            StartType          = $script:testServiceStartupType
+            Status             = $script:testServiceStatusStopped
+            ServicesDependedOn = $script:testServiceDependsOnHash
+        }
+        Add-Member -InputObject  $script:testServiceMockStopped `
+            -MemberType ScriptMethod `
+            -Name Start -Value { $global:ServiceStarted = $True }
+        Add-Member -InputObject  $script:testServiceMockStopped `
+            -MemberType ScriptMethod `
+            -Name WaitForStatus -Value { param($Status,$WaitTimeSpan) }
+
+        $script:testWin32ServiceMockRunningLocalSystem = New-Object -TypeName PSObject -Property @{
             Name                    = $script:testServiceName
             Status                  = 'OK'
             DesktopInteract         = $true
@@ -57,14 +80,14 @@ try
             Started                 = $true
             DisplayName             = $script:testServiceDisplayName
             StartName               = 'LocalSystem'
-            State                   = $script:testServiceStatus
+            State                   = $script:testServiceStatusRunning
         }
-        $script:splatServiceExistsAutomatic = @{
+        $script:splatServiceExistsAutomatic = New-Object -TypeName PSObject -Property @{
             Name                    = $script:testServiceName
             StartupType             = $script:testServiceStartupType
             BuiltInAccount          = 'LocalSystem'
             DesktopInteract         = $true
-            State                   = $script:testServiceStatus
+            State                   = $script:testServiceStatusRunning
             Ensure                  = 'Present'
             Path                    = $script:testServiceExecutablePath
             DisplayName             = $script:testServiceDisplayName
@@ -120,7 +143,7 @@ try
                     $service.Name            | Should Be $script:testServiceName
                     $service.StartupType     | Should Be $script:testServiceStartupType
                     $service.BuiltInAccount  | Should Be 'LocalSystem'
-                    $service.State           | Should Be $script:testServiceStatus
+                    $service.State           | Should Be $script:testServiceStatusRunning
                     $service.Path            | Should Be $script:testServiceExecutablePath
                     $service.DisplayName     | Should Be $script:testServiceDisplayName
                     $service.Description     | Should Be $script:testServiceDescription
@@ -394,10 +417,6 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Stop-ServiceResource" {
-            # TODO: Complete
-        }
-
         Describe "$DSCResourceName\Remove-Service" {
             # Mocks that should be called
             Mock -CommandName 'sc.exe' -Verifiable
@@ -442,7 +461,93 @@ try
         }
 
         Describe "$DSCResourceName\Start-ServiceResource" {
-            # TODO: Complete
+            Context "Service is already running" {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-ServiceResource `
+                    -MockWith { $script:testServiceMockRunning } `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName New-Object
+                It 'Should not throw exception' {
+                    { Start-ServiceResource -Name $script:testServiceName -StartUpTimeout 30000 } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName New-Object -Exactly 0
+                }
+            }
+
+            Context "Service is stopped" {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-ServiceResource `
+                    -MockWith { $script:testServiceMockStopped } `
+                    -Verifiable
+                Mock `
+                    -CommandName New-Object `
+                    -Verifiable
+                $global:ServiceStarted = $false
+                It 'Should not throw exception' {
+                    { Start-ServiceResource -Name $script:testServiceName -StartUpTimeout 30000 } | Should Not Throw
+                }
+                It 'Called start method' {
+                    $global:ServiceStarted | Should Be $true
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName New-Object -Exactly 1
+                }
+                Remove-Variable -Name ServiceStarted -Scope Global
+            }
+        }
+
+        Describe "$DSCResourceName\Stop-ServiceResource" {
+            Context "Service is already stopped" {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-ServiceResource `
+                    -MockWith { $script:testServiceMockStopped } `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName New-Object
+                It 'Should not throw exception' {
+                    { Stop-ServiceResource -Name $script:testServiceName -TerminateTimeout 30000 } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName New-Object -Exactly 0
+                }
+            }
+
+            Context "Service is running" {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-ServiceResource `
+                    -MockWith { $script:testServiceMockRunning } `
+                    -Verifiable
+                Mock `
+                    -CommandName New-Object `
+                    -Verifiable
+                $global:ServiceStopped = $false
+                It 'Should not throw exception' {
+                    { Stop-ServiceResource -Name $script:testServiceName -TerminateTimeout 30000 } | Should Not Throw
+                }
+                It 'Called stop method' {
+                    $global:ServiceStopped | Should Be $true
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName New-Object -Exactly 1
+                }
+                Remove-Variable -Name ServiceStopped -Scope Global
+            }
         }
 
         Describe "$DSCResourceName\Resolve-UserName" {
@@ -637,7 +742,7 @@ try
                     $script:service.ServiceName        | Should Be $script:testServiceName
                     $script:service.DisplayName        | Should Be $script:testServiceDisplayName
                     $script:service.StartType          | Should Be $script:testServiceStartupType
-                    $script:service.Status             | Should Be $script:testServiceStatus
+                    $script:service.Status             | Should Be $script:testServiceStatusRunning
                     $script:service.ServicesDependedOn | Should Be $script:testServiceDependsOnHash
                 }
 

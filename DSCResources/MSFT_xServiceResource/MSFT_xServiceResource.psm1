@@ -927,61 +927,6 @@ function Get-UserNameAndPassword
 
 <#
     .SYNOPSIS
-    Stops a service if it is not already stopped.
-
-    .PARAMETER Name
-    The name of the service to stop.
-
-    .PARAMETER TerminateTimeout
-    The amount of time to wait for the service to stop.
-#>
-function Stop-ServiceResource
-{
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullorEmpty()]
-        [String]
-        $Name,
-
-        [Parameter(Mandatory = $true)]
-        [uint32]
-        $TerminateTimeout
-    )
-
-    $service = Get-ServiceResource -Name $Name
-
-    if ($service.Status -eq [System.ServiceProcess.ServiceControllerStatus]::Stopped)
-    {
-        Write-Verbose -Message ($LocalizedData.ServiceAlreadyStopped -f $service.Name)
-        return
-    }
-
-    if ($PSCmdlet.ShouldProcess($Name, $LocalizedData.StopServiceWhatIf))
-    {
-        try
-        {
-            $service.Stop()
-            $waitTimeSpan = New-Object `
-                -TypeName TimeSpan `
-                -ArgumentList ($TerminateTimeout * 10000)
-            $service.WaitForStatus([System.ServiceProcess.ServiceControllerStatus]::Stopped,`
-                $waitTimeSpan)
-        }
-        catch
-        {
-            Write-Verbose -Message ($LocalizedData.ErrorStoppingService `
-                -f $service.Name, $_.Exception.Message)
-            throw
-        }
-
-        Write-Verbose -Message ($LocalizedData.ServiceStopped -f $service.Name)
-    }
-} # function Stop-ServiceResource
-
-<#
-    .SYNOPSIS
     Deletes a service
 
     .PARAMETER Name
@@ -1079,6 +1024,61 @@ function Start-ServiceResource
         Write-Verbose -Message ($LocalizedData.ServiceStarted -f $service.Name)
     } # if
 } # function Start-ServiceResource
+
+<#
+    .SYNOPSIS
+    Stops a service if it is not already stopped.
+
+    .PARAMETER Name
+    The name of the service to stop.
+
+    .PARAMETER TerminateTimeout
+    The amount of time to wait for the service to stop.
+#>
+function Stop-ServiceResource
+{
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullorEmpty()]
+        [String]
+        $Name,
+
+        [Parameter(Mandatory = $true)]
+        [uint32]
+        $TerminateTimeout
+    )
+
+    $service = Get-ServiceResource -Name $Name
+
+    if ($service.Status -eq [System.ServiceProcess.ServiceControllerStatus]::Stopped)
+    {
+        Write-Verbose -Message ($LocalizedData.ServiceAlreadyStopped -f $service.Name)
+        return
+    }
+
+    if ($PSCmdlet.ShouldProcess($Name, $LocalizedData.StopServiceWhatIf))
+    {
+        try
+        {
+            $service.Stop()
+            $waitTimeSpan = New-Object `
+                -TypeName TimeSpan `
+                -ArgumentList ($TerminateTimeout * 10000)
+            $service.WaitForStatus([System.ServiceProcess.ServiceControllerStatus]::Stopped,`
+                $waitTimeSpan)
+        }
+        catch
+        {
+            Write-Verbose -Message ($LocalizedData.ErrorStoppingService `
+                -f $service.Name, $_.Exception.Message)
+            throw
+        }
+
+        Write-Verbose -Message ($LocalizedData.ServiceStopped -f $service.Name)
+    }
+} # function Stop-ServiceResource
 
 <#
     .SYNOPSIS
