@@ -266,7 +266,8 @@ try
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Automatic' `
-                        -State 'Stopped' } | Should Throw $errorRecord
+                        -State 'Stopped' `
+                        -Verbose } | Should Throw $errorRecord
                 }
             }
 
@@ -275,7 +276,8 @@ try
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
-                        -State 'Stopped' } | Should Not Throw
+                        -State 'Stopped' `
+                        -Verbose } | Should Not Throw
                 }
             }
 
@@ -288,7 +290,8 @@ try
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
-                        -State 'Running' } | Should Throw $errorRecord
+                        -State 'Running' `
+                        -Verbose } | Should Throw $errorRecord
                 }
             }
 
@@ -439,6 +442,34 @@ try
         }
 
         Describe "$DSCResourceName\Write-CredentialProperties" {
+            Mock `
+                -CommandName Get-UserNameAndPassword
+            Mock `
+                -CommandName Test-UserName
+            Mock `
+                -CommandName Set-LogOnAsServicePolicy
+            Mock `
+                -CommandName Invoke-CimMethod
+
+            Context 'No parameters to be changed passed' {
+                It 'Should not throw an exception' {
+                    { $script:result = Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result = $false
+                }
+            }
+            Context 'Desktop interact passed but does not need to be changed' {
+                It 'Should not throw an exception' {
+                    { $script:result = Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -DesktopInteract $true } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result = $false
+                }
+            }
             # TODO: Complete
         }
 

@@ -564,7 +564,7 @@ function ConvertTo-StartModeString
         [String] $StartupType
     )
 
-    if ($StartupType -ieq 'Automatic')
+    if ($StartupType -eq 'Automatic')
     {
         return 'Auto'
     }  # if
@@ -587,11 +587,11 @@ function ConvertTo-StartupTypeString
         [ValidateSet('Auto', 'Manual', 'Disabled')]
         $StartMode
     )
-    if ($StartMode -ieq 'Auto')
+    if ($StartMode -eq 'Auto')
     {
         return "Automatic"
     } # if
-    return $StartupType
+    return $StartMode
 } # function ConvertTo-StartupTypeString
 
 <#
@@ -752,7 +752,7 @@ function Write-WriteProperties
 #>
 function Write-CredentialProperties
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
 
@@ -772,65 +772,74 @@ function Write-CredentialProperties
     )
 
     if(-not $PSBoundParameters.ContainsKey("Credential") `
-        -and -not $PSBoundParameters.ContainsKey("BuiltInAccount"))
+        -and -not $PSBoundParameters.ContainsKey("BuiltInAccount") `
+        -and -not $PSBoundParameters.ContainsKey("DesktopInteract"))
     {
+        # No change parameters actually passed - nothing to change
         return
     } # if
 
-    if($PSBoundParameters.ContainsKey("Credential") `
-        -and $PSBoundParameters.ContainsKey("BuiltInAccount"))
+    # These are the arguments to chnage on the service
+    $changeArgs = @{}
+
+    # Get the Username and Password to change to (if applicable)
+    $getUserNameAndPasswordArgs = @{}
+    if($PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
+        $null = $getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
+    } # if
+    if($PSBoundParameters.ContainsKey("Credential"))
+    {
+        $null = $getUserNameAndPasswordArgs.Add("Credential",$Credential)
+    } # if
+    if($getUserNameAndPasswordArgs.Count -gt 1)
+    {
+        # Both credentials and buildinaccount were set - throw
         New-InvalidArgumentError `
             -ErrorId "OnlyCredentialOrBuiltInAccount" `
             -ErrorMessage ($LocalizedData.OnlyOneParameterCanBeSpecified `
                 -f "Credential","BuiltInAccount")
     } # if
-
-    $getUserNameAndPasswordArgs=@{}
-    if($PSBoundParameters.ContainsKey("BuiltInAccount"))
-    {
-        $null = $getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
-    } # if
-
-    if($PSBoundParameters.ContainsKey("Credential"))
-    {
-        $null = $getUserNameAndPasswordArgs.Add("Credential",$Credential)
-    } # if
-
     $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
 
+    # If the user account needs to be changed add it to the arguments
     if($null -ne $userName `
-        -and -not (Test-UserName -SvcWmi $SvcWmi -Username $userName) `
-        -and $PSCmdlet.ShouldProcess($SvcWmi.Name,$LocalizedData.SetCredentialWhatIf))
+        -and -not (Test-UserName -SvcWmi $SvcWmi -Username $userName))
     {
+        # A specific user account was passed so set log on as a service policy
         if($PSBoundParameters.ContainsKey("Credential"))
         {
-            Set-LogOnAsServicePolicy $userName
+            Set-LogOnAsServicePolicy -Username $userName
         } # if
 
-        $arguments = @{
+        $changeArgs += @{
             StartName = $userName
             StartPassword = $password
         }
+    } # if
 
-        if($PSBoundParameters.ContainsKey("DesktopInteract"))
-        {
-            $arguments.DesktopInteract = $DesktopInteract
-        } # if
+    # The desktop interact flag was passed to set that value
+    if($PSBoundParameters.ContainsKey("DesktopInteract") `
+        -and ($DeskopInteract -ne $SvcWmi.DesktopInteract))
+    {
+        $changeArgs.DesktopInteract = $DesktopInteract
+    } # if
 
+    if ($arguments.Count -gt 0)
+    {
         $ret = Invoke-CimMethod `
             -InputObject $SvcWmi `
             -MethodName Change `
-            -Arguments $arguments
+            -Arguments $changeArgs
         if($ret.ReturnValue -ne 0)
         {
             $innerMessage = ($LocalizedData.MethodFailed `
                 -f "Change","Win32_Service",$ret.ReturnValue)
-            $message = ($LocalizedData.ErrorChangingProperty `
+            $errorMessage = ($LocalizedData.ErrorChangingProperty `
                 -f "Credential",$innerMessage)
             New-InvalidArgumentError `
                 -ErrorId "ChangeCredentialFailed" `
-                -ErrorMessage $message
+                -ErrorMessage $errorMessage
         } # if
     } # if
 } # function Write-CredentialProperties
@@ -857,7 +866,7 @@ function Write-BinaryProperties
     if($SvcWmi.PathName -eq $Path)
     {
         return $false
-    }
+    } # if
 
     $ret = $SvcWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
     if($ret.ReturnValue -ne 0)
@@ -869,7 +878,7 @@ function Write-BinaryProperties
         New-InvalidArgumentError `
             -ErrorId "ChangeBinaryPathFailed" `
             -ErrorMessage $errorMessage
-    }
+    } # if
 
     return $true
 } # function Write-BinaryProperties
