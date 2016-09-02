@@ -70,7 +70,7 @@ try
             -MemberType ScriptMethod `
             -Name WaitForStatus -Value { param($Status,$WaitTimeSpan) }
 
-        $script:testWin32ServiceMockRunningLocalSystem = @{
+        $script:testWin32ServiceMockRunningLocalSystem = New-Object -TypeName PSObject -Property @{
             Name                    = $script:testServiceName
             Status                  = 'OK'
             DesktopInteract         = $true
@@ -82,7 +82,15 @@ try
             StartName               = 'LocalSystem'
             State                   = $script:testServiceStatusRunning
         }
-        $script:splatServiceExistsAutomatic = @{
+        Add-Member -InputObject  $script:testWin32ServiceMockRunningLocalSystem `
+            -MemberType ScriptMethod `
+            -Name Change `
+            -Value { param($a,$path,$c,$d,$e,$f,$g,$h)
+                $global:ChangeMethodCalled = $true
+                return $global:ChangeMethodResult
+            }
+
+        $script:splatServiceExistsAutomatic = New-Object -TypeName PSObject -Property @{
             Name                    = $script:testServiceName
             StartupType             = $script:testServiceStartupType
             BuiltInAccount          = 'LocalSystem'
@@ -93,6 +101,13 @@ try
             DisplayName             = $script:testServiceDisplayName
             Description             = $script:testServiceDescription
         }
+        Add-Member -InputObject  $script:splatServiceExistsAutomatic `
+            -MemberType ScriptMethod `
+            -Name Change `
+            -Value { param($a,$path,$c,$d,$e,$f,$g,$h)
+                $global:ChangeMethodCalled = $true
+                return $global:ChangeMethodResult
+            }
 
         function Get-InvalidArgumentError
         {
@@ -313,10 +328,6 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Write-WriteProperties" {
-            # TODO: Complete
-        }
-
         Describe "$DSCResourceName\Get-Win32ServiceObject" {
             Context 'Service exists' {
                 Mock `
@@ -423,17 +434,64 @@ try
             }
         }
 
+        Describe "$DSCResourceName\Write-WriteProperties" {
+            # TODO: Complete
+        }
+
         Describe "$DSCResourceName\Write-CredentialProperties" {
             # TODO: Complete
         }
 
         Describe "$DSCResourceName\Write-BinaryProperties" {
-            # TODO: Complete
+            Context 'Path is already correct' {
+                It 'Should not throw an exception' {
+                    { $script:result = Write-BinaryProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Path $script:testServiceExecutablePath } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result = $false
+                }
+            }
+            Context 'Path needs to be changed and is changed without error' {
+                $global:ChangeMethodResult = @{ ReturnValue = 0 }
+                It 'Should not throw an exception' {
+                    { $script:result = Write-BinaryProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Path 'c:\NewServicePath.exe' } | Should Not Throw
+                }
+                It 'Should return true' {
+                    $script:result = $true
+                }
+                It 'Change method was called' {
+                    $global:ChangeMethodCalled | Should Be $true
+                }
+            }
+            Context 'Path needs to be changed but an error occurs changing it' {
+                $global:ChangeMethodResult = @{ ReturnValue = 99 }
+
+                $innerMessage = ($LocalizedData.MethodFailed `
+                    -f "Change", "Win32_Service", $global:ChangeMethodResult.ReturnValue)
+                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                    -f "Binary Path", $innerMessage)
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ChangeBinaryPathFailed" `
+                    -ErrorMessage $errorMessage
+
+                It 'Should not throw an exception' {
+                    { $script:result = Write-BinaryProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Path 'c:\NewServicePath.exe' } | Should Throw $errorRecord
+                }
+                It 'Change method was called' {
+                    $global:ChangeMethodCalled | Should Be $true
+                }
+            }
         }
 
         Describe "$DSCResourceName\Test-UserName" {
             Context 'Username matches' {
-                It 'Should not thrown an exception' {
+                It 'Should not throw an exception' {
                     { $script:result = Test-Username `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Username $script:testUsername } | Should Not Throw
@@ -443,7 +501,7 @@ try
                 }
             }
             Context 'Username does not match' {
-                It 'Should not thrown an exception' {
+                It 'Should not throw an exception' {
                     { $script:result = Test-Username `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Username 'mismatch' } | Should Not Throw
@@ -845,7 +903,7 @@ try
         }
 
         Describe "$DSCResourceName\Set-LogOnAsServicePolicy" {
-            # TODO: a non-destructive method of testing this function
+            # Need a a non-destructive method of testing this function
         }
     }
 }

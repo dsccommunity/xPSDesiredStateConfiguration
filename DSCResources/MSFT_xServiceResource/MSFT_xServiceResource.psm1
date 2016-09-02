@@ -596,6 +596,76 @@ function ConvertTo-StartupTypeString
 
 <#
     .SYNOPSIS
+    Retrieves the Win32_Service object for the service with the given name.
+
+    .PARAMETER Name
+    The name of the service for which to get the Win32_Service object
+#>
+function Get-Win32ServiceObject
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullorEmpty()]
+        $Name
+    )
+
+    return Get-CimInstance -ClassName Win32_Service -Filter "Name='$Name'"
+} # function Get-Win32ServiceObject
+
+<#
+    .SYNOPSIS
+    Sets the StartupType property of the given service to the given value.
+
+    .PARAMETER Win32ServiceObject
+    The Win32_Service object for which to set the StartupType
+
+    .PARAMETER StartupType
+    The StartupType to set
+#>
+function Set-ServiceStartMode
+{
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        $Win32ServiceObject,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Automatic", "Manual", "Disabled")]
+        [String]
+        $StartupType
+    )
+
+    if ((ConvertTo-StartupTypeString -StartMode $Win32ServiceObject.StartMode) -ine $StartupType `
+        -and $PSCmdlet.ShouldProcess($Win32ServiceObject.Name, $LocalizedData.SetStartupTypeWhatIf))
+    {
+        $changeServiceArguments = @{
+            StartMode = $StartupType
+        }
+
+        $changeResult = Invoke-CimMethod `
+            -InputObject $Win32ServiceObject `
+            -MethodName Change `
+            -Arguments $changeServiceArguments
+
+        if ($changeResult.ReturnValue -ne 0)
+        {
+            $innerMessage = ($LocalizedData.MethodFailed `
+                -f "Change", "Win32_Service", $changeResult.ReturnValue)
+            $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                -f "StartupType", $innerMessage)
+            New-InvalidArgumentError `
+                -ErrorId "ChangeStartupTypeFailed" `
+                -ErrorMessage $errorMessage
+        }
+    }
+} # function Set-ServiceStartMode
+
+<#
+    .SYNOPSIS
     Writes all write properties if not already correctly set, logging errors and respecting whatif
 #>
 function Write-WriteProperties
@@ -675,76 +745,6 @@ function Write-WriteProperties
     # Return restart status
     return $requiresRestart
 } # function Write-WriteProperties
-
-<#
-    .SYNOPSIS
-    Retrieves the Win32_Service object for the service with the given name.
-
-    .PARAMETER Name
-    The name of the service for which to get the Win32_Service object
-#>
-function Get-Win32ServiceObject
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullorEmpty()]
-        $Name
-    )
-
-    return Get-CimInstance -ClassName Win32_Service -Filter "Name='$Name'"
-} # function Get-Win32ServiceObject
-
-<#
-    .SYNOPSIS
-    Sets the StartupType property of the given service to the given value.
-
-    .PARAMETER Win32ServiceObject
-    The Win32_Service object for which to set the StartupType
-
-    .PARAMETER StartupType
-    The StartupType to set
-#>
-function Set-ServiceStartMode
-{
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        $Win32ServiceObject,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateSet("Automatic", "Manual", "Disabled")]
-        [String]
-        $StartupType
-    )
-
-    if ((ConvertTo-StartupTypeString -StartMode $Win32ServiceObject.StartMode) -ine $StartupType `
-        -and $PSCmdlet.ShouldProcess($Win32ServiceObject.Name, $LocalizedData.SetStartupTypeWhatIf))
-    {
-        $changeServiceArguments = @{
-            StartMode = $StartupType
-        }
-
-        $changeResult = Invoke-CimMethod `
-            -InputObject $Win32ServiceObject `
-            -MethodName Change `
-            -Arguments $changeServiceArguments
-
-        if ($changeResult.ReturnValue -ne 0)
-        {
-            $innerMessage = ($LocalizedData.MethodFailed `
-                -f "Change", "Win32_Service", $changeResult.ReturnValue)
-            $errorChangingPropertyMessage = ($LocalizedData.ErrorChangingProperty `
-                -f "StartupType", $innerMessage)
-            New-InvalidArgumentError `
-                -ErrorId "ChangeStartupTypeFailed" `
-                -ErrorMessage $errorChangingPropertyMessage
-        }
-    }
-} # function Set-ServiceStartMode
 
 <#
     .SYNOPSIS
@@ -862,11 +862,13 @@ function Write-BinaryProperties
     $ret = $SvcWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
     if($ret.ReturnValue -ne 0)
     {
-        $innerMessage = $LocalizedData.MethodFailed -f "Change","Win32_Service",$ret.ReturnValue
-        $message = $LocalizedData.ErrorChangingProperty -f "Binary Path",$innerMessage
+        $innerMessage = ($LocalizedData.MethodFailed `
+            -f "Change", "Win32_Service", $ret.ReturnValue)
+        $errorMessage = ($LocalizedData.ErrorChangingProperty `
+            -f "Binary Path", $innerMessage)
         New-InvalidArgumentError `
             -ErrorId "ChangeBinaryPathFailed" `
-            -ErrorMessage $message
+            -ErrorMessage $errorMessage
     }
 
     return $true
