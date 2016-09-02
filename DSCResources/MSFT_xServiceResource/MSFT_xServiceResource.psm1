@@ -63,7 +63,7 @@ function Get-TargetResource
         }
         return @{
             Name            = $service.Name
-            StartupType     = ConvertTo-StartupTypeString -StartupType $win32ServiceObject.StartMode
+            StartupType     = ConvertTo-StartupTypeString -StartMode $win32ServiceObject.StartMode
             BuiltInAccount  = $builtInAccount
             State           = $service.Status.ToString()
             Path            = $win32ServiceObject.PathName
@@ -585,9 +585,9 @@ function ConvertTo-StartupTypeString
     (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Auto', 'Manual', 'Disabled')]
-        $StartupType
+        $StartMode
     )
-    if ($StartupType -ieq 'Auto')
+    if ($StartMode -ieq 'Auto')
     {
         return "Automatic"
     } # if
@@ -669,7 +669,7 @@ function Write-WriteProperties
     # Update startup type
     if($PSBoundParameters.ContainsKey("StartupType"))
     {
-        Set-ServiceStartupType -Win32ServiceObject $svcWmi -StartupType $StartupType
+        Set-ServiceStartMode -Win32ServiceObject $svcWmi -StartupType $StartupType
     } # if
 
     # Return restart status
@@ -706,7 +706,7 @@ function Get-Win32ServiceObject
     .PARAMETER StartupType
     The StartupType to set
 #>
-function Set-ServiceStartupType
+function Set-ServiceStartMode
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
@@ -721,7 +721,7 @@ function Set-ServiceStartupType
         $StartupType
     )
 
-    if ($Win32ServiceObject.StartMode -ine $StartupType `
+    if ((ConvertTo-StartupTypeString -StartMode $Win32ServiceObject.StartMode) -ine $StartupType `
         -and $PSCmdlet.ShouldProcess($Win32ServiceObject.Name, $LocalizedData.SetStartupTypeWhatIf))
     {
         $changeServiceArguments = @{
@@ -735,7 +735,7 @@ function Set-ServiceStartupType
 
         if ($changeResult.ReturnValue -ne 0)
         {
-            $methodFailedMessage = ($LocalizedData.MethodFailed `
+            $innerMessage = ($LocalizedData.MethodFailed `
                 -f "Change", "Win32_Service", $changeResult.ReturnValue)
             $errorChangingPropertyMessage = ($LocalizedData.ErrorChangingProperty `
                 -f "StartupType", $innerMessage)
@@ -744,7 +744,7 @@ function Set-ServiceStartupType
                 -ErrorMessage $errorChangingPropertyMessage
         }
     }
-} # function Set-ServiceStartupType
+} # function Set-ServiceStartMode
 
 <#
     .SYNOPSIS

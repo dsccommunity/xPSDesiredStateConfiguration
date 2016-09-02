@@ -70,7 +70,7 @@ try
             -MemberType ScriptMethod `
             -Name WaitForStatus -Value { param($Status,$WaitTimeSpan) }
 
-        $script:testWin32ServiceMockRunningLocalSystem = New-Object -TypeName PSObject -Property @{
+        $script:testWin32ServiceMockRunningLocalSystem = @{
             Name                    = $script:testServiceName
             Status                  = 'OK'
             DesktopInteract         = $true
@@ -82,7 +82,7 @@ try
             StartName               = 'LocalSystem'
             State                   = $script:testServiceStatusRunning
         }
-        $script:splatServiceExistsAutomatic = New-Object -TypeName PSObject -Property @{
+        $script:splatServiceExistsAutomatic = @{
             Name                    = $script:testServiceName
             StartupType             = $script:testServiceStartupType
             BuiltInAccount          = 'LocalSystem'
@@ -117,6 +117,9 @@ try
                 -ArgumentList $exception, $ErrorId, $errorCategory, $null
             return $errorRecord
         } # end function Get-InvalidArgumentError
+
+        # Dummy Functions
+        function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
 
         Describe "$DSCResourceName\Get-TargetResource" {
             Context 'Service exists' {
@@ -300,12 +303,12 @@ try
         Describe "$DSCResourceName\ConvertTo-StartupTypeString" {
             Context "StartupType is 'Auto'" {
                 It "Should return 'Automatic'" {
-                    ConvertTo-StartupTypeString -StartupType 'Auto' | Should Be 'Automatic'
+                    ConvertTo-StartupTypeString -StartMode 'Auto' | Should Be 'Automatic'
                 }
             }
             Context "StartupType is 'Disabled'" {
                 It "Should return 'Disabled'" {
-                    ConvertTo-StartupTypeString -StartupType 'Disabled' | Should Be 'Disabled'
+                    ConvertTo-StartupTypeString -StartMode 'Disabled' | Should Be 'Disabled'
                 }
             }
         }
@@ -355,8 +358,69 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Set-ServiceStartupType" {
-            # TODO: Complete
+        Describe "$DSCResourceName\Set-ServiceStartMode" {
+            Context 'Current StartMode is set to Auto and should be' {
+                Mock `
+                    -CommandName Invoke-CimMethod
+
+                It 'Should not throw an exception' {
+                    { Set-ServiceStartMode `
+                        -Win32ServiceObject $script:testWin32ServiceMockRunningLocalSystem `
+                        -StartupType $script:testServiceStartupType `
+                        -Verbose } | Should Not Throw
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
+                }
+            }
+
+            Context 'Current StartMode needs to be changed, and is changed OK' {
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { return @{ ReturnValue = 0 } } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { Set-ServiceStartMode `
+                        -Win32ServiceObject $script:testWin32ServiceMockRunningLocalSystem `
+                        -StartupType 'Manual' `
+                        -Verbose } | Should Not Throw
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'Current StartMode needs to be changed, but an error occured' {
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { return @{ ReturnValue = 99 } } `
+                    -Verifiable
+
+                $innerMessage = ($LocalizedData.MethodFailed `
+                    -f "Change", "Win32_Service", '99' )
+                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                    -f "StartupType", $innerMessage)
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ChangeStartupTypeFailed" `
+                    -ErrorMessage $errorMessage
+
+                It 'Should throw an exception' {
+                    { Set-ServiceStartMode `
+                        -Win32ServiceObject $script:testWin32ServiceMockRunningLocalSystem `
+                        -StartupType 'Manual' `
+                        -Verbose } | Should Throw $errorMessage
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
         }
 
         Describe "$DSCResourceName\Write-CredentialProperties" {
