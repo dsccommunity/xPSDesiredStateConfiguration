@@ -133,9 +133,6 @@ try
             return $errorRecord
         } # end function Get-InvalidArgumentError
 
-        # Dummy Functions
-        function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
-
         Describe "$DSCResourceName\Get-TargetResource" {
             Context 'Service exists' {
                 # Mocks that should be called
@@ -153,7 +150,9 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:service = Get-TargetResource -Name $script:testServiceName -Verbose } | Should Not Throw
+                    { $script:service = Get-TargetResource `
+                            -Name $script:testServiceName `
+                            -Verbose } | Should Not Throw
                 }
 
                 It 'Should return the correct hashtable properties' {
@@ -186,7 +185,9 @@ try
                 Mock -CommandName Get-Win32ServiceObject
 
                 It 'Should not throw an exception' {
-                    { $script:service = Get-TargetResource -Name $script:testServiceName -Verbose } | Should Not Throw
+                    { $script:service = Get-TargetResource `
+                        -Name $script:testServiceName `
+                        -Verbose } | Should Not Throw
                 }
 
                 It 'Should return the correct hashtable properties' {
@@ -300,7 +301,8 @@ try
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Manual' `
-                        -State 'Running' } | Should Not Throw
+                        -State 'Running' `
+                        -Verbose } | Should Not Throw
                 }
             }
         }
@@ -339,7 +341,9 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:result = Get-Win32ServiceObject -Name $script:testServiceName -Verbose } | Should Not Throw
+                    { $script:result = Get-Win32ServiceObject `
+                        -Name $script:testServiceName `
+                        -Verbose } | Should Not Throw
                 }
 
                 It 'Should return expected hash table' {
@@ -358,7 +362,9 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:result = Get-Win32ServiceObject -Name $script:testServiceName -Verbose } | Should Not Throw
+                    { $script:result = Get-Win32ServiceObject `
+                        -Name $script:testServiceName `
+                        -Verbose } | Should Not Throw
                 }
 
                 It 'Should return $null' {
@@ -373,6 +379,9 @@ try
         }
 
         Describe "$DSCResourceName\Set-ServiceStartMode" {
+            # Dummy Functions
+            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+
             Context 'Current StartMode is set to Auto and should be' {
                 Mock `
                     -CommandName Invoke-CimMethod
@@ -447,7 +456,8 @@ try
             Context 'No parameters passed' {
                 It 'Should not throw an exception' {
                     { Write-WriteProperties `
-                        -Name $script:testServiceName } | Should Not Throw
+                        -Name $script:testServiceName `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
@@ -465,7 +475,8 @@ try
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperties `
                         -Name $script:testServiceName `
-                        -Path 'c:\NewExecutable.exe' } | Should Not Throw
+                        -Path 'c:\NewExecutable.exe' `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
@@ -483,7 +494,8 @@ try
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperties `
                         -Name $script:testServiceName `
-                        -StartupType 'Manual' } | Should Not Throw
+                        -StartupType 'Manual' `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should return true' {
                     $script:Result | Should Be $false
@@ -504,7 +516,8 @@ try
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperties `
                         -Name $script:testServiceName `
-                        -Credential $script:testCredential } | Should Not Throw
+                        -Credential $script:testCredential `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should return true' {
                     $script:Result | Should Be $false
@@ -525,7 +538,8 @@ try
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperties `
                         -Name $script:testServiceName `
-                        -BuiltInAccount 'LocalSystem' } | Should Not Throw
+                        -BuiltInAccount 'LocalSystem' `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should return true' {
                     $script:Result | Should Be $false
@@ -546,7 +560,8 @@ try
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperties `
                         -Name $script:testServiceName `
-                        -DesktopInteract $true } | Should Not Throw
+                        -DesktopInteract $true `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should return true' {
                     $script:Result | Should Be $false
@@ -560,6 +575,9 @@ try
         }
 
         Describe "$DSCResourceName\Write-CredentialProperties" {
+            # Dummy Functions
+            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+
             Context 'No parameters to be changed passed' {
                 # Mocks that should not be called
                 Mock `
@@ -573,7 +591,8 @@ try
 
                 It 'Should not throw an exception' {
                     { Write-CredentialProperties `
-                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem } | Should Not Throw
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
@@ -602,7 +621,8 @@ try
                 It 'Should not throw an exception' {
                     { Write-CredentialProperties `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
-                        -DesktopInteract $true } | Should Not Throw
+                        -DesktopInteract $true `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
@@ -633,7 +653,8 @@ try
                 It 'Should not throw an exception' {
                     { Write-CredentialProperties `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
-                        -DesktopInteract $false } | Should Not Throw
+                        -DesktopInteract $false `
+                        -Verbose } | Should Not Throw
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
@@ -672,7 +693,8 @@ try
                 It 'Should throw an exception' {
                     { Write-CredentialProperties `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
-                        -DesktopInteract $false } | Should Throw $errorRecord
+                        -DesktopInteract $false `
+                        -Verbose } | Should Throw $errorRecord
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
