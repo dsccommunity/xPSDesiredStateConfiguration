@@ -1780,3 +1780,201 @@
 2016-09-03 18:39:51, Info                  DISM   API: PID=2968 TID=9164 DismApi.dll:                                          - DismShutdownInternal
 2016-09-03 18:39:51, Info                  DISM   API: PID=2968 TID=9164 DismApi.dll: <----- Ending DismApi.dll session -----> - DismShutdownInternal
 2016-09-03 18:39:51, Info                  DISM   API: PID=2968 TID=9164 DismApi.dll:                                          - DismShutdownInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll:                                            - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll: <----- Starting DismApi.dll session -----> - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll:                                            - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll: Version 10.0.14393.0 - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll: Parent process command line: C:\Windows\system32\wbem\wmiprvse.exe - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Enter DismInitializeInternal - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Input parameters: LogLevel: 2, LogFilePath: C:\Users\Daniel\Source\GitHub\xPSDesiredStateConfiguration\InstallIncorrectWindowsFeatureLog, ScratchDirectory: (null) - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Initialized GlobalConfig - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Initialized SessionTable - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Lookup in table by path failed for: DummyPath-2BA51B78-C7F7-4910-B99D-BB7345357CDC - CTransactionalImageTable::LookupImagePath
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Waiting for m_pInternalThread to start - CCommandThread::Start
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=5156 Enter CCommandThread::CommandThreadProcedureStub - CCommandThread::CommandThreadProcedureStub
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=5156 Enter CCommandThread::ExecuteLoop - CCommandThread::ExecuteLoop
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 CommandThread StartupEvent signaled - CCommandThread::WaitForStartup
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 m_pInternalThread started - CCommandThread::Start
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Created g_internalDismSession - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Leave DismInitializeInternal - DismInitializeInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Enter DismOpenSessionInternal - DismOpenSessionInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Input parameters: ImagePath: DISM_{53BFAE52-B167-4E2F-A258-0A37B57FF845}, WindowsDirectory: (null), SystemDrive: (null) - DismOpenSessionInternal
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Lookup in table by path failed for: DRIVE_C - CTransactionalImageTable::LookupImagePath
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Waiting for m_pInternalThread to start - CCommandThread::Start
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=7848 Enter CCommandThread::CommandThreadProcedureStub - CCommandThread::CommandThreadProcedureStub
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=7848 Enter CCommandThread::ExecuteLoop - CCommandThread::ExecuteLoop
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 CommandThread StartupEvent signaled - CCommandThread::WaitForStartup
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 m_pInternalThread started - CCommandThread::Start
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=8528 Successfully enqueued command object - CCommandThread::EnqueueCommandObject
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=7848 ExecuteLoop: CommandQueue signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:44, Info                  DISM   API: PID=6744 TID=7848 Successfully dequeued command object - CCommandThread::DequeueCommandObject
+2016-09-03 18:54:44, Info                  DISM   PID=6744 TID=7848 Scratch directory set to 'C:\Windows\TEMP\'. - CDISMManager::put_ScratchDir
+2016-09-03 18:54:44, Info                  DISM   PID=6744 TID=7848 DismCore.dll version: 10.0.14393.0 - CDISMManager::FinalConstruct
+2016-09-03 18:54:44, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:44, Info                  DISM   PID=6744 TID=7848 Successfully loaded the ImageSession at "C:\Windows\SYSTEM32\Dism" - CDISMManager::LoadLocalImageSession
+2016-09-03 18:54:44, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Found and Initialized the DISM Logger. - CDISMProviderStore::Internal_InitializeLogger
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Failed to get and initialize the PE Provider.  Continuing by assuming that it is not a WinPE image. - CDISMProviderStore::Final_OnConnect
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Finished initializing the Provider Map. - CDISMProviderStore::Final_OnConnect
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Getting Provider DISMLogger - CDISMProviderStore::GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Getting Provider DISMLogger - CDISMProviderStore::GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Manager: PID=6744 TID=7848 Successfully created the local image session and provider store. - CDISMManager::CreateLocalImageSession
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Getting the collection of providers from a local provider store type. - CDISMProviderStore::GetProviderCollection
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\FolderProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Connecting to the provider located at C:\Windows\SYSTEM32\Dism\FolderProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\WimProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Connecting to the provider located at C:\Windows\SYSTEM32\Dism\WimProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\VHDProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Connecting to the provider located at C:\Windows\SYSTEM32\Dism\VHDProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\ImagingProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Connecting to the provider located at C:\Windows\SYSTEM32\Dism\ImagingProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\CompatProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Connecting to the provider located at C:\Windows\SYSTEM32\Dism\CompatProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\FfuProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Connecting to the provider located at C:\Windows\SYSTEM32\Dism\FfuProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Loading Provider from location C:\Windows\SYSTEM32\Dism\SiloedPackageProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Warning               DISM   DISM Provider Store: PID=6744 TID=7848 Failed to Load the provider: C:\Windows\SYSTEM32\Dism\SiloedPackageProvider.dll. - CDISMProviderStore::Internal_GetProvider(hr:0x8007007e)
+[6744] [0x8007007b] FIOReadFileIntoBuffer:(1250): The filename, directory name, or volume label syntax is incorrect.
+[6744] [0xc142011c] UnmarshallImageHandleFromDirectory:(793)
+[6744] [0xc142011c] WIMGetMountedImageHandle:(3047)
+2016-09-03 18:54:44, Info                  DISM   DISM WIM Provider: PID=6744 TID=7848 [C:\] is not a WIM mount point. - CWimMountedImageInfo::Initialize
+2016-09-03 18:54:44, Info                  DISM   DISM VHD Provider: PID=6744 TID=7848 [C:\] is not recognized by the DISM VHD provider. - CVhdImage::Initialize
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Getting Provider VHDManager - CDISMProviderStore::GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM VHD Provider: PID=6744 TID=7848 [C:\] is not recognized by the DISM VHD provider. - CVhdImage::Initialize
+2016-09-03 18:54:44, Info                  DISM   DISM Imaging Provider: PID=6744 TID=7848 The provider VHDManager does not support CreateDismImage on C:\ - CGenericImagingManager::CreateDismImage
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Getting Provider WimManager - CDISMProviderStore::GetProvider
+2016-09-03 18:54:44, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+[6744] [0x8007007b] FIOReadFileIntoBuffer:(1250): The filename, directory name, or volume label syntax is incorrect.
+[6744] [0xc142011c] UnmarshallImageHandleFromDirectory:(793)
+[6744] [0xc142011c] WIMGetMountedImageHandle:(3047)
+2016-09-03 18:54:44, Info                  DISM   DISM WIM Provider: PID=6744 TID=7848 [C:\] is not a WIM mount point. - CWimMountedImageInfo::Initialize
+2016-09-03 18:54:44, Info                  DISM   DISM Imaging Provider: PID=6744 TID=7848 The provider WimManager does not support CreateDismImage on C:\ - CGenericImagingManager::CreateDismImage
+2016-09-03 18:54:44, Info                  DISM   DISM Imaging Provider: PID=6744 TID=7848 No imaging provider supported CreateDismImage for this path - CGenericImagingManager::CreateDismImage
+2016-09-03 18:54:44, Info                  DISM   DISM Manager: PID=6744 TID=7848 physical location path: C:\ - CDISMManager::CreateImageSession
+2016-09-03 18:54:44, Info                  DISM   DISM Manager: PID=6744 TID=7848 Event name for current DISM session is Global\{AD08B41D-3C41-4E2D-8747-3501DB8E4042} - CDISMManager::CheckSessionAndLock
+2016-09-03 18:54:44, Info                  DISM   DISM Manager: PID=6744 TID=7848 Create session event 0xc48 for current DISM session and event name is Global\{AD08B41D-3C41-4E2D-8747-3501DB8E4042}  - CDISMManager::CheckSessionAndLock
+2016-09-03 18:54:44, Info                  DISM   DISM Manager: PID=6744 TID=7848 Copying DISM from "C:\Windows\System32\Dism" - CDISMManager::CreateImageSessionFromLocation
+2016-09-03 18:54:45, Info                  DISM   DISM Manager: PID=6744 TID=7848 Successfully loaded the ImageSession at "C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF" - CDISMManager::LoadRemoteImageSession
+2016-09-03 18:54:45, Info                  DISM   DISM Image Session: PID=3936 TID=1548 Instantiating the Provider Store. - CDISMImageSession::get_ProviderStore
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Initializing a provider store for the IMAGE session type. - CDISMProviderStore::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Loading Provider from location C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\OSProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Connecting to the provider located at C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\OSProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:45, Info                  DISM   DISM OS Provider: PID=3936 TID=1548 Defaulting SystemPath to C:\ - CDISMOSServiceManager::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM OS Provider: PID=3936 TID=1548 Defaulting Windows folder to C:\Windows - CDISMOSServiceManager::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM OS Provider: PID=3936 TID=1548 Host OS verion is 10.0 - CDISMOSServiceManager::SetDllSearchPath
+2016-09-03 18:54:45, Warning               DISM   DISM OS Provider: PID=3936 TID=1548 Unable to set the DLL search path to the servicing stack folder. C:\Windows may not point to a valid Windows folder. - CDISMOSServiceManager::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Attempting to initialize the logger from the Image Session. - CDISMProviderStore::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Loading Provider from location C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\LogProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Connecting to the provider located at C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\LogProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:45, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Found and Initialized the DISM Logger. - CDISMProviderStore::Internal_InitializeLogger
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Loading Provider from location C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\PEProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Warning               DISM   DISM Provider Store: PID=3936 TID=1548 Failed to Load the provider: C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\PEProvider.dll. - CDISMProviderStore::Internal_GetProvider(hr:0x8007007e)
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Failed to get and initialize the PE Provider.  Continuing by assuming that it is not a WinPE image. - CDISMProviderStore::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Finished initializing the Provider Map. - CDISMProviderStore::Final_OnConnect
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Getting Provider DISMLogger - CDISMProviderStore::GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:45, Info                  DISM   Try to initialize Panther logging 1 times, last error: 0x0
+2016-09-03 18:54:45, Info                  DISM   DISM Manager: PID=6744 TID=7848 Image session successfully loaded from the temporary location: C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF - CDISMManager::CreateImageSession
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Getting Provider OSServices - CDISMProviderStore::GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=7848 Target image information: OS Version=10.0.14393.0, Image architecture=amd64 - CDismCore::LogImageSessionDetails
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Leave DismOpenSessionInternal - DismOpenSessionInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Session id is: 2 - DismOpenSessionInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Enter DismGetOsInfoInternal - DismGetOsInfoInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Input parameters: Session: 2 - DismGetOsInfoInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Initialized default cancel event - DismGetOsInfoInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Successfully enqueued command object - CCommandThread::EnqueueCommandObject
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=7848 ExecuteLoop: CommandQueue signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=7848 Successfully dequeued command object - CCommandThread::DequeueCommandObject
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Getting Provider OSServices - CDISMProviderStore::GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has previously been initialized.  Returning the existing instance. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM OS Provider: PID=3936 TID=1548 Successfully loaded the hive. - CDISMOSServiceManager::DetermineBootDrive
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Leave DismGetOsInfoInternal - DismGetOsInfoInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Enter DismDeleteInternal - DismDeleteInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Leave DismDeleteInternal - DismDeleteInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Enter DismEnableFeatureInternal - DismEnableFeatureInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Enter DismEnableDisableFeatureInternal - DismEnableDisableFeatureInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Input parameters: Session: 2, EnableFeatureName: NonExistentWindowsOptionalFeature, DisableFeatureName: (null), Identifier: (null), PackageIdentifier: 0,                             LimitAccess: 0, SourcePathCount: 0, EnableAll: 0, CancelEvent: 0x0000000000000C54, Progress: 0x00000205238E880C, UserData: 0x0000000000000000 - DismEnableDisableFeatureInternal
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=8528 Successfully enqueued command object - CCommandThread::EnqueueCommandObject
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=7848 ExecuteLoop: CommandQueue signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:45, Info                  DISM   API: PID=6744 TID=7848 Successfully dequeued command object - CCommandThread::DequeueCommandObject
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Getting Provider DISM Package Manager - CDISMProviderStore::GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Provider has not previously been encountered.  Attempting to initialize the provider. - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Loading Provider from location C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\CbsProvider.dll - CDISMProviderStore::Internal_GetProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Connecting to the provider located at C:\Windows\TEMP\574F5975-989D-49D2-A35B-E60570CD7BDF\CbsProvider.dll. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:45, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Encountered a servicing provider, performing additional servicing initializations. - CDISMProviderStore::Internal_LoadProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Package Manager: PID=3936 TID=1548 Finished initializing the CbsConUI Handler. - CCbsConUIHandler::Initialize
+2016-09-03 18:54:46, Info                  DISM   DISM Package Manager: PID=3936 TID=1548 CBS is being initialized for online use. More information about CBS actions can be located at: %windir%\logs\cbs\cbs.log - CDISMPackageManager::Initialize
+2016-09-03 18:54:46, Info                  DISM   DISM Package Manager: PID=3936 TID=1548 Loaded servicing stack for online use only. - CDISMPackageManager::RefreshInstanceAndLock
+2016-09-03 18:54:46, Error                 DISM   DISM Package Manager: PID=3936 TID=1548 Failed to get the Update through CBS. - CDISMPackage::Internal_OpenFeature(hr:0x800f080c)
+2016-09-03 18:54:46, Error                 DISM   DISM Package Manager: PID=3936 TID=1548 Failed to get the underlying CBS Feature - CDISMPackage::OpenFeature(hr:0x800f080c)
+2016-09-03 18:54:46, Error                 DISM   API: PID=6744 TID=7848 Failed to open feature NonExistentWindowsOptionalFeature - CEnableDisableFeatureCommandObject::InternalExecute(hr:0x800f080c)
+2016-09-03 18:54:46, Error                 DISM   API: PID=6744 TID=7848 InternalExecute failed - CBaseCommandObject::Execute(hr:0x800f080c)
+2016-09-03 18:54:46, Error                 DISM   API: PID=6744 TID=8528 CEnableDisableFeatureCommandObject internal execution failed - DismEnableDisableFeatureInternal(hr:0x800f080c)
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Exit DismEnableDisableFeatureInternal - DismEnableDisableFeatureInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Exit DismEnableFeatureInternal - DismEnableFeatureInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Enter DismGetLastErrorMessageInternal - DismGetLastErrorMessageInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Exit DismGetLastErrorMessageInternal - DismGetLastErrorMessageInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Enter DismDeleteInternal - DismDeleteInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Leave DismDeleteInternal - DismDeleteInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Enter DismCloseSessionInternal - DismCloseSessionInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Input parameters: Session: 2 - DismCloseSessionInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 GetReferenceCount hr: 0x0 - CSessionTable::RemoveSession
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Refcount for DismSession= 2s 0 - CSessionTable::RemoveSession
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Successfully enqueued command object - CCommandThread::EnqueueCommandObject
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=7848 ExecuteLoop: CommandQueue signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=7848 Successfully dequeued command object - CCommandThread::DequeueCommandObject
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=7848 ExecuteLoop: Cancel signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=7848 Leave CCommandThread::ExecuteLoop - CCommandThread::ExecuteLoop
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Found the OSServices.  Waiting to finalize it until all other providers are unloaded. - CDISMProviderStore::Final_OnDisconnect
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Found the OSServices.  Waiting to finalize it until all other providers are unloaded. - CDISMProviderStore::Final_OnDisconnect
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Found the PE Provider.  Waiting to finalize it until all other providers are unloaded. - CDISMProviderStore::Final_OnDisconnect
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Finalizing the servicing provider(DISM Package Manager) - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Package Manager: PID=3936 TID=1548 Finalizing CBS core. - CDISMPackageManager::Finalize
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Disconnecting Provider: DISM Package Manager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Releasing the local reference to OSServices. - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Disconnecting Provider: OSServices - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=3936 TID=1548 Releasing the local reference to DISMLogger.  Stop logging. - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Manager: PID=6744 TID=7848 Closing session event handle 0xc48 - CDISMManager::CloseImageSession
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Found the OSServices.  Waiting to finalize it until all other providers are unloaded. - CDISMProviderStore::Final_OnDisconnect
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Disconnecting Provider: FolderManager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Disconnecting Provider: WimManager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Disconnecting Provider: VHDManager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Disconnecting Provider: GenericImagingManager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Disconnecting Provider: Compatibility Manager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Disconnecting Provider: FfuManager - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   DISM Provider Store: PID=6744 TID=7848 Releasing the local reference to DISMLogger.  Stop logging. - CDISMProviderStore::Internal_DisconnectProvider
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=7848 Leave CCommandThread::CommandThreadProcedureStub - CCommandThread::CommandThreadProcedureStub
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Leave DismCloseSessionInternal - DismCloseSessionInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Enter DismShutdownInternal - DismShutdownInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 GetReferenceCount hr: 0x0 - CSessionTable::RemoveSession
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Refcount for DismSession= 1s 0 - CSessionTable::RemoveSession
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Successfully enqueued command object - CCommandThread::EnqueueCommandObject
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=5156 ExecuteLoop: CommandQueue signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=5156 Successfully dequeued command object - CCommandThread::DequeueCommandObject
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=5156 ExecuteLoop: Cancel signaled - CCommandThread::ExecuteLoop
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=5156 Leave CCommandThread::ExecuteLoop - CCommandThread::ExecuteLoop
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=5156 Leave CCommandThread::CommandThreadProcedureStub - CCommandThread::CommandThreadProcedureStub
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Deleted g_internalDismSession - DismShutdownInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Shutdown SessionTable - DismShutdownInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 Leave DismShutdownInternal - DismShutdownInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll:                                          - DismShutdownInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll: <----- Ending DismApi.dll session -----> - DismShutdownInternal
+2016-09-03 18:54:46, Info                  DISM   API: PID=6744 TID=8528 DismApi.dll:                                          - DismShutdownInternal

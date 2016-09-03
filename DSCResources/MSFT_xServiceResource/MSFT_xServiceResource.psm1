@@ -714,9 +714,10 @@ function Write-WriteProperties
 
     # update credentials
     if($PSBoundParameters.ContainsKey("BuiltInAccount") `
-        -or $PSBoundParameters.ContainsKey("Credential"))
+        -or $PSBoundParameters.ContainsKey("Credential") `
+        -or $PSBoundParameters.ContainsKey("DesktopInteract"))
     {
-        $writeCredentialPropertiesArguments=@{"SvcWmi"=$svcWmi}
+        $writeCredentialPropertiesArguments = @{ "SvcWmi" = $svcWmi }
 
         if($PSBoundParameters.ContainsKey("BuiltInAccount"))
         {

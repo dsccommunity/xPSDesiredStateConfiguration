@@ -438,7 +438,125 @@ try
         }
 
         Describe "$DSCResourceName\Write-WriteProperties" {
-            # TODO: Complete
+            # Mocks that should be called
+            Mock `
+                -CommandName Get-Win32ServiceObject `
+                -MockWith { $script:testServiceStartupTypeWin32 } `
+                -Verifiable
+
+            Context 'No parameters passed' {
+                It 'Should not throw an exception' {
+                    { Write-WriteProperties `
+                        -Name $script:testServiceName } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                }
+            }
+
+            Context 'Path passed, will trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Write-BinaryProperties `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperties `
+                        -Name $script:testServiceName `
+                        -Path 'c:\NewExecutable.exe' } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Write-BinaryProperties -Exactly 1
+                }
+            }
+
+            Context 'StartupType passed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Set-ServiceStartMode `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperties `
+                        -Name $script:testServiceName `
+                        -StartupType 'Manual' } | Should Not Throw
+                }
+                It 'Should return true' {
+                    $script:Result | Should Be $false
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Set-ServiceStartMode -Exactly 1
+                }
+            }
+
+            Context 'Credential passed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Write-CredentialProperties `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperties `
+                        -Name $script:testServiceName `
+                        -Credential $script:testCredential } | Should Not Throw
+                }
+                It 'Should return true' {
+                    $script:Result | Should Be $false
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Write-CredentialProperties -Exactly 1
+                }
+            }
+
+            Context 'BuildinAccount passed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Write-CredentialProperties `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperties `
+                        -Name $script:testServiceName `
+                        -BuiltInAccount 'LocalSystem' } | Should Not Throw
+                }
+                It 'Should return true' {
+                    $script:Result | Should Be $false
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Write-CredentialProperties -Exactly 1
+                }
+            }
+
+            Context 'DesktopInteract passed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Write-CredentialProperties `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperties `
+                        -Name $script:testServiceName `
+                        -DesktopInteract $true } | Should Not Throw
+                }
+                It 'Should return true' {
+                    $script:Result | Should Be $false
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Write-CredentialProperties -Exactly 1
+                }
+            }
         }
 
         Describe "$DSCResourceName\Write-CredentialProperties" {
