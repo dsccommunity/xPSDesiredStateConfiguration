@@ -90,7 +90,7 @@ try
                 return $global:ChangeMethodResult
             }
 
-        $script:splatServiceExistsAutomatic = New-Object -TypeName PSObject -Property @{
+        $script:splatServiceExistsAutomatic = @{
             Name                    = $script:testServiceName
             StartupType             = $script:testServiceStartupType
             BuiltInAccount          = 'LocalSystem'
@@ -101,13 +101,6 @@ try
             DisplayName             = $script:testServiceDisplayName
             Description             = $script:testServiceDescription
         }
-        Add-Member -InputObject  $script:splatServiceExistsAutomatic `
-            -MemberType ScriptMethod `
-            -Name Change `
-            -Value { param($a,$path,$c,$d,$e,$f,$g,$h)
-                $global:ChangeMethodCalled = $true
-                return $global:ChangeMethodResult
-            }
 
         function Get-InvalidArgumentError
         {
@@ -211,15 +204,15 @@ try
                 -MockWith { $true } `
                 -Verifiable
             Mock `
+                -CommandName Test-StartupType `
+                -Verifiable
+            Mock `
                 -CommandName Get-ServiceResource `
                 -MockWith { $script:testServiceMockRunning } `
                 -Verifiable
             Mock `
                 -CommandName Get-Win32ServiceObject `
                 -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                -Verifiable
-            Mock `
-                -CommandName Test-StartupType `
                 -Verifiable
             Mock `
                 -CommandName Compare-ServicePath `
@@ -232,25 +225,116 @@ try
 
             Context 'Service exists and should, and all parameters match' {
                 It 'Should not throw an exception' {
-                    { $script:result = Test-TargetResource @script:splatServiceExistsAutomatic -Verbose } | Should Not Throw
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    { $script:result = Test-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
                 }
-
                 It 'Should return true' {
                     $script:result | Should Be $True
                 }
-
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 2
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 2
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
                     Assert-MockCalled -CommandName Test-UserName -Exactly 1
                 }
             }
 
-            # TODO: complete
+            Context 'Service exists and should, path mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $false } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Test-UserName
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Path = 'c:\ANewPath.exe'
+                    { $script:result = Test-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result | Should Be $False
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                }
+            }
+
+            Context 'Service exists and should, path mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $false } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Test-UserName
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Path = 'c:\ANewPath.exe'
+                    { $script:result = Test-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result | Should Be $False
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                }
+            }
+
+            Context 'Service exists and should not' {
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Compare-ServicePath
+                Mock `
+                    -CommandName Test-UserName
+                Mock `
+                    -CommandName Get-ServiceResource
+                Mock `
+                    -CommandName Get-Win32ServiceObject
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Ensure = 'Absent'
+                    { $script:result = Test-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result | Should Be $False
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 0
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                }
+            }
         }
 
         Describe "$DSCResourceName\Set-TargetResource" {

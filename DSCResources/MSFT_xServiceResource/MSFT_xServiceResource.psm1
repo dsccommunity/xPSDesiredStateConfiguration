@@ -38,19 +38,19 @@ function Get-TargetResource
     if (Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue)
     {
         $service = Get-ServiceResource -Name $Name
-        $win32ServiceObject = Get-Win32ServiceObject -Name $Name
+        $svcWmi = Get-Win32ServiceObject -Name $Name
 
         $builtInAccount = $null
 
-        if ($win32ServiceObject.StartName -ieq "LocalSystem")
+        if ($svcWmi.StartName -ieq "LocalSystem")
         {
             $builtInAccount ="LocalSystem"
         }
-        elseif ($win32ServiceObject.StartName -ieq "NT Authority\NetworkService")
+        elseif ($svcWmi.StartName -ieq "NT Authority\NetworkService")
         {
             $builtInAccount = "NetworkService"
         }
-        elseif ($win32ServiceObject.StartName -ieq "NT Authority\LocalService")
+        elseif ($svcWmi.StartName -ieq "NT Authority\LocalService")
         {
             $builtInAccount = "LocalService"
         }
@@ -63,13 +63,13 @@ function Get-TargetResource
         }
         return @{
             Name            = $service.Name
-            StartupType     = ConvertTo-StartupTypeString -StartMode $win32ServiceObject.StartMode
+            StartupType     = ConvertTo-StartupTypeString -StartMode $svcWmi.StartMode
             BuiltInAccount  = $builtInAccount
             State           = $service.Status.ToString()
-            Path            = $win32ServiceObject.PathName
+            Path            = $svcWmi.PathName
             DisplayName     = $service.DisplayName
-            Description     = $win32ServiceObject.Description
-            DesktopInteract = $win32ServiceObject.DesktopInteract
+            Description     = $svcWmi.Description
+            DesktopInteract = $svcWmi.DesktopInteract
             Dependencies    = $dependencies
             Ensure          = 'Present'
         }
@@ -187,6 +187,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
+        # Check that there isn't a conflict with the proposed startup type
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     } # if
 
@@ -202,7 +203,7 @@ function Test-TargetResource
         return $false
     } # if
 
-    $svc = Get-TargetResource -Name $Name
+    $service = Get-ServiceResource -Name $Name
     $svcWmi = Get-Win32ServiceObject -Name $Name
 
     # Check the binary path
@@ -257,10 +258,10 @@ function Test-TargetResource
         } # if
     } # if
 
-    if ($State -ne $svc.State)
+    if ($State -ne $service.Status)
     {
         Write-Verbose -Message ($LocalizedData.TestStateMismatch `
-            -f $svcWmi.Name, $svc.State, $State)
+            -f $svcWmi.Name, $service.Status, $State)
         return $false
     } # if
 
