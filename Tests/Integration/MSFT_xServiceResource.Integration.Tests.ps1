@@ -24,7 +24,7 @@ try
     $script:testServiceCodePath = "$PSScriptRoot\..\DscTestService.cs"
     $script:testServiceDisplayName = "DSC test service display name"
     $script:testServiceDescription = "This is DSC test service used for integration testing MSFT_xServiceResource"
-    $script:testServiceDependencies = "winrm"
+    $script:testServiceDependsOn = "winrm"
     $script:testServiceExecutablePath = Join-Path -Path $ENV:Temp -ChildPath "DscTestService.exe"
 
     Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
@@ -38,7 +38,7 @@ try
         -ServiceCodePath $script:testServiceCodePath `
         -ServiceDisplayName $script:testServiceDisplayName `
         -ServiceDescription $script:testServiceDescription `
-        -ServiceDependencies $script:testServiceDependencies `
+        -ServiceDependsOn $script:testServiceDependsOn `
         -ServiceExecutablePath $script:testServiceExecutablePath
 
     #region Integration Tests
@@ -55,7 +55,7 @@ try
                     -ServicePath $script:testServiceExecutablePath `
                     -ServiceDisplayName $script:testServiceDisplayName `
                     -ServiceDescription $script:testServiceDescription `
-                    -ServiceDependencies $script:testServiceDependencies
+                    -ServiceDependsOn $script:testServiceDependsOn
                 Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
                     -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw
