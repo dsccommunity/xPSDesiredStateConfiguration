@@ -39,6 +39,8 @@ try
         $script:testUsername = 'TestUser'
         $script:testPassword = 'DummyPassword'
         $script:testCredential = New-Object System.Management.Automation.PSCredential $script:testUsername, (ConvertTo-SecureString $script:testPassword -AsPlainText -Force)
+        $script:testNewUsername = 'DifferentUser'
+        $script:testNewCredential = New-Object System.Management.Automation.PSCredential $script:testNewUsername, (ConvertTo-SecureString $script:testPassword -AsPlainText -Force)
 
         $script:testServiceMockRunning = New-Object -TypeName PSObject -Property @{
             Name               = $script:testServiceName
@@ -274,7 +276,61 @@ try
                 }
             }
 
-            Context 'Service exists and should, path mistmatches' {
+            Context 'Service exists and should, startup type mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.StartupType = 'Manual'
+                    { $script:result = Test-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result | Should Be $False
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, credential mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $false } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Credential = $script:testNewCredential
+                    { $script:result = Test-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should return false' {
+                    $script:result | Should Be $False
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, is running but should be stopped' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Compare-ServicePath `
@@ -287,7 +343,7 @@ try
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.Path = 'c:\ANewPath.exe'
+                    $Splat.State = 'Stopped'
                     { $script:result = Test-TargetResource @Splat `
                         -Verbose } | Should Not Throw
                 }
