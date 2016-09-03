@@ -24,7 +24,7 @@ try
     $script:testServiceCodePath = "$PSScriptRoot\..\DscTestService.cs"
     $script:testServiceDisplayName = "DSC test service display name"
     $script:testServiceDescription = "This is DSC test service used for integration testing MSFT_xServiceResource"
-    $script:testServiceDependsOn = "winrm"
+    $script:testServiceDependencies = "winrm"
     $script:testServiceExecutablePath = Join-Path -Path $ENV:Temp -ChildPath "DscTestService.exe"
 
     Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
