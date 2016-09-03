@@ -442,35 +442,367 @@ try
         }
 
         Describe "$DSCResourceName\Write-CredentialProperties" {
-            Mock `
-                -CommandName Get-UserNameAndPassword
-            Mock `
-                -CommandName Test-UserName
-            Mock `
-                -CommandName Set-LogOnAsServicePolicy
-            Mock `
-                -CommandName Invoke-CimMethod
-
             Context 'No parameters to be changed passed' {
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword
+                Mock `
+                    -CommandName Test-UserName
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+                Mock `
+                    -CommandName Invoke-CimMethod
+
                 It 'Should not throw an exception' {
-                    { $script:result = Write-CredentialProperties `
+                    { Write-CredentialProperties `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem } | Should Not Throw
                 }
-                It 'Should return false' {
-                    $script:result = $false
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 0
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
                 }
             }
+
             Context 'Desktop interact passed but does not need to be changed' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { $null,$null } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Test-UserName
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+                Mock `
+                    -CommandName Invoke-CimMethod
+
                 It 'Should not throw an exception' {
-                    { $script:result = Write-CredentialProperties `
+                    { Write-CredentialProperties `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $true } | Should Not Throw
                 }
-                It 'Should return false' {
-                    $script:result = $false
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
                 }
             }
-            # TODO: Complete
+
+            Context 'Desktop interact passed and does need to be changed' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { $null,$null } `
+                    -Verifiable
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 0 } } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Test-UserName
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -DesktopInteract $false } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'Desktop interact passed and does need to be changed but fails' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { $null,$null } `
+                    -Verifiable
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 99 } } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Test-UserName
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+
+                $innerMessage = ($LocalizedData.MethodFailed `
+                    -f "Change","Win32_Service","99")
+                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                    -f "Credential",$innerMessage)
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ChangeCredentialFailed" `
+                    -ErrorMessage $errorMessage
+
+                It 'Should throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -DesktopInteract $false } | Should Throw $errorRecord
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'Both credential and buildinaccount passed' {
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword
+                Mock `
+                    -CommandName Invoke-CimMethod
+                Mock `
+                    -CommandName Test-UserName
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+
+                $errorRecord = Get-InvalidArgumentError `
+                   -ErrorId "OnlyCredentialOrBuiltInAccount" `
+                    -ErrorMessage ($LocalizedData.OnlyOneParameterCanBeSpecified `
+                    -f "Credential","BuiltInAccount")
+
+                It 'Should throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Credential $script:testCredential `
+                        -BuiltInAccount 'LocalSystem' } | Should Throw $errorRecord
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 0
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
+                }
+            }
+
+            Context 'Credential passed but does not need to be changed' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { $script:testUsername,$script:testPassword } `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+                Mock `
+                    -CommandName Invoke-CimMethod
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Credential $script:testCredential } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
+                }
+            }
+
+            Context 'Credential and needs to be changed' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { $script:testUsername,$script:testPassword } `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy `
+                    -Verifiable
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 0 } } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Credential $script:testCredential } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 1
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'Credential and needs to be changed, but throws exception' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { $script:testUsername,$script:testPassword } `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy `
+                    -Verifiable
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 99 } } `
+                    -Verifiable
+
+                $innerMessage = ($LocalizedData.MethodFailed `
+                    -f "Change","Win32_Service","99")
+                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                    -f "Credential",$innerMessage)
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ChangeCredentialFailed" `
+                    -ErrorMessage $errorMessage
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -Credential $script:testCredential } | Should Throw $errorRecord
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 1
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'BuiltInAccount passed but does not need to be changed' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { '.\LocalSystem','' } `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+                Mock `
+                    -CommandName Invoke-CimMethod
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -BuiltInAccount 'LocalSystem' } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
+                }
+            }
+
+            Context 'BuiltInAccount passed and needs to be changed' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { '.\LocalSystem',$null } `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 0 } } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -BuiltInAccount 'LocalSystem' } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'BuiltInAccount passed and needs to be changed, but throws exception' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Get-UserNameAndPassword `
+                    -MockWith { '.\LocalSystem',$null } `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 99 } } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Set-LogOnAsServicePolicy
+
+                $innerMessage = ($LocalizedData.MethodFailed `
+                    -f "Change","Win32_Service","99")
+                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                    -f "Credential",$innerMessage)
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ChangeCredentialFailed" `
+                    -ErrorMessage $errorMessage
+
+                It 'Should not throw an exception' {
+                    { Write-CredentialProperties `
+                        -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
+                        -BuiltInAccount 'LocalSystem' } | Should Throw $errorRecord
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-UserNameAndPassword -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                    Assert-MockCalled -CommandName Set-LogOnAsServicePolicy -Exactly 0
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
         }
 
         Describe "$DSCResourceName\Write-BinaryProperties" {

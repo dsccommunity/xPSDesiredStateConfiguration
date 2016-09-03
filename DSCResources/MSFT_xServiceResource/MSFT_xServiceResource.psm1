@@ -820,12 +820,12 @@ function Write-CredentialProperties
 
     # The desktop interact flag was passed to set that value
     if($PSBoundParameters.ContainsKey("DesktopInteract") `
-        -and ($DeskopInteract -ne $SvcWmi.DesktopInteract))
+        -and ($DesktopInteract -ne $SvcWmi.DesktopInteract))
     {
         $changeArgs.DesktopInteract = $DesktopInteract
     } # if
 
-    if ($arguments.Count -gt 0)
+    if ($changeArgs.Count -gt 0)
     {
         $ret = Invoke-CimMethod `
             -InputObject $SvcWmi `
