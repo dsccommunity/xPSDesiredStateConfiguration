@@ -204,5 +204,5 @@ function Remove-TestService
 
 Export-ModuleMember -Function `
     New-ServiceBinary, `
-    New-TestService `
+    New-TestService, `
     Remove-TestService
