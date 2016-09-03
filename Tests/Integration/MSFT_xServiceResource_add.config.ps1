@@ -9,7 +9,7 @@ Configuration MSFT_xServiceResource_Add_Config {
     )
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
     node localhost {
-        xService Integration_Test {
+        xService AddService {
             Name            = $ServiceName
             Ensure          = 'Present'
             Path            = $ServicePath

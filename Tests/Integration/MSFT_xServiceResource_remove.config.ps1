@@ -5,7 +5,7 @@ Configuration MSFT_xServiceResource_Remove_Config {
     )
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
     node localhost {
-        xService Integration_Test {
+        xService RemoveService {
             Name            = $ServiceName
             Ensure          = 'Absent'
         }
