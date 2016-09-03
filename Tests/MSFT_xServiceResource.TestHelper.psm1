@@ -65,6 +65,90 @@ function New-ServiceBinary
 
 <#
     .SYNOPSIS
+    Creates a new service for testing.
+    .PARAMETER ServiceName
+    The name of the service to create the binary file for.
+    .PARAMETER ServiceCodePath
+    The path to the code for the service to create the binary file for.
+    .PARAMETER ServiceDisplayName
+    The display name of the service to create the binary file for.
+    .PARAMETER ServiceDescription
+    The description of the service to create the binary file for.
+    .PARAMETER ServiceDependsOn
+    Dependencies of the service to create the binary file for.
+    .PARAMETER ServiceExecutablePath
+    The path to write the service executable to.
+#>
+function New-TestService
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ServiceName,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ServiceCodePath,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ServiceDisplayName,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ServiceDescription,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ServiceDependsOn,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $ServiceExecutablePath
+    )
+
+    New-ServiceBinary `
+        -ServiceName $ServiceName `
+        -ServiceCodePath $ServiceCodePath `
+        -ServiceDisplayName $ServiceDisplayName `
+        -ServiceDescription $ServiceDescription `
+        -ServiceDependsOn $ServiceDependsOn `
+        -ServiceExecutablePath $ServiceExecutablePath
+
+    if (-not (Test-Path $ServiceExecutablePath))
+    {
+        throw "Failed to create service executable file."
+    }
+
+    $configurationName = "TestServiceConfig"
+    $configurationPath = Join-Path -Path (Get-Location) -ChildPath $ServiceName
+
+    Configuration $configurationName
+    {
+        Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
+        xService Service1
+        {
+            Name = $ServiceName
+            Path = $ServiceExecutablePath
+            DisplayName = $ServiceDisplayName
+            Description = $ServiceDescription
+            Dependencies = $ServiceDependsOn
+            StartupType = 'Manual'
+            BuiltInAccount = 'LocalSystem'
+            State = 'Stopped'
+            Ensure = 'Present'
+        }
+    }
+
+    & $configurationName -OutputPath $configurationPath
+
+    Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
+}
+
+<#
+    .SYNOPSIS
     Retrieves the path to the install utility.
 #>
 function Get-InstallUtilPath

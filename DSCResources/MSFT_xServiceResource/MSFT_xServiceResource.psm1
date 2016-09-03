@@ -371,11 +371,13 @@ function Set-TargetResource
 
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
+        # Check that there isn't a conflict with the proposed startup type
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     }
 
     if ($Ensure -eq "Absent")
     {
+        # The service exists but needs to be deleted
         Stop-ServiceResource -Name $Name -TerminateTimeout $TerminateTimeout
         Remove-Service $Name
         return

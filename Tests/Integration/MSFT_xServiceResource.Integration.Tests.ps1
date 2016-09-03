@@ -55,7 +55,7 @@ try
                     -ServicePath $script:testServiceExecutablePath `
                     -ServiceDisplayName $script:testServiceDisplayName `
                     -ServiceDescription $script:testServiceDescription `
-                    -ServiceDepependsOn $script:testServiceDependsOn
+                    -ServiceDependsOn $script:testServiceDependsOn
                 Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
                     -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw

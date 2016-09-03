@@ -394,7 +394,6 @@ try
         }
 
         Describe "$DSCResourceName\Set-TargetResource" {
-            # TODO: Complete
         }
 
         Describe "$DSCResourceName\Test-StartupType" {
