@@ -38,7 +38,7 @@ try
         -ServiceCodePath $script:testServiceCodePath `
         -ServiceDisplayName $script:testServiceDisplayName `
         -ServiceDescription $script:testServiceDescription `
-        -ServiceDependsOn $script:testServiceDependsOn `
+        -ServiceDependencies $script:testServiceDependencies `
         -ServiceExecutablePath $script:testServiceExecutablePath
 
     #region Integration Tests
@@ -55,7 +55,7 @@ try
                     -ServicePath $script:testServiceExecutablePath `
                     -ServiceDisplayName $script:testServiceDisplayName `
                     -ServiceDescription $script:testServiceDescription `
-                    -ServiceDependsOn $script:testServiceDependsOn
+                    -ServiceDependencies $script:testServiceDependencies
                 Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
                     -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw

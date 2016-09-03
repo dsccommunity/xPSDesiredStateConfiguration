@@ -5,7 +5,7 @@ Configuration MSFT_xServiceResource_Add_Config {
         $ServicePath,
         $ServiceDisplayName,
         $ServiceDescription,
-        $ServiceDependsOn
+        $ServiceDependencies
     )
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
     node localhost {
@@ -19,7 +19,7 @@ Configuration MSFT_xServiceResource_Add_Config {
             State           = 'Running'
             DisplayName     = $ServiceDisplayName
             Description     = $ServiceDescription
-            DependsOn       = $ServiceDependsOn
+            Dependencies    = $ServiceDependencies
         }
     }
 }
