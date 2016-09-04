@@ -3,12 +3,12 @@ Configuration Sample_xService_ServiceWithCredential
 
     param
     (
-        [string[]] 
+        [string[]]
         $nodeName = 'localhost',
 
         [System.String]
         $Name,
-        
+
         [System.String]
         [ValidateSet("Automatic", "Manual", "Disabled")]
         $StartupType="Automatic",
@@ -53,6 +53,7 @@ Configuration Sample_xService_ServiceWithCredential
             Path = $Path
             StartupType = $StartupType
             Credential = $credential
+            DesktopInteract = 'False'
         }
     }
 }

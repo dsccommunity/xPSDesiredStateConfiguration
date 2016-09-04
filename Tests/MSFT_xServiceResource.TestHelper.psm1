@@ -66,22 +66,16 @@ function New-ServiceBinary
 <#
     .SYNOPSIS
     Creates a new service for testing.
-
     .PARAMETER ServiceName
     The name of the service to create the binary file for.
-
     .PARAMETER ServiceCodePath
     The path to the code for the service to create the binary file for.
-
     .PARAMETER ServiceDisplayName
     The display name of the service to create the binary file for.
-
     .PARAMETER ServiceDescription
     The description of the service to create the binary file for.
-
     .PARAMETER ServiceDependsOn
     Dependencies of the service to create the binary file for.
-
     .PARAMETER ServiceExecutablePath
     The path to write the service executable to.
 #>
@@ -197,8 +191,11 @@ function Remove-TestService
         $ServiceExecutablePath
     )
 
-    $installUtility = Get-InstallUtilPath
-    & $installUtility /u $ServiceExecutablePath
+    if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)
+    {
+        $installUtility = Get-InstallUtilPath
+        & $installUtility /u $ServiceExecutablePath
+    }
 
     Remove-Item $ServiceExecutablePath -Force -ErrorAction SilentlyContinue
     Remove-Item *.InstallLog -Force -ErrorAction SilentlyContinue
@@ -206,5 +203,6 @@ function Remove-TestService
 }
 
 Export-ModuleMember -Function `
+    New-ServiceBinary, `
     New-TestService, `
     Remove-TestService
