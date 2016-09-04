@@ -132,7 +132,7 @@ try
             Context 'Service exists' {
                 # Mocks that should be called
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -165,7 +165,7 @@ try
 
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                 }
@@ -173,7 +173,7 @@ try
 
             Context 'Service does not exist' {
                 # Mocks that should be called
-                Mock -CommandName Test-ServiceExists -MockWith { $false } -Verifiable
+                Mock -CommandName Test-ServiceExist -MockWith { $false } -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Get-serviceResource
@@ -192,7 +192,7 @@ try
 
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-serviceResource -Exactly 0
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 0
                 }
@@ -202,7 +202,7 @@ try
         Describe "$DSCResourceName\Test-TargetResource" {
             # Mocks that should be called
             Mock `
-                -CommandName Test-ServiceExists `
+                -CommandName Test-ServiceExist `
                 -MockWith { $true } `
                 -Verifiable
             Mock `
@@ -236,7 +236,7 @@ try
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
@@ -267,7 +267,7 @@ try
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
@@ -294,7 +294,7 @@ try
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
@@ -321,7 +321,7 @@ try
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
@@ -352,7 +352,7 @@ try
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
@@ -383,7 +383,7 @@ try
                 }
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 0
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
@@ -400,7 +400,7 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -418,7 +418,7 @@ try
                 Mock `
                     -CommandName Compare-ServicePath
                 Mock `
-                    -CommandName Write-WriteProperties
+                    -CommandName Write-WriteProperty
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -429,13 +429,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Remove-Service -Exactly 1
                     Assert-MockCalled -CommandName New-Service -Exactly 0
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 0
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 0
                 }
             }
 
@@ -445,7 +445,7 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -453,7 +453,7 @@ try
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
-                    -CommandName Write-WriteProperties `
+                    -CommandName Write-WriteProperty `
                     -MockWith { $false } `
                     -Verifiable
                 Mock `
@@ -475,13 +475,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Remove-Service -Exactly 0
                     Assert-MockCalled -CommandName New-Service -Exactly 0
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 1
                 }
             }
 
@@ -491,7 +491,7 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -499,7 +499,7 @@ try
                     -MockWith { $false } `
                     -Verifiable
                 Mock `
-                    -CommandName Write-WriteProperties `
+                    -CommandName Write-WriteProperty `
                     -MockWith { $false } `
                     -Verifiable
                 Mock `
@@ -522,13 +522,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Remove-Service -Exactly 0
                     Assert-MockCalled -CommandName New-Service -Exactly 0
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 1
                 }
             }
 
@@ -538,7 +538,7 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -546,7 +546,7 @@ try
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
-                    -CommandName Write-WriteProperties `
+                    -CommandName Write-WriteProperty `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -569,13 +569,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Remove-Service -Exactly 0
                     Assert-MockCalled -CommandName New-Service -Exactly 0
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 1
                 }
             }
 
@@ -585,7 +585,7 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
@@ -593,7 +593,7 @@ try
                     -MockWith { $true } `
                     -Verifiable
                 Mock `
-                    -CommandName Write-WriteProperties `
+                    -CommandName Write-WriteProperty `
                     -MockWith { $false } `
                     -Verifiable
                 Mock `
@@ -616,13 +616,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Remove-Service -Exactly 0
                     Assert-MockCalled -CommandName New-Service -Exactly 0
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 1
                 }
             }
 
@@ -632,14 +632,14 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $false } `
                     -Verifiable
                 Mock `
                     -CommandName New-Service `
                     -Verifiable
                 Mock `
-                    -CommandName Write-WriteProperties `
+                    -CommandName Write-WriteProperty `
                     -MockWith { $false } `
                     -Verifiable
                 Mock `
@@ -662,13 +662,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Remove-Service -Exactly 0
                     Assert-MockCalled -CommandName New-Service -Exactly 1
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 1
                 }
             }
 
@@ -678,7 +678,7 @@ try
                     -CommandName Test-StartupType `
                     -Verifiable
                 Mock `
-                    -CommandName Test-ServiceExists `
+                    -CommandName Test-ServiceExist `
                     -MockWith { $false } `
                     -Verifiable
                 # Mocks that should not be called
@@ -693,7 +693,7 @@ try
                 Mock `
                     -CommandName Stop-ServiceResource
                 Mock `
-                    -CommandName Write-WriteProperties
+                    -CommandName Write-WriteProperty
 
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId "ServiceDoesNotExistPathMissingError" `
@@ -708,13 +708,13 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
                     Assert-MockCalled -CommandName Remove-Service -Exactly 0
                     Assert-MockCalled -CommandName New-Service -Exactly 0
                     Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
-                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 0
+                    Assert-MockCalled -CommandName Write-WriteProperty -Exactly 0
                 }
             }
         }
@@ -908,7 +908,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Write-WriteProperties" {
+        Describe "$DSCResourceName\Write-WriteProperty" {
             # Mocks that should be called
             Mock `
                 -CommandName Get-Win32ServiceObject `
@@ -917,7 +917,7 @@ try
 
             Context 'No parameters passed' {
                 It 'Should not throw an exception' {
-                    { Write-WriteProperties `
+                    { Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Verbose } | Should Not Throw
                 }
@@ -930,12 +930,12 @@ try
             Context 'Path passed, will trigger restart' {
                 # Mocks that should be called
                 Mock `
-                    -CommandName Write-BinaryProperties `
+                    -CommandName Write-BinaryProperty `
                     -MockWith { $true } `
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:Result = Write-WriteProperties `
+                    { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Path 'c:\NewExecutable.exe' `
                         -Verbose } | Should Not Throw
@@ -943,7 +943,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Write-BinaryProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-BinaryProperty -Exactly 1
                 }
             }
 
@@ -954,7 +954,7 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:Result = Write-WriteProperties `
+                    { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -StartupType 'Manual' `
                         -Verbose } | Should Not Throw
@@ -972,11 +972,11 @@ try
             Context 'Credential passed, will not trigger restart' {
                 # Mocks that should be called
                 Mock `
-                    -CommandName Write-CredentialProperties `
+                    -CommandName Write-CredentialProperty `
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:Result = Write-WriteProperties `
+                    { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Credential $script:testCredential `
                         -Verbose } | Should Not Throw
@@ -987,18 +987,18 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Write-CredentialProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-CredentialProperty -Exactly 1
                 }
             }
 
             Context 'BuildinAccount passed, will not trigger restart' {
                 # Mocks that should be called
                 Mock `
-                    -CommandName Write-CredentialProperties `
+                    -CommandName Write-CredentialProperty `
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:Result = Write-WriteProperties `
+                    { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -BuiltInAccount 'LocalSystem' `
                         -Verbose } | Should Not Throw
@@ -1009,18 +1009,18 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Write-CredentialProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-CredentialProperty -Exactly 1
                 }
             }
 
             Context 'DesktopInteract passed, will not trigger restart' {
                 # Mocks that should be called
                 Mock `
-                    -CommandName Write-CredentialProperties `
+                    -CommandName Write-CredentialProperty `
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:Result = Write-WriteProperties `
+                    { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -DesktopInteract $true `
                         -Verbose } | Should Not Throw
@@ -1031,12 +1031,12 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Write-CredentialProperties -Exactly 1
+                    Assert-MockCalled -CommandName Write-CredentialProperty -Exactly 1
                 }
             }
         }
 
-        Describe "$DSCResourceName\Write-CredentialProperties" {
+        Describe "$DSCResourceName\Write-CredentialProperty" {
             # Dummy Functions
             function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
 
@@ -1052,7 +1052,7 @@ try
                     -CommandName Invoke-CimMethod
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Verbose } | Should Not Throw
                 }
@@ -1081,7 +1081,7 @@ try
                     -CommandName Invoke-CimMethod
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $true `
                         -Verbose } | Should Not Throw
@@ -1113,7 +1113,7 @@ try
                     -CommandName Set-LogOnAsServicePolicy
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $false `
                         -Verbose } | Should Not Throw
@@ -1153,7 +1153,7 @@ try
                     -ErrorMessage $errorMessage
 
                 It 'Should throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $false `
                         -Verbose } | Should Throw $errorRecord
@@ -1184,7 +1184,7 @@ try
                     -f "Credential","BuiltInAccount")
 
                 It 'Should throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Credential $script:testCredential `
                         -BuiltInAccount 'LocalSystem' } | Should Throw $errorRecord
@@ -1216,7 +1216,7 @@ try
                     -CommandName Invoke-CimMethod
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Credential $script:testCredential } | Should Not Throw
                 }
@@ -1248,7 +1248,7 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Credential $script:testCredential } | Should Not Throw
                 }
@@ -1288,7 +1288,7 @@ try
                     -ErrorMessage $errorMessage
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Credential $script:testCredential } | Should Throw $errorRecord
                 }
@@ -1319,7 +1319,7 @@ try
                     -CommandName Invoke-CimMethod
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -BuiltInAccount 'LocalSystem' } | Should Not Throw
                 }
@@ -1352,7 +1352,7 @@ try
                     -CommandName Set-LogOnAsServicePolicy
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -BuiltInAccount 'LocalSystem' } | Should Not Throw
                 }
@@ -1393,7 +1393,7 @@ try
                     -ErrorMessage $errorMessage
 
                 It 'Should not throw an exception' {
-                    { Write-CredentialProperties `
+                    { Write-CredentialProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -BuiltInAccount 'LocalSystem' } | Should Throw $errorRecord
                 }
@@ -1407,10 +1407,10 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Write-BinaryProperties" {
+        Describe "$DSCResourceName\Write-BinaryProperty" {
             Context 'Path is already correct' {
                 It 'Should not throw an exception' {
-                    { $script:result = Write-BinaryProperties `
+                    { $script:result = Write-BinaryProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Path $script:testServiceExecutablePath } | Should Not Throw
                 }
@@ -1421,7 +1421,7 @@ try
             Context 'Path needs to be changed and is changed without error' {
                 $global:ChangeMethodResult = @{ ReturnValue = 0 }
                 It 'Should not throw an exception' {
-                    { $script:result = Write-BinaryProperties `
+                    { $script:result = Write-BinaryProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Path 'c:\NewServicePath.exe' } | Should Not Throw
                 }
@@ -1444,7 +1444,7 @@ try
                     -ErrorMessage $errorMessage
 
                 It 'Should not throw an exception' {
-                    { $script:result = Write-BinaryProperties `
+                    { $script:result = Write-BinaryProperty `
                         -SvcWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Path 'c:\NewServicePath.exe' } | Should Throw $errorRecord
                 }
@@ -1507,7 +1507,7 @@ try
         Describe "$DSCResourceName\Remove-Service" {
             # Mocks that should be called
             Mock -CommandName 'sc.exe' -Verifiable
-            Mock -CommandName Test-ServiceExists -MockWith { $false } -Verifiable
+            Mock -CommandName Test-ServiceExist -MockWith { $false } -Verifiable
 
             Context 'Service is deleted successfully' {
                 # Mocks that should not be called
@@ -1520,12 +1520,12 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName 'sc.exe' -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 1
                     Assert-MockCalled -CommandName Start-Sleep -Exactly 0
                 }
             }
 
-            Mock -CommandName Test-ServiceExists -MockWith { $true } -Verifiable
+            Mock -CommandName Test-ServiceExist -MockWith { $true } -Verifiable
 
             Context 'Service can not be deleted (takes a few seconds)' {
                 Mock -CommandName Start-Sleep -Verifiable
@@ -1541,7 +1541,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName 'sc.exe' -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 999
+                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 999
                     Assert-MockCalled -CommandName Start-Sleep -Exactly 999
                 }
             }
@@ -1680,7 +1680,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Test-ServiceExists" {
+        Describe "$DSCResourceName\Test-ServiceExist" {
             Context 'Service exists' {
                 # Mocks that should be called
                 Mock `
@@ -1690,7 +1690,7 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:result = Test-ServiceExists -Name $script:testServiceName -Verbose } | Should Not Throw
+                    { $script:result = Test-ServiceExist -Name $script:testServiceName -Verbose } | Should Not Throw
                 }
 
                 It 'Result is true' {
@@ -1714,7 +1714,7 @@ try
                     -Verifiable
 
                 It 'Should not throw an exception' {
-                    { $script:result = Test-ServiceExists -Name $script:testServiceName -Verbose } | Should Not Throw
+                    { $script:result = Test-ServiceExist -Name $script:testServiceName -Verbose } | Should Not Throw
                 }
 
                 It 'Result is false' {

@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 #region localizeddata
 if (Test-Path "${PSScriptRoot}\${PSUICulture}")
 {
@@ -35,7 +38,7 @@ function Get-TargetResource
         $Name
     )
 
-    if (Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue)
+    if (Test-ServiceExist -Name $Name -ErrorAction SilentlyContinue)
     {
         $service = Get-ServiceResource -Name $Name
         $svcWmi = Get-Win32ServiceObject -Name $Name
@@ -149,6 +152,7 @@ function Test-TargetResource
 
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [Boolean]
@@ -191,7 +195,7 @@ function Test-TargetResource
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     } # if
 
-    $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
+    $serviceExists = Test-ServiceExist -Name $Name -ErrorAction SilentlyContinue
 
     if ($Ensure -eq 'Absent')
     {
@@ -333,6 +337,7 @@ function Set-TargetResource
 
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [Boolean]
@@ -375,7 +380,7 @@ function Set-TargetResource
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     } # if
 
-    $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
+    $serviceExists = Test-ServiceExist -Name $Name -ErrorAction SilentlyContinue
 
     if (($Ensure -eq "Absent") -and $serviceExists)
     {
@@ -474,7 +479,7 @@ function Set-TargetResource
         $writeWritePropertiesArguments['DesktopInteract'] = $DesktopInteract
     } # if
 
-    $requiresRestart = Write-WriteProperties @writeWritePropertiesArguments
+    $requiresRestart = Write-WriteProperty @writeWritePropertiesArguments
 
     if ($State -eq "Stopped")
     {
@@ -673,7 +678,7 @@ function Set-ServiceStartMode
     .SYNOPSIS
     Writes all write properties if not already correctly set, logging errors and respecting whatif
 #>
-function Write-WriteProperties
+function Write-WriteProperty
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
@@ -696,6 +701,7 @@ function Write-WriteProperties
         $BuiltInAccount,
 
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         [ValidateNotNull()]
         $Credential,
 
@@ -714,7 +720,7 @@ function Write-WriteProperties
             Path = $Path
         }
 
-        $requiresRestart = $requiresRestart -or (Write-BinaryProperties @writeBinaryArguments)
+        $requiresRestart = $requiresRestart -or (Write-BinaryProperty @writeBinaryArguments)
     } # if
 
     # update credentials
@@ -739,7 +745,7 @@ function Write-WriteProperties
             $null = $writeCredentialPropertiesArguments.Add("DesktopInteract",$DesktopInteract)
         } # if
 
-        Write-CredentialProperties @writeCredentialPropertiesArguments
+        Write-CredentialProperty @writeCredentialPropertiesArguments
     } # if
 
     # Update startup type
@@ -750,13 +756,13 @@ function Write-WriteProperties
 
     # Return restart status
     return $requiresRestart
-} # function Write-WriteProperties
+} # function Write-WriteProperty
 
 <#
     .SYNOPSIS
     Writes credential properties if not already correctly set, logging errors and respecting whatif
 #>
-function Write-CredentialProperties
+function Write-CredentialProperty
 {
     [CmdletBinding()]
     param
@@ -771,6 +777,7 @@ function Write-CredentialProperties
         $BuiltInAccount,
 
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [Boolean]
@@ -848,13 +855,13 @@ function Write-CredentialProperties
                 -ErrorMessage $errorMessage
         } # if
     } # if
-} # function Write-CredentialProperties
+} # function Write-CredentialProperty
 
 <#
     .SYNOPSIS
     Writes binary path if not already correctly set, logging errors and respecting whatif
 #>
-function Write-BinaryProperties
+function Write-BinaryProperty
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
@@ -887,7 +894,7 @@ function Write-BinaryProperties
     } # if
 
     return $true
-} # function Write-BinaryProperties
+} # function Write-BinaryProperty
 
 <#
     .SYNOPSIS
@@ -925,6 +932,7 @@ function Get-UserNameAndPassword
         $BuiltInAccount,
 
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
@@ -959,10 +967,10 @@ function Remove-Service
         $Name
     )
 
-    $err = & "sc.exe" "delete" "$Name"
+    & "sc.exe" "delete" "$Name"
     for($i = 1; $i -lt 1000; $i++)
     {
-        if(-not (Test-ServiceExists -Name $Name))
+        if(-not (Test-ServiceExist -Name $Name))
         {
             $serviceDeletedSuccessfully = $true
             break
@@ -1182,7 +1190,7 @@ function New-InvalidArgumentError
     .PARAMETER Name
     The name of the service to test for.
 #>
-function Test-ServiceExists
+function Test-ServiceExist
 {
     [OutputType([Boolean])]
     [CmdletBinding()]
@@ -1196,7 +1204,7 @@ function Test-ServiceExists
 
     $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
     return $null -ne $service
-} # function Test-ServiceExists
+} # function Test-ServiceExist
 
 <#
     .SYNOPSIS
@@ -1624,7 +1632,7 @@ function Set-LogOnAsServicePolicy
 
     try
     {
-        $existingType = [LogOnAsServiceHelper.NativeMethods]
+        $null = [LogOnAsServiceHelper.NativeMethods]
     }
     catch
     {
