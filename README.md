@@ -340,6 +340,10 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed PSSA and style issues
     * Renamed internal functions to follow verb-noun format
     * Decorated all functions with comment-based help
+* xWindowsOptionalFeature:
+    * Cleaned up resource (PSSA issues, formatting, etc.)
+    * Added example script
+    * Added integration test
 
 ### 3.13.0.0
 

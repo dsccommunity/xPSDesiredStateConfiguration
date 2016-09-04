@@ -1,7 +1,10 @@
 ﻿
 <#
  *
- * Once you setup your pullserver(V2), run the following set of tests on the pullserver machine to verify if the pullserver is setup properly and ready to go.
+ * Once you setup your pullserver(V2), run the following set of tests on the pullserver machine to verify if the
+ * pullserver is setup properly and ready to go.
+ * You run the test via Invoke-Pester ./PullServerSetupTests.ps1, and you can install Pester with `Install-Module Pester`,
+ * if you have PowerShell 5 or the PackageManagement extensions for older PowerShells installed.
  * This test assumes default values are used during deployment  for the location of web.config and pull server URL.
  * If default values are not used during deployment , please update these values in the 'BeforeAll' block accordingly.
  *
