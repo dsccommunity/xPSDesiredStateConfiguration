@@ -358,6 +358,10 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Merged with in-box Registry
     * Fixed registry key and value removal
     * Added unit tests
+* xPSSessionConfiguration:
+    * Fixed PSSA and style issues
+    * Renamed internal functions to follow verb-noun formats
+    * Decorated all functions with comment-based help
 * xWindowsOptionalFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script
