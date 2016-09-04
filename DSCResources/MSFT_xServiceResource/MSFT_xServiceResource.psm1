@@ -373,25 +373,27 @@ function Set-TargetResource
     {
         # Check that there isn't a conflict with the proposed startup type
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
-    }
+    } # if
 
-    if ($Ensure -eq "Absent")
+    $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
+
+    if (($Ensure -eq "Absent") -and $serviceExists)
     {
         # The service exists but needs to be deleted
         Stop-ServiceResource -Name $Name -TerminateTimeout $TerminateTimeout
         Remove-Service $Name
         return
-    }
+    } # if
 
-    $serviceExists = Test-ServiceExists -Name $Name -ErrorAction SilentlyContinue
     $serviceIsNew = $false
 
     if ($PSBoundParameters.ContainsKey("Path") -and $serviceExists)
     {
         if (-not (Compare-ServicePath -Name $Name -Path $Path))
         {
-            # Update the path
-        }
+            # Update the path - this is not yet supported, but could be
+            Write-Verbose -Message ($LocalizedData.ServiceExecutablePathChangeNotSupported)
+        } # if
     }
     elseif ($PSBoundParameters.ContainsKey("Path") -and -not $serviceExists)
     {
@@ -401,23 +403,23 @@ function Set-TargetResource
         if($PSBoundParameters.ContainsKey("Credential"))
         {
             $argumentsToNewService.Add("Credential", $Credential)
-        }
+        } # if
         if($PSBoundParameters.ContainsKey("StartupType"))
         {
             $argumentsToNewService.Add("StartupType", $StartupType)
-        }
+        } # if
         if($PSBoundParameters.ContainsKey("DisplayName"))
         {
             $argumentsToNewService.Add("DisplayName", $DisplayName)
-        }
+        } # if
         if($PSBoundParameters.ContainsKey("Description"))
         {
             $argumentsToNewService.Add("Description", $Description)
-        }
+        } # if
         if($PSBoundParameters.ContainsKey("Dependencies"))
         {
             $argumentsToNewService.Add("DependsOn", $Dependencies)
-        }
+        } # if
 
         try
         {
@@ -429,19 +431,19 @@ function Set-TargetResource
             Write-Verbose -Message ($LocalizedData.TestStartupTypeMismatch `
                 -f $argumentsToNewService["Name"], $_.Exception.Message)
             throw $_
-        }
+        } # try
     }
     elseif (-not $PSBoundParameters.ContainsKey("Path") -and -not $serviceExists)
     {
-        throw $LocalizedData.ServiceNotExists -f $Name
-    }
-
-    $svc = Get-TargetResource -Name $Name
+        New-InvalidArgumentError `
+            -ErrorId "ServiceDoesNotExistPathMissingError" `
+            -ErrorMessage ($LocalizedData.ServiceDoesNotExistPathMissingError -f $Name)
+    } # if
 
     if (-not $serviceIsNew)
     {
        Write-Verbose -Message ($LocalizedData.WritePropertiesIgnored -f $Name)
-    }
+    } # if
 
     $writeWritePropertiesArguments = @{
         Name = $Name
@@ -450,27 +452,27 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey('Path'))
     {
         $writeWritePropertiesArguments['Path'] = $Path
-    }
+    } # if
 
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
         $writeWritePropertiesArguments['StartupType'] = $StartupType
-    }
+    } # if
 
     if ($PSBoundParameters.ContainsKey('BuiltInAccount'))
     {
         $writeWritePropertiesArguments['BuiltInAccount'] = $BuiltInAccount
-    }
+    } # if
 
     if ($PSBoundParameters.ContainsKey('Credential'))
     {
         $writeWritePropertiesArguments['Credential'] = $Credential
-    }
+    } # if
 
     if ($PSBoundParameters.ContainsKey('DesktopInteract'))
     {
         $writeWritePropertiesArguments['DesktopInteract'] = $DesktopInteract
-    }
+    } # if
 
     $requiresRestart = Write-WriteProperties @writeWritePropertiesArguments
 
@@ -487,9 +489,9 @@ function Set-TargetResource
             Write-Verbose -Message ($LocalizedData.ServiceNeedsRestartMessage -f
                 $Name)
             Stop-ServiceResource -Name $Name -TerminateTimeout $TerminateTimeout
-        }
+        } # if
         Start-ServiceResource $Name -StartupTimeout $StartupTimeout
-    }
+    } # if
 } # function Set-TargetResource
 
 <#

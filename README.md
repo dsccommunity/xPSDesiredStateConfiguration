@@ -364,6 +364,7 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed bug where service start mode would be set to auto when it already was set to auto.
     * Fixed error message content when start mode can not be changed.
     * Removed shouldprocess from functions as not required.
+    * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
 
 ### 3.13.0.0
 

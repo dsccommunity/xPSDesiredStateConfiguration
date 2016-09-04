@@ -394,6 +394,329 @@ try
         }
 
         Describe "$DSCResourceName\Set-TargetResource" {
+            Context 'Service exists and should not' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Stop-ServiceResource `
+                    -Verifiable
+                Mock `
+                    -CommandName Remove-Service `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Start-ServiceResource
+                Mock `
+                    -CommandName New-Service
+                Mock `
+                    -CommandName Compare-ServicePath
+                Mock `
+                    -CommandName Write-WriteProperties
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Ensure = 'Absent'
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 1
+                    Assert-MockCalled -CommandName New-Service -Exactly 0
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 0
+                }
+            }
+
+            Context 'Service exists and should, should be running, all parameters passed and match' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Write-WriteProperties `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Start-ServiceResource `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Stop-ServiceResource
+                Mock `
+                    -CommandName New-Service
+                Mock `
+                    -CommandName Remove-Service
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 0
+                    Assert-MockCalled -CommandName New-Service -Exactly 0
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, should be running, path needs change' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Write-WriteProperties `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Start-ServiceResource `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Stop-ServiceResource
+                Mock `
+                    -CommandName New-Service
+                Mock `
+                    -CommandName Remove-Service
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Path = 'c:\NewServicePath.exe'
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 0
+                    Assert-MockCalled -CommandName New-Service -Exactly 0
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, should be running but needs restart, all parameters passed and match' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Write-WriteProperties `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Start-ServiceResource `
+                    -Verifiable
+                Mock `
+                    -CommandName Stop-ServiceResource `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName New-Service
+                Mock `
+                    -CommandName Remove-Service
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 0
+                    Assert-MockCalled -CommandName New-Service -Exactly 0
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, should be stopped, all parameters passed and match' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $true } `
+                    -Verifiable
+                Mock `
+                    -CommandName Write-WriteProperties `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Stop-ServiceResource `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName New-Service
+                Mock `
+                    -CommandName Remove-Service
+                Mock `
+                    -CommandName Start-ServiceResource
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.State = 'Stopped'
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 0
+                    Assert-MockCalled -CommandName New-Service -Exactly 0
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                }
+            }
+
+            Context 'Service does not exist but should' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName New-Service `
+                    -Verifiable
+                Mock `
+                    -CommandName Write-WriteProperties `
+                    -MockWith { $false } `
+                    -Verifiable
+                Mock `
+                    -CommandName Start-ServiceResource `
+                    -MockWith { $false } `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName Compare-ServicePath
+                Mock `
+                    -CommandName Remove-Service
+                Mock `
+                    -CommandName Stop-ServiceResource
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Not Throw
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 0
+                    Assert-MockCalled -CommandName New-Service -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 1
+                }
+            }
+
+            Context 'Service does not exist but should, but no path specified' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-StartupType `
+                    -Verifiable
+                Mock `
+                    -CommandName Test-ServiceExists `
+                    -MockWith { $false } `
+                    -Verifiable
+                # Mocks that should not be called
+                Mock `
+                    -CommandName New-Service
+                Mock `
+                    -CommandName Compare-ServicePath
+                Mock `
+                    -CommandName Start-ServiceResource
+                Mock `
+                    -CommandName Remove-Service
+                Mock `
+                    -CommandName Stop-ServiceResource
+                Mock `
+                    -CommandName Write-WriteProperties
+
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ServiceDoesNotExistPathMissingError" `
+                    -ErrorMessage ($LocalizedData.ServiceDoesNotExistPathMissingError -f $script:testServiceName)
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Remove('Path')
+                    { Set-TargetResource @Splat `
+                        -Verbose } | Should Throw $errorRecord
+                }
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Start-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Stop-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Remove-Service -Exactly 0
+                    Assert-MockCalled -CommandName New-Service -Exactly 0
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
+                    Assert-MockCalled -CommandName Write-WriteProperties -Exactly 0
+                }
+            }
         }
 
         Describe "$DSCResourceName\Test-StartupType" {
