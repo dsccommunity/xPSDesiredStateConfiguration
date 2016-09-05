@@ -137,7 +137,7 @@ function Split-Credential
         Gets the state of the managed process.
 
     .PARAMETER Path
-        The path to the process executable. If this the file name of the executable
+        The path to the process executable. If this is the file name of the executable
         (not the fully qualified path), the DSC resource will search the environment Path variable
         ($env:Path) to find the executable file. If the value of this property is a fully qualified
         path, DSC will not use the Path environment variable to find the file, and will throw an
@@ -221,7 +221,7 @@ function Get-TargetResource
         Ensures the managed process executable is Present or Absent.
 
     .PARAMETER Path
-        The path to the process executable. If this the file name of the executable
+        The path to the process executable. If this is the file name of the executable
         (not the fully qualified path), the DSC resource will search the environment Path variable
         ($env:Path) to find the executable file. If the value of this property is a fully qualified
         path, DSC will not use the Path environment variable to find the file, and will throw an
@@ -293,12 +293,12 @@ function Set-TargetResource
 
     if ($null -ne $PsDscContext.RunAsUser)
     {
-        $params = @{
+        $newInvalidArgumentExceptionParams = @{
             ArgumentName = 'PsDscRunAsCredential'
             Message =
                 ($LocalizedData.ErrorRunAsCredentialParameterNotSupported -f $PsDscContext.RunAsUser)
         }
-        New-InvalidArgumentException @params
+        New-InvalidArgumentException @newInvalidArgumentExceptionParams
     }
 
     $Path = Expand-Path -Path $Path
@@ -317,12 +317,12 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Absent')
     {
-        $params = @{
+        $assertHashtableParams = @{
             Hashtable = $PSBoundParameters
             Key = @( 'StandardOutputPath', 'StandardErrorPath', 'StandardInputPath',
                 'WorkingDirectory' )
         }
-        Assert-HashtableDoesNotContainKey @params
+        Assert-HashtableDoesNotContainKey @assertHashtableParams
 
         $whatIfShouldProcess = $PSCmdlet.ShouldProcess($Path, $LocalizedData.StoppingProcessWhatif)
         if ($win32Processes.Count -gt 0 -and $whatIfShouldProcess)
@@ -370,11 +370,11 @@ function Set-TargetResource
         {
             if (-not [String]::IsNullOrEmpty($PSBoundParameters[$shouldBeRootedPathArgument]))
             {
-                $params = @{
+                $assertPathArgumentRootedParams = @{
                     PathArgumentName = $shouldBeRootedPathArgument
                     PathArgument = $PSBoundParameters[$shouldBeRootedPathArgument]
                 }
-                Assert-PathArgumentRooted @params
+                Assert-PathArgumentRooted @assertPathArgumentRootedParams
             }
         }
 
@@ -384,11 +384,11 @@ function Set-TargetResource
         {
             if (-not [String]::IsNullOrEmpty($PSBoundParameters[$shouldExistPathArgument]))
             {
-                $params = @{
+                $assertPathArgumentValidParams = @{
                     PathArgumentName = $shouldExistPathArgument
                     PathArgument = $PSBoundParameters[$shouldExistPathArgument]
                 }
-                Assert-PathArgumentValid @params
+                Assert-PathArgumentValid @assertPathArgumentValidParams
             }
         }
 
@@ -409,10 +409,10 @@ function Set-TargetResource
             foreach ($startProcessOptionalArgumentName in $startProcessOptionalArgumentMap.Keys)
             {
                 $parameterKey = $startProcessOptionalArgumentMap[$startProcessOptionalArgumentName]
-                $value = $PSBoundParameters[$parameterKey]
-                if (-not [String]::IsNullOrEmpty($value))
+                $parameterValue = $PSBoundParameters[$parameterKey]
+                if (-not [String]::IsNullOrEmpty($parameterValue))
                 {
-                    $startProcessArguments[$startProcessOptionalArgumentName] = $value
+                    $startProcessArguments[$startProcessOptionalArgumentName] = $parameterValue
                 }
             }
 
@@ -437,11 +437,11 @@ function Set-TargetResource
                 {
                     foreach ($key in @('StandardOutputPath','StandardInputPath','WorkingDirectory'))
                     {
-                        $params = {
+                        $newInvalidArgumentExceptionParams = {
                             ArgumentName = $key
                             Message = $LocalizedData.ErrorParametersNotSupportedWithCredential
                         }
-                        New-InvalidArgumentException @params
+                        New-InvalidArgumentException @newInvalidArgumentExceptionParams
                     }
 
                     $splitCredentialResult = Split-Credential $Credential
@@ -504,7 +504,7 @@ function Set-TargetResource
         Tests if the managed process is Present or Absent.
 
     .PARAMETER Path
-        The path to the process executable. If this the file name of the executable
+        The path to the process executable. If this is the file name of the executable
         (not the fully qualified path), the DSC resource will search the environment Path variable
         ($env:Path) to find the executable file. If the value of this property is a fully qualified
         path, DSC will not use the Path environment variable to find the file, and will throw an
@@ -518,22 +518,33 @@ function Set-TargetResource
         Indicates the credentials for starting the process.
 
     .PARAMETER Ensure
-        Indicates if the process exists. Set this property to "Present" to ensure that the process
-        exists. Otherwise, set it to "Absent". The default is "Present".
+        Indicates if the process exists. Set this property to "Present" to return true
+        if the process that the process exists. Otherwise, set it to "Absent" to return true if
+        the process does not exist. The default is "Present".
 
     .PARAMETER StandardOutputPath
-        Indicates the location to write the standard output. Any existing file there will be
-        overwritten.
+        Indicates the location to write the standard output.
+
+        Note: The value provided to this parameter is not being used inside the function
+        because we only test if the managed process is Present or Absent.
 
     .PARAMETER StandardErrorPath
-        Indicates the directory path to write the standard error. Any existing file there will be
-        overwritten.
+        Indicates the directory path to write the standard error.
+
+        Note: The value provided to this parameter is not being used inside the function
+        because we only test if the managed process is Present or Absent.
 
     .PARAMETER StandardInputPath
         Indicates the standard input location.
 
+        Note: The value provided to this parameter is not being used inside the function
+        because we only test if the managed process is Present or Absent.
+
     .PARAMETER WorkingDirectory
         Indicates the location that will be used as the current working directory for the process.
+
+        Note: The value provided to this parameter is not being used inside the function
+        because we only test if the managed process is Present or Absent.
 #>
 function Test-TargetResource
 {
@@ -577,12 +588,12 @@ function Test-TargetResource
 
     if ($null -ne $PsDscContext.RunAsUser)
     {
-        $params = @{
+        $newInvalidArgumentExceptionParams = @{
             ArgumentName = 'PsDscRunAsCredential'
             Message =
                 ($LocalizedData.ErrorRunAsCredentialParameterNotSupported -f $PsDscContext.RunAsUser)
         }
-        New-InvalidArgumentException @params
+        New-InvalidArgumentException @newInvalidArgumentExceptionParams
     }
 
     $Path = Expand-Path -Path $Path
@@ -745,12 +756,12 @@ function Get-Win32Process
             if ($process.Path -ieq $Path)
             {
                 Write-Verbose -Message ($LocalizedData.VerboseInProcessHandle -f $process.Id)
-                $params = @{
+                $getCimInstanceParams = @{
                     ClassName = 'Win32_Process'
                     Filter = "ProcessId = $($process.Id)"
                     ErrorAction = 'SilentlyContinue'
                 }
-                $processes += Get-CimInstance @params
+                $processes += Get-CimInstance @getCimInstanceParams
             }
         }
     }
