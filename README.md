@@ -348,9 +348,17 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+* xDSCWebService:
+    * Added setting of enhanced security
+    * Cleaned up Examples
+    * Cleaned up pull server verification test
 * xProcess:
     * Fixed PSSA issues
     * Corrected most style guideline issues
+* xPSSessionConfiguration:
+    * Fixed PSSA and style issues
+    * Renamed internal functions to follow verb-noun formats
+    * Decorated all functions with comment-based help
 * xRegistry:
     * Fixed PSSA and style issues
     * Renamed internal functions to follow verb-noun format
@@ -358,14 +366,6 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Merged with in-box Registry
     * Fixed registry key and value removal
     * Added unit tests
-* xPSSessionConfiguration:
-    * Fixed PSSA and style issues
-    * Renamed internal functions to follow verb-noun formats
-    * Decorated all functions with comment-based help
-* xWindowsOptionalFeature:
-    * Cleaned up resource (PSSA issues, formatting, etc.)
-    * Added example script
-    * Added integration test
 * xService:
     * Added descriptions to MOF file.
     * Added additional details to parameters in Readme.md in a format that can be generated from the MOF.
@@ -389,11 +389,19 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed error message content when start mode can not be changed.
     * Removed shouldprocess from functions as not required.
     * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
+* xWindowsOptionalFeature:
+    * Cleaned up resource (PSSA issues, formatting, etc.)
+    * Added example script
+    * Added integration test
 * Removed test log output from repo.
-* xDSCWebService:
-    * Added setting of enhanced security
-    * Cleaned up Examples
-    * Cleaned up pull server verification test 
+* Removed the prefix MSFT_ from all files and folders of the composite resources in this module
+because they were unavailable to Get-DscResource and Import-DscResource.
+    * xFileUpload
+    * xGroupSet
+    * xProcessSet
+    * xServiceSet
+    * xWindowsFeatureSet
+    * xWindowsOptionalFeatureSet
 
 ### 3.13.0.0
 
