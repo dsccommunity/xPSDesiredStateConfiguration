@@ -7,7 +7,9 @@ Configuration MSFT_xServiceResource_Add_Config {
         $ServiceDescription,
         $ServiceDependsOn
     )
+
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
     node localhost {
         xService AddService {
             Name            = $ServiceName

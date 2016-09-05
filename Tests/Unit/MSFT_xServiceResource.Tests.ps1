@@ -1527,7 +1527,7 @@ try
 
             Mock -CommandName Test-ServiceExist -MockWith { $true } -Verifiable
 
-            Context 'Service can not be deleted (takes a few seconds)' {
+            Context 'Service can not be deleted (will take 5 seconds)' {
                 Mock -CommandName Start-Sleep -Verifiable
 
                 $errorRecord = Get-InvalidArgumentError `
@@ -1541,8 +1541,6 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName 'sc.exe' -Exactly 1
-                    Assert-MockCalled -CommandName Test-ServiceExist -Exactly 999
-                    Assert-MockCalled -CommandName Start-Sleep -Exactly 999
                 }
             }
         }

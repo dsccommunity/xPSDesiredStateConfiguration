@@ -365,6 +365,7 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed error message content when start mode can not be changed.
     * Removed shouldprocess from functions as not required.
     * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
+* Removed test log output from repo.
 
 ### 3.13.0.0
 
