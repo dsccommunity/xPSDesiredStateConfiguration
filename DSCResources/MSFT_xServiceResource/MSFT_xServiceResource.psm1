@@ -24,7 +24,8 @@ else
     Get the current status of a service.
 
     .PARAMETER name
-    Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
+    Indicates the service name. Note that sometimes this is different from the display name.
+    You can get a list of the services and their current state with the Get-Service cmdlet.
 #>
 function Get-TargetResource
 {
@@ -191,7 +192,7 @@ function Test-TargetResource
 
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
-        # Check that there isn't a conflict with the proposed startup type
+        # Throw an exception if the requested StartupType will conflict with the current state
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     } # if
 
@@ -226,6 +227,7 @@ function Test-TargetResource
         -or $PSBoundParameters.ContainsKey("DesktopInteract"))
     {
         $getUserNameAndPasswordArgs = @{}
+
         if($PSBoundParameters.ContainsKey("BuiltInAccount"))
         {
             $null = $getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
@@ -376,7 +378,7 @@ function Set-TargetResource
 
     if ($PSBoundParameters.ContainsKey('StartupType'))
     {
-        # Check that there isn't a conflict with the proposed startup type
+        # Throw an exception if the requested StartupType will conflict with the current state
         Test-StartupType -Name $Name -StartupType $StartupType -State $State
     } # if
 
@@ -405,22 +407,27 @@ function Set-TargetResource
         $argumentsToNewService = @{}
         $argumentsToNewService.Add("Name", $Name)
         $argumentsToNewService.Add("BinaryPathName", $Path)
+
         if($PSBoundParameters.ContainsKey("Credential"))
         {
             $argumentsToNewService.Add("Credential", $Credential)
         } # if
+
         if($PSBoundParameters.ContainsKey("StartupType"))
         {
             $argumentsToNewService.Add("StartupType", $StartupType)
         } # if
+
         if($PSBoundParameters.ContainsKey("DisplayName"))
         {
             $argumentsToNewService.Add("DisplayName", $DisplayName)
         } # if
+
         if($PSBoundParameters.ContainsKey("Description"))
         {
             $argumentsToNewService.Add("Description", $Description)
         } # if
+
         if($PSBoundParameters.ContainsKey("Dependencies"))
         {
             $argumentsToNewService.Add("DependsOn", $Dependencies)
@@ -578,6 +585,7 @@ function ConvertTo-StartModeString
     {
         return 'Auto'
     }  # if
+
     return $StartupType
 } # function ConvertTo-StartModeString
 
@@ -597,10 +605,12 @@ function ConvertTo-StartupTypeString
         [ValidateSet('Auto', 'Manual', 'Disabled')]
         $StartMode
     )
+
     if ($StartMode -eq 'Auto')
     {
         return "Automatic"
     } # if
+
     return $StartMode
 } # function ConvertTo-StartupTypeString
 
@@ -684,7 +694,7 @@ function Write-WriteProperty
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         $Name,
 
@@ -797,14 +807,17 @@ function Write-CredentialProperty
 
     # Get the Username and Password to change to (if applicable)
     $getUserNameAndPasswordArgs = @{}
+
     if($PSBoundParameters.ContainsKey("BuiltInAccount"))
     {
         $null = $getUserNameAndPasswordArgs.Add("BuiltInAccount",$BuiltInAccount)
     } # if
+
     if($PSBoundParameters.ContainsKey("Credential"))
     {
         $null = $getUserNameAndPasswordArgs.Add("Credential",$Credential)
     } # if
+
     if($getUserNameAndPasswordArgs.Count -gt 1)
     {
         # Both credentials and buildinaccount were set - throw
@@ -813,6 +826,7 @@ function Write-CredentialProperty
             -ErrorMessage ($LocalizedData.OnlyOneParameterCanBeSpecified `
                 -f "Credential","BuiltInAccount")
     } # if
+
     $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
 
     # If the user account needs to be changed add it to the arguments
@@ -844,6 +858,7 @@ function Write-CredentialProperty
             -InputObject $SvcWmi `
             -MethodName Change `
             -Arguments $changeArgs
+
         if($ret.ReturnValue -ne 0)
         {
             $innerMessage = ($LocalizedData.MethodFailed `
@@ -922,6 +937,9 @@ function Test-UserName
 
     .PARAMETER Credential
     The Credential to extract the username from.
+
+    .OUTPUTS
+    A tuple containing: Username,Password
 #>
 function Get-UserNameAndPassword
 {
@@ -956,6 +974,9 @@ function Get-UserNameAndPassword
 
     .PARAMETER Name
     The name of the service to delete.
+
+    .PARAMETER Timeout
+    The number of milliseconds to wait for the service to be removed.
 #>
 function Remove-Service
 {
@@ -964,30 +985,46 @@ function Remove-Service
     (
         [parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $Name
+        $Name,
+
+        [ValidateNotNullOrEmpty()]
+        [Int]
+        $Timeout = 5000
     )
 
+    # Delete the service
     & "sc.exe" "delete" "$Name"
-    for($i = 1; $i -lt 1000; $i++)
+
+    # Wait for the service to be deleted
+    $serviceDeletedSuccessfully = $false
+    $start = [DateTime]::Now
+
+    While (-not $serviceDeletedSuccessfully `
+        -and ([DateTime]::Now - $start).TotalMilliseconds -lt $Timeout)
     {
         if(-not (Test-ServiceExist -Name $Name))
         {
+            # The service has been deleted OK
             $serviceDeletedSuccessfully = $true
             break
         } # if
-        # try again after 2 millisecs if the service is not deleted.
+
+        # The service wasn't deleted so wait for a second and try again (unless timeout is hit)
+        Start-Sleep -Seconds 1
         Write-Verbose -Message ($LocalizedData.TryDeleteAgain)
-        Start-Sleep -Seconds .002
-    } # for
-    if (-not $serviceDeletedSuccessfully)
+    } # while
+
+    if ($serviceDeletedSuccessfully)
     {
-        New-InvalidArgumentError `
-            -ErrorId "ErrorDeletingService" `
-            -ErrorMessage ($LocalizedData.ErrorDeletingService -f $Name)
+        # Service was deleted OK
+        Write-Verbose -Message ($LocalizedData.ServiceDeletedSuccessfully -f $Name)
     }
     else
     {
-        Write-Verbose -Message ($LocalizedData.ServiceDeletedSuccessfully -f $Name)
+        # Service was not deleted
+        New-InvalidArgumentError `
+            -ErrorId "ErrorDeletingService" `
+            -ErrorMessage ($LocalizedData.ErrorDeletingService -f $Name)
     } # if
 } # function Remove-Service
 
@@ -1098,7 +1135,7 @@ function Stop-ServiceResource
         {
             Write-Verbose -Message ($LocalizedData.ErrorStoppingService `
                 -f $service.Name, $_.Exception.Message)
-            throw
+            throw $_
         }
 
         Write-Verbose -Message ($LocalizedData.ServiceStopped -f $service.Name)
@@ -1121,6 +1158,7 @@ function Resolve-UserName
         [String]
         $UserName
     )
+
     switch ($Username)
     {
         'NetworkService'
@@ -1143,6 +1181,7 @@ function Resolve-UserName
             } # if
         } # default
     } # switch
+
     return $UserName
 } # function Resolve-UserName
 

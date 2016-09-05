@@ -42,7 +42,7 @@ ErrorDeletingService = Error in deleting service '{0}'.
 ServiceDeletedSuccessfully = Service '{0}' Deleted Successfully.
 TryDeleteAgain = Wait for 2 milliseconds for a service to get deleted.
 WritePropertiesIgnored = Service '{0}' already exists. Write properties such as Status, DisplayName, Description, Dependencies will be ignored for existing services.
-ErrorCreatingService = Error creating service "{0}"; Exception Message: "{1}"
+ErrorCreatingService = Error creating service '{0}'; Exception Message: '{1}'
 ServiceNeedsRestartMessage = Service '{0}' needs to be restarted.
 ServiceExecutablePathChangeNotSupported = Changing the path to an existing service executable is not yet supported.
 ###PSLOC
