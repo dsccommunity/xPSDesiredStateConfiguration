@@ -336,6 +336,9 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+* xProcess:
+    * Fixed PSSA issues
+    * Corrected most style guideline issues
 * xWindowsOptionalFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script
