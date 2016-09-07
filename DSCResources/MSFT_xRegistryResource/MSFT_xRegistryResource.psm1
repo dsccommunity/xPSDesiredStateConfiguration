@@ -5,7 +5,7 @@
 #>
 
 # Fallback message strings in en-US
-DATA localizedData
+data localizedData
 {
     # culture = "en-US"
     ConvertFrom-StringData @'
@@ -40,7 +40,7 @@ DATA localizedData
 }
 
 # Commented-out until more languages are supported
-# Import-LocalizedData LocalizedData -filename MSFT_xRegistryResource.strings.psd1
+# Import-LocalizedData LocalizedData -FileName MSFT_xRegistryResource.strings.psd1
 
 <#
     .SYNOPSIS
@@ -303,7 +303,7 @@ function Set-TargetResource
         [System.String[]]
         $ValueData = @(),
 
-        [ValidateSet('String', 'Binary', 'Dword', 'Qword', 'MultiString', 'ExpandString')]
+        [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
         [System.String]
         $ValueType = 'String',
 
@@ -604,7 +604,7 @@ function Test-TargetResource
         [System.String[]]
         $ValueData = @(),
 
-        [ValidateSet('String', 'Binary', 'Dword', 'Qword', 'MultiString', 'ExpandString')]
+        [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
         [System.String]
         $ValueType = 'String',
 
@@ -1287,7 +1287,7 @@ function Convert-ByteArrayToHexString
     )
 
     $retString = ''
-    $Data | ForEach-Object { $retString += ('{0:x}' -f $_) }
+    $Data | ForEach-Object { $retString += ('{0:x2}' -f $_) }
 
     return $retString
 }
@@ -1464,7 +1464,7 @@ function Compare-ValueData
     # Special case for binary comparison (do hex-string comparison)
     if ($ValueType -ieq 'Binary')
     {
-        $specifiedData = $ValueData[0]
+        $specifiedData = $ValueData[0].PadLeft($retrievedData.Length, '0')
     }
 
     # If the ValueType is not multistring, do a simple comparison
@@ -1498,4 +1498,4 @@ function Compare-ValueData
     return $true
 }
 
-Export-ModuleMember -function Get-TargetResource, Set-TargetResource, Test-TargetResource
+Export-ModuleMember -Function *-TargetResource
