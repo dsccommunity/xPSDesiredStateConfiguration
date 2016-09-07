@@ -47,7 +47,7 @@ try
 
     Describe "$($script:DSCResourceName)_Add_Integration" {
         #region DEFAULT TESTS
-        It 'Should compile without throwing' {
+        It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DSCResourceName)_Add_Config" `
                     -OutputPath $TestEnvironment.WorkingFolder `
@@ -93,7 +93,7 @@ try
 
     Describe "$($script:DSCResourceName)_Remove_Integration" {
         #region DEFAULT TESTS
-        It 'Should compile without throwing' {
+        It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DSCResourceName)_Remove_Config" `
                     -OutputPath $TestEnvironment.WorkingFolder `

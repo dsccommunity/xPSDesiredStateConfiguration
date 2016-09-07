@@ -1,3 +1,5 @@
+# Suppressed as per PSSA Rule Severity guidelines for unit/integration tests:
+# https://github.com/PowerShell/DscResources/blob/master/PSSARuleSeverities.md
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 param ()
 
@@ -42,19 +44,19 @@ function Get-TargetResource
     if (Test-ServiceExist -Name $Name -ErrorAction SilentlyContinue)
     {
         $service = Get-ServiceResource -Name $Name
-        $svcWmi = Get-Win32ServiceObject -Name $Name
+        $serviceWmi = Get-Win32ServiceObject -Name $Name
 
         $builtInAccount = $null
 
-        if ($svcWmi.StartName -ieq "LocalSystem")
+        if ($serviceWmi.StartName -ieq "LocalSystem")
         {
             $builtInAccount ="LocalSystem"
         }
-        elseif ($svcWmi.StartName -ieq "NT Authority\NetworkService")
+        elseif ($serviceWmi.StartName -ieq "NT Authority\NetworkService")
         {
             $builtInAccount = "NetworkService"
         }
-        elseif ($svcWmi.StartName -ieq "NT Authority\LocalService")
+        elseif ($serviceWmi.StartName -ieq "NT Authority\LocalService")
         {
             $builtInAccount = "LocalService"
         }
@@ -67,13 +69,13 @@ function Get-TargetResource
         }
         return @{
             Name            = $service.Name
-            StartupType     = ConvertTo-StartupTypeString -StartMode $svcWmi.StartMode
+            StartupType     = ConvertTo-StartupTypeString -StartMode $serviceWmi.StartMode
             BuiltInAccount  = $builtInAccount
             State           = $service.Status.ToString()
-            Path            = $svcWmi.PathName
+            Path            = $serviceWmi.PathName
             DisplayName     = $service.DisplayName
-            Description     = $svcWmi.Description
-            DesktopInteract = $svcWmi.DesktopInteract
+            Description     = $serviceWmi.Description
+            DesktopInteract = $serviceWmi.DesktopInteract
             Dependencies    = $dependencies
             Ensure          = 'Present'
         }
@@ -209,14 +211,14 @@ function Test-TargetResource
     } # if
 
     $service = Get-ServiceResource -Name $Name
-    $svcWmi = Get-Win32ServiceObject -Name $Name
+    $serviceWmi = Get-Win32ServiceObject -Name $Name
 
     # Check the binary path
     if ($PSBoundParameters.ContainsKey("Path") `
         -and -not (Compare-ServicePath -Name $Name -Path $Path))
     {
         Write-Verbose -Message ($LocalizedData.TestBinaryPathMismatch `
-            -f $svcWmi.Name, $svcWmi.PathName, $Path)
+            -f $serviceWmi.Name, $serviceWmi.PathName, $Path)
         return $false
     } # if
 
@@ -240,26 +242,26 @@ function Test-TargetResource
 
         $userName,$password = Get-UserNameAndPassword @getUserNameAndPasswordArgs
         if($null -ne $userName  `
-            -and -not (Test-UserName -SvcWmi $svcWmi -Username $userName))
+            -and -not (Test-UserName -ServiceWmi $serviceWmi -Username $userName))
         {
             Write-Verbose -Message ($LocalizedData.TestUserNameMismatch `
-                -f $svcWmi.Name,$svcWmi.StartName,$userName)
+                -f $serviceWmi.Name,$serviceWmi.StartName,$userName)
             return $false
         } # if
 
         if ($PSBoundParameters.ContainsKey("DesktopInteract") `
-            -and $svcWmi.DesktopInteract -ne $DesktopInteract)
+            -and $serviceWmi.DesktopInteract -ne $DesktopInteract)
         {
             Write-Verbose -Message ($LocalizedData.TestDesktopInteractMismatch `
-                -f $svcWmi.Name,$svcWmi.DesktopInteract,$DesktopInteract)
+                -f $serviceWmi.Name,$serviceWmi.DesktopInteract,$DesktopInteract)
             return $false
         } # if
 
         if ($PSBoundParameters.ContainsKey("StartupType") `
-            -and $svcWmi.StartMode -ine (ConvertTo-StartModeString -StartupType $StartupType))
+            -and $serviceWmi.StartMode -ine (ConvertTo-StartModeString -StartupType $StartupType))
         {
             Write-Verbose -Message ($LocalizedData.TestStartupTypeMismatch `
-                -f $svcWmi.Name,$svcWmi.StartMode,$StartupType)
+                -f $serviceWmi.Name,$serviceWmi.StartMode,$StartupType)
             return $false
         } # if
     } # if
@@ -267,7 +269,7 @@ function Test-TargetResource
     if ($State -ne $service.Status)
     {
         Write-Verbose -Message ($LocalizedData.TestStateMismatch `
-            -f $svcWmi.Name, $service.Status, $State)
+            -f $serviceWmi.Name, $service.Status, $State)
         return $false
     } # if
 
@@ -388,7 +390,7 @@ function Set-TargetResource
     {
         # The service exists but needs to be deleted
         Stop-ServiceResource -Name $Name -TerminateTimeout $TerminateTimeout
-        Remove-Service $Name
+        Remove-Service -Name $Name -TerminateTimeout $TerminateTimeout
         return
     } # if
 
@@ -719,14 +721,14 @@ function Write-WriteProperty
         $DesktopInteract
     )
 
-    $svcWmi = Get-Win32ServiceObject -Name $Name
+    $serviceWmi = Get-Win32ServiceObject -Name $Name
     $requiresRestart = $false
 
     # update binary path
     if ($PSBoundParameters.ContainsKey('Path'))
     {
         $writeBinaryArguments = @{
-            SvcWmi = $svcWmi
+            ServiceWmi = $serviceWmi
             Path = $Path
         }
 
@@ -738,7 +740,7 @@ function Write-WriteProperty
         -or $PSBoundParameters.ContainsKey("Credential") `
         -or $PSBoundParameters.ContainsKey("DesktopInteract"))
     {
-        $writeCredentialPropertiesArguments = @{ "SvcWmi" = $svcWmi }
+        $writeCredentialPropertiesArguments = @{ "ServiceWmi" = $serviceWmi }
 
         if($PSBoundParameters.ContainsKey("BuiltInAccount"))
         {
@@ -761,7 +763,7 @@ function Write-WriteProperty
     # Update startup type
     if($PSBoundParameters.ContainsKey("StartupType"))
     {
-        Set-ServiceStartMode -Win32ServiceObject $svcWmi -StartupType $StartupType
+        Set-ServiceStartMode -Win32ServiceObject $serviceWmi -StartupType $StartupType
     } # if
 
     # Return restart status
@@ -778,9 +780,9 @@ function Write-CredentialProperty
     param
     (
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $SvcWmi,
+        $ServiceWmi,
 
         [System.String]
         [ValidateSet("LocalSystem", "LocalService", "NetworkService")]
@@ -831,7 +833,7 @@ function Write-CredentialProperty
 
     # If the user account needs to be changed add it to the arguments
     if($null -ne $userName `
-        -and -not (Test-UserName -SvcWmi $SvcWmi -Username $userName))
+        -and -not (Test-UserName -ServiceWmi $ServiceWmi -Username $userName))
     {
         # A specific user account was passed so set log on as a service policy
         if($PSBoundParameters.ContainsKey("Credential"))
@@ -847,7 +849,7 @@ function Write-CredentialProperty
 
     # The desktop interact flag was passed to set that value
     if($PSBoundParameters.ContainsKey("DesktopInteract") `
-        -and ($DesktopInteract -ne $SvcWmi.DesktopInteract))
+        -and ($DesktopInteract -ne $ServiceWmi.DesktopInteract))
     {
         $changeArgs.DesktopInteract = $DesktopInteract
     } # if
@@ -855,7 +857,7 @@ function Write-CredentialProperty
     if ($changeArgs.Count -gt 0)
     {
         $ret = Invoke-CimMethod `
-            -InputObject $SvcWmi `
+            -InputObject $ServiceWmi `
             -MethodName Change `
             -Arguments $changeArgs
 
@@ -882,21 +884,21 @@ function Write-BinaryProperty
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        $SvcWmi,
+        $ServiceWmi,
 
         [System.String]
         [ValidateNotNullOrEmpty()]
         $Path
     )
 
-    if($SvcWmi.PathName -eq $Path)
+    if($ServiceWmi.PathName -eq $Path)
     {
         return $false
     } # if
 
-    $ret = $SvcWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
+    $ret = $ServiceWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
     if($ret.ReturnValue -ne 0)
     {
         $innerMessage = ($LocalizedData.MethodFailed `
@@ -914,18 +916,24 @@ function Write-BinaryProperty
 <#
     .SYNOPSIS
     Returns true if the service's StartName matches $UserName
+
+    .PARAMETER ServiceWmi
+    The Service object pulled from WMI for the service.
+
+    .PARAMETER UserName
+    The username of the user to compare the one in the WMI object with.
 #>
 function Test-UserName
 {
     param
     (
-        $SvcWmi,
+        $ServiceWmi,
 
         [string]
         $UserName
     )
 
-    return  (Resolve-UserName -UserName $SvcWmi.StartName) -ieq $UserName
+    return  (Resolve-UserName -UserName $ServiceWmi.StartName) -ieq $UserName
 } # function Test-UserName
 
 <#
@@ -975,7 +983,7 @@ function Get-UserNameAndPassword
     .PARAMETER Name
     The name of the service to delete.
 
-    .PARAMETER Timeout
+    .PARAMETER TerminateTimeout
     The number of milliseconds to wait for the service to be removed.
 #>
 function Remove-Service
@@ -983,13 +991,13 @@ function Remove-Service
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         $Name,
 
         [ValidateNotNullOrEmpty()]
         [Int]
-        $Timeout = 5000
+        $TerminateTimeout = 30000
     )
 
     # Delete the service
@@ -1000,7 +1008,7 @@ function Remove-Service
     $start = [DateTime]::Now
 
     While (-not $serviceDeletedSuccessfully `
-        -and ([DateTime]::Now - $start).TotalMilliseconds -lt $Timeout)
+        -and ([DateTime]::Now - $start).TotalMilliseconds -lt $TerminateTimeout)
     {
         if(-not (Test-ServiceExist -Name $Name))
         {
@@ -1009,7 +1017,7 @@ function Remove-Service
             break
         } # if
 
-        # The service wasn't deleted so wait for a second and try again (unless timeout is hit)
+        # The service wasn't deleted so wait a second and try again (unless TerminateTimeout is hit)
         Start-Sleep -Seconds 1
         Write-Verbose -Message ($LocalizedData.TryDeleteAgain)
     } # while
@@ -1201,12 +1209,12 @@ function New-InvalidArgumentError
     param
     (
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ErrorId,
 
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ErrorMessage
