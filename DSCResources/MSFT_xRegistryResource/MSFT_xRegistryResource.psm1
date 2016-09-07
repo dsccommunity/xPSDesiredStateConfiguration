@@ -254,7 +254,7 @@ function Get-TargetResource
         Indicates the name of the registry value.
 
     .PARAMETER Ensure
-        Indicates if the key and value exist.
+        Indicates if the key and value should exist.
         To ensure that they do, set this property to "Present".
         To ensure that they do not exist, set the property to "Absent".
         The default value is "Present".
@@ -554,9 +554,9 @@ function Set-TargetResource
         Indicates the name of the registry value.
 
     .PARAMETER Ensure
-        Indicates if the key and value exist.
-        To ensure that they do, set this property to "Present".
-        To ensure that they do not exist, set the property to "Absent".
+        Indicates if the key and value should exist.
+        To test that they exist, set this property to "Present".
+        To test that they do not exist, set the property to "Absent".
         The default value is "Present".
 
     .PARAMETER ValueData
