@@ -1,5 +1,6 @@
 # Import the helper functions
 Import-Module $PSScriptRoot\PSWSIISEndpoint.psm1 -Verbose:$false
+Import-Module $PSScriptRoot\SChannel.psm1 -Verbose:$false
 
 # The Get-TargetResource cmdlet.
 function Get-TargetResource
@@ -80,6 +81,7 @@ function Get-TargetResource
         Ensure                          = $Ensure
         RegistrationKeyPath             = $RegistrationKeyPath
         AcceptSelfSignedCertificates    = $AcceptSelfSignedCertificates
+        UseUpToDateSecuritySettings     = (SChannel\Test-EnhancedSecurity)
     }
 }
 
@@ -120,8 +122,19 @@ function Set-TargetResource
         [string]$RegistrationKeyPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
         # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
-        [boolean]$AcceptSelfSignedCertificates = $true
+        [boolean]$AcceptSelfSignedCertificates = $true,
+
+        # Use up to date secure protocol and cipher settings for schannel
+        [boolean]$UseUpToDateSecuritySettings
     )
+
+    # Check parameter values
+    if ($UseUpToDateSecuritySettings -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
+    {
+        throw "Error: Cannot use up to date security settings with unencrypted traffic. Please set UseUpTodateSecuritySettings to `$false or use a certificate to encrypt pull server traffic."
+        # No need to proceed any more
+        return
+    }
 
     # Initialize with default values     
     $script:appCmd = "$env:windir\system32\inetsrv\appcmd.exe"
@@ -256,6 +269,11 @@ function Set-TargetResource
             & $script:appCmd delete module /name:"IISSelfSignedCertModule(32bit)"  /app.name:"PSDSCPullServer/"
         }
     }
+
+    if($UseUpToDateSecuritySettings)
+    {
+        SChannel\Set-EnhancedSecurity
+    }
 }
 
 # The Test-TargetResource cmdlet.
@@ -296,7 +314,10 @@ function Test-TargetResource
         [string]$RegistrationKeyPath,
 
         # Are self-signed certs being accepted for client auth.
-        [boolean]$AcceptSelfSignedCertificates
+        [boolean]$AcceptSelfSignedCertificates,
+
+        # Is up to date secure protocol and cipher settings used for schannel
+        [boolean]$UseUpToDateSecuritySettings
     )
 
     $desiredConfigurationMatch = $true;
@@ -394,6 +415,17 @@ function Test-TargetResource
                     $DesiredConfigurationMatch = $false
                     break
                 }
+            }
+        }
+
+        Write-Verbose "Check UseUpToDateSecuritySettings"
+        if ($UseUpToDateSecuritySettings)
+        {
+            if (-not (SChannel\Test-EnhancedSecurity))
+            {
+                $desiredConfigurationMatch = $false;
+                Write-Verbose "The state of SChannel security settings does not match the desired state."
+                break
             }
         }
         $stop = $false
