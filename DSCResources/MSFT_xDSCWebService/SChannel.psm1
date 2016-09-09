@@ -214,11 +214,31 @@ function Set-CipherSuiteOrder
     New-ItemProperty -path 'HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002' -name 'Functions' -value $cipherSuitesOrderString -PropertyType 'String' -Force | Out-Null
 }
 
+<#
+    .SYNOPSIS
+        This function tests whether the node uses enhanced security settings:
+        a. insecure protocols are disabled, secure protocols are enabled
+        b. insecure ciphers are disabled, secure ciphers are enabled
+        c. insecure hash algorithms are disabled, secure hash algorithms are enabled
+        d. insecure key exchange algorithms are disabled, secure key exchange algorithms are enabled
+        e. cipher suite order conforms with up to date standard
+        The settings (protocols, ciphers, etc.) defined in this module are subject to change with new findings in network volunability
+#>
 function Test-EnhancedSecurity
 {
     return ((Test-Protocol) -and (Test-Cipher) -and (Test-Hash) -and (Test-KeyExchangeAlgorithm) -and (Test-CipherSuiteOrder))
 }
 
+<#
+    .SYNOPSIS
+        This function sets the node to use enhanced security settings:
+        a. disable insecure protocols and enable secure protocols
+        b. disable insecure ciphers and enable secure ciphers
+        c. disable insecure hash algorithms and enable secure hash algorithms
+        d. disable insecure key exchange algorithms and enable secure key exchange algorithms
+        e. set cipher suite order according to up to date standard
+        The settings (protocols, ciphers, etc.) defined in this module are subject to change with new findings in network volunability
+#>
 function Set-EnhancedSecurity
 {
     Set-Protocol
@@ -229,5 +249,3 @@ function Set-EnhancedSecurity
 }
 
 Export-ModuleMember -function *-EnhancedSecurity
-
-& "C:\Windows\System32\inetsrv\appcmd.exe" set config /section:directoryBrowse /enabled:true
