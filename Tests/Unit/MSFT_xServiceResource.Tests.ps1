@@ -204,6 +204,7 @@ try
 
                 # Mocks that should not be called
                 Mock -CommandName Get-serviceResource
+
                 Mock -CommandName Get-Win32ServiceObject
 
                 It 'Should not throw an exception' {
