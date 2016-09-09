@@ -49,3 +49,40 @@ configuration Sample_xDscWebServiceRegistrationWithEnhancedSecurity
         }
     }
  }
+
+[DSCLocalConfigurationManager()]
+configuration Sample_MetaConfigurationToRegisterWithSecurityEnhancedServer
+{
+    param
+    (
+        [ValidateNotNullOrEmpty()]
+        [string] $NodeName,
+
+        [ValidateNotNullOrEmpty()]
+        [string] $RegistrationKey, #same as the one used to setup pull server in previous configuration
+
+        [ValidateNotNullOrEmpty()]
+        [string] $ServerName #node name of the pull server, same as $NodeName used in previous configuration
+    )
+
+    Node $NodeName
+    {
+        Settings
+        {
+            RefreshMode        = 'Pull'
+        }
+
+        ConfigurationRepositoryWeb CONTOSO-PullSrv
+        {
+            ServerURL          = "https://$ServerName:8080/PSDSCPullServer.svc"
+            RegistrationKey    = $RegistrationKey
+            ConfigurationNames = @('ClientConfig')
+        }   
+
+        ReportServerWeb CONTOSO-PullSrv
+        {
+            ServerURL       = "https://$ServerName:8080/PSDSCPullServer.svc"
+            RegistrationKey = $RegistrationKey
+        }
+    }
+}
