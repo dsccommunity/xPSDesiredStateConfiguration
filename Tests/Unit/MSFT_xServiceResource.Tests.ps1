@@ -204,7 +204,6 @@ try
 
                 # Mocks that should not be called
                 Mock -CommandName Get-serviceResource
-
                 Mock -CommandName Get-Win32ServiceObject
 
                 It 'Should not throw an exception' {
@@ -288,8 +287,7 @@ try
                     -Verifiable
 
                 # Mocks that should not be called
-                Mock `
-                    -CommandName Test-UserName
+                Mock -CommandName Test-UserName
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -379,8 +377,7 @@ try
                     -Verifiable
 
                 # Mocks that should not be called
-                Mock `
-                    -CommandName Test-UserName
+                Mock -CommandName Test-UserName
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -407,11 +404,8 @@ try
             Context 'Service exists and should not' {
                 # Mocks that should not be called
                 Mock -CommandName Compare-ServicePath
-
                 Mock -CommandName Test-UserName
-
                 Mock -CommandName Get-ServiceResource
-
                 Mock -CommandName Get-Win32ServiceObject
 
                 It 'Should not throw an exception' {
@@ -507,6 +501,7 @@ try
                 Mock `
                     -CommandName Start-ServiceResource `
                     -Verifiable
+
                 # Mocks that should not be called
                 Mock -CommandName Stop-ServiceResource
                 Mock -CommandName New-Service
@@ -1167,6 +1162,7 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { $null,$null } `
                     -Verifiable
+
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { @{ returnValue = 0 } } `
@@ -1198,6 +1194,7 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { $null,$null } `
                     -Verifiable
+
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { @{ returnValue = 99 } } `
@@ -1265,6 +1262,7 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { $script:testUsername,$script:testPassword } `
                     -Verifiable
+
                 Mock `
                     -CommandName Test-UserName `
                     -MockWith { $true } `
@@ -1295,13 +1293,16 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { $script:testUsername,$script:testPassword } `
                     -Verifiable
+
                 Mock `
                     -CommandName Test-UserName `
                     -MockWith { $false } `
                     -Verifiable
+
                 Mock `
                     -CommandName Set-LogOnAsServicePolicy `
                     -Verifiable
+
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { @{ returnValue = 0 } } `
@@ -1372,6 +1373,7 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { '.\LocalSystem','' } `
                     -Verifiable
+
                 Mock `
                     -CommandName Test-UserName `
                     -MockWith { $true } `
@@ -1402,10 +1404,12 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { '.\LocalSystem',$null } `
                     -Verifiable
+
                 Mock `
                     -CommandName Test-UserName `
                     -MockWith { $false } `
                     -Verifiable
+
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { @{ returnValue = 0 } } `
@@ -1435,10 +1439,12 @@ try
                     -CommandName Get-UserNameAndPassword `
                     -MockWith { '.\LocalSystem',$null } `
                     -Verifiable
+
                 Mock `
                     -CommandName Test-UserName `
                     -MockWith { $false } `
                     -Verifiable
+
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { @{ returnValue = 99 } } `
@@ -1654,6 +1660,7 @@ try
                     -CommandName Get-ServiceResource `
                     -MockWith { $script:testServiceMockStopped } `
                     -Verifiable
+
                 Mock `
                     -CommandName New-Object `
                     -Verifiable
@@ -1709,6 +1716,7 @@ try
                     -CommandName Get-ServiceResource `
                     -MockWith { $script:testServiceMockRunning } `
                     -Verifiable
+
                 Mock `
                     -CommandName New-Object `
                     -Verifiable

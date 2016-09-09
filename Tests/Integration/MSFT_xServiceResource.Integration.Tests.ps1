@@ -98,7 +98,7 @@ try
                 & "$($script:DSCResourceName)_Remove_Config" `
                     -OutputPath $TestEnvironment.WorkingFolder `
                     -ServiceName $script:testServiceName
-                $null = Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
                     -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw
         }
