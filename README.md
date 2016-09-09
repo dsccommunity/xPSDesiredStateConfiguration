@@ -58,10 +58,13 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
 * **Port**: Port for web service.
 * **PhysicalPath**: Folder location where the content of the web service resides.
+* **Ensure**: Ensures that the web service is **Present** or **Absent**
 * **State**: State of the web service: { Started | Stopped }
 * **ModulePath**: Folder location where DSC resources are stored.
 * **ConfigurationPath**: Folder location where DSC configurations are stored.
-* **Ensure**: Ensures that the web service is **Present** or **Absent**
+* **RegistrationKeyPath**: Folder location where DSC pull server registration key file is stored.
+* **AcceptSelfSignedCertificate**: Whether self signed certificate can be used to setup pull server.
+* **UseUpToDateSecuritySettings**: Whether to use enhanced security settings for the node where pull server resides on.
 
 ### xWindowsProcess
 
@@ -373,6 +376,10 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Removed shouldprocess from functions as not required.
     * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
 * Removed test log output from repo.
+* xDSCWebService:
+    * Added setting of enhanced security
+    * Cleaned up Examples
+    * Cleaned up pull server verification test 
 
 ### 3.13.0.0
 

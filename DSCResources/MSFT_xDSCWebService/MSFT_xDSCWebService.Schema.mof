@@ -13,4 +13,5 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [read] string DSCServerUrl;  
   [write] string RegistrationKeyPath;
   [write] boolean AcceptSelfSignedCertificates;
+  [write] boolean UseUpToDateSecuritySettings;
 };
