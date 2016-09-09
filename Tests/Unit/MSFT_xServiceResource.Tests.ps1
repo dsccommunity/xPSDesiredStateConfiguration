@@ -1683,6 +1683,7 @@ try
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName New-Object -Exactly 1
                 }
+
                 Remove-Variable -Name ServiceStarted -Scope Global
             }
         }
@@ -1739,6 +1740,7 @@ try
                     Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
                     Assert-MockCalled -CommandName New-Object -Exactly 1
                 }
+
                 Remove-Variable -Name ServiceStopped -Scope Global
             }
         }
