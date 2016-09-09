@@ -1,17 +1,34 @@
-# DSC configuration for Pull Server
-# Prerequisite: Certificate "CN=PSDSCPullServerCert" in "CERT:\LocalMachine\MY\" store
-# Note: A Certificate may be generated using MakeCert.exe: http://msdn.microsoft.com/en-us/library/windows/desktop/aa386968%28v=vs.85%29.aspx
-# This version sets the RegistrationKeyPath which is where registration keys are stored. It also installs the native module that allows for the
-# acceptance of self-signed certificates in IIS.
+# DSC configuration for Pull Server using registration
 
-configuration Sample_xDscWebService
+# The Sample_xDscWebServiceRegistration configuration sets up a DSC pull server that is capable for client nodes
+# to register with it and retrieve configuration documents with configuration names instead of configuration id
+
+# Prerequisite: Install a certificate in "CERT:\LocalMachine\MY\" store
+#               For testing environments, you could use a self-signed certificate. (New-SelfSignedCertificate cmdlet could generate one for you).
+#               For production environments, you will need a certificate signed by valid CA.
+#               Registration only works over https protocols. So to use registration feature, a secure pull server setup with certificate is necessary
+
+
+# The Sample_MetaConfigurationToRegisterWithLessSecurePullServer register a DSC client node with the pull server
+
+# ======================================== Arguments ======================================== #
+$thumbprint = (New-SelfSignedCertificate -Subject "TestPullServer").Thumbprint
+$registrationkey = [guid]::NewGuid()
+# ======================================== Arguments ======================================== #
+
+# =================================== Section Pull Server =================================== #
+configuration Sample_xDscWebServiceRegistration
 {
     param 
     (
         [string[]]$NodeName = 'localhost',
 
         [ValidateNotNullOrEmpty()]
-        [string] $certificateThumbPrint
+        [string] $certificateThumbPrint,
+
+        [Parameter(HelpMessage='This should be a string with enough entropy (randomness) to protect the registration of clients to the pull server.  We will use new GUID by default.')]
+        [ValidateNotNullOrEmpty()]
+        [string] $RegistrationKey   # A guid that clients use to initiate conversation with pull server
     )
 
     Import-DSCResource -ModuleName xPSDesiredStateConfiguration
@@ -30,7 +47,7 @@ configuration Sample_xDscWebService
             EndpointName            = "PSDSCPullServer"
             Port                    = 8080
             PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCPullServer"
-            CertificateThumbPrint   = $certificateThumbPrint         
+            CertificateThumbPrint   = $certificateThumbPrint
             ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
             ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"            
             State                   = "Started"
@@ -38,5 +55,57 @@ configuration Sample_xDscWebService
             RegistrationKeyPath     = "$env:PROGRAMFILES\WindowsPowerShell\DscService"   
             AcceptSelfSignedCertificates = $true
         }
+
+        File RegistrationKeyFile
+        {
+            Ensure          = 'Present'
+            Type            = 'File'
+            DestinationPath = "$env:ProgramFiles\WindowsPowerShell\DscService\RegistrationKeys.txt"
+            Contents        = $RegistrationKey
+        }
     }
- }
+}
+
+Sample_xDscWebServiceRegistration -RegistrationKey $registrationkey -certificateThumbPrint $thumbprint
+# =================================== Section Pull Server =================================== #
+
+# =================================== Section DSC Client =================================== #
+[DSCLocalConfigurationManager()]
+configuration Sample_MetaConfigurationToRegisterWithLessSecurePullServer
+{
+    param
+    (
+        [ValidateNotNullOrEmpty()]
+        [string] $NodeName = 'localhost',
+
+        [ValidateNotNullOrEmpty()]
+        [string] $RegistrationKey, #same as the one used to setup pull server in previous configuration
+
+        [ValidateNotNullOrEmpty()]
+        [string] $ServerName = 'localhost' #node name of the pull server, same as $NodeName used in previous configuration
+    )
+
+    Node $NodeName
+    {
+        Settings
+        {
+            RefreshMode        = 'Pull'
+        }
+
+        ConfigurationRepositoryWeb CONTOSO-PullSrv
+        {
+            ServerURL          = "https://$ServerName`:8080/PSDSCPullServer.svc" # notice it is https
+            RegistrationKey    = $RegistrationKey
+            ConfigurationNames = @('ClientConfig')
+        }   
+
+        ReportServerWeb CONTOSO-PullSrv
+        {
+            ServerURL       = "https://$ServerName`:8080/PSDSCPullServer.svc" # notice it is https
+            RegistrationKey = $RegistrationKey
+        }
+    }
+}
+
+Sample_MetaConfigurationToRegisterWithLessSecurePullServer -RegistrationKey $registrationkey
+# =================================== Section DSC Client =================================== #
