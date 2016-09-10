@@ -25,7 +25,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroup** provides a mechanism to manage local groups on the target node.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xWindowsOptionalFeature** configures optional Windows features.
-* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
+* **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
@@ -166,8 +166,15 @@ Domain members may be specified using domain\name or User Principal Name (UPN) f
 
 ### xRegistry
 
-This is a copy of the built-in Registry resource from the PSDesiredStateConfiguration module, with one small change:  it now supports
-registry keys whose names contain forward slashes.
+xRegistry provides a mechanism to manage registry keys and values on a target node.
+
+* **[String] Key** _(Key)_: Indicates the path of the registry key for which you want to ensure a specific state. This path must include the hive.
+* **[String] ValueName** _(Key)_: Indicates the name of the registry value.
+* **[String] Ensure** _(Write)_: Indicates if the key and value exist. To ensure that they do, set this property to "Present". To ensure that they do not exist, set the property to "Absent". The default value is "Present". { *Present* | Absent }.
+* **[String] ValueData** _(Write)_: The data for the registry value.
+* **[String] ValueType** _(Write)_: Indicates the type of the value. { String | Binary | DWord | QWord | Multi-string | Expandable string }
+* **[Boolean] Hex** _(Write)_: Indicates if data will be expressed in hexadecimal format. If specified, the DWORD/QWORD value data is presented in hexadecimal format. Not valid for other types. The default value is $false.
+* **[Boolean] Force** _(Write)_: If the specified registry key is present, Force overwrites it with the new value.
 
 ### xWindowsOptionalFeature
 Note: _the xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs._
@@ -348,6 +355,9 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed PSSA and style issues
     * Renamed internal functions to follow verb-noun format
     * Decorated all functions with comment-based help
+    * Merged with in-box Registry
+    * Fixed registry key and value removal
+    * Added unit tests
 * xWindowsOptionalFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script

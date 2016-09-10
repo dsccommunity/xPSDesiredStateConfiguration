@@ -26,6 +26,7 @@ The PSDesiredStateConfiguration High Quality Resource Module will consist of the
 - WindowsOptionalFeatureSet
 
 ## Progress
+
 - [x] [1. Port In-Box Only Resources](#port-in-box-only-resources)
   - [x] Environment
   - [x] GroupSet
@@ -41,13 +42,14 @@ The PSDesiredStateConfiguration High Quality Resource Module will consist of the
   - [x] Group
   - [x] Package
   - [X] Process 
-  - [ ] Registry (In Progress)
+  - [x] Registry 
   - [x] Service
-  - [ ] WindowsOptionalFeature
-- [ ] [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources) 
+  - [ ] WindowsOptionalFeature (In Progress)
+- [x] [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources)
+    The general consensus is to leave the if-statements for now.
 - [ ] [4. Update the Resource Module to a High Quality Resource Module](#update-the-resource-module-to-a-high-quality-resource-module)
   - [ ] 1. Fix PSSA issues per the [DSC Resource Kit PSSA Rule Severity List](https://github.com/PowerShell/DscResources/blob/master/PSSARuleSeverities.md).  
-  - [ ] 2. Ensure unit tests are present for each resource with more than 70% code coverage.  
+  - [ ] 2. Ensure unit tests are present for each resource with more than 70% code coverage. (In Progress) 
   - [ ] 3. Ensure examples run correctly, work as expected, and are documented clearly.  
   - [ ] 4. Ensure clear documentation is provided.  
   - [ ] 5. Ensure the PSDesiredStateConfiguration module follows the standard DSC Resource Kit module format.  
