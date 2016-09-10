@@ -303,7 +303,7 @@ function Set-TargetResource
         [System.String[]]
         $ValueData = @(),
 
-        [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
+        [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [System.String]
         $ValueType = 'String',
 
@@ -474,12 +474,7 @@ function Set-TargetResource
             {
                 try
                 {
-                    # Formulate hiveName and subkeyName compatible with .NET APIs
-                    $hiveName = $keyInfo.Data.PSDrive.Root.Replace('_','').Replace('HKEY','')
-                    $subkeyName = $keyInfo.Data.Name.Substring($keyInfo.Data.Name.IndexOf('\')+1)
-
-                    # Finally remove the subkeytree
-                    [Microsoft.Win32.Registry]::$hiveName.DeleteSubKeyTree($subkeyName)
+                    $null = Remove-Item -Path $Key -Recurse -Force
                 }
                 catch [System.Exception]
                 {
@@ -521,13 +516,7 @@ function Set-TargetResource
         {
             try
             {
-                # Formulate hiveName and subkeyName compatible with .NET APIs
-                $hiveName = $keyInfo.Data.PSDrive.Root.Replace('_','').Replace('HKEY','')
-                $subkeyName = $keyInfo.Data.Name.Substring($keyInfo.Data.Name.IndexOf('\')+1)
-
-                # Finally open the subkey and remove the RegValue in subkey
-                $subkey = [Microsoft.Win32.Registry]::$hiveName.OpenSubKey($subkeyName, $true)
-                $subkey.DeleteValue($ValueName)
+                $null = Remove-ItemProperty -Path $Key -Name $ValueName -Force
 
             }
             catch [System.Exception]
@@ -604,7 +593,7 @@ function Test-TargetResource
         [System.String[]]
         $ValueData = @(),
 
-        [ValidateSet("String", "Binary", "DWord", "QWord", "MultiString", "ExpandString")]
+        [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [System.String]
         $ValueType = 'String',
 
