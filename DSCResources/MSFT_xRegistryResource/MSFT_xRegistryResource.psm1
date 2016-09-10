@@ -204,7 +204,7 @@ function Get-TargetResource
             Special-case: Used only as a boolean flag (along with ValueData) to determine
             if the target entity is the Default Value or the key itself.
         #>
-        [ValidateSet('String', 'Binary', 'Dword', 'Qword', 'MultiString', 'ExpandString')]
+        [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [System.String]
         $ValueType
     )
