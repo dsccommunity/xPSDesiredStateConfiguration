@@ -226,7 +226,8 @@ function Get-TargetResource
 
         if ($retVal.Ensure -eq 'Present')
         {
-            [System.String[]]$retVal.ValueData += $retVal.Data
+            $retVal.ValueData = [System.String[]]@()
+            $retVal.ValueData += $retVal.Data
 
             if ($retVal.ValueType -ieq 'MultiString')
             {

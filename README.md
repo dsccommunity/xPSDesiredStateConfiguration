@@ -172,7 +172,7 @@ xRegistry provides a mechanism to manage registry keys and values on a target no
 * **[String] ValueName** _(Key)_: Indicates the name of the registry value.
 * **[String] Ensure** _(Write)_: Indicates if the key and value exist. To ensure that they do, set this property to "Present". To ensure that they do not exist, set the property to "Absent". The default value is "Present". { *Present* | Absent }.
 * **[String] ValueData** _(Write)_: The data for the registry value.
-* **[String] ValueType** _(Write)_: Indicates the type of the value. { String | Binary | DWord | QWord | Multi-string | Expandable string }
+* **[String] ValueType** _(Write)_: Indicates the type of the value. { String | Binary | DWord | QWord | MultiString | ExpandString }
 * **[Boolean] Hex** _(Write)_: Indicates if data will be expressed in hexadecimal format. If specified, the DWORD/QWORD value data is presented in hexadecimal format. Not valid for other types. The default value is $false.
 * **[Boolean] Force** _(Write)_: If the specified registry key is present, Force overwrites it with the new value.
 
