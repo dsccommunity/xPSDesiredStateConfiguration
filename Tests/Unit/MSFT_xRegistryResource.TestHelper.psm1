@@ -355,12 +355,14 @@ function Mount-RegistryDrive
 
     if ($registryDriveRootMappings.ContainsKey($driveName))
     {
+        # Abbreviated name was given. Use this as the new PSDrive name and the elongated name as the root
         $null = New-PSDrive -Name $driveName -Root $registryDriveRootMappings[$driveName] -PSProvider 'Registry' -Scope 'Script'
     }
     elseif ($registryDriveRootMappings.ContainsValue($driveName))
     {
         $mappingKey = $null
 
+        # Find the abbreviated key that goes with the given registry drive path
         foreach ($key in $registryDriveRootMappings.Keys)
         {
             if ($registryDriveRootMappings[$key] -ieq $driveName)
@@ -370,7 +372,8 @@ function Mount-RegistryDrive
             }
         }
 
-        $null = New-PSDrive @newPSDriveParams -Name $mappingKey -Root $registryDriveRootMappings[$mappingKey]
+        # Mount the PSDrive with the abbreviated name as the Name and the elongated name as the root
+        $null = New-PSDrive @newPSDriveParams -Name $mappingKey -Root $registryDriveRootMappings[$mappingKey] -PSProvider 'Registry' -Scope 'Script'
     }
     else
     {
@@ -397,7 +400,7 @@ function Dismount-RegistryDrive
     )
 
     $driveName = Split-Path -Path $KeyPath -Qualifier
-    Write-Verbose -Message "Mount-RegistryDrive - Drive name: $driveName"
+    Write-Verbose -Message "Dismount-RegistryDrive - Drive name: $driveName"
 
     $null = Remove-PSDrive -Name $driveName -PSProvider 'Registry' -Scope 'Script' -Force
 }
@@ -446,10 +449,10 @@ function Convert-ByteArrayToHexString
         $Data
     )
 
-    $retString = ''
-    $Data | ForEach-Object { $retString += ('{0:x2}' -f $_) }
+    $hexString = ''
+    $Data | ForEach-Object { $hexString += ('{0:x2}' -f $_) }
 
-    return $retString
+    return $hexString
 }
 
 Export-ModuleMember -Function `

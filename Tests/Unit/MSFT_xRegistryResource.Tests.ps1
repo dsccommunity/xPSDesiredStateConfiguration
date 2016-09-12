@@ -15,10 +15,24 @@ try
                 $baseRegistryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\TestKey'
                 $script:registryKeyPath = $baseRegistryKeyPath
 
-                while (Test-RegistryKeyExists -KeyPath $script:registryKeyPath)
+                $script:doNotDeleteRegistryKey = $false
+                $script:registryDriveOriginallyMounted = $true
+
+                $loopTimeoutMinutes = 1
+
+                $startLoopTime = Get-Date
+                while ((Test-RegistryKeyExists -KeyPath $script:registryKeyPath) -and $loopMinutes -lt $loopTimeoutMinutes)
                 {
                     $randomNumber = Get-Random
                     $script:registryKeyPath = $baseRegistryKeyPath + $randomNumber
+                    $loopMinutes = ((Get-Date) - $startLoopTime).Minutes
+                }
+
+                if (Test-RegistryKeyExists -KeyPath $script:registryKeyPath)
+                {
+                    $script:doNotDeleteRegistryKey = $true
+                    throw "Timed out while attempting to set up a non-destructive registry key for testing. Last testing key attempted: $script:registryKeyPath"
+                    return
                 }
 
                 $script:registryDriveOriginallyMounted = Test-RegistryDriveMounted -KeyPath $script:registryKeyPath
@@ -39,7 +53,7 @@ try
 
             AfterAll {
                 # Remove the test registry key if it already exists
-                if (Test-RegistryKeyExists -KeyPath $script:registryKeyPath)
+                if ((Test-RegistryKeyExists -KeyPath $script:registryKeyPath) -and -not $script:doNotDeleteRegistryKey)
                 {
                     Remove-RegistryKey -KeyPath $script:registryKeyPath
                 }
@@ -252,7 +266,7 @@ try
                     $testTargetResourceResult | Should Be $true
                 }
 
-                It 'Should return true for a registry value that does not exist' {
+                It 'Should return false for a registry value that does not exist' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' 
                     $valueName = 'NonExisting'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName $valueName
