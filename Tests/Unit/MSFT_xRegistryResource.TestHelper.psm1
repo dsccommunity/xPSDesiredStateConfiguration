@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Retrieves a registry key in read-only mode.
+        Retrieves a registry key.
 
     .PARAMETER KeyPath
         The path to the registry key to be opened.
@@ -8,6 +8,7 @@
 
     .PARAMETER WriteAccess
         Indicates that the registry key should be retrieved with write access.
+        If this switch parameter is not provided, the key will be opened in read-only mode.
 #>
 function Get-RegistryKey
 {
@@ -108,13 +109,15 @@ function Test-RegistryValueExists
         $registryValueExists = $null -ne $registryValue
 
         Write-Verbose -Message "Test-RegistryValueExists - Registry value is not null: $registryValueExists"
-        
-        if ($registryValueExists)
+
+        if (-not $registryValueExists)
         {
-            $registryValue = $registryValue.$ValueName
+            return $false
         }
 
-        if ($registryValueExists -and $PSBoundParameters.ContainsKey('ValueType'))
+        $registryValue = $registryValue.$ValueName
+
+        if ($PSBoundParameters.ContainsKey('ValueType'))
         {
             Write-Verbose -Message "Test-RegistryValueExists - Registry value type: $($registryValue.GetType().Name)"
 
@@ -129,7 +132,7 @@ function Test-RegistryValueExists
             }
         }
 
-        if ($registryValueExists -and $PSBoundParameters.ContainsKey('ValueData'))
+        if ($PSBoundParameters.ContainsKey('ValueData'))
         {
             Write-Verbose -Message "Test-RegistryValueExists - Registry value data: $registryValue"
 
@@ -165,7 +168,7 @@ function New-RegistryKey
 
     $parentPath = Split-Path -Path $KeyPath -Parent
     
-    if (-not (Test-Path -Path $parentPath))
+    if (-not (Test-RegistryKeyExists -KeyPath $parentPath))
     {
         New-RegistryKey -KeyPath $parentPath
     }
@@ -314,13 +317,7 @@ function Remove-DefaultRegistryValue
         $KeyPath
     )
 
-    $registryDrivePath = Split-Path -Path $KeyPath -Qualifier
-    $registryDrive = Get-Item -Path $registryDrivePath
-
-    $subKeyPath = Split-Path -Path $KeyPath -NoQualifier
-    $subKeyPath = $subKeyPath.Substring(1)
-
-    $registryKey = $registryDrive.OpenSubKey($subKeyPath, $true)
+    $registryKey = Get-RegistryKey -KeyPath $KeyPath -WriteAccess
     $registryKey.DeleteValue('')
 }
 
@@ -373,7 +370,7 @@ function Mount-RegistryDrive
         }
 
         # Mount the PSDrive with the abbreviated name as the Name and the elongated name as the root
-        $null = New-PSDrive @newPSDriveParams -Name $mappingKey -Root $registryDriveRootMappings[$mappingKey] -PSProvider 'Registry' -Scope 'Script'
+        $null = New-PSDrive -Name $mappingKey -Root $driveName -PSProvider 'Registry' -Scope 'Script'
     }
     else
     {
