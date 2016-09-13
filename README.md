@@ -480,6 +480,7 @@ because they were unavailable to Get-DscResource and Import-DscResource.
 * Merged the in-box Service resource with xService and added tests for xService
 * Merged the in-box Archive resource with xArchive and added tests for xArchive
 * Merged the in-box Group resource with xGroup and added tests for xGroup
+* xDscWebService: Add DatabasePath property to specific a custom database path and enable multiple pull server instances on one server.
 
 ### 3.10.0.0
 
