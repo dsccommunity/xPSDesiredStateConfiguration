@@ -26,19 +26,32 @@ try
     $script:testServiceDescription = "This is DSC test service used for integration testing MSFT_xServiceResource"
     $script:testServiceDependsOn = "winrm"
     $script:testServiceExecutablePath = Join-Path -Path $ENV:Temp -ChildPath "DscTestService.exe"
+    $script:testServiceNewCodePath = "$PSScriptRoot\..\DscTestServiceNew.cs"
+    $script:testServiceNewDisplayName = "New DSC test service display name"
+    $script:testServiceNewDescription = "New This is DSC test service used for integration testing MSFT_xServiceResource"
+    $script:testServiceNewDependsOn = "spooler"
+    $script:testServiceNewExecutablePath = Join-Path -Path $ENV:Temp -ChildPath "NewDscTestService.exe"
 
     Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
     Import-Module "$PSScriptRoot\..\MSFT_xServiceResource.TestHelper.psm1" -Force
 
     Stop-Service $script:testServiceName -ErrorAction SilentlyContinue
 
-    # Create a new Service binary for the new service.
+    # Create new Service binaries for the new service.
     New-ServiceBinary `
         -ServiceName $script:testServiceName `
         -ServiceCodePath $script:testServiceCodePath `
         -ServiceDisplayName $script:testServiceDisplayName `
         -ServiceDescription $script:testServiceDescription `
         -ServiceDependsOn $script:testServiceDependsOn `
+        -ServiceExecutablePath $script:testServiceExecutablePath
+
+    New-ServiceBinary `
+        -ServiceName $script:testServiceName `
+        -ServiceCodePath $script:testServiceNewCodePath `
+        -ServiceDisplayName $script:testServiceNewDisplayName `
+        -ServiceDescription $script:testServiceNewDescription `
+        -ServiceDependsOn $script:testServiceNewDependsOn `
         -ServiceExecutablePath $script:testServiceExecutablePath
 
     #region Integration Tests
@@ -86,6 +99,56 @@ try
         }
     }
     #endregion
+
+    Reset-DSC
+
+    #region Integration Tests
+    $ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName)_Edit.config.ps1"
+    . $ConfigFile
+
+    Describe "$($script:DSCResourceName)_Edit_Integration" {
+        #region DEFAULT TESTS
+        It 'Should compile and apply the MOF without throwing' {
+            {
+                & "$($script:DSCResourceName)_Edit_Config" `
+                    -OutputPath $TestEnvironment.WorkingFolder `
+                    -ServiceName $script:testServiceName `
+                    -ServicePath $script:testServiceNewExecutablePath `
+                    -ServiceDisplayName $script:testServiceNewDisplayName `
+                    -ServiceDescription $script:testServiceNewDescription `
+                    -ServiceDependsOn $script:testServiceNewDependsOn
+                Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
+                    -ComputerName localhost -Wait -Verbose -Force
+            } | Should not throw
+        }
+
+        It 'should be able to call Get-DscConfiguration without throwing' {
+            { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not throw
+        }
+        #endregion
+
+        # Get the current service details
+        $script:service = Get-CimInstance -ClassName Win32_Service -Filter "Name='$($script:testServiceName)'"
+        It 'The service should exist' {
+            $script:service | Should BeOfType 'Microsoft.Management.Infrastructure.CimInstance'
+        }
+
+        It 'Should have set the resource and all the parameters should match' {
+            # Get the current service details
+            $script:service.status                | Should Be 'OK'
+            $script:service.pathname              | Should Be $script:testServiceNewExecutablePath
+            $script:service.description           | Should Be $script:testServiceNewDescription
+            $script:service.displayname           | Should Be $script:testServiceNewDisplayName
+            $script:service.started               | Should Be $false
+            $script:service.state                 | Should Be 'Stopped'
+            $script:service.desktopinteract       | Should Be $false
+            $script:service.startname             | Should Be 'NT Authority\LocalService'
+            $script:service.startmode             | Should Be 'Manual'
+        }
+    }
+    #endregion
+
+    Reset-DSC
 
     #region Integration Tests
     $ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName)_Remove.config.ps1"
