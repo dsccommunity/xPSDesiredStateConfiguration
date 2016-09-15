@@ -794,7 +794,7 @@ function Write-WriteProperty
         if ($changeResult.ReturnValue -ne 0)
         {
             $innerMessage = ($LocalizedData.MethodFailed `
-                -f "Change", "Win32_Service", $ret.ReturnValue)
+                -f "Change", "Win32_Service", $changeResult.ReturnValue)
             $errorMessage = ($LocalizedData.ErrorChangingProperty `
                 -f "Dependencies", $innerMessage)
             New-InvalidArgumentError `
@@ -975,7 +975,7 @@ function Write-BinaryProperty
     if ($changeResult.ReturnValue -ne 0)
     {
         $innerMessage = ($LocalizedData.MethodFailed `
-            -f "Change", "Win32_Service", $ret.ReturnValue)
+            -f "Change", "Win32_Service", $changeResult.ReturnValue)
         $errorMessage = ($LocalizedData.ErrorChangingProperty `
             -f "Binary Path", $innerMessage)
         New-InvalidArgumentError `
