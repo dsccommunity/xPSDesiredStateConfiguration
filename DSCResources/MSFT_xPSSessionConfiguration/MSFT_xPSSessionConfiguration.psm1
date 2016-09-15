@@ -306,12 +306,6 @@ function Set-TargetResource
 
                     $restartNeeded = $true
 
-                    # If the $validatedProperties contain more than 1 key, something needs to be changed
-                    if ($validatedProperties.count -gt 1)
-                    {
-                        Write-EndpointMessage -Parameters $validatedProperties -keysToSkip 'Name'
-                    }
-
                     Write-Verbose -Message ($LocalizedData.EndpointNameMessage -f $Name,'present')
                 }
                 catch
