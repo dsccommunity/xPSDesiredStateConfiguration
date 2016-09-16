@@ -294,8 +294,9 @@ These parameters will be the same for each Windows feature in the set. Please re
 Provides a mechanism to enable or disable optional features on a target node.
 
 #### Requirements
-    * Target machine must be running either a Windows client operating system or Windows Server 2012 or later.
-    * Target machine must have access to the DISM PowerShell module
+
+* Target machine must be running either a Windows client operating system or Windows Server 2012 or later.
+* Target machine must have access to the DISM PowerShell module
 
 #### Parameters
 
@@ -303,7 +304,7 @@ Provides a mechanism to enable or disable optional features on a target node.
 * **[String] Ensure** _(Write)_: Specifies whether the feature should be enabled or disabled. To enable the feature, set this property to Present. To disable the feature, set the property to Absent. The default value is Present. { *Present* | Absent }.
 * **[Boolean] RemoveFilesOnDisable** _(Write)_: Specifies that all files associated with the feature should be removed if the feature is being disabled.
 * **[Boolean] NoWindowsUpdateCheck** _(Write)_: Specifies whether or not DISM contacts Windows Update (WU) when searching for the source files to enable the feature. If $true, DISM will not contact WU.
-* **[String] LogPath** _(Write)_: The path to the log file to log this operation. There is not default value, but if not set, the log will appear at %WINDIR%\Logs\Dism\dism.log.
+* **[String] LogPath** _(Write)_: The path to the log file to log this operation. There is no default value, but if not set, the log will appear at %WINDIR%\Logs\Dism\dism.log.
 * **[String] LogLevel** _(Write)_: The maximum output level to show in the log. ErrorsOnly will log only errors. ErrorsAndWarning will log only errors and warnings. ErrorsAndWarningAndInformation will log errors, warnings, and debug information). The default value is "ErrorsAndWarningAndInformation".  { ErrorsOnly | ErrorsAndWarning | *ErrorsAndWarningAndInformation* }.
 
 #### Read-Only Properties from Get-TargetResource
@@ -313,7 +314,8 @@ Provides a mechanism to enable or disable optional features on a target node.
 * **[String] DisplayName** _(Read)_: The display name retrieved from the Windows optional feature.
 
 #### Examples
-    * [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
+
+* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
 
 ### xWindowsOptionalFeatureSet
 Note: xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs.

@@ -3,7 +3,7 @@
 param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonResourceHelper.psm1')
-$script:localizedData = Get-LocalizedData -ResourceName 'WindowsOptionalFeature'
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsOptionalFeature'
 
 <#
     .SYNOPSIS
@@ -87,7 +87,7 @@ function Get-TargetResource
 
     .PARAMETER LogPath
         The path to the log file to log this operation.
-        There is not default value, but if not set, the log will appear at
+        There is no default value, but if not set, the log will appear at
         %WINDIR%\Logs\Dism\dism.log.
 
     .PARAMETER LogLevel
@@ -319,7 +319,6 @@ function Convert-FeatureStateToEnsure
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
         [String]
         $State
     )
@@ -334,7 +333,7 @@ function Convert-FeatureStateToEnsure
     }
     else
     {
-        Write-Warning ($script:localizedData.CouldNotCovertFeatureState -f $State)
+        Write-Warning ($script:localizedData.CouldNotConvertFeatureState -f $State)
         return $State
     }
 }
@@ -359,7 +358,7 @@ function Assert-ResourcePrerequisitesValid
     # Check that we're running on Server 2012 (or later) or on a client SKU
     $operatingSystem = Get-CimInstance -ClassName 'Win32_OperatingSystem'
 
-    if (($operatingSystem.ProductType -ne 1) -and ([System.Int32] $operatingSystem.BuildNumber -lt 9600))
+    if (($operatingSystem.ProductType -eq 2) -and ([System.Int32] $operatingSystem.BuildNumber -lt 9600))
     {
         New-InvalidOperationException -Message $script:localizedData.NotSupportedSku
     }
