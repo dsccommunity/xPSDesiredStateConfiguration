@@ -105,18 +105,6 @@ try
             State                   = $script:testServiceStatusRunning
         }
 
-        Add-Member -InputObject  $script:testWin32ServiceMockRunningLocalSystem `
-            -MemberType ScriptMethod `
-            -Name Change `
-            -Value {
-                param(
-                    $a,$path,$c,$d,$e,$f,$g,$h
-                )
-
-                $global:ChangeMethodCalled = $true
-                return $global:ChangeMethodResult
-            }
-
         $script:splatServiceExistsAutomatic = @{
             Name                    = $script:testServiceName
             StartupType             = $script:testServiceStartupType
@@ -966,11 +954,21 @@ try
         }
 
         Describe "$DSCResourceName\Write-WriteProperty" {
+            # Dummy Functions
+            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+
             # Mocks that should be called
             Mock `
                 -CommandName Get-Win32ServiceObject `
                 -MockWith { $script:testServiceStartupTypeWin32 } `
                 -Verifiable
+            Mock `
+                -CommandName Get-Service `
+                -MockWith { $script:testServiceMockRunning } `
+                -Verifiable
+
+            # Mocks that should not be called
+            Mock -CommandName Set-Service
 
             Context 'No parameters passed' {
                 It 'Should not throw an exception' {
@@ -982,6 +980,102 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
+                    Assert-MockCalled -CommandName Set-Service -Exactly 0
+                }
+            }
+
+            Context 'Different DisplayName passed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Set-Service `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperty `
+                        -Name $script:testServiceName `
+                        -DisplayName 'NewDisplayName' `
+                        -Verbose } | Should Not Throw
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
+                    Assert-MockCalled -CommandName Set-Service -Exactly 1
+                }
+            }
+
+            Context 'Different Description passed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Set-Service `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperty `
+                        -Name $script:testServiceName `
+                        -Description 'NewDescription' `
+                        -Verbose } | Should Not Throw
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
+                    Assert-MockCalled -CommandName Set-Service -Exactly 1
+                }
+            }
+
+            Context 'Different Dependencies passed and set OK, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ ReturnValue = 0 } } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    { $script:Result = Write-WriteProperty `
+                        -Name $script:testServiceName `
+                        -Dependencies 'DepService1','DepService2' `
+                        -Verbose } | Should Not Throw
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
+                }
+            }
+
+            Context 'Different Dependencies passed and set failed, will not trigger restart' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ ReturnValue = 99 } } `
+                    -Verifiable
+
+                $innerMessage = ($LocalizedData.MethodFailed `
+                    -f "Change","Win32_Service","99")
+                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                    -f "Dependencies",$innerMessage)
+                $errorRecord = Get-InvalidArgumentError `
+                    -ErrorId "ChangeCredentialFailed" `
+                    -ErrorMessage $errorMessage
+
+                It 'Should throw an exception' {
+                    { $script:Result = Write-WriteProperty `
+                        -Name $script:testServiceName `
+                        -Dependencies 'DepService1','DepService2' `
+                        -Verbose } | Should Throw $errorRecord
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
                 }
             }
 
@@ -1002,6 +1096,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
                     Assert-MockCalled -CommandName Write-BinaryProperty -Exactly 1
                 }
             }
@@ -1026,6 +1121,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
                     Assert-MockCalled -CommandName Set-ServiceStartMode -Exactly 1
                 }
             }
@@ -1050,6 +1146,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
                     Assert-MockCalled -CommandName Write-CredentialProperty -Exactly 1
                 }
             }
@@ -1074,6 +1171,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
                     Assert-MockCalled -CommandName Write-CredentialProperty -Exactly 1
                 }
             }
@@ -1098,6 +1196,7 @@ try
                 It 'Should call expected Mocks' {
                     Assert-VerifiableMocks
                     Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Get-Service -Exactly 1
                     Assert-MockCalled -CommandName Write-CredentialProperty -Exactly 1
                 }
             }
@@ -1479,7 +1578,13 @@ try
         }
 
         Describe "$DSCResourceName\Write-BinaryProperty" {
+            # Dummy Functions
+            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+
             Context 'Path is already correct' {
+                # Mocks that should not be called
+                Mock -CommandName Invoke-CimMethod
+
                 It 'Should not throw an exception' {
                     { $script:result = Write-BinaryProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
@@ -1489,10 +1594,20 @@ try
                 It 'Should return false' {
                     $script:result = $false
                 }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 0
+                }
             }
 
             Context 'Path needs to be changed and is changed without error' {
-                $global:ChangeMethodResult = @{ ReturnValue = 0 }
+                # Mocks that should be called
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 0 } } `
+                    -Verifiable
+
                 It 'Should not throw an exception' {
                     { $script:result = Write-BinaryProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
@@ -1503,16 +1618,21 @@ try
                     $script:result = $true
                 }
 
-                It 'Change method was called' {
-                    $global:ChangeMethodCalled | Should Be $true
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
                 }
             }
 
             Context 'Path needs to be changed but an error occurs changing it' {
-                $global:ChangeMethodResult = @{ ReturnValue = 99 }
+                # Mocks that should be called
+                Mock `
+                    -CommandName Invoke-CimMethod `
+                    -MockWith { @{ returnValue = 99 } } `
+                    -Verifiable
 
                 $innerMessage = ($LocalizedData.MethodFailed `
-                    -f "Change", "Win32_Service", $global:ChangeMethodResult.ReturnValue)
+                    -f "Change", "Win32_Service", 99)
                 $errorMessage = ($LocalizedData.ErrorChangingProperty `
                     -f "Binary Path", $innerMessage)
                 $errorRecord = Get-InvalidArgumentError `
@@ -1525,8 +1645,9 @@ try
                         -Path 'c:\NewServicePath.exe' } | Should Throw $errorRecord
                 }
 
-                It 'Change method was called' {
-                    $global:ChangeMethodCalled | Should Be $true
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Invoke-CimMethod -Exactly 1
                 }
             }
         }

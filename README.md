@@ -394,6 +394,15 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Fixed error message content when start mode can not be changed.
     * Removed shouldprocess from functions as not required.
     * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
+    * Added integration test for testing changes to additional service properties as well as changing service binary path.
+    * Modified Set-TargetResource so that newly created service created with minimal properties and then all additional properties updated (simplification of code).
+    * Added support for changing Service Description and DisplayName parameters.
+    * Fixed bug when changing binary path of existing service.
+* Removed test log output from repo.
+* xDSCWebService:
+    * Added setting of enhanced security
+    * Cleaned up Examples
+    * Cleaned up pull server verification test
 * xWindowsOptionalFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script

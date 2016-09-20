@@ -223,6 +223,33 @@ function Test-TargetResource
     } # if
 
     # Check the optional parameters
+    if ($PSBoundParameters.ContainsKey('DisplayName') `
+        -and ($DisplayName -ne $serviceWmi.DisplayName))
+    {
+        Write-Verbose -Message ($LocalizedData.ParameterMismatch `
+            -f 'DisplayName',$serviceWmi.DisplayName,$DisplayName)
+        return $false
+    } # if
+
+    if ($PSBoundParameters.ContainsKey('Description') `
+        -and ($Description -ne $serviceWmi.Description))
+    {
+        Write-Verbose -Message ($LocalizedData.ParameterMismatch `
+            -f 'Description',$serviceWmi.Description,$Description)
+        return $false
+    } # if
+
+    # update the service dependencies if required
+    if ($PSBoundParameters.ContainsKey('Dependencies') `
+        -and (@(Compare-Object `
+            -ReferenceObject $service.ServicesDependedOn `
+            -DifferenceObject $Dependencies).Count -gt 0))
+    {
+        Write-Verbose -Message ($LocalizedData.ParameterMismatch `
+            -f 'Dependencies',($service.ServicesDependedOn -join ','),($Dependencies -join ','))
+        return $false
+    } # if
+
     if ($PSBoundParameters.ContainsKey("StartupType") `
         -or $PSBoundParameters.ContainsKey("BuiltInAccount") `
         -or $PSBoundParameters.ContainsKey("Credential") `
@@ -394,8 +421,6 @@ function Set-TargetResource
         return
     } # if
 
-    $serviceIsNew = $false
-
     if ($PSBoundParameters.ContainsKey("Path") -and $serviceExists)
     {
         if (-not (Compare-ServicePath -Name $Name -Path $Path))
@@ -410,35 +435,9 @@ function Set-TargetResource
         $argumentsToNewService.Add("Name", $Name)
         $argumentsToNewService.Add("BinaryPathName", $Path)
 
-        if($PSBoundParameters.ContainsKey("Credential"))
-        {
-            $argumentsToNewService.Add("Credential", $Credential)
-        } # if
-
-        if($PSBoundParameters.ContainsKey("StartupType"))
-        {
-            $argumentsToNewService.Add("StartupType", $StartupType)
-        } # if
-
-        if($PSBoundParameters.ContainsKey("DisplayName"))
-        {
-            $argumentsToNewService.Add("DisplayName", $DisplayName)
-        } # if
-
-        if($PSBoundParameters.ContainsKey("Description"))
-        {
-            $argumentsToNewService.Add("Description", $Description)
-        } # if
-
-        if($PSBoundParameters.ContainsKey("Dependencies"))
-        {
-            $argumentsToNewService.Add("DependsOn", $Dependencies)
-        } # if
-
         try
         {
             New-Service @argumentsToNewService
-            $serviceIsNew = $true
         }
         catch
         {
@@ -454,11 +453,7 @@ function Set-TargetResource
             -ErrorMessage ($LocalizedData.ServiceDoesNotExistPathMissingError -f $Name)
     } # if
 
-    if (-not $serviceIsNew)
-    {
-       Write-Verbose -Message ($LocalizedData.WritePropertiesIgnored -f $Name)
-    } # if
-
+    # Update the parameters of the service
     $writeWritePropertiesArguments = @{
         Name = $Name
     }
@@ -486,6 +481,21 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey('DesktopInteract'))
     {
         $writeWritePropertiesArguments['DesktopInteract'] = $DesktopInteract
+    } # if
+
+    if ($PSBoundParameters.ContainsKey('DisplayName'))
+    {
+        $writeWritePropertiesArguments['DisplayName'] = $DisplayName
+    } # if
+
+    if ($PSBoundParameters.ContainsKey('Description'))
+    {
+        $writeWritePropertiesArguments['Description'] = $Description
+    } # if
+
+    if ($PSBoundParameters.ContainsKey('Dependencies'))
+    {
+        $writeWritePropertiesArguments['Dependencies'] = $Dependencies
     } # if
 
     $requiresRestart = Write-WriteProperty @writeWritePropertiesArguments
@@ -718,9 +728,22 @@ function Write-WriteProperty
         $Credential,
 
         [Boolean]
-        $DesktopInteract
+        $DesktopInteract,
+
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $DisplayName,
+
+        [ValidateNotNull()]
+        [String]
+        $Description,
+
+        [ValidateNotNullOrEmpty()]
+        [String[]]
+        $Dependencies
     )
 
+    $service = Get-Service -Name $Name
     $serviceWmi = Get-Win32ServiceObject -Name $Name
     $requiresRestart = $false
 
@@ -733,6 +756,51 @@ function Write-WriteProperty
         }
 
         $requiresRestart = $requiresRestart -or (Write-BinaryProperty @writeBinaryArguments)
+    } # if
+
+    # update misc service properties
+    $serviceprops = @{}
+
+    if ($PSBoundParameters.ContainsKey('DisplayName') `
+        -and ($DisplayName -ne $serviceWmi.DisplayName))
+    {
+        $serviceprops += @{ DisplayName = $DisplayName }
+    } # if
+
+    if ($PSBoundParameters.ContainsKey('Description') `
+        -and ($Description -ne $serviceWmi.Description))
+    {
+        $serviceprops += @{ Description = $Description }
+    } # if
+    if ($serviceprops.count -gt 0)
+    {
+        $null = Set-Service `
+            -Name $Name `
+            @ServiceProps
+    } # if
+
+    # update the service dependencies if required
+    if ($PSBoundParameters.ContainsKey('Dependencies') `
+        -and (@(Compare-Object `
+            -ReferenceObject $service.ServicesDependedOn `
+            -DifferenceObject $Dependencies).Count -gt 0))
+    {
+        $changeServiceArguments = @{ ServiceDependencies = $Dependencies }
+
+        $changeResult = Invoke-CimMethod `
+            -InputObject $serviceWmi `
+            -MethodName Change `
+            -Arguments $changeServiceArguments
+        if ($changeResult.ReturnValue -ne 0)
+        {
+            $innerMessage = ($LocalizedData.MethodFailed `
+                -f "Change", "Win32_Service", $changeResult.ReturnValue)
+            $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                -f "Dependencies", $innerMessage)
+            New-InvalidArgumentError `
+                -ErrorId "ChangeDependenciesFailed" `
+                -ErrorMessage $errorMessage
+        } # if
     } # if
 
     # update credentials
@@ -876,7 +944,7 @@ function Write-CredentialProperty
 
 <#
     .SYNOPSIS
-    Writes binary path if not already correctly set, logging errors and respecting whatif
+    Writes binary path if not already correctly set, logging errors.
 #>
 function Write-BinaryProperty
 {
@@ -898,11 +966,16 @@ function Write-BinaryProperty
         return $false
     } # if
 
-    $ret = $ServiceWmi.Change($null, $Path, $null, $null, $null, $null, $null, $null)
-    if($ret.ReturnValue -ne 0)
+    $changeServiceArguments = @{ PathName = $Path }
+
+    $changeResult = Invoke-CimMethod `
+        -InputObject $serviceWmi `
+        -MethodName Change `
+        -Arguments $changeServiceArguments
+    if ($changeResult.ReturnValue -ne 0)
     {
         $innerMessage = ($LocalizedData.MethodFailed `
-            -f "Change", "Win32_Service", $ret.ReturnValue)
+            -f "Change", "Win32_Service", $changeResult.ReturnValue)
         $errorMessage = ($LocalizedData.ErrorChangingProperty `
             -f "Binary Path", $innerMessage)
         New-InvalidArgumentError `
