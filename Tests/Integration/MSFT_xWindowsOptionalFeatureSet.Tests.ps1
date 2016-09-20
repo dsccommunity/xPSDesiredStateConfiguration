@@ -1,6 +1,6 @@
 ﻿$TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xWindowsOptionalFeatureSet' `
+    -DSCResourceName 'xWindowsOptionalFeatureSet' `
     -TestType Integration
 
 Describe "xWindowsOptionalFeatureSet Integration Tests" {

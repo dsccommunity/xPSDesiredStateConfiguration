@@ -1,26 +1,25 @@
-
-@{
+﻿@{
 
 # Script module or binary module file associated with this manifest.
-RootModule = 'MSFT_xFileUpload.schema.psm1'
+RootModule = 'xProcessSet.schema.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion = '0.1.0.0'
 
 # ID used to uniquely identify this module
-GUID = '1fbfd112-4272-4fb8-b31c-fb5b417484bc'
+GUID = '0cb71def-366f-4f3b-88a9-b9b37d266dd6'
 
 # Author of this module
-Author = 'kkaczma'
+Author = 'Microsoft Corporation'
 
 # Company or vendor of this module
-CompanyName = 'Unknown'
+CompanyName = 'Microsoft Corporation'
 
 # Copyright statement for this module
-Copyright = '(c) 2014 Microsoft. All rights reserved.'
+Copyright = '(c) 2016 Microsoft. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'Allows starting and stopping of a group of windows processes with no arguments.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -70,14 +69,38 @@ VariablesToExport = '*'
 # Aliases to export from this module
 AliasesToExport = '*'
 
+# DSC resources to export from this module
+DscResourcesToExport = '*'
+
 # List of all modules packaged with this module
 # ModuleList = @()
 
 # List of all files packaged with this module
 # FileList = @()
 
-# Private data to pass to the module specified in RootModule/ModuleToProcess
-# PrivateData = ''
+# Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
+PrivateData = @{
+
+    PSData = @{
+
+        # Tags applied to this module. These help with module discovery in online galleries.
+        # Tags = @()
+
+        # A URL to the license for this module.
+        # LicenseUri = ''
+
+        # A URL to the main website for this project.
+        # ProjectUri = ''
+
+        # A URL to an icon representing this module.
+        # IconUri = ''
+
+        # ReleaseNotes of this module
+        # ReleaseNotes = ''
+
+    } # End of PSData hashtable
+
+} # End of PrivateData hashtable
 
 # HelpInfo URI of this module
 # HelpInfoURI = ''
@@ -86,5 +109,3 @@ AliasesToExport = '*'
 # DefaultCommandPrefix = ''
 
 }
-
-
