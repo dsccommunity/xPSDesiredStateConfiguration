@@ -773,6 +773,52 @@ try
             }
         }
 
+        Describe "$DSCResourceName\Test-EmptyState" {
+            Context 'Service does not exist, but should as stopped, updating StartupType without State should not start the service' {
+                BeforeAll {
+                    #if (Get-Service -Name $script:splatServiceExistsAutomatic.Name)
+                    #{
+                    #    Stop-Service -Name $script:splatServiceExistsAutomatic.Name
+                    #}
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Ensure = "Absent"
+                    Set-TargetResource @Splat -Verbose
+                }
+
+                It 'Should not throw an exception while making sure the service exists' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.StartupType = "Manual"
+                    $Splat.State = "Stopped"
+                    { Set-TargetResource @Splat -Verbose } | Should not Throw
+                }
+                
+                It 'Should exist' {
+                    $script:CurrentTestServices = Get-Service -Name $script:splatServiceExistsAutomatic.Name
+                    $script:CurrentTestServices.Count | Should be 1
+                }
+                
+                It 'Should be stopped' {
+                    $script:CurrentTestServices.Status | Should be 'Stopped'
+                }
+
+                It 'Should not throw an exception while updating service the StartupType' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.StartupType = "Disabled"
+                    $Splat.State = ""
+                    { Set-TargetResource @Splat -Verbose } | Should not Throw
+                }
+
+                It 'Should still exist' {
+                    $script:CurrentTestServices = Get-Service -Name $script:splatServiceExistsAutomatic.Name
+                    $script:CurrentTestServices.Count | Should be 1
+                }
+
+                It 'Should still be stopped' {
+                    $script:CurrentTestServices.Status | Should be 'Stopped'
+                }
+            }
+        }
+
         Describe "$DSCResourceName\Test-StartupType" {
             Context 'Service is stopped, startup is automatic' {
                 $errorRecord = Get-InvalidArgumentError `

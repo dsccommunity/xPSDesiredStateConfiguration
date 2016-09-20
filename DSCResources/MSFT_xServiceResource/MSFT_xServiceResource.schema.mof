@@ -9,7 +9,7 @@ class MSFT_xServiceResource : OMI_BaseResource
   [write,Description("Indicates the sign-in account to use for the service."),ValueMap{"LocalSystem", "LocalService", "NetworkService"},Values{"LocalSystem", "LocalService", "NetworkService"}] string BuiltInAccount;
   [write,Description("The credential to run the service under."),EmbeddedInstance("MSFT_Credential")] string Credential;
   [Write,Description("The service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.")] boolean DesktopInteract;
-  [write,Description("Indicates the state you want to ensure for the service. Defaults to Running."),ValueMap{"Running", "Stopped"},Values{"Running", "Stopped"}] string State;
+  [write,Description("Indicates the state you want to ensure for the service. Defaults to Running. An empty string means ignore the current state."),ValueMap{"Running", "Stopped", ""},Values{"Running", "Stopped", ""}] string State;
   [write,Description("The display name of the service.")] string DisplayName;
   [write,Description("The description of the service.")] string Description;
   [write,Description("An array of strings indicating the names of the dependencies of the service.")] string Dependencies[];

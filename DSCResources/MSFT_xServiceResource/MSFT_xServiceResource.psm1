@@ -117,7 +117,7 @@ function Get-TargetResource
     not running as LocalSystem. Optional. Defaults to False.
 
     .PARAMETER State
-    Indicates the state you want to ensure for the service. Optional. Defaults to Running.
+    Indicates the state you want to ensure for the service. Optional. Defaults to Running. An empty string means ignore the current state.
 
     .PARAMETER DisplayName
     The display name of the service. Optional.
@@ -161,7 +161,8 @@ function Test-TargetResource
         [Boolean]
         $DesktopInteract,
 
-        [ValidateSet("Running", "Stopped")]
+        [ValidateSet("Running", "Stopped", "")]
+        [AllowEmptyString()]
         [String]
         $State = "Running",
 
@@ -266,11 +267,15 @@ function Test-TargetResource
         } # if
     } # if
 
-    if ($State -ne $service.Status)
+    # if $State is empty, ignore the current status value
+    if (-not [string]::IsNullOrEmpty($State))
     {
-        Write-Verbose -Message ($LocalizedData.TestStateMismatch `
-            -f $serviceWmi.Name, $service.Status, $State)
-        return $false
+        if ($State -ne $service.Status)
+        {
+            Write-Verbose -Message ($LocalizedData.TestStateMismatch `
+                -f $serviceWmi.Name, $service.Status, $State)
+            return $false
+        } # if
     } # if
 
     return $true
@@ -304,7 +309,7 @@ function Test-TargetResource
     not running as LocalSystem. Optional. Defaults to False.
 
     .PARAMETER State
-    Indicates the state you want to ensure for the service. Optional. Defaults to Running.
+    Indicates the state you want to ensure for the service. Optional. Defaults to Running. An empty string means ignore the current state.
 
     .PARAMETER DisplayName
     The display name of the service. Optional.
@@ -347,7 +352,8 @@ function Set-TargetResource
         [Boolean]
         $DesktopInteract,
 
-        [ValidateSet("Running", "Stopped")]
+        [ValidateSet("Running", "Stopped", "")]
+        [AllowEmptyString()]
         [String]
         $State = "Running",
 
@@ -537,10 +543,16 @@ function Test-StartupType
         [String]
         $StartupType,
 
-        [ValidateSet("Running", "Stopped")]
+        [ValidateSet("Running", "Stopped", "")]
+        [AllowEmptyString()]
         [String]
         $State = "Running"
     )
+
+    if ([string]::IsNullOrEmpty($State))
+    {
+        $State = (Get-Service -ServiceName $Name).Status
+    }
 
     if ($State -eq "Stopped")
     {
@@ -551,8 +563,7 @@ function Test-StartupType
                 -ErrorId "CannotStopServiceSetToStartAutomatically" `
                 -ErrorMessage ($LocalizedData.CannotStopServiceSetToStartAutomatically -f $Name)
         } # if
-    }
-    else
+    } elseif ($State -eq "Running")
     {
         if ($StartupType -eq "Disabled")
         {
