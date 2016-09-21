@@ -353,6 +353,8 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+### 4.0.0.0
+
 * xDSCWebService:
     * Added setting of enhanced security
     * Cleaned up Examples
