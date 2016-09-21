@@ -130,6 +130,7 @@ function Set-TargetResource
         [string]$State = "Started",
 
         # Location on the disk where the database is stored
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
@@ -325,6 +326,7 @@ function Test-TargetResource
         [string]$State = "Started",
 
         # Location on the disk where the database is stored
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
