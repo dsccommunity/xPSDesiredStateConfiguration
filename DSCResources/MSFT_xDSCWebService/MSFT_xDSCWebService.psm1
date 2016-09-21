@@ -407,11 +407,20 @@ function Test-TargetResource
                 "ESENT" {
                     $expectedConnectionString = "$DatabasePath\Devices.edb"
                 }
-
                 "System.Data.OleDb" {
                     $expectedConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
                 }
+                default {
+                    $expectedConnectionString = [System.String]::Empty
+                }
             }
+            if (([System.String]::IsNullOrEmpty($expectedConnectionString)))
+            {
+                $DesiredConfigurationMatch = $false
+                Write-Verbose "The DB provider does not have a valid value: 'ESENT' or 'System.Data.OleDb'"
+                break
+            }
+
             if (-not (Test-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr" -ExpectedAppSettingValue $expectedConnectionString))
             {
                 $DesiredConfigurationMatch = $false
