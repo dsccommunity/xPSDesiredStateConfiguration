@@ -24,8 +24,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xGroup** provides a mechanism to manage local groups on the target node.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
-* **xWindowsOptionalFeature** configures optional Windows features.
-* **xRegistry** is a copy of the built-in Registry resource, with some small bug fixes.
+* **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
@@ -33,6 +32,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
+* **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
 
 ### xArchive
@@ -58,10 +58,13 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **CertificateThumbPrint**: Certificate thumbprint for creating an HTTPS endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based endpoint.
 * **Port**: Port for web service.
 * **PhysicalPath**: Folder location where the content of the web service resides.
+* **Ensure**: Ensures that the web service is **Present** or **Absent**
 * **State**: State of the web service: { Started | Stopped }
 * **ModulePath**: Folder location where DSC resources are stored.
 * **ConfigurationPath**: Folder location where DSC configurations are stored.
-* **Ensure**: Ensures that the web service is **Present** or **Absent**
+* **RegistrationKeyPath**: Folder location where DSC pull server registration key file is stored.
+* **AcceptSelfSignedCertificate**: Whether self signed certificate can be used to setup pull server.
+* **UseUpToDateSecuritySettings**: Whether to use enhanced security settings for the node where pull server resides on.
 
 ### xWindowsProcess
 
@@ -77,18 +80,20 @@ Specify an empty string if you don't want to pass any arguments.
 
 For a complete list of properties, please use Get-DscResource
 
-* **Name**: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
-* **Ensure**: An enumeration which stating whether the service needs to be created (when set to 'Present') or deleted (when set to 'Absent')
-* **Path**: The path to the service executable file
-* **StartupType**: Indicates the startup type for the service. The values that are allowed for this property are: Automatic, Disabled, and Manual
-* **BuiltInAccount**: Indicates the sign-in account to use for the service. The values that are allowed for this property are: LocalService, LocalSystem, and NetworkService.
-* **Credential**: The credential to run the service under.
-* **State**: Indicates the state you want to ensure for the service.
-* **DisplayName**: The display name of the service.
-* **Description**: The description of the service.
-* **Dependencies**: An array of strings indicating the names of the dependencies of the service.
-* **StartupTimeout**: The time to wait for the service to start in milliseconds.
-* **TerminateTimeout**: The time to wait for the service to stop in milliseconds.
+* **[String] Name** _(Key)_: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
+* **[String] Ensure** _(Write)_: Ensures that the service is present or absent. Defaults to Present. { *Present* | Absent }.
+* **[String] Path** _(Write)_: The path to the service executable file.
+* **[String] StartupType** _(Write)_: Indicates the startup type for the service. { Automatic | Disabled | Manual }.
+* **[String] BuiltInAccount** _(Write)_: Indicates the sign-in account to use for the service. { LocalService | LocalSystem | NetworkService }.
+* **[PSCredential] Credential** _(Write)_: The credential to run the service under.
+* **[Boolean] DesktopInteract** _(Write)_: The service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
+* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped }.
+* **[String] DisplayName** _(Write)_: The display name of the service.
+* **[String] Description** _(Write)_: The description of the service.
+* **[String[]] Dependencies** _(Write)_: An array of strings indicating the names of the dependencies of the service.
+* **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000.
+* **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000.
+* **[String] Status** _(Read)_: The current status of the service.
 
 ### xRemoteFile
 
@@ -120,7 +125,7 @@ For a complete list of properties, please use Get-DscResource
 * **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
 
-Read-Only Properties:  
+Read-Only Properties:
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
 * **InstalledOn**: Date of installation.
@@ -161,30 +166,15 @@ Domain members may be specified using domain\name or User Principal Name (UPN) f
 
 ### xRegistry
 
-This is a copy of the built-in Registry resource from the PSDesiredStateConfiguration module, with one small change:  it now supports
-registry keys whose names contain forward slashes.
+xRegistry provides a mechanism to manage registry keys and values on a target node.
 
-### xWindowsOptionalFeature
-Note: _the xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs._
-
-* **Name**: Name of the optional Windows feature.
-* **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
-   - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
-   - If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
-* **RemoveFilesOnDisable**: Removes the files for an optional feature without removing the feature's manifest from the image.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **LogPath**: Specifies the full path and file name to log to.
-   - If not set, the default is %WINDIR%\Logs\Dism\dism.log.
-* **Ensure**: Ensures that the feature is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **NoWindowsUpdateCheck**: Prevents DISM from contacting Windows Update (WU) when searching for the source files to restore a feature on an online image.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **LogLevel**: Specifies the maximum output level shown in the logs.
-   - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
-   - Default value: ErrorsOnly.
+* **[String] Key** _(Key)_: Indicates the path of the registry key for which you want to ensure a specific state. This path must include the hive.
+* **[String] ValueName** _(Key)_: Indicates the name of the registry value.
+* **[String] Ensure** _(Write)_: Indicates if the key and value exist. To ensure that they do, set this property to "Present". To ensure that they do not exist, set the property to "Absent". The default value is "Present". { *Present* | Absent }.
+* **[String] ValueData** _(Write)_: The data for the registry value.
+* **[String] ValueType** _(Write)_: Indicates the type of the value. { String | Binary | DWord | QWord | MultiString | ExpandString }
+* **[Boolean] Hex** _(Write)_: Indicates if data will be expressed in hexadecimal format. If specified, the DWORD/QWORD value data is presented in hexadecimal format. Not valid for other types. The default value is $false.
+* **[Boolean] Force** _(Write)_: If the specified registry key is present, Force overwrites it with the new value.
 
 ### xEnvironment
 
@@ -300,6 +290,33 @@ These parameters will be the same for each Windows feature in the set. Please re
 * **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
 * **Source**: Indicates the location of the source file to use for installation, if necessary.
 
+### xWindowsOptionalFeature
+Provides a mechanism to enable or disable optional features on a target node.
+
+#### Requirements
+
+* Target machine must be running either a Windows client operating system or Windows Server 2012 or later.
+* Target machine must have access to the DISM PowerShell module
+
+#### Parameters
+
+* **[String] Name** _(Key)_: The name of the Windows optional feature to enable or disable.
+* **[String] Ensure** _(Write)_: Specifies whether the feature should be enabled or disabled. To enable the feature, set this property to Present. To disable the feature, set the property to Absent. The default value is Present. { *Present* | Absent }.
+* **[Boolean] RemoveFilesOnDisable** _(Write)_: Specifies that all files associated with the feature should be removed if the feature is being disabled.
+* **[Boolean] NoWindowsUpdateCheck** _(Write)_: Specifies whether or not DISM contacts Windows Update (WU) when searching for the source files to enable the feature. If $true, DISM will not contact WU.
+* **[String] LogPath** _(Write)_: The path to the log file to log this operation. There is no default value, but if not set, the log will appear at %WINDIR%\Logs\Dism\dism.log.
+* **[String] LogLevel** _(Write)_: The maximum output level to show in the log. ErrorsOnly will log only errors. ErrorsAndWarning will log only errors and warnings. ErrorsAndWarningAndInformation will log errors, warnings, and debug information). The default value is "ErrorsAndWarningAndInformation".  { ErrorsOnly | ErrorsAndWarning | *ErrorsAndWarningAndInformation* }.
+
+#### Read-Only Properties from Get-TargetResource
+
+* **[String[]] CustomProperties** _(Read)_: The custom properties retrieved from the Windows optional feature as an array of strings.
+* **[String] Description** _(Read)_: The description retrieved from the Windows optional feature.
+* **[String] DisplayName** _(Read)_: The display name retrieved from the Windows optional feature.
+
+#### Examples
+
+* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
+
 ### xWindowsOptionalFeatureSet
 Note: xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs.
 
@@ -336,6 +353,74 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+### 4.0.0.0
+
+* xDSCWebService:
+    * Added setting of enhanced security
+    * Cleaned up Examples
+    * Cleaned up pull server verification test
+* xProcess:
+    * Fixed PSSA issues
+    * Corrected most style guideline issues
+* xPSSessionConfiguration:
+    * Fixed PSSA and style issues
+    * Renamed internal functions to follow verb-noun formats
+    * Decorated all functions with comment-based help
+* xRegistry:
+    * Fixed PSSA and style issues
+    * Renamed internal functions to follow verb-noun format
+    * Decorated all functions with comment-based help
+    * Merged with in-box Registry
+    * Fixed registry key and value removal
+    * Added unit tests
+* xService:
+    * Added descriptions to MOF file.
+    * Added additional details to parameters in Readme.md in a format that can be generated from the MOF.
+    * Added DesktopInteract parameter.
+    * Added standard help headers to *-TargetResource functions.
+    * Changed indent/format of all function help headers to be consistent.
+    * Fixed line length violations.
+    * Changed localization code so only a single copy of localization strings are required.
+    * Removed localization strings from inside module file.
+    * Updated unit tests to use standard test enviroment configuration and header.
+    * Recreated unit tests to be non-destructive.
+    * Created integration tests.
+    * Allowed service to be restarted immediately rather than wait for next LCM run.
+    * Changed helper function names to valid verb-noun format.
+    * Removed New-TestService function from MSFT_xServiceResource.TestHelper.psm1 because it should not be used.
+    * Fixed error calling Get-TargetResource when service does not exist.
+    * Fixed bug with Get-TargetResource returning StartupType 'Auto' instead of 'Automatic'.
+    * Converted to HQRM standards.
+    * Removed obfuscation of exception in Get-Win32ServiceObject function.
+    * Fixed bug where service start mode would be set to auto when it already was set to auto.
+    * Fixed error message content when start mode can not be changed.
+    * Removed shouldprocess from functions as not required.
+    * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
+    * Added integration test for testing changes to additional service properties as well as changing service binary path.
+    * Modified Set-TargetResource so that newly created service created with minimal properties and then all additional properties updated (simplification of code).
+    * Added support for changing Service Description and DisplayName parameters.
+    * Fixed bug when changing binary path of existing service.
+* Removed test log output from repo.
+* xDSCWebService:
+    * Added setting of enhanced security
+    * Cleaned up Examples
+    * Cleaned up pull server verification test
+* xWindowsOptionalFeature:
+    * Cleaned up resource (PSSA issues, formatting, etc.)
+    * Added example script
+    * Added integration test
+    * BREAKING CHANGE: Removed the unused Source parameter
+    * Updated to a high quality resource
+* Removed test log output from repo.
+* Removed the prefix MSFT_ from all files and folders of the composite resources in this module
+because they were unavailable to Get-DscResource and Import-DscResource.
+    * xFileUpload
+    * xGroupSet
+    * xProcessSet
+    * xServiceSet
+    * xWindowsFeatureSet
+    * xWindowsOptionalFeatureSet
+
 ### 3.13.0.0
 
 * Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
@@ -354,6 +439,7 @@ These parameters will be the same for each Windows optional feature in the set. 
 * xService
     * Updated xService resource to allow empty string for Description parameter.
 * Merged xProcess with in-box Process resource and added tests.
+* Fixed PSSA issues in xPackageResource.
 
 ### 3.12.0.0
 

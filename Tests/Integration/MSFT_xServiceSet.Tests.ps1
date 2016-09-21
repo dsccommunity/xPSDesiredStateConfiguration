@@ -1,6 +1,6 @@
 ﻿$TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xServiceSet' `
+    -DSCResourceName 'xServiceSet' `
     -TestType Integration
 
 Describe "xServiceSet Integration Tests" {

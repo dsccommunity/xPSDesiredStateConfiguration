@@ -4,7 +4,7 @@ class MSFT_xRegistryResource : OMI_BaseResource
   [Key] string Key;
   [Key] string ValueName;
   [Write] string ValueData[];
-  [Write,ValueMap{"String", "Binary", "Dword", "Qword", "MultiString", "ExpandString"},Values{"String", "Binary", "Dword", "Qword", "MultiString", "ExpandString"}] string ValueType;
+  [Write,ValueMap{"String", "Binary", "DWord", "QWord", "MultiString", "ExpandString"},Values{"String", "Binary", "DWord", "QWord", "MultiString", "ExpandString"}] string ValueType;
   [Write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
   [Write] boolean Hex;
   [Write] boolean Force;

@@ -1,3 +1,8 @@
+# Suppress Global Vars PSSA Error because $global:DSCMachineStatus must be allowed
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseShouldProcessForStateChangingFunctions", "")]
+param()
+
 data LocalizedData
 {
     # culture='en-US'
@@ -98,9 +103,9 @@ function Assert-PathExtensionValid
 
     $pathExtension = [System.IO.Path]::GetExtension($Path)
     Write-Verbose -Message ($LocalizedData.ThePathExtensionWasPathExt -f $pathExtension)
-    
+
     $validPathExtensions = @( '.msi', '.exe' )
-    
+
     if ($validPathExtensions -notcontains $pathExtension.ToLower())
     {
         New-InvalidArgumentException -ArgumentName 'Path' -Message ($LocalizedData.InvalidBinaryType -f $Path)
@@ -130,7 +135,7 @@ function Convert-ProductIdToIdentifyingNumber
     {
         Write-Verbose -Message ($LocalizedData.ParsingProductIdAsAnIdentifyingNumber -f $ProductId)
         $identifyingNumber = "{{{0}}}" -f [Guid]::Parse($ProductId).ToString().ToUpper()
-        
+
         Write-Verbose -Message ($LocalizedData.ParsedProductIdAsIdentifyingNumber -f $ProductId, $identifyingNumber)
         return $identifyingNumber
     }
@@ -224,7 +229,7 @@ function Get-RegistryValueWithErrorsIgnored
     {
         $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, $RegistryView)
         $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key)
-        
+
         if ($null -ne $subRegistryKey)
         {
             $registryValue = $subRegistryKey.GetValue($Value)
@@ -302,7 +307,7 @@ function Get-ProductEntry
         $productEntryKeyLocation = Join-Path -Path $uninstallRegistryKey -ChildPath $IdentifyingNumber
 
         $productEntry = Get-Item -Path $productEntryKeyLocation -ErrorAction 'SilentlyContinue'
-        
+
         if ($null -eq $productEntry)
         {
             $productEntryKeyLocation = Join-Path -Path $uninstallRegistryKeyWow64 -ChildPath $IdentifyingNumber
@@ -326,7 +331,7 @@ function Get-ProductEntry
         if ($CreateCheckRegValue)
         {
             $installValue = $null
-            
+
             $win32OperatingSystem = Get-CimInstance -ClassName 'Win32_OperatingSystem' -ErrorAction 'SilentlyContinue'
 
             # If 64-bit OS, check 64-bit registry view first
@@ -362,7 +367,7 @@ function Test-TargetResource
     param
     (
         [ValidateSet('Present', 'Absent')]
-        [String] 
+        [String]
         $Ensure = 'Present',
 
         [Parameter(Mandatory = $true)]
@@ -384,6 +389,7 @@ function Test-TargetResource
         $Arguments,
 
         [PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         # Return codes 1641 and 3010 indicate success when a restart is requested per installation
@@ -482,7 +488,7 @@ function Test-TargetResource
         }
     }
     else
-    {   
+    {
         $displayName = $null
 
         if (-not [String]::IsNullOrEmpty($Name))
@@ -493,7 +499,7 @@ function Test-TargetResource
         {
             $displayName = $ProductId
         }
-    
+
         Write-Verbose -Message ($LocalizedData.PackageDoesNotAppearInstalled -f $displayName)
     }
 
@@ -525,7 +531,7 @@ function Get-LocalizedRegistryKeyValue
     )
 
     $localizedRegistryKeyValue = $RegistryKey.GetValue('{0}_Localized' -f $ValueName)
-    
+
     if ($null -eq $localizedRegistryKeyValue)
     {
         $localizedRegistryKeyValue = $RegistryKey.GetValue($ValueName)
@@ -569,7 +575,7 @@ function Get-TargetResource
         $InstalledCheckRegValueName,
 
         [String]
-        $InstalledCheckRegValueData        
+        $InstalledCheckRegValueData
     )
 
     Assert-PathExtensionValid -Path $Path
@@ -640,11 +646,11 @@ function Get-TargetResource
     #>
     if ($null -eq $identifyingNumber -and $null -ne $productEntry.Name)
     {
-        $identifyingNumber = Split-Path -Path $productEntry.Name -Leaf 
+        $identifyingNumber = Split-Path -Path $productEntry.Name -Leaf
     }
 
     $installDate = $productEntry.GetValue('InstallDate')
-    
+
     if ($null -ne $installDate)
     {
         try
@@ -658,7 +664,7 @@ function Get-TargetResource
     }
 
     $publisher = Get-LocalizedRegistryKeyValue -RegistryKey $productEntry -ValueName 'Publisher'
-    
+
     $estimatedSize = $productEntry.GetValue('EstimatedSize')
 
     if ($null -ne $estimatedSize)
@@ -692,7 +698,7 @@ function Get-TargetResource
     .SYNOPSIS
         Retrieves the MSI tools type.
 #>
-function Get-MsiTools
+function Get-MsiTool
 {
     [OutputType([System.Type])]
     [CmdletBinding()]
@@ -747,7 +753,7 @@ function Get-MsiTools
         return GetPackageProperty(msi, "ProductName");
     }
 '@
-    
+
     if (([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type)
     {
         $script:msiTools = ([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type
@@ -761,7 +767,7 @@ function Get-MsiTools
             -MemberDefinition $msiToolsCodeDefinition `
             -PassThru
     }
-    
+
     return $script:msiTools
 }
 
@@ -784,7 +790,7 @@ function Get-MsiProductName
         $Path
     )
 
-    $msiTools = Get-MsiTools
+    $msiTools = Get-MsiTool
 
     $productName = $msiTools::GetProductName($Path)
 
@@ -810,7 +816,7 @@ function Get-MsiProductCode
         $Path
     )
 
-    $msiTools = Get-MsiTools
+    $msiTools = Get-MsiTool
 
     $productCode = $msiTools::GetProductCode($Path)
 
@@ -955,7 +961,7 @@ function Remove-RegistryValue
     try
     {
         $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
-        
+
         $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key, $true)
         $subRegistryKey.DeleteValue($Value)
         $subRegistryKey.Close()
@@ -972,7 +978,7 @@ function Set-TargetResource
     param
     (
         [ValidateSet('Present', 'Absent')]
-        [String] 
+        [String]
         $Ensure = 'Present',
 
         [Parameter(Mandatory = $true)]
@@ -994,6 +1000,7 @@ function Set-TargetResource
         $Arguments,
 
         [PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         # Return codes 1641 and 3010 indicate success when a restart is requested per installation
@@ -1160,7 +1167,7 @@ function Set-TargetResource
                     {
                         Write-Verbose -Message ($LocalizedData.CreatingTheSchemeStream -f $uriScheme)
                         $webRequest = [System.Net.WebRequest]::Create($uri)
-                        
+
                         Write-Verbose -Message ($LocalizedData.SettingDefaultCredential)
                         $webRequest.Credentials = [System.Net.CredentialCache]::DefaultCredentials
 
@@ -1210,7 +1217,7 @@ function Set-TargetResource
                         $responseStream.Close()
                     }
                 }
-                
+
                 Write-Verbose -Message ($LocalizedData.RedirectingPackagePathToCacheFileLocation)
                 $Path = $destinationPath
                 $downloadedFileName = $destinationPath
@@ -1234,12 +1241,12 @@ function Set-TargetResource
         $process.StartInfo = $startInfo
 
         # Concept only, will never touch disk
-        $errorLogPath = $LogPath + ".err" 
-        
+        $errorLogPath = $LogPath + ".err"
+
         if ($fileExtension -eq '.msi')
         {
             $startInfo.FileName = "$env:winDir\system32\msiexec.exe"
-            
+
             if ($Ensure -eq 'Present')
             {
                 # Check if the MSI package specifies the ProductName and Code
@@ -1261,7 +1268,7 @@ function Set-TargetResource
             else
             {
                 $productEntry = Get-ProductEntry -Name $Name -IdentifyingNumber $identifyingNumber
-                
+
                 # We may have used the Name earlier, now we need the actual ID
                 $id = Split-Path -Path $productEntry.Name -Leaf
                 $startInfo.Arguments = '/x{0}' -f $id
@@ -1303,7 +1310,7 @@ function Set-TargetResource
             {
                 # Absent case
                 $startInfo.FileName = "$env:winDir\system32\msiexec.exe"
-                
+
                 # We may have used the Name earlier, now we need the actual ID
                 if ($null -eq $productEntry.Name)
                 {
@@ -1313,9 +1320,9 @@ function Set-TargetResource
                 {
                     $id = Split-Path -Path $productEntry.Name -Leaf
                 }
-                
+
                 $startInfo.Arguments = "/x $id /quiet /norestart"
-                
+
                 if ($LogPath)
                 {
                     $startInfo.Arguments += ' /log "{0}"' -f $LogPath
@@ -1339,12 +1346,12 @@ function Set-TargetResource
                 $process.Start() | Out-Null
 
                 # Identical to $fileExtension -eq '.exe' -and $logPath
-                if ($logStream) 
+                if ($logStream)
                 {
                     $process.BeginOutputReadLine()
                     $process.BeginErrorReadLine()
                 }
-          
+
                 $process.WaitForExit()
 
                 if ($process)
@@ -1396,7 +1403,7 @@ function Set-TargetResource
     {
         if ($psDrive)
         {
-            Remove-PSDrive -Name $psDrive -Force 
+            Remove-PSDrive -Name $psDrive -Force
         }
 
         if ($logStream)
@@ -1448,7 +1455,7 @@ function Set-TargetResource
         Write-Verbose $LocalizedData.MachineRequiresReboot
         $global:DSCMachineStatus = 1
     }
-    
+
     if ($Ensure -eq 'Present')
     {
         $getProductEntryParameters = @{

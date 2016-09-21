@@ -26,7 +26,7 @@ try
 
                 $script:msiName = 'DSCSetupProject.msi'
                 $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
-            
+
                 $script:packageName = 'DSCUnitTestPackage'
                 $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
 
@@ -46,7 +46,7 @@ try
                     Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
                     Start-Sleep -Seconds 1 | Out-Null
                 }
-        
+
                 if (Test-PackageInstalledByName -Name $script:packageName)
                 {
                     throw 'Package could not be removed.'
@@ -66,7 +66,7 @@ try
                     Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
                     Start-Sleep -Seconds 1 | Out-Null
                 }
-        
+
                 if (Test-PackageInstalledByName -Name $script:packageName)
                 {
                     throw 'Test output will not be valid - package could not be removed.'
@@ -98,13 +98,13 @@ try
                         InstalledCheckRegValueName = 'xPackageTestValue'
                         InstalledCheckRegValueData = 'installed'
                     }
-                    
+
                     Set-TargetResource -Ensure 'Present' @packageParameters
 
                     try
                     {
                         Clear-xPackageCache
-                    
+
                         $getTargetResourceResult = Get-TargetResource @packageParameters
                         $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'ProductId', 'Installed', 'CreateCheckRegValue', 'InstalledCheckRegHive', 'InstalledCheckRegKey', 'InstalledCheckRegValueName', 'InstalledCheckRegValueData' )
 
@@ -127,10 +127,10 @@ try
                         InstalledCheckRegValueName = ''
                         InstalledCheckRegValueData = ''
                     }
-                    
+
                     Set-TargetResource -Ensure 'Present' @packageParameters
                     Clear-xPackageCache
-                    
+
                     $getTargetResourceResult = Get-TargetResource @packageParameters
                     $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'ProductId', 'Installed', 'Path', 'InstalledOn', 'Size', 'Version', 'PackageDescription', 'Publisher' )
 
@@ -143,7 +143,7 @@ try
                         Name = $script:packageName
                         ProductId = $script:packageId
                     }
-                    
+
                     Set-TargetResource -Ensure 'Present' @packageParameters
                     Clear-xPackageCache
 
@@ -161,9 +161,9 @@ try
                         -Path $script:msiLocation `
                         -ProductId $script:packageId `
                         -Name ([String]::Empty)
-                                 
+
                     $testTargetResourceResult | Should Be $false
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Present' `
                         -Path $script:msiLocation `
@@ -171,7 +171,7 @@ try
                         -ProductId ([String]::Empty)
 
                     $testTargetResourceResult | Should Be $false
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Absent' `
                         -Path $script:msiLocation `
@@ -179,7 +179,7 @@ try
                         -Name ([String]::Empty)
 
                     $testTargetResourceResult | Should Be $true
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Absent' `
                         -Path $script:msiLocation `
@@ -191,19 +191,19 @@ try
 
                 It 'Should return correct value when package is present without registry parameters' {
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
-            
+
                     Clear-xPackageCache
 
                     Test-PackageInstalledByName -Name $script:packageName | Should Be $true
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                             -Ensure 'Present' `
                             -Path $script:msiLocation `
                             -ProductId $script:packageId `
                             -Name ([String]::Empty)
-                                 
+
                     $testTargetResourceResult | Should Be $true
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Present' `
                         -Path $script:msiLocation `
@@ -211,7 +211,7 @@ try
                         -ProductId ([String]::Empty)
 
                     $testTargetResourceResult | Should Be $true
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Absent' `
                         -Path $script:msiLocation `
@@ -219,7 +219,7 @@ try
                         -Name ([String]::Empty)
 
                     $testTargetResourceResult | Should Be $false
-        
+
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Absent' `
                         -Path $script:msiLocation `
@@ -242,12 +242,12 @@ try
 
                 It 'Should return present with existing exe and matching registry parameters' {
                     Set-TargetResource -Ensure 'Present' @existingPackageParameters
-                     
+
                     try
-                    {    
+                    {
                         $testTargetResourceResult = Test-TargetResource -Ensure 'Present' @existingPackageParameters
                         $testTargetResourceResult | Should Be $true
-        
+
                         $testTargetResourceResult = Test-TargetResource -Ensure 'Absent' @existingPackageParameters
                         $testTargetResourceResult | Should Be $false
                     }
@@ -264,9 +264,9 @@ try
                 {
                     It "Should return not present with existing exe and mismatching parameter $parameterToMismatchCheck" {
                         Set-TargetResource -Ensure 'Present' @existingPackageParameters
-                    
+
                         try
-                        { 
+                        {
                             $mismatchingParameters = $existingPackageParameters.Clone()
                             $mismatchingParameters[$parameterToMismatchCheck] = 'not original value'
 
@@ -274,7 +274,7 @@ try
 
                             $testTargetResourceResult = Test-TargetResource -Ensure 'Present' @mismatchingParameters
                             $testTargetResourceResult | Should Be $false
-        
+
                             $testTargetResourceResult = Test-TargetResource -Ensure 'Absent' @mismatchingParameters
                             $testTargetResourceResult | Should Be $true
                         }
@@ -292,9 +292,9 @@ try
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
 
                     Test-PackageInstalledByName -Name $script:packageName | Should Be $true
-        
+
                     $getTargetResourceResult = Get-TargetResource -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
-                
+
                     $getTargetResourceResult.Version | Should Be '1.2.3.4'
                     $getTargetResourceResult.InstalledOn | Should Be ("{0:d}" -f [DateTime]::Now.Date)
                     $getTargetResourceResult.Installed | Should Be $true
@@ -305,9 +305,9 @@ try
                     # $getTargetResourceResult.PackageDescription | Should Be 'A package for unit testing'
 
                     [Math]::Round($getTargetResourceResult.Size, 2) | Should Be 0.03
-        
+
                     Set-TargetResource -Ensure 'Absent' -Path $script:msiLocation -ProductId $script:packageId -Name ([String]::Empty)
-                
+
                     Test-PackageInstalledByName -Name $script:packageName | Should Be $false
                 }
 
@@ -322,15 +322,15 @@ try
                         InstalledCheckRegValueName = 'xPackageTestValue'
                         InstalledCheckRegValueData = 'installed'
                     }
-                    
+
                     Set-TargetResource -Ensure 'Present' @packageParameters
 
                     try
                     {
                         Test-PackageInstalledByName -Name $script:packageName | Should Be $true
-        
+
                         $getTargetResourceResult = Get-TargetResource @packageParameters
-                
+
                         $getTargetResourceResult.Installed | Should Be $true
                         $getTargetResourceResult.ProductId | Should Be $packageParameters.ProductId
                         $getTargetResourceResult.Path | Should Be $packageParameters.Path
@@ -340,9 +340,9 @@ try
                         $getTargetResourceResult.InstalledCheckRegKey | Should Be $packageParameters.InstalledCheckRegKey
                         $getTargetResourceResult.InstalledCheckRegValueName | Should Be $packageParameters.InstalledCheckRegValueName
                         $getTargetResourceResult.InstalledCheckRegValueData | Should Be $packageParameters.InstalledCheckRegValueData
-        
+
                         Set-TargetResource -Ensure 'Absent' @packageParameters
-                
+
                         Test-PackageInstalledByName -Name $script:packageName | Should Be $false
                     }
                     finally
@@ -363,7 +363,7 @@ try
                         InstalledCheckRegValueName = 'xPackageTestValue'
                         InstalledCheckRegValueData = 'installed'
                     }
-                    
+
                     Set-TargetResource -Ensure 'Present' @packageParameters
 
                     try
@@ -371,7 +371,7 @@ try
                         Test-TargetResource -Ensure 'Present' @packageParameters | Should Be $true
 
                         $getTargetResourceResult = Get-TargetResource @packageParameters
-                
+
                         $getTargetResourceResult.Installed | Should Be $true
                         $getTargetResourceResult.ProductId | Should Be $packageParameters.ProductId
                         $getTargetResourceResult.Path | Should Be $packageParameters.Path
@@ -381,7 +381,7 @@ try
                         $getTargetResourceResult.InstalledCheckRegKey | Should Be $packageParameters.InstalledCheckRegKey
                         $getTargetResourceResult.InstalledCheckRegValueName | Should Be $packageParameters.InstalledCheckRegValueName
                         $getTargetResourceResult.InstalledCheckRegValueData | Should Be $packageParameters.InstalledCheckRegValueData
-        
+
                         Set-TargetResource -Ensure 'Absent' @packageParameters
 
                         Test-TargetResource -Ensure 'Absent' @packageParameters | Should Be $true
@@ -461,30 +461,30 @@ try
 
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -Name $script:packageName -LogPath $logPath -ProductId ([string]::Empty)
 
-                    Test-Path -Path $logPath | Should Be $true 
+                    Test-Path -Path $logPath | Should Be $true
                     Get-Content -Path $logPath | Should Not Be $null
                 }
             }
 
-            Context 'Get-MsiTools' {
+            Context 'Get-MsiTool' {
                 It 'Should add MSI tools in the Microsoft.Windows.DesiredStateConfiguration.xPackageResource namespace' {
                     $addTypeResult = @{ Namespace = 'Mock not called' }
                     Mock -CommandName 'Add-Type' -MockWith { $addTypeResult['Namespace'] = $Namespace }
 
-                    $msiTools = Get-MsiTools
-                
+                    $msiTool = Get-MsiTool
+
                     if (([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type)
                     {
                         Assert-MockCalled -CommandName 'Add-Type' -Times 0
 
-                        $msiTools | Should Be ([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type
+                        $msiTool | Should Be ([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type
                     }
                     else
                     {
                         Assert-MockCalled -CommandName 'Add-Type' -Times 1
 
                         $addTypeResult['Namespace'] | Should Be 'Microsoft.Windows.DesiredStateConfiguration.xPackageResource'
-                        $msiTools | Should Be $null
+                        $msiTool | Should Be $null
                     }
                 }
             }
