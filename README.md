@@ -353,6 +353,9 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 ### Unreleased
 
+* xDSCWebService:
+    * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
+
 ### 4.0.0.0
 
 * xDSCWebService:
@@ -401,11 +404,6 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Added support for changing Service Description and DisplayName parameters.
     * Fixed bug when changing binary path of existing service.
 * Removed test log output from repo.
-* xDSCWebService:
-    * Added setting of enhanced security
-    * Cleaned up Examples
-    * Cleaned up pull server verification test
-    * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
 * xWindowsOptionalFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script
