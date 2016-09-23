@@ -35,6 +35,10 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
 
+Resources that work on Nano Server:
+
+* xWindowsOptionalFeature
+
 ### xArchive
 
 * **Destination**: (Key) Specifies the location where you want to ensure the archive contents are extracted.
@@ -292,10 +296,11 @@ These parameters will be the same for each Windows feature in the set. Please re
 
 ### xWindowsOptionalFeature
 Provides a mechanism to enable or disable optional features on a target node.
+This resource works on Nano Server.
 
 #### Requirements
 
-* Target machine must be running either a Windows client operating system or Windows Server 2012 or later.
+* Target machine must be running a Windows client operating system, Windows Server 2012 or later, or Nano Server.
 * Target machine must have access to the DISM PowerShell module
 
 #### Parameters
