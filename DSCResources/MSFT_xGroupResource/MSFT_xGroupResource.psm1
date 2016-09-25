@@ -130,7 +130,7 @@ function Get-TargetResource
         [String]
         $GroupName,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -165,7 +165,7 @@ function Get-TargetResource
         The name of the group for which you want to ensure a specific state.
 
     .PARAMETER Ensure
-        Indicates if the group exist.
+        Indicates if the group should exist.
 
         Set this property to "Absent" to ensure that the group does not exist.
         Setting it to "Present" (the default value) ensures that the group exists.
@@ -237,7 +237,7 @@ function Set-TargetResource
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -336,7 +336,7 @@ function Test-TargetResource
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -378,7 +378,7 @@ function Get-TargetResourceOnFullSKU
         [String]
         $GroupName,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -430,7 +430,7 @@ function Get-TargetResourceOnFullSKU
     }
     finally
     {
-        Invoke-ObjectDisposal -Disposables $disposables
+        Remove-DisposableObject -Disposables $disposables
     }
 }
 
@@ -453,7 +453,7 @@ function Get-TargetResourceOnFullSKU
         
         The value of this property is an array of strings of the formats domain qualified name 
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts.
+        an unqualified (username) for local machine accounts.
         
         If you set this property in a configuration, do not use either the MembersToExclude or 
         MembersToInclude property. Doing so will generate an error.
@@ -511,7 +511,7 @@ function Set-TargetResourceOnFullSKU
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -672,11 +672,7 @@ function Set-TargetResourceOnFullSKU
                                     $saveChanges = $true
                                 }
 
-                                $removeGroupMemberParams = @{
-                                    Group = $group
-                                    MembersAsPrincipals = $membersToRemove
-                                }
-                                if (Remove-GroupMember @removeGroupMemberParams)
+                                if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToRemove)
                                 {
                                     $saveChanges = $true
                                 }
@@ -684,11 +680,7 @@ function Set-TargetResourceOnFullSKU
                             else
                             {
                                 # Set the members of the group
-                                $addGroupMemberParams = @{
-                                    Group = $group
-                                    MembersAsPrincipals = $membersAsPrincipals
-                                }
-                                if (Add-GroupMember @addGroupMemberParams)
+                                if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersAsPrincipals)
                                 {
                                     $saveChanges = $true
                                 }
@@ -697,11 +689,7 @@ function Set-TargetResourceOnFullSKU
                         else
                         {
                             # ISSUE: Is an empty $Members parameter valid?
-                            $newInvalidArgumentExceptionParams = @{
-                                ArgumentName = 'Members'
-                                Message = ($LocalizedData.MembersIsEmpty)
-                            }
-                            New-InvalidArgumentException @newInvalidArgumentExceptionParams
+                            New-InvalidArgumentException -ArgumentName 'Members' -Message ($LocalizedData.MembersIsEmpty)
                         }
                     }
                 }
@@ -847,7 +835,7 @@ function Set-TargetResourceOnFullSKU
     }
     finally
     {
-        Invoke-ObjectDisposal -Disposables $disposables
+        Remove-DisposableObject -Disposables $disposables
     }
 }
 
@@ -933,7 +921,7 @@ function Test-TargetResourceOnFullSKU
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -1047,8 +1035,7 @@ function Test-TargetResourceOnFullSKU
                 {
                     if ($actualMembersAsPrincipals -notcontains $expectedMemberAsPrincipal)
                     {
-                        $message = $LocalizedData.MembersMemberMismatch
-                        Write-Verbose -Message ($message -f $expectedMemberAsPrincipal.SamAccountName,
+                        Write-Verbose -Message ($LocalizedData.MembersMemberMismatch -f $expectedMemberAsPrincipal.SamAccountName,
                             'Members', $group.SamAccountName)
                         return $false
                     }
@@ -1058,37 +1045,30 @@ function Test-TargetResourceOnFullSKU
         elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or
                 $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
-            $getMembersAsPrincipalListParams = @{
-                Group = $group
-                PrincipalContexts = $principalContexts
-                Disposables = $disposables
-                Credential = $Credential
-            }
-            $actualMembersAsPrincipals =
-                @( Get-MembersAsPrincipalsList @getMembersAsPrincipalListParams )
+            $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
+                -Group $group `
+                -PrincipalContexts $principalContexts `
+                -Disposables $disposables `
+                -Credential $Credential )
 
             if ($PSBoundParameters.ContainsKey('MembersToInclude'))
             {
                 $MembersToInclude = @( Get-UniqueMembersList -Members $MembersToInclude )
 
                 # Resolve the names to actual principal objects.
-                $convertToPrincipalListParams = @{
-                    MemberNames = $MembersToInclude
-                    PrincipalContexts = $principalContexts
-                    Disposables = $disposables
-                    Credential = $Credential
-                }
-                $expectedMembersAsPrincipals = ConvertTo-PrincipalsList @convertToPrincipalListParams
+                $expectedMembersAsPrincipals = ConvertTo-Principals `
+                    -MemberNames $MembersToInclude `
+                    -PrincipalContexts $principalContexts `
+                    -Disposables $disposables `
+                    -Credential $Credential
 
                 # Compare two members lists.
                 foreach ($expectedMemberAsPrincipal in $expectedMembersAsPrincipals)
                 {
                     if ($actualMembersAsPrincipals -notcontains $expectedMemberAsPrincipal)
                     {
-                        $message = $LocalizedData.MembersMemberMismatch
-                        $message = $message -f $expectedMemberAsPrincipal.SamAccountName,
-                            'MembersToInclude', $group.SamAccountName
-                        Write-Verbose -Message $message
+                        Write-Verbose -Message ($LocalizedData.MembersMemberMismatch -f $expectedMemberAsPrincipal.SamAccountName,
+                            'MembersToInclude', $group.SamAccountName)
                         return $false
                     }
                 }
@@ -1099,23 +1079,18 @@ function Test-TargetResourceOnFullSKU
                 $MembersToExclude = @( Get-UniqueMembersList -Members $MembersToExclude )
 
                 # Resolve the names to actual principal objects.
-                $convertToPrincipalListParams = @{
-                    MemberNames = $MembersToExclude
-                    PrincipalContexts = $principalContexts
-                    Disposables = $disposables
-                    Credential = $Credential
-                }
-                $notExpectedMembersAsPrincipals =
-                    ConvertTo-PrincipalsList @convertToPrincipalListParams
+                $notExpectedMembersAsPrincipals = ConvertTo-Principals `
+                    -MemberNames $MembersToExclude `
+                    -PrincipalContexts $principalContexts `
+                    -Disposables $disposables `
+                    -Credential $Credential
 
                 foreach($notExpectedMemberAsPrincipal in $notExpectedMembersAsPrincipals)
                 {
                     if ($actualMembersAsPrincipals -contains $notExpectedMemberAsPrincipal)
                     {
-                        $message = $LocalizedData.MemberToExcludeMatch
-                        $message = $message -f $notExpectedMemberAsPrincipal.SamAccountName,
-                            'MembersToExclude', $group.SamAccountName
-                        Write-Verbose -Message $message
+                        Write-Verbose -Message ($LocalizedData.MemberToExcludeMatch -f $notExpectedMemberAsPrincipal.SamAccountName,
+                            'MembersToExclude', $group.SamAccountName)
                         return $false
                     }
                 }
@@ -1124,7 +1099,7 @@ function Test-TargetResourceOnFullSKU
     }
     finally
     {
-        Invoke-ObjectDisposal -Disposables $disposables
+        Remove-DisposableObject -Disposables $disposables
     }
 
     return $true
@@ -1151,7 +1126,7 @@ function Get-TargetResourceOnNanoServer
         [String]
         $GroupName,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -1266,7 +1241,7 @@ function Set-TargetResourceOnNanoServer
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -1371,8 +1346,7 @@ function Set-TargetResourceOnNanoServer
                 }
                 else
                 {
-                    $message = $LocalizedData.MembersIsEmpty
-                    New-InvalidArgumentException -ArgumentName 'Members' -Message $message
+                    New-InvalidArgumentException -ArgumentName 'Members' -Message ($LocalizedData.MembersIsEmpty)
                 }
             }
             else
@@ -1400,10 +1374,9 @@ function Set-TargetResourceOnNanoServer
                         {
                             if ($includedMember -eq $excludedMember)
                             {
-                                $message = $LocalizedData.IncludeAndExcludeConflict
                                 $newInvalidArgumentExceptionParams = @{
                                     ArgumentName = 'MembersToInclude and MembersToExclude'
-                                    Message = ($message -f $includedMember, 'MembersToInclude',
+                                    Message = ($LocalizedData.IncludeAndExcludeConflict -f $includedMember, 'MembersToInclude',
                                         'MembersToExclude')
                                 }
                                 New-InvalidArgumentException @newInvalidArgumentExceptionParams
@@ -1573,7 +1546,7 @@ function Test-TargetResourceOnNanoServer
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -1624,7 +1597,7 @@ function Test-TargetResourceOnNanoServer
             {
                 $newInvalidArgumentExceptionParams = @{
                     ArgumentName = $key
-                    Message = $LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', $Key
+                    Message = $LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', $key
                 }
                 New-InvalidArgumentException @newInvalidArgumentExceptionParams
             }
@@ -1815,7 +1788,7 @@ function Get-MembersOnFullSKU
         [AllowEmptyCollection()]
         $Disposables,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -1904,7 +1877,7 @@ function Get-MembersAsPrincipalsList
         [AllowEmptyCollection()]
         $Disposables,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -2057,7 +2030,7 @@ function ConvertTo-PrincipalsList
         [AllowEmptyCollection()]
         $Disposables,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -2149,7 +2122,7 @@ function ConvertTo-Principal
         [AllowEmptyCollection()]
         $Disposables,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -2325,7 +2298,7 @@ function Get-PrincipalContext
         [String]
         $Scope,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
     )
@@ -2342,12 +2315,8 @@ function Get-PrincipalContext
         else
         {
             # Create a PrincipalContext for the local machine
-            $newObjectParams = @{
-                TypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
-                ArgumentList =
-                    @( [System.DirectoryServices.AccountManagement.ContextType]::Machine )
-            }
-            $principalContext = New-Object @newObjectParams
+            $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
+                -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Machine )
 
             # Cache the PrincipalContext for this scope for subsequent calls.
             $null = $PrincipalContexts.Add($env:COMPUTERNAME, $principalContext)
@@ -2369,12 +2338,9 @@ function Get-PrincipalContext
         {
             $principalContextName = $Credential.UserName
         }
-        $newObjectParams = @{
-            TypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
-            ArgumentList = @( [System.DirectoryServices.AccountManagement.ContextType]::Domain,
-                $Scope, $principalContextName, $Credential.Password )
-        }
-        $principalContext = New-Object @newObjectParams
+        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
+            -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, 
+                $principalContextName, $Credential.Password )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
         $null = $PrincipalContexts.Add($scope, $principalContext)
@@ -2383,12 +2349,8 @@ function Get-PrincipalContext
     else
     {
         # Get a PrincipalContext for the current user in the target domain (even for local System account).
-        $newObjectParams = @{
-            TypeName = 'System.DirectoryServices.AccountManagement.PrincipalContext'
-            ArgumentList =
-                @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope )
-        }
-        $principalContext = New-Object @newObjectParams
+        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
+            -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
         $null = $PrincipalContexts.Add($Scope, $principalContext)
@@ -2667,8 +2629,13 @@ function Split-MemberName
     .PARAMETER Disosables
         The array list of IDisposable Objects to dispose of.
 #>
-function Invoke-ObjectDisposal
+function Remove-DisposableObject
 {
+    <#
+        Suppress script analyzer warning because this function should use the Remove verb 
+        as per our discussion on https://github.com/PowerShell/xPSDesiredStateConfiguration/pull/240
+    #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param
     (

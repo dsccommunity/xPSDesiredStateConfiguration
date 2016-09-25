@@ -31,13 +31,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -55,8 +50,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     $testGetTargetResourceResultParams = @{
                         GetTargetResourceResult = $getTargetResourceResult
-                        GetTargetResourceResultProperties =
-                            @( 'GroupName', 'Ensure', 'Description', 'Members' )
+                        GetTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
                     }
                     Test-GetTargetResourceResult @testGetTargetResourceResultParams
 
@@ -95,8 +89,7 @@ InModuleScope 'MSFT_xGroupResource' {
                     #>
                     $testGetTargetResourceResultParams = @{
                         GetTargetResourceResult = $getTargetResourceResult
-                        GetTargetResourceResultProperties = 
-                            @( 'GroupName', 'Ensure', 'Description' )
+                        GetTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description' )
                     }
                     Test-GetTargetResourceResult @testGetTargetResourceResultParams
 
@@ -117,8 +110,7 @@ InModuleScope 'MSFT_xGroupResource' {
             It 'Should return hashtable with correct values when group is absent' {
                 $testGroupName = 'AbsentGroup'
 
-                $getTargetResourceResult =
-                    (Get-TargetResource -GroupName $testGroupName) -as [hashtable]
+                $getTargetResourceResult = (Get-TargetResource -GroupName $testGroupName) -as [hashtable]
 
                 $testGetTargetResourceResultParams = @{
                     GetTargetResourceResult = $getTargetResourceResult
@@ -164,13 +156,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams  -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -212,13 +199,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -260,13 +242,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -315,13 +292,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -357,13 +329,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -404,13 +371,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -452,13 +414,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -470,11 +427,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     $secureDomainUserPassword =
                         ConvertTo-SecureString $domainUserPassword -AsPlainText -Force
-                    $newObjectParams = @{
-                        TypeName = 'PSCredential'
-                        ArgumentList = @( $domainUserName, $secureDomainUserPassword )
-                    }
-                    $domainCredential = New-Object @newObjectParams
+                    $domainCredential = New-Object -TypeName 'PSCredential' -ArgumentList @( $domainUserName, $secureDomainUserPassword )
 
                     $setTargetResourceParams = @{
                         GroupName = $testGroupName
@@ -491,12 +444,10 @@ InModuleScope 'MSFT_xGroupResource' {
                     }
                     Test-TargetResource  @testTargetResourceParams | Should Be $true
 
-                    $getTargetResourceResult =
-                        Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
+                    $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName -Credential $domainCredential
                     $testGetTargetResourceResultParams = @{
                         GetTargetResourceResult = $getTargetResourceResult
-                        GetTargetResourceResultProperties =
-                            @( 'GroupName', 'Ensure', 'Description', 'Members' )
+                        GetTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
                     }
                     Test-GetTargetResourceResult @testGetTargetResourceResultParams
 
@@ -531,8 +482,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $primaryDomainAccount = '?'
                 $twoWayTrustDomainAccount = '?'
 
-                $membersToInclude = @( $primaryDomainAccount['DomainUserName'],
-                    $twoWayTrustDomainAccount['DomainUserName'] )
+                $membersToInclude = @( $primaryDomainAccount['DomainUserName'], $twoWayTrustDomainAccount['DomainUserName'] )
                 $primaryDomainAccountCredential = $primaryDomainAccount['Credential']
 
                 try
@@ -560,8 +510,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     $testGetTargetResourceResultParams = @{
                         GetTargetResourceResult = $getTargetResourceResult
-                        GetTargetResourceResultProperties =
-                            @( 'GroupName', 'Ensure', 'Description', 'Members' )
+                        GetTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
                     }
                     Test-GetTargetResourceResult @testGetTargetResourceResultParams
 
@@ -594,8 +543,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $primaryDomainAccount = '?'
                 $twoWayTrustDomainAccount = '?'
 
-                $membersToInclude = @( $primaryDomainAccount['UpnName'],
-                    $twoWayTrustDomainAccount['UpnName'] )
+                $membersToInclude = @( $primaryDomainAccount['UpnName'], $twoWayTrustDomainAccount['UpnName'] )
                 $primaryDomainAccountCredential = $primaryDomainAccount['Credential']
 
                 try
@@ -623,8 +571,7 @@ InModuleScope 'MSFT_xGroupResource' {
 
                     $testGetTargetResourceResultParams = @{
                         GetTargetResourceResult = $getTargetResourceResult
-                        GetTargetResourceResultProperties =
-                            @( 'GroupName', 'Ensure', 'Description', 'Members' )
+                        GetTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
                     }
                     Test-GetTargetResourceResult @testGetTargetResourceResultParams
 
@@ -652,8 +599,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 {
                     $setTargetResourceParams = @{
                         GroupName = $testGroupName
-                        MembersToInclude = @( $primaryDomainAccount['UpnName'],
-                            $invalidDomainAccountUserName )
+                        MembersToInclude = @( $primaryDomainAccount['UpnName'], $invalidDomainAccountUserName )
                         Credential = $primaryDomainAccountCredential
                         Description = $testDescription
                     }
@@ -680,8 +626,7 @@ InModuleScope 'MSFT_xGroupResource' {
                 $primaryDomainAccount = '?'
                 $twoWayTrustDomainAccount = '?'
 
-                $membersToInclude = @( $primaryDomainAccount['DomainUserName'],
-                    $twoWayTrustDomainAccount['DomainUserName'] )
+                $membersToInclude = @( $primaryDomainAccount['DomainUserName'], $twoWayTrustDomainAccount['DomainUserName'] )
 
                 try
                 {
@@ -703,8 +648,7 @@ InModuleScope 'MSFT_xGroupResource' {
                     $getTargetResourceResult = Get-TargetResource -GroupName $testGroupName
                     $testGetTargetResourceResultParams = @{
                         GetTargetResourceResult = $getTargetResourceResult
-                        GetTargetResourceResultProperties =
-                            @( 'GroupName', 'Ensure', 'Description', 'Members' )
+                        GetTargetResourceResultProperties = @( 'GroupName', 'Ensure', 'Description', 'Members' )
                     }
                     Test-GetTargetResourceResult @testGetTargetResourceResultParams
 
@@ -728,22 +672,14 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testUserPassword = 'StrongOne7.'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                    ArgumentList = @( $testUserName1, $secureTestPassword )
-                }
-                $testCredential1 = New-Object @newObjectParams
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
 
                 # Domain user with invalid password
                 $domainUserName = '?'
                 $invalidDomainUserPassword = '?' + 'invalidstring'
-                $secureInvalidDomainUserPassword =
-                    ConvertTo-SecureString -String $invalidDomainUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'System.Management.Automation.PSCredential'
-                    ArgumentList = @($domainUserName, $invalidDomainUserPassword)
-                }
-                $invalidDomainUserCredential = New-Object @newObjectParams
+                $secureInvalidDomainUserPassword = ConvertTo-SecureString -String $invalidDomainUserPassword -AsPlainText -Force
+                $invalidDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' `
+                    -ArgumentList @($domainUserName, $invalidDomainUserPassword)
 
                 try
                 {
@@ -778,22 +714,14 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testUserPassword = 'StrongOne7.'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                    ArgumentList = @( $testUserName1, $secureTestPassword )
-                }
-                $testCredential1 = New-Object @newObjectParams
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
 
                 # Domain user with invalid username
                 $invalidDomainUserName = '?' + 'invalidstring'
                 $invalidDomainUserPassword = '?' + 'invalidstring'
-                $secureInvalidDomainUserPassword =
-                    ConvertTo-SecureString -String $invalidDomainUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'System.Management.Automation.PSCredential'
-                    ArgumentList = @( $invalidDomainUserName, $invalidDomainUserPassword )
-                }
-                $invalidDomainUserCredential = New-Object @newObjectParams
+                $secureInvalidDomainUserPassword = ConvertTo-SecureString -String $invalidDomainUserPassword -AsPlainText -Force
+                $invalidDomainUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' `
+                    -ArgumentList @( $invalidDomainUserName, $invalidDomainUserPassword )
 
                 try
                 {
@@ -804,8 +732,7 @@ InModuleScope 'MSFT_xGroupResource' {
                             GroupName = $testGroupName
                             Credential = $invalidDomainUserCredential
                             Description = $testDescription
-                            MembersToInclude = @( $testUserName1,
-                                $invalidDomainUserName )
+                            MembersToInclude = @( $testUserName1, $invalidDomainUserName )
                         }
                         Set-TargetResource @setTargetResourceParams
                     } | Should Throw
@@ -869,13 +796,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -915,15 +837,9 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
-                $testCredential3 = New-Object @newObjectParams -ArgumentList @( $testUserName3,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+                $testCredential3 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName3, $secureTestPassword )
 
                 try
                 {
@@ -964,13 +880,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -1009,13 +920,8 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
 
                 try
                 {
@@ -1055,15 +961,9 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
-                $testCredential3 = New-Object @newObjectParams -ArgumentList @( $testUserName3,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+                $testCredential3 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName3, $secureTestPassword )
 
                 try
                 {
@@ -1106,17 +1006,10 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
-                $testCredential3 = New-Object @newObjectParams -ArgumentList @( $testUserName3,
-                    $secureTestPassword )
-                $testCredential4 = New-Object @newObjectParams -ArgumentList @( $testUserName4,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+                $testCredential3 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName3, $secureTestPassword )
+                $testCredential4 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName4, $secureTestPassword )
 
                 try
                 {
@@ -1161,17 +1054,10 @@ InModuleScope 'MSFT_xGroupResource' {
                 $testGroupName = 'LocalTestGroup'
 
                 $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-                $newObjectParams = @{
-                    TypeName = 'PSCredential'
-                }
-                $testCredential1 = New-Object @newObjectParams -ArgumentList @( $testUserName1,
-                    $secureTestPassword )
-                $testCredential2 = New-Object @newObjectParams -ArgumentList @( $testUserName2,
-                    $secureTestPassword )
-                $testCredential3 = New-Object @newObjectParams -ArgumentList @( $testUserName3,
-                    $secureTestPassword )
-                $testCredential4 = New-Object @newObjectParams -ArgumentList @( $testUserName4,
-                    $secureTestPassword )
+                $testCredential1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName1, $secureTestPassword )
+                $testCredential2 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName2, $secureTestPassword )
+                $testCredential3 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName3, $secureTestPassword )
+                $testCredential4 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUserName4, $secureTestPassword )
 
                 try
                 {
