@@ -355,6 +355,13 @@ These parameters will be the same for each Windows optional feature in the set. 
 
 * xDSCWebService:
     * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
+* xGroup:
+    * Fixed PSSA issues
+    * Formatting updated as per style guidelines
+    * Missing comment-based help added for Get-/Set-/Test-TargetResource
+    * Typos fixed in Unit test script
+    * Unit test 'Get-TargetResource/Should return hashtable with correct values when group 
+    has no members' updated to handle the expected empty Members array correctly    
 
 ### 4.0.0.0
 
