@@ -17,7 +17,7 @@ try {
 
     InModuleScope 'MSFT_xUserResource' {
         # Used to skip the Nano server tests for the time being since they are not working on AppVeyor
-        $script:skipMe = $false
+        $script:skipMe = $true
     
         $existingUserName = 'TestUserName12345'
         $existingUserPassword = 'StrongOne7.'
