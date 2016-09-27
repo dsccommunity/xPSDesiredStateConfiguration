@@ -211,7 +211,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding()]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -2487,11 +2486,6 @@ function Split-MemberName
 #>
 function Remove-DisposableObject
 {
-    <#
-        Suppress script analyzer warning because this function should use the Remove verb 
-        as per our discussion on https://github.com/PowerShell/xPSDesiredStateConfiguration/pull/240
-    #>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
     [CmdletBinding()]
     param
     (
