@@ -189,7 +189,7 @@ try {
                             Test-User -UserName $newUserName2 | Should Be $true
                         }
                         
-                        It 'Should update the user' {
+                        It 'Should update the user' -Skip:$script:skipMe {
                             $disabled = $false
                             $passwordNeverExpires = $true
                             $passwordChangeRequired = $false
@@ -217,7 +217,7 @@ try {
                                                         -PasswordChangeNotAllowed $passwordChangeNotAllowed
                             $testTargetResourceResult1 | Should Be $true
                         }
-                        It 'Should update the user again with different values' {
+                        It 'Should update the user again with different values' -Skip:$script:skipMe {
                             $disabled = $false
                             $passwordNeverExpires = $false
                             $passwordChangeRequired = $true
