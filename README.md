@@ -38,6 +38,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 Resources that work on Nano Server:
 
 * xWindowsOptionalFeature
+* xUser
 
 ### xArchive
 
@@ -365,8 +366,10 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Formatting updated as per style guidelines
     * Missing comment-based help added for Get-/Set-/Test-TargetResource
     * Typos fixed in Unit test script
-    * Unit test 'Get-TargetResource/Should return hashtable with correct values when group 
-    has no members' updated to handle the expected empty Members array correctly    
+    * Unit test 'Get-TargetResource/Should return hashtable with correct values when group has no members' updated to handle the expected empty Members array correctly
+* xUser:
+    * Fixed PSSA/Style violations
+    * Added/Updated Tests and Examples
 
 ### 4.0.0.0
 
