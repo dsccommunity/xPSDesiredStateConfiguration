@@ -1,4 +1,4 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')] # To be removed when username/password changed to a credential
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')] # User name and password needed for this resource
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')] # Write-Verbose Used in helper functions
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')] # Should process is called in a helper functions but not directly in Set-TargetResource
 param ()
@@ -15,7 +15,7 @@ if (-not (Test-IsNanoServer))
 
 <#
     .SYNOPSIS
-        Retrieves the state of a Windows optional feature resource.
+        Retrieves the user with the given Username
 
     .PARAMETER UserName
         The name of the user to retrieve.
@@ -44,10 +44,10 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Creates, Modifies, or Deletes a User.
+        Creates, modifies, or deletes a User.
     
     .PARAMETER UserName
-        The name of the user to Create/Modify/Delete.
+        The name of the user to create, modify, or delete.
 
     .PARAMETER Ensure
         Specifies whether the user should exist or not.
@@ -61,14 +61,14 @@ function Get-TargetResource
         Optional description for the user.
 
     .PARAMETER Password
-        Password for the user account.
+        The desired password for the user.
 
     .PARAMETER Disabled
-        Specifies whether the accound should be disabled or not.
+        Specifies whether the user should be disabled or not.
         By default this is set to $false
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password expires or not.
+        Specifies whether the Password should ever expire or not.
         By default this is set to $false
 
     .PARAMETER PasswordChangeRequired
@@ -76,7 +76,7 @@ function Get-TargetResource
         By default this is set to $false
 
     .PARAMETER PasswordChangeNotAllowed
-        Specifies whether the user is allowed to change their password.
+        Specifies whether the user is allowed to change their password or not.
         By default this is set to $false
 #>
 function Set-TargetResource
@@ -129,8 +129,7 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        The Test-TargetResource cmdlet is used to validate if the resource
-        is in the specified state.
+        Tests if a user is in the desired state.
 
     .PARAMETER UserName
         The name of the user to test the state of.
@@ -140,28 +139,27 @@ function Set-TargetResource
         By default this is set to Present
 
     .PARAMETER FullName
-        The FullName of the user being tested.
-        If you don't care about what the FullName is, don't include this.
+        The full name/display name that the user should have..
+        If not provided, this value will not be tested.
 
     .PARAMETER Description
-        The Description of the user being tested.
-        If you don't care about what the description is, don't include this.
+        The Description that the user should have.
+        If not provided, this value will not be tested.
 
     .PARAMETER Password
-        Password for the user account to be tested
+        The password the user should have.
 
     .PARAMETER Disabled
-        Specifies whether the accound should be disabled or not.
+        Specifies whether the user account should be disabled or not.
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should expire or not.
+        Specifies whether the Password should ever expire or not.
 
     .PARAMETER PasswordChangeRequired
-        There's no easy way to check whether the PasswordChangeRequired is set
-        to true or false, so this value is not tested here.
+        Not used in Test-TargetResource as there is no easy way to test this value.
 
     .PARAMETER PasswordChangeNotAllowed
-        Specifies whether the user should be allowed to change their password.
+        Specifies whether the user should be allowed to change their password or not.
 #>
 function Test-TargetResource
 {
@@ -169,7 +167,7 @@ function Test-TargetResource
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $UserName,
@@ -234,13 +232,15 @@ function Get-TargetResourceOnFullSKU
     Assert-UserNameValid -UserName $UserName
 
     # Try to find a user by a name
-    $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+    $principalContext = New-Object 
+                -TypeName System.DirectoryServices.AccountManagement.PrincipalContext
+                -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
     {
         Write-Verbose -Message 'Starting Get-TargetResource on FullSKU'
         $user = [System.DirectoryServices.AccountManagement.UserPrincipal]::FindByIdentity($principalContext, $UserName)
-        if ($user -ne $null)
+        if ($null -ne $user)
         {
             # The user is found. Return all user properties and Ensure='Present'.
             $returnValue = @{
@@ -330,7 +330,9 @@ function Set-TargetResourceOnFullSKU
 
 
     # Try to find a user by name.
-    $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+    $principalContext = New-Object `
+                -TypeName System.DirectoryServices.AccountManagement.PrincipalContext `
+                -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
     {
@@ -360,7 +362,9 @@ function Set-TargetResourceOnFullSKU
                 if (-not $userExists)
                 {
                     # The user with the provided name does not exist so add a new user
-                    $user = New-Object System.DirectoryServices.AccountManagement.UserPrincipal -ArgumentList $principalContext
+                    $user = New-Object `
+                                -TypeName System.DirectoryServices.AccountManagement.UserPrincipal `
+                                -ArgumentList $principalContext
                     $user.Name = $UserName
                     $saveChanges = $true
                 }

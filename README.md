@@ -31,6 +31,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
+* **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
