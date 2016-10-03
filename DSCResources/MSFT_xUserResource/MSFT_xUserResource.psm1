@@ -1,9 +1,9 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')] # User name and password needed for this resource
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSDSCUseVerboseMessageInDSCResource', '')] # Write-Verbose Used in helper functions
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')] # Should process is called in a helper functions but not directly in Set-TargetResource
 param ()
 
-Import-Module "$PSScriptRoot\..\CommonResourceHelper.psm1"
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonResourceHelper.psm1')
 
 # Localized messages for Write-Verbose statements in this resource
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xUserResource'
@@ -78,9 +78,14 @@ function Get-TargetResource
     .PARAMETER PasswordChangeNotAllowed
         Specifies whether the user is allowed to change their password or not.
         By default this is set to $false
+
+    .NOTES 
+        If Ensure is set to 'Present' then the Password parameter is required.
 #>
 function Set-TargetResource
 {
+    # Should process is called in a helper functions but not directly in Set-TargetResource
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess', '')]
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
@@ -213,7 +218,10 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
-        The Get-TargetResource cmdlet on a full server.
+        Retrieves the user with the given Username when on a full server
+
+    .PARAMETER UserName
+        The name of the user to retrieve.
 #>
 function Get-TargetResourceOnFullSKU
 {
@@ -232,8 +240,8 @@ function Get-TargetResourceOnFullSKU
     Assert-UserNameValid -UserName $UserName
 
     # Try to find a user by a name
-    $principalContext = New-Object 
-                -TypeName System.DirectoryServices.AccountManagement.PrincipalContext
+    $principalContext = New-Object `
+                -TypeName System.DirectoryServices.AccountManagement.PrincipalContext `
                 -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
@@ -280,9 +288,43 @@ function Get-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        The Set-TargetResource cmdlet on a full server.
-    .NOTES
-        $Password is required if $Ensure is set to 'Present'
+        Creates, modifies, or deletes a User when on a full server.
+    
+    .PARAMETER UserName
+        The name of the user to create, modify, or delete.
+
+    .PARAMETER Ensure
+        Specifies whether the user should exist or not.
+        By default this is set to Present
+
+    .PARAMETER FullName
+        The (optional) full name or display name of the user.
+        If not provided this value will remain blank.
+
+    .PARAMETER Description
+        Optional description for the user.
+
+    .PARAMETER Password
+        The desired password for the user.
+
+    .PARAMETER Disabled
+        Specifies whether the user should be disabled or not.
+        By default this is set to $false
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the Password should ever expire or not.
+        By default this is set to $false
+
+    .PARAMETER PasswordChangeRequired
+        Specifies whether the user must reset their password or not.
+        By default this is set to $false
+
+    .PARAMETER PasswordChangeNotAllowed
+        Specifies whether the user is allowed to change their password or not.
+        By default this is set to $false
+
+    .NOTES 
+        If Ensure is set to 'Present' then the Password parameter is required.
 #>
 function Set-TargetResourceOnFullSKU
 {
@@ -485,10 +527,37 @@ function Set-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        The Test-TargetResource cmdlet on a full server.
-    .NOTES
-        There's no easy way to check whether the PasswordChangeRequired is set
-        to true or false, so this value is not tested here.
+        Tests if a user is in the desired state when on a full server.
+
+    .PARAMETER UserName
+        The name of the user to test the state of.
+
+    .PARAMETER Ensure
+        Specifies whether the user should exist or not.
+        By default this is set to Present
+
+    .PARAMETER FullName
+        The full name/display name that the user should have..
+        If not provided, this value will not be tested.
+
+    .PARAMETER Description
+        The Description that the user should have.
+        If not provided, this value will not be tested.
+
+    .PARAMETER Password
+        The password the user should have.
+
+    .PARAMETER Disabled
+        Specifies whether the user account should be disabled or not.
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the Password should ever expire or not.
+
+    .PARAMETER PasswordChangeRequired
+        Not used in Test-TargetResource as there is no easy way to test this value.
+
+    .PARAMETER PasswordChangeNotAllowed
+        Specifies whether the user should be allowed to change their password or not.
 #>
 function Test-TargetResourceOnFullSKU
 {
@@ -635,7 +704,10 @@ function Test-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        The Get-TargetResource cmdlet on a Nano Server.
+        Retrieves the user with the given Username when on a nano server.
+
+    .PARAMETER UserName
+        The name of the user to retrieve.
 #>
 function Get-TargetResourceOnNanoServer
 {
@@ -697,7 +769,43 @@ function Get-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        The Set-TargetResource cmdlet on a Nano server.
+        Creates, modifies, or deletes a User when on a nano server.
+    
+    .PARAMETER UserName
+        The name of the user to create, modify, or delete.
+
+    .PARAMETER Ensure
+        Specifies whether the user should exist or not.
+        By default this is set to Present
+
+    .PARAMETER FullName
+        The (optional) full name or display name of the user.
+        If not provided this value will remain blank.
+
+    .PARAMETER Description
+        Optional description for the user.
+
+    .PARAMETER Password
+        The desired password for the user.
+
+    .PARAMETER Disabled
+        Specifies whether the user should be disabled or not.
+        By default this is set to $false
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the Password should ever expire or not.
+        By default this is set to $false
+
+    .PARAMETER PasswordChangeRequired
+        Specifies whether the user must reset their password or not.
+        By default this is set to $false
+
+    .PARAMETER PasswordChangeNotAllowed
+        Specifies whether the user is allowed to change their password or not.
+        By default this is set to $false
+
+    .NOTES 
+        If Ensure is set to 'Present' then the Password parameter is required.
 #>
 function Set-TargetResourceOnNanoServer
 {
@@ -874,10 +982,37 @@ function Set-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        The Test-TargetResource cmdlet on a Nano server.
-    .NOTES
-        There's no easy way to check whether the PasswordChangeRequired is set
-        to true or false, so this value is not tested here.
+        Tests if a user is in the desired state when on a nano server.
+
+    .PARAMETER UserName
+        The name of the user to test the state of.
+
+    .PARAMETER Ensure
+        Specifies whether the user should exist or not.
+        By default this is set to Present
+
+    .PARAMETER FullName
+        The full name/display name that the user should have..
+        If not provided, this value will not be tested.
+
+    .PARAMETER Description
+        The Description that the user should have.
+        If not provided, this value will not be tested.
+
+    .PARAMETER Password
+        The password the user should have.
+
+    .PARAMETER Disabled
+        Specifies whether the user account should be disabled or not.
+
+    .PARAMETER PasswordNeverExpires
+        Specifies whether the Password should ever expire or not.
+
+    .PARAMETER PasswordChangeRequired
+        Not used in Test-TargetResource as there is no easy way to test this value.
+
+    .PARAMETER PasswordChangeNotAllowed
+        Specifies whether the user should be allowed to change their password or not.
 #>
 function Test-TargetResourceOnNanoServer
 {
@@ -971,7 +1106,7 @@ function Test-TargetResourceOnNanoServer
 
     if ($PSBoundParameters.ContainsKey('Password'))
     {
-        if(-not (Test-ValidCredentialsOnNanoServer -UserName $UserName -Password $Password.Password))
+        if(-not (Test-CredentialsValidOnNanoServer -UserName $UserName -Password $Password.Password))
         {
             # The Password property does not match
             Write-Verbose -Message ($script:localizedData.PasswordPropertyMismatch -f 'Password')
@@ -1162,7 +1297,7 @@ function New-TerminatingError
     .PARAMETER Password
         The Password of the given user.
 #>
-function Test-ValidCredentialsOnNanoServer
+function Test-CredentialsValidOnNanoServer
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
