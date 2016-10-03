@@ -273,7 +273,7 @@ function Get-TargetResourceOnFullSKU
     }
     catch
     {
-         New-ExceptionDueToDirectoryServicesError -ErrorId 'MultipleMatches' -ErrorMessage ($script:localizedData.MultipleMatches + $_)
+         New-ConnectionException -ErrorId 'MultipleMatches' -ErrorMessage ($script:localizedData.MultipleMatches + $_)
     }
     finally
     {
@@ -510,7 +510,7 @@ function Set-TargetResourceOnFullSKU
     }
     catch
     {
-         New-ExceptionDueToDirectoryServicesError -ErrorId 'MultipleMatches' -ErrorMessage ($script:localizedData.MultipleMatches + $_)
+         New-InvlaidOperationException -Message ($script:localizedData.MultipleMatches + $_)
     }
     finally
     {
@@ -682,7 +682,7 @@ function Test-TargetResourceOnFullSKU
     }
     catch
     {
-         New-ExceptionDueToDirectoryServicesError -ErrorId 'ConnectionError' -ErrorMessage ($script:localizedData.ConnectionError + $_)
+         New-ConnectionException -ErrorId 'ConnectionError' -ErrorMessage ($script:localizedData.ConnectionError + $_)
     }
 
     finally
@@ -741,7 +741,7 @@ function Get-TargetResourceOnNanoServer
                         Ensure = 'Absent'
                     }
         }
-        New-TerminatingError -ErrorRecord $_
+        New-InvalidOperationException -ErrorRecord $_
     }
 
     # The user is found. Return all user properties and Ensure='Present'.
@@ -867,7 +867,7 @@ function Set-TargetResourceOnNanoServer
         }
         else
         {
-            New-TerminatingError -ErrorRecord $_
+            New-InvalidOperationException -ErrorRecord $_
         }
     }
 
@@ -1076,7 +1076,7 @@ function Test-TargetResourceOnNanoServer
                 return $false
             }
         }
-        New-TerminatingError -ErrorRecord $_
+        New-InvlaidOperationException -ErrorRecord $_
     }
 
     # A user with the provided name exists
@@ -1175,46 +1175,17 @@ function Assert-UserNameValid
 
     if ($wrongName)
     {
-        New-InvalidArgumentError -ErrorId 'UserNameHasOnlyWhiteSpacesAndDots' -ErrorMessage ($script:localizedData.InvalidUserName -f $UserName, [String]::Join(' ', $invalidChars))
+        New-InvalidArgumentException `
+            -Message ($script:localizedData.InvalidUserName -f $UserName, [String]::Join(' ', $invalidChars)) `
+            -ArgumentName 'UserName'
     }
 
     if ($UserName.IndexOfAny($invalidChars) -ne -1)
     {
-        New-InvalidArgumentError -ErrorId 'UserNameHasInvalidCharachter' -ErrorMessage ($script:localizedData.InvalidUserName -f $UserName, [String]::Join(' ', $invalidChars))
+        New-InvalidArgumentException `
+            -Message ($script:localizedData.InvalidUserName -f $UserName, [String]::Join(' ', $invalidChars)) `
+            -ArgumentName 'UserName'
     }
-}
-
-<#
-    .SYNOPSIS
-        Creates a new Invalid Argument Error record and throws it.
-
-    .PARAMETER ErrorId
-        The ID for the error record to be thrown
-
-    .PARAMETER ErrorMessage
-        Message to be included in the error record to be thrown
-#>
-function New-InvalidArgumentError
-{
-    [CmdletBinding()]
-    param
-    (
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorId,
-
-        [parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $ErrorMessage
-    )
-
-    $errorCategory=[System.Management.Automation.ErrorCategory]::InvalidArgument
-    $exception = New-Object System.ArgumentException $ErrorMessage
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $ErrorId, $errorCategory, $null
-    throw $errorRecord
 }
 
 <#
@@ -1227,7 +1198,7 @@ function New-InvalidArgumentError
     .PARAMETER ErrorMessage
         Message to be included in the error record to be thrown
 #>
-function New-ExceptionDueToDirectoryServicesError
+function New-ConnectionException
 {
     [CmdletBinding()]
     param
@@ -1244,46 +1215,12 @@ function New-ExceptionDueToDirectoryServicesError
     )
 
     $errorCategory = [System.Management.Automation.ErrorCategory]::ConnectionError
-    $exception = New-Object System.ArgumentException $ErrorMessage
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $ErrorId, $errorCategory, $null
-    throw $errorRecord
-}
-
-<#
-    .SYNOPSIS
-        Create a new terminating error record and throws it.
-
-    .PARAMETER Message
-        Optional message to be included in the error record to be thrown.
-
-    .PARAMETER ErrorRecord
-        Optional ErrorRecord object if you want the exception from this object to
-        be included in the new error record to be thrown.
-#>
-function New-TerminatingError
-{
-    [CmdletBinding()]
-    param
-    (
-        [System.String]
-        $Message,
-        
-        [System.Management.Automation.ErrorRecord]
-        $ErrorRecord
-    )
-
-
-    if ($null -ne $ErrorRecord)
-    {
-        $exception = New-Object 'System.InvalidOperationException' $Message, $ErrorRecord.Exception
-    }
-    else
-    {
-        $exception = New-Object 'System.InvalidOperationException' $Message
-    }
-    
-    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, 'MachineStateIncorrect', 'InvalidOperation', $null
-    
+    $exception = New-Object `
+        -TypeName System.ArgumentException `
+        -ArgumentList $ErrorMessage
+    $errorRecord = New-Object `
+        -TypeName System.Management.Automation.ErrorRecord `
+        -ArgumentList @($exception, $ErrorId, $errorCategory, $null)
     throw $errorRecord
 }
 

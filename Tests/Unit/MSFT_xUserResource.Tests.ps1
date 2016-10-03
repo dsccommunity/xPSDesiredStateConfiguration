@@ -172,7 +172,7 @@ try {
 
                 Context 'Tests on Nano Server' {
                     Mock -CommandName Test-IsNanoServer -MockWith { return $true }
-                    Mock -CommandName Test-ValidCredentialsOnNanoServer { return $true }
+                    Mock -CommandName Test-CredentialsValidOnNanoServer { return $true }
                     
                     try
                     {
@@ -334,7 +334,7 @@ try {
                     $absentUserName = 'AbsentUserUserName123456789'
                     
                     It 'Should return true when user Present and correct values' -Skip:$script:skipMe {
-                        Mock -CommandName Test-ValidCredentialsOnNanoServer { return $true }
+                        Mock -CommandName Test-CredentialsValidOnNanoServer { return $true }
                         
                         $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
                                                                         -Description $existingDescription `
@@ -364,7 +364,7 @@ try {
                     }
                     
                     It 'Should return false when Password is wrong' -Skip:$script:skipMe {
-                        Mock -CommandName Test-ValidCredentialsOnNanoServer { return $false }
+                        Mock -CommandName Test-CredentialsValidOnNanoServer { return $false }
                         
                         $badPassword = 'WrongPassword'
                         $secureBadPassword = ConvertTo-SecureString $badPassword -AsPlainText -Force
