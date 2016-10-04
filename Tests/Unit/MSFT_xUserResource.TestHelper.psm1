@@ -464,4 +464,5 @@ function Test-UserOnNanoServer
 Export-ModuleMember -Function `
     New-User, `
     Remove-User, `
-    Test-*
+    Test-IsLocalMachine, `
+    Test-User

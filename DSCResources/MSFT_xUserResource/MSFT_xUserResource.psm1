@@ -510,7 +510,7 @@ function Set-TargetResourceOnFullSKU
     }
     catch
     {
-         New-InvlaidOperationException -Message ($script:localizedData.MultipleMatches + $_)
+         New-InvalidOperationException -Message ($script:localizedData.MultipleMatches + $_)
     }
     finally
     {
@@ -1076,7 +1076,7 @@ function Test-TargetResourceOnNanoServer
                 return $false
             }
         }
-        New-InvlaidOperationException -ErrorRecord $_
+        New-InvalidOperationException -ErrorRecord $_
     }
 
     # A user with the provided name exists
