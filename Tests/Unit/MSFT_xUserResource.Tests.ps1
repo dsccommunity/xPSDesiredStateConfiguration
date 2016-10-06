@@ -1,19 +1,21 @@
-#To run these tests, the currently logged on user must have rights to create a user
+# To run these tests, the currently logged on user must have rights to create a user
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1') `
+                               -Force
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DSCResourceModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xUserResource' `
     -TestType Unit
 
-
-
 try {
 
-    Import-Module "$PSScriptRoot\MSFT_xUserResource.TestHelper.psm1" -Force
+    Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                                   -ChildPath 'MSFT_xUserResource.TestHelper.psm1') `
+                                   -Force
 
     InModuleScope 'MSFT_xUserResource' {
         # Used to skip the Nano server tests for the time being since they are not working on AppVeyor
