@@ -9,8 +9,8 @@
 
     xUser xUserExample
     {
-        Ensure = "Present"  # To ensure the user account does not exist, set Ensure to "Absent"
-        UserName = "SomeUserName"
+        Ensure = 'Present'  # To ensure the user account does not exist, set Ensure to "Absent"
+        UserName = 'SomeUserName'
         Password = $PasswordCredential # This needs to be a credential object
     }
 }
