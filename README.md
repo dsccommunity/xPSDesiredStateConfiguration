@@ -31,6 +31,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
+* **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
@@ -38,6 +39,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 Resources that work on Nano Server:
 
 * xWindowsOptionalFeature
+* xUser
 
 ### xArchive
 
@@ -212,25 +214,37 @@ xRegistry provides a mechanism to manage registry keys and values on a target no
 * **Credential**: Indicates the credentials to use for running this script, if credentials are required.
 
 ### xUser
-* **UserName**: Indicates the account name for which you want to ensure a specific state.
-* **Description**: Indicates the description you want to use for the user account.
-* **Disabled**: Indicates if the account is enabled. Set this property to $true to ensure that this account is disabled, and set it to $false to ensure that it is enabled.
+Provides a mechanism to manage local users on a target node.
+
+#### Requirements
+
+* Target machine must be running a windows client operating system, Windows Server 2012 or later, or Nano Server.
+
+#### Parameters
+
+* **[String] UserName** _(Key)_: Indicates the account name for which you want to ensure a specific state.
+* **[String] Description** _(Write)_: Indicates the description you want to use for the user account.
+* **[Boolean] Disabled** _(Write)_: Indicates if the account is enabled. Set this property to $true to ensure that this account is disabled, and set it to $false to ensure that it is enabled.
    - Suported values: $true, $false
    - Default value: $false
-* **Ensure**: Ensures that the feature is present or absent.
+* **[String] Ensure** _(Write)_: Ensures that the feature is present or absent.
    - Supported values: Present, Absent
    - Default Value: Present
-* **FullName**: Represents a string with the full name you want to use for the user account.
-* **Password**: Indicates the password you want to use for this account.
-* **PasswordChangeNotAllowed**: Indicates if the user can change the password. Set this property to $true to ensure that the user cannot change the password, and set it to $false to allow the user to change the password.
+* **[String] FullName** _(Write)_: Represents a string with the full name you want to use for the user account.
+* **[PSCredential] Password** _(Write)_: Indicates the password you want to use for this account.
+* **[Boolean] PasswordChangeNotAllowed** _(Write)_: Indicates if the user can change the password. Set this property to $true to ensure that the user cannot change the password, and set it to $false to allow the user to change the password.
    - Suported values: $true, $false
    - Default value: $false
-* **PasswordChangeRequired**: Indicates if the user must change the password at the next sign in. Set this property to $true if the user must change the password.
+* **[Boolean] PasswordChangeRequired** _(Write)_: Indicates if the user must change the password at the next sign in. Set this property to $true if the user must change the password.
    - Suported values: $true, $false
    - Default value: $true
-* **PasswordNeverExpires**: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
+* **[Boolean] PasswordNeverExpires** _(Write)_: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
    - Suported values: $true, $false
    - Default value: $false
+   
+#### Examples
+
+* [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
 
 ### xGroupSet
 * **GroupName**: Defines the names of the groups in the set.
@@ -365,8 +379,10 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Formatting updated as per style guidelines
     * Missing comment-based help added for Get-/Set-/Test-TargetResource
     * Typos fixed in Unit test script
-    * Unit test 'Get-TargetResource/Should return hashtable with correct values when group 
-    has no members' updated to handle the expected empty Members array correctly    
+    * Unit test 'Get-TargetResource/Should return hashtable with correct values when group has no members' updated to handle the expected empty Members array correctly
+* xUser:
+    * Fixed PSSA/Style violations
+    * Added/Updated Tests and Examples
 
 ### 4.0.0.0
 
