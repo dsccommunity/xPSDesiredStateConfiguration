@@ -15,7 +15,7 @@ if (-not (Test-IsNanoServer))
 
 <#
     .SYNOPSIS
-        Retrieves the user with the given Username
+        Retrieves the user with the given username
 
     .PARAMETER UserName
         The name of the user to retrieve.
@@ -44,14 +44,14 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Creates, modifies, or deletes a User.
+        Creates, modifies, or deletes a user.
     
     .PARAMETER UserName
         The name of the user to create, modify, or delete.
 
     .PARAMETER Ensure
         Specifies whether the user should exist or not.
-        By default this is set to Present
+        By default this is set to Present.
 
     .PARAMETER FullName
         The (optional) full name or display name of the user.
@@ -68,7 +68,7 @@ function Get-TargetResource
         By default this is set to $false
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should ever expire or not.
+        Specifies whether the password should ever expire or not.
         By default this is set to $false
 
     .PARAMETER PasswordChangeRequired
@@ -80,7 +80,7 @@ function Get-TargetResource
         By default this is set to $false
 
     .NOTES 
-        If Ensure is set to 'Present' then the Password parameter is required.
+        If Ensure is set to 'Present' then the password parameter is required.
 #>
 function Set-TargetResource
 {
@@ -144,11 +144,11 @@ function Set-TargetResource
         By default this is set to Present
 
     .PARAMETER FullName
-        The full name/display name that the user should have..
+        The full name/display name that the user should have.
         If not provided, this value will not be tested.
 
     .PARAMETER Description
-        The Description that the user should have.
+        The description that the user should have.
         If not provided, this value will not be tested.
 
     .PARAMETER Password
@@ -158,7 +158,7 @@ function Set-TargetResource
         Specifies whether the user account should be disabled or not.
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should ever expire or not.
+        Specifies whether the password should ever expire or not.
 
     .PARAMETER PasswordChangeRequired
         Not used in Test-TargetResource as there is no easy way to test this value.
@@ -218,7 +218,7 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
-        Retrieves the user with the given Username when on a full server
+        Retrieves the user with the given username when on a full server
 
     .PARAMETER UserName
         The name of the user to retrieve.
@@ -288,7 +288,7 @@ function Get-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        Creates, modifies, or deletes a User when on a full server.
+        Creates, modifies, or deletes a user when on a full server.
     
     .PARAMETER UserName
         The name of the user to create, modify, or delete.
@@ -312,7 +312,7 @@ function Get-TargetResourceOnFullSKU
         By default this is set to $false
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should ever expire or not.
+        Specifies whether the password should ever expire or not.
         By default this is set to $false
 
     .PARAMETER PasswordChangeRequired
@@ -385,7 +385,7 @@ function Set-TargetResourceOnFullSKU
             $userExists = $false
             $saveChanges = $false
 
-            if ($user -eq $null)
+            if ($null -eq $user)
             {
                 # A user does not exist. Check WhatIf for adding a user
                 $whatIfShouldProcess = $pscmdlet.ShouldProcess($script:localizedData.UserWithName -f $UserName, $script:localizedData.AddOperation)
@@ -537,11 +537,11 @@ function Set-TargetResourceOnFullSKU
         By default this is set to Present
 
     .PARAMETER FullName
-        The full name/display name that the user should have..
+        The full name/display name that the user should have.
         If not provided, this value will not be tested.
 
     .PARAMETER Description
-        The Description that the user should have.
+        The description that the user should have.
         If not provided, this value will not be tested.
 
     .PARAMETER Password
@@ -551,7 +551,7 @@ function Set-TargetResourceOnFullSKU
         Specifies whether the user account should be disabled or not.
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should ever expire or not.
+        Specifies whether the password should ever expire or not.
 
     .PARAMETER PasswordChangeRequired
         Not used in Test-TargetResource as there is no easy way to test this value.
@@ -603,12 +603,13 @@ function Test-TargetResourceOnFullSKU
     Assert-UserNameValid -UserName $UserName
 
     # Try to find a user by a name
-    $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+    $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext `
+                -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
     {
         $user = [System.DirectoryServices.AccountManagement.UserPrincipal]::FindByIdentity($principalContext, $UserName)
-        if ($user -eq $null)
+        if ($null -eq $user)
         {
             # A user with the provided name does not exist
             Write-Verbose -Message ($script:localizedData.UserDoesNotExist -f $UserName)
@@ -704,7 +705,7 @@ function Test-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        Retrieves the user with the given Username when on a nano server.
+        Retrieves the user with the given username when on a Nano Server.
 
     .PARAMETER UserName
         The name of the user to retrieve.
@@ -744,7 +745,7 @@ function Get-TargetResourceOnNanoServer
         New-InvalidOperationException -ErrorRecord $_
     }
 
-    # The user is found. Return all user properties and Ensure='Present'.
+    # The user is found. Return all user properties and Ensure = 'Present'.
     $returnValue = @{
                         UserName = $user.Name
                         Ensure = 'Present'
@@ -769,7 +770,7 @@ function Get-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        Creates, modifies, or deletes a User when on a nano server.
+        Creates, modifies, or deletes a user when on a Nano Server.
     
     .PARAMETER UserName
         The name of the user to create, modify, or delete.
@@ -793,7 +794,7 @@ function Get-TargetResourceOnNanoServer
         By default this is set to $false
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should ever expire or not.
+        Specifies whether the password should ever expire or not.
         By default this is set to $false
 
     .PARAMETER PasswordChangeRequired
@@ -982,7 +983,7 @@ function Set-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        Tests if a user is in the desired state when on a nano server.
+        Tests if a user is in the desired state when on a Nano Server.
 
     .PARAMETER UserName
         The name of the user to test the state of.
@@ -992,11 +993,11 @@ function Set-TargetResourceOnNanoServer
         By default this is set to Present
 
     .PARAMETER FullName
-        The full name/display name that the user should have..
+        The full name/display name that the user should have.
         If not provided, this value will not be tested.
 
     .PARAMETER Description
-        The Description that the user should have.
+        The description that the user should have.
         If not provided, this value will not be tested.
 
     .PARAMETER Password
@@ -1006,7 +1007,7 @@ function Set-TargetResourceOnNanoServer
         Specifies whether the user account should be disabled or not.
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the Password should ever expire or not.
+        Specifies whether the password should ever expire or not.
 
     .PARAMETER PasswordChangeRequired
         Not used in Test-TargetResource as there is no easy way to test this value.
@@ -1143,10 +1144,10 @@ function Test-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        Checks that the User name does not contain invalid characters.
+        Checks that the username does not contain invalid characters.
 
     .PARAMETER UserName
-        The username to validate
+        The username to validate.
 #>
 function Assert-UserNameValid
 {
@@ -1193,10 +1194,10 @@ function Assert-UserNameValid
         Creates a new Connection error record and throws it.
 
     .PARAMETER ErrorId
-        The ID for the error record to be thrown
+        The ID for the error record to be thrown.
 
     .PARAMETER ErrorMessage
-        Message to be included in the error record to be thrown
+        Message to be included in the error record to be thrown.
 #>
 function New-ConnectionException
 {
@@ -1229,10 +1230,10 @@ function New-ConnectionException
         Tests the local user's credentials on the local machine.
     
     .PARAMETER UserName
-        The user name to validate the credentials of.
+        The username to validate the credentials of.
 
     .PARAMETER Password
-        The Password of the given user.
+        The password of the given user.
 #>
 function Test-CredentialsValidOnNanoServer
 {
