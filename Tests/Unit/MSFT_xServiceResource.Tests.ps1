@@ -1,26 +1,15 @@
-# Suppressed as per PSSA Rule Severity guidelines for unit/integration tests:
-# https://github.com/PowerShell/DscResources/blob/master/PSSARuleSeverities.md
+# Need to be able to create a password from plain text for testing purposes
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-$script:DSCModuleName      = 'xPSDesiredStateConfiguration'
-$script:DSCResourceName    = 'MSFT_xServiceResource'
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1') `
+                               -Force
 
-#region HEADER
-# Integration Test Template Version: 1.1.0
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
-{
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
-}
-
-Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
+$script:testEnvironment = Enter-DscResourceTestEnvironment `
+    -DSCResourceModuleName 'xPSDesiredStateConfiguration' `
+    -DSCResourceName 'MSFT_xServiceResource' `
     -TestType Unit
-#endregion
 
 # Begin Testing
 try
@@ -29,12 +18,12 @@ try
     # This is needed so that the ServiceControllerStatus enum is recognized as a valid type
     Add-Type -AssemblyName 'System.ServiceProcess'
 
-    InModuleScope $script:DSCResourceName {
-        $DSCResourceName = 'MSFT_xServiceResource'
+    InModuleScope 'MSFT_xServiceResource' {
+        $script:DscResourceName = 'MSFT_xServiceResource'
 
         $script:testServiceName = 'DscTestService'
         $script:testServiceDisplayName = 'DSC test service display name'
-        $script:testServiceDescription = 'This is DSC test service used for integration testing MSFT_xServiceResource'
+        $script:testServiceDescription = 'This is the DSC test service used for unit testing MSFT_xServiceResource'
         $script:testServiceDependsOn = @('winrm','spooler')
         $script:testServiceDependsOnHash = @( @{ name = 'winrm' }, @{ name = 'spooler' } )
         $script:testServiceExecutablePath = Join-Path -Path $ENV:Temp -ChildPath 'DscTestService.exe'
@@ -47,12 +36,12 @@ try
         $script:testCredential = New-Object `
             -TypeName System.Management.Automation.PSCredential `
             -ArgumentList ($script:testUsername, `
-                (ConvertTo-SecureString $script:testPassword -AsPlainText -Force))
+                          (ConvertTo-SecureString $script:testPassword -AsPlainText -Force))
         $script:testNewUsername = 'DifferentUser'
         $script:testNewCredential = New-Object `
             -TypeName System.Management.Automation.PSCredential `
             -ArgumentList ($script:testNewUsername, `
-                (ConvertTo-SecureString $script:testPassword -AsPlainText -Force))
+                          (ConvertTo-SecureString $script:testPassword -AsPlainText -Force))
 
         $script:testServiceMockRunning = New-Object -TypeName PSObject -Property @{
             Name               = $script:testServiceName
@@ -65,15 +54,11 @@ try
 
         Add-Member -InputObject  $script:testServiceMockRunning `
             -MemberType ScriptMethod `
-            -Name Stop -Value { $global:ServiceStopped = $True }
+            -Name Stop -Value { $global:ServiceStopped = $true }
 
         Add-Member -InputObject  $script:testServiceMockRunning `
             -MemberType ScriptMethod `
-            -Name WaitForStatus -Value {
-                param(
-                    $Status, $WaitTimeSpan
-                )
-            }
+            -Name WaitForStatus -Value { param( $Status, $WaitTimeSpan ) }
 
         $script:testServiceMockStopped = New-Object -TypeName PSObject -Property @{
             Name               = $script:testServiceName
@@ -86,15 +71,11 @@ try
 
         Add-Member -InputObject  $script:testServiceMockStopped `
             -MemberType ScriptMethod `
-            -Name Start -Value { $global:ServiceStarted = $True }
+            -Name Start -Value { $global:ServiceStarted = $true }
 
         Add-Member -InputObject  $script:testServiceMockStopped `
             -MemberType ScriptMethod `
-            -Name WaitForStatus -Value {
-                param(
-                    $Status, $WaitTimeSpan
-                )
-            }
+            -Name WaitForStatus -Value { param( $Status, $WaitTimeSpan ) }
 
         $script:testWin32ServiceMockRunningLocalSystem = New-Object -TypeName PSObject -Property @{
             Name                    = $script:testServiceName
@@ -138,14 +119,14 @@ try
             )
 
             $exception = New-Object -TypeName System.InvalidOperationException `
-                -ArgumentList $ErrorMessage
+                                    -ArgumentList $ErrorMessage
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
             $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-                -ArgumentList $exception, $ErrorId, $errorCategory, $null
+                                      -ArgumentList $exception, $ErrorId, $errorCategory, $null
             return $errorRecord
-        } # end function Get-InvalidArgumentError
+        }
 
-        Describe "$DSCResourceName\Get-TargetResource" {
+        Describe "$script:DscResourceName\Get-TargetResource" {
             Context 'Service exists' {
                 # Mocks that should be called
                 Mock `
@@ -166,7 +147,7 @@ try
                 It 'Should not throw an exception' {
                     { $script:service = Get-TargetResource `
                             -Name $script:testServiceName `
-                            -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should return the correct hashtable properties' {
@@ -202,7 +183,7 @@ try
                 It 'Should not throw an exception' {
                     { $script:service = Get-TargetResource `
                         -Name $script:testServiceName `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should return the correct hashtable properties' {
@@ -219,248 +200,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Test-TargetResource" {
-            # Mocks that should be called
-            Mock `
-                -CommandName Test-ServiceExists `
-                -MockWith { $true } `
-                -Verifiable
-
-            Mock `
-                -CommandName Test-StartupType `
-                -Verifiable
-
-            Mock `
-                -CommandName Get-ServiceResource `
-                -MockWith { $script:testServiceMockRunning } `
-                -Verifiable
-
-            Mock `
-                -CommandName Get-Win32ServiceObject `
-                -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                -Verifiable
-
-            Mock `
-                -CommandName Compare-ServicePath `
-                -MockWith { $true } `
-                -Verifiable
-
-            Mock `
-                -CommandName Test-UserName `
-                -MockWith { $true } `
-                -Verifiable
-
-            Context 'Service exists and should, and all parameters match' {
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return true' {
-                    $script:result | Should Be $True
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
-                }
-            }
-
-            Context 'Service exists and should, path mistmatches' {
-                # Mocks that should be called
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $false } `
-                    -Verifiable
-
-                # Mocks that should not be called
-                Mock -CommandName Test-UserName
-
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.Path = 'c:\ANewPath.exe'
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return false' {
-                    $script:result | Should Be $False
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
-                }
-            }
-
-            Context 'Service exists and should, startup type mistmatches' {
-                # Mocks that should be called
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
-
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.StartupType = 'Manual'
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return false' {
-                    $script:result | Should Be $False
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
-                }
-            }
-
-            Context 'Service exists and should, credential mistmatches' {
-                # Mocks that should be called
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $false } `
-                    -Verifiable
-
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.Credential = $script:testNewCredential
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return false' {
-                    $script:result | Should Be $False
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
-                }
-            }
-
-            Context 'Service exists and should, is running but should be stopped' {
-                # Mocks that should be called
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
-
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
-
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.State = 'Stopped'
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return false' {
-                    $script:result | Should Be $false
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
-                }
-            }
-
-            Context 'Service exists and should, everything matches and State is set to Ignore' {
-                # Mocks that should be called
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
-
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
-
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.State = 'Ignore'
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return true' {
-                    $script:result | Should Be $true
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
-                }
-            }
-
-            Context 'Service exists and should not' {
-                # Mocks that should not be called
-                Mock -CommandName Compare-ServicePath
-                Mock -CommandName Test-UserName
-                Mock -CommandName Get-ServiceResource
-                Mock -CommandName Get-Win32ServiceObject
-
-                It 'Should not throw an exception' {
-                    $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    $Splat.Ensure = 'Absent'
-                    { $script:result = Test-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
-                }
-
-                It 'Should return false' {
-                    $script:result | Should Be $False
-                }
-
-                It 'Should call expected Mocks' {
-                    Assert-VerifiableMocks
-                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
-                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 0
-                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 0
-                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
-                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
-                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
-                }
-            }
-        }
-
-        Describe "$DSCResourceName\Set-TargetResource" {
+                Describe "$script:DscResourceName\Set-TargetResource" {
             Context 'Service exists and should not' {
                 # Mocks that should be called
                 Mock `
@@ -489,8 +229,7 @@ try
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
                     $Splat.Ensure = 'Absent'
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -506,7 +245,7 @@ try
                 }
             }
 
-            Context 'Service exists and should, should be running, all parameters passed and match' {
+            Context 'Service exists and should, should be running, all parameters passed' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Test-StartupType `
@@ -538,8 +277,7 @@ try
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -588,8 +326,7 @@ try
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
                     $Splat.Path = 'c:\NewServicePath.exe'
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -605,7 +342,7 @@ try
                 }
             }
 
-            Context 'Service exists and should, should be running but needs restart, all parameters passed and match' {
+            Context 'Service exists and should, should be running but needs restart, all parameters passed' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Test-StartupType `
@@ -640,8 +377,7 @@ try
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -657,7 +393,7 @@ try
                 }
             }
 
-            Context 'Service exists and should, should be stopped, all parameters passed and match' {
+            Context 'Service exists and should, should be stopped, all parameters passed' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Test-StartupType `
@@ -690,8 +426,7 @@ try
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
                     $Splat.State = 'Stopped'
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -707,7 +442,7 @@ try
                 }
             }
 
-             Context 'Service exists and should, State is Ignore, all parameters passed and match' {
+             Context 'Service exists and should, State is Ignore, all parameters passed' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Test-StartupType `
@@ -737,8 +472,7 @@ try
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
                     $Splat.State = 'Ignore'
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -786,8 +520,7 @@ try
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Not Throw
+                    { Set-TargetResource @Splat } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -824,14 +557,12 @@ try
 
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'ServiceDoesNotExistPathMissingError' `
-                    -ErrorMessage ($LocalizedData.ServiceDoesNotExistPathMissingError `
-                        -f $script:testServiceName)
+                    -ErrorMessage 'Test error'
 
-                It 'Should not throw an exception' {
+                It 'Should throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
                     $Splat.Remove('Path')
-                    { Set-TargetResource @Splat `
-                        -Verbose } | Should Throw $errorRecord
+                    { Set-TargetResource @Splat } | Should Throw $errorRecord
                 }
 
                 It 'Should call expected Mocks' {
@@ -848,7 +579,241 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Test-StartupType" {
+        Describe "$script:DscResourceName\Test-TargetResource" {
+            # Mocks that should be called
+            Mock `
+                -CommandName Test-ServiceExists `
+                -MockWith { $true } `
+                -Verifiable
+
+            Mock `
+                -CommandName Test-StartupType `
+                -Verifiable
+
+            Mock `
+                -CommandName Get-ServiceResource `
+                -MockWith { $script:testServiceMockRunning } `
+                -Verifiable
+
+            Mock `
+                -CommandName Get-Win32ServiceObject `
+                -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                -Verifiable
+
+            Mock `
+                -CommandName Compare-ServicePath `
+                -MockWith { $true } `
+                -Verifiable
+
+            Mock `
+                -CommandName Test-UserName `
+                -MockWith { $true } `
+                -Verifiable
+
+            Context 'Service exists and should, and all parameters match' {
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return true' {
+                    $script:result | Should Be $true
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, path mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $false } `
+                    -Verifiable
+
+                # Mocks that should not be called
+                Mock -CommandName Test-UserName
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Path = 'c:\ANewPath.exe'
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    $script:result | Should Be $false
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                }
+            }
+
+            Context 'Service exists and should, startup type mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.StartupType = 'Manual'
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    $script:result | Should Be $false
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, credential mistmatches' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $false } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Credential = $script:testNewCredential
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    $script:result | Should Be $false
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, is running but should be stopped' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.State = 'Stopped'
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    $script:result | Should Be $false
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should, everything matches and State is set to Ignore' {
+                # Mocks that should be called
+                Mock `
+                    -CommandName Compare-ServicePath `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                Mock `
+                    -CommandName Test-UserName `
+                    -MockWith { $true } `
+                    -Verifiable
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.State = 'Ignore'
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return true' {
+                    $script:result | Should Be $true
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 1
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 1
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 1
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 1
+                }
+            }
+
+            Context 'Service exists and should not' {
+                # Mocks that should not be called
+                Mock -CommandName Compare-ServicePath
+                Mock -CommandName Test-UserName
+                Mock -CommandName Get-ServiceResource
+                Mock -CommandName Get-Win32ServiceObject
+
+                It 'Should not throw an exception' {
+                    $Splat = $script:splatServiceExistsAutomatic.Clone()
+                    $Splat.Ensure = 'Absent'
+                    { $script:result = Test-TargetResource @Splat } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    $script:result | Should Be $false
+                }
+
+                It 'Should call expected Mocks' {
+                    Assert-VerifiableMocks
+                    Assert-MockCalled -CommandName Test-ServiceExists -Exactly 1
+                    Assert-MockCalled -CommandName Get-ServiceResource -Exactly 0
+                    Assert-MockCalled -CommandName Get-Win32ServiceObject -Exactly 0
+                    Assert-MockCalled -CommandName Test-StartupType -Exactly 1
+                    Assert-MockCalled -CommandName Compare-ServicePath -Exactly 0
+                    Assert-MockCalled -CommandName Test-UserName -Exactly 0
+                }
+            }
+        }
+
+        Describe "$script:DscResourceName\Test-StartupType" {
             Context 'Service is stopped, startup is automatic' {
                 $errorRecord = Get-InvalidArgumentError `
                     -ErrorId 'CannotStopServiceSetToStartAutomatically' `
@@ -860,7 +825,7 @@ try
                         -Name $script:testServiceName `
                         -StartupType 'Automatic' `
                         -State 'Stopped' `
-                        -Verbose } | Should Throw $errorRecord
+                    } | Should Throw $errorRecord
                 }
             }
 
@@ -870,7 +835,7 @@ try
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
                         -State 'Stopped' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
             }
 
@@ -884,7 +849,7 @@ try
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
                         -State 'Running' `
-                        -Verbose } | Should Throw $errorRecord
+                    } | Should Throw $errorRecord
                 }
             }
 
@@ -894,7 +859,7 @@ try
                         -Name $script:testServiceName `
                         -StartupType 'Manual' `
                         -State 'Running' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
             }
 
@@ -904,7 +869,7 @@ try
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
                         -State 'Ignore' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Shoult not throw exception for Automatic' {
@@ -912,12 +877,12 @@ try
                         -Name $script:testServiceName `
                         -StartupType 'Automatic' `
                         -State 'Ignore' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
             }
         }
 
-        Describe "$DSCResourceName\ConvertTo-StartModeString" {
+        Describe "$script:DscResourceName\ConvertTo-StartModeString" {
             Context 'StartupType is Automatic' {
                 It 'Should return Automatic' {
                     ConvertTo-StartModeString -StartupType 'Automatic' | Should Be 'Auto'
@@ -931,7 +896,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\ConvertTo-StartupTypeString" {
+        Describe "$script:DscResourceName\ConvertTo-StartupTypeString" {
             Context 'StartupType is Auto' {
                 It 'Should return Automatic' {
                     ConvertTo-StartupTypeString -StartMode 'Auto' | Should Be 'Automatic'
@@ -945,7 +910,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Get-Win32ServiceObject" {
+        Describe "$script:DscResourceName\Get-Win32ServiceObject" {
             Context 'Service exists' {
                 Mock `
                     -CommandName Get-CimInstance `
@@ -954,8 +919,7 @@ try
 
                 It 'Should not throw an exception' {
                     { $script:result = Get-Win32ServiceObject `
-                        -Name $script:testServiceName `
-                        -Verbose } | Should Not Throw
+                        -Name $script:testServiceName } | Should Not Throw
                 }
 
                 It 'Should return expected hash table' {
@@ -975,8 +939,7 @@ try
 
                 It 'Should not throw an exception' {
                     { $script:result = Get-Win32ServiceObject `
-                        -Name $script:testServiceName `
-                        -Verbose } | Should Not Throw
+                        -Name $script:testServiceName } | Should Not Throw
                 }
 
                 It 'Should return $null' {
@@ -990,7 +953,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Set-ServiceStartMode" {
+        Describe "$script:DscResourceName\Set-ServiceStartMode" {
             # Dummy Functions
             function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
 
@@ -1002,7 +965,7 @@ try
                     { Set-ServiceStartMode `
                         -Win32ServiceObject $script:testWin32ServiceMockRunningLocalSystem `
                         -StartupType $script:testServiceStartupType `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1021,7 +984,7 @@ try
                     { Set-ServiceStartMode `
                         -Win32ServiceObject $script:testWin32ServiceMockRunningLocalSystem `
                         -StartupType 'Manual' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1048,7 +1011,7 @@ try
                     { Set-ServiceStartMode `
                         -Win32ServiceObject $script:testWin32ServiceMockRunningLocalSystem `
                         -StartupType 'Manual' `
-                        -Verbose } | Should Throw $errorMessage
+                    } | Should Throw $errorMessage
                 }
 
                 It 'Should call expected Mocks' {
@@ -1058,7 +1021,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Write-WriteProperty" {
+        Describe "$script:DscResourceName\Write-WriteProperty" {
             # Dummy Functions
             function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
 
@@ -1077,9 +1040,7 @@ try
 
             Context 'No parameters passed' {
                 It 'Should not throw an exception' {
-                    { Write-WriteProperty `
-                        -Name $script:testServiceName `
-                        -Verbose } | Should Not Throw
+                    { Write-WriteProperty -Name $script:testServiceName } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1100,7 +1061,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -DisplayName 'NewDisplayName' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1121,7 +1082,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Description 'NewDescription' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1143,7 +1104,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Dependencies 'DepService1','DepService2' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1173,7 +1134,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Dependencies 'DepService1','DepService2' `
-                        -Verbose } | Should Throw $errorRecord
+                    } | Should Throw $errorRecord
                 }
 
                 It 'Should call expected Mocks' {
@@ -1195,7 +1156,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Path 'c:\NewExecutable.exe' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1216,7 +1177,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -StartupType 'Manual' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should return true' {
@@ -1241,7 +1202,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -Credential $script:testCredential `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should return true' {
@@ -1266,7 +1227,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -BuiltInAccount 'LocalSystem' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should return true' {
@@ -1291,7 +1252,7 @@ try
                     { $script:Result = Write-WriteProperty `
                         -Name $script:testServiceName `
                         -DesktopInteract $true `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should return true' {
@@ -1307,7 +1268,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Write-CredentialProperty" {
+        Describe "$script:DscResourceName\Write-CredentialProperty" {
             # Dummy Functions
             function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
 
@@ -1321,7 +1282,7 @@ try
                 It 'Should not throw an exception' {
                     { Write-CredentialProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1349,7 +1310,7 @@ try
                     { Write-CredentialProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $true `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1381,7 +1342,7 @@ try
                     { Write-CredentialProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $false `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Should call expected Mocks' {
@@ -1421,7 +1382,7 @@ try
                     { Write-CredentialProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -DesktopInteract $false `
-                        -Verbose } | Should Throw $errorRecord
+                    } | Should Throw $errorRecord
                 }
 
                 It 'Should call expected Mocks' {
@@ -1682,7 +1643,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Write-BinaryProperty" {
+        Describe "$script:DscResourceName\Write-BinaryProperty" {
             # Dummy Functions
             function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
 
@@ -1757,7 +1718,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Test-UserName" {
+        Describe "$script:DscResourceName\Test-UserName" {
             Context 'Username matches' {
                 It 'Should not throw an exception' {
                     { $script:result = Test-Username `
@@ -1783,7 +1744,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Get-UserNameAndPassword" {
+        Describe "$script:DscResourceName\Get-UserNameAndPassword" {
             Context 'Built-in account provided' {
                 $script:result = Get-UserNameAndPassword -BuiltInAccount 'LocalService'
 
@@ -1812,7 +1773,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Remove-Service" {
+        Describe "$script:DscResourceName\Remove-Service" {
             # Mocks that should be called
             Mock -CommandName 'sc.exe' -Verifiable
             Mock -CommandName Test-ServiceExists -MockWith { $false } -Verifiable
@@ -1857,7 +1818,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Start-ServiceResource" {
+        Describe "$script:DscResourceName\Start-ServiceResource" {
             Context 'Service is already running' {
                 # Mocks that should be called
                 Mock `
@@ -1914,7 +1875,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Stop-ServiceResource" {
+        Describe "$script:DscResourceName\Stop-ServiceResource" {
             Context 'Service is already stopped' {
                 # Mocks that should be called
                 Mock `
@@ -1971,7 +1932,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Resolve-UserName" {
+        Describe "$script:DscResourceName\Resolve-UserName" {
             Context 'Username is NetworkService' {
                 It 'Should return NT Authority\NetworkService' {
                     Resolve-UserName -Username 'NetworkService' | Should Be 'NT Authority\NetworkService'
@@ -2003,7 +1964,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Test-ServiceExists" {
+        Describe "$script:DscResourceName\Test-ServiceExists" {
             Context 'Service exists' {
                 # Mocks that should be called
                 Mock `
@@ -2014,7 +1975,7 @@ try
 
                 It 'Should not throw an exception' {
                     {
-                        $script:result = Test-ServiceExists -Name $script:testServiceName -Verbose
+                        $script:result = Test-ServiceExists -Name $script:testServiceName
                     } | Should Not Throw
                 }
 
@@ -2040,7 +2001,7 @@ try
 
                 It 'Should not throw an exception' {
                     {
-                        $script:result = Test-ServiceExists -Name $script:testServiceName -Verbose
+                        $script:result = Test-ServiceExists -Name $script:testServiceName
                     } | Should Not Throw
                 }
 
@@ -2058,7 +2019,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Compare-ServicePath" {
+        Describe "$script:DscResourceName\Compare-ServicePath" {
             Context 'Service exists, path matches' {
                 # Mocks that should be called
                 Mock `
@@ -2070,7 +2031,7 @@ try
                     { $script:result = Compare-ServicePath `
                         -Name $script:testServiceName `
                         -Path $script:testServiceExecutablePath `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Result is true' {
@@ -2096,7 +2057,7 @@ try
                     { $script:result = Compare-ServicePath `
                         -Name $script:testServiceName `
                         -Path 'c:\differentpath' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Result is false' {
@@ -2121,7 +2082,7 @@ try
                     { $script:result = Compare-ServicePath `
                         -Name $script:testServiceName `
                         -Path 'c:\differentpath' `
-                        -Verbose } | Should Not Throw
+                    } | Should Not Throw
                 }
 
                 It 'Result is false' {
@@ -2137,7 +2098,7 @@ try
             }
         }
 
-        Describe "$DSCResourceName\Get-ServiceResource" {
+        Describe "$script:DscResourceName\Get-ServiceResource" {
             Context 'Service exists' {
                 # Mocks that should be called
                 Mock `
@@ -2148,7 +2109,7 @@ try
 
                 It 'Should not throw an exception' {
                     {
-                        $script:service = Get-ServiceResource -Name $script:testServiceName -Verbose
+                        $script:service = Get-ServiceResource -Name $script:testServiceName
                     } | Should Not Throw
                 }
 
@@ -2183,7 +2144,7 @@ try
 
                 It 'Should throw a ServiceNotFound exception' {
                     {
-                        $script:service = Get-ServiceResource -Name $script:testServiceName -Verbose
+                        $script:service = Get-ServiceResource -Name $script:testServiceName
                     } | Should Throw $errorRecord
                 }
 
