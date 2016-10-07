@@ -951,7 +951,7 @@ try
                 }
 
                 It 'Should return $null' {
-                    $script:result | Should Be NullOrEmpty
+                    $script:result | Should BeNullOrEmpty
                 }
 
                 It 'Should call expected Mocks' {
@@ -1001,7 +1001,7 @@ try
                 }
             }
 
-            Context 'Current StartMode needs to be changed, but an error occured' {
+            Context 'Current StartMode needs to be changed but an error occured' {
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { return @{ ReturnValue = 99 } } `
@@ -1030,14 +1030,15 @@ try
         }
 
         Describe "$script:DscResourceName\Write-WriteProperty" {
-            # Dummy Functions
-            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+            # Stub Functions for Mocking
+            function Invoke-CimMethod { param ( $InputObject, $MethodName, $Arguments ) }
 
             # Mocks that should be called
             Mock `
                 -CommandName Get-Win32ServiceObject `
                 -MockWith { $script:testServiceStartupTypeWin32 } `
                 -Verifiable
+
             Mock `
                 -CommandName Get-Service `
                 -MockWith { $script:testServiceMockRunning } `
@@ -1101,7 +1102,7 @@ try
                 }
             }
 
-            Context 'Different Dependencies passed and set OK, will not trigger restart' {
+            Context 'Different Dependencies passed and set successfully, will not trigger restart' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Invoke-CimMethod `
@@ -1188,7 +1189,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Should return true' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -1213,7 +1214,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Should return true' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -1238,7 +1239,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Should return true' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -1263,7 +1264,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Should return true' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -1278,9 +1279,9 @@ try
 
         Describe "$script:DscResourceName\Write-CredentialProperty" {
             # Dummy Functions
-            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+            function Invoke-CimMethod { param ( $InputObject, $MethodName, $Arguments ) }
 
-            Context 'No parameters to be changed passed' {
+            Context 'No parameters to be changed passed in' {
                 # Mocks that should not be called
                 Mock -CommandName Get-UserNameAndPassword
                 Mock -CommandName Test-UserName
@@ -1306,7 +1307,7 @@ try
                 # Mocks that should be called
                 Mock `
                     -CommandName Get-UserNameAndPassword `
-                    -MockWith { $null,$null } `
+                    -MockWith { $null, $null } `
                     -Verifiable
 
                 # Mocks that should not be called
@@ -1334,7 +1335,7 @@ try
                 # Mocks that should be called
                 Mock `
                     -CommandName Get-UserNameAndPassword `
-                    -MockWith { $null,$null } `
+                    -MockWith { $null, $null } `
                     -Verifiable
 
                 Mock `
@@ -1402,7 +1403,7 @@ try
                 }
             }
 
-            Context 'Both credential and buildinaccount passed' {
+            Context 'Both credential and BuiltInAccount passed' {
                 # Mocks that should not be called
                 Mock -CommandName Get-UserNameAndPassword
                 Mock -CommandName Invoke-CimMethod
@@ -1461,7 +1462,7 @@ try
                 }
             }
 
-            Context 'Credential and needs to be changed' {
+            Context 'Credential passed and needs to be changed' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Get-UserNameAndPassword `
@@ -1497,7 +1498,7 @@ try
                 }
             }
 
-            Context 'Credential and needs to be changed, but throws exception' {
+            Context 'Credential passed and needs to be changed, but throws exception' {
                 # Mocks that should be called
                 Mock `
                     -CommandName Get-UserNameAndPassword `
@@ -1635,7 +1636,7 @@ try
                     -ErrorId 'ChangeCredentialFailed' `
                     -ErrorMessage $errorMessage
 
-                It 'Should not throw an exception' {
+                It 'Should throw an exception' {
                     { Write-CredentialProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -BuiltInAccount 'LocalSystem' } | Should Throw $errorRecord
@@ -1652,8 +1653,8 @@ try
         }
 
         Describe "$script:DscResourceName\Write-BinaryProperty" {
-            # Dummy Functions
-            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+            # Stub Functions for Mocking
+            function Invoke-CimMethod { param ( $InputObject, $MethodName, $Arguments ) }
 
             Context 'Path is already correct' {
                 # Mocks that should not be called
@@ -1713,7 +1714,7 @@ try
                     -ErrorId 'ChangeBinaryPathFailed' `
                     -ErrorMessage $errorMessage
 
-                It 'Should not throw an exception' {
+                It 'Should throw an exception' {
                     { $script:result = Write-BinaryProperty `
                         -ServiceWmi $script:testWin32ServiceMockRunningLocalSystem `
                         -Path 'c:\NewServicePath.exe' } | Should Throw $errorRecord
@@ -1804,9 +1805,11 @@ try
                 }
             }
 
-            Mock -CommandName Test-ServiceExists -MockWith { $true } -Verifiable
+            
 
             Context 'Service can not be deleted (will take 5 seconds)' {
+                Mock -CommandName Test-ServiceExists -MockWith { $true } -Verifiable
+
                 Mock -CommandName Start-Sleep -Verifiable
 
                 $errorRecord = Get-InvalidArgumentRecord `
@@ -1814,9 +1817,7 @@ try
                     -ErrorMessage ($script:localizedData.ErrorDeletingService -f $script:testServiceName)
 
                 It 'Should throw ErrorDeletingService exception' {
-                    {
-                        Remove-Service -Name $script:testServiceName
-                    } | Should Throw $errorRecord
+                    { Remove-Service -Name $script:testServiceName } | Should Throw $errorRecord
                 }
 
                 It 'Should call expected Mocks' {
