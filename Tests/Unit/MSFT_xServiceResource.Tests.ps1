@@ -6,6 +6,13 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
 
+# Need this module to import the localized data
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+              -ChildPath 'CommonResourceHelper.psm1')
+
+# Localized messages for Write-Verbose statements
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xServiceResource'
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DSCResourceModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xServiceResource' `
@@ -102,7 +109,7 @@ try
             Description             = $script:testServiceDescription
         }
 
-        function Get-InvalidArgumentError
+        function Get-InvalidArgumentRecord
         {
             [CmdletBinding()]
             param
@@ -555,9 +562,10 @@ try
                 Mock -CommandName Stop-ServiceResource
                 Mock -CommandName Write-WriteProperty
 
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ServiceDoesNotExistPathMissingError' `
-                    -ErrorMessage 'Test error'
+                    -ErrorMessage ($script:localizedData.ServiceDoesNotExistPathMissingError `
+                                    -f $script:testServiceName)
 
                 It 'Should throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -815,12 +823,12 @@ try
 
         Describe "$script:DscResourceName\Test-StartupType" {
             Context 'Service is stopped, startup is automatic' {
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'CannotStopServiceSetToStartAutomatically' `
-                    -ErrorMessage ($LocalizedData.CannotStopServiceSetToStartAutomatically `
+                    -ErrorMessage ($script:localizedData.CannotStopServiceSetToStartAutomatically `
                         -f $script:testServiceName)
 
-                It 'Shoult throw CannotStopServiceSetToStartAutomatically exception' {
+                It 'Should throw CannotStopServiceSetToStartAutomatically exception' {
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Automatic' `
@@ -830,7 +838,7 @@ try
             }
 
             Context 'Service is stopped, startup is not automatic' {
-                It 'Shoult not throw exception' {
+                It 'Should not throw an exception' {
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
@@ -840,11 +848,11 @@ try
             }
 
             Context 'Service is running, startup is disabled' {
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'CannotStartAndDisable' `
-                    -ErrorMessage ($LocalizedData.CannotStartAndDisable -f $script:testServiceName)
+                    -ErrorMessage ($script:localizedData.CannotStartAndDisable -f $script:testServiceName)
 
-                It 'Shoult throw CannotStartAndDisable exception' {
+                It 'Should throw CannotStartAndDisable exception' {
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
@@ -854,7 +862,7 @@ try
             }
 
             Context 'Service is running, startup is not disabled' {
-                It 'Shoult not throw exception' {
+                It 'Should not throw exception' {
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Manual' `
@@ -864,7 +872,7 @@ try
             }
 
             Context 'State is Ignore' {
-                It 'Shoult not throw exception for Disabled' {
+                It 'Should not throw exception for Disabled' {
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Disabled' `
@@ -872,7 +880,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Shoult not throw exception for Automatic' {
+                It 'Should not throw exception for Automatic' {
                     { Test-StartupType `
                         -Name $script:testServiceName `
                         -StartupType 'Automatic' `
@@ -884,7 +892,7 @@ try
 
         Describe "$script:DscResourceName\ConvertTo-StartModeString" {
             Context 'StartupType is Automatic' {
-                It 'Should return Automatic' {
+                It 'Should return Auto' {
                     ConvertTo-StartModeString -StartupType 'Automatic' | Should Be 'Auto'
                 }
             }
@@ -919,7 +927,7 @@ try
 
                 It 'Should not throw an exception' {
                     { $script:result = Get-Win32ServiceObject `
-                        -Name $script:testServiceName } | Should Not Throw
+                                            -Name $script:testServiceName } | Should Not Throw
                 }
 
                 It 'Should return expected hash table' {
@@ -943,7 +951,7 @@ try
                 }
 
                 It 'Should return $null' {
-                    $script:result | Should BeNullOrEmpty
+                    $script:result | Should Be NullOrEmpty
                 }
 
                 It 'Should call expected Mocks' {
@@ -954,8 +962,8 @@ try
         }
 
         Describe "$script:DscResourceName\Set-ServiceStartMode" {
-            # Dummy Functions
-            function Invoke-CimMethod { param ( $InputObject,$MethodName,$Arguments ) }
+            # Stub Functions for Mocking
+            function Invoke-CimMethod { param ( $InputObject, $MethodName, $Arguments ) }
 
             Context 'Current StartMode is set to Auto and should be' {
                 Mock `
@@ -974,7 +982,7 @@ try
                 }
             }
 
-            Context 'Current StartMode needs to be changed, and is changed OK' {
+            Context 'Current StartMode needs to be changed, and is changed successfully' {
                 Mock `
                     -CommandName Invoke-CimMethod `
                     -MockWith { return @{ ReturnValue = 0 } } `
@@ -999,11 +1007,11 @@ try
                     -MockWith { return @{ ReturnValue = 99 } } `
                     -Verifiable
 
-                $innerMessage = ($LocalizedData.MethodFailed `
+                $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change', 'Win32_Service', '99' )
-                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                $errorMessage = ($script:localizedData.ErrorChangingProperty `
                     -f 'StartupType', $innerMessage)
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ChangeStartupTypeFailed' `
                     -ErrorMessage $errorMessage
 
@@ -1122,11 +1130,11 @@ try
                     -MockWith { @{ ReturnValue = 99 } } `
                     -Verifiable
 
-                $innerMessage = ($LocalizedData.MethodFailed `
+                $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change','Win32_Service','99')
-                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                $errorMessage = ($script:localizedData.ErrorChangingProperty `
                     -f 'Dependencies',$innerMessage)
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ChangeCredentialFailed' `
                     -ErrorMessage $errorMessage
 
@@ -1370,11 +1378,11 @@ try
                 Mock -CommandName Test-UserName
                 Mock -CommandName Set-LogOnAsServicePolicy
 
-                $innerMessage = ($LocalizedData.MethodFailed `
+                $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change','Win32_Service','99')
-                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                $errorMessage = ($script:localizedData.ErrorChangingProperty `
                     -f 'Credential',$innerMessage)
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ChangeCredentialFailed' `
                     -ErrorMessage $errorMessage
 
@@ -1401,9 +1409,9 @@ try
                 Mock -CommandName Test-UserName
                 Mock -CommandName Set-LogOnAsServicePolicy
 
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                    -ErrorId 'OnlyCredentialOrBuiltInAccount' `
-                    -ErrorMessage ($LocalizedData.OnlyOneParameterCanBeSpecified `
+                    -ErrorMessage ($script:localizedData.OnlyOneParameterCanBeSpecified `
                     -f 'Credential','BuiltInAccount')
 
                 It 'Should throw an exception' {
@@ -1510,11 +1518,11 @@ try
                     -MockWith { @{ returnValue = 99 } } `
                     -Verifiable
 
-                $innerMessage = ($LocalizedData.MethodFailed `
+                $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change','Win32_Service','99')
-                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                $errorMessage = ($script:localizedData.ErrorChangingProperty `
                     -f 'Credential',$innerMessage)
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ChangeCredentialFailed' `
                     -ErrorMessage $errorMessage
 
@@ -1619,11 +1627,11 @@ try
                 # Mocks that should not be called
                 Mock -CommandName Set-LogOnAsServicePolicy
 
-                $innerMessage = ($LocalizedData.MethodFailed `
+                $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change','Win32_Service','99')
-                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                $errorMessage = ($script:localizedData.ErrorChangingProperty `
                     -f 'Credential',$innerMessage)
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ChangeCredentialFailed' `
                     -ErrorMessage $errorMessage
 
@@ -1697,11 +1705,11 @@ try
                     -MockWith { @{ returnValue = 99 } } `
                     -Verifiable
 
-                $innerMessage = ($LocalizedData.MethodFailed `
+                $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change', 'Win32_Service', 99)
-                $errorMessage = ($LocalizedData.ErrorChangingProperty `
+                $errorMessage = ($script:localizedData.ErrorChangingProperty `
                     -f 'Binary Path', $innerMessage)
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ChangeBinaryPathFailed' `
                     -ErrorMessage $errorMessage
 
@@ -1801,9 +1809,9 @@ try
             Context 'Service can not be deleted (will take 5 seconds)' {
                 Mock -CommandName Start-Sleep -Verifiable
 
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ErrorDeletingService' `
-                    -ErrorMessage ($LocalizedData.ErrorDeletingService -f $script:testServiceName)
+                    -ErrorMessage ($script:localizedData.ErrorDeletingService -f $script:testServiceName)
 
                 It 'Should throw ErrorDeletingService exception' {
                     {
@@ -2138,9 +2146,9 @@ try
                     -ParameterFilter { $Name -eq $script:testServiceName } `
                     -Verifiable
 
-                $errorRecord = Get-InvalidArgumentError `
+                $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ServiceNotFound' `
-                    -ErrorMessage ($LocalizedData.ServiceNotFound -f $script:testServiceName)
+                    -ErrorMessage ($script:localizedData.ServiceNotFound -f $script:testServiceName)
 
                 It 'Should throw a ServiceNotFound exception' {
                     {
