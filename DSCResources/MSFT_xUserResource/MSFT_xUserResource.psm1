@@ -705,7 +705,7 @@ function Test-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        Retrieves the user with the given username when on a Nano Server.
+        Retrieves the user with the given username when on Nano Server.
 
     .PARAMETER UserName
         The name of the user to retrieve.
@@ -770,7 +770,7 @@ function Get-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        Creates, modifies, or deletes a user when on a Nano Server.
+        Creates, modifies, or deletes a user when on Nano Server.
     
     .PARAMETER UserName
         The name of the user to create, modify, or delete.
@@ -983,7 +983,7 @@ function Set-TargetResourceOnNanoServer
 
 <#
     .SYNOPSIS
-        Tests if a user is in the desired state when on a Nano Server.
+        Tests if a user is in the desired state when on Nano Server.
 
     .PARAMETER UserName
         The name of the user to test the state of.
