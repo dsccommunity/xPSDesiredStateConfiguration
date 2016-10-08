@@ -3,12 +3,12 @@
 param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'DSCResources\CommonTestHelper.psm1') `
+                               -ChildPath 'CommonTestHelper.psm1') `
                                -Force
 
 # Need this module to import the localized data
 Import-Module -Name (Join-Path -Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) `
-              -ChildPath 'CommonResourceHelper.psm1')
+              -ChildPath 'DSCResources\CommonResourceHelper.psm1')
 
 # Localized messages for Write-Verbose statements
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xServiceResource'

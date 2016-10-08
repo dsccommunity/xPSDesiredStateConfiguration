@@ -1,32 +1,24 @@
 $script:DSCModuleName   = 'xPSDesiredStateConfiguration'
 $script:DSCResourceName = 'MSFT_xServiceResource'
 
-#region HEADER
-# Integration Test Template Version: 1.1.0
-[String] $script:moduleRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
-{
-    & git @('clone','https://github.com/PowerShell/DscResource.Tests.git',(Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests\'))
-}
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1') `
+                               -Force
 
-Import-Module (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:DSCModuleName `
-    -DSCResourceName $script:DSCResourceName `
-    -TestType Integration
-#endregion
+$script:testEnvironment = Enter-DscResourceTestEnvironment `
+    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
+    -DscResourceName 'MSFT_xServiceResource' `
+    -TestType 'Integration'
 
-# Using try/finally to always cleanup even if something awful happens.
 try
 {
     $script:testServiceName = 'DscTestService'
-    $script:testServiceCodePath = "$PSScriptRoot\..\DscTestService.cs"
+    $script:testServiceCodePath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'DscTestService.cs'
     $script:testServiceDisplayName = 'DSC test service display name'
     $script:testServiceDescription = 'This is a DSC test service used for integration testing MSFT_xServiceResource'
     $script:testServiceDependsOn = 'winrm'
     $script:testServiceExecutablePath = Join-Path -Path $ENV:Temp -ChildPath 'DscTestService.exe'
-    $script:testServiceNewCodePath = "$PSScriptRoot\..\DscTestServiceNew.cs"
+    $script:testServiceNewCodePath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'DscTestService.cs'
     $script:testServiceNewDisplayName = 'New: DSC test service display name'
     $script:testServiceNewDescription = 'New: This is a DSC test service used for integration testing MSFT_xServiceResource'
     $script:testServiceNewDependsOn = 'spooler'
@@ -38,8 +30,9 @@ try
     #>
     if ($PSVersionTable.PSEdition -ieq 'Core') { $script:testServiceNewDependsOn = 'winrm' }
 
-    Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1" -Force
-    Import-Module "$PSScriptRoot\..\MSFT_xServiceResource.TestHelper.psm1" -Force
+    Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'MSFT_xServiceResource.TestHelper.psm1') `
+                               -Force
 
     Stop-Service $script:testServiceName -ErrorAction SilentlyContinue
 
