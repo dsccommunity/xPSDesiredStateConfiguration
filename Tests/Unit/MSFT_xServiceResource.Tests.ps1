@@ -1870,7 +1870,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Called start method' {
+                It 'Should call start method' {
                     $global:ServiceStarted | Should Be $true
                 }
 
@@ -1927,7 +1927,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Called stop method' {
+                It 'Should call stop method' {
                     $global:ServiceStopped | Should Be $true
                 }
 
@@ -1988,7 +1988,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Result is true' {
+                It 'Should return true' {
                     $script:Result | Should Be $true
                 }
 
@@ -2014,7 +2014,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Result is false' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -2043,7 +2043,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Result is true' {
+                It 'Should return true' {
                     $script:Result | Should Be $true
                 }
 
@@ -2069,7 +2069,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Result is false' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -2094,7 +2094,7 @@ try
                     } | Should Not Throw
                 }
 
-                It 'Result is false' {
+                It 'Should return false' {
                     $script:Result | Should Be $false
                 }
 
@@ -2170,7 +2170,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
 }
