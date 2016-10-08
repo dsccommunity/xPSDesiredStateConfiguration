@@ -57,7 +57,7 @@ try
     $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DscResourceName)_Add.config.ps1"
     . $configFile
 
-    Describe "$($script:DscResourceName)_Add_Integration" {
+    Describe "$($script:DscResourceName) Add Service" {
 
         It 'Should compile and apply the MOF without throwing' {
             {
@@ -102,7 +102,7 @@ try
     $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DscResourceName)_Edit.config.ps1"
     . $configFile
 
-    Describe "$($script:DscResourceName)_Edit_Integration" {
+    Describe "$($script:DscResourceName) Edit Service" {
 
         It 'Should compile and apply the MOF without throwing' {
             {
@@ -148,7 +148,7 @@ try
     $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DscResourceName)_Remove.config.ps1"
     . $configFile
 
-    Describe "$($script:DscResourceName)_Remove_Integration" {
+    Describe "$($script:DscResourceName) Remove Service" {
 
         It 'Should compile and apply the MOF without throwing' {
             {

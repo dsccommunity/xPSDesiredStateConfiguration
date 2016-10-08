@@ -109,47 +109,20 @@ try
             Description             = $script:testServiceDescription
         }
 
-        function Get-InvalidArgumentRecord
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter(Mandatory)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorId,
-
-                [Parameter(Mandatory)]
-                [ValidateNotNullOrEmpty()]
-                [System.String]
-                $ErrorMessage
-            )
-
-            $exception = New-Object -TypeName System.InvalidOperationException `
-                                    -ArgumentList $ErrorMessage
-            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-            $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
-                                      -ArgumentList $exception, $ErrorId, $errorCategory, $null
-            return $errorRecord
-        }
-
         Describe "$script:DscResourceName\Get-TargetResource" {
             Context 'Service exists' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Get-ServiceResource `
-                    -MockWith { $script:testServiceMockRunning } `
-                    -Verifiable
+                Mock -CommandName Get-ServiceResource `
+                     -MockWith { $script:testServiceMockRunning } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Get-Win32ServiceObject `
-                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                    -Verifiable
+                Mock -CommandName Get-Win32ServiceObject `
+                     -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:service = Get-TargetResource `
@@ -207,25 +180,21 @@ try
             }
         }
 
-                Describe "$script:DscResourceName\Set-TargetResource" {
+        Describe "$script:DscResourceName\Set-TargetResource" {
             Context 'Service exists and should not' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Stop-ServiceResource `
-                    -Verifiable
+                Mock -CommandName Stop-ServiceResource `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Remove-Service `
-                    -Verifiable
+                Mock -CommandName Remove-Service `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Start-ServiceResource
@@ -254,28 +223,23 @@ try
 
             Context 'Service exists and should, should be running, all parameters passed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Write-WriteProperty `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Write-WriteProperty `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Start-ServiceResource `
-                    -Verifiable
+                Mock -CommandName Start-ServiceResource `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Stop-ServiceResource
@@ -302,28 +266,23 @@ try
 
             Context 'Service exists and should, should be running, path needs change' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Write-WriteProperty `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Write-WriteProperty `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Start-ServiceResource `
-                    -Verifiable
+                Mock -CommandName Start-ServiceResource `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Stop-ServiceResource
@@ -351,32 +310,28 @@ try
 
             Context 'Service exists and should, should be running but needs restart, all parameters passed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 Mock `
                     -CommandName Compare-ServicePath `
                     -MockWith { $true } `
                     -Verifiable
 
-                Mock `
-                    -CommandName Write-WriteProperty `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Write-WriteProperty `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 Mock `
                     -CommandName Start-ServiceResource `
                     -Verifiable
 
-                Mock `
-                    -CommandName Stop-ServiceResource `
-                    -Verifiable
+                Mock -CommandName Stop-ServiceResource `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName New-Service
@@ -402,28 +357,23 @@ try
 
             Context 'Service exists and should, should be stopped, all parameters passed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Write-WriteProperty `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Write-WriteProperty `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Stop-ServiceResource `
-                    -Verifiable
+                Mock -CommandName Stop-ServiceResource `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName New-Service
@@ -451,24 +401,20 @@ try
 
              Context 'Service exists and should, State is Ignore, all parameters passed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Write-WriteProperty `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Write-WriteProperty `
+                     -MockWith { $false } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName New-Service
@@ -497,28 +443,23 @@ try
 
             Context 'Service does not exist but should' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName New-Service `
-                    -Verifiable
+                Mock -CommandName New-Service `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Write-WriteProperty `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Write-WriteProperty `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Start-ServiceResource `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Start-ServiceResource `
+                     -MockWith { $false } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Compare-ServicePath
@@ -545,14 +486,12 @@ try
 
             Context 'Service does not exist but should, but no path specified' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-StartupType `
-                    -Verifiable
+                Mock -CommandName Test-StartupType `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-ServiceExists `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-ServiceExists `
+                     -MockWith { $false } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName New-Service
@@ -589,34 +528,28 @@ try
 
         Describe "$script:DscResourceName\Test-TargetResource" {
             # Mocks that should be called
-            Mock `
-                -CommandName Test-ServiceExists `
-                -MockWith { $true } `
-                -Verifiable
+            Mock -CommandName Test-ServiceExists `
+                 -MockWith { $true } `
+                 -Verifiable
 
-            Mock `
-                -CommandName Test-StartupType `
-                -Verifiable
+            Mock -CommandName Test-StartupType `
+                 -Verifiable
 
-            Mock `
-                -CommandName Get-ServiceResource `
-                -MockWith { $script:testServiceMockRunning } `
-                -Verifiable
+            Mock -CommandName Get-ServiceResource `
+                 -MockWith { $script:testServiceMockRunning } `
+                 -Verifiable
 
-            Mock `
-                -CommandName Get-Win32ServiceObject `
-                -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                -Verifiable
+            Mock -CommandName Get-Win32ServiceObject `
+                 -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                 -Verifiable
 
-            Mock `
-                -CommandName Compare-ServicePath `
-                -MockWith { $true } `
-                -Verifiable
+            Mock -CommandName Compare-ServicePath `
+                 -MockWith { $true } `
+                 -Verifiable
 
-            Mock `
-                -CommandName Test-UserName `
-                -MockWith { $true } `
-                -Verifiable
+            Mock -CommandName Test-UserName `
+                 -MockWith { $true } `
+                 -Verifiable
 
             Context 'Service exists and should, and all parameters match' {
                 It 'Should not throw an exception' {
@@ -641,10 +574,9 @@ try
 
             Context 'Service exists and should, path mistmatches' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $false } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Test-UserName
@@ -672,10 +604,9 @@ try
 
             Context 'Service exists and should, startup type mistmatches' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -700,10 +631,9 @@ try
 
             Context 'Service exists and should, credential mistmatches' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $false } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -728,15 +658,13 @@ try
 
             Context 'Service exists and should, is running but should be stopped' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -761,15 +689,13 @@ try
 
             Context 'Service exists and should, everything matches and State is set to Ignore' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Compare-ServicePath `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Compare-ServicePath `
+                     -MockWith { $true } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     $Splat = $script:splatServiceExistsAutomatic.Clone()
@@ -920,10 +846,9 @@ try
 
         Describe "$script:DscResourceName\Get-Win32ServiceObject" {
             Context 'Service exists' {
-                Mock `
-                    -CommandName Get-CimInstance `
-                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                    -Verifiable
+                Mock -CommandName Get-CimInstance `
+                     -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:result = Get-Win32ServiceObject `
@@ -941,9 +866,8 @@ try
             }
 
             Context 'Service does not exist' {
-                Mock `
-                    -CommandName Get-CimInstance `
-                    -Verifiable
+                Mock -CommandName Get-CimInstance `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:result = Get-Win32ServiceObject `
@@ -966,8 +890,7 @@ try
             function Invoke-CimMethod { param ( $InputObject, $MethodName, $Arguments ) }
 
             Context 'Current StartMode is set to Auto and should be' {
-                Mock `
-                    -CommandName Invoke-CimMethod
+                Mock -CommandName Invoke-CimMethod
 
                 It 'Should not throw an exception' {
                     { Set-ServiceStartMode `
@@ -983,10 +906,9 @@ try
             }
 
             Context 'Current StartMode needs to be changed, and is changed successfully' {
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { return @{ ReturnValue = 0 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { return @{ ReturnValue = 0 } } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { Set-ServiceStartMode `
@@ -1002,10 +924,9 @@ try
             }
 
             Context 'Current StartMode needs to be changed but an error occured' {
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { return @{ ReturnValue = 99 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { return @{ ReturnValue = 99 } } `
+                     -Verifiable
 
                 $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change', 'Win32_Service', '99' )
@@ -1034,15 +955,13 @@ try
             function Invoke-CimMethod { param ( $InputObject, $MethodName, $Arguments ) }
 
             # Mocks that should be called
-            Mock `
-                -CommandName Get-Win32ServiceObject `
-                -MockWith { $script:testServiceStartupTypeWin32 } `
-                -Verifiable
+            Mock -CommandName Get-Win32ServiceObject `
+                 -MockWith { $script:testServiceStartupTypeWin32 } `
+                 -Verifiable
 
-            Mock `
-                -CommandName Get-Service `
-                -MockWith { $script:testServiceMockRunning } `
-                -Verifiable
+            Mock -CommandName Get-Service `
+                 -MockWith { $script:testServiceMockRunning } `
+                 -Verifiable
 
             # Mocks that should not be called
             Mock -CommandName Set-Service
@@ -1062,9 +981,8 @@ try
 
             Context 'Different DisplayName passed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Set-Service `
-                    -Verifiable
+                Mock -CommandName Set-Service `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1083,9 +1001,8 @@ try
 
             Context 'Different Description passed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Set-Service `
-                    -Verifiable
+                Mock -CommandName Set-Service `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1104,10 +1021,9 @@ try
 
             Context 'Different Dependencies passed and set successfully, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ ReturnValue = 0 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ ReturnValue = 0 } } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1126,10 +1042,9 @@ try
 
             Context 'Different Dependencies passed and set failed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ ReturnValue = 99 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ ReturnValue = 99 } } `
+                     -Verifiable
 
                 $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change','Win32_Service','99')
@@ -1156,10 +1071,9 @@ try
 
             Context 'Path passed, will trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Write-BinaryProperty `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Write-BinaryProperty `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1178,9 +1092,8 @@ try
 
             Context 'StartupType passed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Set-ServiceStartMode `
-                    -Verifiable
+                Mock -CommandName Set-ServiceStartMode `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1203,9 +1116,8 @@ try
 
             Context 'Credential passed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Write-CredentialProperty `
-                    -Verifiable
+                Mock -CommandName Write-CredentialProperty `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1228,9 +1140,8 @@ try
 
             Context 'BuildinAccount passed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Write-CredentialProperty `
-                    -Verifiable
+                Mock -CommandName Write-CredentialProperty `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1253,9 +1164,8 @@ try
 
             Context 'DesktopInteract passed, will not trigger restart' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Write-CredentialProperty `
-                    -Verifiable
+                Mock -CommandName Write-CredentialProperty `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:Result = Write-WriteProperty `
@@ -1305,10 +1215,9 @@ try
 
             Context 'Desktop interact passed but does not need to be changed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { $null, $null } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { $null, $null } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Test-UserName
@@ -1333,15 +1242,13 @@ try
 
             Context 'Desktop interact passed and does need to be changed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { $null, $null } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { $null, $null } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 0 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 0 } } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Test-UserName
@@ -1365,15 +1272,13 @@ try
 
             Context 'Desktop interact passed and does need to be changed but fails' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { $null,$null } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { $null,$null } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 99 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 99 } } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Test-UserName
@@ -1433,15 +1338,13 @@ try
 
             Context 'Credential passed but does not need to be changed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { $script:testUsername,$script:testPassword } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { $script:testUsername,$script:testPassword } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Set-LogOnAsServicePolicy
@@ -1464,24 +1367,20 @@ try
 
             Context 'Credential passed and needs to be changed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { $script:testUsername,$script:testPassword } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { $script:testUsername,$script:testPassword } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Set-LogOnAsServicePolicy `
-                    -Verifiable
+                Mock -CommandName Set-LogOnAsServicePolicy `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 0 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 0 } } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { Write-CredentialProperty `
@@ -1500,24 +1399,20 @@ try
 
             Context 'Credential passed and needs to be changed, but throws exception' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { $script:testUsername,$script:testPassword } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { $script:testUsername,$script:testPassword } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Set-LogOnAsServicePolicy `
-                    -Verifiable
+                Mock -CommandName Set-LogOnAsServicePolicy `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 99 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 99 } } `
+                     -Verifiable
 
                 $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change','Win32_Service','99')
@@ -1544,15 +1439,13 @@ try
 
             Context 'BuiltInAccount passed but does not need to be changed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { '.\LocalSystem','' } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { '.\LocalSystem','' } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $true } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $true } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Set-LogOnAsServicePolicy
@@ -1575,20 +1468,17 @@ try
 
             Context 'BuiltInAccount passed and needs to be changed' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { '.\LocalSystem',$null } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { '.\LocalSystem',$null } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 0 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 0 } } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Set-LogOnAsServicePolicy
@@ -1610,20 +1500,17 @@ try
 
             Context 'BuiltInAccount passed and needs to be changed, but throws exception' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-UserNameAndPassword `
-                    -MockWith { '.\LocalSystem',$null } `
-                    -Verifiable
+                Mock -CommandName Get-UserNameAndPassword `
+                     -MockWith { '.\LocalSystem',$null } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Test-UserName `
-                    -MockWith { $false } `
-                    -Verifiable
+                Mock -CommandName Test-UserName `
+                     -MockWith { $false } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 99 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 99 } } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName Set-LogOnAsServicePolicy
@@ -1678,10 +1565,9 @@ try
 
             Context 'Path needs to be changed and is changed without error' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 0 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 0 } } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:result = Write-BinaryProperty `
@@ -1701,10 +1587,9 @@ try
 
             Context 'Path needs to be changed but an error occurs changing it' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Invoke-CimMethod `
-                    -MockWith { @{ returnValue = 99 } } `
-                    -Verifiable
+                Mock -CommandName Invoke-CimMethod `
+                     -MockWith { @{ returnValue = 99 } } `
+                     -Verifiable
 
                 $innerMessage = ($script:localizedData.MethodFailed `
                     -f 'Change', 'Win32_Service', 99)
@@ -1830,10 +1715,9 @@ try
         Describe "$script:DscResourceName\Start-ServiceResource" {
             Context 'Service is already running' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-ServiceResource `
-                    -MockWith { $script:testServiceMockRunning } `
-                    -Verifiable
+                Mock -CommandName Get-ServiceResource `
+                     -MockWith { $script:testServiceMockRunning } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName New-Object
@@ -1853,14 +1737,12 @@ try
 
             Context 'Service is stopped' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-ServiceResource `
-                    -MockWith { $script:testServiceMockStopped } `
-                    -Verifiable
+                Mock -CommandName Get-ServiceResource `
+                     -MockWith { $script:testServiceMockStopped } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName New-Object `
-                    -Verifiable
+                Mock -CommandName New-Object `
+                     -Verifiable
 
                 $global:ServiceStarted = $false
 
@@ -1887,10 +1769,9 @@ try
         Describe "$script:DscResourceName\Stop-ServiceResource" {
             Context 'Service is already stopped' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-ServiceResource `
-                    -MockWith { $script:testServiceMockStopped } `
-                    -Verifiable
+                Mock -CommandName Get-ServiceResource `
+                     -MockWith { $script:testServiceMockStopped } `
+                     -Verifiable
 
                 # Mocks that should not be called
                 Mock -CommandName New-Object
@@ -1910,14 +1791,12 @@ try
 
             Context 'Service is running' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-ServiceResource `
-                    -MockWith { $script:testServiceMockRunning } `
-                    -Verifiable
+                Mock -CommandName Get-ServiceResource `
+                     -MockWith { $script:testServiceMockRunning } `
+                     -Verifiable
 
-                Mock `
-                    -CommandName New-Object `
-                    -Verifiable
+                Mock -CommandName New-Object `
+                     -Verifiable
 
                 $global:ServiceStopped = $false
 
@@ -1976,11 +1855,10 @@ try
         Describe "$script:DscResourceName\Test-ServiceExists" {
             Context 'Service exists' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-Service `
-                    -ParameterFilter { $Name -eq $script:testServiceName } `
-                    -MockWith { $script:testServiceMockRunning } `
-                    -Verifiable
+                Mock -CommandName Get-Service `
+                     -ParameterFilter { $Name -eq $script:testServiceName } `
+                     -MockWith { $script:testServiceMockRunning } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     {
@@ -2003,10 +1881,9 @@ try
 
             Context 'Service does not exist' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-Service `
-                    -ParameterFilter { $Name -eq $script:testServiceName } `
-                    -Verifiable
+                Mock -CommandName Get-Service `
+                     -ParameterFilter { $Name -eq $script:testServiceName } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     {
@@ -2031,10 +1908,9 @@ try
         Describe "$script:DscResourceName\Compare-ServicePath" {
             Context 'Service exists, path matches' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-CimInstance `
-                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                    -Verifiable
+                Mock -CommandName Get-CimInstance `
+                     -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:result = Compare-ServicePath `
@@ -2057,10 +1933,9 @@ try
 
             Context 'Service exists, path does not match' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-CimInstance `
-                    -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
-                    -Verifiable
+                Mock -CommandName Get-CimInstance `
+                     -MockWith { $script:testWin32ServiceMockRunningLocalSystem } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:result = Compare-ServicePath `
@@ -2083,9 +1958,8 @@ try
 
             Context 'Service does not exist' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-CimInstance `
-                    -Verifiable
+                Mock -CommandName Get-CimInstance `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     { $script:result = Compare-ServicePath `
@@ -2110,11 +1984,10 @@ try
         Describe "$script:DscResourceName\Get-ServiceResource" {
             Context 'Service exists' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-Service `
-                    -ParameterFilter { $Name -eq $script:testServiceName } `
-                    -MockWith { $script:testServiceMockRunning } `
-                    -Verifiable
+                Mock -CommandName Get-Service `
+                     -ParameterFilter { $Name -eq $script:testServiceName } `
+                     -MockWith { $script:testServiceMockRunning } `
+                     -Verifiable
 
                 It 'Should not throw an exception' {
                     {
@@ -2142,10 +2015,9 @@ try
 
             Context 'Service does not exist' {
                 # Mocks that should be called
-                Mock `
-                    -CommandName Get-Service `
-                    -ParameterFilter { $Name -eq $script:testServiceName } `
-                    -Verifiable
+                Mock -CommandName Get-Service `
+                     -ParameterFilter { $Name -eq $script:testServiceName } `
+                     -Verifiable
 
                 $errorRecord = Get-InvalidArgumentRecord `
                     -ErrorId 'ServiceNotFound' `

@@ -87,10 +87,11 @@ Specify an empty string if you don't want to pass any arguments.
 
 ### xService
 Provides a mechanism to configure and manage Windows services.
+This resource works on Nano Server.
 
 ### Requirements
 
-* Target machine must be running a Windows client operating system, Windows Server 2012 or later, or Nano Server.
+* None.
 
 ### Parameters
 
