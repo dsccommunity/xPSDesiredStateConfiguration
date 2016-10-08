@@ -13,7 +13,7 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 
 try {
 
-    Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+    Import-Module -Name (Join-Path -Path $PSScriptRoot `
                                    -ChildPath 'MSFT_xUserResource.TestHelper.psm1') `
                                    -Force
 

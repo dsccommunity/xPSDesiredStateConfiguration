@@ -19,7 +19,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
 * **xWindowsProcess** configures and manages Windows processes.
-* **xService** configures and manages Windows services.
+* **xService** provides a mechanism to configure and manage Windows services.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xGroup** provides a mechanism to manage local groups on the target node.
@@ -42,6 +42,7 @@ Resources that work on Nano Server:
 * xUser
 * xWindowsOptionalFeature
 * xWindowsPackageCab
+* xService
 
 ### xArchive
 
@@ -85,23 +86,33 @@ Specify an empty string if you don't want to pass any arguments.
 * **Ensure**: Ensures that the process is running or stopped: { Present | Absent }
 
 ### xService
+Provides a mechanism to configure and manage Windows services.
+This resource works on Nano Server.
 
-For a complete list of properties, please use Get-DscResource
+### Requirements
+
+* None.
+
+### Parameters
 
 * **[String] Name** _(Key)_: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
-* **[String] Ensure** _(Write)_: Ensures that the service is present or absent. Defaults to Present. { *Present* | Absent }.
+* **[String] Ensure** _(Write)_: Indicates whether the service is present or absent. Defaults to Present. { *Present* | Absent }.
 * **[String] Path** _(Write)_: The path to the service executable file.
 * **[String] StartupType** _(Write)_: Indicates the startup type for the service. { Automatic | Disabled | Manual }.
 * **[String] BuiltInAccount** _(Write)_: Indicates the sign-in account to use for the service. { LocalService | LocalSystem | NetworkService }.
 * **[PSCredential] Credential** _(Write)_: The credential to run the service under.
-* **[Boolean] DesktopInteract** _(Write)_: The service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
-* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped }.
+* **[Boolean] DesktopInteract** _(Write)_: Indicates whether the service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
+* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped | Ignore }.
 * **[String] DisplayName** _(Write)_: The display name of the service.
 * **[String] Description** _(Write)_: The description of the service.
 * **[String[]] Dependencies** _(Write)_: An array of strings indicating the names of the dependencies of the service.
 * **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000.
 * **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000.
-* **[String] Status** _(Read)_: The current status of the service.
+
+### Examples
+
+* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_CreateService.ps1)
+* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_DeleteService.ps1)
 
 ### xRemoteFile
 
@@ -410,6 +421,10 @@ None
     * Fixed PSSA/Style violations
     * Added/Updated Tests and Examples
 * Added xWindowsPackageCab
+* xService:
+    * Fixed PSSA/Style violations
+    * Updated Tests
+    * Added 'Ignore' state
 
 ### 4.0.0.0
 

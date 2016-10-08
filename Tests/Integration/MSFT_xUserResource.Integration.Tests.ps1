@@ -1,4 +1,4 @@
-﻿<#
+<#
     To run these tests, the currently logged on user must have rights to create a user.
     These integration tests cover creating a brand new user, updating values 
     of a user that already exists, and deleting a user that exists.
@@ -8,7 +8,9 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-Import-Module -Name "$PSScriptRoot\..\CommonTestHelper.psm1"
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1') `
+                               -Force
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `

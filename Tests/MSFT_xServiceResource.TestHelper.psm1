@@ -1,24 +1,24 @@
 <#
     .SYNOPSIS
-    Creates a service binary file.
+        Creates a service binary file.
 
     .PARAMETER ServiceName
-    The name of the service to create the binary file for.
+        The name of the service to create the binary file for.
 
     .PARAMETER ServiceCodePath
-    The path to the code for the service to create the binary file for.
+        The path to the code for the service to create the binary file for.
 
     .PARAMETER ServiceDisplayName
-    The display name of the service to create the binary file for.
+        The display name of the service to create the binary file for.
 
     .PARAMETER ServiceDescription
-    The description of the service to create the binary file for.
+        The description of the service to create the binary file for.
 
     .PARAMETER ServiceDependsOn
-    Dependencies of the service to create the binary file for.
+        Dependencies of the service to create the binary file for.
 
     .PARAMETER ServiceExecutablePath
-    The path to write the service executable to.
+        The path to write the service executable to.
 #>
 function New-ServiceBinary
 {
@@ -56,28 +56,37 @@ function New-ServiceBinary
     }
 
     $fileText = Get-Content $ServiceCodePath -Raw
-    $fileText = $fileText.Replace("TestServiceReplacementName", $ServiceName)
-    $fileText = $fileText.Replace("TestServiceReplacementDisplayName", $ServiceDisplayName)
-    $fileText = $fileText.Replace("TestServiceReplacementDescription", $ServiceDescription)
-    $fileText = $fileText.Replace("TestServiceReplacementDependsOn", $ServiceDependsOn)
-    Add-Type $fileText -OutputAssembly $ServiceExecutablePath -OutputType WindowsApplication -ReferencedAssemblies "System.ServiceProcess", "System.Configuration.Install"
+    $fileText = $fileText.Replace('TestServiceReplacementName', $ServiceName)
+    $fileText = $fileText.Replace('TestServiceReplacementDisplayName', $ServiceDisplayName)
+    $fileText = $fileText.Replace('TestServiceReplacementDescription', $ServiceDescription)
+    $fileText = $fileText.Replace('TestServiceReplacementDependsOn', $ServiceDependsOn)
+    Add-Type $fileText `
+                -OutputAssembly $ServiceExecutablePath `
+                -OutputType WindowsApplication `
+                -ReferencedAssemblies @('System.ServiceProcess', 'System.Configuration.Install')
 }
 
 <#
     .SYNOPSIS
-    Creates a new service for testing.
+        Creates a new service for testing.
+
     .PARAMETER ServiceName
-    The name of the service to create the binary file for.
+        The name of the service to create.
+
     .PARAMETER ServiceCodePath
-    The path to the code for the service to create the binary file for.
+        The path to the code for the service to create.
+
     .PARAMETER ServiceDisplayName
-    The display name of the service to create the binary file for.
+        The display name of the service to create.
+
     .PARAMETER ServiceDescription
-    The description of the service to create the binary file for.
+        The description of the service to create.
+
     .PARAMETER ServiceDependsOn
-    Dependencies of the service to create the binary file for.
+        Dependencies of the service to create.
+
     .PARAMETER ServiceExecutablePath
-    The path to write the service executable to.
+        The path to write the service executable to.
 #>
 function New-TestService
 {
@@ -118,10 +127,10 @@ function New-TestService
 
     if (-not (Test-Path $ServiceExecutablePath))
     {
-        throw "Failed to create service executable file."
+        throw 'Failed to create service executable file.'
     }
 
-    $configurationName = "TestServiceConfig"
+    $configurationName = 'TestServiceConfig'
     $configurationPath = Join-Path -Path (Get-Location) -ChildPath $ServiceName
 
     Configuration $configurationName
@@ -158,14 +167,15 @@ function Get-InstallUtilPath
 
     if ($env:Processor_Architecture -ieq 'amd64')
     {
-        $frameworkName = "Framework64"
+        $frameworkName = 'Framework64'
     }
     else
     {
-        $frameworkName = "Framework"
+        $frameworkName = 'Framework'
     }
 
-    return Join-Path (Resolve-Path "$env:WinDir\Microsoft.Net\$frameworkName\v4*") "installUtil.exe"
+    return Join-Path -Path (Resolve-Path "$env:WinDir\Microsoft.Net\$frameworkName\v4*") `
+                     -ChildPath 'installUtil.exe'
 }
 
 <#
@@ -202,7 +212,32 @@ function Remove-TestService
     Remove-Item $ServiceName -Force -Recurse -ErrorAction SilentlyContinue
 }
 
+function Get-InvalidArgumentRecord
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ErrorId,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ErrorMessage
+    )
+
+    $exception = New-Object -TypeName System.InvalidOperationException `
+                            -ArgumentList $ErrorMessage
+    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
+    $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord `
+                              -ArgumentList $exception, $ErrorId, $errorCategory, $null
+    return $errorRecord
+}
+
 Export-ModuleMember -Function `
     New-ServiceBinary, `
     New-TestService, `
-    Remove-TestService
+    Remove-TestService, `
+    Get-InvalidArgumentRecord
