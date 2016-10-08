@@ -1,5 +1,5 @@
-$script:DSCModuleName   = 'xPSDesiredStateConfiguration'
-$script:DSCResourceName = 'MSFT_xServiceResource'
+
+$script:DscResourceName = 'MSFT_xServiceResource'
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
@@ -54,31 +54,30 @@ try
         -ServiceExecutablePath $script:testServiceExecutablePath
 
     #region Integration Tests
-    $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName)_Add.config.ps1"
+    $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DscResourceName)_Add.config.ps1"
     . $configFile
 
-    Describe "$($script:DSCResourceName)_Add_Integration" {
-        #region DEFAULT TESTS
+    Describe "$($script:DscResourceName)_Add_Integration" {
+
         It 'Should compile and apply the MOF without throwing' {
             {
-                & "$($script:DSCResourceName)_Add_Config" `
-                    -OutputPath $TestEnvironment.WorkingFolder `
+                & "$($script:DscResourceName)_Add_Config" `
+                    -OutputPath $script:testEnvironment.WorkingFolder `
                     -ServiceName $script:testServiceName `
                     -ServicePath $script:testServiceExecutablePath `
                     -ServiceDisplayName $script:testServiceDisplayName `
                     -ServiceDescription $script:testServiceDescription `
                     -ServiceDependsOn $script:testServiceDependsOn
-                Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
-                    -ComputerName localhost -Wait -Verbose -Force
-            } | Should not throw
+
+                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                                       -ComputerName localhost -Wait -Verbose -Force
+            } | Should Not Throw
         }
 
         It 'Should be able to call Get-DscConfiguration without throwing' {
             { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not Throw
         }
-        #endregion
 
-        # Get the current service details
         $script:service = Get-CimInstance -ClassName Win32_Service -Filter "Name='$($script:testServiceName)'"
         It 'Should return a service of type CimInstance' {
             $script:service | Should BeOfType 'Microsoft.Management.Infrastructure.CimInstance'
@@ -97,34 +96,32 @@ try
             $script:service.startmode             | Should Be 'Auto'
         }
     }
-    #endregion
 
     Reset-DSC
 
-    #region Integration Tests
-    $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName)_Edit.config.ps1"
+    $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DscResourceName)_Edit.config.ps1"
     . $configFile
 
-    Describe "$($script:DSCResourceName)_Edit_Integration" {
-        #region DEFAULT TESTS
+    Describe "$($script:DscResourceName)_Edit_Integration" {
+
         It 'Should compile and apply the MOF without throwing' {
             {
-                & "$($script:DSCResourceName)_Edit_Config" `
-                    -OutputPath $TestEnvironment.WorkingFolder `
+                & "$($script:DscResourceName)_Edit_Config" `
+                    -OutputPath $script:testEnvironment.WorkingFolder `
                     -ServiceName $script:testServiceName `
                     -ServicePath $script:testServiceNewExecutablePath `
                     -ServiceDisplayName $script:testServiceNewDisplayName `
                     -ServiceDescription $script:testServiceNewDescription `
                     -ServiceDependsOn $script:testServiceNewDependsOn
-                Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
-                    -ComputerName localhost -Wait -Verbose -Force
-            } | Should not throw
+
+                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                                       -ComputerName localhost -Wait -Verbose -Force
+            } | Should Not Throw
         }
 
         It 'Should be able to call Get-DscConfiguration without throwing' {
             { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not Throw
         }
-        #endregion
 
         # Get the current service details
         $script:service = Get-CimInstance -ClassName Win32_Service -Filter "Name='$($script:testServiceName)'"
@@ -145,33 +142,32 @@ try
             $script:service.startmode             | Should Be 'Manual'
         }
     }
-    #endregion
 
     Reset-DSC
 
-    #region Integration Tests
-    $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName)_Remove.config.ps1"
+    $configFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DscResourceName)_Remove.config.ps1"
     . $configFile
 
-    Describe "$($script:DSCResourceName)_Remove_Integration" {
-        #region DEFAULT TESTS
+    Describe "$($script:DscResourceName)_Remove_Integration" {
+
         It 'Should compile and apply the MOF without throwing' {
             {
-                & "$($script:DSCResourceName)_Remove_Config" `
-                    -OutputPath $TestEnvironment.WorkingFolder `
+                & "$($script:DscResourceName)_Remove_Config" `
+                    -OutputPath $script:testEnvironment.WorkingFolder `
                     -ServiceName $script:testServiceName
-                Start-DscConfiguration -Path $TestEnvironment.WorkingFolder `
-                    -ComputerName localhost -Wait -Verbose -Force
+
+                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                                       -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw
         }
 
         It 'Should be able to call Get-DscConfiguration without throwing' {
             { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not throw
         }
-        #endregion
 
         # Get the current service details
         $script:service = Get-CimInstance -ClassName Win32_Service -Filter "Name='$($script:testServiceName)'"
+
         It 'Should return the service as null' {
             $script:service | Should BeNullOrEmpty
         }
@@ -185,7 +181,5 @@ finally
         -ServiceName $script:testServiceName `
         -ServiceExecutablePath $script:testServiceExecutablePath
 
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
 }
