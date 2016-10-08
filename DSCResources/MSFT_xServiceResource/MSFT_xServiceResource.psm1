@@ -1055,6 +1055,7 @@ function Test-UserName
         If BuiltInAccount is provided, this will return the resolved username from BuiltInAccount.
         If Credential is provided, this will return the resolved username and password from Credential.
         If nothing is provided, this will return null for both username and password.
+        If both parameters are provided the username from BuiltInAccount is returned.
 
     .PARAMETER BuiltInAccount
         The built in account to extract the username from. Optional
