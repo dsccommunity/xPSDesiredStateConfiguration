@@ -312,12 +312,10 @@ function Set-TargetResource
         Optional.
 
     .PARAMETER StartupTimeout
-        Indicates what the time to wait for the service to start should be in milliseconds.
-        Optional. Default is 3000. Not used in Test-TargetResource.
+        Not used in Test-TargetResource.
 
     .PARAMETER TerminateTimeout
-        Indicates what the time to wait for the service to stop should be in milliseconds.
-        Optional. Default is 3000. Not used in Test-TargetResource.
+        Not used in Test-TargetResource.
 #>
 function Test-TargetResource
 {
