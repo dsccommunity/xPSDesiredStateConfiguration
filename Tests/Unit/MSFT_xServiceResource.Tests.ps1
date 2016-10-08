@@ -3,11 +3,11 @@
 param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1') `
+                               -ChildPath 'DSCResources\CommonTestHelper.psm1') `
                                -Force
 
 # Need this module to import the localized data
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+Import-Module -Name (Join-Path -Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) `
               -ChildPath 'CommonResourceHelper.psm1')
 
 # Localized messages for Write-Verbose statements
