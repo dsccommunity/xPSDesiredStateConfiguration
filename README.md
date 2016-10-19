@@ -439,6 +439,8 @@ None
     * Fixes null verbose log output error. This resolves issue [#224](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/224).
 * xDSCWebService
 	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
+* xArchive
+	* Fixed issue where resource would throw exception when file name contains brackets. This resolves issue [#255](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/255).
 
 ### 5.0.0.0
 
