@@ -1,5 +1,6 @@
-# These tests use a mock server module. They will fail on an actual server.
-# All tests that require a credential will be skipped
+# Needed to create a fake credential
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
