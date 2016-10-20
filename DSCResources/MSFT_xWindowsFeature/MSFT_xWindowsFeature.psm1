@@ -194,7 +194,10 @@ function Set-TargetResource
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
         {
             $parameters = $psboundparameters.Remove('Credential')
-            $feature = Invoke-Command -ScriptBlock { Add-WindowsFeature @using:psboundparameters } -ComputerName . -Credential $Credential -ErrorVariable ev
+            $feature = Invoke-Command -ScriptBlock { Add-WindowsFeature @using:psboundparameters } `
+                                      -ComputerName . `
+                                      -Credential $Credential `
+                                      -ErrorVariable ev
             $psboundparameters.Add('Credential', $Credential)
         }
         else
@@ -247,7 +250,10 @@ function Set-TargetResource
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
         {
             $parameters = $psboundparameters.Remove('Credential')
-            $feature = Invoke-Command -ScriptBlock { Remove-WindowsFeature @using:psboundparameters } -ComputerName . -Credential $Credential -ErrorVariable ev
+            $feature = Invoke-Command -ScriptBlock { Remove-WindowsFeature @using:psboundparameters } `
+                                      -ComputerName . `
+                                      -Credential $Credential `
+                                      -ErrorVariable ev
             $psboundparameters.Add('Credential', $Credential)
         }
         else
@@ -314,6 +320,7 @@ function Test-TargetResource
         $IncludeAllSubFeature = $false,
 
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [ValidateNotNullOrEmpty()]
@@ -325,7 +332,19 @@ function Test-TargetResource
         $testTargetResourceStartVerboseMessage = $($script:localizedData.TestTargetResourceStartVerboseMessage) -f ${Name} 
         Write-Verbose -Message $testTargetResourceStartVerboseMessage
 
-        Assert-PrerequisitesValid 
+        Assert-PrerequisitesValid
+
+        # -Source Parameter is not applicable to Windows Server 2008 R2 SP1. Hence removing it.
+        # all role/feature spcific binaries are avaliable inboc on Windows Server 2008 R2 SP1, hence
+        # -Source is not supported on Windows Server 2008 R2 SP1.
+        $isR2Sp1 = Test-IsWinServer2008R2SP1
+        if ($isR2Sp1 -and $psboundparameters.ContainsKey('Source'))
+        {
+            $sourcePropertyNotSupportedDebugMessage = $($script:localizedData.SourcePropertyNotSupportedDebugMessage) 
+            Write-Verbose -Message $sourcePropertyNotSupportedDebugMessage
+
+            $parameters = $psboundparameters.Remove('Source')
+        }
 
         $testTargetResourceResult = $false
 
@@ -340,7 +359,10 @@ function Test-TargetResource
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
         {
             $parameters = $psboundparameters.Remove('Credential')
-            $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature @using:psboundparameters } -ComputerName . -Credential $Credential -ErrorVariable ev
+            $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature @using:psboundparameters } `
+                                      -ComputerName . `
+                                      -Credential $Credential `
+                                      -ErrorVariable ev
             $psboundparameters.Add('Credential', $Credential)
         }
         else
@@ -362,10 +384,9 @@ function Test-TargetResource
                 $testTargetResourceResult = $true
 
                 # IncludeAllSubFeature is set to $true, so we need to make
-                # sure that all Sub Features are alsi installed.
+                # sure that all Sub Features are also installed.
                 if ($IncludeAllSubFeature)
                 {
-
                     foreach ($currentSubFeature in $feature.SubFeatures)
                     {
                         $parameters = $psboundparameters.Remove('Name')
@@ -391,7 +412,13 @@ function Test-TargetResource
                         {
                             Assert-FeatureValid $subFeature $currentSubFeature
 
-                            if (-not $subFeature.Installed)
+                            if (-not $subFeature.Installed -and $Ensure -eq 'Present')
+                            {
+                                $testTargetResourceResult = $false
+                                break
+                            }
+
+                            if ($subFeature.Installed -and $Ensure -eq 'Absent')
                             {
                                 $testTargetResourceResult = $false
                                 break
