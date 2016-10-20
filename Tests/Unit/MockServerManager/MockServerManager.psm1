@@ -67,7 +67,7 @@ function Add-WindowsFeature
         ${IncludeManagementTools},
 
         [System.Management.Automation.PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [System.Object]
@@ -84,7 +84,7 @@ function Add-WindowsFeature
         ${LogPath})
 
     #Test-Credential $Credential
-
+    <#
     $changeMade = $false
     $featureResult = @()
     $exitCode = 'NoChangeNeeded'
@@ -125,6 +125,7 @@ function Add-WindowsFeature
     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.FeatureOperationResult'
             
     return $windowsFeatureObject
+    #>
 }
 
 <#
@@ -144,7 +145,7 @@ function Get-WindowsFeature
         ${Name},
 
         [System.Management.Automation.PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [Alias('Cn')]
@@ -158,11 +159,11 @@ function Get-WindowsFeature
 
     #Test-Credential $Credential
 
-    $windowsFeature = $script:mockWindowsFeatures[$Name]
-    $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
-    $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+    #$windowsFeature = $script:mockWindowsFeatures[$Name]
+    #$windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+    #$windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
-    return $windowsFeatureObject
+    #return $windowsFeatureObject
 }
 
 <#
@@ -209,7 +210,7 @@ function Remove-WindowsFeature
         ${LogPath})
 
     #Test-Credential $Credential
-
+<#
     $changeMade = $false
     $featureResult = @()
     $exitCode = 'NoChangeNeeded'
@@ -246,7 +247,8 @@ function Remove-WindowsFeature
     $windowsFeatureObject =New-Object PSObject -Property $windowsFeature
     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.FeatureOperationResult'
             
-    return $windowsFeatureObject       
+    return $windowsFeatureObject 
+    #>      
 }
 
 # The following mock windows feature objects are structured the same as the output from Get-WindowsFeature.
