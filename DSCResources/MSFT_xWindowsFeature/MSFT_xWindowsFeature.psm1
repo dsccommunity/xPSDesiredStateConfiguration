@@ -503,7 +503,6 @@ function Assert-PrerequisitesValid
 
     try
     {
-    
         Import-Module ServerManager -PassThru
     }
     catch
