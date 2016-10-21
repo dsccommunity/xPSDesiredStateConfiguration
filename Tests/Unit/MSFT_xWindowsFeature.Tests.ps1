@@ -8,7 +8,8 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
 
 # Need this module to import the localized data
 Import-Module -Name (Join-Path -Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) `
-              -ChildPath 'DSCResources\CommonResourceHelper.psm1')
+                               -ChildPath (Join-Path -Path 'DSCResources' `
+                                                     -ChildPath 'CommonResourceHelper.psm1'))
 
 # Localized messages for Write-Verbose statements
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsFeature'
@@ -20,11 +21,6 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 
 try {
     InModuleScope 'MSFT_xWindowsFeature' {
-
-        Import-Module -Name (Join-Path -Path $PSScriptRoot `
-                                       -ChildPath (Join-Path -Path 'MockServerManager' `
-                                                             -ChildPath 'MockServerManager.psm1')) `
-                                       -Force
 
         $testUserName = 'TestUserName12345'
         $testUserPassword = 'StrongOne7.'
