@@ -487,7 +487,7 @@ function Assert-PrerequisitesValid
     $standardServerCore = 13
     $EnterpriseServerCore = 14
 
-    $operatingSystem = Get-WmiObject -Class Win32_operatingsystem
+    $operatingSystem = Get-CimInstance -Class Win32_operatingsystem
     if ($operatingSystem.Version.StartsWith('6.1.') -and `
         (($operatingSystem.OperatingSystemSKU -eq $datacenterServerCore) -or `
          ($operatingSystem.OperatingSystemSKU -eq $standardServerCore) -or `
