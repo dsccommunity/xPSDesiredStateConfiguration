@@ -1,6 +1,6 @@
 # Import the helper functions
 Import-Module $PSScriptRoot\PSWSIISEndpoint.psm1 -Verbose:$false
-Import-Module $PSScriptRoot\SChannel.psm1 -Verbose:$false
+Import-Module $PSScriptRoot\UseSecurityBestPractices.psm1 -Verbose:$false
 
 # The Get-TargetResource cmdlet.
 function Get-TargetResource
@@ -16,7 +16,15 @@ function Get-TargetResource
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]                         
-        [string]$CertificateThumbPrint      
+        [string]$CertificateThumbPrint,
+
+        # Pull Server is created with the most secure practices
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [bool]$UseSecurityBestPractices,
+
+        # Exceptions of security best practices
+        [string[]] $DisableSecurityBestPractices
     )
 
     $webSite = Get-Website -Name $EndpointName
@@ -98,7 +106,8 @@ function Get-TargetResource
         Ensure                          = $Ensure
         RegistrationKeyPath             = $RegistrationKeyPath
         AcceptSelfSignedCertificates    = $AcceptSelfSignedCertificates
-        UseUpToDateSecuritySettings     = (SChannel\Test-EnhancedSecurity)
+        UseSecurityBestPractices        = $UseSecurityBestPractices
+        DisableSecurityBestPractices    = $DisableSecurityBestPractices
     }
 }
 
@@ -146,14 +155,19 @@ function Set-TargetResource
         # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
         [boolean]$AcceptSelfSignedCertificates = $true,
 
-        # Use up to date secure protocol and cipher settings for schannel
-        [boolean]$UseUpToDateSecuritySettings
+        # Pull Server is created with the most secure practices
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [bool]$UseSecurityBestPractices,
+
+        # Exceptions of security best practices
+        [string[]] $DisableSecurityBestPractices
     )
 
     # Check parameter values
-    if ($UseUpToDateSecuritySettings -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
+    if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
     {
-        throw "Error: Cannot use up to date security settings with unencrypted traffic. Please set UseUpTodateSecuritySettings to `$false or use a certificate to encrypt pull server traffic."
+        throw "Error: Cannot use best practice security settings with unencrypted traffic. Please set UseSecurityBestPractices to `$false or use a certificate to encrypt pull server traffic."
         # No need to proceed any more
         return
     }
@@ -291,9 +305,9 @@ function Set-TargetResource
         }
     }
 
-    if($UseUpToDateSecuritySettings)
+    if($UseSecurityBestPractices)
     {
-        SChannel\Set-EnhancedSecurity
+        UseSecurityBestPractices\Set-UseSecurityBestPractices -DisableSecurityBestPractices $DisableSecurityBestPractices
     }
 }
 
@@ -342,8 +356,13 @@ function Test-TargetResource
         # Are self-signed certs being accepted for client auth.
         [boolean]$AcceptSelfSignedCertificates,
 
-        # Is up to date secure protocol and cipher settings used for schannel
-        [boolean]$UseUpToDateSecuritySettings
+        # Pull Server is created with the most secure practices
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [bool]$UseSecurityBestPractices,
+
+        # Exceptions of security best practices
+        [string[]] $DisableSecurityBestPractices
     )
 
     $desiredConfigurationMatch = $true;
@@ -470,13 +489,13 @@ function Test-TargetResource
             }
         }
 
-        Write-Verbose "Check UseUpToDateSecuritySettings"
-        if ($UseUpToDateSecuritySettings)
+        Write-Verbose "Check UseSecurityBestPractices"
+        if ($UseSecurityBestPractices)
         {
-            if (-not (SChannel\Test-EnhancedSecurity))
+            if (-not (UseSecurityBestPractices\Test-UseSecurityBestPractices -DisableSecurityBestPractices $DisableSecurityBestPractices))
             {
                 $desiredConfigurationMatch = $false;
-                Write-Verbose "The state of SChannel security settings does not match the desired state."
+                Write-Verbose "The state of security settings does not match the desired state."
                 break
             }
         }
