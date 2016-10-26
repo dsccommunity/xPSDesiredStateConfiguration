@@ -19,10 +19,6 @@ Configuration $ConfigurationName
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
-        
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Source,
 
         [System.Boolean]
         $IncludeAllSubFeature = $false,

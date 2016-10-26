@@ -390,24 +390,22 @@ try {
                     return $windowsFeatureObject
                 }
 
-                It 'Should install the feature when Ensure set to Present and Credential and Source passed in' {
+                It 'Should install the feature when Ensure set to Present and Credential passed in' {
 
                     { 
                         Set-TargetResource -Name $testWindowsFeatureName2 `
                                            -Ensure 'Present' `
-                                           -Source 'testSource' `
                                            -Credential $testCredential
                     } | Should Not Throw
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
                     Assert-MockCalled -CommandName Add-WindowsFeature -Times 0 -Scope It
                 }
 
-                It 'Should uninstall the feature when Ensure set to Absent and Credential and Source passed in' {
+                It 'Should uninstall the feature when Ensure set to Absent and Credential passed in' {
 
                     { 
                         Set-TargetResource -Name $testWindowsFeatureName2 `
                                            -Ensure 'Absent' `
-                                           -Source 'testSource' `
                                            -Credential $testCredential
                     } | Should Not Throw
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
@@ -501,7 +499,6 @@ try {
 
                     $result = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
-                                                  -Source 'testSource' `
                                                   -IncludeAllSubFeature $false `
                                                   -Credential $testCredential
                     $result | Should Be $true
@@ -573,7 +570,6 @@ try {
 
                     $result = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
-                                                  -Source 'testSource' `
                                                   -IncludeAllSubFeature $false `
                                                   -Credential $testCredential
                     $result | Should Be $false

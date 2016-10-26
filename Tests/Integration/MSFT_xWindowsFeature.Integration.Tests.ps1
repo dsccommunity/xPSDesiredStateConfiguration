@@ -1,5 +1,10 @@
 ﻿<#
-    <Description of Integration tests>
+    Integration tests for Installing/uninstalling a Windows Feature. Currently Telnet-Client is
+    set as the feature to test since it's fairly small and doesn't require a restart. dfklsjdfl
+    is set as the feature to test installing/uninstalling a feature with its SubFeatures,
+    but this takes a good chunk of time, so by default these tests are set to be skipped.
+    If there's any major changes to the resource, then set the skipLongTests variable to $true
+    and run those tests at least once to test the new functionality more completely. 
 #> 
 
 # Suppressing this rule since we need to create a plaintext password to test this resource
@@ -20,6 +25,10 @@ $script:testFeatureWithSubFeaturesName = 'Web-Server'
 $script:installStateOfTestFeature
 $script:installStateOfTestWithSubFeatures
 
+<#
+    If this is set to $true then the tests that test installing/uninstalling a feature with
+    its subfeatures will not run.
+#>
 $script:skipLongTests = $false
 
 try {
@@ -271,15 +280,17 @@ finally
         Remove-WindowsFeature -Name $script:testFeatureName
     }
 
-    if ($script:installStateOfTestWithSubFeatures)
+    if (-not $script:skipLongTests)
     {
-        Add-WindowsFeature -Name $script:testFeatureWithSubFeaturesName -IncludeAllSubFeature
+        if ($script:installStateOfTestWithSubFeatures)
+        {
+            Add-WindowsFeature -Name $script:testFeatureWithSubFeaturesName -IncludeAllSubFeature
+        }
+        else
+        {
+            Remove-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
+        }
     }
-    else
-    {
-        Remove-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
-    }
-
     Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
 }
 

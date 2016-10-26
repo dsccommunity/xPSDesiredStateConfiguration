@@ -154,8 +154,6 @@ function Get-TargetResource
         Specifies whether the feature should be installed ('Present') or uninstalled ('Absent').
         By default this is set to Present.
 
-    .PARAMETER Source
-
     .PARAMETER IncludeAllSubFeature
         Specifies whether the subfeatures of the indicated feature should also be installed.
         If Ensure is set to 'Absent' then all (if any) subfeatures will always be uninstalled
@@ -163,10 +161,11 @@ function Get-TargetResource
         By default this is set to $false.
 
     .PARAMETER Credential
-        Credential attributes (if required) to install or uninstall the role or feature.
+        Credential (if required) to install or uninstall the role or feature.
         Optional.
 
     .PARAMETER LogPath
+        The path to the log file to log this operation
 
 #>
 function Set-TargetResource
@@ -183,10 +182,6 @@ function Set-TargetResource
        [String]
        $Ensure = 'Present',
 
-       [ValidateNotNullOrEmpty()]
-       [String]
-       $Source,
-
        [Boolean]
        $IncludeAllSubFeature = $false,
 
@@ -202,17 +197,6 @@ function Set-TargetResource
     Write-Verbose -Message $($script:localizedData.SetTargetResourceStartVerboseMessage) -f ${Name}
 
     Assert-PrerequisitesValid 
-
-    # The Source Parameter is not used by Windows Server 2008 R2 SP1, hence, removing it.
-    $isR2Sp1 = Test-IsWinServer2008R2SP1
-
-    if ($isR2Sp1 -and $psboundparameters.ContainsKey('Source'))
-    {
-        Write-Verbose -Message $($script:localizedData.SourcePropertyNotSupportedDebugMessage)
-
-        $parameters = $psboundparameters.Remove('Source')
-    }
-
 
     if ($Ensure -eq 'Present')
     {
@@ -274,7 +258,6 @@ function Set-TargetResource
     {
         $parameters = $psboundparameters.Remove('Ensure')
         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
-        $parameters = $psboundparameters.Remove('Source')
 
         Write-Verbose -Message $($script:localizedData.UninstallFeature) -f ${Name}
 
@@ -342,8 +325,6 @@ function Set-TargetResource
         Specifies whether the feature should be installed ('Present') or uninstalled ('Absent').
         By default this is set to Present.
 
-    .PARAMETER Source
-
     .PARAMETER IncludeAllSubFeature
         Specifies whether the subfeatures of the indicated feature should also be checked that
         they are in the desired state. If Ensure is set to 'Present' and this is set to $true
@@ -358,6 +339,7 @@ function Set-TargetResource
         Optional.
 
     .PARAMETER LogPath
+        The path to the log file to log this operation.
 
 #>
 function Test-TargetResource
@@ -373,10 +355,6 @@ function Test-TargetResource
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
-
-        [ValidateNotNullOrEmpty()]
-        [String]
-        $Source,
 
         [Boolean]
         $IncludeAllSubFeature = $false,
@@ -395,20 +373,10 @@ function Test-TargetResource
 
         Assert-PrerequisitesValid
 
-        # The Source Parameter is not applicable to Windows Server 2008 R2 SP1, hence, removing it.
-        $isR2Sp1 = Test-IsWinServer2008R2SP1
-        if ($isR2Sp1 -and $psboundparameters.ContainsKey('Source'))
-        {
-            Write-Verbose -Message $($script:localizedData.SourcePropertyNotSupportedDebugMessage)
-
-            $parameters = $psboundparameters.Remove('Source')
-        }
-
         $testTargetResourceResult = $false
 
         $parameters = $psboundparameters.Remove('Ensure')
         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
-        $parameters = $psboundparameters.Remove('Source')
 
         Write-Verbose -Message $($script:localizedData.QueryFeature) -f ${Name}
 
@@ -447,7 +415,6 @@ function Test-TargetResource
                         $parameters = $psboundparameters.Remove('Name')
                         $parameters = $psboundparameters.Remove('Ensure')
                         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
-                        $parameters = $psboundparameters.Remove('Source')
                         $psboundparameters.Add('Name', $currentSubFeature)
 
                         $isR2Sp1 = Test-IsWinServer2008R2SP1
