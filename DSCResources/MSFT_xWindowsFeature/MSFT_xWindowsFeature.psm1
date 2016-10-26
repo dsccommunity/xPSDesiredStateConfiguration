@@ -5,12 +5,23 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
 # Localized messages for Write-Verbose statements in this resource
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsFeature'
 
-# The Get-TargetResource cmdlet is used to fetch the status of role or feature on the target machine.
-# It gives the feature info of the requested role/feature on the target machine.
+<#
+    .SYNOPSIS
+        Retrieves the status of the role or feature with the given name on the target machine.
 
-# If a feature does not contain any SubFeatures then $includeAllSubFeature would be set to $false.
-# If a feature contains one or more subfeatures then $includeAllSubFeature would be set to
-# $true only if all the subfeatures are installed, or else $includeAllSubFeature would be set to $false.
+    .PARAMETER Name
+        The name of the Windows feature to retrieve
+
+    .PARAMETER Credential
+        Credential attributes (if required) to retrieve the info on the role or feature.
+        Optional.
+
+    .NOTES
+        If a feature does not contain any subfeatures then $includeAllSubFeature
+        will be set to $false. If a feature contains one or more subfeatures then
+        $includeAllSubFeature will be set to $true only if all the subfeatures are installed
+        otherwise, $includeAllSubFeature will be set to $false. 
+#>
 function Get-TargetResource
 {
      [OutputType([Hashtable])]
@@ -27,9 +38,8 @@ function Get-TargetResource
      )
 
         $getTargetResourceResult = $null
-
-        $getTargetResourceStartVerboseMessage = $($script:localizedData.GetTargetResourceStartVerboseMessage) -f ${Name} 
-        Write-Verbose -Message $getTargetResourceStartVerboseMessage
+ 
+        Write-Verbose -Message $($script:localizedData.GetTargetResourceStartVerboseMessage) -f ${Name}
 
         Assert-PrerequisitesValid 
 
@@ -118,23 +128,47 @@ function Get-TargetResource
 
                 # Add all feature properties to the hash table
                 $getTargetResourceResult = @{
-                                                Name = $Name
-                                                DisplayName = $feature.DisplayName
-                                                Ensure = $ensureResult
-                                                IncludeAllSubFeature = $includeAllSubFeature
-                                            }
+                    Name = $Name
+                    DisplayName = $feature.DisplayName
+                    Ensure = $ensureResult
+                    IncludeAllSubFeature = $includeAllSubFeature
+                }
 
-                $getTargetResourceEndVerboseMessage = $($script:localizedData.GetTargetResourceEndVerboseMessage) -f ${Name} 
-                Write-Verbose -Message $getTargetResourceEndVerboseMessage
+                Write-Verbose -Message $($script:localizedData.GetTargetResourceEndVerboseMessage) -f ${Name}
 
-                $getTargetResourceResult
+                return $getTargetResourceResult
             }
         }
 }
 
+<#
+    .SYNOPSIS
+        Installs or uninstalls the role or feature with the given name on the target machine.
+        If IncludeAllSubFeature is set to $true, then all of the subfeatures of the given feature
+        will also be installed. 
 
-# The Set-TargetResource cmdlet is used to install or uninstall a role on the target machine.
-# It also supports installing & uninstalling the role or feature specific subfeatures.
+    .PARAMETER Name
+        The name of the Windows feature to install or uninstall.
+
+    .PARAMETER Ensure
+        Specifies whether the feature should be installed ('Present') or uninstalled ('Absent').
+        By default this is set to Present.
+
+    .PARAMETER Source
+
+    .PARAMETER IncludeAllSubFeature
+        Specifies whether the subfeatures of the indicated feature should also be installed.
+        If Ensure is set to 'Absent' then all (if any) subfeatures will always be uninstalled
+        as well.
+        By default this is set to $false.
+
+    .PARAMETER Credential
+        Credential attributes (if required) to install or uninstall the role or feature.
+        Optional.
+
+    .PARAMETER LogPath
+
+#>
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'FeatureName')]
@@ -165,19 +199,16 @@ function Set-TargetResource
        $LogPath
     )
 
-    $setTargetResourceStartVerboseMessage = $($script:localizedData.SetTargetResourceStartVerboseMessage) -f ${Name} 
-    Write-Verbose -Message $setTargetResourceStartVerboseMessage
+    Write-Verbose -Message $($script:localizedData.SetTargetResourceStartVerboseMessage) -f ${Name}
 
     Assert-PrerequisitesValid 
 
-    # -Source Parameter is not applicable to Windows Server 2008 R2 SP1. Hence removing it.
-    # all role/feature spcific binaries are avaliable inboc on Windows Server 2008 R2 SP1, hence
-    # -Source is not supported on Windows Server 2008 R2 SP1.
+    # The Source Parameter is not used by Windows Server 2008 R2 SP1, hence, removing it.
     $isR2Sp1 = Test-IsWinServer2008R2SP1
+
     if ($isR2Sp1 -and $psboundparameters.ContainsKey('Source'))
     {
-        $sourcePropertyNotSupportedDebugMessage = $($script:localizedData.SourcePropertyNotSupportedDebugMessage) 
-        Write-Verbose -Message $sourcePropertyNotSupportedDebugMessage
+        Write-Verbose -Message $($script:localizedData.SourcePropertyNotSupportedDebugMessage)
 
         $parameters = $psboundparameters.Remove('Source')
     }
@@ -220,10 +251,12 @@ function Set-TargetResource
         }
         else
         {
-            # Add-WindowsFeature cmdlet falied to successfully install the requested feature.
-            # If there are errors from the Add-WindowsFeature cmdlet. We surface those errors.
-            # If Add-WindwosFeature cmdlet does not surface any errors. Then the provider throws a
-            # terminating error.
+            <#
+                The Add-WindowsFeature cmdlet failed to successfully install the requested feature.
+                If there are errors from the Add-WindowsFeature cmdlet. We surface those errors.
+                If Add-WindwosFeature cmdlet does not surface any errors. Then the provider throws
+                a terminating error.
+            #>
             if ($null -eq $ev -or $ev.Count -eq 0)
             {
                 $errorId = 'FeatureInstallationFailure'
@@ -243,8 +276,7 @@ function Set-TargetResource
         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
         $parameters = $psboundparameters.Remove('Source')
 
-        $uninstallFeatureMessage = $($script:localizedData.UninstallFeature) -f ${Name} 
-        Write-Verbose -Message $uninstallFeatureMessage
+        Write-Verbose -Message $($script:localizedData.UninstallFeature) -f ${Name}
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
@@ -276,10 +308,12 @@ function Set-TargetResource
         }
         else
         {
-            # Remove-WindowsFeature cmdlet falied to successfully Uninstall the requested feature.
-            # If there are errors from the Remove-WindowsFeature cmdlet. We surface those errors.
-            # If Remove-WindwosFeature cmdlet does not surface any errors. Then the provider throws a
-            # terminating error.
+            <#
+                The Remove-WindowsFeature cmdlet failed to successfully Uninstall the requested feature.
+                If there are errors from the Remove-WindowsFeature cmdlet. We surface those errors.
+                If Remove-WindwosFeature cmdlet does not surface any errors. Then the provider throws
+                a terminating error.
+            #>
             if ($null -eq $ev -or $ev.Count -eq 0)
             {
                 $errorId = 'FeatureUnInstallationFailure'
@@ -297,7 +331,35 @@ function Set-TargetResource
     Write-Verbose -Message $setTargetResourceEndVerboseMessage
 }
 
-# The Test-TargetResource cmdlet is used to validate if the role or feature is in a state as expected in the instance document.
+<#
+    .SYNOPSIS
+        Tests if the feature with the given name is in the desired state. 
+
+    .PARAMETER Name
+        The name of the Windows feature to test the state of.
+
+    .PARAMETER Ensure
+        Specifies whether the feature should be installed ('Present') or uninstalled ('Absent').
+        By default this is set to Present.
+
+    .PARAMETER Source
+
+    .PARAMETER IncludeAllSubFeature
+        Specifies whether the subfeatures of the indicated feature should also be checked that
+        they are in the desired state. If Ensure is set to 'Present' and this is set to $true
+        then each subfeature is checked to ensure it is installed as well. If Ensure is set to
+        Absent and this is set to $true, then each subfeature is checked to ensure it is uninstalled.
+        As of now, this test can't be used to check if a feature is Installed but all of its
+        subfeatures are uninstalled.
+        By default this is set to $false.
+
+    .PARAMETER Credential
+        Credential attributes (if required) to test the status of the role or feature.
+        Optional.
+
+    .PARAMETER LogPath
+
+#>
 function Test-TargetResource
 {
     [OutputType([System.Boolean])]
@@ -329,19 +391,15 @@ function Test-TargetResource
 
     )
 
-        $testTargetResourceStartVerboseMessage = $($script:localizedData.TestTargetResourceStartVerboseMessage) -f ${Name} 
-        Write-Verbose -Message $testTargetResourceStartVerboseMessage
+        Write-Verbose -Message $($script:localizedData.TestTargetResourceStartVerboseMessage) -f ${Name}
 
         Assert-PrerequisitesValid
 
-        # -Source Parameter is not applicable to Windows Server 2008 R2 SP1. Hence removing it.
-        # all role/feature spcific binaries are avaliable inboc on Windows Server 2008 R2 SP1, hence
-        # -Source is not supported on Windows Server 2008 R2 SP1.
+        # The Source Parameter is not applicable to Windows Server 2008 R2 SP1, hence, removing it.
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Source'))
         {
-            $sourcePropertyNotSupportedDebugMessage = $($script:localizedData.SourcePropertyNotSupportedDebugMessage) 
-            Write-Verbose -Message $sourcePropertyNotSupportedDebugMessage
+            Write-Verbose -Message $($script:localizedData.SourcePropertyNotSupportedDebugMessage)
 
             $parameters = $psboundparameters.Remove('Source')
         }
@@ -352,8 +410,7 @@ function Test-TargetResource
         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
         $parameters = $psboundparameters.Remove('Source')
 
-        $queryFeatureMessage = $($script:localizedData.QueryFeature) -f ${Name} 
-        Write-Verbose -Message $queryFeatureMessage
+        Write-Verbose -Message $($script:localizedData.QueryFeature) -f ${Name}
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
@@ -377,16 +434,14 @@ function Test-TargetResource
 
 
             # Check if the feature is in the requested Ensure state.
-            # If so then check if then check if the subfeature is in the requested Ensure state.
             if (($Ensure -eq 'Present' -and $feature.Installed -eq $true) -or `
                 ($Ensure -eq 'Absent' -and $feature.Installed -eq $false))
             {
                 $testTargetResourceResult = $true
 
-                # IncludeAllSubFeature is set to $true, so we need to make
-                # sure that all Sub Features are also installed.
                 if ($IncludeAllSubFeature)
                 {
+                    # Check if each subfeature is in the requested state.
                     foreach ($currentSubFeature in $feature.SubFeatures)
                     {
                         $parameters = $psboundparameters.Remove('Name')
@@ -428,16 +483,26 @@ function Test-TargetResource
                 }
             }
 
-            $testTargetResourceEndVerboseMessage = $($script:localizedData.TestTargetResourceEndVerboseMessage) -f ${Name} 
-            Write-Verbose -Message $testTargetResourceEndVerboseMessage
+            Write-Verbose -Message $($script:localizedData.TestTargetResourceEndVerboseMessage) -f ${Name}
 
-            $testTargetResourceResult
+            return $testTargetResourceResult
         }
 }
 
 
-# Assert-FeatureValid is a helper function used to validate the results of SM+ cmdlets
-# Get-Windowsfeature for the user supplied feature name.
+<#
+    .SYNOPSIS
+        Asserts that the given feature exists and that there are not multiple instances of it.
+        Throws an invalid operation exception if either of the above errors is found.
+
+    .PARAMETER Feature
+        The feature object to check for validity.
+
+    .PARAMETER Name
+        The name of the feature to include in any error messages that are thrown.
+        (Not used to assert validity of the feature).
+        
+#>
 function Assert-FeatureValid
 {
     param
@@ -460,8 +525,6 @@ function Assert-FeatureValid
         New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
     }
 
-    # WildCard pattern is not supported by the role provider.
-    # Hence we restrict user to request only one feature information in a single request.
     if ($Feature.Count -gt 1)
     {
         $errorId = 'FeatureDiscoveryFailure'
@@ -474,20 +537,25 @@ function Assert-FeatureValid
     }
 }
 
-# Assert-PrerequisitesValid is a helper function used to validate if the MSFT_RoleResource is supported on the target machine.
-# MSFT_RoleResource is supported only on Server SKU's. MSFT_RoleResource depends on ServerManagerModule which is avaliable
-# only on Server SKU's.
+<#
+    .SYNOPSIS
+        Asserts that the MSFT_RoleResource is supported on the target machine.
+        MSFT_RoleResource depends on the ServerManager Module
+        which is only supported on Server SKU's.
+        If ServerManager is not available on the target machine then an Invalid Operation exception
+        is thrown.
+#>
 function Assert-PrerequisitesValid
 {
     param 
     ()
 
-    #Enable ServerManager-PSH-Cmdlets feature if os is WS2008R2 Core.
+    # Enable ServerManager-PSH-Cmdlets feature if OS is WS2008R2 Core.
     $datacenterServerCore = 12
     $standardServerCore = 13
     $EnterpriseServerCore = 14
 
-    $operatingSystem = Get-CimInstance -Class Win32_operatingsystem
+    $operatingSystem = Get-CimInstance -Class 'Win32_OperatingSystem'
     if ($operatingSystem.Version.StartsWith('6.1.') -and `
         (($operatingSystem.OperatingSystemSKU -eq $datacenterServerCore) -or `
          ($operatingSystem.OperatingSystemSKU -eq $standardServerCore) -or `
@@ -497,8 +565,8 @@ function Assert-PrerequisitesValid
 
         # Update:ServerManager-PSH-Cmdlets has a depndency on Powershell 2 update: MicrosoftWindowsPowerShell
         # Hence enabling MicrosoftWindowsPowerShell.
-        dism /online /enable-feature /FeatureName:MicrosoftWindowsPowerShell | Out-Null
-        dism /online /enable-feature /FeatureName:ServerManager-PSH-Cmdlets | Out-Null
+        $null = dism /online /enable-feature /FeatureName:MicrosoftWindowsPowerShell
+        $null = dism /online /enable-feature /FeatureName:ServerManager-PSH-Cmdlets
     }
 
     try
@@ -507,9 +575,7 @@ function Assert-PrerequisitesValid
     }
     catch
     {
-
-        $serverManagerModuleNotFoundDebugMessage = $($script:localizedData.ServerManagerModuleNotFoundDebugMessage)
-        Write-Verbose -Message $serverManagerModuleNotFoundDebugMessage
+        Write-Verbose -Message $($script:localizedData.ServerManagerModuleNotFoundDebugMessage)
 
         $errorId = 'SkuNotSupported'
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
@@ -521,16 +587,20 @@ function Assert-PrerequisitesValid
     }
 }
 
-
-# Test-IsWinServer2008R2SP1 is a helper function to detect if the target machine is a Win 2008 R2 SP1.
+<#
+    .SYNOPSIS
+        Tests if the machine is a Windows Server 2008 R2 SP1 machine.
+        Returns $true if so, $false otherwise.
+    
+    .NOTES
+        Since Assert-PrequisitesValid ensures that ServerManager is available on the machine,
+        the version is the only thing that needs to be checked in this function.
+#>
 function Test-IsWinServer2008R2SP1
 {
     param
     ()
 
-    # We are already checking for the Presence of ServerManager module before using this helper function.
-    # Hence checking for the version shoudl be good enough to confirm that the target machine is
-    # Windows Server 2008 R2 machine.
     if ([Environment]::OSVersion.Version.ToString().Contains('6.1.'))
     {
         return $true
