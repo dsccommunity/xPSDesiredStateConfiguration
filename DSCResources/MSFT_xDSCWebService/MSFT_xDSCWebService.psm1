@@ -24,6 +24,7 @@ function Get-TargetResource
         [bool]$UseSecurityBestPractices,
 
         # Exceptions of security best practices
+        [ValidateSet("SecureTLSProtocols")]
         [string[]] $DisableSecurityBestPractices
     )
 
@@ -161,6 +162,7 @@ function Set-TargetResource
         [bool]$UseSecurityBestPractices,
 
         # Exceptions of security best practices
+        [ValidateSet("SecureTLSProtocols")]
         [string[]] $DisableSecurityBestPractices
     )
 
@@ -362,6 +364,7 @@ function Test-TargetResource
         [bool]$UseSecurityBestPractices,
 
         # Exceptions of security best practices
+        [ValidateSet("SecureTLSProtocols")]
         [string[]] $DisableSecurityBestPractices
     )
 
