@@ -39,12 +39,11 @@ function Get-TargetResource
 
         $getTargetResourceResult = $null
  
-        Write-Verbose -Message $($script:localizedData.GetTargetResourceStartVerboseMessage) -f ${Name}
+        Write-Verbose -Message ($script:localizedData.GetTargetResourceStartVerboseMessage-f ${Name})
 
         Assert-PrerequisitesValid 
 
-        $queryFeatureMessage = $($script:localizedData.QueryFeature) -f ${Name} 
-        Write-Verbose -Message $queryFeatureMessage
+        Write-Verbose -Message ($script:localizedData.QueryFeature -f ${Name})
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
@@ -134,7 +133,7 @@ function Get-TargetResource
                     IncludeAllSubFeature = $includeAllSubFeature
                 }
 
-                Write-Verbose -Message $($script:localizedData.GetTargetResourceEndVerboseMessage) -f ${Name}
+                Write-Verbose -Message ($script:localizedData.GetTargetResourceEndVerboseMessage -f ${Name})
 
                 return $getTargetResourceResult
             }
@@ -194,7 +193,7 @@ function Set-TargetResource
        $LogPath
     )
 
-    Write-Verbose -Message $($script:localizedData.SetTargetResourceStartVerboseMessage) -f ${Name}
+    Write-Verbose -Message ($script:localizedData.SetTargetResourceStartVerboseMessage -f ${Name})
 
     Assert-PrerequisitesValid 
 
@@ -202,8 +201,7 @@ function Set-TargetResource
     {
         $parameters = $psboundparameters.Remove('Ensure')
 
-        $installFeatureMessage = $($script:localizedData.InstallFeature) -f ${Name} 
-        Write-Verbose -Message $installFeatureMessage
+        Write-Verbose -Message ($script:localizedData.InstallFeature -f ${Name})
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
@@ -227,8 +225,7 @@ function Set-TargetResource
             # Check if reboot is required, if so notify CA.
             if ($feature.RestartNeeded -eq 'Yes')
             {
-                $restartNeededMessage = $($script:localizedData.RestartNeeded)
-                Write-Verbose -Message $restartNeededMessage
+                Write-Verbose -Message $script:localizedData.RestartNeeded
 
                 $global:DSCMachineStatus = 1
             }
@@ -259,7 +256,7 @@ function Set-TargetResource
         $parameters = $psboundparameters.Remove('Ensure')
         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
 
-        Write-Verbose -Message $($script:localizedData.UninstallFeature) -f ${Name}
+        Write-Verbose -Message ($script:localizedData.UninstallFeature -f ${Name})
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
@@ -283,9 +280,7 @@ function Set-TargetResource
             # Check if reboot is required, if so notify CA.
             if ($feature.RestartNeeded -eq 'Yes')
             {
-                $restartNeededMessage = $($script:localizedData.RestartNeeded)
-                Write-Verbose -Message $restartNeededMessage
-
+                Write-Verbose -Message $script:localizedData.RestartNeeded
                 $global:DSCMachineStatus = 1
             }
         }
@@ -310,8 +305,7 @@ function Set-TargetResource
         }
     }
 
-    $setTargetResourceEndVerboseMessage = $($script:localizedData.SetTargetResourceEndVerboseMessage) -f ${Name} 
-    Write-Verbose -Message $setTargetResourceEndVerboseMessage
+    Write-Verbose -Message ($script:localizedData.SetTargetResourceEndVerboseMessage -f ${Name})
 }
 
 <#
@@ -369,7 +363,7 @@ function Test-TargetResource
 
     )
 
-        Write-Verbose -Message $($script:localizedData.TestTargetResourceStartVerboseMessage) -f ${Name}
+        Write-Verbose -Message ($script:localizedData.TestTargetResourceStartVerboseMessage -f ${Name})
 
         Assert-PrerequisitesValid
 
@@ -378,7 +372,7 @@ function Test-TargetResource
         $parameters = $psboundparameters.Remove('Ensure')
         $parameters = $psboundparameters.Remove('IncludeAllSubFeature')
 
-        Write-Verbose -Message $($script:localizedData.QueryFeature) -f ${Name}
+        Write-Verbose -Message ($script:localizedData.QueryFeature -f ${Name})
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $psboundparameters.ContainsKey('Credential'))
@@ -450,7 +444,7 @@ function Test-TargetResource
                 }
             }
 
-            Write-Verbose -Message $($script:localizedData.TestTargetResourceEndVerboseMessage) -f ${Name}
+            Write-Verbose -Message ($script:localizedData.TestTargetResourceEndVerboseMessage -f ${Name})
 
             return $testTargetResourceResult
         }
@@ -528,7 +522,7 @@ function Assert-PrerequisitesValid
          ($operatingSystem.OperatingSystemSKU -eq $standardServerCore) -or `
          ($operatingSystem.OperatingSystemSKU -eq $EnterpriseServerCore)))
     {
-        Write-Verbose -Message $($script:localizedData.EnableServerManagerPSHCmdletsFeature)
+        Write-Verbose -Message $script:localizedData.EnableServerManagerPSHCmdletsFeature
 
         # Update:ServerManager-PSH-Cmdlets has a depndency on Powershell 2 update: MicrosoftWindowsPowerShell
         # Hence enabling MicrosoftWindowsPowerShell.
@@ -542,7 +536,7 @@ function Assert-PrerequisitesValid
     }
     catch
     {
-        Write-Verbose -Message $($script:localizedData.ServerManagerModuleNotFoundDebugMessage)
+        Write-Verbose -Message $script:localizedData.ServerManagerModuleNotFoundDebugMessage
 
         $errorId = 'SkuNotSupported'
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
