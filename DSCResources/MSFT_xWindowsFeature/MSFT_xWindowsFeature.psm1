@@ -13,14 +13,14 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsFeature'
         The name of the role or feature to retrieve
 
     .PARAMETER Credential
-        A credential (if required) to retrieve the info on the role or feature.
+        The credential (if required) to retrieve the info on the role or feature.
         Optional.
 
     .NOTES
-        If the specified feature does not contain any subfeatures then IncludeAllSubFeature
-        will be set to $false. If the specified feature contains one or more subfeatures then
-        IncludeAllSubFeature will be set to $true only if all the subfeatures are installed,
-        otherwise, IncludeAllSubFeature will be set to $false. 
+        If the specified role or feature does not contain any subfeatures then
+        IncludeAllSubFeature will be set to $false. If the specified feature contains one
+        or more subfeatures then IncludeAllSubFeature will be set to $true only if all the
+        subfeatures are installed, otherwise, IncludeAllSubFeature will be set to $false. 
 #>
 function Get-TargetResource
 {
@@ -32,18 +32,16 @@ function Get-TargetResource
        [ValidateNotNullOrEmpty()]
        [String]
        $Name,
-        
+       
+       [ValidateNotNullOrEmpty()]
        [System.Management.Automation.PSCredential]
        [System.Management.Automation.Credential()]
        $Credential
     )
 
     $getTargetResourceResult = $null
-
-    # String variable used to collect error messages that occur in WindowsFeature cmdlets.
-    $errors = ''
  
-    Write-Verbose -Message ($script:localizedData.GetTargetResourceStartMessage-f $Name)
+    Write-Verbose -Message ($script:localizedData.GetTargetResourceStartMessage -f $Name)
     
     Assert-PrerequisitesValid 
     
@@ -52,97 +50,80 @@ function Get-TargetResource
     $isR2Sp1 = Test-IsWinServer2008R2SP1
     if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
     {
-        $PSBoundParameters.Remove('Credential')
-        $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature @using:PSBoundParameters } `
+        $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $Name } `
                                   -ComputerName . `
                                   -Credential $Credential `
-                                  -ErrorVariable $errors
-        $PSBoundParameters.Add('Credential', $Credential)
     }
     else
     {
-        $feature = Get-WindowsFeature @PSBoundParameters -ErrorVariable $errors
+        $feature = Get-WindowsFeature @PSBoundParameters
     }
     
-    if ($null -eq $errors -or $errors.Count -eq 0)
+    Assert-FeatureValid -Feature $feature -Name $Name
+    
+    $includeAllSubFeature = $true
+    
+    if ($feature.SubFeatures.Count -eq 0)
     {
-        $foundError = $false
-    
-        Assert-FeatureValid $feature $Name
-    
-        $includeAllSubFeature = $true
-    
-        if ($feature.SubFeatures.Count -eq 0)
+        $includeAllSubFeature = $false
+    }
+    else
+    {
+        foreach ($currentSubFeatureName in $feature.SubFeatures)
         {
-            $includeAllSubFeature = $false
-        }
-        else
-        {
-            foreach ($currentSubFeature in $feature.SubFeatures)
+
+            $getWindowsFeatureParameters = @{
+                Name = $currentSubFeatureName
+            }
+
+            if ($PSBoundParameters.ContainsKey('Credential'))
             {
-               if ($foundError -eq $false)
-               {
-                    $PSBoundParameters.Remove('Name')
-                    $PSBoundParameters.Add('Name', $currentSubFeature)
+               $getWindowsFeatureParameters.Add('Credential', $Credential) 
+            }
+
     
-                    $isR2Sp1 = Test-IsWinServer2008R2SP1
-                    if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
-                    {
-                        $PSBoundParameters.Remove('Credential')
-                        $subFeature = Invoke-Command -ScriptBlock { Get-WindowsFeature @using:PSBoundParameters } `
-                                                     -ComputerName . `
-                                                     -Credential $Credential `
-                                                     -ErrorVariable $errors
-                        $PSBoundParameters.Add('Credential', $Credential)
-                    }
-                    else
-                    {
-                        $subFeature = Get-WindowsFeature @PSBoundParameters -ErrorVariable $errors
-                    }
+            $isR2Sp1 = Test-IsWinServer2008R2SP1
+            if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
+            {
+                $subFeature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $currentSubFeatureName } `
+                                             -ComputerName . `
+                                             -Credential $Credential `
+            }
+            else
+            {
+                $subFeature = Get-WindowsFeature @getWindowsFeatureParameters
+            }
     
-                    if ($null -eq $errors -or $errors.Count -eq 0)
-                    {
-                        Assert-FeatureValid $subFeature $currentSubFeature
+            Assert-FeatureValid -Feature $subFeature -Name $currentSubFeatureName
     
-                        if (-not $subFeature.Installed)
-                        {
-                            $includeAllSubFeature = $false
-                            break
-                        }
-                    }
-                    else
-                    {
-                        New-InvalidOperationException -Message $errors
-                    }
-                }
+            if (-not $subFeature.Installed)
+            {
+                $includeAllSubFeature = $false
+                break
             }
         }
+    }
 
-        if ($feature.Installed)
-        {
-            $ensureResult = 'Present'
-        }
-        else
-        {
-            $ensureResult = 'Absent'
-        }
-    
-        # Add all feature properties to the hash table
-        $getTargetResourceResult = @{
-            Name = $Name
-            DisplayName = $feature.DisplayName
-            Ensure = $ensureResult
-            IncludeAllSubFeature = $includeAllSubFeature
-        }
-    
-        Write-Verbose -Message ($script:localizedData.GetTargetResourceEndMessage -f $Name)
-    
-        return $getTargetResourceResult
+    if ($feature.Installed)
+    {
+        $ensureResult = 'Present'
     }
     else
     {
-        New-InvalidOperationException -Message $errors
+        $ensureResult = 'Absent'
     }
+    
+    # Add all feature properties to the hash table
+    $getTargetResourceResult = @{
+        Name = $Name
+        DisplayName = $feature.DisplayName
+        Ensure = $ensureResult
+        IncludeAllSubFeature = $includeAllSubFeature
+    }
+    
+    Write-Verbose -Message ($script:localizedData.GetTargetResourceEndMessage -f $Name)
+    
+    return $getTargetResourceResult
 }
 
 <#
@@ -152,20 +133,21 @@ function Get-TargetResource
         will also be installed. 
 
     .PARAMETER Name
-        The name of the Windows feature to install or uninstall.
+        The name of the role or feature to install or uninstall.
 
     .PARAMETER Ensure
-        Specifies whether the feature should be installed ('Present') or uninstalled ('Absent').
+        Specifies whether the role or feature should be installed ('Present')
+        or uninstalled ('Absent').
         By default this is set to Present.
 
     .PARAMETER IncludeAllSubFeature
-        Specifies whether the subfeatures of the indicated feature should also be installed.
-        If Ensure is set to 'Absent' then all (if any) subfeatures will always be uninstalled
-        as well.
+        Specifies whether the subfeatures of the indicated role or feature should also
+        be installed. If Ensure is set to 'Absent' then all (if any) subfeatures will
+        always be uninstalled as well.
         By default this is set to $false.
 
     .PARAMETER Credential
-        Credential (if required) to install or uninstall the role or feature.
+        The Credential (if required) to install or uninstall the role or feature.
         Optional.
 
     .PARAMETER LogPath
@@ -178,7 +160,7 @@ function Set-TargetResource
     [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'FeatureName')]
     param
     (
-       [parameter(Mandatory = $true, ParameterSetName = 'FeatureName')]
+       [Parameter(Mandatory = $true, ParameterSetName = 'FeatureName')]
        [ValidateNotNullOrEmpty()]
        [String]
        $Name,
@@ -190,6 +172,7 @@ function Set-TargetResource
        [Boolean]
        $IncludeAllSubFeature = $false,
 
+       [ValidateNotNullOrEmpty()]
        [System.Management.Automation.PSCredential]
        [System.Management.Automation.Credential()]
        $Credential,
@@ -203,28 +186,35 @@ function Set-TargetResource
 
     Assert-PrerequisitesValid
 
-    # String variable used to collect error messages that occur in WindowsFeature cmdlets.
-    $errors = ''
-
     if ($Ensure -eq 'Present')
     {
-        $PSBoundParameters.Remove('Ensure')
+        $addWindowsFeatureParameters = @{
+            Name = $Name
+            IncludeAllSubFeature = $IncludeAllSubFeature
+        }
+
+        if ($PSBoundParameters.ContainsKey('LogPath'))
+        {
+           $addWindowsFeatureParameters.Add('LogPath', $LogPath) 
+        }
 
         Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name)
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
         {
-            $PSBoundParameters.Remove('Credential')
-            $feature = Invoke-Command -ScriptBlock { Add-WindowsFeature @using:PSBoundParameters } `
+            $feature = Invoke-Command -ScriptBlock { Add-WindowsFeature @addWindowsFeatureParameters } `
                                       -ComputerName . `
-                                      -Credential $Credential `
-                                      -ErrorVariable $errors
-            $PSBoundParameters.Add('Credential', $Credential)
+                                      -Credential $Credential
         }
         else
         {
-            $feature = Add-WindowsFeature @PSBoundParameters -ErrorVariable $errors
+            if ($PSBoundParameters.ContainsKey('Credential'))
+            {
+               $addWindowsFeatureParameters.Add('Credential', $Credential) 
+            }
+
+            $feature = Add-WindowsFeature @addWindowsFeatureParameters
         }
 
         if ($null -ne $feature -and $feature.Success -eq $true)
@@ -235,55 +225,49 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-
                 $global:DSCMachineStatus = 1
             }
         }
         else
         {
-            <#
-                The Add-WindowsFeature cmdlet failed to successfully install the requested feature.
-                If there are errors from the Add-WindowsFeature cmdlet. We surface those errors.
-                If Add-WindwosFeature cmdlet does not surface any errors. Then the provider throws
-                a terminating error.
-            #>
-            if ($null -eq $errors -or $errors.Count -eq 0)
-            {
-                $errorId = 'FeatureInstallationFailure'
-                $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                $errorMessage = $($script:localizedData.FeatureInstallationFailureError) -f $Name 
-                $exception = New-Object System.InvalidOperationException $errorMessage 
-                $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+            $errorId = 'FeatureInstallationFailure'
+            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
+            $errorMessage = $($script:localizedData.FeatureInstallationFailureError) -f $Name 
+            $exception = New-Object System.InvalidOperationException $errorMessage 
+            $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
-                New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
-            }
-            else
-            {
-                New-InvalidOperationException -Message $errors
-            }
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
         }
     }
     # Ensure = 'Absent'
     else
     {
-        $PSBoundParameters.Remove('Ensure')
-        $PSBoundParameters.Remove('IncludeAllSubFeature')
+        $removeWindowsFeatureParameters = @{
+            Name = $Name
+        }
+
+        if ($PSBoundParameters.ContainsKey('LogPath'))
+        {
+           $removeWindowsFeatureParameters.Add('LogPath', $LogPath) 
+        }
 
         Write-Verbose -Message ($script:localizedData.UninstallFeature -f $Name)
 
         $isR2Sp1 = Test-IsWinServer2008R2SP1
         if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
         {
-            $PSBoundParameters.Remove('Credential')
-            $feature = Invoke-Command -ScriptBlock { Remove-WindowsFeature @using:PSBoundParameters } `
+            $feature = Invoke-Command -ScriptBlock { Remove-WindowsFeature @removeWindowsFeatureParameters } `
                                       -ComputerName . `
-                                      -Credential $Credential `
-                                      -ErrorVariable $errors
-            $PSBoundParameters.Add('Credential', $Credential)
+                                      -Credential $Credential
         }
         else
         {
-            $feature = Remove-WindowsFeature @PSBoundParameters -ErrorVariable $errors
+            if ($PSBoundParameters.ContainsKey('Credential'))
+            {
+               $addWindowsFeatureParameters.Add('Credential', $Credential) 
+            }
+
+            $feature = Remove-WindowsFeature @PSBoundParameters
         }
 
         if ($feature -ne $null -and $feature.Success -eq $true)
@@ -299,26 +283,13 @@ function Set-TargetResource
         }
         else
         {
-            <#
-                The Remove-WindowsFeature cmdlet failed to successfully Uninstall the requested feature.
-                If there are errors from the Remove-WindowsFeature cmdlet. We surface those errors.
-                If Remove-WindwosFeature cmdlet does not surface any errors. Then the provider throws
-                a terminating error.
-            #>
-            if ($null -eq $errors -or $errors.Count -eq 0)
-            {
-                $errorId = 'FeatureUninstallationFailure'
-                $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                $errorMessage = $($script:localizedData.FeatureUninstallationFailureError) -f $Name 
-                $exception = New-Object System.InvalidOperationException $errorMessage 
-                $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
+            $errorId = 'FeatureUninstallationFailure'
+            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
+            $errorMessage = $($script:localizedData.FeatureUninstallationFailureError) -f $Name 
+            $exception = New-Object System.InvalidOperationException $errorMessage 
+            $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
-                New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
-            }
-            else
-            {
-                New-InvalidOperationException -Message $errors
-            }
+            New-InvalidOperationException -Message $errorMessage -ErrorRecord $errorRecord
         }
     }
 
@@ -327,26 +298,27 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
-        Tests if the feature with the given name is in the desired state. 
+        Tests if the role or feature with the given name is in the desired state. 
 
     .PARAMETER Name
-        The name of the Windows feature to test the state of.
+        The name of the role or feature to test the state of.
 
     .PARAMETER Ensure
-        Specifies whether the feature should be installed ('Present') or uninstalled ('Absent').
+        Specifies whether the role or feature should be installed ('Present')
+        or uninstalled ('Absent').
         By default this is set to Present.
 
     .PARAMETER IncludeAllSubFeature
-        Specifies whether the subfeatures of the indicated feature should also be checked that
-        they are in the desired state. If Ensure is set to 'Present' and this is set to $true
-        then each subfeature is checked to ensure it is installed as well. If Ensure is set to
+        Specifies whether the subfeatures of the indicated role or feature should also be checked
+        to ensure they are in the desired state. If Ensure is set to 'Present' and this is set to
+        $true then each subfeature is checked to ensure it is installed as well. If Ensure is set to
         Absent and this is set to $true, then each subfeature is checked to ensure it is uninstalled.
         As of now, this test can't be used to check if a feature is Installed but all of its
         subfeatures are uninstalled.
         By default this is set to $false.
 
     .PARAMETER Credential
-        Credential attributes (if required) to test the status of the role or feature.
+        The Credential (if required) to test the status of the role or feature.
         Optional.
 
     .PARAMETER LogPath
@@ -360,7 +332,7 @@ function Test-TargetResource
     [OutputType([System.Boolean])]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
         $Name,
@@ -372,6 +344,7 @@ function Test-TargetResource
         [Boolean]
         $IncludeAllSubFeature = $false,
 
+        [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
@@ -388,114 +361,95 @@ function Test-TargetResource
     
     $testTargetResourceResult = $false
 
-    # String variable used to collect error messages that occur in WindowsFeature cmdlets.
-    $errors = ''
+    $getWindowsFeatureParameters = @{
+        Name = $Name
+    }
 
-    $PSBoundParameters.Remove('Ensure')
-    $PSBoundParameters.Remove('IncludeAllSubFeature')
+    if ($PSBoundParameters.ContainsKey('Credential'))
+    {
+       $getWindowsFeatureParameters.Add('Credential', $Credential) 
+    }
     
     Write-Verbose -Message ($script:localizedData.QueryFeature -f $Name)
     
     $isR2Sp1 = Test-IsWinServer2008R2SP1
     if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
     {
-        $PSBoundParameters.Remove('Credential')
-        $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature @using:PSBoundParameters } `
+        $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $Name } `
                                   -ComputerName . `
-                                  -Credential $Credential `
-                                  -ErrorVariable $errors
-        $PSBoundParameters.Add('Credential', $Credential)
+                                  -Credential $Credential
     }
     else
     {
-        $feature = Get-WindowsFeature @PSBoundParameters -ErrorVariable $errors
+        $feature = Get-WindowsFeature @getWindowsFeatureParameters
     }
     
+    Assert-FeatureValid -Feature $feature -Name $Name
     
-    if ($null -eq $errors -or $errors.Count -eq 0)
+    # Check if the feature is in the requested Ensure state.
+    if (($Ensure -eq 'Present' -and $feature.Installed -eq $true) -or `
+        ($Ensure -eq 'Absent' -and $feature.Installed -eq $false))
     {
-        Assert-FeatureValid $feature $Name
+        $testTargetResourceResult = $true
     
-    
-        # Check if the feature is in the requested Ensure state.
-        if (($Ensure -eq 'Present' -and $feature.Installed -eq $true) -or `
-            ($Ensure -eq 'Absent' -and $feature.Installed -eq $false))
+        if ($IncludeAllSubFeature)
         {
-            $testTargetResourceResult = $true
-    
-            if ($IncludeAllSubFeature)
+            # Check if each subfeature is in the requested state.
+            foreach ($currentSubFeatureName in $feature.SubFeatures)
             {
-                # Check if each subfeature is in the requested state.
-                foreach ($currentSubFeature in $feature.SubFeatures)
+                $getWindowsFeatureParameters['Name'] = $currentSubFeatureName
+    
+                $isR2Sp1 = Test-IsWinServer2008R2SP1
+                if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
                 {
-                    $PSBoundParameters.Remove('Name')
-                    $PSBoundParameters.Remove('Ensure')
-                    $PSBoundParameters.Remove('IncludeAllSubFeature')
-                    $PSBoundParameters.Add('Name', $currentSubFeature)
+                    $subFeature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $currentSubFeatureName } `
+                                                 -ComputerName . `
+                                                 -Credential $Credential
+                }
+                else
+                {
+                    $subFeature = Get-WindowsFeature @getWindowsFeatureParameters
+                }
+                
+                Assert-FeatureValid $subFeature $currentSubFeatureName
     
-                    $isR2Sp1 = Test-IsWinServer2008R2SP1
-                    if ($isR2Sp1 -and $PSBoundParameters.ContainsKey('Credential'))
-                    {
-                        $PSBoundParameters.Remove('Credential')
-                        $subFeature = Invoke-Command -ScriptBlock { Get-WindowsFeature @using:PSBoundParameters } `
-                                                     -ComputerName . `
-                                                     -Credential $Credential `
-                                                     -ErrorVariable $errors
-                        $PSBoundParameters.Add('Credential', $Credential)
-                    }
-                    else
-                    {
-                        $subFeature = Get-WindowsFeature @PSBoundParameters -ErrorVariable $errors
-                    }
+                if (-not $subFeature.Installed -and $Ensure -eq 'Present')
+                {
+                    $testTargetResourceResult = $false
+                    break
+                }
     
-    
-                    if ($null -eq $errors -or $errors.Count -eq 0)
-                    {
-                        Assert-FeatureValid $subFeature $currentSubFeature
-    
-                        if (-not $subFeature.Installed -and $Ensure -eq 'Present')
-                        {
-                            $testTargetResourceResult = $false
-                            break
-                        }
-    
-                        if ($subFeature.Installed -and $Ensure -eq 'Absent')
-                        {
-                            $testTargetResourceResult = $false
-                            break
-                        }
-                    }
+                if ($subFeature.Installed -and $Ensure -eq 'Absent')
+                {
+                    $testTargetResourceResult = $false
+                    break
                 }
             }
         }
-        else
-        {
-            New-InvalidOperationException -Message $errors
-        }
-    
-        Write-Verbose -Message ($script:localizedData.TestTargetResourceEndMessage -f $Name)
-    
-        return $testTargetResourceResult
     }
     else
     {
-        New-InvalidOperationException -Message $errors
+        # Ensure is not in the correct state
+        $testTargetResourceResult = $false
     }
+    
+    Write-Verbose -Message ($script:localizedData.TestTargetResourceEndMessage -f $Name)
+    
+    return $testTargetResourceResult
 }
 
 
 <#
     .SYNOPSIS
-        Asserts that the given feature exists and that there are not multiple instances of it.
-        Throws an invalid operation exception if either of the above errors is found.
+        Asserts that the given role or feature exists and that multiple instances of it don't exist.
+        Throws an invalid operation exception if either of the above errors are found.
 
     .PARAMETER Feature
-        The feature object to check for validity.
+        The role or feature object to check for validity.
 
     .PARAMETER Name
-        The name of the feature to include in any error messages that are thrown.
-        (Not used to assert validity of the feature).
-        
+        The name of the role or feature to include in any error messages that are thrown.
+        (Not used to assert validity of the feature).    
 #>
 function Assert-FeatureValid
 {
@@ -513,7 +467,7 @@ function Assert-FeatureValid
     {
         $errorId = 'FeatureNotFound'
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-        $errorMessage = $($script:localizedData.FeatureNotFoundError) -f $Name
+        $errorMessage = $script:localizedData.FeatureNotFoundError -f $Name
         $exception = New-Object System.InvalidOperationException $errorMessage
         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -524,7 +478,7 @@ function Assert-FeatureValid
     {
         $errorId = 'FeatureDiscoveryFailure'
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-        $errorMessage = $($script:localizedData.FeatureDiscoveryFailureError) -f $Name
+        $errorMessage = $script:localizedData.FeatureDiscoveryFailureError -f $Name
         $exception = New-Object System.InvalidOperationException $errorMessage
         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -535,10 +489,9 @@ function Assert-FeatureValid
 <#
     .SYNOPSIS
         Asserts that the MSFT_RoleResource is supported on the target machine.
-        MSFT_RoleResource depends on the ServerManager Module
-        which is only supported on Server SKU's.
-        If ServerManager is not available on the target machine then an Invalid Operation exception
-        is thrown.
+        MSFT_RoleResource depends on the ServerManager Module which is only supported
+        on Server SKU's. If ServerManager is not available on the target machine
+        then an Invalid Operation exception is thrown.
 #>
 function Assert-PrerequisitesValid
 {
@@ -576,7 +529,7 @@ function Assert-PrerequisitesValid
 
         $errorId = 'SkuNotSupported'
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-        $errorMessage = $($script:localizedData.SkuNotSupported)
+        $errorMessage = $script:localizedData.SkuNotSupported
         $exception = New-Object System.InvalidOperationException $errorMessage
         $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
