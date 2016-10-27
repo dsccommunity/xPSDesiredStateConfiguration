@@ -9,7 +9,7 @@ $secureProtocols              = @("TLS 1.1", "TLS 1.2")
 
 # ===========================================================
 
-function Test-Protocol
+function Test-SChannelProtocol
 {
     foreach ($protocol in $insecureProtocols)
     {
@@ -22,7 +22,7 @@ function Test-Protocol
     foreach ($protocol in $secureProtocols)
     {
         $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-        if (($null -eq (Get-Item -Path $registryPath -ErrorAction SilentlyContinue -ErrorVariable ev)) -or ($null -eq (Get-ItemProperty -Path $registryPath)) -or ((Get-ItemProperty -Path $registryPath).Enabled -eq 0))
+        if (($null -eq (Get-Item -Path $registryPath -ErrorAction SilentlyContinue)) -or ($null -eq (Get-ItemProperty -Path $registryPath)) -or ((Get-ItemProperty -Path $registryPath).Enabled -eq 0))
         {
             return $false
         }
@@ -30,7 +30,7 @@ function Test-Protocol
     return $true
 }
 
-function Set-Protocol
+function Set-SChannelProtocol
 {
     foreach ($protocol in $insecureProtocols)
     {

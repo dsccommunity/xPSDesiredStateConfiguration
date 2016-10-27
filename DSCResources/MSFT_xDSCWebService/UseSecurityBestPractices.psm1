@@ -16,7 +16,7 @@ function Test-UseSecurityBestPractices
 {
     param([string[]] $DisableSecurityBestPractices)
 
-    $usedProtocolsBestPractices = ($DisableSecurityBestPractices -icontains $SecureTLSProtocols) -or (Test-Protocol)
+    $usedProtocolsBestPractices = ($DisableSecurityBestPractices -icontains $SecureTLSProtocols) -or (Test-SChannelProtocol)
 
     return $usedProtocolsBestPractices
 }
@@ -31,7 +31,7 @@ function Set-UseSecurityBestPractices
 
     if (-not ($DisableSecurityBestPractices -icontains $SecureTLSProtocols))
     {
-        Set-Protocol
+        Set-SChannelProtocol
     }
 }
 
