@@ -39,7 +39,7 @@ function Get-TargetResource
 
         $getTargetResourceResult = $null
  
-        Write-Verbose -Message ($script:localizedData.GetTargetResourceStartVerboseMessage-f ${Name})
+        Write-Verbose -Message ($script:localizedData.GetTargetResourceStartMessage-f ${Name})
 
         Assert-PrerequisitesValid 
 
@@ -133,7 +133,7 @@ function Get-TargetResource
                     IncludeAllSubFeature = $includeAllSubFeature
                 }
 
-                Write-Verbose -Message ($script:localizedData.GetTargetResourceEndVerboseMessage -f ${Name})
+                Write-Verbose -Message ($script:localizedData.GetTargetResourceEndMessage -f ${Name})
 
                 return $getTargetResourceResult
             }
@@ -164,7 +164,8 @@ function Get-TargetResource
         Optional.
 
     .PARAMETER LogPath
-        The path to the log file to log this operation
+        The custom path to the log file to log this operation.
+        If not passed in, the default log path will be used.
 
 #>
 function Set-TargetResource
@@ -193,7 +194,7 @@ function Set-TargetResource
        $LogPath
     )
 
-    Write-Verbose -Message ($script:localizedData.SetTargetResourceStartVerboseMessage -f ${Name})
+    Write-Verbose -Message ($script:localizedData.SetTargetResourceStartMessage -f ${Name})
 
     Assert-PrerequisitesValid 
 
@@ -294,9 +295,9 @@ function Set-TargetResource
             #>
             if ($null -eq $ev -or $ev.Count -eq 0)
             {
-                $errorId = 'FeatureUnInstallationFailure'
+                $errorId = 'FeatureUninstallationFailure'
                 $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                $errorMessage = $($script:localizedData.FeatureUnInstallationFailureError) -f ${Name} 
+                $errorMessage = $($script:localizedData.FeatureUninstallationFailureError) -f ${Name} 
                 $exception = New-Object System.InvalidOperationException $errorMessage 
                 $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
@@ -305,7 +306,7 @@ function Set-TargetResource
         }
     }
 
-    Write-Verbose -Message ($script:localizedData.SetTargetResourceEndVerboseMessage -f ${Name})
+    Write-Verbose -Message ($script:localizedData.SetTargetResourceEndMessage -f ${Name})
 }
 
 <#
@@ -334,6 +335,7 @@ function Set-TargetResource
 
     .PARAMETER LogPath
         The path to the log file to log this operation.
+        Not used in Test-TargetResource.
 
 #>
 function Test-TargetResource
@@ -363,7 +365,7 @@ function Test-TargetResource
 
     )
 
-        Write-Verbose -Message ($script:localizedData.TestTargetResourceStartVerboseMessage -f ${Name})
+        Write-Verbose -Message ($script:localizedData.TestTargetResourceStartMessage -f ${Name})
 
         Assert-PrerequisitesValid
 
@@ -444,7 +446,7 @@ function Test-TargetResource
                 }
             }
 
-            Write-Verbose -Message ($script:localizedData.TestTargetResourceEndVerboseMessage -f ${Name})
+            Write-Verbose -Message ($script:localizedData.TestTargetResourceEndMessage -f ${Name})
 
             return $testTargetResourceResult
         }
@@ -536,7 +538,7 @@ function Assert-PrerequisitesValid
     }
     catch
     {
-        Write-Verbose -Message $script:localizedData.ServerManagerModuleNotFoundDebugMessage
+        Write-Verbose -Message $script:localizedData.ServerManagerModuleNotFoundMessage
 
         $errorId = 'SkuNotSupported'
         $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
