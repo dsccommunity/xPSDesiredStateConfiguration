@@ -21,15 +21,7 @@ Configuration $ConfigurationName
         $Ensure = 'Present',
 
         [System.Boolean]
-        $IncludeAllSubFeature = $false,
-
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]
-        $Credential,
-
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $LogPath
+        $IncludeAllSubFeature = $false
     )
     
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
@@ -41,7 +33,6 @@ Configuration $ConfigurationName
             Name = $Name
             Ensure = $Ensure
             IncludeAllSubFeature = $IncludeAllSubFeature
-            Credential = $Credential
         }
     }
 }

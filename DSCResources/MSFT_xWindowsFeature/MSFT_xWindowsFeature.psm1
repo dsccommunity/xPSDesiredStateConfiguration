@@ -267,7 +267,7 @@ function Set-TargetResource
                $addWindowsFeatureParameters.Add('Credential', $Credential) 
             }
 
-            $feature = Remove-WindowsFeature @PSBoundParameters
+            $feature = Remove-WindowsFeature @removeWindowsFeatureParameters
         }
 
         if ($feature -ne $null -and $feature.Success -eq $true)
