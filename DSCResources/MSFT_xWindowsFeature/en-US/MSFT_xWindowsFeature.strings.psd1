@@ -2,7 +2,7 @@
 
 ConvertFrom-StringData @'
     FeatureNotFoundError=The requested feature {0} is not found on the target machine.
-    FeatureDiscoveryFailureError=Failure to get the requested feature {0} information from the target machine. Wildcard pattern is not supported in the feature name.
+    MultipleFeatureInstancesError=Failure to get the requested feature {0} information from the target machine. Wildcard pattern is not supported in the feature name.
     FeatureInstallationFailureError=Failure to successfully install the feature {0} .
     FeatureUninstallationFailureError=Failure to successfully Unintstall the feature {0} .
     QueryFeature=Querying for feature {0} using Server Manager cmdlet Get-WindowsFeature.

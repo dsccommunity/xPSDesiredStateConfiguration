@@ -223,14 +223,13 @@ Provides a mechanism to install or uninstall Windows roles or features on a targ
 #### Parameters
 
 * **[String] Name** _(Key)_: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
-* **[PSCredential] Credential** _(Write)_: Indicates the credentials to use to add or remove the role or feature if required.
-* **[String] Ensure** _(Write)_: Ensures that the feature is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **[Boolean] IncludeAllSubFeature** _(Write)_: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **[String] LogPath** _(Write)_: Indicates the path to a log file where you want the resource provider to log the operation.
+* **[PSCredential] Credential** _(Write)_: Indicates the credential to use to add or remove the role or feature if needed.
+* **[String] Ensure** _(Write)_: Specifies whether the feature should be installed (Present) or uninstalled (Absent). The default value is Present. { *Present* | Absent }.
+* **[Boolean] IncludeAllSubFeature** _(Write)_: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property. The default value is $false.
+* **[String] LogPath** _(Write)_: Indicates the path to a log file to log the operation.
+
+#### Read-Only Properties from Get-TargetResource
+
 * **[String] DisplayName** _(Read)_: The display name retrieved from the role or feature.
 
 #### Examples

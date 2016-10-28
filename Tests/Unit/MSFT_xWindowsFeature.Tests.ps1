@@ -598,7 +598,7 @@ try {
             It 'Should throw invalid operation when there are multiple features with the given name' {
                 $errorId = 'FeatureDiscoveryFailure'
                 $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-                $errorMessage = $($script:localizedData.FeatureDiscoveryFailureError) -f $multipleFeature.Name
+                $errorMessage = $($script:localizedData.MultipleFeatureInstancesError) -f $multipleFeature.Name
                 $exception = New-Object System.InvalidOperationException $errorMessage
                 $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
 
