@@ -270,7 +270,7 @@ function Set-TargetResource
             $feature = Remove-WindowsFeature @removeWindowsFeatureParameters
         }
 
-        if ($feature -ne $null -and $feature.Success -eq $true)
+        if ($null -ne $feature -and $feature.Success -eq $true)
         {
             Write-Verbose ($script:localizedData.UninstallSuccess -f $Name)
 

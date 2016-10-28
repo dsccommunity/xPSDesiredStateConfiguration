@@ -26,7 +26,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
-* **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
+* **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
@@ -218,6 +218,7 @@ Provides a mechanism to install or uninstall Windows roles or features on a targ
 
 * Target machine must be running Windows Server 2008 or later.
 * Target machine must have access to the DISM PowerShell module.
+* Target machine must have access to the ServerManager module.
 
 #### Parameters
 
@@ -425,6 +426,11 @@ None
 
 ### Unreleased
 
+* xWindowsFeature:
+    * Cleaned up resource (PSSA issues, formatting, etc.)
+    * Added/Updated Tests and Examples
+    * BREAKING CHANGE: Removed the unused Source parameter
+    * Updated to a high quality resource
 * xDSCWebService:
     * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
 * xGroup:
