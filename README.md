@@ -3,7 +3,6 @@
 # xPSDesiredStateConfiguration
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
-The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, **xWindowsOptionalFeature** and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource.
 
 **This module is currently in the process of becoming one of our first experimental High Quality Resource Modules (HQRMs). The plan for updating this module is available [here](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/HighQualityResourceModulePlan.md). Any comments or questions about this process/plan can be submitted under issue [#160](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/160).**
 
@@ -119,7 +118,7 @@ This resource works on Nano Server.
 
 ### Requirements
 
-* None.
+None
 
 ### Parameters
 
@@ -213,16 +212,29 @@ xRegistry provides a mechanism to manage registry keys and values on a target no
    - Default value: $false.
 
 ### xWindowsFeature
-* **Name**: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
-* **Credential**: Indicates the credentials to use to add or remove the role or feature.
-* **Ensure**: Ensures that the feature is present or absent.
+Provides a mechanism to install or uninstall Windows roles or features on a target node.
+
+#### Requirements
+
+* Target machine must be running Windows Server 2008 or later.
+* Target machine must have access to the DISM PowerShell module.
+
+#### Parameters
+
+* **[String] Name** _(Key)_: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
+* **[PSCredential] Credential** _(Write)_: Indicates the credentials to use to add or remove the role or feature if required.
+* **[String] Ensure** _(Write)_: Ensures that the feature is present or absent.
    - Supported values: Present, Absent.
    - Default Value: Present.
-* **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property.
+* **[Boolean] IncludeAllSubFeature** _(Write)_: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property.
    - Suported values: $true, $false.
    - Default value: $false.
-* **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
-* **Source**: Indicates the location of the source file to use for installation, if necessary.
+* **[String] LogPath** _(Write)_: Indicates the path to a log file where you want the resource provider to log the operation.
+* **[String] DisplayName** _(Read)_: The display name retrieved from the role or feature.
+
+#### Examples
+
+* [Install or uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeature.ps1)
 
 ### xScript
 * **GetScript**: Provides a block of Windows PowerShell script that runs when you invoke the Get-DscConfiguration cmdlet. This block must return a hash table.
@@ -235,7 +247,7 @@ Provides a mechanism to manage local users on a target node.
 
 #### Requirements
 
-* Target machine must be running a windows client operating system, Windows Server 2012 or later, or Nano Server.
+None
 
 #### Parameters
 
@@ -332,7 +344,7 @@ This resource works on Nano Server.
 #### Requirements
 
 * Target machine must be running a Windows client operating system, Windows Server 2012 or later, or Nano Server.
-* Target machine must have access to the DISM PowerShell module
+* Target machine must have access to the DISM PowerShell module.
 
 #### Parameters
 

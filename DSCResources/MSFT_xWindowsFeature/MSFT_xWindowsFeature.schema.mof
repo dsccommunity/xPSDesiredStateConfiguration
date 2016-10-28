@@ -2,13 +2,10 @@
 [ClassVersion("1.0.0.0"), FriendlyName("xWindowsFeature")] 
 class MSFT_xWindowsFeature : OMI_BaseResource
 {
-    [Key, Description("The name of the feature to install or uninstall.")] String Name;
-    [Write, Description("Specifies whether the feature should be installed or uninstalled. To install the feature, set this property to Present. To uninstall the feature, set the property to Absent."), ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
+    [Key, Description("The name of the role or feature to install or uninstall.")] String Name;
+    [Write, Description("Specifies whether the role or feature should be installed or uninstalled. To install the feature, set this property to Present. To uninstall the feature, set the property to Absent."), ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
     [Write, Description("Specifies whether the subfeatures of the main feature should also be installed.")] Boolean IncludeAllSubFeature;
     [Write, Description("The path to the log file to log this operation.")] String LogPath;
     [Write, Description("Credential, if needed, to install or uninstall the role or feature."), EmbeddedInstance("MSFT_Credential")] String Credential;
-    [Read, Description("The display name retrieved from the Windows feature.")] String DisplayName;
+    [Read, Description("The display name retrieved from the role or feature.")] String DisplayName;
 };
-
-
-
