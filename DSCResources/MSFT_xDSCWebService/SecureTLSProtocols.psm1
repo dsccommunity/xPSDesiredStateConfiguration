@@ -14,7 +14,7 @@ function Test-SChannelProtocol
     foreach ($protocol in $insecureProtocols)
     {
         $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-        if (($null -ne (Get-Item -Path $registryPath -ErrorAction SilentlyContinue)) -and ($null -ne (Get-ItemProperty -Path $registryPath)) -and ((Get-ItemProperty -Path $registryPath).Enabled -ne 0))
+        if ((Test-Path $registryPath) -and ($null -ne (Get-ItemProperty -Path $registryPath)) -and ((Get-ItemProperty -Path $registryPath).Enabled -ne 0))
         {
             return $false
         }
@@ -22,7 +22,7 @@ function Test-SChannelProtocol
     foreach ($protocol in $secureProtocols)
     {
         $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-        if (($null -eq (Get-Item -Path $registryPath -ErrorAction SilentlyContinue)) -or ($null -eq (Get-ItemProperty -Path $registryPath)) -or ((Get-ItemProperty -Path $registryPath).Enabled -eq 0))
+        if ((-not (Test-Path $registryPath)) -or ($null -eq (Get-ItemProperty -Path $registryPath)) -or ((Get-ItemProperty -Path $registryPath).Enabled -eq 0))
         {
             return $false
         }
