@@ -231,7 +231,7 @@ try {
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $true
 
-                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 4 -Exactly -Scope It
+                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
                 }
 
                 It 'Should return the correct hashtable when not all subfeatures are installed' {
@@ -244,7 +244,7 @@ try {
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
 
-                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 4 -Exactly -Scope It
+                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
 
                     $mockWindowsFeatures[$testSubFeatureName3].Installed = $true
                 }
