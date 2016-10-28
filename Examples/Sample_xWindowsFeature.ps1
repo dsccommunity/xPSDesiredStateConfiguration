@@ -1,10 +1,4 @@
-﻿param 
-(
-    [System.String]
-    $ConfigurationName = 'Install_Feature_Telnet_Client'
-)
-
-<#
+﻿<#
     Create a custom configuration by passing in whatever values you need. 
     $Name is the only parameter that is required which indicates which
     Windows Feature you want to install (or uninstall if you set Ensure to Absent).
@@ -13,7 +7,7 @@
     LogPath = $LogPath and/or Credential = $Credential to the configuration here
 #>      
 
-Configuration $ConfigurationName
+Configuration 'Install_Feature_Telnet_Client'
 {
     param 
     (       

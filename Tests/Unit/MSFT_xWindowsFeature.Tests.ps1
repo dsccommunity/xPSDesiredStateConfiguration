@@ -135,7 +135,7 @@ try {
 
 
         Describe 'xWindowsFeature/Get-TargetResource' {
-            Mock -CommandName Assert-PrerequisitesValid -MockWith {}
+            Mock -CommandName Import-ServerManager -MockWith {}
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName2 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName2]
@@ -261,7 +261,7 @@ try {
         }
         
         Describe 'xWindowsFeature/Set-TargetResource' {
-            Mock -CommandName Assert-PrerequisitesValid -MockWith {}
+            Mock -CommandName Import-ServerManager -MockWith {}
 
             Context 'Install/Uninstall successful' {
                 Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
@@ -388,7 +388,7 @@ try {
         }
 
         Describe 'xWindowsFeature/Test-TargetResource' {
-            Mock -CommandName Assert-PrerequisitesValid -MockWith {}
+            Mock -CommandName Import-ServerManager -MockWith {}
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName1 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
@@ -569,7 +569,7 @@ try {
             }
         }
 
-        Describe 'xWindowsFeature/Assert-PrerequisitesValid' {
+        Describe 'xWindowsFeature/Import-ServerManager' {
             $mockOperatingSystem = @{
                 Name = 'mockOS'
                 Version = '6.1.'
@@ -579,13 +579,13 @@ try {
 
             It 'Should Not Throw' {
                 Mock -CommandName Import-Module -MockWith {}
-                { Assert-PrerequisitesValid } | Should Not Throw
+                { Import-ServerManager } | Should Not Throw
             }
 
             It 'Should throw invalid operation exception' {
                 Mock -CommandName Import-Module -MockWith { Throw }
 
-                { Assert-PrerequisitesValid } | Should Throw ($script:localizedData.SkuNotSupported)
+                { Import-ServerManager } | Should Throw ($script:localizedData.SkuNotSupported)
             }
         }
     }

@@ -44,7 +44,7 @@ function Get-TargetResource
  
     Write-Verbose -Message ($script:localizedData.GetTargetResourceStartMessage -f $Name)
     
-    Assert-PrerequisitesValid 
+    Import-ServerManager 
     
     Write-Verbose -Message ($script:localizedData.QueryFeature -f $Name)
     
@@ -130,9 +130,8 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
-        Installs or uninstalls the role or feature with the given name on the target machine.
-        If IncludeAllSubFeature is set to $true, then all of the subfeatures of the given feature
-        will also be installed. 
+        Installs or uninstalls the role or feature with the given name on the target machine
+        with the option of installing or uninstalling all subfeatures as well. 
 
     .PARAMETER Name
         The name of the role or feature to install or uninstall.
@@ -147,8 +146,7 @@ function Get-TargetResource
         the specified role or feature. Default is false.
         If this property is true and Ensure is set to Present, all subfeatures will be installed.
         If this property is false and Ensure is set to Present, subfeatures will not be installed or uninstalled.
-        If this property is true and Ensure is set to Absent, all subfeatures will be uninstalled.
-        If this property is false and Ensure is set to Absent, all subfeatures will still be uninstalled.
+        If Ensure is set to Absent, all subfeatures will be uninstalled.
 
     .PARAMETER Credential
         The credential (if required) to install or uninstall the role or feature.
@@ -187,7 +185,7 @@ function Set-TargetResource
 
     Write-Verbose -Message ($script:localizedData.SetTargetResourceStartMessage -f $Name)
 
-    Assert-PrerequisitesValid
+    Import-ServerManager
 
     $isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
 
@@ -358,7 +356,7 @@ function Test-TargetResource
 
     Write-Verbose -Message ($script:localizedData.TestTargetResourceStartMessage -f $Name)
     
-    Assert-PrerequisitesValid
+    Import-ServerManager
     
     $testTargetResourceResult = $false
 
@@ -452,7 +450,6 @@ function Test-TargetResource
 <#
     .SYNOPSIS
         Asserts that a single instance of the given role or feature exists.
-        Throws an invalid operation exception if either of the above errors are found.
 
     .PARAMETER Feature
         The role or feature object to check.
@@ -486,12 +483,10 @@ function Assert-SingleFeatureExists
 
 <#
     .SYNOPSIS
-        Asserts that the xWindowsFeature is supported on the target machine.
-        This resource depends on the ServerManager Module which is only supported
-        on Server SKU's. If ServerManager is not available on the target machine
-        then an Invalid Operation exception is thrown.
+        Sets up the ServerManager module on the target node.
+        Throws an error if not on a machine running Windows Server.
 #>
-function Assert-PrerequisitesValid
+function Import-ServerManager
 {
     param 
     ()
