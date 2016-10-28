@@ -551,7 +551,7 @@ try {
             }
         }
 
-        Describe 'xWindowsFeature/Assert-FeatureValid' { 
+        Describe 'xWindowsFeature/Assert-SingleFeatureExists' {
             $multipleFeature = @{
                 Name = 'MultiFeatureName'
                 Count = 2
@@ -559,12 +559,12 @@ try {
 
             It 'Should throw invalid operation when feature equals null' {
                 $nonexistentName = 'NonexistentFeatureName'
-                { Assert-FeatureValid -Name $nonexistentName } | 
+                { Assert-SingleFeatureExists -Feature $null -Name $nonexistentName } | 
                     Should Throw ($script:localizedData.FeatureNotFoundError -f $nonexistentName)
             }
 
             It 'Should throw invalid operation when there are multiple features with the given name' {
-                { Assert-FeatureValid -Feature $multipleFeature -Name $multipleFeature.Name } | 
+                { Assert-SingleFeatureExists -Feature $multipleFeature -Name $multipleFeature.Name } | 
                     Should Throw ($script:localizedData.MultipleFeatureInstancesError -f $multipleFeature.Name)
             }
         }
