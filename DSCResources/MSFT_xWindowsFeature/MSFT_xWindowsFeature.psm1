@@ -466,7 +466,7 @@ function Assert-SingleFeatureExists
     [CmdletBinding()]
     param
     (
-        [Microsoft.Windows.ServerManager.Commands.Feature[]]
+        [PSObject]
         $Feature,
 
         [String]

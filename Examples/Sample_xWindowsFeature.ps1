@@ -1,25 +1,24 @@
 ﻿param 
 (
-    [Parameter(Mandatory)]
     [System.String]
-    $ConfigurationName
+    $ConfigurationName = 'Install_Feature_Telnet_Client'
 )
 
 <#
     Create a custom configuration by passing in whatever values you need. 
     $Name is the only parameter that is required which indicates which
     Windows Feature you want to install (or uninstall if you set Ensure to Absent).
-    LogPath is not included here, but if you would like to specify a custom log path
-    just pass in that value and add LogPath = $LogPath to the configuration here
+    LogPath and Credential are not included here, but if you would like to specify
+    a custom log path or need a credential just pass in the desired values and add
+    LogPath = $LogPath and/or Credential = $Credential to the configuration here
 #>      
 
 Configuration $ConfigurationName
 {
     param 
-    (   
-        [Parameter(Mandatory = $true)]     
+    (       
         [System.String]
-        $Name,
+        $Name = 'Telnet-Client',
 
         [ValidateSet('Present', 'Absent')]
         [System.String]
@@ -46,7 +45,6 @@ Configuration $ConfigurationName
             Name = $Name
             Ensure = $Ensure
             IncludeAllSubFeature = $IncludeAllSubFeature
-            Credential = $Credential
         }
     }
 }

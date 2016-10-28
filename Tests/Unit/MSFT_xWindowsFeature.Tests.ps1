@@ -6,15 +6,6 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
 
-# Need this module to import the localized data
-Import-Module -Name (Join-Path -Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) `
-                               -ChildPath (Join-Path -Path 'DSCResources' `
-                                                     -ChildPath 'CommonResourceHelper.psm1')) `
-                               -Force
-
-# Localized messages for Write-Verbose statements
-$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsFeature'
-
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DSCResourceModuleName 'xPSDesiredStateConfiguration' `
     -DSCResourceName 'MSFT_xWindowsFeature' `
@@ -25,8 +16,8 @@ try {
 
         $testUserName = 'TestUserName12345'
         $testUserPassword = 'StrongOne7.'
-        $testSecurePassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
-        $testCredential = New-Object PSCredential ($testUserName, $testSecurePassword)
+        $testSecurePassword = ConvertTo-SecureString -String $testUserPassword -AsPlainText -Force
+        $testCredential = New-Object -TypeName PSCredential -ArgumentList ($testUserName, $testSecurePassword)
 
         $testWindowsFeatureName1 = 'Test1'
         $testWindowsFeatureName2 = 'Test2'
@@ -148,7 +139,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName2 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName2]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -156,7 +147,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName1 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -164,7 +155,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName1 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName1]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -172,7 +163,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName2 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName2]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -180,7 +171,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName3 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName3]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -192,38 +183,38 @@ try {
                 It 'Should return the correct hashtable when not on a 2008 Server' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
-                    $result = Get-TargetResource -Name $testWindowsFeatureName2
-                    $result.Name | Should Be $testWindowsFeatureName2
-                    $result.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
-                    $result.Ensure | Should Be 'Present'
-                    $result.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName2
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName2
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
                 }
 
                 It 'Should return the correct hashtable when on a 2008 Server' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $true }
 
-                    $result = Get-TargetResource -Name $testWindowsFeatureName2
-                    $result.Name | Should Be $testWindowsFeatureName2
-                    $result.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
-                    $result.Ensure | Should Be 'Present'
-                    $result.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName2
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName2
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
                 }
 
                 It 'Should return the correct hashtable when on a 2008 Server and Credential is passed' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $true }
                     Mock -CommandName Invoke-Command -MockWith { 
                         $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName2]
-                        $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                        $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                         $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                         return $windowsFeatureObject
                     }
 
-                    $result = Get-TargetResource -Name $testWindowsFeatureName2 -Credential $testCredential
-                    $result.Name | Should Be $testWindowsFeatureName2
-                    $result.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
-                    $result.Ensure | Should Be 'Present'
-                    $result.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName2 -Credential $testCredential
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName2
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
 
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
 
@@ -234,11 +225,11 @@ try {
                 It 'Should return the correct hashtable when all subfeatures are installed' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
-                    $result = Get-TargetResource -Name $testWindowsFeatureName1
-                    $result.Name | Should Be $testWindowsFeatureName1
-                    $result.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName1].DisplayName
-                    $result.Ensure | Should Be 'Absent'
-                    $result.IncludeAllSubFeature | Should Be $true
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName1
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName1
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName1].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $true
 
                     Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 4 -Exactly -Scope It
                 }
@@ -247,11 +238,11 @@ try {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
                     $mockWindowsFeatures[$testSubFeatureName3].Installed = $false
 
-                    $result = Get-TargetResource -Name $testWindowsFeatureName1
-                    $result.Name | Should Be $testWindowsFeatureName1
-                    $result.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName1].DisplayName
-                    $result.Ensure | Should Be 'Absent'
-                    $result.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName1
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName1
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName1].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
 
                     Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 4 -Exactly -Scope It
 
@@ -263,17 +254,9 @@ try {
 
                 It 'Should throw invalid operation exception' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
-                    $badName = 'InvalidFeature'
-                    $errorId = 'FeatureNotFound'
-                    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                    $errorMessage = $($script:localizedData.FeatureNotFoundError) -f $badName
-                    $exception = New-Object System.InvalidOperationException $errorMessage
-                    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                    { Get-TargetResource -Name $badName } | Should Throw $errorRecord
-                    
+                    $invalidName = 'InvalidFeature'
+                    { Get-TargetResource -Name $invalidName } | Should Throw ($script:localizedData.FeatureNotFoundError -f $invalidName)
                 }
-
             }
         }
         
@@ -290,7 +273,7 @@ try {
                         FeatureResult = @($testWindowsFeatureName2)
                         ExitCode = 'Success'
                     }
-                    $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                    $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                     return $windowsFeatureObject
@@ -303,7 +286,7 @@ try {
                         FeatureResult = @($testWindowsFeatureName2)
                         ExitCode = 'Success'
                     }
-                    $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                    $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                     return $windowsFeatureObject
@@ -329,9 +312,9 @@ try {
                         Success = $false
                         RestartNeeded = 'No'
                         FeatureResult = @($testWindowsFeatureName2)
-                        ExitCode = 'Success'
+                        ExitCode = 'Nothing succeeded'
                     }
-                    $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                    $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                     return $windowsFeatureObject
@@ -342,33 +325,23 @@ try {
                         Success = $false
                         RestartNeeded = 'No'
                         FeatureResult = @($testWindowsFeatureName2)
-                        ExitCode = 'Success'
+                        ExitCode = 'Nothing succeeded'
                     }
-                    $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                    $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                     return $windowsFeatureObject
                 }
 
                 It 'Should throw invalid operation exception when Ensure set to Present' {
-                    $errorId = 'FeatureInstallationFailure'
-                    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                    $errorMessage = $($script:localizedData.FeatureInstallationFailureError) -f $testWindowsFeatureName2 
-                    $exception = New-Object System.InvalidOperationException $errorMessage 
-                    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                    { Set-TargetResource -Name $testWindowsFeatureName2 -Ensure 'Present' } | Should Throw $errorRecord
+                    { Set-TargetResource -Name $testWindowsFeatureName2 -Ensure 'Present' } | 
+                        Should Throw ($script:localizedData.FeatureInstallationFailureError -f $testWindowsFeatureName2)
                     Assert-MockCalled -CommandName Add-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
                 It 'Should throw invalid operation exception when Ensure set to Absent' {
-                    $errorId = 'FeatureUninstallationFailure'
-                    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                    $errorMessage = $($script:localizedData.FeatureUninstallationFailureError) -f $testWindowsFeatureName2 
-                    $exception = New-Object System.InvalidOperationException $errorMessage 
-                    $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                    { Set-TargetResource -Name $testWindowsFeatureName2 -Ensure 'Absent' } | Should Throw $errorRecord
+                    { Set-TargetResource -Name $testWindowsFeatureName2 -Ensure 'Absent' } | 
+                        Should Throw ($script:localizedData.FeatureUninstallationFailureError -f $testWindowsFeatureName2)
                     Assert-MockCalled -CommandName Remove-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
@@ -384,7 +357,7 @@ try {
                         FeatureResult = @($testWindowsFeatureName2)
                         ExitCode = 'Success'
                     }
-                    $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                    $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                     $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                     return $windowsFeatureObject
@@ -419,7 +392,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName1 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -427,7 +400,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName1 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName1]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -435,7 +408,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName2 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName2]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -443,7 +416,7 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName3 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName3]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -452,7 +425,7 @@ try {
             # Used as Get-WindowsFeature when on R2/SP1 2008
             Mock -CommandName Invoke-Command -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
-                $windowsFeatureObject = New-Object PSObject -Property $windowsFeature
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
                 return $windowsFeatureObject
@@ -463,10 +436,10 @@ try {
                 It 'Should return true when Ensure set to Absent and Feature not installed' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
                                                   -IncludeAllSubFeature $false
-                    $result | Should Be $true
+                    $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
@@ -474,10 +447,10 @@ try {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
                                                   -IncludeAllSubFeature $false
-                    $result | Should Be $true
+                    $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
                 }
@@ -486,10 +459,10 @@ try {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
                                                   -IncludeAllSubFeature $true
-                    $result | Should Be $true
+                    $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 4 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
                 }
@@ -497,11 +470,11 @@ try {
                 It 'Should return true when Ensure set to Absent and Feature not installed and on R2/SP1 2008' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $true }
 
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
                                                   -IncludeAllSubFeature $false `
                                                   -Credential $testCredential
-                    $result | Should Be $true
+                    $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
                 }
             }
@@ -510,45 +483,45 @@ try {
                 Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
                 It 'Should return false when Ensure set to Present and Feature not installed' {
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
                                                   -IncludeAllSubFeature $false
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
                 It 'Should return false when Ensure set to Absent and Feature installed not checking subFeatures' {
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
                                                   -IncludeAllSubFeature $false
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
                 }
 
                 It 'Should return false when Ensure set to Present, Feature not installed and subFeatures installed' {
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
                                                   -IncludeAllSubFeature $true
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
                 It 'Should return false when Ensure set to Absent and Feature not installed but subFeatures installed' {
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
                                                   -IncludeAllSubFeature $true
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 2 -Exactly -Scope It
                 }
 
                 It 'Should return false when Ensure set to Absent and Feature installed and subFeatures installed' {
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
                                                   -IncludeAllSubFeature $true
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
                 }
@@ -556,10 +529,10 @@ try {
                 It 'Should return false when Ensure set to Present and Feature installed but not all subFeatures installed' {
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
                     $mockWindowsFeatures[$testSubFeatureName2].Installed = $false
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
                                                   -IncludeAllSubFeature $true
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 3 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
                     $mockWindowsFeatures[$testSubFeatureName2].Installed = $true
@@ -568,11 +541,11 @@ try {
                 It 'Should return false when Ensure set to Present and Feature not installed and on R2/SP1 2008' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $true }
 
-                    $result = Test-TargetResource -Name $testWindowsFeatureName1 `
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
                                                   -IncludeAllSubFeature $false `
                                                   -Credential $testCredential
-                    $result | Should Be $false
+                    $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
                 }
             }
@@ -586,23 +559,13 @@ try {
 
             It 'Should throw invalid operation when feature equals null' {
                 $nonexistentName = 'NonexistentFeatureName'
-                $errorId = 'FeatureNotFound'
-                $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                $errorMessage = $($script:localizedData.FeatureNotFoundError) -f $nonexistentName
-                $exception = New-Object System.InvalidOperationException $errorMessage
-                $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                { Assert-FeatureValid -Name $nonexistentName } | Should Throw $errorRecord
+                { Assert-FeatureValid -Name $nonexistentName } | 
+                    Should Throw ($script:localizedData.FeatureNotFoundError -f $nonexistentName)
             }
 
             It 'Should throw invalid operation when there are multiple features with the given name' {
-                $errorId = 'FeatureDiscoveryFailure'
-                $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidResult
-                $errorMessage = $($script:localizedData.MultipleFeatureInstancesError) -f $multipleFeature.Name
-                $exception = New-Object System.InvalidOperationException $errorMessage
-                $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                { Assert-FeatureValid -Feature $multipleFeature -Name $multipleFeature.Name } | Should Throw $errorRecord
+                { Assert-FeatureValid -Feature $multipleFeature -Name $multipleFeature.Name } | 
+                    Should Throw ($script:localizedData.MultipleFeatureInstancesError -f $multipleFeature.Name)
             }
         }
 
@@ -622,15 +585,8 @@ try {
             It 'Should throw invalid operation exception' {
                 Mock -CommandName Import-Module -MockWith { Throw }
 
-                $errorId = 'SkuNotSupported'
-                $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidOperation
-                $errorMessage = $($script:localizedData.SkuNotSupported)
-                $exception = New-Object System.InvalidOperationException $errorMessage
-                $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-
-                { Assert-PrerequisitesValid } | Should Throw $errorRecord
+                { Assert-PrerequisitesValid } | Should Throw ($script:localizedData.SkuNotSupported)
             }
-
         }
     }
 }
