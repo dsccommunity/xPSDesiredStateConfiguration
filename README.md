@@ -75,7 +75,9 @@ Resources that work on Nano Server:
 * **ConfigurationPath**: Folder location where DSC configurations are stored.
 * **RegistrationKeyPath**: Folder location where DSC pull server registration key file is stored.
 * **AcceptSelfSignedCertificate**: Whether self signed certificate can be used to setup pull server.
-* **UseUpToDateSecuritySettings**: Whether to use enhanced security settings for the node where pull server resides on.
+* **UseSecurityBestPractices**: Whether to use best practice security settings for the node where pull server resides on.
+Caution: Setting this property to $true will reset registry values under "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL". This environment change enforces the use of stronger encryption cypher and may affect legacy applications. More information can be found at https://support.microsoft.com/en-us/kb/245030 and https://technet.microsoft.com/en-us/library/dn786418(v=ws.11).aspx.
+* **DisableSecurityBestPractices**: The items that are excepted from following best practice security settings.
 
 ### xGroup
 Provides a mechanism to manage local groups on the target node.
@@ -415,6 +417,8 @@ None
 
 * xDSCWebService:
     * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
+    * Rename UseUpToDateSecuritySettings property to UseSecurityBestPractices.
+    * Add DisableSecurityBestPractices property to specify items that are excepted from following best practice security settings.
 * xGroup:
     * Fixed PSSA issues
     * Formatting updated as per style guidelines

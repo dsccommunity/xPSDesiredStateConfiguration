@@ -16,7 +16,7 @@ $registrationkey = [guid]::NewGuid()
 # ======================================== Arguments ======================================== #
 
 # =================================== Section DSC Client =================================== #
-configuration Sample_xDscWebServiceRegistrationWithEnhancedSecurity
+configuration Sample_xDscWebServiceRegistrationWithSecurityBestPractices
 {
     param 
     (
@@ -53,7 +53,7 @@ configuration Sample_xDscWebServiceRegistrationWithEnhancedSecurity
             DependsOn               = "[WindowsFeature]DSCServiceFeature" 
             RegistrationKeyPath     = "$env:PROGRAMFILES\WindowsPowerShell\DscService"   
             AcceptSelfSignedCertificates = $true
-            UseUpToDateSecuritySettings = $true
+            UseSecurityBestPractices = $true
         }
 
         File RegistrationKeyFile
@@ -65,7 +65,7 @@ configuration Sample_xDscWebServiceRegistrationWithEnhancedSecurity
         }
     }
 }
-Sample_xDscWebServiceRegistrationWithEnhancedSecurity -RegistrationKey $registrationkey -certificateThumbPrint $thumbprint
+Sample_xDscWebServiceRegistrationWithSecurityBestPractices -RegistrationKey $registrationkey -certificateThumbPrint $thumbprint
 # =================================== Section Pull Server =================================== #
 
 # =================================== Section DSC Client =================================== #
