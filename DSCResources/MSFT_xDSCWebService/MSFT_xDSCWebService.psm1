@@ -1,6 +1,6 @@
 # Import the helper functions
 Import-Module $PSScriptRoot\PSWSIISEndpoint.psm1 -Verbose:$false
-Import-Module $PSScriptRoot\SChannel.psm1 -Verbose:$false
+Import-Module $PSScriptRoot\UseSecurityBestPractices.psm1 -Verbose:$false
 
 # The Get-TargetResource cmdlet.
 function Get-TargetResource
@@ -16,7 +16,16 @@ function Get-TargetResource
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]                         
-        [string]$CertificateThumbPrint      
+        [string]$CertificateThumbPrint,
+
+        # Pull Server is created with the most secure practices
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [bool]$UseSecurityBestPractices,
+
+        # Exceptions of security best practices
+        [ValidateSet("SecureTLSProtocols")]
+        [string[]] $DisableSecurityBestPractices
     )
 
     $webSite = Get-Website -Name $EndpointName
@@ -33,6 +42,22 @@ function Get-TargetResource
             $modulePath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "ModulePath"
             $ConfigurationPath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "ConfigurationPath"
             $RegistrationKeyPath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "RegistrationKeyPath"
+
+            # Get database path
+            switch ((Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbprovider"))
+            {
+                "ESENT" {
+                    $databasePath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr" | Split-Path -Parent
+                }
+
+                "System.Data.OleDb" {
+                    $connectionString = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr"
+                    if ($connectionString -match 'Data Source=(.*)\\Devices\.mdb')
+                    {
+                        $databasePath = $Matches[0]
+                    }
+                }
+            }
 
             $UrlPrefix = $website.bindings.Collection[0].protocol + "://"
 
@@ -75,13 +100,15 @@ function Get-TargetResource
         Port                            = $iisPort
         PhysicalPath                    = $website.physicalPath
         State                           = $webSite.state
+        DatabasePath                    = $databasePath
         ModulePath                      = $modulePath
         ConfigurationPath               = $ConfigurationPath
         DSCServerUrl                    = $serverUrl
         Ensure                          = $Ensure
         RegistrationKeyPath             = $RegistrationKeyPath
         AcceptSelfSignedCertificates    = $AcceptSelfSignedCertificates
-        UseUpToDateSecuritySettings     = (SChannel\Test-EnhancedSecurity)
+        UseSecurityBestPractices        = $UseSecurityBestPractices
+        DisableSecurityBestPractices    = $DisableSecurityBestPractices
     }
 }
 
@@ -111,7 +138,12 @@ function Set-TargetResource
 
         [ValidateSet("Started", "Stopped")]
         [string]$State = "Started",
-    
+
+        # Location on the disk where the database is stored
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
+
         # Location on the disk where the Modules are stored            
         [string]$ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
 
@@ -124,14 +156,20 @@ function Set-TargetResource
         # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
         [boolean]$AcceptSelfSignedCertificates = $true,
 
-        # Use up to date secure protocol and cipher settings for schannel
-        [boolean]$UseUpToDateSecuritySettings
+        # Pull Server is created with the most secure practices
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [bool]$UseSecurityBestPractices,
+
+        # Exceptions of security best practices
+        [ValidateSet("SecureTLSProtocols")]
+        [string[]] $DisableSecurityBestPractices
     )
 
     # Check parameter values
-    if ($UseUpToDateSecuritySettings -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
+    if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
     {
-        throw "Error: Cannot use up to date security settings with unencrypted traffic. Please set UseUpTodateSecuritySettings to `$false or use a certificate to encrypt pull server traffic."
+        throw "Error: Cannot use best practice security settings with unencrypted traffic. Please set UseSecurityBestPractices to `$false or use a certificate to encrypt pull server traffic."
         # No need to proceed any more
         return
     }
@@ -140,11 +178,10 @@ function Set-TargetResource
     $script:appCmd = "$env:windir\system32\inetsrv\appcmd.exe"
    
     $pathPullServer = "$pshome\modules\PSDesiredStateConfiguration\PullServer"
-    $rootDataPath ="$env:PROGRAMFILES\WindowsPowerShell\DscService"
     $jet4provider = "System.Data.OleDb"
-    $jet4database = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$env:PROGRAMFILES\WindowsPowerShell\DscService\Devices.mdb;"
+    $jet4database = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
     $eseprovider = "ESENT";
-    $esedatabase = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Devices.edb";
+    $esedatabase = "$DatabasePath\Devices.edb";
 
     $culture = Get-Culture
     $language = $culture.TwoLetterISOLanguageName
@@ -221,7 +258,7 @@ function Set-TargetResource
         if($isDownlevelOfBlue)
         {
             Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
-            $repository = Join-Path "$rootDataPath" "Devices.mdb"
+            $repository = Join-Path "$DatabasePath" "Devices.mdb"
             Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
 
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
@@ -240,7 +277,7 @@ function Set-TargetResource
     Write-Verbose "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
 
     # Create the application data directory calculated above
-    $null = New-Item -path $rootDataPath -itemType "directory" -Force
+    $null = New-Item -path $DatabasePath -itemType "directory" -Force
 
     $null = New-Item -path "$ConfigurationPath" -itemType "directory" -Force
 
@@ -270,9 +307,9 @@ function Set-TargetResource
         }
     }
 
-    if($UseUpToDateSecuritySettings)
+    if($UseSecurityBestPractices)
     {
-        SChannel\Set-EnhancedSecurity
+        UseSecurityBestPractices\Set-UseSecurityBestPractices -DisableSecurityBestPractices $DisableSecurityBestPractices
     }
 }
 
@@ -303,7 +340,12 @@ function Test-TargetResource
 
         [ValidateSet("Started", "Stopped")]
         [string]$State = "Started",
-    
+
+        # Location on the disk where the database is stored
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
+
         # Location on the disk where the Modules are stored            
         [string]$ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
 
@@ -316,8 +358,14 @@ function Test-TargetResource
         # Are self-signed certs being accepted for client auth.
         [boolean]$AcceptSelfSignedCertificates,
 
-        # Is up to date secure protocol and cipher settings used for schannel
-        [boolean]$UseUpToDateSecuritySettings
+        # Pull Server is created with the most secure practices
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [bool]$UseSecurityBestPractices,
+
+        # Exceptions of security best practices
+        [ValidateSet("SecureTLSProtocols")]
+        [string[]] $DisableSecurityBestPractices
     )
 
     $desiredConfigurationMatch = $true;
@@ -377,6 +425,32 @@ function Test-TargetResource
         $webConfigFullPath = Join-Path $website.physicalPath "web.config"
         if ($IsComplianceServer -eq $false)
         {
+            Write-Verbose "Check DatabasePath"
+            switch ((Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbprovider"))
+            {
+                "ESENT" {
+                    $expectedConnectionString = "$DatabasePath\Devices.edb"
+                }
+                "System.Data.OleDb" {
+                    $expectedConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
+                }
+                default {
+                    $expectedConnectionString = [System.String]::Empty
+                }
+            }
+            if (([System.String]::IsNullOrEmpty($expectedConnectionString)))
+            {
+                $DesiredConfigurationMatch = $false
+                Write-Verbose "The DB provider does not have a valid value: 'ESENT' or 'System.Data.OleDb'"
+                break
+            }
+
+            if (-not (Test-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr" -ExpectedAppSettingValue $expectedConnectionString))
+            {
+                $DesiredConfigurationMatch = $false
+                break
+            }
+
             Write-Verbose "Check ModulePath"
             if ($ModulePath)
             {
@@ -418,13 +492,13 @@ function Test-TargetResource
             }
         }
 
-        Write-Verbose "Check UseUpToDateSecuritySettings"
-        if ($UseUpToDateSecuritySettings)
+        Write-Verbose "Check UseSecurityBestPractices"
+        if ($UseSecurityBestPractices)
         {
-            if (-not (SChannel\Test-EnhancedSecurity))
+            if (-not (UseSecurityBestPractices\Test-UseSecurityBestPractices -DisableSecurityBestPractices $DisableSecurityBestPractices))
             {
                 $desiredConfigurationMatch = $false;
-                Write-Verbose "The state of SChannel security settings does not match the desired state."
+                Write-Verbose "The state of security settings does not match the desired state."
                 break
             }
         }

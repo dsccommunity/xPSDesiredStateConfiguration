@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '4.0.0.0'
+ModuleVersion = '5.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,71 +52,31 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xDSCWebService:
-    * Added setting of enhanced security
-    * Cleaned up Examples
-    * Cleaned up pull server verification test
-* xProcess:
-    * Fixed PSSA issues
-    * Corrected most style guideline issues
-* xPSSessionConfiguration:
-    * Fixed PSSA and style issues
-    * Renamed internal functions to follow verb-noun formats
-    * Decorated all functions with comment-based help
-* xRegistry:
-    * Fixed PSSA and style issues
-    * Renamed internal functions to follow verb-noun format
-    * Decorated all functions with comment-based help
-    * Merged with in-box Registry
-    * Fixed registry key and value removal
-    * Added unit tests
-* xService:
-    * Added descriptions to MOF file.
-    * Added additional details to parameters in Readme.md in a format that can be generated from the MOF.
-    * Added DesktopInteract parameter.
-    * Added standard help headers to *-TargetResource functions.
-    * Changed indent/format of all function help headers to be consistent.
-    * Fixed line length violations.
-    * Changed localization code so only a single copy of localization strings are required.
-    * Removed localization strings from inside module file.
-    * Updated unit tests to use standard test enviroment configuration and header.
-    * Recreated unit tests to be non-destructive.
-    * Created integration tests.
-    * Allowed service to be restarted immediately rather than wait for next LCM run.
-    * Changed helper function names to valid verb-noun format.
-    * Removed New-TestService function from MSFT_xServiceResource.TestHelper.psm1 because it should not be used.
-    * Fixed error calling Get-TargetResource when service does not exist.
-    * Fixed bug with Get-TargetResource returning StartupType "Auto" instead of "Automatic".
-    * Converted to HQRM standards.
-    * Removed obfuscation of exception in Get-Win32ServiceObject function.
-    * Fixed bug where service start mode would be set to auto when it already was set to auto.
-    * Fixed error message content when start mode can not be changed.
-    * Removed shouldprocess from functions as not required.
-    * Optimized Test-TargetResource and Set-TargetResource by removing repeated calls to Get-Service and Get-CimInstance.
-    * Added integration test for testing changes to additional service properties as well as changing service binary path.
-    * Modified Set-TargetResource so that newly created service created with minimal properties and then all additional properties updated (simplification of code).
-    * Added support for changing Service Description and DisplayName parameters.
-    * Fixed bug when changing binary path of existing service.
-* Removed test log output from repo.
-* xDSCWebService:
-    * Added setting of enhanced security
-    * Cleaned up Examples
-    * Cleaned up pull server verification test
-* xWindowsOptionalFeature:
+        ReleaseNotes = '* xWindowsFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
-    * Added example script
-    * Added integration test
+    * Added/Updated Tests and Examples
     * BREAKING CHANGE: Removed the unused Source parameter
     * Updated to a high quality resource
-* Removed test log output from repo.
-* Removed the prefix MSFT_ from all files and folders of the composite resources in this module
-because they were unavailable to Get-DscResource and Import-DscResource.
-    * xFileUpload
-    * xGroupSet
-    * xProcessSet
-    * xServiceSet
-    * xWindowsFeatureSet
-    * xWindowsOptionalFeatureSet
+* xDSCWebService:
+    * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
+    * Rename UseUpToDateSecuritySettings property to UseSecurityBestPractices.
+    * Add DisableSecurityBestPractices property to specify items that are excepted from following best practice security settings.
+* xGroup:
+    * Fixed PSSA issues
+    * Formatting updated as per style guidelines
+    * Missing comment-based help added for Get-/Set-/Test-TargetResource
+    * Typos fixed in Unit test script
+    * Unit test "Get-TargetResource/Should return hashtable with correct values when group has no members" updated to handle the expected empty Members array correctly
+    * Added a lot of unit tests
+    * Cleaned resource
+* xUser:
+    * Fixed PSSA/Style violations
+    * Added/Updated Tests and Examples
+* Added xWindowsPackageCab
+* xService:
+    * Fixed PSSA/Style violations
+    * Updated Tests
+    * Added "Ignore" state
 
 '
 
@@ -124,6 +84,7 @@ because they were unavailable to Get-DscResource and Import-DscResource.
 
 } # End of PrivateData hashtable
 }
+
 
 
 

@@ -4,7 +4,7 @@
     Managing Disposable Objects
         The types PrincipalContext, Principal, and DirectoryEntry are used througout the code and
         all are disposable. However, in many cases, disposing the object immediately causes
-        subsequent operations to fail or duplicate dispose calls to occur.
+        subsequent operations to fail or duplicate disposes calls to occur.
 
         To simplify management of these disposables, each public entry point defines a $disposables
         ArrayList variable and passes it to secondary functions that may need to create disposable
@@ -29,7 +29,7 @@
         accounts in each of the domains.
 
         To manage the use of PrincipalContext across domains, public entry points define a
-        $principalContexts hashtable and pass it to support functions that need to resolve a group
+        $principalContextCache hashtable and pass it to support functions that need to resolve a group
         or group member. Consumers of a PrincipalContext call Get-PrincipalContext with a scope
         (domain name or machine name). Get-PrincipalContext returns an existing hashtable entry or
         creates a new entry.  Note that a PrincipalContext to a target domain requires connecting
@@ -51,8 +51,6 @@
         then resolved to Principal objects using a PrincipalContext appropriate for the target
         domain.
 
-        See Resolve-GroupMembersToPrincipals for more details.
-
     Handling Stale Group Members
         A group may have stale members if the machine was moved from one domain to a another
         foreign domain or when accounts are deleted (domain or local). At this point, members that
@@ -62,52 +60,26 @@
         with the associated SID of the member that cannot be resolved then continues the operation.
 #>
 
-# A global variable that contains localized messages.
-data LocalizedData
-{
-# culture="en-US"
-ConvertFrom-StringData @'
-GroupWithName = Group: {0}
-RemoveOperation = Remove
-AddOperation = Add
-SetOperation = Set
-GroupCreated = Group {0} created successfully.
-GroupUpdated = Group {0} properties updated successfully.
-GroupRemoved = Group {0} removed successfully.
-NoConfigurationRequired = Group {0} exists on this node with the desired properties. No action required.
-NoConfigurationRequiredGroupDoesNotExist = Group {0} does not exist on this node. No action required.
-CouldNotFindPrincipal = Could not find a principal with the provided name [{0}]
-MembersAndIncludeExcludeConflict = The {0} and {1} parameters conflict. The {0} parameter should not be used in any combination with the {1} parameter.
-MembersIsNull = The Members parameter value is null. The {0} parameter must be provided if neither {1} nor {2} is provided.
-MembersIsEmpty = The Members parameter is empty.  At least one group member must be provided.
-MemberNotValid = The group member does not exist or cannot be resolved: {0}.
-IncludeAndExcludeConflict = The principal {0} is included in both {1} and {2} parameter values. The same principal must not be included in both {1} and {2} parameter values.
-IncludeAndExcludeAreEmpty = The MembersToInclude and MembersToExclude are either both null or empty.  At least one member must be specified in one of these parameters"
-InvalidGroupName = The name {0} cannot be used. Names may not consist entirely of periods and/or spaces, or contain these characters: {1}
-GroupExists = A group with the name {0} exists.
-GroupDoesNotExist = A group with the name {0} does not exist.
-PropertyMismatch = The value of the {0} property is expected to be {1} but it is {2}.
-MembersNumberMismatch = Property {0}. The number of provided unique group members {1} is different from the number of actual group members {2}.
-MembersMemberMismatch = At least one member {0} of the provided {1} parameter does not have a match in the existing group {2}.
-MemberToExcludeMatch = At least one member {0} of the provided {1} parameter has a match in the existing group {2}.
-ResolvingLocalAccount = Resolving {0} as a local account.
-ResolvingDomainAccount = Resolving {0} in the {1} domain.
-ResolvingDomainAccountWithTrust = Resolving {0} with domain trust.
-DomainCredentialsRequired = Credentials are required to resolve the domain account {0}.
-UnableToResolveAccount = Unable to resolve account '{0}'. Failed with message: {1} (error code={2})
-'@
-}
+Set-StrictMode -Version 'Latest'
 
-# Commented-out until more languages are supported
-# Import-LocalizedData -BindingVariable 'LocalizedData' -FileName 'MSFT_xGroupResource.strings.psd1'
-
-Import-Module -Name "$PSScriptRoot\..\CommonResourceHelper.psm1"
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonResourceHelper.psm1')
+$script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xGroupResource'
 
 if (-not (Test-IsNanoServer))
 {
     Add-Type -AssemblyName 'System.DirectoryServices.AccountManagement'
 }
 
+<#
+    .SYNOPSIS
+        Retrieves the current state of the group with the specified name.
+
+    .PARAMETER GroupName
+        The name of the group to retrieve the current state of.
+
+    .PARAMETER Credential
+        A credential to resolve non-local group members.
+#>
 function Get-TargetResource
 {
     [OutputType([Hashtable])]
@@ -119,23 +91,82 @@ function Get-TargetResource
         [String]
         $GroupName,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
+    Assert-GroupNameValid -GroupName $GroupName
+
     if (Test-IsNanoServer)
     {
+        Write-Verbose -Message ($script:localizedData.InvokingFunctionForGroup -f 'Get-TargetResourceOnNanoServer', $GroupName)
         return Get-TargetResourceOnNanoServer @PSBoundParameters
     }
     else
     {
+        Write-Verbose -Message ($script:localizedData.InvokingFunctionForGroup -f 'Get-TargetResourceOnFullSKU', $GroupName)
         return Get-TargetResourceOnFullSKU @PSBoundParameters
     }
 }
 
+<#
+    .SYNOPSIS
+        Creates, modifies, or removes a group.
+
+    .PARAMETER GroupName
+        The name of the group to create, modify, or remove.
+
+    .PARAMETER Ensure
+        Specifies whether the group should exist or not.
+
+        To ensure that the group does exist, set this property to present.
+        To ensure that the group does not exist, set this property to Absent.
+        
+        The default value is Present.
+
+    .PARAMETER Description
+        The description the group should have.
+
+    .PARAMETER Members
+        The members the group should have.
+
+        This property will replace all the current group members with the specified members.
+
+        Members should be specified as strings in the format of their domain qualified name 
+        (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts).  
+        
+        Using either the MembersToExclude or MembersToInclude properties in the same configuration as this property will generate an error.
+
+    .PARAMETER MembersToInclude
+        The members the group should include.
+
+        This property will only add members to a group.
+
+        Members should be specified as strings in the format of their domain qualified name 
+        (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts).
+
+        Using the Members property in the same configuration as this property will generate an error.
+
+    .PARAMETER MembersToExclude
+        The members the group should exclude.
+
+        This property will only remove members from a group.
+
+        Members should be specified as strings in the format of their domain qualified name 
+        (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts).
+
+        Using the Members property in the same configuration as this property will generate an error.
+
+    .PARAMETER Credential
+        A credential to resolve and add non-local group members.
+
+        An error will occur if this account does not have the appropriate Active Directory permissions to add all
+        non-local accounts to the group.
+#>
 function Set-TargetResource
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -160,9 +191,14 @@ function Set-TargetResource
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
+
+    Write-Verbose ($script:localizedData.SetTargetResourceStartMessage -f $GroupName)
+
+    Assert-GroupNameValid -GroupName $GroupName
 
     if (Test-IsNanoServer)
     {
@@ -172,8 +208,59 @@ function Set-TargetResource
     {
         Set-TargetResourceOnFullSKU @PSBoundParameters
     }
+
+    Write-Verbose ($script:localizedData.SetTargetResourceEndMessage -f $GroupName)
 }
 
+<#
+    .SYNOPSIS
+        Tests if the group with the specified name is in the desired state.
+
+    .PARAMETER GroupName
+        The name of the group to test the state of.
+
+    .PARAMETER Ensure
+        Indicates if the group should exist or not.
+
+        Set this property to "Absent" to test that the group does not exist.
+        Setting it to "Present" (the default value) tests that the group exists.
+
+    .PARAMETER Description
+        The description of the group to test for.
+
+    .PARAMETER Members
+        The list of members the group should have.
+        
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.  
+
+        If you set this property in a configuration, do not use either the MembersToExclude or
+        MembersToInclude property. Doing so will generate an error.
+
+    .PARAMETER MembersToInclude
+        A list of members that should be in the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.  
+
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
+
+    .PARAMETER MembersToExclude
+        A list of members that should not be in the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
+
+    .PARAMETER Credential
+        The credentials required to resolve non-local group members
+#>
 function Test-TargetResource
 {
     [OutputType([Boolean])]
@@ -202,29 +289,34 @@ function Test-TargetResource
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
+    Assert-GroupNameValid -GroupName $GroupName
+
     if (Test-IsNanoServer)
     {
+        Write-Verbose ($script:localizedData.InvokingFunctionForGroup -f 'Test-TargetResourceOnNanoServer', $GroupName)
         return Test-TargetResourceOnNanoServer @PSBoundParameters
     }
     else
     {
+        Write-Verbose ($script:localizedData.InvokingFunctionForGroup -f 'Test-TargetResourceOnFullSKU', $GroupName)
         return Test-TargetResourceOnFullSKU @PSBoundParameters
     }
 }
 
 <#
     .SYNOPSIS
-        The Get-TargetResource cmdlet for a full server.
+        Retrieves the current state of the group with the specified name on a full server.
 
     .PARAMETER GroupName
-        The name of the xGroup resource to retrieve.
+        The name of the group to retrieve the current state of.
 
     .PARAMETER Credential
-        The credential to use to retrieve the xGroup resource.
+        A credential to resolve non-local group members.
 #>
 function Get-TargetResourceOnFullSKU
 {
@@ -237,47 +329,105 @@ function Get-TargetResourceOnFullSKU
         [String]
         $GroupName,
 
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
-    Set-StrictMode -Version 'Latest'
-
-    Assert-GroupNameValid -GroupName $GroupName
-
-    $principalContexts = @{}
+    $principalContextCache = @{}
     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
     try
     {
-        $group = Get-Group -GroupName $GroupName -PrincipalContexts $principalContexts -Disposables $disposables
+        $principalContext = Get-PrincipalContext `
+            -PrincipalContextCache $principalContextCache `
+            -Disposables $Disposables `
+            -Scope $env:COMPUTERNAME
+
+        $group = Get-Group -GroupName $GroupName -PrincipalContext $principalContext
 
         if ($null -ne $group)
         {
-            $disposables.Add($group) | Out-Null
+            $null = $disposables.Add($group)
 
-            # The group is found. Enumerate all group members.
-            $members = Get-MembersOnFullSKU -Group $group -PrincipalContexts $principalContexts -Disposables $disposables -Credential $Credential
+            # The group was found. Find the group members.
+            $members = Get-MembersOnFullSKU -Group $group -PrincipalContextCache $principalContextCache `
+                -Credential $Credential -Disposables $disposables
 
-            $returnValue = @{
+            return @{
                 GroupName = $group.Name
                 Ensure = 'Present'
                 Description = $group.Description
                 Members = $members
             }
-
-            return $returnValue
         }
-
-        # The group is not found.
-        return @{
-            GroupName = $GroupName
-            Ensure = 'Absent'
+        else
+        {
+            # The group was not found.
+            return @{
+                GroupName = $GroupName
+                Ensure = 'Absent'
+            }
         }
     }
     finally
     {
-        Remove-Disposables -Disposables $disposables
+        Remove-DisposableObject -Disposables $disposables
+    }
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the current state of the group with the specified name on Nano Server.
+
+    .PARAMETER GroupName
+        The name of the group to retrieve the current state of.
+
+    .PARAMETER Credential
+        A credential to resolve non-local group members.
+#>
+function Get-TargetResourceOnNanoServer
+{
+    [OutputType([Hashtable])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential
+    )
+
+    try
+    {
+        $group = Get-LocalGroup -Name $GroupName -ErrorAction 'Stop'
+    }
+    catch
+    {
+        if ($_.CategoryInfo.Reason -eq 'GroupNotFoundException')
+        {
+            # The group was not found.
+            return @{
+                GroupName = $GroupName
+                Ensure = 'Absent'
+            }
+        }
+
+        New-InvalidOperationException -ErrorRecord $_
+    }
+
+    # The group was found. Find the group members.
+    $members = Get-MembersOnNanoServer -Group $group
+
+    return @{
+        GroupName = $group.Name
+        Ensure = 'Present'
+        Description = $group.Description
+        Members = $members
     }
 }
 
@@ -289,27 +439,45 @@ function Get-TargetResourceOnFullSKU
         The name of the group for which you want to ensure a specific state.
 
     .PARAMETER Ensure
-        Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
-        not exist. Setting it to 'Present' (the default value) ensures that the group exists.
+        Indicates if the group should exist or not.
+        
+        Set this property to Present to ensure that the group exists.
+        Set this property to Absent to ensure that the group does not exist.
+        
+        The default value is Present.
 
     .PARAMETER Description
         The description of the group.
 
     .PARAMETER Members
-        Use this property to replace the current group membership with the specified members. The
-        value of this property is an array of strings of the form Domain\UserName. If you set this
-        property in a configuration, do not use either the MembersToExclude or MembersToInclude
-        property. Doing so will generate an error.
+        Use this property to replace the current group membership with the specified members.
+        
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        an unqualified (username) for local machine accounts.
+        
+        If you set this property in a configuration, do not use either the MembersToExclude or 
+        MembersToInclude property. Doing so will generate an error.
 
     .PARAMETER MembersToInclude
-        Use this property to add members to the existing membership of the group. The value of this
-        property is an array of strings of the form Domain\UserName. If you set this property in a
-        configuration, do not use the Members property. Doing so will generate an error.
+        Use this property to add members to the existing membership of the group.
+        
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts. 
+        
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
 
     .PARAMETER MembersToExclude
-        Use this property to remove members from the existing membership of the group. The value of
-        this property is an array of strings of the form Domain\UserName. If you set this property
-        in a configuration, do not use the Members property. Doing so will generate an error.
+        Use this property to remove members from the existing membership of the group.
+        
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts. 
+        
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
 
     .PARAMETER Credential
         The credentials required to access remote resources. Note: This account must have the
@@ -333,7 +501,6 @@ function Set-TargetResourceOnFullSKU
         [String]
         $Description,
 
-        [ValidateNotNull()]
         [String[]]
         $Members,
 
@@ -344,41 +511,45 @@ function Set-TargetResourceOnFullSKU
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
-    Set-StrictMode -Version 'Latest'
-
-    Assert-GroupNameValid -GroupName $GroupName
-
-    $principalContexts = @{}
+    $principalContextCache = @{}
     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
     try
     {
+        $principalContext = Get-PrincipalContext `
+            -PrincipalContextCache $principalContextCache `
+            -Disposables $disposables `
+            -Scope $env:computerName
+
         # Try to find a group by its name.
-        $group = Get-Group -GroupName $GroupName -PrincipalContexts $principalContexts -Disposables $disposables
+        $group = Get-Group -GroupName $GroupName -PrincipalContext $principalContext
         $groupOriginallyExists = $null -ne $group
 
         if ($Ensure -eq 'Present')
         {
             $actualMembersAsPrincipals = $null
 
+            $shouldProcessTarget = $script:localizedData.GroupWithName -f $GroupName
             if ($groupOriginallyExists)
             {
-                $disposables.Add($group) | Out-Null
-                $whatIfShouldProcess = $pscmdlet.ShouldProcess(($LocalizedData.GroupWithName -f $GroupName), $LocalizedData.SetOperation)
+                $null = $disposables.Add($group)
+                $whatIfShouldProcess = $PSCmdlet.ShouldProcess($shouldProcessTarget, $script:localizedData.SetOperation)
 
-                $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
+                $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
                     -Group $group `
-                    -PrincipalContexts $principalContexts `
+                    -PrincipalContextCache $principalContextCache `
                     -Disposables $disposables `
-                    -Credential $Credential )
+                    -Credential $Credential
+                )
             }
             else
             {
-                $whatIfShouldProcess = $pscmdlet.ShouldProcess(($LocalizedData.GroupWithName -f $GroupName), $LocalizedData.AddOperation)
+                $whatIfShouldProcess = $PSCmdlet.ShouldProcess($shouldProcessTarget, $script:localizedData.AddOperation)
             }
 
             if ($whatIfShouldProcess)
@@ -387,10 +558,12 @@ function Set-TargetResourceOnFullSKU
 
                 if (-not $groupOriginallyExists)
                 {
-                    $localPrincipalContext = Get-PrincipalContext -PrincipalContexts $principalContexts -Disposables $disposables -Scope $env:computerName
+                    $localPrincipalContext = Get-PrincipalContext -PrincipalContextCache $principalContextCache `
+                        -Disposables $disposables -Scope $env:COMPUTERNAME
 
-                    $group = New-Object -TypeName 'System.DirectoryServices.AccountManagement.GroupPrincipal' -ArgumentList @( $localPrincipalContext )
-                    $disposables.Add($group) | Out-Null
+                    $group = New-Object -TypeName 'System.DirectoryServices.AccountManagement.GroupPrincipal' `
+                        -ArgumentList @( $localPrincipalContext )
+                    $null = $disposables.Add($group)
 
                     $group.Name = $GroupName
                     $saveChanges = $true
@@ -406,154 +579,145 @@ function Set-TargetResourceOnFullSKU
 
                 <#
                     Group members can be updated in two ways:
-                    1. Supplying the Members parameter - this causes the membership to be replaced with the members defined in Members.
+                    1. Supplying the Members parameter - this causes the membership to be replaced
+                        with the members defined in Members.
+
                         NOTE: If Members is empty, the group membership is cleared.
-                    2. Providing MembersToInclude and/or MembersToExclude - this adds/removes members from the list.
+
+                    2. Providing MembersToInclude and/or MembersToExclude
+                        - this adds/removes members from the list.
+
                         If Members is mutually exclusive with MembersToInclude and MembersToExclude
-                        If Members is not defined then MembersToInclude or MembersToExclude must contain at least one entry.
+                        If Members is not defined then MembersToInclude or MembersToExclude
+                        must contain at least one entry.
                 #>
                 if ($PSBoundParameters.ContainsKey('Members'))
                 {
-                    if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+                    foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
                     {
-                        New-InvalidArgumentException -ArgumentName 'MembersToInclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude')
+                        if ($PSBoundParameters.ContainsKey($incompatibleParameterName))
+                        {
+                            New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
+                                -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
+                        }
                     }
 
-                    if ($PSBoundParameters.ContainsKey('MembersToExclude'))
+                    if ($Members.Count -eq 0 -and $null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -ne 0)
                     {
-                        New-InvalidArgumentException -ArgumentName 'MembersToExclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude')
-                    }
-
-                    if ($Members.Count -eq 0 -and $null -ne $group.Members -and $group.Members.Count -ne 0)
-                    {
-                        $group.Members.Clear()
+                        Clear-GroupMembers -Group $group
                         $saveChanges = $true
                     }
                     elseif ($Members.Count -ne 0)
                     {
                         # Remove duplicate names as strings.
-                        $Members = Remove-DuplicateMembers -Members $Members
+                        $uniqueMembers = $Members | Select-Object -Unique
 
                         # Resolve the names to actual principal objects.
-                        $membersAsPrincipals = ConvertTo-Principals `
-                            -MemberNames $Members `
-                            -PrincipalContexts $principalContexts `
+                        $membersAsPrincipals = @( ConvertTo-UniquePrincipalsList `
+                            -MemberNames $uniqueMembers `
+                            -PrincipalContextCache $principalContextCache `
                             -Disposables $disposables `
-                            -Credential $Credential
+                            -Credential $Credential )
 
-                        if ($membersAsPrincipals.Count -gt 0)
+                        if ($null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -gt 0)
                         {
-                            if ($null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -gt 0)
+                            foreach ($memberAsPrincipal in $membersAsPrincipals)
                             {
-                                $membersToAdd = @()
-                                $membersToRemove = @()
-
-                                foreach ($membersAsPrincipal in $membersAsPrincipals)
+                                if ($actualMembersAsPrincipals -notcontains $memberAsPrincipal)
                                 {
-                                    if ($actualMembersAsPrincipals -notcontains $membersAsPrincipal)
-                                    {
-                                        $membersToAdd += $membersAsPrincipal
-                                    }
-                                }
-
-                                foreach ($actualMembersAsPrincipal in $actualMembersAsPrincipals)
-                                {
-                                    if ($membersAsPrincipals -notcontains $actualMembersAsPrincipal)
-                                    {
-                                        $membersToRemove += $actualMembersAsPrincipal
-                                    }
-                                }
-
-                                # Set the members of the group
-                                if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersToAdd)
-                                {
-                                    $saveChanges = $true
-                                }
-
-                                if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToRemove)
-                                {
+                                    Add-GroupMember -Group $group -MemberAsPrincipal $memberAsPrincipal
                                     $saveChanges = $true
                                 }
                             }
-                            else
+
+                            foreach ($actualMemberAsPrincipal in $actualMembersAsPrincipals)
                             {
-                                # Set the members of the group
-                                if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersAsPrincipals)
-                                {
-                                    $saveChanges = $true
+                                    if ($membersAsPrincipals -notcontains $actualMemberAsPrincipal)
+                                    {
+                                        Remove-GroupMember -Group $group -MemberAsPrincipal $actualMemberAsPrincipal
+                                        $saveChanges = $true
+                                    }
                                 }
-                            }
                         }
                         else
                         {
-                            # ISSUE: Is an empty $Members parameter valid?
-                            New-InvalidArgumentException -ArgumentName 'Members' -Message ($LocalizedData.MembersIsEmpty)
+                            # Set the members of the group
+                            foreach ($memberAsPrincipal in $membersAsPrincipals)
+                            {
+                                    Add-GroupMember -Group $group -MemberAsPrincipal $memberAsPrincipal
+                                }
+
+                            $saveChanges = $true
                         }
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ($script:localizedData.GroupAndMembersEmpty -f $GroupName)
                     }
                 }
                 else
                 {
-
                     $membersToIncludeAsPrincipals = $null
-                    if ($PSBoundParameters.ContainsKey('MembersToInclude'))
-                    {
-                        $MembersToInclude = Remove-DuplicateMembers -Members $MembersToInclude
+                    $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
 
+                    if ($null -eq $uniqueMembersToInclude)
+                    {
+                        Write-Verbose -Message $script:localizedData.MembersToIncludeEmpty
+                    }
+                    else
+                    {
                         # Resolve the names to actual principal objects.
-                        $membersToIncludeAsPrincipals = @( ConvertTo-Principals `
-                            -MemberNames $MembersToInclude `
-                            -PrincipalContexts $principalContexts `
+                        $membersToIncludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
+                            -MemberNames $uniqueMembersToInclude `
+                            -PrincipalContextCache $principalContextCache `
                             -Disposables $disposables `
                             -Credential $Credential
                         )
                     }
 
                     $membersToExcludeAsPrincipals = $null
-                    if ($PSBoundParameters.ContainsKey('MembersToExclude'))
-                    {
-                        $MembersToExclude = Remove-DuplicateMembers -Members $MembersToExclude
+                    $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
 
+                    if ($null -eq $uniqueMembersToExclude)
+                    {
+                        Write-Verbose -Message $script:localizedData.MembersToExcludeEmpty
+                    }
+                    else
+                    {
                         # Resolve the names to actual principal objects.
-                        $membersToExcludeAsPrincipals = @( ConvertTo-Principals `
-                            -MemberNames $MembersToExclude `
-                            -PrincipalContexts $principalContexts `
+                        $membersToExcludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
+                            -MemberNames $uniqueMembersToExclude `
+                            -PrincipalContextCache $principalContextCache `
                             -Disposables $disposables `
                             -Credential $Credential
                         )
                     }
 
-                    if ($null -ne $membersToIncludeAsPrincipals -and $null -ne $membersToExcludeAsPrincipals)
+                    foreach ($includedPrincipal in $membersToIncludeAsPrincipals)
                     {
-                        # Both MembersToInclude and MembersToExclude were provided. Check if they have any common principals.
-                        foreach ($includedPrincipal in $membersToIncludeAsPrincipals)
+                        <#
+                            Throw an error if any common principals were provided in MembersToInclude
+                            and MembersToExclude.
+                        #>
+                        if ($membersToExcludeAsPrincipals -contains $includedPrincipal)
                         {
-                            foreach ($excludedPrincipal in $membersToExcludeAsPrincipals)
-                            {
-                                if ($includedPrincipal -eq $excludedPrincipal)
-                                {
-                                    New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,'MembersToInclude', 'MembersToExclude')
-                                }
-                            }
+                            New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
+                                -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,
+                                    'MembersToInclude', 'MembersToExclude')
                         }
 
-                        if ($membersToIncludeAsPrincipals.Count -eq 0 -and $membersToExcludeAsPrincipals.Count -eq 0)
+                        if ($actualMembersAsPrincipals -notcontains $includedPrincipal)
                         {
-                            New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeAreEmpty)
-                        }
-                    }
-
-                    if ($null -ne $membersToExcludeAsPrincipals -and $membersToExcludeAsPrincipals.Count -gt 0)
-                    {
-                        if (Remove-GroupMembers -Group $group -MembersAsPrincipals $membersToExcludeAsPrincipals)
-                        {
+                            Add-GroupMember -Group $group -MemberAsPrincipal $includedPrincipal
                             $saveChanges = $true
                         }
                     }
 
-                    if ($null -ne $membersToIncludeAsPrincipals -and $membersToIncludeAsPrincipals.Count -gt 0)
+                    foreach ($excludedPrincipal in $membersToExcludeAsPrincipals)
                     {
-                        if (Add-GroupMembers -Group $group -MembersAsPrincipals $membersToIncludeAsPrincipals)
+                        if ($actualMembersAsPrincipals -contains $excludedPrincipal)
                         {
+                            Remove-GroupMember -Group $group -MemberAsPrincipal $excludedPrincipal
                             $saveChanges = $true
                         }
                     }
@@ -561,21 +725,21 @@ function Set-TargetResourceOnFullSKU
 
                 if ($saveChanges)
                 {
-                    $group.Save()
+                    Save-Group -Group $group
 
                     # Send an operation success verbose message.
                     if ($groupOriginallyExists)
                     {
-                        Write-Verbose -Message ($LocalizedData.GroupUpdated -f $GroupName)
+                        Write-Verbose -Message ($script:localizedData.GroupUpdated -f $GroupName)
                     }
                     else
                     {
-                        Write-Verbose -Message ($LocalizedData.GroupCreated -f $GroupName)
+                        Write-Verbose -Message ($script:localizedData.GroupCreated -f $GroupName)
                     }
                 }
                 else
                 {
-                    Write-Verbose -Message ($LocalizedData.NoConfigurationRequired -f $GroupName)
+                    Write-Verbose -Message ($script:localizedData.NoConfigurationRequired -f $GroupName)
                 }
             }
         }
@@ -583,64 +747,310 @@ function Set-TargetResourceOnFullSKU
         {
             if ($groupOriginallyExists)
             {
-                if ($PSCmdlet.ShouldProcess(($LocalizedData.GroupWithName -f $GroupName), $LocalizedData.RemoveOperation))
+                if ($PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName), $script:localizedData.RemoveOperation))
                 {
-                    # Don't add to $disposables since Delete also disposes.
-                    $group.Delete()
-                    Write-Verbose -Message ($LocalizedData.GroupRemoved -f $GroupName)
+                    # Don't add group to $disposables since Delete also disposes.
+                    Remove-Group -Group $group
+                    Write-Verbose -Message ($script:localizedData.GroupRemoved -f $GroupName)
                 }
                 else
                 {
-                    $disposables.Add($group) | Out-Null
+                    $null = $disposables.Add($group)
                 }
             }
             else
             {
-                Write-Verbose -Message ($LocalizedData.NoConfigurationRequiredGroupDoesNotExist -f $GroupName)
+                Write-Verbose -Message ($script:localizedData.NoConfigurationRequiredGroupDoesNotExist -f $GroupName)
             }
         }
     }
     finally
     {
-        Remove-Disposables -Disposables $disposables
+        Remove-DisposableObject -Disposables $disposables
     }
 }
 
 <#
     .SYNOPSIS
-        The Test-TargetResource cmdlet on a full server
-        Tests if the resource is in the given state.
+        The Set-TargetResource cmdlet on Nano Server.
 
     .PARAMETER GroupName
         The name of the group for which you want to ensure a specific state.
 
     .PARAMETER Ensure
-        Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
-        not exist. Setting it to 'Present' (the default value) ensures that the group exists.
+        Indicates if the group should exist or not.
+        
+        Set this property to Present to ensure that the group exists.
+        Set this property to Absent to ensure that the group does not exist.
+        
+        The default value is Present.
 
     .PARAMETER Description
         The description of the group.
 
     .PARAMETER Members
-        Use this property to replace the current group membership with the specified members. The
-        value of this property is an array of strings of the form Domain\UserName. If you set this
-        property in a configuration, do not use either the MembersToExclude or MembersToInclude
-        property. Doing so will generate an error.
+        Use this property to replace the current group membership with the specified members.
+        
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+        
+        If you set this property in a configuration, do not use either the MembersToExclude or 
+        MembersToInclude property. Doing so will generate an error.
 
     .PARAMETER MembersToInclude
-        Use this property to add members to the existing membership of the group. The value of this
-        property is an array of strings of the form Domain\UserName. If you set this property in a
-        configuration, do not use the Members property. Doing so will generate an error.
+        Use this property to add members to the existing membership of the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+        
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
 
     .PARAMETER MembersToExclude
-        Use this property to remove members from the existing membership of the group. The value of
-        this property is an array of strings of the form Domain\UserName. If you set this property
-        in a configuration, do not use the Members property. Doing so will generate an error.
+        Use this property to remove members from the existing membership of the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+        
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
 
     .PARAMETER Credential
-        The credentials required to access remote resources. Note: This account must have the
-        appropriate Active Directory permissions to add all non-local accounts to the group.
-        Otherwise, an error will occur.
+        Not used on Nano Server.
+        Only local users are accessible from the resource.
+#>
+function Set-TargetResourceOnNanoServer
+{
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName,
+
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [String]
+        $Description,
+
+        [String[]]
+        $Members,
+
+        [String[]]
+        $MembersToInclude,
+
+        [String[]]
+        $MembersToExclude,
+
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential
+    )
+
+    try
+    {
+        $group = Get-LocalGroup -Name $GroupName -ErrorAction 'Stop'
+        $groupOriginallyExists = $true
+    }
+    catch [System.Exception]
+    {
+        if ($_.CategoryInfo.Reason -eq 'GroupNotFoundException')
+        {
+            # A group with the provided name does not exist.
+            Write-Verbose -Message ($script:localizedData.GroupDoesNotExist -f $GroupName)
+            $groupOriginallyExists = $false
+        }
+        else
+        {
+            New-InvalidOperationException -ErrorRecord $_
+        }
+    }
+
+    if ($Ensure -eq 'Present')
+    {
+        $whatIfShouldProcess =
+            if ($groupOriginallyExists)
+            {
+                $PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName),
+                    $script:localizedData.SetOperation)
+            }
+            else
+            {
+                $PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName),
+                    $script:localizedData.AddOperation)
+            }
+
+        if ($whatIfShouldProcess)
+        {
+            if (-not $groupOriginallyExists)
+            {
+                $group = New-LocalGroup -Name $GroupName
+                Write-Verbose -Message ($script:localizedData.GroupCreated -f $GroupName)
+            }
+
+            # Set the group properties.
+            if ($PSBoundParameters.ContainsKey('Description') -and 
+                ((-not $groupOriginallyExists) -or ($Description -ne $group.Description)))
+            {
+                Set-LocalGroup -Name $GroupName -Description $Description
+            }
+
+            $groupMembers = Get-MembersOnNanoServer -Group $group
+
+            if ($PSBoundParameters.ContainsKey('Members'))
+            {
+                foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
+                {
+                    if ($PSBoundParameters.ContainsKey($incompatibleParameterName))
+                    {
+                        New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
+                            -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
+                    }
+                }
+
+                # Remove duplicate names as strings.
+                $uniqueMembers = $Members | Select-Object -Unique
+
+                # Remove unspecified members
+                foreach ($groupMember in $groupMembers)
+                {
+                    if ($uniqueMembers -notcontains $groupMember)
+                    {
+                        Remove-LocalGroupMember -Group $GroupName -Member $groupMember
+                    }
+                }
+
+                # Add specified missing members
+                foreach ($uniqueMember in $uniqueMembers)
+                {
+                    if ($groupMembers -notcontains $uniqueMember)
+                    {
+                        Add-LocalGroupMember -Group $GroupName -Member $uniqueMember
+                    }
+                }
+            }
+            else
+            {
+                $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
+                $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
+
+                <#
+                    Both MembersToInclude and MembersToExclude were provided.
+                    Check if they have common principals.
+                #>
+                foreach ($includedMember in $uniqueMembersToInclude)
+                {
+                    foreach($excludedMember in $uniqueMembersToExclude)
+                    {
+                        if ($includedMember -eq $excludedMember)
+                        {
+                            New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
+                                -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedMember, 'MembersToInclude',
+                                    'MembersToExclude')
+                        }
+                    }
+                }
+
+                foreach ($includedMember in $uniqueMembersToInclude)
+                {
+                    if ($groupMembers -notcontains $includedMember)
+                    {
+                        Add-LocalGroupMember -Group $GroupName -Member $includedMember
+                    }
+                }
+
+                foreach($excludedMember in $uniqueMembersToExclude)
+                {
+                    if ($groupMembers -contains $excludedMember)
+                    {
+                        Remove-LocalGroupMember -Group $GroupName -Member $excludedMember
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        # Ensure is set to "Absent".
+        if ($groupOriginallyExists)
+        {
+            $whatIfShouldProcess = $PSCmdlet.ShouldProcess(
+                ($script:localizedData.GroupWithName -f $GroupName), $script:localizedData.RemoveOperation)
+            if ($whatIfShouldProcess)
+            {
+                # The group exists. Remove the group by the provided name.
+                Remove-LocalGroup -Name $GroupName
+                Write-Verbose -Message ($script:localizedData.GroupRemoved -f $GroupName)
+            }
+        }
+        else
+        {
+            Write-Verbose -Message ($script:localizedData.NoConfigurationRequiredGroupDoesNotExist -f $GroupName)
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        The Test-TargetResource cmdlet on a full server.
+        Tests if the group being managed is in the desired state.
+
+    .PARAMETER GroupName
+        The name of the group for which you want to test a specific state.
+
+    .PARAMETER Ensure
+        Indicates if the group should exist or not.
+        
+        Set this property to Present to ensure that the group exists.
+        Set this property to Absent to ensure that the group does not exist.
+        
+        The default value is Present.
+
+    .PARAMETER Description
+        The description of the group to test for.
+
+    .PARAMETER Members
+        Use this property to test if the existing membership of the group matches
+        the list provided.
+        
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use either the MembersToExclude or
+        MembersToInclude property. Doing so will generate an error.
+
+    .PARAMETER MembersToInclude
+        Use this property to test if members need to be added to the existing membership
+        of the group. 
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
+
+    .PARAMETER MembersToExclude
+        Use this property to test if members need to removed from the existing membership
+        of the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
+
+    .PARAMETER Credential
+        The credentials required to resolve non-local group members
 #>
 function Test-TargetResourceOnFullSKU
 {
@@ -671,163 +1081,172 @@ function Test-TargetResourceOnFullSKU
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
-    Set-StrictMode -Version 'Latest'
-
-    Assert-GroupNameValid -GroupName $GroupName
-
-    $principalContexts = @{}
+    $principalContextCache = @{}
     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
     try
     {
-        $group = Get-Group -GroupName $GroupName -PrincipalContexts $principalContexts -Disposables  $disposables
+        $principalContext = Get-PrincipalContext `
+            -PrincipalContextCache $PrincipalContextCache `
+            -Disposables $Disposables `
+            -Scope $env:computerName
+
+        $group = Get-Group -GroupName $GroupName -PrincipalContext $principalContext
 
         if ($null -eq $group)
         {
-            Write-Verbose -Message ($LocalizedData.GroupDoesNotExist -f $GroupName)
-            return ($Ensure -eq 'Absent')
+            Write-Verbose -Message ($script:localizedData.GroupDoesNotExist -f $GroupName)
+            return $Ensure -eq 'Absent'
         }
 
-        if ($null -ne $group.Members)
-        {
-            $actualGroupMembers = @($group.Members)
-        }
-        else
-        {
-            $actualGroupMembers = $null
-        }
-
-        $disposables.Add($group) | Out-Null
-        Write-Verbose -Message ($LocalizedData.GroupExists -f $GroupName)
+        $null = $disposables.Add($group)
+        Write-Verbose -Message ($script:localizedData.GroupExists -f $GroupName)
 
         # Validate separate properties.
         if ($Ensure -eq 'Absent')
         {
-            Write-Verbose -Message ($LocalizedData.PropertyMismatch -f 'Ensure', 'Absent', 'Present')
-            return $false
-        }
-
-        if ($PSBoundParameters.ContainsKey('GroupName') -and $GroupName -ne $group.SamAccountName -and $GroupName -ne $group.Sid.Value)
-        {
+            Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Ensure', 'Absent', 'Present')
             return $false
         }
 
         if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $group.Description)
         {
-            Write-Verbose -Message ($LocalizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
+            Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
             return $false
         }
 
+        $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
+            -Group $group `
+            -PrincipalContextCache $principalContextCache `
+            -Disposables $disposables `
+            -Credential $Credential
+        )
+
         if ($PSBoundParameters.ContainsKey('Members'))
         {
-            if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+            foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
             {
-                New-InvalidArgumentException -ArgumentName 'MembersToInclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude')
+                if ($PSBoundParameters.ContainsKey($incompatibleParameterName))
+                {
+                    New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
+                        -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
+                }
             }
 
-            if ($PSBoundParameters.ContainsKey('MembersToExclude'))
-            {
-                New-InvalidArgumentException -ArgumentName 'MembersToExclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude')
-            }
+            $uniqueMembers = $Members | Select-Object -Unique
 
-            if ($Members.Count -eq 0)
+            if ($null -eq $uniqueMembers)
             {
-                return ($null -eq $actualGroupMembers -or $actualGroupMembers.Count -eq 0)
+                return ($null -eq $actualMembersAsPrincipals -or $actualMembersAsPrincipals.Count -eq 0)
             }
             else
             {
-                # Remove duplicate names as strings.
-                $Members = @( Remove-DuplicateMembers -Members $Members )
-
-                # Resolve the names to actual principal objects.
-                $expectedMembersAsPrincipals = @( ConvertTo-Principals `
-                    -MemberNames $Members `
-                    -PrincipalContexts $principalContexts `
-                    -Disposables $disposables `
-                    -Credential $Credential )
-
-                if ($expectedMembersAsPrincipals.Count -ne $actualGroupMembers.Count)
+                if ($null -eq $actualMembersAsPrincipals -or $actualMembersAsPrincipals.Count -eq 0)
                 {
-                    Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembersAsPrincipals.Count, $actualGroupMembers.Count)
                     return $false
                 }
 
-                $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
-                    -Group $group `
-                    -PrincipalContexts $principalContexts `
+                # Resolve the names to actual principal objects.
+                $expectedMembersAsPrincipals = @( ConvertTo-UniquePrincipalsList `
+                    -MemberNames $uniqueMembers `
+                    -PrincipalContextCache $principalContextCache `
                     -Disposables $disposables `
-                    -Credential $Credential )
+                    -Credential $Credential
+                )
+
+                if ($expectedMembersAsPrincipals.Count -ne $actualMembersAsPrincipals.Count)
+                {
+                    Write-Verbose -Message ($script:localizedData.MembersNumberMismatch -f 'Members',
+                        $expectedMembersAsPrincipals.Count, $actualMembersAsPrincipals.Count)
+                    return $false
+                }
 
                 # Compare the two member lists.
                 foreach ($expectedMemberAsPrincipal in $expectedMembersAsPrincipals)
                 {
                     if ($actualMembersAsPrincipals -notcontains $expectedMemberAsPrincipal)
                     {
-                        Write-Verbose -Message ($LocalizedData.MembersMemberMismatch -f $expectedMember.SamAccountName, 'Members', $group.SamAccountName)
+                        Write-Verbose -Message ($script:localizedData.MembersMemberMismatch -f $expectedMemberAsPrincipal.SamAccountName,
+                            'Members', $group.SamAccountName)
                         return $false
                     }
                 }
             }
         }
-        elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
+        else
         {
-            $actualMembersAsPrincipals = @( Get-MembersAsPrincipals `
-                -Group $group `
-                -PrincipalContexts $principalContexts `
-                -Disposables $disposables `
-                -Credential $Credential )
+            $membersToIncludeAsPrincipals = $null
+            $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
 
-            if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+            if ($null -eq $uniqueMembersToInclude)
             {
-                $MembersToInclude = @( Remove-DuplicateMembers -Members $MembersToInclude )
-
+                Write-Verbose -Message $script:localizedData.MembersToIncludeEmpty
+            }
+            else
+            {
                 # Resolve the names to actual principal objects.
-                $expectedMembersAsPrincipals = ConvertTo-Principals `
-                    -MemberNames $MembersToInclude `
-                    -PrincipalContexts $principalContexts `
+                $membersToIncludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
+                    -MemberNames $uniqueMembersToInclude `
+                    -PrincipalContextCache $principalContextCache `
                     -Disposables $disposables `
                     -Credential $Credential
+                )
+            }
 
-                # Compare two members lists.
-                foreach ($expectedMemberAsPrincipal in $expectedMembersAsPrincipals)
+            $membersToExcludeAsPrincipals = $null
+            $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
+
+            if ($null -eq $uniqueMembersToExclude)
+            {
+                Write-Verbose -Message $script:localizedData.MembersToExcludeEmpty
+            }
+            else
+            {
+                # Resolve the names to actual principal objects.
+                $membersToExcludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
+                    -MemberNames $uniqueMembersToExclude `
+                    -PrincipalContextCache $principalContextCache `
+                    -Disposables $disposables `
+                    -Credential $Credential
+                )
+            }
+
+            foreach ($includedPrincipal in $membersToIncludeAsPrincipals)
+            {
+                <#
+                    Throw an error if any common principals were provided in MembersToInclude
+                    and MembersToExclude.
+                #>
+                if ($membersToExcludeAsPrincipals -contains $includedPrincipal)
                 {
-                    if ($actualMembersAsPrincipals -notcontains $expectedMemberAsPrincipal)
-                    {
-                        Write-Verbose -Message ($LocalizedData.MembersMemberMismatch -f $expectedMemberAsPrincipal.SamAccountName, 'MembersToInclude', $group.SamAccountName)
-                        return $false
-                    }
+                    New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
+                        -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,
+                            'MembersToInclude', 'MembersToExclude')
+                }
+
+                if ($actualMembersAsPrincipals -notcontains $includedPrincipal)
+                {
+                    return $false
                 }
             }
 
-            if ($PSBoundParameters.ContainsKey('MembersToExclude'))
+            foreach ($excludedPrincipal in $membersToExcludeAsPrincipals)
             {
-                $MembersToExclude = @( Remove-DuplicateMembers -Members $MembersToExclude)
-
-                # Resolve the names to actual principal objects.
-                $notExpectedMembersAsPrincipals = ConvertTo-Principals `
-                    -MemberNames $MembersToExclude `
-                    -PrincipalContexts $principalContexts `
-                    -Disposables $disposables `
-                    -Credential $Credential
-
-                foreach($notExpectedMemberAsPrincipal in $notExpectedMembersAsPrincipals)
+                if ($actualMembersAsPrincipals -contains $excludedPrincipal)
                 {
-                    if ($actualMembersAsPrincipals -contains $notExpectedMemberAsPrincipal)
-                    {
-                        Write-Verbose -Message ($LocalizedData.MemberToExcludeMatch -f $notExpectedMemberAsPrincipal.SamAccountName, 'MembersToExclude', $group.SamAccountName)
-                        return $false
-                    }
+                    return $false
                 }
             }
         }
     }
     finally
     {
-        Remove-Disposables $disposables
+        Remove-DisposableObject -Disposables $disposables
     }
 
     return $true
@@ -835,328 +1254,58 @@ function Test-TargetResourceOnFullSKU
 
 <#
     .SYNOPSIS
-        The Get-TargetResource cmdlet for a Nano server.
-
-    .PARAMETER GroupName
-        The name of the xGroup resource to retrieve.
-
-    .PARAMETER Credential
-        The credential to use to retrieve the xGroup resource.
-#>
-function Get-TargetResourceOnNanoServer
-{
-    [OutputType([Hashtable])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String]
-        $GroupName,
-
-        [PSCredential]
-        $Credential
-    )
-
-    Set-StrictMode -Version 'Latest'
-
-    Assert-GroupNameValid -GroupName $GroupName
-
-    try
-    {
-        $group = Get-LocalGroup -Name $GroupName -ErrorAction Stop
-    }
-    catch [System.Exception]
-    {
-        if ($_.CategoryInfo.Reason -eq 'GroupNotFoundException')
-        {
-            # The group is not found.
-            return @{
-                GroupName = $GroupName
-                Ensure = 'Absent'
-            }
-        }
-
-        New-InvalidOperationException -ErrorRecord $_
-    }
-
-    # The group is found. Enumerate all group members.
-    $members = Get-MembersOnNanoServer -Group $group
-
-    return @{
-        GroupName = $group.Name
-        Ensure = 'Present'
-        Description = $group.Description
-        Members = $members
-    }
-}
-
-<#
-    .SYNOPSIS
-        The Set-TargetResource cmdlet on a Nano server.
-
-    .PARAMETER GroupName
-        The name of the group for which you want to ensure a specific state.
-
-    .PARAMETER Ensure
-        Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
-        not exist. Setting it to 'Present' (the default value) ensures that the group exists.
-
-    .PARAMETER Description
-        The description of the group.
-
-    .PARAMETER Members
-        Use this property to replace the current group membership with the specified members. The
-        value of this property is an array of strings of the form Domain\UserName. If you set this
-        property in a configuration, do not use either the MembersToExclude or MembersToInclude
-        property. Doing so will generate an error.
-
-    .PARAMETER MembersToInclude
-        Use this property to add members to the existing membership of the group. The value of this
-        property is an array of strings of the form Domain\UserName. If you set this property in a
-        configuration, do not use the Members property. Doing so will generate an error.
-
-    .PARAMETER MembersToExclude
-        Use this property to remove members from the existing membership of the group. The value of
-        this property is an array of strings of the form Domain\UserName. If you set this property
-        in a configuration, do not use the Members property. Doing so will generate an error.
-
-    .PARAMETER Credential
-        The credentials required to access remote resources. Note: This account must have the
-        appropriate Active Directory permissions to add all non-local accounts to the group.
-        Otherwise, an error will occur.
-#>
-function Set-TargetResourceOnNanoServer
-{
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String]
-        $GroupName,
-
-        [ValidateSet('Present', 'Absent')]
-        [String]
-        $Ensure = 'Present',
-
-        [String]
-        $Description,
-
-        [ValidateNotNull()]
-        [String[]]
-        $Members,
-
-        [String[]]
-        $MembersToInclude,
-
-        [String[]]
-        $MembersToExclude,
-
-        [ValidateNotNullOrEmpty()]
-        [PSCredential]
-        $Credential
-    )
-
-    Set-StrictMode -Version 'Latest'
-
-    Assert-GroupNameValid -GroupName $GroupName
-
-    $groupOriginallyExists = $false
-
-    try
-    {
-        $group = Get-LocalGroup -Name $GroupName -ErrorAction Stop
-        $groupOriginallyExists = $true
-    }
-    catch [System.Exception]
-    {
-        if ($_.CategoryInfo.Reason -eq 'GroupNotFoundException')
-        {
-            # A group with the provided name does not exist.
-            Write-Verbose -Message ($LocalizedData.GroupDoesNotExist -f $GroupName)
-        }
-        else
-        {
-            New-InvalidOperationException -ErrorRecord $_
-        }
-    }
-
-    if ($Ensure -eq 'Present')
-    {
-        if (-not $groupOriginallyExists)
-        {
-            New-LocalGroup -Name $GroupName
-            Write-Verbose -Message ($LocalizedData.GroupCreated -f $GroupName)
-        }
-
-        # Set the group properties.
-
-        if ($PSBoundParameters.ContainsKey('Description') -and ((-not $groupExists) -or ($Description -ne $group.Description)))
-        {
-            Set-LocalGroup -Name $GroupName -Description $Description
-        }
-
-        <#
-            Group members can be updated in two ways:
-            1. Supplying the Members parameter - this causes the membership to be replaced with the members defined in Members.
-                NOTE: If Members is empty, the group membership is cleared.
-            2. Providing MembersToInclude and/or MembersToExclude - this adds/removes members from the list.
-                If Members is mutually exclusive with MembersToInclude and MembersToExclude
-                If Members is not defined then MembersToInclude or MembersToExclude must contain at least one entry.
-        #>
-
-        if ($PSBoundParameters.ContainsKey('Members'))
-        {
-            if ($PSBoundParameters.ContainsKey('MembersToInclude'))
-            {
-                New-InvalidArgumentException -ArgumentName 'MembersToInclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude')
-            }
-
-            if ($PSBoundParameters.ContainsKey('MembersToExclude'))
-            {
-                New-InvalidArgumentException -ArgumentName 'MembersToExclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude')
-            }
-
-            # Remove duplicate names as strings.
-            $Members = @( Remove-DuplicateMembers -Members $Members )
-
-            if ($Members.Count -gt 0)
-            {
-                # Get current members
-                $groupMembers = Get-MembersOnNanoServer -Group $group
-
-                # Remove the current members of the group
-                Remove-LocalGroupMember -Group $GroupName -Member $groupMembers
-
-                # Add the list of expected members to the group
-                Add-LocalGroupMember -Group $GroupName -Member $Members
-            }
-            else
-            {
-                New-InvalidArgumentException -ArgumentName 'Members' -Message ($LocalizedData.MembersIsEmpty)
-            }
-        }
-        else
-        {
-            if ($PSBoundParameters.ContainsKey('MembersToInclude'))
-            {
-                $MembersToInclude = @( Remove-DuplicateMembers -Members $MembersToInclude )
-            }
-
-            if ($PSBoundParameters.ContainsKey('MembersToExclude'))
-            {
-                $MembersToExclude = @( Remove-DuplicateMembers -Members $MembersToExclude )
-            }
-
-            if ($PSBoundParameters.ContainsKey('MembersToInclude') -and $PSBoundParameters.ContainsKey('MembersToExclude'))
-            {
-                # Both MembersToInclude and MembersToExlude were provided. Check if they have common principals.
-                foreach ($includedMember in $MembersToInclude)
-                {
-                    foreach($excludedMember in $MembersToExclude)
-                    {
-                        if ($includedMember -eq $excludedMember)
-                        {
-                            New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeConflict -f $includedMember, 'MembersToInclude', 'MembersToExclude')
-                        }
-                    }
-                }
-
-                if ($MembersToInclude.Count -eq 0 -and $MembersToExclude.Count -eq 0)
-                {
-                    New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' -Message ($LocalizedData.IncludeAndExcludeAreEmpty)
-                }
-            }
-
-            if ($PSBoundParameters.ContainsKey('MembersToInclude'))
-            {
-                foreach ($includedMember in $MembersToInclude)
-                {
-                    try
-                    {
-                        Add-LocalGroupMember -Group $GroupName -Member $includedMember -ErrorAction Stop
-                    }
-                    catch [System.Exception]
-                    {
-                        if ($_.CategoryInfo.Reason -ne 'MemberExistsException')
-                        {
-                            throw $_.Exception
-                        }
-                    }
-                }
-            }
-
-            if ($PSBoundParameters.ContainsKey('MembersToExclude'))
-            {
-                foreach($excludedMember in $MembersToExclude)
-                {
-                    try
-                    {
-                        Remove-LocalGroupMember -Group $GroupName -Member $excludedMember -ErrorAction Stop
-                    }
-                    catch [System.Exception]
-                    {
-                        if ($_.CategoryInfo.Reason -ne 'MemberNotFoundException')
-                        {
-                            New-InvalidOperationException -ErrorRecord $_
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        # Ensure is set to "Absent".
-        if ($groupOrginallyExists)
-        {
-            # The group exists. Remove the group by the provided name.
-            Remove-LocalGroup -Name $GroupName
-            Write-Verbose -Message ($LocalizedData.GroupRemoved -f $GroupName)
-        }
-        else
-        {
-            Write-Verbose -Message ($LocalizedData.NoConfigurationRequiredGroupDoesNotExist -f $GroupName)
-        }
-    }
-}
-
-<#
-    .SYNOPSIS
         The Test-TargetResource cmdlet on a Nano server
-        Tests if the resource is in the given state.
+        Tests if the group being managed is in the desired state.
 
     .PARAMETER GroupName
-        The name of the group for which you want to ensure a specific state.
+        The name of the group for which you want to test a specific state.
 
     .PARAMETER Ensure
-        Indicates if the group exists. Set this property to 'Absent' to ensure that the group does
-        not exist. Setting it to 'Present' (the default value) ensures that the group exists.
+        Indicates if the group should exist or not.
+        
+        Set this property to Present to ensure that the group exists.
+        Set this property to Absent to ensure that the group does not exist.
+        
+        The default value is Present.
 
     .PARAMETER Description
-        The description of the group.
+        The description of the group to test for.
 
     .PARAMETER Members
-        Use this property to replace the current group membership with the specified members. The
-        value of this property is an array of strings of the form Domain\UserName. If you set this
-        property in a configuration, do not use either the MembersToExclude or MembersToInclude
-        property. Doing so will generate an error.
+        Use this property to test if the existing membership of the group matches
+        the list provided.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use either the MembersToExclude or
+        MembersToInclude property. Doing so will generate an error.
 
     .PARAMETER MembersToInclude
-        Use this property to add members to the existing membership of the group. The value of this
-        property is an array of strings of the form Domain\UserName. If you set this property in a
-        configuration, do not use the Members property. Doing so will generate an error.
+        Use this property to test if members need to be added to the existing membership
+        of the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
 
     .PARAMETER MembersToExclude
-        Use this property to remove members from the existing membership of the group. The value of
-        this property is an array of strings of the form Domain\UserName. If you set this property
-        in a configuration, do not use the Members property. Doing so will generate an error.
+        Use this property to test if members need to removed from the existing membership
+        of the group.
+
+        The value of this property is an array of strings of the formats domain qualified name 
+        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
+        a unqualified (username) for local machine accounts.
+
+        If you set this property in a configuration, do not use the Members property.
+        Doing so will generate an error.
 
     .PARAMETER Credential
-        The credentials required to access remote resources. Note: This account must have the
-        appropriate Active Directory permissions to add all non-local accounts to the group.
-        Otherwise, an error will occur.
+        The credentials required to resolve non-local group members
 #>
 function Test-TargetResourceOnNanoServer
 {
@@ -1187,13 +1336,10 @@ function Test-TargetResourceOnNanoServer
         $MembersToExclude,
 
         [ValidateNotNullOrEmpty()]
-        [PSCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
-
-    Set-StrictMode -Version 'Latest'
-
-    Assert-GroupNameValid -GroupName $GroupName
 
     try
     {
@@ -1204,7 +1350,7 @@ function Test-TargetResourceOnNanoServer
         if ($_.CategoryInfo.Reason -eq 'GroupNotFoundException')
         {
             # A group with the provided name does not exist.
-            Write-Verbose -Message ($LocalizedData.GroupDoesNotExist -f $GroupName)
+            Write-Verbose -Message ($script:localizedData.GroupDoesNotExist -f $GroupName)
 
             return ($Ensure -eq 'Absent')
         }
@@ -1213,127 +1359,98 @@ function Test-TargetResourceOnNanoServer
     }
 
     # A group with the provided name exists.
-    Write-Verbose -Message ($LocalizedData.GroupExists -f $GroupName)
+    Write-Verbose -Message ($script:localizedData.GroupExists -f $GroupName)
 
     # Validate separate properties.
     if ($Ensure -eq 'Absent')
     {
-        Write-Verbose -Message ($LocalizedData.PropertyMismatch -f 'Ensure', 'Absent', 'Present')
+        Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Ensure', 'Absent', 'Present')
         return $false
     }
 
     if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $group.Description)
     {
-        Write-Verbose -Message ($LocalizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
+        Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
         return $false
     }
 
+    $groupMembers = Get-MembersOnNanoServer -Group $group
+
     if ($PSBoundParameters.ContainsKey('Members'))
     {
-        if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+        foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
         {
-            New-InvalidArgumentException -ArgumentName 'MembersToInclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude')
-        }
-
-        if ($PSBoundParameters.ContainsKey('MembersToExclude'))
-        {
-            New-InvalidArgumentException -ArgumentName 'MembersToExclude' -Message ($LocalizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude')
+            if ($PSBoundParameters.ContainsKey($incompatibleParameterName))
+            {
+                New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
+                    -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
+            }
         }
 
         # Remove duplicate names as strings.
-        $expectedMembers = @( Remove-DuplicateMembers -Members $Members )
+        $uniqueMembers = $Members | Select-Object -Unique
 
-        # Get current members
-        $groupMembers = Get-MembersOnNanoServer -Group $group
-
-        if ($expectedMembers.Count -ne $groupMembers.Count)
+        if ($null -eq $uniqueMembers)
         {
-            Write-Verbose -Message ($LocalizedData.MembersNumberMismatch -f 'Members', $expectedMembers.Count, $groupMembers.Count)
-            return $false
+            return ($null -eq $groupMembers -or $groupMembers.Count -eq 0)
         }
-
-        # Compare two members lists.
-        foreach ($expectedMember in $expectedMembers)
+        else
         {
-            if ($groupMembers -notcontains $expectedMember)
+            if ($null -eq $groupMembers -or $uniqueMembers.Count -ne $groupMembers.Count)
             {
-                Write-Verbose -Message ($LocalizedData.MembersMemberMismatch -f $expectedMember, 'Members', $group.Name)
                 return $false
+            }
+
+            foreach ($groupMember in $groupMembers)
+            {
+                if ($uniqueMembers -notcontains $groupMember)
+                {
+                    return $false
+                }
             }
         }
     }
     else
     {
-        # Get current members
-        $groupMembers = Get-MembersOnNanoServer -Group $group
+        $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
+        $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
 
-        if ($PSBoundParameters.ContainsKey('MembersToInclude'))
+        <#
+            Both MembersToInclude and MembersToExclude were provided.
+            Check if they have common principals.
+        #>
+        foreach ($includedMember in $uniqueMembersToInclude)
         {
-            $MembersToInclude = @( Remove-DuplicateMembers -Members $MembersToInclude )
-
-            # Compare two members lists.
-            foreach ($memberToInclude in $MembersToInclude)
+            foreach($excludedMember in $uniqueMembersToExclude)
             {
-                if ($groupMembers -notcontains $memberToInclude)
+                if ($includedMember -eq $excludedMember)
                 {
-                    Write-Verbose -Message ($LocalizedData.MemberToIncludeMismatch -f $memberToInclude, 'MembersToInclude', $group.Name)
-                    return $false
+                    New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
+                        -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedMember, 'MembersToInclude',
+                            'MembersToExclude')
                 }
             }
         }
 
-        if ($PSBoundParameters.ContainsKey('MembersToExclude'))
+        foreach ($includedMember in $uniqueMembersToInclude)
         {
-            $MembersToExclude = @( Remove-DuplicateMembers -Members $MembersToExclude )
-
-            # Compare two members lists.
-            foreach ($memberToExclude in $MembersToExclude)
+            if ($groupMembers -notcontains $includedMember)
             {
-                if ($groupMembers -notcontains $memberToExclude)
-                {
-                    Write-Verbose -Message ($LocalizedData.MemberToExcludeMismatch -f $memberToExclude, 'MembersToExclude', $group.Name)
-                    return $false
-                }
+                return $false
+            }
+        }
+
+        foreach($excludedMember in $uniqueMembersToExclude)
+        {
+            if ($groupMembers -contains $excludedMember)
+            {
+                return $false
             }
         }
     }
 
     # All properties match. Return $true.
     return $true
-}
-
-<#
-    .SYNOPSIS
-        Removes duplicates members from a list of members.
-
-    .PARAMETER Members
-        The list of members to remove duplicates from.
-#>
-function Remove-DuplicateMembers
-{
-    [OutputType([String[]])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String[]]
-        $Members
-    )
-
-    Set-StrictMode -Version 'Latest'
-
-    $membersWithoutDuplicates = @()
-
-    foreach ($member in $Members)
-    {
-        if ($membersWithoutDuplicates -notcontains $member)
-        {
-            $membersWithoutDuplicates += $member
-        }
-    }
-
-    return $membersWithoutDuplicates
 }
 
 <#
@@ -1355,8 +1472,6 @@ function Get-MembersOnNanoServer
         $Group
     )
 
-    Set-StrictMode -Version 'Latest'
-
     $localMemberNames = New-Object -TypeName 'System.Collections.ArrayList'
 
     # Get the group members.
@@ -1367,11 +1482,12 @@ function Get-MembersOnNanoServer
         if ($groupMember.PrincipalSource -ieq 'Local')
         {
             $localMemberName = $groupMember.Name.Substring($groupMember.Name.IndexOf('\') + 1)
-            $localMemberNames.Add($localMemberName) | Out-Null
+            $null = $localMemberNames.Add($localMemberName)
         }
         else
         {
-            Write-Verbose -Message "$($groupMember.Name) is not a local user (PrincipalSource = $($groupMember.PrincipalSource))"
+            Write-Verbose -Message ($script:localizedData.MemberIsNotALocalUser -f $groupMember.Name,
+                $groupMember.PrincipalSource)
         }
     }
 
@@ -1385,7 +1501,7 @@ function Get-MembersOnNanoServer
     .PARAMETER Group
         The GroupPrincipal Object to retrieve members for.
 
-    .PARAMETER PrincipalContexts
+    .PARAMETER PrincipalContextCache
         A hashtable cache of PrincipalContext instances for each scope.
         This is used to cache PrincipalContext instances for cases where it is used multiple times.
 
@@ -1410,7 +1526,7 @@ function Get-MembersOnFullSKU
         [ValidateNotNull()]
         [Hashtable]
         [AllowEmptyCollection()]
-        $PrincipalContexts,
+        $PrincipalContextCache,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
@@ -1418,22 +1534,26 @@ function Get-MembersOnFullSKU
         [AllowEmptyCollection()]
         $Disposables,
 
-        [System.Net.NetworkCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
-    Set-StrictMode -Version 'Latest'
-
     $members = New-Object -TypeName 'System.Collections.ArrayList'
 
-    $membersAsPrincipals = @( Get-MembersAsPrincipals -Group $Group -PrincipalContexts $PrincipalContexts -Disposables  $Disposables -Credential $Credential )
+    $membersAsPrincipals = @( Get-MembersAsPrincipalsList `
+        -Group $Group `
+        -PrincipalContextCache $PrincipalContextCache `
+        -Disposables $Disposables `
+        -Credential $Credential
+    )
 
-    foreach ($membersAsPrincipal in $membersAsPrincipals)
+    foreach ($memberAsPrincipal in $membersAsPrincipals)
     {
-        if ($membersAsPrincipal.ContextType -eq [System.DirectoryServices.AccountManagement.ContextType]::Domain)
+        if ($memberAsPrincipal.ContextType -eq [System.DirectoryServices.AccountManagement.ContextType]::Domain)
         {
             # Select only the first part of the full domain name.
-            $domainName = $membersAsPrincipal.Context.Name
+            $domainName = $memberAsPrincipal.Context.Name
 
             $domainNameDotIndex = $domainName.IndexOf('.')
             if ($domainNameDotIndex -ne -1)
@@ -1441,18 +1561,18 @@ function Get-MembersOnFullSKU
                 $domainName = $domainName.Substring(0, $domainNameDotIndex)
             }
 
-            if ($membersAsPrincipal.StructuralObjectClass -ieq 'computer')
+            if ($memberAsPrincipal.StructuralObjectClass -ieq 'computer')
             {
-                $members.Add($domainName + '\' + $membersAsPrincipal.Name) | Out-Null
+                $null = $members.Add($domainName + '\' + $memberAsPrincipal.Name)
             }
             else
             {
-                $members.Add($domainName + '\' + $membersAsPrincipal.SamAccountName) | Out-Null
+                $null = $members.Add($domainName + '\' + $memberAsPrincipal.SamAccountName)
             }
         }
         else
         {
-            $members.Add($membersAsPrincipal.Name) | Out-Null
+            $null = $members.Add($memberAsPrincipal.Name)
         }
     }
 
@@ -1466,7 +1586,7 @@ function Get-MembersOnFullSKU
     .PARAMETER Group
         The group to retrieve members for.
 
-    .PARAMETER PrincipalContexts
+    .PARAMETER PrincipalContextCache
         A hashtable cache of PrincipalContext instances for each scope.
         This is used to cache PrincipalContext instances for cases where it is used multiple times.
 
@@ -1476,7 +1596,7 @@ function Get-MembersOnFullSKU
     .PARAMETER Credential
         The network credential to use when explicit credentials are needed for the target domain.
 #>
-function Get-MembersAsPrincipals
+function Get-MembersAsPrincipalsList
 {
     [OutputType([System.DirectoryServices.AccountManagement.Principal[]])]
     [CmdletBinding()]
@@ -1491,7 +1611,7 @@ function Get-MembersAsPrincipals
         [ValidateNotNull()]
         [Hashtable]
         [AllowEmptyCollection()]
-        $PrincipalContexts,
+        $PrincipalContextCache,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
@@ -1499,11 +1619,10 @@ function Get-MembersAsPrincipals
         [AllowEmptyCollection()]
         $Disposables,
 
-        [System.Net.NetworkCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
-
-    Set-StrictMode -Version 'latest'
 
     $principals = New-Object -TypeName 'System.Collections.ArrayList'
 
@@ -1516,14 +1635,14 @@ function Get-MembersAsPrincipals
         access the account's SID which can then be used to resolve the associated principal using
         explicit credentials.
     #>
-    $groupDirectoryEntry = $group.GetUnderlyingObject()
+    $groupDirectoryMembers = Get-GroupMembersFromDirectoryEntry -Group $Group
 
-    $groupDirectoryMembers = $groupDirectoryEntry.Invoke('Members')
     foreach ($groupDirectoryMember in $groupDirectoryMembers)
     {
         # Extract the ObjectSid from the underlying DirectoryEntry
-        $memberDirectoryEntry = New-Object -TypeName 'System.DirectoryServices.DirectoryEntry' -ArgumentList @( $groupDirectoryMember )
-        $disposables.Add($memberDirectoryEntry) | Out-Null
+        $memberDirectoryEntry = New-Object -TypeName 'System.DirectoryServices.DirectoryEntry' `
+            -ArgumentList @( $groupDirectoryMember )
+        $null = $disposables.Add($memberDirectoryEntry)
 
         $memberDirectoryEntryPathParts = $memberDirectoryEntry.Path.Split('/')
 
@@ -1548,25 +1667,25 @@ function Get-MembersAsPrincipals
                 warning allows the operation to complete while leaving the stale member in the
                 group.
             #>
-            Write-Warning -Message ($LocalizedData.MemberNotValid -f $groupDirectoryEntry.Path)
+            Write-Warning -Message ($script:localizedData.MemberNotValid -f $memberDirectoryEntry.Path)
             continue
         }
 
         $principalContext = Get-PrincipalContext `
-            -PrincipalContexts $PrincipalContexts `
-            -Disposables $Disposables `
             -Scope $scope `
-            -Credential $Credential
+            -Credential $Credential `
+            -PrincipalContextCache $PrincipalContextCache `
+            -Disposables $Disposables
 
         # If local machine qualified, get the PrincipalContext for the local machine
         if (Test-IsLocalMachine -Scope $scope)
         {
-            Write-Verbose -Message ($LocalizedData.ResolvingLocalAccount -f $accountName)
+            Write-Verbose -Message ($script:localizedData.ResolvingLocalAccount -f $accountName)
         }
         # The account is domain qualified - credential required to resolve it.
-        elseif ($null -ne $Credential -or $null -ne $principalContext)
+        elseif ($null -ne $principalContext)
         {
-            Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f  $accountName, $scope)
+            Write-Verbose -Message ($script:localizedData.ResolvingDomainAccount -f $accountName, $scope)
         }
         else
         {
@@ -1575,22 +1694,67 @@ function Get-MembersAsPrincipals
                 provided. This is an unsupported use case. A credential is required to resolve
                 off-box.
             #>
-            New-InvalidArgumentException `
-                -ErrorId 'PrincipalNotFoundNoCredential' `
-                -ErrorMessage ($LocalizedData.DomainCredentialsRequired -f $accountName)
+            New-InvalidArgumentException -ArgumentName 'Credential' `
+                -Message ($script:localizedData.DomainCredentialsRequired -f $accountName)
         }
 
         # Create a SID to enable comparison againt the expected member's SID.
         $memberSidBytes = $memberDirectoryEntry.Properties['ObjectSid'].Value
-        $memberSid = New-Object -TypeName 'System.Security.Principal.SecurityIdentifier' -ArgumentList @( $memberSidBytes, 0 )
+        $memberSid = New-Object -TypeName 'System.Security.Principal.SecurityIdentifier' `
+            -ArgumentList @( $memberSidBytes, 0 )
 
         $principal = Resolve-SidToPrincipal -PrincipalContext $principalContext -Sid $memberSid -Scope $scope
-        $disposables.Add($principal) | Out-Null
+        $null = $disposables.Add($principal)
 
-        $principals.Add($principal) | Out-Null
+        $null = $principals.Add($principal)
     }
 
     return $principals.ToArray()
+}
+
+<#
+    .SYNOPSIS
+        Throws an error if a group name contains invalid characters.
+
+    .PARAMETER GroupName
+        The group name to test.
+#>
+function Assert-GroupNameValid
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName
+    )
+
+    $invalidCharacters = @( '\', '/', '"', '[', ']', ':', '|', '<', '>', '+', '=', ';', ',', '?', '*', '@' )
+
+    if ($GroupName.IndexOfAny($invalidCharacters) -ne -1)
+    {
+        New-InvalidArgumentException -ArgumentName 'GroupName' `
+            -Message ($script:localizedData.InvalidGroupName -f $GroupName, [String]::Join(' ', $invalidCharacters))
+    }
+
+    $nameContainsOnlyWhitspaceOrDots = $true
+
+    # Check if the name consists of only periods and/or white spaces.
+    for ($groupNameIndex = 0; $groupNameIndex -lt $GroupName.Length; $groupNameIndex++)
+    {
+        if (-not [Char]::IsWhiteSpace($GroupName, $groupNameIndex) -and $GroupName[$groupNameIndex] -ne '.')
+        {
+            $nameContainsOnlyWhitspaceOrDots = $false
+            break
+        }
+    }
+
+    if ($nameContainsOnlyWhitspaceOrDots)
+    {
+        New-InvalidArgumentException -ArgumentName 'GroupName' `
+            -Message ($script:localizedData.InvalidGroupName -f $GroupName, [String]::Join(' ', $invalidCharacters))
+    }
 }
 
 <#
@@ -1600,7 +1764,7 @@ function Get-MembersAsPrincipals
     .PARAMETER MemberNames
         The member names to convert to Principal instances.
 
-    .PARAMETER PrincipalContexts
+    .PARAMETER PrincipalContextCache
         A hashtable cache of PrincipalContext instances for each scope.
         This is used to cache PrincipalContext instances for cases where it is used multiple times.
 
@@ -1610,14 +1774,13 @@ function Get-MembersAsPrincipals
     .PARAMETER Credential
         The network credential to use when explicit credentials are needed for the target domain.
 #>
-function ConvertTo-Principals
+function ConvertTo-UniquePrincipalsList
 {
     [OutputType([System.DirectoryServices.AccountManagement.Principal[]])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
         [String[]]
         $MemberNames,
 
@@ -1625,7 +1788,7 @@ function ConvertTo-Principals
         [ValidateNotNull()]
         [Hashtable]
         [AllowEmptyCollection()]
-        $PrincipalContexts,
+        $PrincipalContextCache,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
@@ -1633,44 +1796,45 @@ function ConvertTo-Principals
         [AllowEmptyCollection()]
         $Disposables,
 
-        [System.Net.NetworkCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
 
-    Set-StrictMode -Version 'Latest'
-
     $principals = @()
-    $uniquePrincipalKeys = @()
 
     foreach ($memberName in $MemberNames)
     {
         $principal = ConvertTo-Principal `
             -MemberName $memberName `
-            -PrincipalContexts $PrincipalContexts `
+            -PrincipalContextCache $PrincipalContextCache `
             -Disposables $Disposables `
             -Credential $Credential
 
         if ($null -ne $principal)
         {
-            # Handle duplicate entries
+            # Do not add duplicate entries
             if ($principal.ContextType -eq [System.DirectoryServices.AccountManagement.ContextType]::Domain)
             {
-                $principalKey = $principal.DistinguishedName
+                $duplicatePrincipal = $principals | Where-Object -FilterScript { $_.DistinguishedName -ieq $principal.DistinguishedName }
+
+                if ($null -eq $duplicatePrincipal)
+                {
+                    $principals += $principal
+                }
             }
             else
             {
-                $principalKey = $principal.SamAccountName
-            }
+                $duplicatePrincipal = $principals | Where-Object -FilterScript { $_.SamAccountName -ieq $principal.SamAccountName }
 
-            if ($uniquePrincipalKeys -inotcontains $principalKey)
-            {
-                $uniquePrincipalKeys += $principalKey
-                $principals += $principal
+                if ($null -eq $duplicatePrincipal)
+                {
+                    $principals += $principal
+                }
             }
         }
     }
 
-    $uniquePrincipalKeys.Clear()
     return $principals
 }
 
@@ -1681,7 +1845,7 @@ function ConvertTo-Principals
     .PARAMETER MemberName
         The member name to convert to a Principal instance.
 
-    .PARAMETER PrincipalContexts
+    .PARAMETER PrincipalContextCache
         A hashtable cache of PrincipalContext instances for each scope.
         This is used to cache PrincipalContext instances for cases where it is used multiple times.
 
@@ -1713,7 +1877,7 @@ function ConvertTo-Principal
         [ValidateNotNull()]
         [Hashtable]
         [AllowEmptyCollection()]
-        $PrincipalContexts,
+        $PrincipalContextCache,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
@@ -1721,11 +1885,10 @@ function ConvertTo-Principal
         [AllowEmptyCollection()]
         $Disposables,
 
-        [System.Net.NetworkCredential]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential
     )
-
-    Set-StrictMode -Version 'Latest'
 
     # The scope of the the object name when in the form of scope\name, UPN, or DN
     $scope, $identityValue = Split-MemberName -MemberName $MemberName
@@ -1733,12 +1896,12 @@ function ConvertTo-Principal
     if (Test-IsLocalMachine -Scope $scope)
     {
         # If local machine qualified, get the PrincipalContext for the local machine
-        Write-Verbose -Message ($LocalizedData.ResolvingLocalAccount -f $MemberName)
+        Write-Verbose -Message ($script:localizedData.ResolvingLocalAccount -f $identityValue)
     }
     elseif ($null -ne $Credential)
     {
         # The account is domain qualified - a credential is provided to resolve it.
-        Write-Verbose -Message ($LocalizedData.ResolvingDomainAccount -f  $MemberName, $scope)
+        Write-Verbose -Message ($script:localizedData.ResolvingDomainAccount -f $identityValue, $scope)
     }
     else
     {
@@ -1750,29 +1913,29 @@ function ConvertTo-Principal
             distinguished name for the scope
         #>
 
-        Write-Verbose -Message ($LocalizedData.ResolvingDomainAccountWithTrust -f $MemberName)
-
+        Write-Verbose -Message ($script:localizedData.ResolvingDomainAccountWithTrust -f $MemberName)
         $identityValue = $MemberName
     }
 
     $principalContext = Get-PrincipalContext `
         -Scope $scope `
-        -PrincipalContexts $PrincipalContexts `
-        -Disposables $Disposables  `
+        -PrincipalContextCache $PrincipalContextCache `
+        -Disposables $Disposables `
         -Credential $Credential
 
     try
     {
-        $principal = [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($principalContext, $identityValue)
+        $principal = Find-Principal -PrincipalContext $principalContext -IdentityValue $identityValue
     }
     catch [System.Runtime.InteropServices.COMException]
     {
-        New-InvalidArgumentException -ArgumentName $MemberName -Message ( $LocalizedData.UnableToResolveAccount -f $MemberName, $_.Exception.Message, $_.Exception.HResult )
+        New-InvalidArgumentException -ArgumentName $MemberName `
+            -Message ( $script:localizedData.UnableToResolveAccount -f $MemberName, $_.Exception.Message, $_.Exception.HResult )
     }
 
     if ($null -eq $principal)
     {
-        New-InvalidArgumentException -ArgumentName $MemberName -Message ($LocalizedData.CouldNotFindPrincipal -f $MemberName)
+        New-InvalidArgumentException -ArgumentName $MemberName -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
     }
 
     return $principal
@@ -1783,13 +1946,13 @@ function ConvertTo-Principal
         Resolves a SID to a principal.
 
     .PARAMETER Sid
-    The security identifier to resolve to a Principal.
+        The security identifier to resolve to a Principal.
 
     .PARAMETER PrincipalContext
-    The PrincipalContext to use to resolve the Principal.
+        The PrincipalContext to use to resolve the Principal.
 
     .PARAMETER Scope
-    The scope of the PrincipalContext.
+        The scope of the PrincipalContext.
 #>
 function Resolve-SidToPrincipal
 {
@@ -1812,22 +1975,18 @@ function Resolve-SidToPrincipal
         $Scope
     )
 
-    Set-StrictMode -Version 'Latest'
-
-    $principal = [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, [System.DirectoryServices.AccountManagement.IdentityType]::Sid, $Sid.Value)
+    $principal = Find-Principal -PrincipalContext $PrincipalContext -IdentityValue $Sid.Value -IdentityType ([System.DirectoryServices.AccountManagement.IdentityType]::Sid)
 
     if ($null -eq $principal)
     {
         if (Test-IsLocalMachine -Scope $Scope)
         {
-            $errorId = "PrincipalNotFound_LocalMachine"
+            New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, or MembersToExclude' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
         }
         else
         {
-            $errorId = "PrincipalNotFound_ProvidedCredential"
+            New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, MembersToExclude, or Credential' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
         }
-
-        New-InvalidArgumentException -ErrorId $errorId -ErrorMessage ($LocalizedData.CouldNotFindPrincipal -f $Sid.Value)
     }
 
     return $principal
@@ -1837,21 +1996,22 @@ function Resolve-SidToPrincipal
     .SYNOPSIS
         Retrieves a PrincipalContext to use to resolve an object in the given scope.
 
-    .PARAMETER PrincipalContexts
-        A hashtable cache of PrincipalContext instances for each scope.
-        This is used to cache PrincipalContext instances for cases where it is used multiple times.
-
-    .PARAMETER Disposables
-        The ArrayList of disposable objects to which to add any objects that need to be disposed.
-
     .PARAMETER Scope
         The scope to retrieve the principal context for.
 
     .PARAMETER Credential
         The network credential to use when explicit credentials are needed for the target domain.
 
+    .PARAMETER PrincipalContextCache
+        A hashtable cache of PrincipalContext instances for each scope.
+        This is used to cache PrincipalContext instances for cases where it is used multiple times.
+
+    .PARAMETER Disposables
+        The ArrayList of disposable objects to which to add any objects that need to be disposed.
+
     .NOTES
-        When a new PrincipalContext is created, it is added to the Disposables list as well as the PrincipalContexts cache.
+        When a new PrincipalContext is created, it is added to the Disposables list
+        as well as the PrincipalContextCache.
 #>
 function Get-PrincipalContext
 {
@@ -1860,24 +2020,25 @@ function Get-PrincipalContext
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Scope,
+
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential,
+
+        [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         [Hashtable]
         [AllowEmptyCollection()]
-        $PrincipalContexts,
+        $PrincipalContextCache,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         [System.Collections.ArrayList]
         [AllowEmptyCollection()]
-        $Disposables,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String]
-        $Scope,
-
-        [System.Net.NetworkCredential]
-        $Credential
+        $Disposables
     )
 
     $principalContext = $null
@@ -1885,143 +2046,59 @@ function Get-PrincipalContext
     if (Test-IsLocalMachine -Scope $Scope)
     {
         # Check for a cached PrincipalContext for the local machine.
-        if ($PrincipalContexts.ContainsKey($env:computerName))
+        if ($PrincipalContextCache.ContainsKey($env:computerName))
         {
-            $principalContext = $PrincipalContexts[$env:computerName]
+            $principalContext = $PrincipalContextCache[$env:computerName]
         }
         else
         {
             # Create a PrincipalContext for the local machine
-            $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Machine )
+            $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
+                -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Machine )
 
             # Cache the PrincipalContext for this scope for subsequent calls.
-            $PrincipalContexts.Add($env:COMPUTERNAME, $principalContext) | Out-Null
-            $Disposables.Add($principalContext) | Out-Null
+            $null = $PrincipalContextCache.Add($env:computerName, $principalContext)
+            $null = $Disposables.Add($principalContext)
         }
     }
-    elseif ($PrincipalContexts.ContainsKey($Scope))
+    elseif ($PrincipalContextCache.ContainsKey($Scope))
     {
-        $principalContext = $PrincipalContexts[$Scope]
+        $principalContext = $PrincipalContextCache[$Scope]
     }
     elseif ($null -ne $Credential)
     {
         # Create a PrincipalContext targeting $Scope using the network credentials that were passed in.
-        if ($Credential.Domain)
+        $credentialDomain = $Credential.GetNetworkCredential().Domain
+        $credentialUserName = $Credential.GetNetworkCredential().UserName
+        if ($credentialDomain -ne [String]::Empty)
         {
-            $principalContextName = "$($Credential.Domain)\$($Credential.UserName)"
+            $principalContextName = "$credentialDomain\$credentialUserName"
         }
         else
         {
-            $principalContextName = $Credential.UserName
+            $principalContextName = $credentialUserName
         }
-        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, $principalContextName, $Credential.Password )
+
+        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
+            -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, 
+                $principalContextName, $Credential.GetNetworkCredential().Password )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
-        $PrincipalContexts.Add($scope, $principalContext) | Out-Null
-        $Disposables.Add($principalContext) | Out-Null
+        $null = $PrincipalContextCache.Add($Scope, $principalContext)
+        $null = $Disposables.Add($principalContext)
     }
     else
     {
         # Get a PrincipalContext for the current user in the target domain (even for local System account).
-        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope )
+        $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
+            -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
-        $PrincipalContexts.Add($Scope, $principalContext) | Out-Null
-        $Disposables.Add($principalContext) | Out-Null
+        $null = $PrincipalContextCache.Add($Scope, $principalContext)
+        $null = $Disposables.Add($principalContext)
     }
 
     return $principalContext
-}
-
-<#
-    .SYNOPSIS
-        Adds the given members to the given group if the members are not already in the group.
-
-        Returns true if the members were added and false if all the given members were already
-        present.
-
-    .PARAMETER Group
-        The group to add the members to.
-
-    .PARAMETER MembersAsPrincipals
-        The members to add to the group as principal objects.
-#>
-function Add-GroupMembers
-{
-    [OutputType([Boolean])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        [System.DirectoryServices.AccountManagement.GroupPrincipal]
-        $Group,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        [System.DirectoryServices.AccountManagement.Principal[]]
-        $MembersAsPrincipals
-    )
-
-    Set-StrictMode -Version 'Latest'
-
-    $memberAdded = $false
-
-    foreach ($member in $MembersAsPrincipals)
-    {
-        if (-not $group.Members.Contains($member))
-        {
-            $group.Members.Add($member)
-            $memberAdded = $true
-        }
-    }
-
-    return $memberAdded
-}
-
-<#
-    .SYNOPSIS
-        Removes the given members from the given group if the members are in the group.
-
-        Returns true if the members were removed and false if none of the given members were in the
-        group.
-
-    .PARAMETER Group
-        The group to remove the members from.
-
-    .PARAMETER MembersAsPrincipals
-        The members to remove from the group as principal objects.
-#>
-function Remove-GroupMembers
-{
-    [OutputType([Boolean])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        [System.DirectoryServices.AccountManagement.GroupPrincipal]
-        $Group,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        [System.DirectoryServices.AccountManagement.Principal[]]
-        $MembersAsPrincipals
-    )
-
-    Set-StrictMode -Version 'Latest'
-
-    $memberRemoved = $false
-
-    foreach ($member in $MembersAsPrincipals)
-    {
-        if ($group.Members.Remove($member))
-        {
-            $memberRemoved = $true
-        }
-    }
-
-    return $memberRemoved
 }
 
 <#
@@ -2043,8 +2120,6 @@ function Test-IsLocalMachine
         $Scope
     )
 
-    Set-StrictMode -Version 'latest'
-
     $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1' )
 
     if ($localMachineScopes -icontains $Scope)
@@ -2061,7 +2136,7 @@ function Test-IsLocalMachine
         $win32NetworkAdapterConfigurations = @( Get-CimInstance -ClassName 'Win32_NetworkAdapterConfiguration' )
         foreach ($win32NetworkAdapterConfiguration in $win32NetworkAdapterConfigurations)
         {
-            if ($null -ne $win32NetworkAdapterConfiguration.IPaddress)
+            if ($null -ne $win32NetworkAdapterConfiguration.IPAddress)
             {
                 foreach ($ipAddress in $win32NetworkAdapterConfiguration.IPAddress)
                 {
@@ -2122,7 +2197,7 @@ function Test-IsLocalMachine
 #>
 function Split-MemberName
 {
-    [OutputType([String], [String])]
+    [OutputType([System.String[]])]
     [CmdletBinding()]
     param
     (
@@ -2131,8 +2206,6 @@ function Split-MemberName
         [String]
         $MemberName
     )
-
-    Set-StrictMode -Version 'latest'
 
     # Assume no scope is defined or $FullName is a DistinguishedName
     $scope = $env:computerName
@@ -2151,7 +2224,7 @@ function Split-MemberName
 
         $accountName = $MemberName.Substring($separatorIndex + 1)
 
-        return $scope, $accountName
+        return [System.String[]] @( $scope, $accountName )
     }
 
     # Parse UPN for the scope
@@ -2161,7 +2234,7 @@ function Split-MemberName
         $scope = $MemberName.Substring($separatorIndex + 1)
         $accountName = $MemberName.Substring(0, $separatorIndex)
 
-        return $scope, $accountName
+        return [System.String[]] @( $scope, $accountName )
     }
 
     # Parse distinguished name for the scope
@@ -2171,7 +2244,8 @@ function Split-MemberName
     if ($separatorIndex -ne -1)
     {
         <#
-            For distinguished name formats, the DistinguishedName is returned as the account name.
+            For member names in the distinguished name format, the account name returned should be
+            the entire distinguished name.
             See the initialization of $accountName above.
         #>
 
@@ -2180,44 +2254,42 @@ function Split-MemberName
 
         if ($endScopeIndex -gt $startScopeIndex)
         {
-            $scopeLength = $endScopeIndex - $separatorScopeIndex - $distinguishedNamePrefix.Length
+            $scopeLength = $endScopeIndex - $separatorIndex - $distinguishedNamePrefix.Length
             $scope = $MemberName.Substring($startScopeIndex, $scopeLength)
 
-            return $scope, $accountName
+            return [System.String[]] @( $scope, $accountName )
         }
     }
 
-    return $scope, $accountName
+    return [System.String[]] @( $scope, $accountName )
 }
 
-<#
-    .SYNOPSIS
-        Disposes of the contents of an array list containing IDisposable objects.
-
-    .PARAMETER Disosables
-        The array list of IDisposable Objects to dispose of.
-#>
-function Remove-Disposables
+function Find-Principal
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        [System.Collections.ArrayList]
-        [AllowEmptyCollection()]
-        $Disposables
+        [System.DirectoryServices.AccountManagement.PrincipalContext]
+        $PrincipalContext,
+
+        [Parameter(Mandatory = $true)]
+        [String]
+        $IdentityValue,
+
+        [System.DirectoryServices.AccountManagement.IdentityType]
+        $IdentityType
     )
 
-    Set-StrictMode -Version 'latest'
-
-    foreach ($disposable in $Disposables)
+    if ($PSBoundParameters.ContainsKey('IdentityType'))
     {
-        if ($disposable -is [System.IDisposable])
-        {
-            $disposable.Dispose()
-        }
+        return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, $IdentityType, $IdentityValue)
     }
+    else
+    {
+        return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, $IdentityValue)
+    }
+    
 }
 
 <#
@@ -2230,7 +2302,7 @@ function Remove-Disposables
     .PARAMETER Disposables
         The ArrayList of disposable objects to which to add any objects that need to be disposed.
 
-    .PARAMETER PrincipalContexts
+    .PARAMETER PrincipalContextCache
         A hashtable cache of PrincipalContext instances for each scope.
         This is used to cache PrincipalContext instances for cases where it is used multiple times.
 
@@ -2250,81 +2322,194 @@ function Get-Group
         $GroupName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNull()]
-        [System.Collections.ArrayList]
-        [AllowEmptyCollection()]
-        $Disposables,
-
-        [Parameter(Mandatory = $true)]
-        [Hashtable]
-        [AllowEmptyCollection()]
-        $PrincipalContexts
+        [System.DirectoryServices.AccountManagement.PrincipalContext]
+        $PrincipalContext
     )
 
     $principalContext = Get-PrincipalContext `
-        -PrincipalContexts $PrincipalContexts `
+        -PrincipalContextCache $PrincipalContextCache `
         -Disposables $Disposables `
-        -Scope $env:computerName
+        -Scope $env:COMPUTERNAME
 
     try
     {
-        $group = [System.DirectoryServices.AccountManagement.GroupPrincipal]::FindByIdentity($principalContext, $GroupName)
+        $group = [System.DirectoryServices.AccountManagement.GroupPrincipal]::FindByIdentity($PrincipalContext, $GroupName)
     }
     catch
     {
-        $group = $null 
+        $group = $null
     }
 
     return $group
 }
 
-<#
-    .SYNOPSIS
-        Throws an error if a group name contains invalid characters.
-
-    .PARAMETER GroupName
-        The group name to test.
-#>
-function Assert-GroupNameValid
+function Get-GroupMembersFromDirectoryEntry
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String]
-        $GroupName
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.GroupPrincipal]
+        $Group
     )
 
-    $invalidCharacters = @( '\', '/', '"', '[', ']', ':', '|', '<', '>', '+', '=', ';', ',', '?', '*', '@' )
+    $groupDirectoryEntry = $Group.GetUnderlyingObject()
+    return $groupDirectoryEntry.Invoke('Members')
+}
 
-    if ($GroupName.IndexOfAny($invalidCharacters) -ne -1)
+<#
+    .SYNOPSIS
+        Clears the members of the specified group.
+        This is a wrapper function for testing purposes.
+
+    .PARAMETER Group
+        The group to clear the members of.
+#>
+function Clear-GroupMembers
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.GroupPrincipal]
+        $Group
+    )
+    
+    $Group.Members.Clear()
+}
+
+<#
+    .SYNOPSIS
+        Adds the specified member to the specified group.
+        This is a wrapper function for testing purposes.
+
+    .PARAMETER Group
+        The group to add the member to.
+
+    .PARAMETER MemberAsPrincipal
+        The member to add to the group as a principal.
+#>
+function Add-GroupMember
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.GroupPrincipal]
+        $Group,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.Principal]
+        $MemberAsPrincipal
+    )
+
+    $Group.Members.Add($MemberAsPrincipal)
+}
+
+<#
+    .SYNOPSIS
+        Removes the specified member from the specified group.
+        This is a wrapper function for testing purposes.
+
+    .PARAMETER Group
+        The group to remove the member from.
+
+    .PARAMETER MemberAsPrincipal
+        The member to remove from the group as a principal.
+#>
+function Remove-GroupMember
+{
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.GroupPrincipal]
+        $Group,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.Principal]
+        $MemberAsPrincipal
+    )
+
+    $Group.Members.Remove($MemberAsPrincipal)
+}
+
+<#
+    .SYNOPSIS
+        Deletes the specified group.
+        This is a wrapper function for testing purposes.
+
+    .PARAMETER Group
+        The group to delete.
+#>
+function Remove-Group
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.GroupPrincipal]
+        $Group
+    )
+    
+    $Group.Delete()
+}
+
+<#
+    .SYNOPSIS
+        Saves the specified group.
+        This is a wrapper function for testing purposes.
+
+    .PARAMETER Group
+        The group to save.
+#>
+function Save-Group
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.DirectoryServices.AccountManagement.GroupPrincipal]
+        $Group
+    )
+
+    $Group.Save()
+}
+
+<#
+    .SYNOPSIS
+        Disposes of the contents of an array list containing IDisposable objects.
+
+    .PARAMETER Disosables
+        The array list of IDisposable Objects to dispose of.
+#>
+function Remove-DisposableObject
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.Collections.ArrayList]
+        [AllowEmptyCollection()]
+        $Disposables
+    )
+
+    foreach ($disposable in $Disposables)
     {
-        New-InvalidArgumentException `
-            -ArgumentName 'GroupNameHasInvalidCharacter' `
-            -Message ($LocalizedData.InvalidGroupName `
-                -f $GroupName, [String]::Join(' ', $invalidCharacters))
-    }
-
-    $nameContainsOnlyWhitspaceOrDots = $true
-
-    # Check if the name consists of only periods and/or white spaces.
-    for ($groupNameIndex = 0; $groupNameIndex -lt $GroupName.Length; $groupNameIndex++)
-    {
-        if (-not [Char]::IsWhiteSpace($GroupName, $groupNameIndex) -and $GroupName[$groupNameIndex] -ne '.')
+        if ($disposable -is [System.IDisposable])
         {
-            $nameContainsOnlyWhitspaceOrDots = $false
-            break
+            $disposable.Dispose()
         }
-    }
-
-    if ($nameContainsOnlyWhitspaceOrDots)
-    {
-        New-InvalidArgumentException `
-            -ErrorId 'GroupNameHasOnlyWhiteSpacesAndDots' `
-            -Message ($LocalizedData.InvalidGroupName `
-                -f $GroupName, [String]::Join(' ', $invalidCharacters))
     }
 }
 
-Export-ModuleMember -Function *-TargetResource
+Export-ModuleMember -Function '*-TargetResource'

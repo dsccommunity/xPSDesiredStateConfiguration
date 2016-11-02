@@ -3,7 +3,6 @@
 # xPSDesiredStateConfiguration
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
-The module contains the **xDscWebService**, **xWindowsProcess**, **xService**, **xPackage**, **xRemoteFile**, **xWindowsOptionalFeature** and **xGroup** DSC resources, as well as the **xFileUpload** composite DSC resource.
 
 **This module is currently in the process of becoming one of our first experimental High Quality Resource Modules (HQRMs). The plan for updating this module is available [here](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/HighQualityResourceModulePlan.md). Any comments or questions about this process/plan can be submitted under issue [#160](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/160).**
 
@@ -18,22 +17,33 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 * **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
+* **xGroup** provides a mechanism to manage local groups on the target node.
+* **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xWindowsProcess** configures and manages Windows processes.
-* **xService** configures and manages Windows services.
+* **xService** provides a mechanism to configure and manage Windows services.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
 * **xPackage** manages the installation of .msi and .exe packages.
-* **xGroup** provides a mechanism to manage local groups on the target node.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
-* **xWindowsFeature** provides a mechanism to ensure that roles and features are added or removed on a target node.
+* **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xScript** provides a mechanism to run Windows PowerShell script blocks on target nodes.
-* **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
+* **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
+* **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
+
+Resources that work on Nano Server:
+
+* xGroup
+* xService
+* xUser
+* xWindowsOptionalFeature
+* xWindowsPackageCab
+
 
 ### xArchive
 
@@ -64,7 +74,35 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **ConfigurationPath**: Folder location where DSC configurations are stored.
 * **RegistrationKeyPath**: Folder location where DSC pull server registration key file is stored.
 * **AcceptSelfSignedCertificate**: Whether self signed certificate can be used to setup pull server.
-* **UseUpToDateSecuritySettings**: Whether to use enhanced security settings for the node where pull server resides on.
+* **UseSecurityBestPractices**: Whether to use best practice security settings for the node where pull server resides on.
+Caution: Setting this property to $true will reset registry values under "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL". This environment change enforces the use of stronger encryption cypher and may affect legacy applications. More information can be found at https://support.microsoft.com/en-us/kb/245030 and https://technet.microsoft.com/en-us/library/dn786418(v=ws.11).aspx.
+* **DisableSecurityBestPractices**: The items that are excepted from following best practice security settings.
+
+### xGroup
+Provides a mechanism to manage local groups on the target node.
+This resource works on Nano Server.
+
+#### Requirements
+
+None
+
+#### Parameters
+* **[String] GroupName** _(Key)_: The name of the group to create, modify, or remove.
+* **[String] Ensure** _(Write)_: Indicates if the group should exist or not. To add a group or modify an existing group, set this property to Present. To remove a group, set this property to Absent. The default value is Present. { *Present* | Absent }.
+* **[String] Description** _(Write)_: The description the group should have.
+* **[String[]] Members** _(Write)_: The members the group should have. This property will replace all the current group members with the specified members. Members should be specified as strings in the format of their domain qualified name (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts). Using either the MembersToExclude or MembersToInclude properties in the same configuration as this property will generate an error.
+* **[String[]] MembersToInclude** _(Write)_: The members the group should include. This property will only add members to a group. Members should be specified as strings in the format of their domain qualified name (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts). Using the Members property in the same configuration as this property will generate an error.
+* **[String[]] MembersToExclude** _(Write)_: The members the group should exclude. This property will only remove members from a group. Members should be specified as strings in the format of their domain qualified name (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts). Using the Members property in the same configuration as this property will generate an error.
+* **[System.Management.Automation.PSCredential] Credential** _(Write)_: A credential to resolve non-local group members.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Create or modify a group with Members](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_Members.ps1)
+* [Create or modify a group with MembersToInclude and/or MembersToExclude](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_Members.ps1)
 
 ### xWindowsProcess
 
@@ -77,23 +115,33 @@ Specify an empty string if you don't want to pass any arguments.
 * **Ensure**: Ensures that the process is running or stopped: { Present | Absent }
 
 ### xService
+Provides a mechanism to configure and manage Windows services.
+This resource works on Nano Server.
 
-For a complete list of properties, please use Get-DscResource
+### Requirements
+
+None
+
+### Parameters
 
 * **[String] Name** _(Key)_: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
-* **[String] Ensure** _(Write)_: Ensures that the service is present or absent. Defaults to Present. { *Present* | Absent }.
+* **[String] Ensure** _(Write)_: Indicates whether the service is present or absent. Defaults to Present. { *Present* | Absent }.
 * **[String] Path** _(Write)_: The path to the service executable file.
 * **[String] StartupType** _(Write)_: Indicates the startup type for the service. { Automatic | Disabled | Manual }.
 * **[String] BuiltInAccount** _(Write)_: Indicates the sign-in account to use for the service. { LocalService | LocalSystem | NetworkService }.
 * **[PSCredential] Credential** _(Write)_: The credential to run the service under.
-* **[Boolean] DesktopInteract** _(Write)_: The service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
-* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped }.
+* **[Boolean] DesktopInteract** _(Write)_: Indicates whether the service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
+* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped | Ignore }.
 * **[String] DisplayName** _(Write)_: The display name of the service.
 * **[String] Description** _(Write)_: The description of the service.
 * **[String[]] Dependencies** _(Write)_: An array of strings indicating the names of the dependencies of the service.
 * **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000.
 * **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000.
-* **[String] Status** _(Read)_: The current status of the service.
+
+### Examples
+
+* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_CreateService.ps1)
+* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_DeleteService.ps1)
 
 ### xRemoteFile
 
@@ -133,30 +181,6 @@ Read-Only Properties:
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
 
-### xGroup
-
-* **GroupName**: (Key) The name of the group for which you want to ensure a specific state.
-* **Ensure**: Indicates if the group exists. Set this property to "Absent" to ensure that the group does not exist. Setting it to "Present" (the default value) ensures that the group exists.
-   - Supported values: Present, Absent
-   - Default Value: Present
-* **Description**: The description of the group.
-* **Members**: Use this property to replace the current group membership with the specified members. The value of this property is an array of strings of the form Domain\UserName. If you set this property in a configuration, do not use either the MembersToExclude or MembersToInclude property. Doing so will generate an error. Note: If the group already exists, the listed items in this property replaces what is in the group.
-* **MembersToInclude**: Use this property to add members to the existing membership of the group. The value of this property is an array of strings of the form Domain\UserName. If you set this property in a configuration, do not use the Members property. Doing so will generate an error. Note: This property is ignored if 'Members' is specified.
-* **MembersToExclude**: Use this property to remove members from the existing membership of the group. The value of this property is an array of strings of the form Domain\UserName. If you set this property in a configuration, do not use the Members property. Doing so will generate an error. Note: This property is ignored if 'Members' is specified.
-* **Credential**: The credentials required to access remote resources. Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group; otherwise, an error will occur.
-
-Local accounts may be specified in one of the following ways:
-
-* The simple name of the account of the group or local user.
-* The account name scoped to the explicit machine name (eg. myserver\users or myserver\username).
-* The account name scoped using the explicit local machine qualifier (eg. .\users or .\username).
-
-Domain members may be specified using domain\name or User Principal Name (UPN) formatting. The following illustrates the various formats
-
-* Domain joined machines: mydomain\myserver or myserver@mydomain.com
-* Domain user accounts: mydomain\username or username@mydomain.com
-* Domain group accounts: mydomain\groupname or groupname@mydomain.com
-
 ### xFileUpload
 
 * **DestinationPath**: Path where the local file should be uploaded.
@@ -190,16 +214,29 @@ xRegistry provides a mechanism to manage registry keys and values on a target no
    - Default value: $false.
 
 ### xWindowsFeature
-* **Name**: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
-* **Credential**: Indicates the credentials to use to add or remove the role or feature.
-* **Ensure**: Ensures that the feature is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
-* **Source**: Indicates the location of the source file to use for installation, if necessary.
+Provides a mechanism to install or uninstall Windows roles or features on a target node.
+
+#### Requirements
+
+* Target machine must be running Windows Server 2008 or later.
+* Target machine must have access to the DISM PowerShell module.
+* Target machine must have access to the ServerManager module.
+
+#### Parameters
+
+* **[String] Name** _(Key)_: Indicates the name of the role or feature that you want to ensure is added or removed. This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the display name of the role or feature.
+* **[PSCredential] Credential** _(Write)_: Indicates the credential to use to add or remove the role or feature if needed.
+* **[String] Ensure** _(Write)_: Specifies whether the feature should be installed (Present) or uninstalled (Absent) { *Present* | Absent }.
+* **[Boolean] IncludeAllSubFeature** _(Write)_: Set this property to $true to ensure the state of all required subfeatures with the state of the feature you specify with the Name property. The default value is $false.
+* **[String] LogPath** _(Write)_: Indicates the path to a log file to log the operation.
+
+#### Read-Only Properties from Get-TargetResource
+
+* **[String] DisplayName** _(Read)_: The display name of the retrieved role or feature.
+
+#### Examples
+
+* [Install or uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeature.ps1)
 
 ### xScript
 * **GetScript**: Provides a block of Windows PowerShell script that runs when you invoke the Get-DscConfiguration cmdlet. This block must return a hash table.
@@ -208,25 +245,37 @@ xRegistry provides a mechanism to manage registry keys and values on a target no
 * **Credential**: Indicates the credentials to use for running this script, if credentials are required.
 
 ### xUser
-* **UserName**: Indicates the account name for which you want to ensure a specific state.
-* **Description**: Indicates the description you want to use for the user account.
-* **Disabled**: Indicates if the account is enabled. Set this property to $true to ensure that this account is disabled, and set it to $false to ensure that it is enabled.
+Provides a mechanism to manage local users on a target node.
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String] UserName** _(Key)_: Indicates the account name for which you want to ensure a specific state.
+* **[String] Description** _(Write)_: Indicates the description you want to use for the user account.
+* **[Boolean] Disabled** _(Write)_: Indicates if the account is enabled. Set this property to $true to ensure that this account is disabled, and set it to $false to ensure that it is enabled.
    - Suported values: $true, $false
    - Default value: $false
-* **Ensure**: Ensures that the feature is present or absent.
+* **[String] Ensure** _(Write)_: Ensures that the feature is present or absent.
    - Supported values: Present, Absent
    - Default Value: Present
-* **FullName**: Represents a string with the full name you want to use for the user account.
-* **Password**: Indicates the password you want to use for this account.
-* **PasswordChangeNotAllowed**: Indicates if the user can change the password. Set this property to $true to ensure that the user cannot change the password, and set it to $false to allow the user to change the password.
+* **[String] FullName** _(Write)_: Represents a string with the full name you want to use for the user account.
+* **[PSCredential] Password** _(Write)_: Indicates the password you want to use for this account.
+* **[Boolean] PasswordChangeNotAllowed** _(Write)_: Indicates if the user can change the password. Set this property to $true to ensure that the user cannot change the password, and set it to $false to allow the user to change the password.
    - Suported values: $true, $false
    - Default value: $false
-* **PasswordChangeRequired**: Indicates if the user must change the password at the next sign in. Set this property to $true if the user must change the password.
+* **[Boolean] PasswordChangeRequired** _(Write)_: Indicates if the user must change the password at the next sign in. Set this property to $true if the user must change the password.
    - Suported values: $true, $false
    - Default value: $true
-* **PasswordNeverExpires**: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
+* **[Boolean] PasswordNeverExpires** _(Write)_: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
    - Suported values: $true, $false
    - Default value: $false
+   
+#### Examples
+
+* [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
 
 ### xGroupSet
 * **GroupName**: Defines the names of the groups in the set.
@@ -292,11 +341,12 @@ These parameters will be the same for each Windows feature in the set. Please re
 
 ### xWindowsOptionalFeature
 Provides a mechanism to enable or disable optional features on a target node.
+This resource works on Nano Server.
 
 #### Requirements
 
-* Target machine must be running either a Windows client operating system or Windows Server 2012 or later.
-* Target machine must have access to the DISM PowerShell module
+* Target machine must be running a Windows client operating system, Windows Server 2012 or later, or Nano Server.
+* Target machine must have access to the DISM PowerShell module.
 
 #### Parameters
 
@@ -341,6 +391,30 @@ These parameters will be the same for each Windows optional feature in the set. 
    - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
    - Default value: ErrorsOnly.
 
+### xWindowsPackageCab
+Provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
+This resource works on Nano Server.
+
+#### Requirements
+
+* Target machine must have access to the DISM PowerShell module
+
+#### Parameters
+
+* **[String] Name** _(Key)_: The name of the package to install or uninstall.
+* **[String] Ensure** _(Required)_: Specifies whether the package should be installed or uninstalled. To install the package, set this property to Present. To uninstall the package, set the property to Absent. { *Present* | Absent }.
+* **[String] SourcePath** _(Required)_: The path to the cab file to install or uninstall the package from.
+* **[String] LogPath** _(Write)_: The path to a file to log the operation to. There is no default value, but if not set, the log will appear at %WINDIR%\Logs\Dism\dism.log.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsPackageCab.ps1)
+
+   
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -352,6 +426,34 @@ These parameters will be the same for each Windows optional feature in the set. 
 ## Versions
 
 ### Unreleased
+
+### 5.0.0.0
+
+* xWindowsFeature:
+    * Cleaned up resource (PSSA issues, formatting, etc.)
+    * Added/Updated Tests and Examples
+    * BREAKING CHANGE: Removed the unused Source parameter
+    * Updated to a high quality resource
+* xDSCWebService:
+    * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
+    * Rename UseUpToDateSecuritySettings property to UseSecurityBestPractices.
+    * Add DisableSecurityBestPractices property to specify items that are excepted from following best practice security settings.
+* xGroup:
+    * Fixed PSSA issues
+    * Formatting updated as per style guidelines
+    * Missing comment-based help added for Get-/Set-/Test-TargetResource
+    * Typos fixed in Unit test script
+    * Unit test 'Get-TargetResource/Should return hashtable with correct values when group has no members' updated to handle the expected empty Members array correctly
+    * Added a lot of unit tests
+    * Cleaned resource
+* xUser:
+    * Fixed PSSA/Style violations
+    * Added/Updated Tests and Examples
+* Added xWindowsPackageCab
+* xService:
+    * Fixed PSSA/Style violations
+    * Updated Tests
+    * Added 'Ignore' state
 
 ### 4.0.0.0
 
@@ -401,10 +503,6 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Added support for changing Service Description and DisplayName parameters.
     * Fixed bug when changing binary path of existing service.
 * Removed test log output from repo.
-* xDSCWebService:
-    * Added setting of enhanced security
-    * Cleaned up Examples
-    * Cleaned up pull server verification test
 * xWindowsOptionalFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added example script
@@ -631,6 +729,6 @@ This configuration will install a .msi package and verify the package using the 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
 
 ### Validate pullserver deployement.
-If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in Powershll or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
+If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in PowerShell or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
 
 [Pullserver Validation Pester Tests](Examples/PullServerDeploymentVerificationTest)
