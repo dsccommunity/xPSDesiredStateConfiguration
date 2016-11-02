@@ -427,6 +427,8 @@ None
 
 ### Unreleased
 
+### 5.0.0.0
+
 * xWindowsFeature:
     * Cleaned up resource (PSSA issues, formatting, etc.)
     * Added/Updated Tests and Examples
