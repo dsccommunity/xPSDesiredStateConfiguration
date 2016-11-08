@@ -517,7 +517,6 @@ function Import-ServerManager
     {
         Import-Module -Name 'ServerManager' -ErrorAction Stop
     }
-    
     catch [System.Management.Automation.RuntimeException] {
         if ($_.Exception.Message -like "*Some or all identity references could not be translated*")
         {
