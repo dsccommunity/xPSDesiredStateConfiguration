@@ -575,11 +575,25 @@ try {
                 Version = '6.1.'
                 OperatingSystemSKU = 10
             }
+            $mockIdentityReferenceRuntimeException = New-Object -TypeName System.Management.Automation.RuntimeException -ArgumentList 'Some or all identity references could not be translated'
+            $mockOtherRuntimeException = New-Object -TypeName System.Management.Automation.RuntimeException -ArgumentList 'Other error'
             Mock -CommandName Get-WmiObject -MockWith { return $mockOperatingSystem }
 
             It 'Should Not Throw' {
                 Mock -CommandName Import-Module -MockWith {}
                 { Import-ServerManager } | Should Not Throw
+            }
+            
+            It 'Should Not Throw when exception is Identity Reference Runtime Exception' {
+                Mock -CommandName Import-Module -MockWith { Throw $mockIdentityReferenceRuntimeException}
+
+                { Import-ServerManager } | Should Not Throw
+            }
+            
+            It 'Should throw invalid operation exception when exception is not Identity Reference Runtime Exception' {
+                Mock -CommandName Import-Module -MockWith { Throw $mockOtherRuntimeException}
+
+                { Import-ServerManager } | Should Throw ($script:localizedData.SkuNotSupported)
             }
 
             It 'Should throw invalid operation exception' {
