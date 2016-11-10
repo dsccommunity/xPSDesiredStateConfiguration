@@ -11,11 +11,6 @@
 
 # The Sample_MetaConfigurationToRegisterWithLessSecurePullServer register a DSC client node with the pull server
 
-# ======================================== Arguments ======================================== #
-$thumbprint = (New-SelfSignedCertificate -Subject "TestPullServer").Thumbprint
-$registrationkey = [guid]::NewGuid()
-# ======================================== Arguments ======================================== #
-
 # =================================== Section Pull Server =================================== #
 configuration Sample_xDscWebServiceRegistration
 {
@@ -66,7 +61,11 @@ configuration Sample_xDscWebServiceRegistration
     }
 }
 
-Sample_xDscWebServiceRegistration -RegistrationKey $registrationkey -certificateThumbPrint $thumbprint
+# Sample use (please change values of parameters according to your scenario):
+# $thumbprint = (New-SelfSignedCertificate -Subject "TestPullServer").Thumbprint
+# $registrationkey = [guid]::NewGuid()
+# Sample_xDscWebServiceRegistration -RegistrationKey $registrationkey -certificateThumbPrint $thumbprint
+
 # =================================== Section Pull Server =================================== #
 
 # =================================== Section DSC Client =================================== #
@@ -107,5 +106,7 @@ configuration Sample_MetaConfigurationToRegisterWithLessSecurePullServer
     }
 }
 
-Sample_MetaConfigurationToRegisterWithLessSecurePullServer -RegistrationKey $registrationkey
+# Sample use (please change values of parameters according to your scenario):
+# Sample_MetaConfigurationToRegisterWithLessSecurePullServer -RegistrationKey $registrationkey
+
 # =================================== Section DSC Client =================================== #
