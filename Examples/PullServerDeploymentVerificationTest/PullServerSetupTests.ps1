@@ -22,42 +22,45 @@ Describe PullServerInstallationTests {
     BeforeAll{
  
         # UPDATE THE PULLSERVER URL, If it is different from the default value.
-        $HostFQDN = [System.Net.Dns]::GetHostEntry([string]$env:computername).HostName
-        $PullServerURL = "https://$($HostFQDN):8080/PSDSCPullserver.svc"
+        $DscHostFQDN = [System.Net.Dns]::GetHostEntry([string]$env:computername).HostName
+        $DscPullServerURL = "https://$($DscHostFQDN):8080/PSDSCPullserver.svc"
 
         # UPDATE THE LOCATION OF WEB.CONFIG, if it is differnet from the default path.
-        $DefaultPullServerConfigFile = "$($env:SystemDrive)\inetpub\wwwroot\psdscpullserver\web.config"
+        $DscWebConfigChildPath = '\inetpub\wwwroot\psdscpullserver\web.config'
+        $DscWebConfigPath = Join-Path -Path $env:SystemDrive -ChildPath $DscWebConfigChildPath
 
         # Skip all tests if web.config is not found
-        if (-not (Test-Path $DefaultPullServerConfigFile)){
-            Write-Error "No pullserver web.config found." -ErrorAction Stop
+        if (-not (Test-Path $DscWebConfigPath)){
+            Write-Error 'No pullserver web.config found.' -ErrorAction Stop
         }
 
         # Get web.config content as XML
-        $WebConfigXML = [xml](Get-Content $DefaultPullServerConfigFile)
+        $DscWebConfigXML = [xml](Get-Content $DscWebConfigPath)
 
         # Registration Keys info.
-        $RegKeyFile = "RegistrationKeys.txt"
-        $DscRegKeyXMLNode = $WebConfigXML.SelectNodes("//appSettings/add[@key = 'RegistrationKeyPath']")
-        $RegKeyPath = Join-Path $DscRegKeyXMLNode.value $RegKeyFile
-        $RegKey = Get-Content $RegKeyPath
+        $DscRegKeyName = 'RegistrationKeys.txt'
+        $DscRegKeyXMLNode = "//appSettings/add[@key = 'RegistrationKeyPath']"
+        $DscRegKeyParentPath = ($DscWebConfigXML.SelectNodes($DscRegKeyXMLNode)).value
+        $DscRegKeyPath = Join-Path -Path $DscRegKeyParentPath -ChildPath $DscRegKeyName
+        $DscRegKey = Get-Content $DscRegKeyPath
 
         # Configuration repository info.
         $DscConfigPathXMLNode = "//appSettings/add[@key = 'ConfigurationPath']"
-        $DscConfigPath  = ($WebConfigXML.SelectNodes($DscConfigPathXMLNode)).value
+        $DscConfigPath  = ($DscWebConfigXML.SelectNodes($DscConfigPathXMLNode)).value
 
         # Module repository info.
         $DscModulePathXMLNode = "//appSettings/add[@key = 'ModulePath']"
-        $DscModulePath = ($WebConfigXML.SelectNodes($DscModulePathXMLNode)).value
+        $DscModulePath = ($DscWebConfigXML.SelectNodes($DscModulePathXMLNode)).value
 
         # Testing Files/Variables
-        $DscTestMetaConfigPath = "$PSScriptRoot\PullServerSetupTestMetaConfig"
-        $DscTestConfigName = "PullServerSetUpTest"
-        $DscTestMofPath = "$DscConfigPath/$DscTestConfigName.mof"
+        $DscTestMetaConfigName = 'PullServerSetupTestMetaConfig'
+        $DscTestMetaConfigPath = Join-Path -Path $PSScriptRoot -ChildPath $DscTestMetaConfigName
+        $DscTestConfigName = 'PullServerSetUpTest'
+        $DscTestMofPath = Join-Path -Path $DscConfigPath -ChildPath "$DscTestConfigName.mof"
     }
     Context "Verify general pull server functionality" {
-        It "$RegKeyPath exists" {
-            $RegKeyPath | Should Exist
+        It "$DscRegKeyPath exists" {
+            $DscRegKeyPath | Should Exist
         }
         It "Module repository $DscModulePath exists" {
             $DscModulePath | Should Exist 
@@ -65,15 +68,15 @@ Describe PullServerInstallationTests {
         It "Configuration repository $DscConfigPath exists" {
             $DscConfigPath | Should Exist 
         }
-        It "Verify server $PullServerURL is up and running" {
-            $response = Invoke-WebRequest -Uri $PullServerURL -UseBasicParsing
-            $response.StatusCode | Should Be 200
+        It "Verify server $DscPullServerURL is up and running" {
+            $DscPullServerResponse = Invoke-WebRequest -Uri $DscPullServerURL -UseBasicParsing
+            $DscPullServerResponse.StatusCode | Should Be 200
         }
     }
     Context "Verify pull end to end works" {
         It 'Tests local configuration manager' {
             [DscLocalConfigurationManager()]
-            Configuration PullServerSetUpTestMetaConfig
+            Configuration $DscTestMetaConfigName
             {
                 Settings
                 {
@@ -81,13 +84,13 @@ Describe PullServerInstallationTests {
                 }
                 ConfigurationRepositoryWeb ConfigurationManager
                 {
-                    ServerURL =  $PullServerURL
-                    RegistrationKey = $RegKey
+                    ServerURL =  $DscPullServerURL
+                    RegistrationKey = $DscRegKey
                     ConfigurationNames = @($DscTestConfigName)
                 }
             }
 
-            PullServerSetUpTestMetaConfig -OutputPath $DscTestMetaConfigPath
+            PullServerSetupTestMetaConfig -OutputPath $DscTestMetaConfigPath
             Set-DscLocalConfigurationManager -Path $DscTestMetaConfigPath -Verbose:$VerbosePreference -Force
 
             $DscLocalConfigNames = (Get-DscLocalConfigurationManager).ConfigurationDownloadManagers.ConfigurationNames
