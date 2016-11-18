@@ -62,14 +62,14 @@ try
         It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DscResourceName)_Add_Config" `
-                    -OutputPath $script:testEnvironment.WorkingFolder `
+                    -OutputPath $TestDrive `
                     -ServiceName $script:testServiceName `
                     -ServicePath $script:testServiceExecutablePath `
                     -ServiceDisplayName $script:testServiceDisplayName `
                     -ServiceDescription $script:testServiceDescription `
                     -ServiceDependsOn $script:testServiceDependsOn
 
-                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestDrive `
                                        -ComputerName localhost -Wait -Verbose -Force
             } | Should Not Throw
         }
@@ -107,14 +107,14 @@ try
         It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DscResourceName)_Edit_Config" `
-                    -OutputPath $script:testEnvironment.WorkingFolder `
+                    -OutputPath $TestDrive `
                     -ServiceName $script:testServiceName `
                     -ServicePath $script:testServiceNewExecutablePath `
                     -ServiceDisplayName $script:testServiceNewDisplayName `
                     -ServiceDescription $script:testServiceNewDescription `
                     -ServiceDependsOn $script:testServiceNewDependsOn
 
-                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestDrive `
                                        -ComputerName localhost -Wait -Verbose -Force
             } | Should Not Throw
         }
@@ -153,10 +153,10 @@ try
         It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DscResourceName)_Remove_Config" `
-                    -OutputPath $script:testEnvironment.WorkingFolder `
+                    -OutputPath $TestDrive `
                     -ServiceName $script:testServiceName
 
-                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestDrive `
                                        -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw
         }
