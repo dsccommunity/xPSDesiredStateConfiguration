@@ -1,15 +1,19 @@
-﻿Import-Module "$PSScriptRoot\..\DSCResources\CommonResourceHelper.psm1" -Force
+﻿$moduleRootFilePath = Split-Path -Path $PSScriptRoot -Parent
+$dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DSCResources'
+$commonResourceHelperFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'CommonResourceHelper.psm1'
+
+Import-Module -Name $commonResourceHelperFilePath
 
 <#
     .SYNOPSIS
-    Tests that the Get-TargetResource method of a DSC Resource is not null, can be converted to a hashtable, and has the correct properties.
-    Uses Pester.
+        Tests that the Get-TargetResource method of a DSC Resource is not null, can be converted to a hashtable, and has the correct properties.
+        Uses Pester.
 
     .PARAMETER GetTargetResourceResult
-    The result of the Get-TargetResource method.
+        The result of the Get-TargetResource method.
 
     .PARAMETER GetTargetResourceResultProperties
-    The properties that the result of Get-TargetResource should have.
+        The properties that the result of Get-TargetResource should have.
 #>
 function Test-GetTargetResourceResult
 {
@@ -18,9 +22,11 @@ function Test-GetTargetResourceResult
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable] $GetTargetResourceResult,
+        [Hashtable]
+        $GetTargetResourceResult,
 
-        [String[]] $GetTargetResourceResultProperties
+        [String[]]
+        $GetTargetResourceResultProperties
     )
 
     foreach ($property in $GetTargetResourceResultProperties)
@@ -31,24 +37,26 @@ function Test-GetTargetResourceResult
 
 <#
     .SYNOPSIS
-    Tests if a scope represents the current machine.
+        Tests if a scope represents the current machine.
 
     .PARAMETER Scope
-    The scope to test.
+        The scope to test.
 #>
 function Test-IsLocalMachine
 {
     [OutputType([Boolean])]
-    param (
+    [CmdletBinding()]
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]
+        [String]
         $Scope
     )
 
     Set-StrictMode -Version latest
 
-    if ($scope -eq ".")
+    if ($scope -eq '.')
     {
         return $true
     }
@@ -58,20 +66,22 @@ function Test-IsLocalMachine
         return $true
     }
 
-    if ($scope -eq "localhost")
+    if ($scope -eq 'localhost')
     {
         return $true
     }
 
-    if ($scope.Contains("."))
+    if ($scope.Contains('.'))
     {
-        if ($scope -eq "127.0.0.1")
+        if ($scope -eq '127.0.0.1')
         {
             return $true
         }
 
-        # Determine if we have an ip address that matches an ip address on one of the network adapters.
-        # NOTE: This is likely overkill; consider removing it.
+        <#
+            Determine if we have an ip address that matches an ip address on one of the network adapters.
+            NOTE: This is likely overkill; consider removing it.
+        #>
         $networkAdapters = @(Get-CimInstance Win32_NetworkAdapterConfiguration)
         foreach ($networkAdapter in $networkAdapters)
         {
@@ -93,36 +103,37 @@ function Test-IsLocalMachine
 
 <#
     .SYNOPSIS
-    Creates a user account.
+        Creates a user account.
 
     .DESCRIPTION
-    This function creates a user on the local or remote machine.
+        This function creates a user on the local or remote machine.
 
     .PARAMETER Credential
-    The credential containing the username and password to use to create the account.
+        The credential containing the username and password to use to create the account.
 
     .PARAMETER Description
-    The optional description to set on the user account.
+        The optional description to set on the user account.
 
     .PARAMETER ComputerName
-    The optional name of the computer to update. Omit to create a user on the local machine.
+        The optional name of the computer to update. Omit to create a user on the local machine.
 
     .NOTES
-    For remote machines, the currently logged on user must have rights to create a user.
+        For remote machines, the currently logged on user must have rights to create a user.
 #>
 function New-User
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
-        [string]
+        [String]
         $Description,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
@@ -138,36 +149,37 @@ function New-User
 
 <#
     .SYNOPSIS
-    Creates a user account on a full server.
+        Creates a user account on a full server.
 
     .DESCRIPTION
-    This function creates a user on the local or remote machine running a full server.
+        This function creates a user on the local or remote machine running a full server.
 
     .PARAMETER Credential
-    The credential containing the username and password to use to create the account.
+        The credential containing the username and password to use to create the account.
 
     .PARAMETER Description
-    The optional description to set on the user account.
+        The optional description to set on the user account.
 
     .PARAMETER ComputerName
-    The optional name of the computer to update. Omit to create a user on the local machine.
+        The optional name of the computer to update. Omit to create a user on the local machine.
 
     .NOTES
-    For remote machines, the currently logged on user must have rights to create a user.
+        For remote machines, the currently logged on user must have rights to create a user.
 #>
 function New-UserOnFullSKU
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
-        [string]
+        [String]
         $Description,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
@@ -180,12 +192,12 @@ function New-UserOnFullSKU
     Remove-User $userName $ComputerName
 
     $adComputerEntry = [ADSI] "WinNT://$ComputerName"
-    $adUserEntry = $adComputerEntry.Create("User", $userName)
+    $adUserEntry = $adComputerEntry.Create('User', $userName)
     $null = $adUserEntry.SetPassword($password)
 
-    if ($PSBoundParameters.ContainsKey("Description"))
+    if ($PSBoundParameters.ContainsKey('Description'))
     {
-        $null = $adUserEntry.Put("Description", $Description)
+        $null = $adUserEntry.Put('Description', $Description)
     }
 
     $null = $adUserEntry.SetInfo()
@@ -193,43 +205,44 @@ function New-UserOnFullSKU
 
 <#
     .SYNOPSIS
-    Creates a user account on a Nano server.
+        Creates a user account on a Nano server.
 
     .DESCRIPTION
-    This function creates a user on the local machine running a Nano server.
+        This function creates a user on the local machine running a Nano server.
 
     .PARAMETER Credential
-    The credential containing the username and password to use to create the account.
+        The credential containing the username and password to use to create the account.
 
     .PARAMETER Description
-    The optional description to set on the user account.
+        The optional description to set on the user account.
 
     .PARAMETER ComputerName
-    This parameter should not be used on NanoServer.
+        This parameter should not be used on NanoServer.
 #>
 function New-UserOnNanoServer
 {
-
-    param (
+    [CmdletBinding()]
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [PSCredential]
-        [System.Management.Automation.CredentialAttribute()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
-        [string]
+        [String]
         $Description,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
     Set-StrictMode -Version Latest
 
-    if ($PSBoundParameters.ContainsKey("ComputerName"))
+    if ($PSBoundParameters.ContainsKey('ComputerName'))
     {
         if (-not (Test-IsLocalMachine -Scope $ComputerName))
         {
-            throw "Do not specify the ComputerName arguments when running on NanoServer unless it is local machine."
+            throw 'Do not specify the ComputerName arguments when running on NanoServer unless it is a local machine.'
         }
     }
 
@@ -241,7 +254,7 @@ function New-UserOnNanoServer
 
     New-LocalUser -Name $userName -Password $securePassword
 
-    if ($PSBoundParameters.ContainsKey("Description"))
+    if ($PSBoundParameters.ContainsKey('Description'))
     {
         Set-LocalUser -Name $userName -Description $Description
     }
@@ -249,29 +262,30 @@ function New-UserOnNanoServer
 
 <#
     .SYNOPSIS
-    Removes a user account.
+        Removes a user account.
 
     .DESCRIPTION
-    This function removes a local user from the local or remote machine.
+        This function removes a local user from the local or remote machine.
 
     .PARAMETER UserName
-    The name of the user to remove.
+        The name of the user to remove.
 
     .PARAMETER ComputerName
-    The optional name of the computer to update. Omit to remove the user on the local machine.
+        The optional name of the computer to update. Omit to remove the user on the local machine.
 
     .NOTES
-    For remote machines, the currently logged on user must have rights to remove a user.
+        For remote machines, the currently logged on user must have rights to remove a user.
 #>
 function Remove-User
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [string]
+        [String]
         $UserName,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
@@ -287,29 +301,30 @@ function Remove-User
 
 <#
     .SYNOPSIS
-    Removes a user account on a full server.
+        Removes a user account on a full server.
 
     .DESCRIPTION
-    This function removes a local user from the local or remote machine running a full server.
+        This function removes a local user from the local or remote machine running a full server.
 
     .PARAMETER UserName
-    The name of the user to remove.
+        The name of the user to remove.
 
     .PARAMETER ComputerName
-    The optional name of the computer to update. Omit to remove the user on the local machine.
+        The optional name of the computer to update. Omit to remove the user on the local machine.
 
     .NOTES
-    For remote machines, the currently logged on user must have rights to remove a user.
+        For remote machines, the currently logged on user must have rights to remove a user.
 #>
 function Remove-UserOnFullSKU
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [string]
+        [String]
         $UserName,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
@@ -325,36 +340,37 @@ function Remove-UserOnFullSKU
 
 <#
     .SYNOPSIS
-    Removes a local user account on a Nano server.
+        Removes a local user account on a Nano server.
 
     .DESCRIPTION
-    This function removes a local user from the local machine running a Nano Server.
+        This function removes a local user from the local machine running a Nano Server.
 
     .PARAMETER UserName
-    The name of the user to remove.
+        The name of the user to remove.
 
     .PARAMETER ComputerName
-    This parameter should not be used on NanoServer.
+        This parameter should not be used on NanoServer.
 #>
 function Remove-UserOnNanoServer
 {
     [CmdletBinding()]
-    param (
-        [Parameter(Mandatory=$true)]
-        [string]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
         $UserName,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
     Set-StrictMode -Version Latest
 
-    if ($PSBoundParameters.ContainsKey("ComputerName"))
+    if ($PSBoundParameters.ContainsKey('ComputerName'))
     {
         if (-not (Test-IsLocalMachine -Scope $ComputerName))
         {
-            throw "Do not specify the ComputerName arguments when running on NanoServer unless it is local machine."
+            throw 'Do not specify the ComputerName arguments when running on NanoServer unless it is a local machine.'
         }
     }
 
@@ -363,26 +379,27 @@ function Remove-UserOnNanoServer
 
 <#
     .SYNOPSIS
-    Determines if a user exists..
+        Determines if a user exists.
 
     .DESCRIPTION
-    This function determines if a user exists on a local or remote machine running.
+        This function determines if a user exists on a local or remote machine.
 
     .PARAMETER UserName
-    The name of the user to test.
+        The name of the user to test.
 
     .PARAMETER ComputerName
-    The optional name of the computer to update.
+        The optional name of the computer to update.
 #>
 function Test-User
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [string]
+        [String]
         $UserName,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
@@ -398,32 +415,34 @@ function Test-User
 
 <#
     .SYNOPSIS
-    Determines if a user exists on a full server.
+        Determines if a user exists on a full server.
 
     .DESCRIPTION
-    This function determines if a user exists on a local or remote machine running a full server.
+        This function determines if a user exists on a local or remote machine running a full server.
 
     .PARAMETER UserName
-    The name of the user to test.
+        The name of the user to test.
 
     .PARAMETER ComputerName
-    The optional name of the computer to update.
+        The optional name of the computer to update.
 #>
 function Test-UserOnFullSKU
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [string]
+        [String]
         $UserName,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
     Set-StrictMode -Version Latest
 
     $adComputerEntry = [ADSI] "WinNT://$ComputerName"
+
     if ($adComputerEntry.Children | Where-Object Path -like "WinNT://*$ComputerName/$UserName")
     {
         return $true
@@ -434,38 +453,39 @@ function Test-UserOnFullSKU
 
 <#
     .SYNOPSIS
-    Determines if a user exists on a Nano server.
+        Determines if a user exists on a Nano server.
 
     .DESCRIPTION
-    This function determines if a user exists on a local or remote machine running a Nano server.
+        This function determines if a user exists on a local or remote machine running a Nano server.
 
     .PARAMETER UserName
-    The name of the user to test.
+        The name of the user to test.
 
     .PARAMETER ComputerName
-    This parameter should not be used on NanoServer.
+        This parameter should not be used on NanoServer.
 #>
 function Test-UserOnNanoServer
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
-        [string]
+        [String]
         $UserName,
 
-        [string]
+        [String]
         $ComputerName = $env:COMPUTERNAME
     )
 
-    if ($PSBoundParameters.ContainsKey("ComputerName"))
+    if ($PSBoundParameters.ContainsKey('ComputerName'))
     {
         if (-not (Test-IsLocalMachine -Scope $ComputerName))
         {
-            throw "Do not specify the ComputerName arguments when running on NanoServer unless it is local machine."
+            throw 'Do not specify the ComputerName arguments when running on NanoServer unless it is a local machine.'
         }
     }
 
-    # Try to find a group by its name.
+    # Try to find a user by name.
     try
     {
         $null = Get-LocalUser -Name $UserName -ErrorAction Stop
@@ -482,24 +502,26 @@ function Test-UserOnNanoServer
     }
 
     return $false
-
-    Remove-LocalUser -Name $UserName
 }
 
 <#
     .SYNOPSIS
-    Waits for a script block to return true.
+        Waits a certain amount of time for a script block to return true.
+        Return $true if completed successfully in the given amount of time, $false otherwise.
 
     .PARAMETER ScriptBlock
-    The ScriptBlock to wait. Should return a result of $true when complete.
+        The ScriptBlock to wait for.
 
     .PARAMETER TimeoutSeconds
-    The number of seconds to wait for the ScriptBlock to return true.
+        The number of seconds to wait for the ScriptBlock to return $true.
+        Default value is 5.
 #>
 function Wait-ScriptBlockReturnTrue
 {
+    [OutputType([Boolean])]
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [ScriptBlock]
@@ -523,10 +545,10 @@ function Wait-ScriptBlockReturnTrue
 
 <#
     .SYNOPSIS
-    Tests if a file is currently locked.
+        Tests if a file is currently locked.
 
     .PARAMETER Path
-    The path to the file to test.
+        The path to the file to test.
 #>
 function Test-IsFileLocked
 {
@@ -557,21 +579,23 @@ function Test-IsFileLocked
 
 <#
     .SYNOPSIS
-        Tests that calling the Set-TargetResource cmdlet with the WhatIf parameter specified produces output that contains all the given expected output.
-        If empty or null expected output is specified, this cmdlet will check that there was no output from Set-TargetResource with WhatIf specified.
+        Tests that calling the Set-TargetResource cmdlet with the WhatIf parameter specified
+        produces output that contains all the given expected output.
         Uses Pester.
 
     .PARAMETER Parameters
         The parameters to pass to Set-TargetResource.
-        These parameters do not need to contain that WhatIf parameter, but if they do, 
-        this function will run Set-TargetResource with WhatIf = $true no matter what is in the Parameters Hashtable.
+        These parameters do not need to contain the WhatIf parameter, but if they do, this function
+        will run Set-TargetResource with WhatIf = $true no matter what is in the Parameters Hashtable.
 
     .PARAMETER ExpectedOutput
         The output expected to be in the output from running WhatIf with the Set-TargetResource cmdlet.
-        If this parameter is empty or null, this cmdlet will check that there was no output from Set-TargetResource with WhatIf specified.    
+        If this parameter is empty or null, this cmdlet will check that there was no output from
+        Set-TargetResource with WhatIf specified.    
 #>
 function Test-SetTargetResourceWithWhatIf
 {
+    [OutputType([Boolean])]
     [CmdletBinding()]
     param
     (
@@ -608,14 +632,16 @@ function Test-SetTargetResourceWithWhatIf
         $regexString = '\*+[^\*]*\*+'
 
         # Removing transcript diagnostic logging at top and bottom of file
-        $selectedString = Select-String -InputObject $transcriptContent -Pattern $regexString -AllMatches
+        $selectedString = Select-String -InputObject $transcriptContent `
+                                        -Pattern $regexString `
+                                        -AllMatches
 
         foreach ($match in $selectedString.Matches)
         {
             $transcriptContent = $transcriptContent.Replace($match.Captures, '')
         }
 
-        $transcriptContent = $transcriptContent.Replace("`r`n", "").Replace("`n", "")
+        $transcriptContent = $transcriptContent.Replace("`r`n", '').Replace("`n", '')
 
         if ($null -eq $ExpectedOutput -or $ExpectedOutput.Count -eq 0)
         {
@@ -633,7 +659,8 @@ function Test-SetTargetResourceWithWhatIf
     {
         if (Test-Path -Path $transcriptPath)
         {
-            Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)} -TimeoutSeconds 10
+            Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)} `
+                                       -TimeoutSeconds 10
             Remove-Item -Path $transcriptPath -Force
         }
     }
@@ -654,7 +681,7 @@ function Test-SetTargetResourceWithWhatIf
 #>
 function Enter-DscResourceTestEnvironment
 {
-    [OutputType([PSObject])]
+    [OutputType([Hashtable])]
     [CmdletBinding()]
     param
     (
@@ -674,10 +701,14 @@ function Enter-DscResourceTestEnvironment
         $TestType
     )
 
-    if ((-not (Test-Path -Path "$PSScriptRoot\..\DSCResource.Tests")) -or (-not (Test-Path -Path "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1")))
+    $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
+    $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
+    $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
+
+    if (-not (Test-Path -Path $dscResourceTestsPath))
     {
-        Push-Location "$PSScriptRoot\.."
-        git clone https://github.com/PowerShell/DscResource.Tests.git --quiet
+        Push-Location $moduleRootPath
+        git clone 'https://github.com/PowerShell/DscResource.Tests' --quiet
         Pop-Location
     }
     else
@@ -686,17 +717,17 @@ function Enter-DscResourceTestEnvironment
 
         if ($gitInstalled)
         {
-            Push-Location "$PSScriptRoot\..\DSCResource.Tests"
-            git pull origin master --quiet
+            Push-Location $dscResourceTestsPath
+            git pull origin dev --quiet
             Pop-Location
         }
         else
         {
-            Write-Verbose -Message "Git not installed. Leaving current DSCResource.Tests as is."
+            Write-Verbose -Message 'Git not installed. Leaving current DSCResource.Tests as is.'
         }
     }
 
-    Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1"
+    Import-Module -Name $testHelperFilePath
 
     return Initialize-TestEnvironment `
         -DSCModuleName $DscResourceModuleName `
@@ -718,10 +749,15 @@ function Exit-DscResourceTestEnvironment
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [PSObject]$TestEnvironment
+        [Hashtable]
+        $TestEnvironment
     )
 
-    Import-Module "$PSScriptRoot\..\DSCResource.Tests\TestHelper.psm1"
+    $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
+    $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
+    $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
+
+    Import-Module -Name $testHelperFilePath
 
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }

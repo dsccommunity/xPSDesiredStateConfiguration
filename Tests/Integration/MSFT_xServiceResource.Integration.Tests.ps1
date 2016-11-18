@@ -1,9 +1,10 @@
 
 $script:DscResourceName = 'MSFT_xServiceResource'
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1') `
-                               -Force
+$script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+
+Import-Module -Name $script:commonTestHelperFilePath
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -30,11 +31,17 @@ try
     #>
     if ($PSVersionTable.PSEdition -ieq 'Core') { $script:testServiceNewDependsOn = 'winrm' }
 
-    Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'MSFT_xServiceResource.TestHelper.psm1') `
-                               -Force
+    $script:serviceTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xServiceResource.TestHelper.psm1'
 
-    Stop-Service $script:testServiceName -ErrorAction SilentlyContinue
+    Import-Module -Name $script:serviceTestHelperFilePath
+
+    $script:moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
+    $script:dscResourceTestsFilePath = Join-Path -Path $script:moduleRootFilePath -ChildPath 'DscResource.Tests'
+    $script:dscResourceTestHelperFilePath = Join-Path -Path $script:dscResourceTestsFilePath -ChildPath 'TestHelper.psm1'
+
+    Import-Module -Name $script:dscResourceTestHelperFilePath
+
+    Stop-Service -Name $script:testServiceName -ErrorAction 'SilentlyContinue'
 
     # Create new Service binaries for the new service.
     New-ServiceBinary `
@@ -62,14 +69,14 @@ try
         It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DscResourceName)_Add_Config" `
-                    -OutputPath $script:testEnvironment.WorkingFolder `
+                    -OutputPath $TestDrive `
                     -ServiceName $script:testServiceName `
                     -ServicePath $script:testServiceExecutablePath `
                     -ServiceDisplayName $script:testServiceDisplayName `
                     -ServiceDescription $script:testServiceDescription `
                     -ServiceDependsOn $script:testServiceDependsOn
 
-                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestDrive `
                                        -ComputerName localhost -Wait -Verbose -Force
             } | Should Not Throw
         }
@@ -107,14 +114,14 @@ try
         It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DscResourceName)_Edit_Config" `
-                    -OutputPath $script:testEnvironment.WorkingFolder `
+                    -OutputPath $TestDrive `
                     -ServiceName $script:testServiceName `
                     -ServicePath $script:testServiceNewExecutablePath `
                     -ServiceDisplayName $script:testServiceNewDisplayName `
                     -ServiceDescription $script:testServiceNewDescription `
                     -ServiceDependsOn $script:testServiceNewDependsOn
 
-                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestDrive `
                                        -ComputerName localhost -Wait -Verbose -Force
             } | Should Not Throw
         }
@@ -153,10 +160,10 @@ try
         It 'Should compile and apply the MOF without throwing' {
             {
                 & "$($script:DscResourceName)_Remove_Config" `
-                    -OutputPath $script:testEnvironment.WorkingFolder `
+                    -OutputPath $TestDrive `
                     -ServiceName $script:testServiceName
 
-                Start-DscConfiguration -Path $script:testEnvironment.WorkingFolder `
+                Start-DscConfiguration -Path $TestDrive `
                                        -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw
         }
