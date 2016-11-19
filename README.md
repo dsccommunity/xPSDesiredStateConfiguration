@@ -163,6 +163,7 @@ None
 * **Path**: The source path of the package.
 * **ProductId**: The product ID of the package (usually a GUID).
 * **Arguments**: Command line arguments passed on the installation command line.
+    - When installing MSI packages, the `/quiet` and `/norestart` arguments are automatically applied.
 * **Credential**: PSCredential needed to access Path.
 * **ReturnCode**: An array of return codes that are returned after a successful installation.
 * **LogPath**: The destination path of the log.
@@ -172,6 +173,7 @@ None
 * **SignerSubject**: The certificate subject that should match that of the package file's signing certificate.
 * **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
+* **RunAsCredential**: Credential used to install the package on the local system.
 
 Read-Only Properties:
 * **PackageDescription**: A text description of the package being installed.
@@ -430,6 +432,11 @@ None
 * xWindowsFeature:
     * Added Catch to ignore RuntimeException when importing ServerManager module. This resolves issue [#69](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/69).
     * Updated unit tests.
+* xPackage:
+    * No longer checks for package installation when a reboot is required. This resolves issue [#52](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/52).
+    * Ensures a space is added to MSI installation arguments. This resolves issue [#195](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/195).
+    * Adds RunAsCredential parameter to permit installing packages with specific user account. This resolves issue [#221](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/221).
+    * Fixes null verbose log output error. This resolves issue [#224](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/224).
 
 ### 5.0.0.0
 
