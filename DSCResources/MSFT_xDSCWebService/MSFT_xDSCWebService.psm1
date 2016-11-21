@@ -678,7 +678,7 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
 
     [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.Web.Administration") | Out-Null
 
-    $webAdminSrvMgr = new-object Microsoft.Web.Administration.ServerManager
+    $webAdminSrvMgr = [Microsoft.Web.Administration.ServerManager]::OpenRemote("127.0.0.1")
 
     $appHostConfig = $webAdminSrvMgr.GetApplicationHostConfiguration()
 
