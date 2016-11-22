@@ -19,10 +19,10 @@ try
 
                 if (Test-Path -Path $script:testDirectoryPath)
                 {
-                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
                 }
 
-                New-Item -Path $script:testDirectoryPath -ItemType 'Directory' | Out-Null
+                $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
 
                 $script:msiName = 'DSCSetupProject.msi'
                 $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
@@ -31,22 +31,22 @@ try
                 $script:packageName = 'DSCUnitTestPackage'
                 $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
 
-                New-TestMsi -DestinationPath $script:msiLocation | Out-Null
+                $null = New-TestMsi -DestinationPath $script:msiLocation
 
                 $script:testExecutablePath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestExecutable.exe'
-                
-                New-TestExecutable -DestinationPath $script:testExecutablePath | Out-Null
 
-                Clear-xPackageCache | Out-Null
+                $null = New-TestExecutable -DestinationPath $script:testExecutablePath
+
+                $null = Clear-xPackageCache
             }
 
             BeforeEach {
-                Clear-xPackageCache | Out-Null
+                $null = Clear-xPackageCache
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
                 {
-                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                    Start-Sleep -Seconds 1 | Out-Null
+                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                    $null = Start-Sleep -Seconds 1
                 }
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
@@ -58,15 +58,15 @@ try
             AfterAll {
                 if (Test-Path -Path $script:testDirectoryPath)
                 {
-                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
                 }
 
-                Clear-xPackageCache | Out-Null
+                $null = Clear-xPackageCache
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
                 {
-                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                    Start-Sleep -Seconds 1 | Out-Null
+                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                    $null = Start-Sleep -Seconds 1
                 }
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
@@ -471,7 +471,7 @@ try
                     Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } { return @{ ExitCode = 0 } }
                     Mock Test-TargetResource { return $false }
                     Mock Get-ProductEntry { return $script:packageId }
-                    
+
                     $packageParameters = @{
                         Path = $script:msiLocation
                         Name = [String]::Empty
@@ -488,7 +488,7 @@ try
                     Mock Invoke-Process { return [PSCustomObject] @{ ExitCode = 3010 } }
                     Mock Test-TargetResource { return $false }
                     Mock Get-ProductEntry { }
-                                        
+
                     $packageParameters = @{
                         Path = $script:msiLocation
                         Name = [String]::Empty
