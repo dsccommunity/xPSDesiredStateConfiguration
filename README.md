@@ -430,6 +430,8 @@ None
 * xWindowsFeature:
     * Added Catch to ignore RuntimeException when importing ServerManager module. This resolves issue [#69](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/69).
     * Updated unit tests.
+* xDSCWebService
+	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
 
 ### 5.0.0.0
 
