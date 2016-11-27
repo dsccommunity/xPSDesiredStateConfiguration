@@ -432,6 +432,8 @@ None
     * Updated unit tests.
 * xDSCWebService
 	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
+* xRegistry:
+    * Fixed issue unable to create registry value with data zero. #276
 
 ### 5.0.0.0
 
