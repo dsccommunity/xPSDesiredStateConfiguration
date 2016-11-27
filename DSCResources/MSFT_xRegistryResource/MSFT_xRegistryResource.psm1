@@ -1131,7 +1131,14 @@ function Get-TypedObject
             elseif ($Hex)
             {
                 $retVal = $null
-                $val = $Data[0].TrimStart('0x')
+                if ($Data[0].StartsWith('0x'))
+                {
+                    $val = $Data[0].Substring(2)
+                }
+                else
+                {
+                    $val = $Data[0]
+                }
 
                 $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
                 if ([System.Int32]::TryParse($val, 'HexNumber', $currentCultureInfo, [ref] $retVal))
@@ -1163,7 +1170,14 @@ function Get-TypedObject
             elseif ($Hex)
             {
                 $retVal = $null
-                $val = $Data[0].TrimStart('0x')
+                if ($Data[0].StartsWith('0x'))
+                {
+                    $val = $Data[0].Substring(2)
+                }
+                else
+                {
+                    $val = $Data[0]
+                }
 
                 $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
                 if ([System.Int64]::TryParse($val, 'HexNumber', $currentCultureInfo, [ref] $retVal))
@@ -1195,7 +1209,15 @@ function Get-TypedObject
                 return
             }
 
-            $val = $Data[0].TrimStart('0x')
+            if ($Data[0].StartsWith('0x'))
+            {
+                $val = $Data[0].Substring(2)
+            }
+            else
+            {
+                $val = $Data[0]
+            }
+            
             if ($val.Length % 2 -ne 0)
             {
                 $val = $val.PadLeft($val.Length+1, '0')
