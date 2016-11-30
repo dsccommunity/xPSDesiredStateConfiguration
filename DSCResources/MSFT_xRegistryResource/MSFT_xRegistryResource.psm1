@@ -1131,14 +1131,7 @@ function Get-TypedObject
             elseif ($Hex)
             {
                 $retVal = $null
-                if ($Data[0].StartsWith('0x'))
-                {
-                    $val = $Data[0].Substring(2)
-                }
-                else
-                {
-                    $val = $Data[0]
-                }
+                $val = Remove-PrefixString -Data $Data[0] -Prefix '0x'
 
                 $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
                 if ([System.Int32]::TryParse($val, 'HexNumber', $currentCultureInfo, [ref] $retVal))
@@ -1170,14 +1163,7 @@ function Get-TypedObject
             elseif ($Hex)
             {
                 $retVal = $null
-                if ($Data[0].StartsWith('0x'))
-                {
-                    $val = $Data[0].Substring(2)
-                }
-                else
-                {
-                    $val = $Data[0]
-                }
+                $val = Remove-PrefixString -Data $Data[0] -Prefix '0x'
 
                 $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
                 if ([System.Int64]::TryParse($val, 'HexNumber', $currentCultureInfo, [ref] $retVal))
@@ -1209,14 +1195,7 @@ function Get-TypedObject
                 return
             }
 
-            if ($Data[0].StartsWith('0x'))
-            {
-                $val = $Data[0].Substring(2)
-            }
-            else
-            {
-                $val = $Data[0]
-            }
+            $val = Remove-PrefixString -Data $Data[0] -Prefix '0x'
             
             if ($val.Length % 2 -ne 0)
             {
@@ -1243,6 +1222,45 @@ function Get-TypedObject
                 Invoke-Command @invokeCommandParams
             }
         }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Helper function to remove prefix of string.
+
+    .PARAMETER Data
+        Specifies the original string.
+
+    .PARAMETER Prefix
+        Specifies the prefix string that you want to remove
+#>
+function Remove-PrefixString
+{
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Data = [string]::Empty,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.String]
+        $Prefix
+    )
+
+    if($Data -eq [string]::Empty){
+        return [string]::Empty
+    }
+
+    if ($Data.StartsWith($Prefix))
+    {
+        return $Data.Substring($Prefix.Length)
+    }
+    else
+    {
+        return $Data
     }
 }
 
