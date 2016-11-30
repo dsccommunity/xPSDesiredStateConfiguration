@@ -833,7 +833,7 @@ function Assert-PathArgumentValid
 
     $ErrorActionPreference = 'Stop'
 
-    if (-not (Test-Path -Path $Path -PathType Leaf))
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf))
     {
         New-InvalidArgumentException -Message ($LocalizedData.InvalidSourcePath -f $Path) -ArgumentName 'Path'
     }
