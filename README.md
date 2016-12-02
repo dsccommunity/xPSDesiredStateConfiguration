@@ -437,6 +437,8 @@ None
     * Ensures a space is added to MSI installation arguments. This resolves issue [#195](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/195).
     * Adds RunAsCredential parameter to permit installing packages with specific user account. This resolves issue [#221](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/221).
     * Fixes null verbose log output error. This resolves issue [#224](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/224).
+* xDSCWebService
+	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
 
 ### 5.0.0.0
 

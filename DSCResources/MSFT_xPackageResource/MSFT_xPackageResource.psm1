@@ -1045,7 +1045,7 @@ function Set-TargetResource
 
         [String]
         $InstalledCheckRegValueData,
-        
+
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $RunAsCredential
@@ -1645,7 +1645,7 @@ function Assert-FileSignatureValid
 
     .DESCRIPTION
         Allows mocking and testing of process arguments.
-    
+
     .PARAMETER Process
         The System.Diagnositics.Process object to start.
 
@@ -1681,8 +1681,8 @@ function Invoke-Process
 <#
     .SYNOPSIS
         Runs a process as the specified user via PInvoke.
-    
-    .PARAMETER ProcessCommandLine
+
+    .PARAMETER CommandLine
         The command line (including arguments) of the process to start.
 
     .PARAMETER Credential
