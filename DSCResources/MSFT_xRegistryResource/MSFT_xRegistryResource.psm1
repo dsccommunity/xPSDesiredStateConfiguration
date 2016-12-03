@@ -1495,6 +1495,12 @@ function Compare-ValueData
     if ($ValueType -ieq 'Binary')
     {
         $val = Remove-PrefixString -Data $ValueData[0] -Prefix '0x'
+
+        if ($val.Length % 2 -ne 0)
+        {
+            $val = $val.PadLeft($val.Length+1, '0')
+        }
+        
         $specifiedData = $val
     }
 
