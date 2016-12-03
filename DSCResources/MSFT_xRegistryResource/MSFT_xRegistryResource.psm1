@@ -1494,7 +1494,8 @@ function Compare-ValueData
     # Special case for binary comparison (do hex-string comparison)
     if ($ValueType -ieq 'Binary')
     {
-        $specifiedData = $ValueData[0].PadLeft($retrievedData.Length, '0')
+        $val = Remove-PrefixString -Data $ValueData[0] -Prefix '0x'
+        $specifiedData = $val
     }
 
     # If the ValueType is not multistring, do a simple comparison
