@@ -440,7 +440,8 @@ None
 * xDSCWebService
 	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
 * xRegistry:
-    * Fixed issue unable to create registry value with data zero. #276
+    * Fixed issue when the ValueData starts with '0x', Test-TargetResource always returned $false
+    * Fixed issue unable to create registry value with data zero. This resolves issue [#276] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/276)
 
 ### 5.0.0.0
 
