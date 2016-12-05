@@ -1131,7 +1131,7 @@ function Get-TypedObject
             elseif ($Hex)
             {
                 $retVal = $null
-                $val = $Data[0].TrimStart('0x')
+                $val = Remove-PrefixString -Data $Data[0] -Prefix '0x'
 
                 $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
                 if ([System.Int32]::TryParse($val, 'HexNumber', $currentCultureInfo, [ref] $retVal))
@@ -1163,7 +1163,7 @@ function Get-TypedObject
             elseif ($Hex)
             {
                 $retVal = $null
-                $val = $Data[0].TrimStart('0x')
+                $val = Remove-PrefixString -Data $Data[0] -Prefix '0x'
 
                 $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
                 if ([System.Int64]::TryParse($val, 'HexNumber', $currentCultureInfo, [ref] $retVal))
@@ -1195,7 +1195,8 @@ function Get-TypedObject
                 return
             }
 
-            $val = $Data[0].TrimStart('0x')
+            $val = Remove-PrefixString -Data $Data[0] -Prefix '0x'
+            
             if ($val.Length % 2 -ne 0)
             {
                 $val = $val.PadLeft($val.Length+1, '0')
@@ -1221,6 +1222,45 @@ function Get-TypedObject
                 Invoke-Command @invokeCommandParams
             }
         }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Helper function to remove prefix of string.
+
+    .PARAMETER Data
+        Specifies the original string.
+
+    .PARAMETER Prefix
+        Specifies the prefix string that you want to remove
+#>
+function Remove-PrefixString
+{
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Data = [string]::Empty,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.String]
+        $Prefix
+    )
+
+    if($Data -eq [string]::Empty){
+        return [string]::Empty
+    }
+
+    if ($Data.StartsWith($Prefix))
+    {
+        return $Data.Substring($Prefix.Length)
+    }
+    else
+    {
+        return $Data
     }
 }
 
@@ -1454,7 +1494,14 @@ function Compare-ValueData
     # Special case for binary comparison (do hex-string comparison)
     if ($ValueType -ieq 'Binary')
     {
-        $specifiedData = $ValueData[0].PadLeft($retrievedData.Length, '0')
+        $val = Remove-PrefixString -Data $ValueData[0] -Prefix '0x'
+
+        if ($val.Length % 2 -ne 0)
+        {
+            $val = $val.PadLeft($val.Length+1, '0')
+        }
+        
+        $specifiedData = $val
     }
 
     # If the ValueType is not multistring, do a simple comparison
