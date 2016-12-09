@@ -104,7 +104,7 @@ function Get-TargetResource
 
     if ($null -eq $Credential)
     {
-        $PSBoundParameters.Remove('Credential')
+        $PSBoundParameters.Remove('Credential') > $null
     }
 
     $ensureValue = 'Absent'
