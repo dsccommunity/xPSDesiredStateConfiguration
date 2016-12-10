@@ -41,7 +41,7 @@ Configuration xProcessSet
         Parameters = $PSBoundParameters
     }
 
-    # Arguments is a key parameter in xProcess resource. Adding it as a common parameter with an empty value string
+    # Arguments is a key parameter in xWindowsProcess resource. Adding it as a common parameter with an empty value string
     $newResourceSetConfigurationParams['Parameters']['Arguments'] = ''
     
     $configurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
