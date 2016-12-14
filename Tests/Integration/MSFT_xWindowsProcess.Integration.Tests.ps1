@@ -281,9 +281,6 @@ try
             )
         }
 
-        $testUserName = 'TestUserName12345'
-        $testUserPassword = 'StrongOne7.'
-        $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
         $testCredential = Get-AppVeyorAdministratorCredential
 
         $testProcessPath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `

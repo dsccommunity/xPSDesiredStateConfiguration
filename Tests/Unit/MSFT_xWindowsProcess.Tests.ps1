@@ -87,37 +87,51 @@ try
             HandleCount = 0
         }
 
-        Describe 'Exported Methods Tests' {
-            BeforeAll {
-                # Mocked methods
-                Mock -CommandName Expand-Path -MockWith { return $script:validPath1 } `
-                                              -ParameterFilter { $Path -eq $script:validPath1 }
-                Mock -CommandName Expand-Path -MockWith { return $script:validPath2 } `
-                                              -ParameterFilter { $Path -eq $script:validPath2 }
-                Mock -CommandName Expand-Path -MockWith { return $script:invalidPath } `
-                                              -ParameterFilter { $Path -eq $script:invalidPath }
-                Mock -CommandName Expand-Path -MockWith { return $script:validPath3 } `
-                                              -ParameterFilter { $Path -eq $script:validPath3 }
-                Mock -CommandName Get-ProcessCimInstance -MockWith { return @() } `
-                                                   -ParameterFilter { $Path -eq $script:invalidPath }
-                Mock -CommandName Get-ProcessCimInstance -MockWith { return @($script:mockProcess1, $script:mockProcess3) } `
-                                                   -ParameterFilter { $Path -eq $script:validPath1 }
-                Mock -CommandName Get-ProcessCimInstance -MockWith { return @($script:mockProcess2) } `
-                                                   -ParameterFilter { $Path -eq $script:validPath2 }
-                Mock -CommandName Get-ProcessCimInstance -MockWith { return @($script:errorProcess) } `
-                                                   -ParameterFilter { $Path -eq $script:validPath3 }
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
-                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
-            }
+            Describe 'xWindowsProcess\Get-TargetResource' {
+                BeforeAll {
+                    # Mocked methods
+                    Mock -CommandName Expand-Path -MockWith { return $Path }
 
-            Context 'Get-TargetResource' {
-                Mock -CommandName Get-Process -MockWith { return $script:mockProcess1 } `
-                                              -ParameterFilter { $ID -eq $script:mockProcess1.ProcessId }
-                Mock -CommandName Get-Process -MockWith { return $script:mockProcess2 } `
-                                              -ParameterFilter { $ID -eq $script:mockProcess2.ProcessId }
-                Mock -CommandName Get-Process -MockWith { return $script:mockProcess3 } `
-                                              -ParameterFilter { $ID -eq $script:mockProcess3.ProcessId }
-
+                    Mock -CommandName Get-ProcessCimInstance -MockWith { 
+                        if ($Path -eq $script:validPath1)
+                        {
+                            return @($script:mockProcess1, $script:mockProcess3) 
+                        }
+                        elseif ($Path -eq $script:validPath2)
+                        {
+                            return @($script:mockProcess2)
+                        }
+                        elseif ($Path -eq $script:validPath3)
+                        {
+                            return @($script:errorProcess)
+                        }
+                        else
+                        {
+                            return @()
+                        }
+                    }
+                    Mock -CommandName Get-Process -MockWith {
+                        if ($ID -eq $script:mockProcess1.Id)
+                        {
+                            return $script:mockProcess1 
+                        }
+                        elseif ($script:mockProcess2.Id)
+                        {
+                            return $script:mockProcess2
+                        }
+                        elseif ($script:mockProcess3.Id)
+                        {
+                            return $script:mockProcess3
+                        }
+                        else
+                        {
+                            return $script:errorProcess
+                        }
+                    }
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
+                
                 It 'Should return the correct properties for a process that is Absent' {
                     $processArguments = 'TestGetProperties'
 
@@ -172,7 +186,33 @@ try
                 }
             }
 
-            Context 'Set-TargetResource' {
+            Describe 'xWindowsProcess\Set-TargetResource' {
+                BeforeAll {
+                # Mocked methods
+                Mock -CommandName Expand-Path -MockWith { return $Path } `
+
+                 Mock -CommandName Get-ProcessCimInstance -MockWith { 
+                        if ($Path -eq $script:validPath1)
+                        {
+                            return @($script:mockProcess1, $script:mockProcess3) 
+                        }
+                        elseif ($Path -eq $script:validPath2)
+                        {
+                            return @($script:mockProcess2)
+                        }
+                        elseif ($Path -eq $script:validPath3)
+                        {
+                            return @($script:errorProcess)
+                        }
+                        else
+                        {
+                            return @()
+                        }
+                    }
+
+                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+            }
                 Mock -CommandName Stop-Process -MockWith { return $null } `
                                                -ParameterFilter { ($Id -contains $script:mockProcess1.ProcessId) -or `
                                                                   ($Id -contains $script:mockProcess2.ProcessId) -or `
@@ -372,7 +412,33 @@ try
                 }
             }
 
-            Context 'Test-TargetResource' {
+            Describe 'xWindowsProcess\Test-TargetResource' {
+                BeforeAll {
+                # Mocked methods
+                Mock -CommandName Expand-Path -MockWith { return $Path } `
+
+                 Mock -CommandName Get-ProcessCimInstance -MockWith { 
+                        if ($Path -eq $script:validPath1)
+                        {
+                            return @($script:mockProcess1, $script:mockProcess3) 
+                        }
+                        elseif ($Path -eq $script:validPath2)
+                        {
+                            return @($script:mockProcess2)
+                        }
+                        elseif ($Path -eq $script:validPath3)
+                        {
+                            return @($script:errorProcess)
+                        }
+                        else
+                        {
+                            return @()
+                        }
+                    }
+
+                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+            }
                 It 'Should return true when Ensure set to Present and process is running' {
                     $testTargetResourceResult = Test-TargetResource -Path $script:validPath1 `
                                                                     -Arguments $script:mockProcess1.Arguments `
@@ -403,16 +469,14 @@ try
                 }
 
             }
-        }
 
-        Describe 'Private Methods Tests' {
-            BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
-                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
-            }
-            
-            Context 'Expand-Path' {
-                
+
+            Describe 'xWindowsProcess\Expand-Path' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
+
                 It 'Should return the original path when path is rooted' {
                     $rootedPath = 'C:\testProcess.exe'
                     Mock -CommandName Test-Path -MockWith { return $true }
@@ -440,7 +504,12 @@ try
                 }
             }
 
-            Context 'Get-ProcessCimInstance' {
+            Describe 'xWindowsProcess\Get-ProcessCimInstance' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
+
                 It 'Should return the correct process when it exists and no arguments passed' {
                     Mock -CommandName Get-Process -MockWith { return @($script:mockProcess2) }
                     Mock -CommandName Get-CimInstance -MockWith { return $script:mockProcess2 }
@@ -542,8 +611,12 @@ try
             
             }
             
-            Context 'ConvertTo-EscapedStringForWqlFilter' {
-            
+            Describe 'xWindowsProcess\ConvertTo-EscapedStringForWqlFilter' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
+
                 It 'Should return the same string when there are no escaped characters' {
                     $inputString = 'testString%$.@123'
                     $convertedString = ConvertTo-EscapedStringForWqlFilter -FilterString $inputString
@@ -565,11 +638,16 @@ try
                 }
             }
 
-            Context 'Get-ProcessOwner' {
+            Describe 'xWindowsProcess\Get-ProcessOwner' {
                 $mockOwner = @{
                     Domain = 'Mock Domain'
                     User = 'Mock User'
                 }
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
+
                 Mock -CommandName Get-ProcessOwnerCimInstance -MockWith { return $mockOwner }
 
                 It 'Should return the correct string with domain\user' {
@@ -585,7 +663,12 @@ try
             
             }
 
-            Context 'Get-ArgumentsFromCommandLineInput' {
+            Describe 'xWindowsProcess\Get-ArgumentsFromCommandLineInput' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
+
                 It 'Should return the correct arguments when single quotes are used' {
                     $inputString = 'test.txt a b c'
                     $argumentsReturned = Get-ArgumentsFromCommandLineInput -CommandLineInput $inputString
@@ -613,11 +696,15 @@ try
                 }
             }
 
-            Context 'Assert-HashtableDoesNotContainKey' {
+            Describe 'xWindowsProcess\Assert-HashtableDoesNotContainKey' {
                 $mockHashtable = @{
                     Key1 = 'test key1'
                     Key2 = 'test key2'
                     Key3 = 'test key3'
+                }
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
                 }
 
                 It 'Should not throw an exception if the hashtable does not contain a key' {
@@ -633,7 +720,11 @@ try
                 }
             }
 
-            Context 'Wait-ProcessCount' {
+            Describe 'xWindowsProcess\Wait-ProcessCount' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
                 Mock -CommandName Get-ProcessCimInstance -MockWith { return @($script:mockProcess1, $script:mockProcess3) }
                 $mockProcessSettings = @{ Path = 'mockPath' 
                                           Arguments = 'mockArguments'}
@@ -652,8 +743,11 @@ try
             
             }
 
-            Context 'Assert-PathArgumentRooted' {
-                
+            Describe 'xWindowsProcess\Assert-PathArgumentRooted' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
                 It 'Should not throw when path is rooted' {
                     $rootedPath = 'C:\testProcess.exe'
 
@@ -672,8 +766,11 @@ try
                 }
             }
 
-            Context 'Assert-PathArgumentValid' {
-                
+            Describe 'xWindowsProcess\Assert-PathArgumentValid' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
                 It 'Should not throw when path is valid' {
                     Mock -CommandName Test-Path -MockWith { return $true }
 
@@ -691,7 +788,11 @@ try
                 }
             }
 
-            Context 'Split-Credential' {
+            Describe 'xWindowsProcess\Split-Credential' {
+                BeforeAll {
+                    Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+                    Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
+                }
                 It 'Should return correct domain and username with @ seperator' {
                     $testUsername = 'user@domain'
                     $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
@@ -746,8 +847,6 @@ try
                 }
             }
         }
-
-    }
 }
 finally
 {

@@ -78,7 +78,8 @@ function Get-TargetResource
     }
     else
     {
-        $getProcessResult = Get-Process -ID $processCimInstance[0].ProcessId -ErrorAction 'Ignore'
+        $processId = $processCimInstance[0].ProcessId
+        $getProcessResult = Get-Process -ID $processId
 
         $processToReturn = @{
             Path = $Path
@@ -88,7 +89,7 @@ function Get-TargetResource
             VirtualMemorySize = $getProcessResult.VirtualMemorySize64
             HandleCount = $getProcessResult.HandleCount
             Ensure = 'Present'
-            ProcessId = $processCimInstance[0].ProcessId
+            ProcessId = $processId
             ProcessCount = $processCimInstance.Count
         }
     }

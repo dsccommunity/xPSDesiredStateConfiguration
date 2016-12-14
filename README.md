@@ -161,10 +161,10 @@ None
 
 #### Examples
 
-* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_WithoutCredential.ps1)
-* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_EnsureAbsent.ps1)
-* [Start a process with a credential](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_ArgumentsWithCredential.ps1)
-* [Stop a process with a credential](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_EnsureAbsentWithCredential.ps1)
+* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Start.ps1)
+* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Stop.ps1)
+* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StartUnderUser.ps1)
+* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StopUnderUser.ps1)
 
 ### xService
 Provides a mechanism to configure and manage Windows services.
