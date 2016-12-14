@@ -1,6 +1,7 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/master)
-
 # xPSDesiredStateConfiguration
+
+master: [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/master)
+dev : [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/dev)
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
 
@@ -10,25 +11,25 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## Contributing
-Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
+Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
 ## Resources
 
 * **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
 * **xGroup** provides a mechanism to manage local groups on the target node.
-* **xGroupSet** configures multiple xGroups with common settings but different names.
+* **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
 * **xWindowsProcess** configures and manages Windows processes.
+* **xScript** provides a mechanism to run PowerShell script blocks on a target node.
 * **xService** provides a mechanism to configure and manage Windows services.
+* **xServiceSet** provides a mechanism to configure and manage multiple xService resources with common settings but different names.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
-* **xServiceSet** allows starting, stopping and change in state or account type for a group of services.
-* **xScript** provides a mechanism to run PowerShell script blocks on a target node.
 * **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
@@ -102,8 +103,35 @@ None
 
 #### Examples
 
-* [Create or modify a group with Members](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_Members.ps1)
-* [Create or modify a group with MembersToInclude and/or MembersToExclude](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_Members.ps1)
+* [Remove members from a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_RemoveMembers.ps1)
+* [Set the members of a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_SetMembers.ps1)
+
+### xGroupSet
+
+Provides a mechanism to configure and manage multiple xGroup resources with common settings but different names
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String] GroupName** _(Key)_: The names of the groups to create, modify, or remove.
+
+The following parameters will be the same for each group in the set:
+
+* **[String] Ensure** _(Write)_: Indicates if the groups should exist or not. To add groups or modify existing groups, set this property to Present. To remove groups, set this property to Absent. { Present | Absent }.
+* **[String[]] MembersToInclude** _(Write)_: The members the groups should include. This property will only add members to groups. Members should be specified as strings in the format of their domain qualified name (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts).
+* **[String[]] MembersToExclude** _(Write)_: The members the groups should exclude. This property will only remove members groups. Members should be specified as strings in the format of their domain qualified name (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...), or their username (for local machine accounts).
+* **[System.Management.Automation.PSCredential] Credential** _(Write)_: A credential to resolve non-local group members.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroupSet_AddMembers.ps1)
 
 ### xWindowsProcess
 
@@ -119,30 +147,63 @@ Specify an empty string if you don't want to pass any arguments.
 Provides a mechanism to configure and manage Windows services.
 This resource works on Nano Server.
 
-### Requirements
+#### Requirements
 
 None
 
-### Parameters
+#### Parameters
 
-* **[String] Name** _(Key)_: Indicates the service name. Note that sometimes this is different from the display name. You can get a list of the services and their current state with the Get-Service cmdlet.
-* **[String] Ensure** _(Write)_: Indicates whether the service is present or absent. Defaults to Present. { *Present* | Absent }.
-* **[String] Path** _(Write)_: The path to the service executable file.
-* **[String] StartupType** _(Write)_: Indicates the startup type for the service. { Automatic | Disabled | Manual }.
-* **[String] BuiltInAccount** _(Write)_: Indicates the sign-in account to use for the service. { LocalService | LocalSystem | NetworkService }.
-* **[PSCredential] Credential** _(Write)_: The credential to run the service under.
-* **[Boolean] DesktopInteract** _(Write)_: Indicates whether the service can create or communicate with a window on the desktop. Must be false for services not running as LocalSystem. Defaults to False.
-* **[String] State** _(Write)_: Indicates the state you want to ensure for the service. Defaults to Running. { *Running* | Stopped | Ignore }.
+* **[String] Name** _(Key)_: Indicates the service name. This may be different from the service's display name. To retrieve a list of all services with their names and current states, use the Get-Service cmdlet.
+* **[String] Ensure** _(Write)_: Indicates whether the service is present or absent. { *Present* | Absent }.
+* **[String] Path** _(Write)_: The path to the service executable file. Required when creating a service. The user account specified by BuiltInAccount or Credential must have access to this path in order to start the service.
 * **[String] DisplayName** _(Write)_: The display name of the service.
 * **[String] Description** _(Write)_: The description of the service.
-* **[String[]] Dependencies** _(Write)_: An array of strings indicating the names of the dependencies of the service.
-* **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000.
-* **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000.
+* **[String[]] Dependencies** _(Write)_: The names of the dependencies of the service.
+* **[String] BuiltInAccount** _(Write)_: The built-in account the service should start under. Cannot be specified at the same time as Credential. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. { LocalService | LocalSystem | NetworkService }.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account the service should start under. Cannot be specified at the same time as BuiltInAccount. The user specified by this credential will automatically be granted the Log on as a Service right. The user account specified by this property must have access to the service executable path defined by Path in order to start the service.
+* **[Boolean] DesktopInteract** _(Write)_: Indicates whether or not the service should be able to communicate with a window on the desktop. Must be false for services not running as LocalSystem. The default value is False.
+* **[String] StartupType** _(Write)_: The startup type of the service. { Automatic | Disabled | Manual }.
+* **[String] State** _(Write)_: The state of the service. { *Running* | Stopped | Ignore }.
+* **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000 (30 seconds).
+* **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000 (30 seconds).
 
-### Examples
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
 
 * [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_CreateService.ps1)
 * [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_DeleteService.ps1)
+
+### xServiceSet
+Provides a mechanism to configure and manage multiple xService resources with common settings but different names.
+This resource can only modify or delete existing services. It cannot create services.
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String[]] Name** _(Key)_: The names of the services to modify or delete. This may be different from the service's display name. To retrieve a list of all services with their names and current states, use the Get-Service cmdlet.
+
+The following parameters will be the same for each service in the set:
+
+* **[String] Ensure** _(Write)_: Indicates whether the services are present or absent. { *Present* | Absent }.
+* **[String] BuiltInAccount** _(Write)_: The built-in account the services should start under. Cannot be specified at the same time as Credential. The user account specified by this property must have access to the service executable paths in order to start the services. { LocalService | LocalSystem | NetworkService }.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account the services should start under. Cannot be specified at the same time as BuiltInAccount. The user specified by this credential will automatically be granted the Log on as a Service right. The user account specified by this property must have access to the service executable paths in order to start the services.
+* **[String] StartupType** _(Write)_: The startup type of the services. { Automatic | Disabled | Manual }.
+* **[String] State** _(Write)_: The state the services. { *Running* | Stopped | Ignore }.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Ensure that multiple services are running](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xServiceSet_StartServices.ps1)
+* [Set multiple services to run under the built-in account LocalService](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xServiceSet_BuiltInAccount.ps1)
 
 ### xRemoteFile
 
@@ -272,21 +333,6 @@ None
 
 * [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
 
-### xGroupSet
-* **GroupName**: Defines the names of the groups in the set.
-
-These parameters will be the same for each group in the set. Please refer to the xGroup section above for more details on these parameters:
-* **Ensure**: Ensures that the group specified is **Present** or **Absent**.
-* **Description**: Description of the group.
-* **Members**: The members that form the group.
-Note: If the group already exists, the listed items in this property replaces what is in the group.
-* **MembersToInclude**: List of users to add to the group.
-Note: This property is ignored if 'Members' is specified.
-* **MembersToExclude**: List of users you want to ensure are not members of the group.
-Note: This property is ignored if 'Members' is specified.
-* **Credential**: Indicates the credentials required to access remote resources.
-Note: This account must have the appropriate Active Directory permissions to add all non-local accounts to the group or an error will occur.
-
 ### xProcessSet
 Note: All processes in a process set will run without arguments.
 
@@ -301,24 +347,6 @@ These parameters will be the same for each process in the set. Please refer to t
 * **StandardErrorPath**: The path to write the standard error stream to.
 * **StandardInputPath**: The path to receive standard input from.
 * **WorkingDirectory**: The directory to run the processes under.
-
-### xServiceSet
-Note: xServiceSet should not be used to create services. Please use xService instead.
-
-* **Name**: Defines the names of the services in the set.
-
-These parameters will be the same for each service in the set. Please refer to the xService section above for more details on these parameters:
-* **StartupType**: Indicates the startup type for the service.
-   - Suported values: Automatic, Disabled, and Manual
-* **BuiltInAccount**: Indicates the sign-in account to use for the service.
-   - Suported values: LocalService, LocalSystem, and NetworkService
-* **State**: Indicates the state you want to ensure for the service.
-   - Suported values: Running, Stopped
-   - Default value: Running
-* **Ensure**: Ensures that the group specified is **Present** or **Absent**.
-   - Suported values: Present, Absent
-   - Default value: Present
-* **Credential**: Indicates credentials for the account that the service will run under. This property and the BuiltinAccount property cannot be used together.
 
 ### xWindowsFeature
 Provides a mechanism to install or uninstall Windows roles or features on a target node.
@@ -434,7 +462,6 @@ None
 
 * [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsPackageCab.ps1)
 
-   
 ## Functions
 
 ### Publish-ModuleToPullServer
@@ -464,7 +491,21 @@ None
     * Added unit tests
     * Added integration tests
     * Updated documentation and example
-	
+* ResourceSetHelper:
+    * Updated common functions for all 'Set' resources.
+    * Added unit tests
+* xGroupSet:
+    * Updated resource to use new ResouceSetHelper functions and added integration tests.
+* xGroup:
+    * Cleaned module imports, fixed PSSA issues, and set ErrorActionPreference to stop.
+* xService:
+    * Cleaned resource functions to enable StrictMode.
+    * Fixed bug in which Set-TargetResource would create a service when Ensure set to Absent and Path specified.
+    * Added unit tests.
+    * Added integration tests for BuiltInAccount and Credential.
+* xServiceSet:
+    * Updated resource to use new ResouceSetHelper functions and added integration tests.
+
 ### 5.0.0.0
 
 * xWindowsFeature:
