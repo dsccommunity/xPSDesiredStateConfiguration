@@ -6,6 +6,7 @@
     They must be run in the order given - if one test fails, subsequent tests may
     also fail.
 #>
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
@@ -308,7 +309,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -Wait -Force
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should Not Throw
             }
 
