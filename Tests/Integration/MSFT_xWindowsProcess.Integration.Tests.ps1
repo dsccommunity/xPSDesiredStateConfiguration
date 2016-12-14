@@ -6,8 +6,6 @@
     They must be run in the order given - if one test fails, subsequent tests may
     also fail.
 #>
-
-$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
