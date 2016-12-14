@@ -414,8 +414,6 @@ try
                         return @()
                     }
                 }
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
-                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
 
             It 'Should return true when Ensure set to Present and process is running' {
@@ -451,7 +449,6 @@ try
         
         Describe 'xWindowsProcess\Expand-Path' {
             BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
                 Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
             
@@ -484,11 +481,7 @@ try
         }
         
         Describe 'xWindowsProcess\Get-ProcessCimInstance' {
-            BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
-                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
-            }
-            
+
             Mock -CommandName Get-Process -MockWith { return @($script:mockProcess2) }
             Mock -CommandName Get-CimInstance -MockWith { return $script:mockProcess2 }
 
@@ -588,11 +581,6 @@ try
         }
         
         Describe 'xWindowsProcess\ConvertTo-EscapedStringForWqlFilter' {
-            BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
-                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
-            }
-        
             It 'Should return the same string when there are no escaped characters' {
                 $inputString = 'testString%$.@123'
                 $convertedString = ConvertTo-EscapedStringForWqlFilter -FilterString $inputString
@@ -620,9 +608,8 @@ try
                     Domain = 'Mock Domain'
                     User = 'Mock User'
                 }
+
                 Mock -CommandName Get-ProcessOwnerCimInstance -MockWith { return $mockOwner }
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
-                Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
 
             It 'Should return the correct string with domain\user' {
@@ -673,7 +660,7 @@ try
                     Key2 = 'test key2'
                     Key3 = 'test key3'
                 }
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
+
                 Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
         
@@ -715,7 +702,6 @@ try
         
         Describe 'xWindowsProcess\Assert-PathArgumentRooted' {
             BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
                 Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
             It 'Should not throw when path is rooted' {
@@ -738,7 +724,6 @@ try
         
         Describe 'xWindowsProcess\Assert-PathArgumentValid' {
             BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
                 Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
             It 'Should not throw when path is valid' {
@@ -760,7 +745,6 @@ try
         
         Describe 'xWindowsProcess\Split-Credential' {
             BeforeAll {
-                Mock -CommandName New-InvalidOperationException -MockWith { Throw $script:exceptionMessage }
                 Mock -CommandName New-InvalidArgumentException -MockWith { Throw $script:exceptionMessage }
             }
             It 'Should return correct domain and username with @ seperator' {
