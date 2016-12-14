@@ -1,6 +1,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `

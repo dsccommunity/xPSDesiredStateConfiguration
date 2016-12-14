@@ -1,8 +1,8 @@
 <#
     .SYNOPSIS
-        Stops the gpresult process.
+        Stops the gpresult process if it is running.
 #>
-Configuration Sample_xWindowsProcess_EnsureAbsent
+Configuration Sample_xWindowsProcess_Stop
 {
     param
     ()
@@ -20,5 +20,5 @@ Configuration Sample_xWindowsProcess_EnsureAbsent
     }
 }
  
-Sample_xProcess_EnsureAbsent
+Sample_xWindowsProcess_Stop
 

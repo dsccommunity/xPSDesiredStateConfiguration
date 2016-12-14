@@ -507,15 +507,12 @@ function Expand-Path
 
     $Path = [Environment]::ExpandEnvironmentVariables($Path)
 
-    $fileNotFoundMessage = $script:localizedData.InvalidArgumentAndMessage -f ($script:localizedData.InvalidArgument -f 'Path', $Path), 
-                                                                               $script:localizedData.FileNotFound
-
     # Check to see if the path is rooted. If so, return it as is.
     if ([IO.Path]::IsPathRooted($Path))
     {
         if (-not (Test-Path -Path $Path -PathType 'Leaf'))
         {
-            New-InvalidArgumentException -ArgumentName 'Path' -Message $fileNotFoundMessage
+            New-InvalidArgumentException -ArgumentName 'Path' -Message ($script:localizedData.FileNotFound -f $Path)
         }
 
         return $Path
@@ -529,7 +526,7 @@ function Expand-Path
     }
     
     # If the path is not found, throw an exception
-    New-InvalidArgumentException -ArgumentName 'Path' -Message $fileNotFoundMessage
+    New-InvalidArgumentException -ArgumentName 'Path' -Message ($script:localizedData.FileNotFound -f $Path)
 }
 
 <#
@@ -881,10 +878,9 @@ function Assert-PathArgumentRooted
 
     if (-not ([IO.Path]::IsPathRooted($PathArgument)))
     {
-        $message = $script:localizedData.InvalidArgumentAndMessage -f `
-                  ($script:localizedData.InvalidArgument -f $PathArgumentName, $PathArgument),
-                   $script:localizedData.PathShouldBeAbsolute
-        New-InvalidArgumentException -ArgumentName $PathArgumentName `
+        $message = $script:localizedData.PathShouldBeAbsolute -f $PathArgumentName, $PathArgument
+
+        New-InvalidArgumentException -ArgumentName 'Path' `
                                      -Message $message
     }
 }
@@ -917,10 +913,9 @@ function Assert-PathArgumentValid
 
     if (-not (Test-Path -Path $PathArgument))
     {
-        $message = $script:localizedData.InvalidArgumentAndMessage -f `
-                  ($script:localizedData.InvalidArgument -f $PathArgumentName, $PathArgument),
-                   $script:localizedData.PathShouldExist
-        New-InvalidArgumentException -ArgumentName $PathArgumentName `
+        $message = $script:localizedData.PathShouldExist -f $PathArgument, $PathArgumentName
+                   
+        New-InvalidArgumentException -ArgumentName 'Path' `
                                      -Message $message
     }
 }

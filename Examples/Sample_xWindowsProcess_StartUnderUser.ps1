@@ -1,11 +1,12 @@
 <#
     .SYNOPSIS
-        Starts the gpresult process which generates a log about the group policy.
+        Starts the gpresult process under the given credential which generates a log
+        about the group policy. The path to the log is provided in 'Arguments'.
 
     .PARAMETER Credential
         Credential to start the process under.
 #>
-Configuration Sample_xWindowsProcess_ArgumentsWithCredential
+Configuration Sample_xWindowsProcess_StartUnderUser
 {
     [CmdletBinding()]
     param

@@ -1,8 +1,9 @@
 <#
     .SYNOPSIS
         Starts the gpresult process which generates a log about the group policy.
+        The path to the log is provided in 'Arguments'.
 #>
-Configuration Sample_xWindowsProcess_WithoutCredential
+Configuration Sample_xWindowsProcess_Start
 {
     param
     ()
@@ -20,5 +21,5 @@ Configuration Sample_xWindowsProcess_WithoutCredential
     }
 }
 
-Sample_xProcess_WithoutCredential
+Sample_xWindowsProcess_Start
 

@@ -142,14 +142,14 @@ Provides a mechanism to start and stop a Windows process.
 None
 
 #### Parameters
-* **[String] Path** _(Key)_: The full path or file name to the process executable to start or stop.
-* **[String] Arguments** _(Key)_: A string of arguments to pass to the process executable. Pass in an empty string if no arguments are needed.
-* **[PSCredential] Credential** _(Write)_: The credential to run the process under.
-* **[String] Ensure** _(Write)_: Indicates whether the process is present (running) or absent (not running). Defaults to Present. { *Present* | Absent }.
-* **[String] StandardOutputPath** _(Write)_: The path to write the standard output stream to.
-* **[String] StandardErrorPath** _(Write)_: The path to write the standard error stream to.
-* **[String] StandardInputPath** _(Write)_: The path to receive standard input from.
-* **[String] WorkingDirectory** _(Write)_: The directory to run the processes under.
+* **[String] Path** _(Key)_: The executable file of the process. This can be defined as either the full path to the file or as the name of the file if it is accessible through the environment path. Relative paths are not supported.
+* **[String] Arguments** _(Key)_: A single string containing all the arguments to pass to the process. Pass in an empty string if no arguments are needed.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account to run the process under. If this user is from the local system, the StandardOutputPath, StandardInputPath, and WorkingDirectory parameters cannot be provided at the same time.
+* **[String] Ensure** _(Write)_: Specifies whether or not the process should be running. To start the process, specify this property as Present. To stop the process, specify this property as Absent. { *Present* | Absent }.
+* **[String] StandardOutputPath** _(Write)_: The file path to which to write the standard output from the process. Any existing file at this file path will be overwritten. This property cannot be specified at the same time as Credential when running the process as a local user.
+* **[String] StandardErrorPath** _(Write)_: The file path to which to write the standard error output from the process. Any existing file at this file path will be overwritten.
+* **[String] StandardInputPath** _(Write)_: The file path from which to receive standard input for the process. This property cannot be specified at the same time as Credential when running the process as a local user.
+* **[String] WorkingDirectory** _(Write)_: The file path to the working directory under which to run the file. This property cannot be specified at the same time as Credential when running the process as a local user.
 
 #### Read-Only Properties from Get-TargetResource
 * **[UInt64] PagedMemorySize** _(Read)_: The amount of paged memory, in bytes, allocated for the process.
@@ -163,6 +163,8 @@ None
 
 * [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_WithoutCredential.ps1)
 * [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_EnsureAbsent.ps1)
+* [Start a process with a credential](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_ArgumentsWithCredential.ps1)
+* [Stop a process with a credential](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_EnsureAbsentWithCredential.ps1)
 
 ### xService
 Provides a mechanism to configure and manage Windows services.

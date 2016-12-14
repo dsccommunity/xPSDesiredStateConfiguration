@@ -1,11 +1,11 @@
 <#
     .SYNOPSIS
-        Stops the gpresult process running under the given credential
+        Stops the gpresult process running under the given credential if it is running.
 
     .PARAMETER Credential
-        Credential to stop the process
+        Credential that the process is running under.
 #>
-Configuration Sample_xWindowsProcess_EnsureAbsentWithCredential
+Configuration Sample_xWindowsProcess_StopUnderUser
 {
     [CmdletBinding()]
     param

@@ -1,13 +1,11 @@
 # Localized resources for MSFT_xWindowsProcess
 
 ConvertFrom-StringData @'
-    AbsolutePathOrFileName = Absolute path or file name expected.
     CouldNotCreateProcessError = Could not create process. Error code: 
     DuplicateTokenError = Duplicate token. Error code: 
-    FileNotFound = File not found in the environment path.
-    ErrorCredentialParameterNotSupportedWithRunAsCredential = The PsDscRunAsCredential parameter is not supported by the Process resource, and cannot be used with the Credential parameter. To start the process with user '{0}', use only the Credential parameter, not the PsDscRunAsCredential parameter.
+    FileNotFound = File '{0}' not found in the environment path.
     ErrorInvalidUserName = Invalid username: {0}. Username cannot contain multiple '@' or multiple '\'
-    ErrorParametersNotSupportedWithCredential = Can't specify StandardOutputPath, StandardInputPath or WorkingDirectory when trying to run a process under a user context.
+    ErrorParametersNotSupportedWithCredential = Can't specify StandardOutputPath, StandardInputPath or WorkingDirectory when trying to run a process under a local user.
     ErrorRunAsCredentialParameterNotSupported = The PsDscRunAsCredential parameter is not supported by the Process resource. To start the process with user '{0}', add the Credential parameter.
     ErrorStarting = Failure starting process matching path '{0}'. Message: {1}.
     ErrorStopping = Failure stopping processes matching path '{0}' with IDs '({1})'. Message: {2}.
@@ -15,12 +13,10 @@ ConvertFrom-StringData @'
     FailureWaitingForProcessesToStop = Failed to wait for processes to stop.
     GetTargetResourceStartMessage = Begin executing Get functionality for the process {0}.
     GetTargetResourceEndMessage = End executing Get functionality for the process {0}.
-    InvalidArgument = Invalid argument: '{0}' with value: '{1}'.
-    InvalidArgumentAndMessage = {0} {1}
     OpenProcessTokenError = Error while opening process token. Error code: 
     ParameterShouldNotBeSpecified = Parameter {0} should not be specified.
-    PathShouldBeAbsolute = The path should be absolute.
-    PathShouldExist = The path should exist.
+    PathShouldBeAbsolute = The path '{0}' should be absolute for argument '{1}'.
+    PathShouldExist = The path '{0}' should exist for argument '{1}'.
     PrivilegeLookingUpError = Error while looking up privilege. Error code: 
     ProcessAlreadyStarted = Process matching path '{0}' found running. No action required.
     ProcessAlreadyStopped = Process matching path '{0}' not found running. No action required.
