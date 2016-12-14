@@ -29,14 +29,14 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
-* **xWindowsProcess** provides a mechanism to start and stop a windows process.
+* **xWindowsProcess** provides a mechanism to start and stop a Windows process.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
-* **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
+* **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a Windows cabinet (cab) file on a target node.
 
 Resources that work on Nano Server:
 
@@ -527,7 +527,7 @@ None
 * xServiceSet:
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
     * Updated documentation and example	
-* xProcess
+* xWindowsProcess
     * Cleaned resource as per high quality guidelines.
     * Added unit tests.
     * Added integration tests.
@@ -536,6 +536,7 @@ None
     * Fixed bug in Get-TargetResource.
     * Added a 'Count' value to the hashtable returned by Get-TargetResource so that the user can see how many instances of the process are running.
     * Fixed bug in finding the path to the executable.
+    * Changed name to be xWindowsProcess everywhere.
     
 ### 5.0.0.0
 
