@@ -30,7 +30,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
 * **xWindowsProcess** provides a mechanism to start and stop a Windows process.
-* **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
+* **xProcessSet** provides a mechanism to configure and manage multiple xWindowsProcess resources on a target node.
 * **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xWindowsFeatureSet** provides a mechanism to configure and manage multiple xWindowsFeature resources on a target node.
@@ -135,6 +135,7 @@ None
 * [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroupSet_AddMembers.ps1)
 
 ### xWindowsProcess
+
 Provides a mechanism to start and stop a Windows process.
 
 #### Requirements
@@ -142,6 +143,7 @@ Provides a mechanism to start and stop a Windows process.
 None
 
 #### Parameters
+
 * **[String] Path** _(Key)_: The executable file of the process. This can be defined as either the full path to the file or as the name of the file if it is accessible through the environment path. Relative paths are not supported.
 * **[String] Arguments** _(Key)_: A single string containing all the arguments to pass to the process. Pass in an empty string if no arguments are needed.
 * **[PSCredential] Credential** _(Write)_: The credential of the user account to run the process under. If this user is from the local system, the StandardOutputPath, StandardInputPath, and WorkingDirectory parameters cannot be provided at the same time.
@@ -149,9 +151,10 @@ None
 * **[String] StandardOutputPath** _(Write)_: The file path to which to write the standard output from the process. Any existing file at this file path will be overwritten. This property cannot be specified at the same time as Credential when running the process as a local user.
 * **[String] StandardErrorPath** _(Write)_: The file path to which to write the standard error output from the process. Any existing file at this file path will be overwritten.
 * **[String] StandardInputPath** _(Write)_: The file path from which to receive standard input for the process. This property cannot be specified at the same time as Credential when running the process as a local user.
-* **[String] WorkingDirectory** _(Write)_: The file path to the working directory under which to run the file. This property cannot be specified at the same time as Credential when running the process as a local user.
+* **[String] WorkingDirectory** _(Write)_: The file path to the working directory under which to run the process. This property cannot be specified at the same time as Credential when running the process as a local user.
 
 #### Read-Only Properties from Get-TargetResource
+
 * **[UInt64] PagedMemorySize** _(Read)_: The amount of paged memory, in bytes, allocated for the process.
 * **[UInt64] NonPagedMemorySize** _(Read)_: The amount of nonpaged memory, in bytes, allocated for the process.
 * **[UInt64] VirtualMemorySize** _(Read)_: The amount of virtual memory, in bytes, allocated for the process.
@@ -165,6 +168,41 @@ None
 * [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Stop.ps1)
 * [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StartUnderUser.ps1)
 * [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StopUnderUser.ps1)
+
+### xProcessSet
+
+Provides a mechanism to configure and manage multiple xWindowsProcess resources on a target node.
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String[]] Path** _(Key)_: The file paths to the executables of the processes to start or stop. Only the names of the files may be specified if they are all accessible through the environment path. Relative paths are not supported.
+
+The following parameters will be the same for each process in the set:
+
+* **[PSCredential] Credential** _(Write)_: The credential of the user account to run the processes under. If this user is from the local system, the StandardOutputPath, StandardInputPath, and WorkingDirectory parameters cannot be provided at the same time.
+* **[String] Ensure** _(Write)_: Specifies whether or not the processes should be running. To start the processes, specify this property as Present. To stop the processes, specify this property as Absent. { Present | Absent }.
+* **[String] StandardOutputPath** _(Write)_: The file path to which to write the standard output from the processes. Any existing file at this file path will be overwritten. This property cannot be specified at the same time as Credential when running the processes as a local user.
+* **[String] StandardErrorPath** _(Write)_: The file path to which to write the standard error output from the processes. Any existing file at this file path will be overwritten.
+* **[String] StandardInputPath** _(Write)_: The file path from which to receive standard input for the processes. This property cannot be specified at the same time as Credential when running the processes as a local user.
+* **[String] WorkingDirectory** _(Write)_: The file path to the working directory under which to run the process. This property cannot be specified at the same time as Credential when running the processes as a local user.
+
+#### Read-Only Properties from Get-TargetResource
+
+* **[UInt64] PagedMemorySize** _(Read)_: The amount of paged memory, in bytes, allocated for the processes.
+* **[UInt64] NonPagedMemorySize** _(Read)_: The amount of nonpaged memory, in bytes, allocated for the processes.
+* **[UInt64] VirtualMemorySize** _(Read)_: The amount of virtual memory, in bytes, allocated for the processes.
+* **[SInt32] HandleCount** _(Read)_: The number of handles opened by the processes.
+* **[SInt32] ProcessId** _(Read)_: The unique identifier of the processes.
+* **[SInt32] ProcessCount** _(Read)_: The number of instances of the given processes that are currently running.
+
+#### Examples
+
+* [Start multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Start.ps1)
+* [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Stop.ps1)
 
 ### xService
 Provides a mechanism to configure and manage Windows services.
@@ -355,21 +393,6 @@ None
 #### Examples
 
 * [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
-
-### xProcessSet
-Note: All processes in a process set will run without arguments.
-
-* **Path**: Defines the path to each process in the set.
-
-These parameters will be the same for each process in the set. Please refer to the xWindowsProcess section above for more details on these parameters:
-* **Credential**: The credentials of the user under whose context you want to run the process.
-* **Ensure**: Ensures that the process is running or stopped.
-   - Supported values: Present, Absent
-   - Default Value: Present
-* **StandardOutputPath**: The path to write the standard output stream to.
-* **StandardErrorPath**: The path to write the standard error stream to.
-* **StandardInputPath**: The path to receive standard input from.
-* **WorkingDirectory**: The directory to run the processes under.
 
 ### xWindowsFeature
 
@@ -563,10 +586,13 @@ None
     * Changed name to be xWindowsProcess everywhere.
 * xWindowsOptionalFeatureSet
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-    * Updated documentation and example
+    * Updated documentation and examples
 * xWindowsFeatureSet
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-    * Updated documentation and example
+    * Updated documentation and examples
+* xProcessSet
+    * Updated resource to use new ResouceSetHelper functions and added integration tests.
+    * Updated documentation and examples
     
 ### 5.0.0.0
 

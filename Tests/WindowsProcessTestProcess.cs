@@ -12,9 +12,6 @@ namespace WindowsProcessTestProcess
 
             if (args.Length > 0)
             {
-                // and that it is a path
-
-                // a second argument for infinite wait
                 string filePath = args[0];
 
                 using (StreamWriter outputFile = new StreamWriter(filePath))
@@ -25,11 +22,12 @@ namespace WindowsProcessTestProcess
                         outputFile.WriteLine(line);
                     }
                 }
-                if (args.Length == 1 || args[1] != "Stop Running")
-                {
-                    // Sleep so that the process stays running until it is killed
-                    Thread.Sleep(Timeout.Infinite);
-                }
+            }
+
+            if (args.Length <= 1 || (args.Length > 1 && args[1] != "Stop Running"))
+            {
+                // Sleep so that the process stays running until it is killed
+                Thread.Sleep(Timeout.Infinite);
             }
         }
     }

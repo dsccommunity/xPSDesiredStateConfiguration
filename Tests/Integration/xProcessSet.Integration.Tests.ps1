@@ -1,116 +1,147 @@
-﻿Set-StrictMode -Version 'latest'
-$errorActionPreference = 'stop'
+﻿$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'xProcessSet' `
     -TestType 'Integration'
 
-Describe "xProcessSet Integration Tests" {
-    BeforeAll {
-        $script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
-        $script:processTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath `
-                                                      -ChildPath 'MSFT_xWindowsProcess.TestHelper.psm1'
+try
+{
+    Describe 'xProcessSet Integration Tests' {
+        BeforeAll {
+            $script:configurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xProcessSet.config.ps1'
 
-        Import-Module -Name $script:processTestHelperFilePath
+            $originalProcessPath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'WindowsProcessTestProcessSet.exe'
+            $copiedProcessPath = Join-Path -Path $TestDrive -ChildPath 'TestWindowsProcess2.exe'
 
-        $script:cmdProcess1ShortName = 'ProcessTest1'
-        $script:cmdProcess1FullName = 'ProcessTest1.exe'
-        $script:cmdProcess1FullPath = "$env:WinDir\system32\ProcessTest1.exe"
-        Copy-Item "$env:WinDir\system32\cmd.exe" $script:cmdProcess1FullPath -Force -ErrorAction SilentlyContinue
+            Copy-Item -Path $originalProcessPath -Destination $copiedProcessPath -Force
 
-        $script:cmdProcess2ShortName = 'ProcessTest2'
-        $script:cmdProcess2FullName = 'ProcessTest2.exe'
-        $script:cmdProcess2FullPath = "$env:WinDir\system32\ProcessTest2.exe"
-        Copy-Item "$env:WinDir\system32\cmd.exe" $script:cmdProcess2FullPath -Force -ErrorAction SilentlyContinue
-    }
+            $script:processPaths = @( $originalProcessPath, $copiedProcessPath)
+        }
 
-    AfterEach {
-        Stop-ProcessByName -ProcessName $script:cmdProcess1ShortName
-        Stop-ProcessByName -ProcessName $script:cmdProcess2ShortName
-    }
-
-    AfterAll {
-        Remove-Item $script:cmdProcess1FullPath -ErrorAction SilentlyContinue
-        Remove-Item $script:cmdProcess2FullPath -ErrorAction SilentlyContinue
-    }
-
-    It "Ensure a set of processes is present" {
-        $configurationName = "EnsureProcessIsPresent"
-        $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-        $errorPath = Join-Path -Path $TestDrive -ChildPath "StdErrorPath.txt"
-        $outputPath = Join-Path -Path $TestDrive -ChildPath "StdOutputPath.txt"
-
-        try
-        {
-            Configuration $configurationName
+        AfterAll {
+            foreach ($processPath in $script:processPaths)
             {
-                Import-DscResource -ModuleName xPSDesiredStateConfiguration
+                $processName = [System.IO.Path]::GetFileNameWithoutExtension($processPath)
+                $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
 
-                xProcessSet xProcessSet1
+                if ($null -ne $process)
                 {
-                    Path = @($script:cmdProcess1FullPath, $script:cmdProcess2FullPath)
-                    Ensure = "Present"
-                    StandardErrorPath = $errorPath
-                    StandardOutputPath = $outputPath
+                    Stop-Process -Name $processName -ErrorAction 'SilentlyContinue' -Force
+                }
+            }
+        }
+
+        Context 'Start two processes' {
+            $configurationName = 'StartProcessSet'
+
+            $processSetParameters = @{
+                ProcessPaths = $script:processPaths
+                Ensure = 'Present'
+            }
+
+            foreach ($processPath in $processSetParameters.ProcessPaths)
+            {
+                $processName = [System.IO.Path]::GetFileNameWithoutExtension($processPath)
+                $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
+
+                if ($null -ne $process)
+                {
+                    $null = Stop-Process -Name $processName -ErrorAction 'SilentlyContinue' -Force
+
+                    # May need to wait a moment for the correct state to populate
+                    $millisecondsElapsed = 0
+                    $startTime = Get-Date
+                    while ($null -eq $process -and $millisecondsElapsed -lt 3000)
+                    {
+                        $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
+                        $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                    }
+                }
+
+                It "Should not have started process $processName before configuration" {
+                    $process | Should Be $null
                 }
             }
 
-            & $configurationName -OutputPath $configurationPath
+            It 'Should compile and run configuration' {
+                { 
+                    . $script:configurationFilePath -ConfigurationName $configurationName
+                    & $configurationName -OutputPath $TestDrive @processSetParameters
+                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                } | Should Not Throw
+            }
 
-            Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
-
-            $process1 = Get-Process $script:cmdProcess1ShortName
-            $process1 | Should Not Be $null
-
-            $process2 = Get-Process $script:cmdProcess2ShortName
-            $process2 | Should Not Be $null
-        }
-        finally
-        {
-            if (Test-Path -Path $configurationPath)
+            foreach ($processPath in $processSetParameters.ProcessPaths)
             {
-                Remove-Item -Path $configurationPath -Recurse -Force
+                $processName = [System.IO.Path]::GetFileNameWithoutExtension($processPath)
+                $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
+
+                It "Should have started process $processName after configuration" {
+                    $process | Should Not Be $null
+                }
             }
         }
-    }
 
-    It "Ensure a set of processes is absent" {
-        $configurationName = "EnsureProcessIsAbsent"
-        $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        Context 'Stop two processes' {
+            $configurationName = 'StopProcessSet'
 
-        try
-        {
-            Configuration $configurationName
+            $processSetParameters = @{
+                ProcessPaths = $script:processPaths
+                Ensure = 'Absent'
+            }
+
+            foreach ($processPath in $processSetParameters.ProcessPaths)
             {
-                Import-DscResource -ModuleName xPSDesiredStateConfiguration
+                $processName = [System.IO.Path]::GetFileNameWithoutExtension($processPath)
+                $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
 
-                xProcessSet xProcessSet1
+                if ($null -eq $process)
                 {
-                    Path = @($script:cmdProcess1FullPath, $script:cmdProcess2FullPath)
-                    Ensure = "Absent"
+                    $null = Start-Process -FilePath $processPath -ErrorAction 'SilentlyContinue'
+
+                    # May need to wait a moment for the correct state to populate
+                    $millisecondsElapsed = 0
+                    $startTime = Get-Date
+                    while ($null -eq $process -and $millisecondsElapsed -lt 3000)
+                    {
+                        $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
+                        $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                    }
+                }
+
+                It "Should have started process $processName before configuration" {
+                    $process | Should Not Be $null
                 }
             }
 
-            & $configurationName -OutputPath $configurationPath
+            It 'Should compile and run configuration' {
+                { 
+                    . $script:configurationFilePath -ConfigurationName $configurationName
+                    & $configurationName -OutputPath $TestDrive @processSetParameters
+                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                } | Should Not Throw
+            }
 
-            Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
-
-            $process1 = Get-Process $script:cmdProcess1ShortName -ErrorAction SilentlyContinue
-            $process1 | Should Be $null
-
-            $process2 = Get-Process $script:cmdProcess2ShortName -ErrorAction SilentlyContinue
-            $process2 | Should Be $null
-
-        }
-        finally
-        {
-            if (Test-Path -path $configurationPath)
+            foreach ($processPath in $processSetParameters.ProcessPaths)
             {
-                Remove-Item -Path $configurationPath -Recurse -Force
+                $processName = [System.IO.Path]::GetFileNameWithoutExtension($processPath)
+                $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
+
+                It "Should have stopped process $processName after configuration" {
+                    $process | Should Be $null
+                }
             }
         }
     }
+}
+finally
+{
+    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
 }
