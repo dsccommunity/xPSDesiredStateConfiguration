@@ -11,10 +11,10 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 Describe "xProcessSet Integration Tests" {
     BeforeAll {
         $script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
-        $script:serviceTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath `
+        $script:processTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath `
                                                       -ChildPath 'MSFT_xWindowsProcess.TestHelper.psm1'
 
-        Import-Module -Name $script:serviceTestHelperFilePath
+        Import-Module -Name $script:processTestHelperFilePath
 
         $script:cmdProcess1ShortName = 'ProcessTest1'
         $script:cmdProcess1FullName = 'ProcessTest1.exe'

@@ -1,6 +1,8 @@
 <#
     .SYNOPSIS
         Stops the gpresult process running under the given credential if it is running.
+        Since the Arguments parameter isn't needed to stop the process,
+        an empty string is passed in.
 
     .PARAMETER Credential
         Credential that the process is running under.
@@ -22,7 +24,7 @@ Configuration Sample_xWindowsProcess_StopUnderUser
         xWindowsProcess GPresult
         {
             Path = 'C:\Windows\System32\gpresult.exe'
-            Arguments = '/h C:\gp2.htm'
+            Arguments = ''
             Credential = $Credential
             Ensure = 'Absent'
         }
