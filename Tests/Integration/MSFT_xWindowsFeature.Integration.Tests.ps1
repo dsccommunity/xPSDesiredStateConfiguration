@@ -1,10 +1,8 @@
 ﻿<#
     Integration tests for Installing/uninstalling a Windows Feature. Currently Telnet-Client is
-    set as the feature to test since it's fairly small and doesn't require a restart. ADRMS
-    is set as the feature to test installing/uninstalling a feature with subfeatures,
-    but this takes a good chunk of time, so by default these tests are set to be skipped.
-    If there's any major changes to the resource, then set the skipLongTests variable to $false
-    and run those tests at least once to test the new functionality more completely. 
+    set as the feature to test since it's fairly small and doesn't require a restart.
+    RSAT-File-Services is set as the feature to test installing/uninstalling a feature with
+    subfeatures.
 #> 
 
 # Suppressing this rule since we need to create a plaintext password to test this resource
@@ -19,6 +17,7 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xWindowsFeature' `
     -TestType 'Integration'
+
 <#
     If this is set to $true then the tests that test installing/uninstalling a feature with
     its subfeatures will not run.

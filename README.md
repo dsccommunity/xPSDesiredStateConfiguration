@@ -33,7 +33,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
-* **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
+* **xWindowsFeatureSet** provides a mechanism to configure and manage multiple xWindowsFeature resources on a target node.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** provides a mechanism to configure and manage multiple xWindowsOptionalFeature resources on a target node.
 * **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a Windows cabinet (cab) file on a target node.
@@ -372,6 +372,7 @@ These parameters will be the same for each process in the set. Please refer to t
 * **WorkingDirectory**: The directory to run the processes under.
 
 ### xWindowsFeature
+
 Provides a mechanism to install or uninstall Windows roles or features on a target node.
 
 #### Requirements
@@ -397,20 +398,34 @@ Provides a mechanism to install or uninstall Windows roles or features on a targ
 * [Install or uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeature.ps1)
 
 ### xWindowsFeatureSet
-* **Name**: Defines the names of the Windows features in the set.
 
-These parameters will be the same for each Windows feature in the set. Please refer to the xWindowsFeature section above for more details on these parameters:
-* **Ensure**: Ensures that the set of features is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **Credential**: Indicates the credentials to use to add or remove the role or feature.
-* **IncludeAllSubFeature**: Set this property to $true to ensure the state of all required subfeatures matches the state of the Ensure property.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **LogPath**: Indicates the path to a log file where you want the resource provider to log the operation.
-* **Source**: Indicates the location of the source file to use for installation, if necessary.
+Provides a mechanism to configure and manage multiple xWindowsFeature resources on a target node.
+
+#### Requirements
+
+* Target machine must be running Windows Server 2008 or later.
+* Target machine must have access to the DISM PowerShell module.
+* Target machine must have access to the ServerManager module.
+
+#### Parameters
+
+* **[String] Name** _(Key)_: The names of the roles or features that you want install or uninstall. This may be different from the display name of the feature/role. To retrieve the names of features/roles on a machine use the Get-WindowsFeature cmdlet.
+* **[String] Ensure** _(Write)_: Specifies whether the feature should be installed or uninstalled. To install features, set this property to Present. To uninstall features, set this property to Absent. { Present | Absent }.
+* **[Boolean] IncludeAllSubFeature** _(Write)_: Specifies whether or not all subfeatures should be installed or uninstalled alongside the specified roles or features. If this property is true and Ensure is set to Present, all subfeatures will be installed. If this property is false and Ensure is set to Present, subfeatures will not be installed or uninstalled. If Ensure is set to Absent, all subfeatures will be uninstalled.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account under which to install or uninstall the role or feature.
+* **[String] LogPath** _(Write)_: The custom file path to which to log this operation. If not passed in, the default log path will be used (%windir%\logs\ServerManager.log).
+
+#### Read-Only Properties from Get-TargetResource
+
+* **[String] DisplayName** _(Read)_: The display names of the retrieved roles or features.
+
+#### Examples
+
+* [Install multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeatureSet_Install.ps1)
+* [Uninstall multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeatureSet_Uninstall.ps1)
 
 ### xWindowsOptionalFeature
+
 Provides a mechanism to enable or disable optional features on a target node.
 This resource works on Nano Server.
 
@@ -439,6 +454,7 @@ This resource works on Nano Server.
 * [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
 
 ### xWindowsOptionalFeatureSet
+
 Provides a mechanism to configure and manage multiple xWindowsOptionalFeature resources on a target node.
 This resource works on Nano Server.
 
@@ -546,6 +562,9 @@ None
     * Fixed bug in finding the path to the executable.
     * Changed name to be xWindowsProcess everywhere.
 * xWindowsOptionalFeatureSet
+    * Updated resource to use new ResouceSetHelper functions and added integration tests.
+    * Updated documentation and example
+* xWindowsFeatureSet
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
     * Updated documentation and example
     
