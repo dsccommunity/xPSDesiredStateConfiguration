@@ -20,8 +20,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
 * **xGroup** provides a mechanism to manage local groups on the target node.
 * **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
-* **xWindowsProcess** configures and manages Windows processes.
 * **xScript** provides a mechanism to run PowerShell script blocks on a target node.
+* **xGroupSet** configures multiple xGroups with common settings but different names.
 * **xService** provides a mechanism to configure and manage Windows services.
 * **xServiceSet** provides a mechanism to configure and manage multiple xService resources with common settings but different names.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
@@ -29,13 +29,14 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xEnvironment** configures and manages environment variables.
+* **xWindowsProcess** provides a mechanism to start and stop a Windows process.
 * **xProcessSet** allows starting and stopping of a group of windows processes with no arguments.
 * **xUser** provides a mechanism to manage local users on the target node.
 * **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
 * **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
-* **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
+* **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a Windows cabinet (cab) file on a target node.
 
 Resources that work on Nano Server:
 
@@ -134,14 +135,36 @@ None
 * [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroupSet_AddMembers.ps1)
 
 ### xWindowsProcess
+Provides a mechanism to start and stop a Windows process.
 
-For a complete list of properties, please use Get-DscResource
+#### Requirements
 
-* **Path**: The full path or the process executable
-* **Arguments**: This is a mandatory parameter for passing arguments to the process executable.
-Specify an empty string if you don't want to pass any arguments.
-* **Credential**: The credentials of the user under whose context you want to run the process.
-* **Ensure**: Ensures that the process is running or stopped: { Present | Absent }
+None
+
+#### Parameters
+* **[String] Path** _(Key)_: The executable file of the process. This can be defined as either the full path to the file or as the name of the file if it is accessible through the environment path. Relative paths are not supported.
+* **[String] Arguments** _(Key)_: A single string containing all the arguments to pass to the process. Pass in an empty string if no arguments are needed.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account to run the process under. If this user is from the local system, the StandardOutputPath, StandardInputPath, and WorkingDirectory parameters cannot be provided at the same time.
+* **[String] Ensure** _(Write)_: Specifies whether or not the process should be running. To start the process, specify this property as Present. To stop the process, specify this property as Absent. { *Present* | Absent }.
+* **[String] StandardOutputPath** _(Write)_: The file path to which to write the standard output from the process. Any existing file at this file path will be overwritten. This property cannot be specified at the same time as Credential when running the process as a local user.
+* **[String] StandardErrorPath** _(Write)_: The file path to which to write the standard error output from the process. Any existing file at this file path will be overwritten.
+* **[String] StandardInputPath** _(Write)_: The file path from which to receive standard input for the process. This property cannot be specified at the same time as Credential when running the process as a local user.
+* **[String] WorkingDirectory** _(Write)_: The file path to the working directory under which to run the file. This property cannot be specified at the same time as Credential when running the process as a local user.
+
+#### Read-Only Properties from Get-TargetResource
+* **[UInt64] PagedMemorySize** _(Read)_: The amount of paged memory, in bytes, allocated for the process.
+* **[UInt64] NonPagedMemorySize** _(Read)_: The amount of nonpaged memory, in bytes, allocated for the process.
+* **[UInt64] VirtualMemorySize** _(Read)_: The amount of virtual memory, in bytes, allocated for the process.
+* **[SInt32] HandleCount** _(Read)_: The number of handles opened by the process.
+* **[SInt32] ProcessId** _(Read)_: The unique identifier of the process.
+* **[SInt32] ProcessCount** _(Read)_: The number of instances of the given process that are currently running.
+
+#### Examples
+
+* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Start.ps1)
+* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Stop.ps1)
+* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StartUnderUser.ps1)
+* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StopUnderUser.ps1)
 
 ### xService
 Provides a mechanism to configure and manage Windows services.
@@ -505,7 +528,18 @@ None
     * Added integration tests for BuiltInAccount and Credential.
 * xServiceSet:
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-
+    * Updated documentation and example	
+* xWindowsProcess
+    * Cleaned resource as per high quality guidelines.
+    * Added unit tests.
+    * Added integration tests.
+    * Updated documentation.
+    * Updated examples.
+    * Fixed bug in Get-TargetResource.
+    * Added a 'Count' value to the hashtable returned by Get-TargetResource so that the user can see how many instances of the process are running.
+    * Fixed bug in finding the path to the executable.
+    * Changed name to be xWindowsProcess everywhere.
+    
 ### 5.0.0.0
 
 * xWindowsFeature:

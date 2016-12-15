@@ -1,4 +1,5 @@
-Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
+﻿$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
 
 <#
     .SYNOPSIS
@@ -10,14 +11,16 @@ Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 function Stop-ProcessByName
 {
     [CmdletBinding()]
-    param (
+    param
+    (
         [Parameter(Mandatory = $true)]
         [String]
         $ProcessName
     )
 
     Stop-Process -Name $ProcessName -ErrorAction 'SilentlyContinue' -Force
-    Wait-ScriptBlockReturnTrue -ScriptBlock { return $null -eq (Get-Process -Name $ProcessName -ErrorAction 'SilentlyContinue') } -TimeoutSeconds 15
+    Wait-ScriptBlockReturnTrue -ScriptBlock { return $null -eq (Get-Process -Name $ProcessName -ErrorAction 'SilentlyContinue') } `
+                               -TimeoutSeconds 15
 }
 
 Export-ModuleMember -Function Stop-ProcessByName
