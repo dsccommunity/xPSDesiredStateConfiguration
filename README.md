@@ -35,7 +35,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xWindowsFeature** provides a mechanism to install or uninstall Windows roles or features on a target node.
 * **xWindowsFeatureSet** allows installation and uninstallation of a group of Windows features and their subfeatures.
 * **xWindowsOptionalFeature** provides a mechanism to enable or disable optional features on a target node.
-* **xWindowsOptionalFeatureSet** allows installation and uninstallation of a group of optional Windows features.
+* **xWindowsOptionalFeatureSet** provides a mechanism to configure and manage multiple xWindowsOptionalFeature resources on a target node.
 * **xWindowsPackageCab** provides a mechanism to install or uninstall a package from a Windows cabinet (cab) file on a target node.
 
 Resources that work on Nano Server:
@@ -45,8 +45,8 @@ Resources that work on Nano Server:
 * xScript
 * xUser
 * xWindowsOptionalFeature
+* xWindowsOptionalFeatureSet
 * xWindowsPackageCab
-
 
 ### xArchive
 
@@ -439,28 +439,34 @@ This resource works on Nano Server.
 * [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
 
 ### xWindowsOptionalFeatureSet
-Note: xWindowsOptionalFeature is only supported on Windows client or Windows Server 2012 (and later) SKUs.
+Provides a mechanism to configure and manage multiple xWindowsOptionalFeature resources on a target node.
+This resource works on Nano Server.
 
-* **Name**: Defines the names of the Windows optional features in the set.
+#### Requirements
 
-These parameters will be the same for each Windows optional feature in the set. Please refer to the xWindowsOptionalFeature section above for more details on these parameters:
-* **Ensure**: Ensures that the set of features is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **Source**: Specifies the location of the files that are required to restore a feature that has been removed from the image.
-   - You can specify the Windows directory of a mounted image or a running Windows installation that is shared on the network.
-   - If you specify multiple Source arguments, the files are gathered from the first location where they are found and the rest of the locations are ignored.
-* **RemoveFilesOnDisable**: Removes the files for an optional feature without removing the feature's manifest from the image.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **LogPath**: Specifies the full path and file name to log to.
-   - If not set, the default is %WINDIR%\Logs\Dism\dism.log.
-* **NoWindowsUpdateCheck**: Prevents DISM from contacting Windows Update (WU) when searching for the source files to restore a feature on an online image.
-   - Suported values: $true, $false.
-   - Default value: $false.
-* **LogLevel**: Specifies the maximum output level shown in the logs.
-   - Suported values: ErrorsOnly, ErrorsAndWarning, ErrorsAndWarningAndInformation.
-   - Default value: ErrorsOnly.
+* Target machine must be running a Windows client operating system, Windows Server 2012 or later, or Nano Server.
+* Target machine must have access to the DISM PowerShell module.
+
+#### Parameters
+
+* **[String[]] Name** _(Key)_: The names of the Windows optional features to enable or disable.
+
+The following parameters will be the same for each Windows optional feature in the set:
+
+* **[String] Ensure** _(Write)_: Specifies whether the Windows optional features should be enabled or disabled. To enable the features, set this property to Present. To disable the features, set this property to Absent. { *Present* | Absent }.
+* **[Boolean] RemoveFilesOnDisable** _(Write)_: Specifies whether or not to remove the files associated with the Windows optional features when they are disabled.
+* **[Boolean] NoWindowsUpdateCheck** _(Write)_: Specifies whether or not DISM should contact Windows Update (WU) when searching for the source files to restore Windows optional features on an online image.
+* **[String] LogPath** _(Write)_: The file path to which to log the operation.
+* **[String] LogLevel** _(Write)_: The level of detail to include in the log. { ErrorsOnly | ErrorsAndWarning | ErrorsAndWarningAndInformation }.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Enable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeatureSet_Enable.ps1)
+* [Disable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeatureSet_Disable.ps1)
 
 ### xWindowsPackageCab
 Provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
@@ -539,6 +545,9 @@ None
     * Added a 'Count' value to the hashtable returned by Get-TargetResource so that the user can see how many instances of the process are running.
     * Fixed bug in finding the path to the executable.
     * Changed name to be xWindowsProcess everywhere.
+* xWindowsOptionalFeatureSet
+    * Updated resource to use new ResouceSetHelper functions and added integration tests.
+    * Updated documentation and example
     
 ### 5.0.0.0
 
