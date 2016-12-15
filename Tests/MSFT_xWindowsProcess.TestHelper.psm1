@@ -1,10 +1,6 @@
 ﻿$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-Import-Module -Name (Join-Path -Path (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) `
-                                                -ChildPath 'DSCResources') `
-                               -ChildPath 'CommonResourceHelper.psm1')
-
 <#
     .SYNOPSIS
         Stops all instances of the process with the given name.
