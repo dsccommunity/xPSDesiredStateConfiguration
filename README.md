@@ -432,10 +432,10 @@ Provides a mechanism to configure and manage multiple xWindowsFeature resources 
 
 #### Parameters
 
-* **[String] Name** _(Key)_: The names of the roles or features that you want install or uninstall. This may be different from the display name of the feature/role. To retrieve the names of features/roles on a machine use the Get-WindowsFeature cmdlet.
+* **[String] Name** _(Key)_: The names of the roles or features to install or uninstall. This may be different from the display name of the feature/role. To retrieve the names of features/roles on a machine use the Get-WindowsFeature cmdlet.
 * **[String] Ensure** _(Write)_: Specifies whether the feature should be installed or uninstalled. To install features, set this property to Present. To uninstall features, set this property to Absent. { Present | Absent }.
 * **[Boolean] IncludeAllSubFeature** _(Write)_: Specifies whether or not all subfeatures should be installed or uninstalled alongside the specified roles or features. If this property is true and Ensure is set to Present, all subfeatures will be installed. If this property is false and Ensure is set to Present, subfeatures will not be installed or uninstalled. If Ensure is set to Absent, all subfeatures will be uninstalled.
-* **[PSCredential] Credential** _(Write)_: The credential of the user account under which to install or uninstall the role or feature.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account under which to install or uninstall the roles or features.
 * **[String] LogPath** _(Write)_: The custom file path to which to log this operation. If not passed in, the default log path will be used (%windir%\logs\ServerManager.log).
 
 #### Read-Only Properties from Get-TargetResource
@@ -492,7 +492,7 @@ This resource works on Nano Server.
 
 The following parameters will be the same for each Windows optional feature in the set:
 
-* **[String] Ensure** _(Write)_: Specifies whether the Windows optional features should be enabled or disabled. To enable the features, set this property to Present. To disable the features, set this property to Absent. { *Present* | Absent }.
+* **[String] Ensure** _(Write)_: Specifies whether the Windows optional features should be enabled or disabled. To enable the features, set this property to Present. To disable the features, set this property to Absent. { Present | Absent }.
 * **[Boolean] RemoveFilesOnDisable** _(Write)_: Specifies whether or not to remove the files associated with the Windows optional features when they are disabled.
 * **[Boolean] NoWindowsUpdateCheck** _(Write)_: Specifies whether or not DISM should contact Windows Update (WU) when searching for the source files to restore Windows optional features on an online image.
 * **[String] LogPath** _(Write)_: The file path to which to log the operation.

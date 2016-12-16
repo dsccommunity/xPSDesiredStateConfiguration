@@ -27,7 +27,7 @@ Import-Module -Name $script:resourceSetHelperFilePath
         If Ensure is set to Absent, all subfeatures will be uninstalled.
 
     .PARAMETER Credential
-        The credential of the user account under which to install or uninstall the role or feature.
+        The credential of the user account under which to install or uninstall the roles or features.
 
     .PARAMETER LogPath
         The custom file path to which to log this operation.

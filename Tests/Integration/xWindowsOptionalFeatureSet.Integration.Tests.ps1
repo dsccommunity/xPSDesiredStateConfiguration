@@ -97,6 +97,7 @@ try
             foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
             {
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+
                 It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the configuration" {
                     $windowsOptionalFeature | Should Not Be $null
                 }
@@ -172,6 +173,7 @@ try
             foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
             {
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+
                 It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the confguration" {
                     $windowsOptionalFeature | Should Not Be $null
                 }
