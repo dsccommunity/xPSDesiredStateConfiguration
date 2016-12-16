@@ -9,6 +9,7 @@ class MSFT_xPackageResource : OMI_BaseResource
   [write,EmbeddedInstance("MSFT_Credential")] string Credential;
   [write] uint32 ReturnCode[];
   [write] string LogPath;
+  [write] boolean IsMSIPackage;
   [read] string PackageDescription;
   [read] string Publisher;
   [read] string InstalledOn;
