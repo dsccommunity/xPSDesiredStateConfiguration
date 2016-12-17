@@ -158,7 +158,7 @@ function Get-TargetResource
 #>
 function Set-TargetResource
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding()]
     param
     (
        [Parameter(Mandatory = $true)]
@@ -357,7 +357,7 @@ function Test-TargetResource
     Write-Verbose -Message ($script:localizedData.TestTargetResourceStartMessage -f $Name)
     
     Import-ServerManager
-    
+
     $testTargetResourceResult = $false
 
     $getWindowsFeatureParameters = @{
@@ -515,7 +515,18 @@ function Import-ServerManager
 
     try
     {
-        Import-Module -Name 'ServerManager'
+        Import-Module -Name 'ServerManager' -ErrorAction Stop
+    }
+    catch [System.Management.Automation.RuntimeException] {
+        if ($_.Exception.Message -like "*Some or all identity references could not be translated*")
+        {
+            Write-Verbose $_.Exception.Message
+        }
+        else
+        {
+            Write-Verbose -Message $script:localizedData.ServerManagerModuleNotFoundMessage
+            New-InvalidOperationException -Message $script:localizedData.SkuNotSupported
+        }
     }
     catch
     {

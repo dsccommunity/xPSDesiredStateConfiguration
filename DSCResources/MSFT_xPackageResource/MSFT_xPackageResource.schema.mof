@@ -25,4 +25,5 @@ class MSFT_xPackageResource : OMI_BaseResource
   [write] string InstalledCheckRegValueName;
   [write] string InstalledCheckRegValueData;
   [write] boolean CreateCheckRegValue;
+  [write,EmbeddedInstance("MSFT_Credential")] string RunAsCredential;
 };
