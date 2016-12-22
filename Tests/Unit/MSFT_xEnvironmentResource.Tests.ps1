@@ -83,6 +83,170 @@ try
         }
 
         Describe 'xEnvironmentResource\Set-TargetResource' {
+            Context 'Add new environment variable without Path and item properties not present' {
+                $newPathValue = 'new path value'
+                Mock -CommandName Get-ItemPropertyExpanded -MockWith { return $null }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith { $script:mockEnvironmentVar1.PATH = $newPathValue }
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue } | Should Not Throw
+                }
+                
+                It 'Should have set the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Be $newPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemPropertyExpanded -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 1 -Scope Context
+                }
+            }
+
+            Context 'Add new environment variable with Path and item properties present' {
+                $newPathValue = 'new path value2'
+                Mock -CommandName Get-ItemProperty -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return $null }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith { $script:mockEnvironmentVar1.PATH = $newPathValue }
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue -Path $true } | Should Not Throw
+                }
+                
+                It 'Should have set the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Be $newPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemProperty -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 1 -Scope Context
+                }
+            }
+
+            Context 'Update environment variable but no value specified' {
+                Mock -CommandName Get-ItemPropertyExpanded -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith {}
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 } | Should Not Throw
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemPropertyExpanded -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 0 -Scope Context
+                }
+            }
+
+            Context 'Update environment variable without Path and value given is the value already set' {
+                $newPathValue = 'new path value2'
+                $script:mockEnvironmentVar1.PATH = $newPathValue
+                Mock -CommandName Get-ItemPropertyExpanded -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith {}
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue } | Should Not Throw
+                }
+                
+                It 'Should not have updated the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Be $newPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemPropertyExpanded -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 0 -Scope Context
+                }
+            }
+
+            Context 'Update environment variable without Path and new value passed in' {
+                $newPathValue = 'new path value3'
+                Mock -CommandName Get-ItemPropertyExpanded -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith { $script:mockEnvironmentVar1.PATH = $newPathValue }
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue } | Should Not Throw
+                }
+                
+                It 'Should have updated the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Be $newPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemPropertyExpanded -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 1 -Scope Context
+                }
+            }
+
+            Context 'Update environment variable with Path and invalid value (;) passed in' {
+                $newPathValue = ';'
+                Mock -CommandName Get-ItemProperty -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith { $script:mockEnvironmentVar1.PATH = $newPathValue }
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue -Path $true } | Should Not Throw
+                }
+                
+                It 'Should not have updated the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Not Be $newPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemProperty -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 0 -Scope Context
+                }
+            }
+
+            Context 'Update environment variable with Path and invalid value ( ) passed in' {
+                $newPathValue = '    '
+                Mock -CommandName Get-ItemProperty -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith { $script:mockEnvironmentVar1.PATH = $newPathValue }
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue -Path $true } | Should Not Throw
+                }
+                
+                It 'Should not have updated the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Not Be $newPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemProperty -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 0 -Scope Context
+                }
+            }
+
+            Context 'Update environment variable with new Path and valid value passed in' {
+                $newPathValue = 'new path value 4'
+                $newFullPathValue = ($script:mockEnvironmentVar1.PATH +';' + $newPathValue)
+                Mock -CommandName Get-ItemProperty -MockWith { return $script:mockEnvironmentVar1 }
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return 'mock environment variable' }
+                Mock -CommandName Set-MachineAndProcessEnvironmentVariables -MockWith { $script:mockEnvironmentVar1.PATH = $newFullPathValue }
+                
+                It 'Should not throw an exception' {
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName1 -Value $newPathValue -Path $true } | Should Not Throw
+                }
+                
+                It 'Should not have updated the mock variable value' {
+                    $script:mockEnvironmentVar1.PATH | Should Be $newFullPathValue
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-ItemProperty -Exactly 1 -Scope Context
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Set-MachineAndProcessEnvironmentVariables -Exactly 1 -Scope Context
+                }
+            }
         }
 
         Describe 'xEnvironmentResource\Test-TargetResource' {

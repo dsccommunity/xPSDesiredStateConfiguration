@@ -36,7 +36,7 @@ function Get-TargetResource
         $Name       
     )
         
-    $envVar = Get-ItemPropertyExpanded -Name $Name -ErrorAction SilentlyContinue
+    $envVar = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
     
     if ($envVar -eq $null)
     {        
@@ -92,15 +92,15 @@ function Set-TargetResource
     )
     
     $valueSpecified = $PSBoundParameters.ContainsKey('Value')
-    $curVarProperties = System.Management.Automation.PSObject
+    $curVarProperties = $null
 
     if ($Path)
     {
-        $curVarProperties = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction SilentlyContinue
+        $curVarProperties = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
     } 
     else
     {
-        $curVarProperties = Get-ItemPropertyExpanded -Name $Name -ErrorAction SilentlyContinue
+        $curVarProperties = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
     }
 
     $currentValueFromEnv = Get-EnvironmentVariable -Name $name -Target $script:environmentVariableTarget.Process
@@ -115,8 +115,7 @@ function Set-TargetResource
             # specified, the default value is set to empty string '' (per spec).
             # Both path and non-path cases are covered by this.
             
-            $successMessage = $script:localizedData.EnvVarCreated -f $Name, $Value
-            Write-Verbose -Message $successMessage
+            Write-Verbose -Message ($script:localizedData.EnvVarCreated -f $Name, $Value)
 
             Set-MachineAndProcessEnvironmentVariables -Name $Name -Value $Value          
                         
@@ -141,11 +140,11 @@ function Set-TargetResource
 
             if ($Value -ceq $curVarProperties.$Name)
             {
-                Write-Verbose -Message $script:localizedData.EnvVarUnchanged -f $Name, $curVarProperties.$Name
+                Write-Verbose -Message ($script:localizedData.EnvVarUnchanged -f $Name, $curVarProperties.$Name)
                 return
             }
             
-            Write-Verbose -Message $script:localizedData.EnvVarUpdated -f $Name, $curVarProperties.$Name, $Value
+            Write-Verbose -Message ($script:localizedData.EnvVarUpdated -f $Name, $curVarProperties.$Name, $Value)
 
             Set-MachineAndProcessEnvironmentVariables -Name $Name -Value $Value            
             return
@@ -185,12 +184,12 @@ function Set-TargetResource
         if ($varUpdated)
         {
             # update the existing environment path variable
-            Write-Verbose -Message $script:localizedData.EnvVarPathUpdated -f $Name, $curVarProperties.$Name, $setValue        
+            Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $curVarProperties.$Name, $setValue)       
             Set-MachineAndProcessEnvironmentVariables -Name $Name -Value $setValue
         }
         else
         {
-            Write-Verbose -Message $script:localizedData.EnvVarPathUnchanged -f $Name, $curVarProperties.$Name
+            Write-Verbose -Message ($script:localizedData.EnvVarPathUnchanged -f $Name, $curVarProperties.$Name)
         }
     }
 
@@ -211,7 +210,7 @@ function Set-TargetResource
             # OR
             # Regardless of $Value, if the target variable is a non-path variable, simply remove it to meet the absent condition
 
-            Write-Verbose -Message $script:localizedData.EnvVarRemoved -f $Name
+            Write-Verbose -Message ($script:localizedData.EnvVarRemoved -f $Name)
 
             Remove-EnvironmentVariable -Name $Name        
 
@@ -256,15 +255,15 @@ function Set-TargetResource
         $finalPath = $finalPath.Trim(';')                
             
         # Set the expected success message
-        $successMessage = $script:localizedData.EnvVarPathUnchanged -f $Name, $curVarProperties.$Name
+        $successMessage = ($script:localizedData.EnvVarPathUnchanged -f $Name, $curVarProperties.$Name)
 
         if ($varAltered)
         {
-            $successMessage = $script:localizedData.EnvVarPathUpdated -f $Name, $curVarProperties.$Name, $finalPath
+            $successMessage = ($script:localizedData.EnvVarPathUpdated -f $Name, $curVarProperties.$Name, $finalPath)
             
             if ([String]::IsNullOrEmpty($finalPath))
             {
-                $successMessage = $script:localizedData.EnvVarRemoved -f $Name
+                $successMessage = ($script:localizedData.EnvVarRemoved -f $Name)
             }            
         }
         
@@ -322,11 +321,11 @@ function Test-TargetResource
 
     if ($Path)
     {
-        $curVarProperties = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction SilentlyContinue
+        $curVarProperties = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
     } 
     else
     {
-        $curVarProperties = Get-ItemPropertyExpanded -Name $Name -ErrorAction SilentlyContinue
+        $curVarProperties = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
     }
 
     $currentValueFromEnv = Get-EnvironmentVariable -Name $name -Target $script:environmentVariableTarget.Process
@@ -478,12 +477,12 @@ function Get-EnvironmentVariable
     }
     elseif ($Target -eq $script:environmentVariableTarget.Machine)
     {
-        $retVal = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction SilentlyContinue
+        $retVal = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
         return $retVal.$Name
     }
     elseif ($Target -eq $script:environmentVariableTarget.User)
     {
-        $retVal = Get-ItemProperty -Path $script:envVarRegPathUser -Name $Name -ErrorAction SilentlyContinue
+        $retVal = Get-ItemProperty -Path $script:envVarRegPathUser -Name $Name -ErrorAction 'SilentlyContinue'
         return $retVal.$Name
     }
     else
@@ -587,17 +586,17 @@ function Set-EnvironmentVariable
         New-InvalidArgumentException -Message $script:localizedData.InvalidTarget -ArgumentName $Target
     }
 
-    $environmentKey = Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue
+    $environmentKey = Get-ItemProperty -Path $Path -Name $Name -ErrorAction 'SilentlyContinue'
 
     if ($environmentKey) 
     {
         if (!$Value) 
         {
-            Remove-ItemProperty $Path -Name $Name -ErrorAction SilentlyContinue
+            Remove-ItemProperty $Path -Name $Name -ErrorAction 'SilentlyContinue'
         }
         else 
         {
-            Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue'
         }
     }
     else
@@ -623,7 +622,7 @@ function Remove-EnvironmentVariable
         $Name
     )
 
-    $curVarProperties = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction SilentlyContinue
+    $curVarProperties = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
     $currentValueFromEnv = Get-EnvironmentVariable -Name $name -Target $script:environmentVariableTarget.Process
         
     try
