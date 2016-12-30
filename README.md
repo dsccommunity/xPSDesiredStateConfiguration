@@ -313,17 +313,19 @@ Read-Only Properties:
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
 
 ### xEnvironment
+Provides a mechanism to manage environment variables on a target node.
 
-* **Name**: Indicates the name of the environment variable for which you want to ensure a specific state.
-* **Value**: The value to assign to the environment variable.
-   - Supported values: Non-null strings
-   - Default Value: [String]::Empty
-* **Ensure**: Ensures that the feature is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **Path**: Defines the environment variable that is being configured. Set this property to $true if the variable is the Path variable; otherwise, set it to $false. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value.
-   - Suported values: $true, $false.
-   - Default value: $false.
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String] Name** _(Key)_: Indicates the name of the environment variable for which you want to ensure a specific state.
+* **[String] Value** _(Write)_: The value to assign to the environment variable.
+* **[String] Ensure** _(Write)_: Indicates whether the environment varaible is present or absent. { *Present* | Absent }.
+* **[Boolean] Path** _(Write)_: Defines the environment variable that is being configured. Set this property to $true if the variable is the Path variable; otherwise, set it to $false. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value. The default value is False.
+* **[String[]] Target** _(Write)_: Indicates the target of where to check the environment variable. { *Process, Machine* }.
 
 ### xScript
 Provides a mechanism to run PowerShell script blocks on a target node.
