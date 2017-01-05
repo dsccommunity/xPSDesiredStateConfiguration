@@ -38,7 +38,7 @@ function Get-TargetResource
         
     $envVar = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
     
-    if ($envVar -eq $null)
+    if ($null -eq $envVar)
     {        
         Write-Verbose -Message ($script:localizedData.EnvVarNotFound -f $Name)
         
@@ -137,8 +137,8 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $setMachineVariable = ($checkMachineTarget -and (($currentValueFromMachine -eq $null) -or ($currentValueFromMachine -eq [String]::Empty)))
-        $setProcessVariable = ($checkProcessTarget -and (($currentValueFromProcess -eq $null) -or ($currentValueFromProcess -eq [String]::Empty)))
+        $setMachineVariable = ($checkMachineTarget -and (($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty)))
+        $setProcessVariable = ($checkProcessTarget -and (($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty)))
 
         if ($setMachineVariable -and $setProcessVariable)
         {
@@ -231,8 +231,8 @@ function Set-TargetResource
     # Ensure = 'Absent'
     else
     {
-        $machineVariableRemoved = ($checkMachineTarget -or ($currentValueFromMachine -eq $null))
-        $processVariableRemoved = ($checkProcessTarget -or ($currentValueFromProcess -eq $null))
+        $machineVariableRemoved = ($checkMachineTarget -or ($null -eq $currentValueFromMachine))
+        $processVariableRemoved = ($checkProcessTarget -or ($null -eq $currentValueFromProcess))
 
         if ($machineVariableRemoved -and $processVariableRemoved)
         {
@@ -388,7 +388,7 @@ function Test-TargetResource
 
     if ($Ensure -eq 'Present')
     {        
-        if (($checkMachineTarget -and ($currentValueFromMachine -eq $null)) -or ($checkProcessTarget -and ($currentValueFromProcess -eq $null)))
+        if (($checkMachineTarget -and ($null -eq $currentValueFromMachine)) -or ($checkProcessTarget -and ($null -eq $currentValueFromProcess)))
         {
             # Variable not found, return failure
             Write-Verbose ($script:localizedData.EnvVarNotFound -f $Name)
@@ -449,8 +449,8 @@ function Test-TargetResource
     # Ensure = 'Absent'
     else
     {
-        if (((-not $checkMachineTarget) -or ($currentValueFromMachine -eq $null)) -and `
-            ((-not $checkProcessTarget) -or ($currentValueFromProcess -eq $null)))
+        if (((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine)) -and `
+            ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess)))
         {
             # Variable not found (path/non-path and $Value both do not matter then), return success
             return $true
@@ -543,7 +543,7 @@ function Get-EnvironmentVariable
     {
         $retrievedProperty = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
 
-        if ($retrievedProperty -ne $null)
+        if ($null -ne $retrievedProperty)
         {
             $valueToReturn = $retrievedProperty.$Name
         }
@@ -552,7 +552,7 @@ function Get-EnvironmentVariable
     {
         $retrievedProperty = Get-ItemProperty -Path $script:envVarRegPathUser -Name $Name -ErrorAction 'SilentlyContinue'
 
-        if ($retrievedProperty -ne $null)
+        if ($null -ne $retrievedProperty)
         {
             $valueToReturn = $retrievedProperty.$Name
         }
@@ -732,7 +732,7 @@ function Set-EnvironmentVariable
 
             if ($environmentKey) 
             {
-                if ($Value -ne $null) 
+                if ($null -ne $Value) 
                 {
                     Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue' 
                 }
