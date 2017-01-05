@@ -5,5 +5,5 @@ class MSFT_xEnvironmentResource : OMI_BaseResource
   [Write] String Value;
   [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}] String Ensure;
   [Write] Boolean Path;
-  [Write, ValueMap{"Machine", "Process"}, Values{"Process", "Machine"}] String Target[];
+  [Write, ValueMap{"Process", "Machine"}, Values{"Process", "Machine"}] String Target[];
 };
