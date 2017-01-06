@@ -38,23 +38,23 @@ function Get-TargetResource
         
     $envVar = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
     
+    $environmentResource = @{
+      Ensure = 'Absent'
+      Name = $Name
+      Value = $envVar
+    }
+    
     if ($null -eq $envVar)
     {        
         Write-Verbose -Message ($script:localizedData.EnvVarNotFound -f $Name)
-        
-        return @{
-            Ensure = 'Absent'
-            Name = $Name
-        }      
     }    
-
-    Write-Verbose -Message ($script:localizedData.EnvVarFound -f $Name, $envVar)
-
-    return @{
-        Ensure = 'Present'
-        Name = $Name
-        Value = $envVar
+    else
+    {
+        Write-Verbose -Message ($script:localizedData.EnvVarFound -f $Name, $envVar)
+        $environmentResource.Ensure = 'Present'
     }
+
+    return $environmentResource
 }
 
 <#
@@ -407,16 +407,16 @@ function Test-TargetResource
             # For this non-path variable, make sure that the specified $Value matches the current value.
             # Success if it matches, failure otherwise
 
-            if (($checkMachineTarget -and ($Value -ceq $currentValueFromMachine)) -or `
-               ($checkProcessTarget -and ($Value -ceq $currentValueFromProcess)))
+            if (($checkMachineTarget -and ($Value -cne $currentValueFromMachine)) -or `
+               ($checkProcessTarget -and ($Value -cne $currentValueFromProcess)))
             {
-                Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
-                return $true                
+                Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
+                return $false                
             }
             else
             {
-                Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
-                return $false
+                Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
+                return $true
             }
         }             
                        
@@ -470,8 +470,8 @@ function Test-TargetResource
             # For this non-path variable, make sure that the specified value doesn't match the current value
             # Success if it doesn't match, failure otherwise
             
-            if (($checkMachineTarget -and ($Value -cne $currentValueFromMachine)) -and `
-               ($checkProcessTarget -and ($Value -cne $currentValueFromProcess)))
+            if (((-not $checkMachineTarget) -or ($Value -cne $currentValueFromMachine)) -and `
+               ((-not $checkProcessTarget) -or ($Value -cne $currentValueFromProcess)))
             {
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)                
                 return $true                
