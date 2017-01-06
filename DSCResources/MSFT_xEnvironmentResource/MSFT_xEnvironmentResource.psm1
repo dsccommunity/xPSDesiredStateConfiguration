@@ -231,8 +231,8 @@ function Set-TargetResource
     # Ensure = 'Absent'
     else
     {
-        $machineVariableRemoved = ($checkMachineTarget -or ($null -eq $currentValueFromMachine))
-        $processVariableRemoved = ($checkProcessTarget -or ($null -eq $currentValueFromProcess))
+        $machineVariableRemoved = ((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine))
+        $processVariableRemoved = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess))
 
         if ($machineVariableRemoved -and $processVariableRemoved)
         {
