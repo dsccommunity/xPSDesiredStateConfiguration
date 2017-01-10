@@ -137,8 +137,8 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $setMachineVariable = ($checkMachineTarget -and (($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty)))
-        $setProcessVariable = ($checkProcessTarget -and (($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty)))
+        $setMachineVariable = ((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
+        $setProcessVariable = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
 
         if ($setMachineVariable -and $setProcessVariable)
         {
@@ -179,7 +179,7 @@ function Set-TargetResource
         if (-not $Path)
         {
             # For non-path variables, simply set the specified $Value as the new value of the specified 
-            # variable $Name, then return.
+            # variable $Name for the given $Target
 
             if (($checkMachineTarget -and ($Value -cne $currentValueFromMachine)) -or `
                 ($checkProcessTarget -and ($Value -cne $currentValueFromProcess)))
@@ -199,12 +199,18 @@ function Set-TargetResource
 
         if ($checkMachineTarget)
         {
-            $setValue = Add-EnvironmentPaths -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
+            <#
+                If this function returns $null, than all of the paths specified to be added are
+                already listed in the current value so it does not need to be updated, otherwise
+                this function will return the updated value of the variable after any new paths
+                have been added.
+            #>
+            $updatedValue = Get-UpdatedPathValue -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
 
-            if ($setValue)
+            if ($updatedValue)
             {
-                Set-EnvironmentVariable -Name $Name -Value $setValue -Target @('Machine')
-                Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromMachine, $setValue)
+                Set-EnvironmentVariable -Name $Name -Value $updatedValue -Target @('Machine')
+                Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromMachine, $updatedValue)
             }
             else
             {
@@ -214,12 +220,18 @@ function Set-TargetResource
 
         if ($checkProcessTarget)
         {
-            $setValue = Add-EnvironmentPaths -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
+            <#
+                If this function returns $null, than all of the paths specified to be added are
+                already listed in the current value so it does not need to be updated, otherwise
+                this function will return the updated value of the variable after any new paths
+                have been added.
+            #>
+            $updatedValue = Get-UpdatedPathValue -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
 
-            if ($setValue)
+            if ($updatedValue)
             {
-                Set-EnvironmentVariable -Name $Name -Value $setValue -Target @('Process')
-                Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromProcess, $setValue)
+                Set-EnvironmentVariable -Name $Name -Value $updatedValue -Target @('Process')
+                Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromProcess, $updatedValue)
             }
             else
             {
@@ -267,6 +279,12 @@ function Set-TargetResource
 
         if ($checkMachineTarget)
         {
+            <#
+                If this value returns $null or an empty string, than the entire path should be removed.
+                If it returns the same value as the path that was passed in, than nothing needs to be
+                updated, otherwise, only the specified paths were removed but there are still others
+                that need to be left in, so the path variable is updated to remove only the specified paths.
+            #>
             $finalPath = Remove-EnvironmentPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
 
             if ([String]::IsNullOrEmpty($finalPath))
@@ -287,6 +305,12 @@ function Set-TargetResource
 
         if ($checkProcessTarget)
         {
+            <#
+                If this value returns $null or an empty string, than the entire path should be removed.
+                If it returns the same value as the path that was passed in, than nothing needs to be
+                updated, otherwise, only the specified paths were removed but there are still others
+                that need to be left in, so the path variable is updated to remove only the specified paths.
+            #>
             $finalPath = Remove-EnvironmentPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
 
             if ([String]::IsNullOrEmpty($finalPath))
@@ -575,7 +599,7 @@ function Get-EnvironmentVariable
 
     .PARAMETER NewPaths      
 #>
-function Add-EnvironmentPaths
+function Get-UpdatedPathValue
 {
     [OutputType([String])]
     [CmdletBinding()]
@@ -622,13 +646,14 @@ function Add-EnvironmentPaths
 
 <#
     .SYNOPSIS
-        If there are any paths in NewPaths that aren't in CurrentValue it will add the new
-        paths to the current paths and return the new value with all new paths added in.
-        Otherwise, it will return $null.
+        If there are any paths in PathsToRemove that aren't in CurrentValue it will remove the
+        specified paths and return either the new value if there are still paths that remain or
+        an empty string if all paths were removed. If none of the paths in PathsToRemove are in
+        CurrentValue than this function will return CurrentValue since nothing needs to be changed.
         
     .PARAMETER CurrentValue
 
-    .PARAMETER NewPaths      
+    .PARAMETER PathsToRemove      
 #>
 function Remove-EnvironmentPaths
 {
