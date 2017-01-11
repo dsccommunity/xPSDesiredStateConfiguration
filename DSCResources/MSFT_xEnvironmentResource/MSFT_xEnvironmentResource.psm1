@@ -137,8 +137,8 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $setMachineVariable = ((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
-        $setProcessVariable = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
+        $setMachineVariable = ($checkMachineTarget -and (($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty)))
+        $setProcessVariable = ($checkProcessTarget -and (($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty)))
 
         if ($setMachineVariable -and $setProcessVariable)
         {
@@ -285,7 +285,7 @@ function Set-TargetResource
                 updated, otherwise, only the specified paths were removed but there are still others
                 that need to be left in, so the path variable is updated to remove only the specified paths.
             #>
-            $finalPath = Remove-EnvironmentPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
+            $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
 
             if ([String]::IsNullOrEmpty($finalPath))
             {
@@ -311,7 +311,7 @@ function Set-TargetResource
                 updated, otherwise, only the specified paths were removed but there are still others
                 that need to be left in, so the path variable is updated to remove only the specified paths.
             #>
-            $finalPath = Remove-EnvironmentPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
+            $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
 
             if ([String]::IsNullOrEmpty($finalPath))
             {
@@ -550,7 +550,7 @@ function Get-EnvironmentVariable
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
-        $Name, 
+        $Name,
 
         [Parameter(Mandatory = $true)]
         [Int]
@@ -561,7 +561,7 @@ function Get-EnvironmentVariable
 
     if ($Target -eq $script:environmentVariableTarget.Process) 
     {
-        $valueToReturn = [System.Environment]::GetEnvironmentVariable($Name)
+        $valueToReturn = Get-ProcessEnvironmentVariable -Name $Name
     }
     elseif ($Target -eq $script:environmentVariableTarget.Machine)
     {
@@ -591,6 +591,29 @@ function Get-EnvironmentVariable
 
 <#
     .SYNOPSIS
+        Wrapper function to retrieve an environment variable from the current process.
+        
+    .PARAMETER Name
+        The name of the variable to retrieve
+      
+#>
+function Get-ProcessEnvironmentVariable
+{
+    [CmdletBinding()]
+    [OutputType([String])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Name
+    )
+
+    [System.Environment]::GetEnvironmentVariable($Name)
+}
+
+<#
+    .SYNOPSIS
         If there are any paths in NewPaths that aren't in CurrentValue it will add the new
         paths to the current paths and return the new value with all new paths added in.
         Otherwise, it will return $null.
@@ -599,10 +622,9 @@ function Get-EnvironmentVariable
 
     .PARAMETER NewPaths      
 #>
-function Get-UpdatedPathValue
+function Get-PathValueWithAddedPaths
 {
-    [OutputType([String])]
-    [CmdletBinding()]
+    [OutputType([SUpdatedPathValuending()]
     param
     (       
         [Parameter(Mandatory = $true)]
@@ -655,7 +677,7 @@ function Get-UpdatedPathValue
 
     .PARAMETER PathsToRemove      
 #>
-function Remove-EnvironmentPaths
+function Get-PathValueWithRemovedPaths
 {
     [OutputType([String])]
     [CmdletBinding()]

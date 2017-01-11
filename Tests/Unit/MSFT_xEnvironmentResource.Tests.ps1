@@ -24,7 +24,7 @@ try
         $script:mockEnvironmentVar2 = @{
             APPDATA = 'mock path to Application Data directory for testing'
         }
-
+        <#
         Describe 'xEnvironmentResource\Get-TargetResource' {
             Mock -CommandName 'Get-ItemPropertyExpanded' -MockWith {
                 if ($Name -eq $script:mockEnvironmentVarName1)
@@ -1161,7 +1161,16 @@ try
             Context 'Ensure set to Present, Path set to true, and not all paths in Value are set in machine' {
                 $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
                 $expectedValue = 'path3;path4;path5'
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
+                Mock -CommandName Get-EnvironmentVariable -MockWith {
+                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    {
+                        return $script:mockEnvironmentVar1.PATH
+                    }
+                    else
+                    {
+                        return $expectedValue
+                    }
+                }
 
                 It 'Should return false' {
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
@@ -1280,41 +1289,32 @@ try
             }
 
             Context 'Ensure set to Absent, Path set to true, and Value is set in machine environment variable' {
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
-                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $true }
+                $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
+                $nonExistentValue = 'path5;path6;path7'
+                Mock -CommandName Get-EnvironmentVariable -MockWith {
+                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    {
+                        return $nonExistentValue
+                    }
+                    else
+                    {
+                        return $script:mockEnvironmentVar1.PATH
+                    }
+                }
                 
                 It 'Should return false' {
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
-                                                                    -Value 'existentValue' `
+                                                                    -Value $nonExistentValue `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true
                     $testTargetResourceResult | Should Be $false
                 }
 
                 It 'Should have called the correct mocks' {
-                    Assert-MockCalled Get-EnvironmentVariable -Exactly 2 -Scope Context
-                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 1 -Scope Context                    
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 2 -Scope Context                   
                 }
             }
 
-            Context 'Ensure set to Absent, Path set to true, and none of the paths in Value are set in environment variable' {
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
-                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $false }
-
-                It 'Should return true' {
-                    $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
-                                                                    -Value 'nonExistentValue' `
-                                                                    -Ensure 'Absent' `
-                                                                    -Path $true
-                    $testTargetResourceResult | Should Be $true
-                }
-
-                It 'Should have called the correct mocks' {
-                    Assert-MockCalled Get-EnvironmentVariable -Exactly 2 -Scope Context
-                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 2 -Scope Context
-                }
-            }
-            
             Context 'Ensure set to Absent, Path set to true, and Value is set in process environment variable' {
                 $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
                 $nonExistentValue = 'path5;path6;path7'
@@ -1339,6 +1339,24 @@ try
 
                 It 'Should have called the correct mocks' {
                     Assert-MockCalled Get-EnvironmentVariable -Exactly 2 -Scope Context
+                }
+            }
+
+            Context 'Ensure set to Absent, Path set to true, and none of the paths in Value are set in environment variable' {
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
+                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $false }
+
+                It 'Should return true' {
+                    $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
+                                                                    -Value 'nonExistentValue' `
+                                                                    -Ensure 'Absent' `
+                                                                    -Path $true
+                    $testTargetResourceResult | Should Be $true
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 2 -Scope Context
+                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 2 -Scope Context
                 }
             }
         }
@@ -1467,11 +1485,11 @@ try
                 Mock -CommandName Get-EnvironmentVariable -MockWith {
                     if ($Target -eq $script:environmentVariableTarget.Machine)
                     {
-                        return $expectedValue
+                        return $script:mockEnvironmentVar1.PATH
                     }
                     else
                     {
-                        return $script:mockEnvironmentVar1.PATH
+                        return $expectedValue
                     }
                 }
 
@@ -1601,13 +1619,13 @@ try
                 $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
                 $existentValue = 'path5;path6;path7'
                 Mock -CommandName Get-EnvironmentVariable -MockWith {
-                    if ($Target -eq $script:environmentVariableTarget.Process)
+                    if ($Target -eq $script:environmentVariableTarget.Machine)
                     {
-                        return $script:mockEnvironmentVar1.PATH
+                        return $existentValue
                     }
                     else
                     {
-                        return $existentValue
+                        return $script:mockEnvironmentVar1.PATH
                     }
                 }
                 
@@ -1625,25 +1643,6 @@ try
                 }
             }
 
-            Context 'Ensure set to Absent, Path set to true, and none of the paths in Value are set in environment variable' {
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
-                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $false }
-
-                It 'Should return true' {
-                    $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
-                                                                    -Value 'nonExistentValue' `
-                                                                    -Ensure 'Absent' `
-                                                                    -Path $true `
-                                                                    -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
-                }
-
-                It 'Should have called the correct mocks' {
-                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
-                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 1 -Scope Context
-                }
-            }
-            
             Context 'Ensure set to Absent, Path set to true, and Value is set in process environment variable' {
                 $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
                 $existentValue = 'path5;path6;path7'
@@ -1669,6 +1668,25 @@ try
 
                 It 'Should have called the correct mocks' {
                     Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                }
+            }
+
+            Context 'Ensure set to Absent, Path set to true, and none of the paths in Value are set in environment variable' {
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
+                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $false }
+
+                It 'Should return true' {
+                    $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
+                                                                    -Value 'nonExistentValue' `
+                                                                    -Ensure 'Absent' `
+                                                                    -Path $true `
+                                                                    -Target @('Process')
+                    $testTargetResourceResult | Should Be $true
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 1 -Scope Context
                 }
             }
         }
@@ -1794,7 +1812,16 @@ try
             Context 'Ensure set to Present, Path set to true, and not all paths in Value are set in machine' {
                 $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
                 $expectedValue = 'path3;path4;path5'
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
+                Mock -CommandName Get-EnvironmentVariable -MockWith {
+                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    {
+                        return $script:mockEnvironmentVar1.PATH
+                    }
+                    else
+                    {
+                        return $expectedValue
+                    }
+                }
 
                 It 'Should return false' {
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
@@ -1919,12 +1946,22 @@ try
             }
 
             Context 'Ensure set to Absent, Path set to true, and Value is set in machine environment variable' {
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
-                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $true }
+                $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
+                $nonExistentValue = 'path5;path6;path7'
+                Mock -CommandName Get-EnvironmentVariable -MockWith {
+                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    {
+                        return $nonExistentValue
+                    }
+                    else
+                    {
+                        return $script:mockEnvironmentVar1.PATH
+                    }
+                }
                 
                 It 'Should return false' {
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
-                                                                    -Value 'existentValue' `
+                                                                    -Value $nonExistentValue `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
@@ -1932,30 +1969,10 @@ try
                 }
 
                 It 'Should have called the correct mocks' {
-                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
-                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 1 -Scope Context                    
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context                   
                 }
             }
 
-            Context 'Ensure set to Absent, Path set to true, and none of the paths in Value are set in environment variable' {
-                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
-                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $false }
-
-                It 'Should return true' {
-                    $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
-                                                                    -Value 'nonExistentValue' `
-                                                                    -Ensure 'Absent' `
-                                                                    -Path $true `
-                                                                    -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
-                }
-
-                It 'Should have called the correct mocks' {
-                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
-                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 1 -Scope Context
-                }
-            }
-            
             Context 'Ensure set to Absent, Path set to true, and Value is set in process environment variable' {
                 $script:mockEnvironmentVar1.PATH = 'path1;path2;path3;path4'
                 $nonExistentValue = 'path5;path6;path7'
@@ -1983,12 +2000,98 @@ try
                     Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
                 }
             }
-        }
 
+            Context 'Ensure set to Absent, Path set to true, and none of the paths in Value are set in environment variable' {
+                Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar1.PATH }
+                Mock -CommandName Test-PathInPathListWithCriteria -MockWith { return $false }
+
+                It 'Should return true' {
+                    $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName1 `
+                                                                    -Value 'nonExistentValue' `
+                                                                    -Ensure 'Absent' `
+                                                                    -Path $true `
+                                                                    -Target @('Machine')
+                    $testTargetResourceResult | Should Be $true
+                }
+
+                It 'Should have called the correct mocks' {
+                    Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
+                    Assert-MockCalled Test-PathInPathListWithCriteria -Exactly 1 -Scope Context
+                }
+            }
+        }
+        #>
         Describe 'xEnvironmentResource\Get-EnvironmentVariable' {
+            Context 'Get Process variable' {
+                $desiredValue = 'desiredValue'
+                Mock -CommandName Get-ProcessEnvironmentVariable -MockWith { return $desiredValue }
+
+                It 'Should return the correct value' {
+                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'VariableName' `
+                                                            -Target $script:environmentVariableTarget.Process
+                    $getEnvironmentVariableResult | Should Be $desiredValue
+                }
+            }
+
+            Context 'Get Machine variable' {
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    if ($Name -eq $script:mockEnvironmentVarName1)
+                    {
+                        return $script:mockEnvironmentVar1
+                    }
+                    else
+                    {
+                        return $null
+                    }
+                }
+
+                It 'Should return the correct value' {
+                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name $script:mockEnvironmentVarName1 `
+                                                            -Target $script:environmentVariableTarget.Machine
+                    $getEnvironmentVariableResult | Should Be $script:mockEnvironmentVar1.$script:mockEnvironmentVarName1
+                }
+
+                It 'Should return the null when Name does not exist' {
+                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'nonExistentName' `
+                                                            -Target $script:environmentVariableTarget.Machine
+                    $getEnvironmentVariableResult | Should Be $null
+                }
+            }
+
+            Context 'Get User variable' {
+                Mock -CommandName Get-ItemProperty -MockWith {
+                    if ($Name -eq $script:mockEnvironmentVarName1)
+                    {
+                        return $script:mockEnvironmentVar1
+                    }
+                    else
+                    {
+                        return $null
+                    }
+                }
+
+                It 'Should return the correct value' {
+                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name $script:mockEnvironmentVarName1 `
+                                                            -Target $script:environmentVariableTarget.User
+                    $getEnvironmentVariableResult | Should Be $script:mockEnvironmentVar1.$script:mockEnvironmentVarName1
+                }
+
+                It 'Should return the null when Name does not exist' {
+                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'nonExistentName' `
+                                                            -Target $script:environmentVariableTarget.User
+                    $getEnvironmentVariableResult | Should Be $null
+                }
+            }
+
+            Context 'Invalid Target passed in' {
+                It 'Should throw an exception' {
+                    { Get-EnvironmentVariable -Name 'variableName' -Target 59 } | Should Throw $script:localizedData.InvalidTarget
+                }
+            }
         }
 
         Describe 'xEnvironmentResource\Set-EnvironmentVariable' {
+
         }
 
         Describe 'xEnvironmentResource\Set-EnvironmentVariable' {
