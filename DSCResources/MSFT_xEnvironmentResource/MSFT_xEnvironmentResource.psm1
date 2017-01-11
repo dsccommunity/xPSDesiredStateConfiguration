@@ -137,8 +137,8 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $setMachineVariable = ($checkMachineTarget -and (($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty)))
-        $setProcessVariable = ($checkProcessTarget -and (($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty)))
+        $setMachineVariable = ((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
+        $setProcessVariable = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
 
         if ($setMachineVariable -and $setProcessVariable)
         {
@@ -205,7 +205,7 @@ function Set-TargetResource
                 this function will return the updated value of the variable after any new paths
                 have been added.
             #>
-            $updatedValue = Get-UpdatedPathValue -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
+            $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
 
             if ($updatedValue)
             {
@@ -226,7 +226,7 @@ function Set-TargetResource
                 this function will return the updated value of the variable after any new paths
                 have been added.
             #>
-            $updatedValue = Get-UpdatedPathValue -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
+            $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
 
             if ($updatedValue)
             {
@@ -780,11 +780,11 @@ function Set-EnvironmentVariable
             {
                 if ($null -ne $Value -and $Value -ne [String]::Empty) 
                 {
-                    Set-ItemProperty -Path $path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue' 
+                    Set-ItemProperty -Path $path -Name $Name -Value $Value 
                 }
                 else 
                 {
-                    Remove-ItemProperty $path -Name $Name -ErrorAction 'SilentlyContinue'
+                    Remove-ItemProperty $path -Name $Name
                 }
             }
             else
@@ -794,6 +794,7 @@ function Set-EnvironmentVariable
             }
         }
 
+        # The User feature of this resource is not yet implemented.
         if ($Target -contains 'User')
         {
             if ($Name.Length -ge $script:maxUserEnvVariableLength)
@@ -809,11 +810,11 @@ function Set-EnvironmentVariable
             {
                 if ($PSBoundParameters.ContainsKey('Value')) 
                 {
-                    Set-ItemProperty -Path $path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue'
+                    Set-ItemProperty -Path $path -Name $Name -Value $Value
                 }
                 else 
                 {
-                    Remove-ItemProperty $path -Name $Name -ErrorAction 'SilentlyContinue'
+                    Remove-ItemProperty $path -Name $Name
                 }
             }
             else

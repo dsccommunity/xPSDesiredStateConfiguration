@@ -24,7 +24,7 @@ try
         $script:mockEnvironmentVar2 = @{
             APPDATA = 'mock path to Application Data directory for testing'
         }
-        
+
         Describe 'xEnvironmentResource\Get-TargetResource' {
             Mock -CommandName 'Get-ItemPropertyExpanded' -MockWith {
                 if ($Name -eq $script:mockEnvironmentVarName1)
@@ -2020,7 +2020,7 @@ try
                 }
             }
         }
-        
+
         Describe 'xEnvironmentResource\Get-EnvironmentVariable' {
             Context 'Get Process variable' {
                 $desiredValue = 'desiredValue'
@@ -2156,9 +2156,19 @@ try
                     Assert-MockCalled -CommandName Remove-ItemProperty -Exactly 1 -Scope It
                 }
             }
-        }
 
-        Describe 'xEnvironmentResource\Remove-EnvironmentVariable' {
+            Context 'Error occurred while setting the variable' {
+                $errorRecord = 'mock error record'
+                Mock -CommandName Set-ProcessEnvironmentVariable -MockWith { Throw $errorRecord }
+
+                It 'Should throw exception' {
+                    $name = 'mockVariableName'
+                    $value = 'mockValue'
+                    { 
+                        Set-EnvironmentVariable -Name $name -Value $value -Target @('Process')
+                    } | Should Throw $errorRecord
+                }
+            }
         }
 
         Describe 'xEnvironmentResource\Test-PathInPathListWithCriteria' {
