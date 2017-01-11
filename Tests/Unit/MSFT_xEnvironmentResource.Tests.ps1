@@ -2091,10 +2091,71 @@ try
         }
 
         Describe 'xEnvironmentResource\Set-EnvironmentVariable' {
+            Context 'Set Process variable' {
+                Mock -CommandName Set-ProcessEnvironmentVariable -MockWith {}
 
-        }
+                It 'Should call the correct mocks' {
+                    Set-EnvironmentVariable -Name $script:mockEnvironmentVarName1 -Target @('Process')
+                    Assert-MockCalled -CommandName Set-ProcessEnvironmentVariable -Exactly 1 -Scope It
+                }
+            }
 
-        Describe 'xEnvironmentResource\Set-EnvironmentVariable' {
+            Context 'Set Machine variable' {
+                It 'Should throw exception when name is too long' {
+                    { Set-EnvironmentVariable -Name 'really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine. `
+                            really really really long name that will not be accepted by the machine.' `
+                            -Target @('Machine')
+                    } | Should Throw $script:localizedData.ArgumentTooLong
+                }
+
+                Mock -CommandName Set-ItemProperty -MockWith {}
+                Mock -CommandName Remove-ItemProperty -MockWith {}
+                Mock -CommandName Get-ItemProperty -MockWith { 
+                    if ($Name -eq $script:mockEnvironmentVarName1)
+                    {
+                        return $script:mockEnvironmentVar1.$script:mockEnvironmentVarName1
+                    } 
+                    else
+                    {
+                        return $null
+                    }
+                }
+
+                It 'Should throw exception when environment variable cannot be found' {
+                    $invalidName = 'invalidName'
+                    {
+                        Set-EnvironmentVariable -Name $invalidName -Target @('Machine') 
+                    } | Should Throw ($script:localizedData.GetItemPropertyFailure -f $invalidName, $script:envVarRegPathMachine)
+                }
+
+                It 'Should set the environment variable if a value is passed in' {
+                    Set-EnvironmentVariable -Name $script:mockEnvironmentVarName1 -Value 'mockValue' -Target @('Machine')
+
+                    Assert-MockCalled -CommandName Set-ItemProperty -Exactly 1 -Scope It
+                    Assert-MockCalled -CommandName Remove-ItemProperty -Exactly 0 -Scope It
+                }
+
+                It 'Should remove the environment variable if no value is passed in' {
+                    Set-EnvironmentVariable -Name $script:mockEnvironmentVarName1 -Target @('Machine')
+
+                    Assert-MockCalled -CommandName Set-ItemProperty -Exactly 0 -Scope It
+                    Assert-MockCalled -CommandName Remove-ItemProperty -Exactly 1 -Scope It
+                }
+            }
         }
 
         Describe 'xEnvironmentResource\Remove-EnvironmentVariable' {

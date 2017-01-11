@@ -609,7 +609,7 @@ function Get-ProcessEnvironmentVariable
         $Name
     )
 
-    [System.Environment]::GetEnvironmentVariable($Name)
+    return [System.Environment]::GetEnvironmentVariable($Name)
 }
 
 <#
@@ -624,7 +624,8 @@ function Get-ProcessEnvironmentVariable
 #>
 function Get-PathValueWithAddedPaths
 {
-    [OutputType([SUpdatedPathValuending()]
+    [CmdletBinding()]
+    [OutputType([String])]
     param
     (       
         [Parameter(Mandatory = $true)]
@@ -761,36 +762,34 @@ function Set-EnvironmentVariable
     {
         if ($Target -contains 'Process')
         {
-            [System.Environment]::SetEnvironmentVariable($Name, $Value)
+            Set-ProcessEnvironmentVariable -Name $Name -Value $Value
         }
 
         if ($Target -contains 'Machine')
         {
-            Set-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -Value $Value
-
             if ($Name.Length -ge $script:maxSystemEnvVariableLength)
             {
                 New-InvalidArgumentException -Message $script:localizedData.ArgumentTooLong -ArgumentName $Name
             }
 
-            $Path = $script:envVarRegPathMachine
+            $path = $script:envVarRegPathMachine
         
-            $environmentKey = Get-ItemProperty -Path $Path -Name $Name -ErrorAction 'SilentlyContinue'
+            $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
             if ($environmentKey) 
             {
-                if ($null -ne $Value) 
+                if ($null -ne $Value -and $Value -ne [String]::Empty) 
                 {
-                    Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue' 
+                    Set-ItemProperty -Path $path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue' 
                 }
                 else 
                 {
-                    Remove-ItemProperty $Path -Name $Name -ErrorAction 'SilentlyContinue'
+                    Remove-ItemProperty $path -Name $Name -ErrorAction 'SilentlyContinue'
                 }
             }
             else
             {
-                $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $Path)
+                $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
                 New-InvalidArgumentException -Message $message -ArgumentName $Name
             }
         }
@@ -802,24 +801,24 @@ function Set-EnvironmentVariable
                 New-InvalidArgumentException -Message $script:localizedData.ArgumentTooLong -ArgumentName $Name
             }
 
-            $Path = $script:envVarRegPathUser
+            $path = $script:envVarRegPathUser
 
-            $environmentKey = Get-ItemProperty -Path $Path -Name $Name -ErrorAction 'SilentlyContinue'
+            $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
             if ($environmentKey) 
             {
                 if ($PSBoundParameters.ContainsKey('Value')) 
                 {
-                    Set-ItemProperty -Path $Path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue'
+                    Set-ItemProperty -Path $path -Name $Name -Value $Value -ErrorAction 'SilentlyContinue'
                 }
                 else 
                 {
-                    Remove-ItemProperty $Path -Name $Name -ErrorAction 'SilentlyContinue'
+                    Remove-ItemProperty $path -Name $Name -ErrorAction 'SilentlyContinue'
                 }
             }
             else
             {
-                $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $Path)
+                $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
                 New-InvalidArgumentException -Message $message -ArgumentName $Name
             }
         }
@@ -830,6 +829,34 @@ function Set-EnvironmentVariable
         throw $_
     }
 
+}
+
+<#
+    .SYNOPSIS
+        Wrapper function to set an environment variable for the current process.
+        
+    .PARAMETER Name
+        The name of the environment variable to set.
+
+    .PARAMETER Value
+        The value to set the environment variable to.
+         
+#>
+function Set-ProcessEnvironmentVariable
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Name,
+
+        [String]
+        $Value = [String]::Empty
+    )
+
+    [System.Environment]::SetEnvironmentVariable($Name, $Value)
 }
 
 <#
