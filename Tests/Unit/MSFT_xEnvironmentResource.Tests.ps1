@@ -2089,6 +2089,12 @@ try
                 }
             }
         }
+        
+        Describe 'xEnvironmentResource\Get-PathValueWithAddedPaths' {
+        }
+        
+        Describe 'xEnvironmentResource\Get-PathValueWithRemovedPaths' {
+        }
 
         Describe 'xEnvironmentResource\Set-EnvironmentVariable' {
             Context 'Set Process variable' {
@@ -2169,6 +2175,12 @@ try
                     } | Should Throw $errorRecord
                 }
             }
+        }
+        
+        Describe 'xEnvironmentResource\Test-PathInPathListWithCriteria' {
+        }
+
+        Describe 'xEnvironmentResource\Test-PathInPathList' {
         }
 
         Describe 'xEnvironmentResource\Get-EnvironmentVariableWithoutExpanding' {
