@@ -36,12 +36,12 @@ function Get-TargetResource
         $Name       
     )
         
-    $envVar = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
+    $envVar = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
     
     $environmentResource = @{
-      Ensure = 'Absent'
-      Name = $Name
-      Value = $envVar
+        Ensure = 'Absent'
+        Name = $Name
+        Value = $envVar
     }
     
     if ($null -eq $envVar)
@@ -111,7 +111,7 @@ function Set-TargetResource
         } 
         else
         {
-            $currentValueFromMachine = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
+            $currentValueFromMachine = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
         }
     }
 
@@ -386,7 +386,7 @@ function Test-TargetResource
         } 
         else
         {
-            $currentValueFromMachine = Get-ItemPropertyExpanded -Name $Name -ErrorAction 'SilentlyContinue'
+            $currentValueFromMachine = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
         }
     }
 
@@ -1001,9 +1001,9 @@ function Test-PathInPathList
           
     .PARAMETER Name    
 #>
-function Get-ItemPropertyExpanded
+function Get-EnvironmentVariableWithoutExpanding
 {
-    [OutputType([System.Management.Automation.PSObject])]
+    [OutputType([String])]
     [CmdletBinding()]
     param
     (
@@ -1013,14 +1013,12 @@ function Get-ItemPropertyExpanded
         $Name
     )
 
-    $path = $script:envVarRegPathMachine
+    $path = $script:envVarRegPathMachine #'HKLM:\System\CurrentControlSet\Control\Session Manager\Environment'
     $pathTokens = $path.Split('\',[System.StringSplitOptions]::RemoveEmptyEntries)
     $entry = $pathTokens[1..($pathTokens.Count - 1)] -join '\'
     
     # Since the target registry path coming to this function is hardcoded for local machine
     $hive = [Microsoft.Win32.Registry]::LocalMachine
-
-    $noteProperties = @{}
 
     try
     {
@@ -1033,8 +1031,7 @@ function Get-ItemPropertyExpanded
             return $null
         }
         
-        [String] $value = $key.GetValue($Name, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
-        $noteProperties.Add($Name, $value)
+        return Get-KeyValue -Name $Name -Key $key
     }
     finally
     {
@@ -1042,10 +1039,34 @@ function Get-ItemPropertyExpanded
         {
             $key.Close()
         }
-    }
+    }  
+}
 
-    [System.Management.Automation.PSObject] $propertyResults = New-Object -TypeName 'System.Management.Automation.PSObject' -Property $noteProperties
-    return $propertyResults.$Name    
+<#
+    .SYNOPSIS
+          
+    .PARAMETER Name
+
+    .PARAMETER Key
+#>
+function Get-KeyValue
+{
+    [OutputType([String])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [String]
+        $Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [PSObject]
+        $Key
+    )
+
+    return $Key.GetValue($Name, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
 }
 
 Export-ModuleMember -Function *-TargetResource
