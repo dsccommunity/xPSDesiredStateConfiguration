@@ -51,14 +51,14 @@ try
             }
             
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Absent'
             }
 
             It 'Should not create a logfile' {
@@ -71,13 +71,13 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartProcess'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should not have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $false
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -89,15 +89,15 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Present'
-                    $currentConfig.ProcessCount | Should Be 1
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.ProcessCount | Should Be 1
             }
 
             It 'Should create a logfile' {
@@ -110,13 +110,17 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartSecondProcess'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $true
+            }
+
+            It 'Should not throw when removing the log file' {
+                { Remove-Item -Path $logFilePath } | Should not Throw
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -128,15 +132,15 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Present'
-                    $currentConfig.ProcessCount | Should Be 1
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.ProcessCount | Should Be 1
             }
 
             It 'Should not create a logfile' {
@@ -149,13 +153,13 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StopProcesses'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should not have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $false
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -167,14 +171,14 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Absent'
             }
 
             It 'Should not create a logfile' {
@@ -187,13 +191,13 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartMultipleProcesses'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should not have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $false
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -209,36 +213,38 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Present'
-                    $currentConfig.ProcessCount | Should Be 2
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.ProcessCount | Should Be 2
             }
 
             It 'Should create a logfile' {
                 $pathResult = Test-Path $logFilePath
                 $pathResult | Should Be $true
             }
-        
-        
         }
 
         Context 'Should stop all of the testProcess instances from running' {
             $configurationName = 'MSFT_xWindowsProcess_StopAllProcesses'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $true
+            }
+
+            It 'Should not throw when removing the log file' {
+                { Remove-Item -Path $logFilePath } | Should not Throw
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -250,14 +256,14 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Absent'
             }
 
             It 'Should not create a logfile' {
@@ -314,14 +320,14 @@ try
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Absent'
             }
 
             It 'Should not create a logfile' {
@@ -334,13 +340,13 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartProcessWithCredential'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should not have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $false
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -354,15 +360,15 @@ try
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Present'
-                    $currentConfig.ProcessCount | Should Be 1
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.ProcessCount | Should Be 1
             }
 
             It 'Should create a logfile' {
@@ -375,13 +381,17 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartSecondProcessWithCredential'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $true
+            }
+
+            It 'Should not throw when removing the log file' {
+                { Remove-Item -Path $logFilePath } | Should not Throw
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -395,15 +405,15 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Present'
-                    $currentConfig.ProcessCount | Should Be 1
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.ProcessCount | Should Be 1
             }
 
             It 'Should not create a logfile' {
@@ -416,13 +426,13 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StopProcessesWithCredential'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should not have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $false
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -436,14 +446,14 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Absent'
             }
 
             It 'Should not create a logfile' {
@@ -456,13 +466,13 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartMultipleProcessesWithCredential'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            It 'Should not have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $false
+            }
+
             It 'Should compile without throwing' {
                 {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
                     .$configFile -ConfigurationName $configurationName
                     & $configurationName -Path $testProcessPath `
                                          -Arguments $logFilePath `
@@ -480,28 +490,35 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Present'
-                    $currentConfig.ProcessCount | Should Be 2
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.ProcessCount | Should Be 2
             }
 
             It 'Should create a logfile' {
                 $pathResult = Test-Path $logFilePath
                 $pathResult | Should Be $true
             }
-        
-        
         }
 
         Context 'Should stop all of the testProcess instances from running' {
             $configurationName = 'MSFT_xWindowsProcess_StopAllProcessesWithCredential'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+
+            It 'Should have a logfile already present' {
+                $pathResult = Test-Path $logFilePath
+                $pathResult | Should Be $true
+            }
+
+            It 'Should not throw when removing the log file' {
+                { Remove-Item -Path $logFilePath } | Should not Throw
+            }
 
             It 'Should compile without throwing' {
                 {
@@ -523,19 +540,14 @@ try
             }
        
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
 
             It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                    $currentConfig.Path | Should Be $testProcessPath
-                    $currentConfig.Arguments | Should Be $logFilePath
-                    $currentConfig.Ensure | Should Be 'Absent'
-            }
-
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                $currentConfig.Path | Should Be $testProcessPath
+                $currentConfig.Arguments | Should Be $logFilePath
+                $currentConfig.Ensure | Should Be 'Absent'
             }
         }
     }

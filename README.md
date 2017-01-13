@@ -558,6 +558,9 @@ None
 
 ### Unreleased
 
+* xWindowsProcess
+    * Minor updates to integration tests because one of the tests was flaky.
+
 ### 5.1.0.0
 
 * xWindowsFeature:
