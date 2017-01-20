@@ -184,7 +184,8 @@ function Set-TargetResource
     $esedatabase = "$DatabasePath\Devices.edb";
 
     $culture = Get-Culture
-    $language = $culture.TwoLetterISOLanguageName
+    $language = $culture.IetfLanguageTag
+
     # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
     if (-not (Test-Path $pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
         $language = 'en'
