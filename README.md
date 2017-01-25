@@ -561,6 +561,9 @@ None
 * xWindowsProcess
     * Minor updates to integration tests because one of the tests was flaky.
 
+* xRegistry:
+    * Added support for forward slashes in registry key names. This resolves issue [#285](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/285).
+
 ### 5.1.0.0
 
 * xWindowsFeature:
