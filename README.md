@@ -575,9 +575,9 @@ None
     * Adds RunAsCredential parameter to permit installing packages with specific user account. This resolves issue [#221](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/221).
     * Fixes null verbose log output error. This resolves issue [#224](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/224).
 * xDSCWebService
-	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
+    * Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
 * xArchive
-	* Fixed issue where resource would throw exception when file name contains brackets. This resolves issue [#255](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/255).
+    * Fixed issue where resource would throw exception when file name contains brackets. This resolves issue [#255](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/255).
 * xScript
     * Cleaned resource for high quality requirements
     * Added unit tests
@@ -597,7 +597,7 @@ None
     * Added integration tests for BuiltInAccount and Credential.
 * xServiceSet:
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-    * Updated documentation and example	
+    * Updated documentation and example 
 * xWindowsProcess
     * Cleaned resource as per high quality guidelines.
     * Added unit tests.
