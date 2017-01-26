@@ -33,25 +33,44 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
-        $Name       
-    )
+        $Name,
         
-    $envVar = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+        [ValidateSet('Process', 'Machine')]
+        [String[]]
+        $Target = ('Process', 'Machine')      
+    )
+    
+    $valueToReturn = $null
+
+    if ($Target -contains 'Machine')
+    {   
+        $environmentVaraible = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+
+        if ($null -ne $environmentVaraible)
+        {
+            $valueToReturn = $environmentVaraible.$Name
+        }
+    }
+    else
+    {
+        $valueToReturn = Get-ProcessEnvironmentVariable -Name $Name
+    }
     
     $environmentResource = @{
         Ensure = 'Absent'
         Name = $Name
-        Value = $envVar
+        Value = $null
     }
     
-    if ($null -eq $envVar)
+    if ($null -eq $valueToReturn)
     {        
         Write-Verbose -Message ($script:localizedData.EnvVarNotFound -f $Name)
     }    
     else
     {
-        Write-Verbose -Message ($script:localizedData.EnvVarFound -f $Name, $envVar)
+        Write-Verbose -Message ($script:localizedData.EnvVarFound -f $Name, $valueToReturn)
         $environmentResource.Ensure = 'Present'
+        $environmentResource.Value = $valueToReturn
     }
 
     return $environmentResource
@@ -96,9 +115,10 @@ function Set-TargetResource
         $Target = ('Process', 'Machine')
     )
     
-    $valueSpecified = $PSBoundParameters.ContainsKey('Value')
+    $valueSpecified = ($Value -ne [String]::Empty)
     $currentValueFromMachine = $null
     $currentValueFromProcess = $null
+    $currentPropertiesFromMachine = $null
 
     $checkMachineTarget = ($Target -contains 'Machine')
     $checkProcessTarget = ($Target -contains 'Process')
@@ -107,11 +127,17 @@ function Set-TargetResource
     {
         if ($Path)
         {
-            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Machine
+            $currentPropertiesFromMachine = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+
+            if ($null -ne $currentPropertiesFromMachine)
+            {
+                $currentValueFromMachine = $currentPropertiesFromMachine.$Name
+            }
         } 
         else
         {
-            $currentValueFromMachine = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+            $currentPropertiesFromMachine = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
+            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Machine
         }
     }
 
@@ -137,15 +163,25 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $setMachineVariable = ((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
+        $setMachineVariable = ((-not $checkMachineTarget) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
         $setProcessVariable = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
 
         if ($setMachineVariable -and $setProcessVariable)
         {
+
+            if (-not $valueSpecified)
+            {
+                <#
+                    If the environment variable doesn't exist and no value is passed in
+                    then there is nothing to set - so throw an error.
+                #>
+
+                New-InvalidOperationException -Message ($script:localizedData.CannotSetValueToEmpty -f $Name)
+            }
+
             <#
                 Given the specified $Name environment variable hasn't been created or set
-                simply create one with the specified value and return. If $Value is not 
-                specified the variable will be set to an empty string '' (per spec).
+                simply create one with the specified value and return.
                 Both path and non-path cases are covered by this.
             #>
 
@@ -158,7 +194,7 @@ function Set-TargetResource
         if (-not $valueSpecified)
         {
             <#
-                Given no $Value was specified to be set and the variable exists, 
+                Given no $Value was specified to be set and the variable exists,
                 we'll leave the existing variable as is.
                 This covers both path and non-path variables.
             #>
@@ -199,13 +235,17 @@ function Set-TargetResource
 
         if ($checkMachineTarget)
         {
+            $updatedValue = $trimmedValue
             <#
                 If this function returns $null, than all of the paths specified to be added are
                 already listed in the current value so it does not need to be updated, otherwise
                 this function will return the updated value of the variable after any new paths
                 have been added.
             #>
-            $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
+            if ($currentValueFromMachine)
+            {
+                $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
+            }
 
             if ($updatedValue)
             {
@@ -220,13 +260,17 @@ function Set-TargetResource
 
         if ($checkProcessTarget)
         {
+            $updatedValue = $trimmedValue
             <#
                 If this function returns $null, than all of the paths specified to be added are
                 already listed in the current value so it does not need to be updated, otherwise
                 this function will return the updated value of the variable after any new paths
                 have been added.
             #>
-            $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
+            if ($currentValueFromProcess)
+            {
+                $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
+            }
 
             if ($updatedValue)
             {
@@ -243,7 +287,7 @@ function Set-TargetResource
     # Ensure = 'Absent'
     else
     {
-        $machineVariableRemoved = ((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine))
+        $machineVariableRemoved = ((-not $checkMachineTarget) -or ($null -eq $currentPropertiesFromMachine))
         $processVariableRemoved = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess))
 
         if ($machineVariableRemoved -and $processVariableRemoved)
@@ -279,13 +323,17 @@ function Set-TargetResource
 
         if ($checkMachineTarget)
         {
+            $finalPath = $null
             <#
                 If this value returns $null or an empty string, than the entire path should be removed.
                 If it returns the same value as the path that was passed in, than nothing needs to be
                 updated, otherwise, only the specified paths were removed but there are still others
                 that need to be left in, so the path variable is updated to remove only the specified paths.
             #>
-            $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
+            if ($currentValueFromMachine)
+            {
+                $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
+            }
 
             if ([String]::IsNullOrEmpty($finalPath))
             {
@@ -305,13 +353,17 @@ function Set-TargetResource
 
         if ($checkProcessTarget)
         {
+            $finalPath = $null
             <#
                 If this value returns $null or an empty string, than the entire path should be removed.
                 If it returns the same value as the path that was passed in, than nothing needs to be
                 updated, otherwise, only the specified paths were removed but there are still others
                 that need to be left in, so the path variable is updated to remove only the specified paths.
             #>
-            $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
+            if ($currentValueFromProcess)
+            {
+                $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
+            }
 
             if ([String]::IsNullOrEmpty($finalPath))
             {
@@ -371,9 +423,10 @@ function Test-TargetResource
         $Target = ('Process', 'Machine')
     )
     
-    $valueSpecified = $PSBoundParameters.ContainsKey('Value')
+    $valueSpecified = $PSBoundParameters.ContainsKey('Value') -and ($Value -ne [String]::Empty)
     $currentValueFromMachine = $null
     $currentValueFromProcess = $null
+    $currentPropertiesFromMachine = $null
 
     $checkMachineTarget = ($Target -contains 'Machine')
     $checkProcessTarget = ($Target -contains 'Process')
@@ -382,11 +435,17 @@ function Test-TargetResource
     {
         if ($Path)
         {
-            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Machine
+            $currentPropertiesFromMachine = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+
+            if ($null -ne $currentPropertiesFromMachine)
+            {
+                $currentValueFromMachine = $currentPropertiesFromMachine.$Name
+            }
         } 
         else
         {
-            $currentValueFromMachine = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+            $currentPropertiesFromMachine = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
+            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Machine
         }
     }
 
@@ -412,7 +471,7 @@ function Test-TargetResource
 
     if ($Ensure -eq 'Present')
     {        
-        if (($checkMachineTarget -and ($null -eq $currentValueFromMachine)) -or ($checkProcessTarget -and ($null -eq $currentValueFromProcess)))
+        if (($checkMachineTarget -and ($null -eq $currentPropertiesFromMachine)) -or ($checkProcessTarget -and ($null -eq $currentValueFromProcess)))
         {
             # Variable not found, return failure
             Write-Verbose ($script:localizedData.EnvVarNotFound -f $Name)
@@ -473,7 +532,7 @@ function Test-TargetResource
     # Ensure = 'Absent'
     else
     {
-        if (((-not $checkMachineTarget) -or ($null -eq $currentValueFromMachine)) -and `
+        if (((-not $checkMachineTarget) -or ($null -eq $currentPropertiesFromMachine)) -and `
             ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess)))
         {
             # Variable not found (path/non-path and $Value both do not matter then), return success
@@ -750,7 +809,7 @@ function Set-EnvironmentVariable
         $Name,
 
         [String]
-        $Value = [String]::Empty,
+        $Value,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
@@ -758,11 +817,20 @@ function Set-EnvironmentVariable
         $Target
     )
 
+    $valueSpecified = $PSBoundParameters.ContainsKey('Value')
+
     try
     {
-        if ($Target -contains 'Process')
+        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [String]::Empty))) #Problem with this check! is it remove or is it an empty value set
         {
-            Set-ProcessEnvironmentVariable -Name $Name -Value $Value
+            if (-not $valueSpecified)
+            {
+                Set-ProcessEnvironmentVariable -Name $Name -Value $null
+            }
+            else
+            {
+                Set-ProcessEnvironmentVariable -Name $Name -Value $Value
+            }
         }
 
         if ($Target -contains 'Machine')
@@ -773,24 +841,38 @@ function Set-EnvironmentVariable
             }
 
             $path = $script:envVarRegPathMachine
-        
-            $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
-            if ($environmentKey) 
+            if (-not $PSBoundParameters.ContainsKey('Value')) 
             {
-                if ($null -ne $Value -and $Value -ne [String]::Empty) 
+                $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
+
+                if ($environmentKey)
                 {
-                    Set-ItemProperty -Path $path -Name $Name -Value $Value 
+                    Remove-ItemProperty -Path $path -Name $Name
                 }
-                else 
+                else
                 {
-                    Remove-ItemProperty $path -Name $Name
+                    $message = ($script:localizedData.RemoveNonExistentVarError -f $Name)
+                    New-InvalidArgumentException -Message $message -ArgumentName $Name
                 }
             }
             else
             {
-                $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
-                New-InvalidArgumentException -Message $message -ArgumentName $Name
+                Set-ItemProperty -Path $path -Name $Name -Value $Value
+                $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
+
+                if ($environmentKey) 
+                {
+                    if ($PSBoundParameters.ContainsKey('Value') -and $Value -ne [String]::Empty) 
+                    {
+                        Set-ItemProperty -Path $path -Name $Name -Value $Value 
+                    }
+                }
+                else
+                {
+                    $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
+                    New-InvalidArgumentException -Message $message -ArgumentName $Name
+                }
             }
         }
 
@@ -804,23 +886,37 @@ function Set-EnvironmentVariable
 
             $path = $script:envVarRegPathUser
 
-            $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
-
-            if ($environmentKey) 
+            if (-not $PSBoundParameters.ContainsKey('Value')) 
             {
-                if ($PSBoundParameters.ContainsKey('Value')) 
+                $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
+
+                if ($environmentKey)
                 {
-                    Set-ItemProperty -Path $path -Name $Name -Value $Value
+                    Remove-ItemProperty -Path $path -Name $Name
                 }
-                else 
+                else
                 {
-                    Remove-ItemProperty $path -Name $Name
+                    $message = ($script:localizedData.RemoveNonExistentVarError -f $Name)
+                    New-InvalidArgumentException -Message $message -ArgumentName $Name
                 }
             }
             else
             {
-                $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
-                New-InvalidArgumentException -Message $message -ArgumentName $Name
+                Set-ItemProperty -Path $path -Name $Name -Value $Value
+                $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
+
+                if ($environmentKey) 
+                {
+                    if ($PSBoundParameters.ContainsKey('Value') -and $Value -ne [String]::Empty) 
+                    {
+                        Set-ItemProperty -Path $path -Name $Name -Value $Value 
+                    }
+                }
+                else
+                {
+                    $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
+                    New-InvalidArgumentException -Message $message -ArgumentName $Name
+                }
             }
         }
     }
@@ -883,7 +979,7 @@ function Remove-EnvironmentVariable
         
     try
     {
-        Set-EnvironmentVariable -Name $Name -Value $null -Target $Target
+        Set-EnvironmentVariable -Name $Name -Target $Target
     }
     catch 
     {
@@ -1003,7 +1099,7 @@ function Test-PathInPathList
 #>
 function Get-EnvironmentVariableWithoutExpanding
 {
-    [OutputType([String])]
+    [OutputType([System.Management.Automation.PSObject])]
     [CmdletBinding()]
     param
     (
@@ -1020,18 +1116,20 @@ function Get-EnvironmentVariableWithoutExpanding
     # Since the target registry path coming to this function is hardcoded for local machine
     $hive = [Microsoft.Win32.Registry]::LocalMachine
 
+    $noteProperties = @{}
+
     try
     {
         $key = $hive.OpenSubKey($entry)
         
         $valueNames = $key.GetValueNames()
-
         if ($valueNames -inotcontains $Name)
         {
             return $null
         }
         
-        return Get-KeyValue -Name $Name -Key $key
+        [String] $value = Get-KeyValue -Name $Name -Key $key
+        $noteProperties.Add($Name, $value)
     }
     finally
     {
@@ -1039,7 +1137,11 @@ function Get-EnvironmentVariableWithoutExpanding
         {
             $key.Close()
         }
-    }  
+    }
+
+    [System.Management.Automation.PSObject] $propertyResults = New-Object -TypeName System.Management.Automation.PSObject -Property $noteProperties
+
+    return $propertyResults
 }
 
 <#

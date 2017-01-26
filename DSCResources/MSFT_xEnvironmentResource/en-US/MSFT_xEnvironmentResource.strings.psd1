@@ -2,6 +2,7 @@
 
 ConvertFrom-StringData @'
     ArgumentTooLong = Argument is too long.
+    CannotSetValueToEmpty = Cannot create environment variable with an empty value. Set Ensure = Absent to remove environment variable '{0}'.
     EnvVarCreated = Environment variable '{0}' created with value '{1}'.
     EnvVarSetError = Failed to set environment variable '{0}' to value '{1}'.
     EnvVarPathSetError = Failed to add path '{0}' to environment variable '{1}' holding value '{2}'.
@@ -16,5 +17,6 @@ ConvertFrom-StringData @'
     EnvVarFoundWithMisMatchingValue = Environment variable '{0}' with value '{1}' mismatched the specified value '{2}'.
     EnvVarRemoved = Environment variable '{0}' removed.
     GetItemPropertyFailure = Failed to get the item property for variable '{0}' with path '{1}'.
-    InvalidTarget = 'Invalid environment variable Target Number provided'.
+    InvalidTarget = Invalid environment variable Target Number provided.
+    RemoveNonExistentVarError = Environment variable: '{0}' cannot be removed because it does not exist.
 '@
