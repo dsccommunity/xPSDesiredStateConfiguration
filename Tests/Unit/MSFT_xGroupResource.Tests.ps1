@@ -316,7 +316,7 @@ try
                     
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 2
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Absent'
@@ -340,7 +340,7 @@ try
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Get-MembersOnNanoServer' -ParameterFilter { $Group -eq $script:testLocalGroup }
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -359,7 +359,7 @@ try
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Get-MembersOnNanoServer' -ParameterFilter { $Group -eq $script:testLocalGroup }
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -854,7 +854,7 @@ try
                         Assert-MockCalled -CommandName 'Get-Group' -ParameterFilter { $GroupName -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 2
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Absent'
@@ -871,7 +871,7 @@ try
                         Assert-MockCalled -CommandName 'Get-MembersOnFullSKU' -ParameterFilter { $Group -eq $script:testGroup }
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -891,7 +891,7 @@ try
                         Assert-MockCalled -CommandName 'Get-MembersOnFullSKU' -ParameterFilter { $Group -eq $script:testGroup }
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
