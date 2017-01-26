@@ -13,7 +13,6 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 
 try
 {
-    InModuleScope 'MSFT_xEnvironmentResource' {
         function Get-TestEnvironmentVariable
         {
             [CmdletBinding()]
@@ -81,7 +80,7 @@ try
                 $envVar = 'TestEnvVar'
                 Set-TargetResource -Name $envVar -Ensure Absent
 
-                { Set-TargetResource -Name $envVar } | Should Throw ($script:localizedData.CannotSetValueToEmpty -f $envVar)
+                { Set-TargetResource -Name $envVar } | Should Throw
         
                 # Now retrieve the created variable
                 $retrievedVar = Get-TargetResource -Name $envVar
@@ -302,7 +301,6 @@ try
                 $retrievedVarValue | Should Be $matchVar
             }
         }
-    }
 }
 finally
 {
