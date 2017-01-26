@@ -13,43 +13,16 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 
 try
 {
-        function Get-TestEnvironmentVariable
-        {
-            [CmdletBinding()]
-            param
-            (
-                [Parameter(Mandatory = $true)]
-                [String] 
-                $Name,
-
-                [String]
-                $Target
-            )
-    
-            switch ($Target) 
-            { 
-                'Machine' 
-                {
-                    $regItem = Get-Item -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Session Manager\\Environment'
-                    $regItem.GetValue($Name)
-                    break
-                } 
-
-                'User'
-                {
-                    $regItem = Get-Item -Path 'HKCU:\\Environment'
-                    $regItem.GetValue($Name)
-                    break
-                } 
-
-                default 
-                {
-                    [Environment]::GetEnvironmentVariable($Name) 
-                }
-            }
-        }
-
         Describe 'xEnvironment Integration Tests' {
+            BeforeAll {
+                # Import environment resource module for Get-TargetResource, Test-TargetResource, Set-TargetResource
+                $moduleRootFilePath = Split-Path -Path (Split-Path $PSScriptRoot -Parent) -Parent
+                $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
+                $environmentResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xEnvironmentResource'
+                $environmentResourceModuleFilePath = Join-Path -Path $environmentResourceFolderFilePath -ChildPath 'MSFT_xEnvironmentResource.psm1'
+                Import-Module -Name $environmentResourceModuleFilePath -Force
+            }
+
             It 'Should return the correct value for an environment variable that exists' {
                 $envVar = 'Username'               
                 $retrievedVar = Get-TargetResource -Name $envVar
@@ -57,7 +30,8 @@ try
                 # Verify the environmnet variable $envVar is successfully retrieved
                 $retrievedVar.Ensure | Should Be 'Present'
 
-                $matchVar = Get-TestEnvironmentVariable -Name $envVar -Target 'Machine'
+                $regItem = Get-Item -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Session Manager\\Environment'
+                $matchVar = $regItem.GetValue($envVar)
                 $retrievedVarValue = $retrievedVar.Value
 
                 # Verify the $retrievedVar environmnet variable value matches the value retrieved using [Environment] API
