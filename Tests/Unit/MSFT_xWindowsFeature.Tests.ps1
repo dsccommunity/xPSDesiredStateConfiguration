@@ -363,6 +363,9 @@ try {
                     return $windowsFeatureObject
                 }
 
+                Mock -CommandName 'Add-WindowsFeature' -MockWith { }
+                Mock -CommandName 'Remove-WindowsFeature' -MockWith { }
+
                 It 'Should install the feature when Ensure set to Present and Credential passed in' {
 
                     { 

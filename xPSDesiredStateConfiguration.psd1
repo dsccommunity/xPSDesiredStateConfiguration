@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '5.1.0.0'
+ModuleVersion = '5.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,13 +52,19 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xWindowsFeature:
-    * Added Catch to ignore RuntimeException when importing ServerManager module. This resolves issue ['
+        ReleaseNotes = '* xWindowsProcess
+    * Minor updates to integration tests because one of the tests was flaky.
+
+* xRegistry:
+    * Added support for forward slashes in registry key names. This resolves issue [285](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/285).
+
+'
 
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
 }
+
 
 
 

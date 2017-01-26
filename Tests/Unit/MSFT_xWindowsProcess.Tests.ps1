@@ -489,13 +489,15 @@ try
                 Assert-MockCalled -CommandName Get-CimInstance -Exactly 1 -Scope It
             }
             
-            Mock -CommandName Get-Process -MockWith { return @($script:mockProcess1, $script:mockProcess1, $script:mockProcess1) }
-            Mock -CommandName Get-CimInstance -MockWith { return @($script:mockProcess1, $script:mockProcess1, $script:mockProcess1) }
+            $expectedProcesses = @($script:mockProcess1, $script:mockProcess1, $script:mockProcess1)
+            Mock -CommandName Get-Process -MockWith { return $expectedProcesses }
+            Mock -CommandName Get-CimInstance -MockWith { return $script:mockProcess1 }
 
             It 'Should return the correct processes when multiple exist' {
                 $resultProcess = Get-ProcessCimInstance -Path $script:mockProcess1.Path `
                                                   -Arguments $script:mockProcess1.Arguments
-                $resultProcess | Should Be @($script:mockProcess1, $script:mockProcess1, $script:mockProcess1)
+                
+                Compare-Object -ReferenceObject $expectedProcesses -DifferenceObject $resultProcess | Should Be $null
         
                 Assert-MockCalled -CommandName Get-Process -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-CimInstance -Exactly 3 -Scope It
