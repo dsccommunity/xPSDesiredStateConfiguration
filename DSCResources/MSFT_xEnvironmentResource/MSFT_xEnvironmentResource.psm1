@@ -918,15 +918,7 @@ function Set-EnvironmentVariable
                 Set-ItemProperty -Path $path -Name $Name -Value $Value
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
-                if ($environmentKey) 
-                {
-                    # If the Value is set to [String]::Empty then nothing more should be updated for the machine
-                    if ($valueSpecified -and $Value -ne [String]::Empty) 
-                    {
-                        Set-ItemProperty -Path $path -Name $Name -Value $Value 
-                    }
-                }
-                else
+                if ($null -eq $environmentKey) 
                 {
                     $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
                     New-InvalidArgumentException -Message $message -ArgumentName $Name
@@ -963,15 +955,7 @@ function Set-EnvironmentVariable
                 Set-ItemProperty -Path $path -Name $Name -Value $Value
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
-                if ($environmentKey) 
-                {
-                    # If the Value is not empty then nothing more should be updated for User
-                    if ($valueSpecified -and $Value -ne [String]::Empty) 
-                    {
-                        Set-ItemProperty -Path $path -Name $Name -Value $Value 
-                    }
-                }
-                else
+                if ($null -eq $environmentKey) 
                 {
                     $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
                     New-InvalidArgumentException -Message $message -ArgumentName $Name

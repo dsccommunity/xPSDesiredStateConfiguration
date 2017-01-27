@@ -2390,7 +2390,7 @@ try
                 It 'Should set the environment variable if a value is passed in' {
                     Set-EnvironmentVariable -Name $script:mockEnvironmentVarName -Value 'mockValue' -Target @('Machine')
 
-                    Assert-MockCalled -CommandName Set-ItemProperty -Exactly 2 -Scope It
+                    Assert-MockCalled -CommandName Set-ItemProperty -Exactly 1 -Scope It
                     Assert-MockCalled -CommandName Remove-ItemProperty -Exactly 0 -Scope It
                 }
 
