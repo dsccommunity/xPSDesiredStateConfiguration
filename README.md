@@ -18,7 +18,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 * **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
-* **xEnvironment** configures and manages environment variables.
+* **xEnvironment** provides a mechanism to configure and manage environment variables on a machine or process.
 * **xGroup** provides a mechanism to manage local groups on the target node.
 * **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
@@ -297,7 +297,8 @@ None
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
 * **RunAsCredential**: Credential used to install the package on the local system.
 
-Read-Only Properties:
+### Read-Only Properties from Get-TargetResource
+
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
 * **InstalledOn**: Date of installation.
@@ -313,7 +314,7 @@ Read-Only Properties:
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
 
 ### xEnvironment
-Provides a mechanism to manage environment variables on a target node.
+Provides a mechanism to configure and manage environment variables on a machine and/or process.
 
 #### Requirements
 
@@ -322,10 +323,20 @@ None
 #### Parameters
 
 * **[String] Name** _(Key)_: Indicates the name of the environment variable for which you want to ensure a specific state.
-* **[String] Value** _(Write)_: The value to assign to the environment variable.
-* **[String] Ensure** _(Write)_: Indicates whether the environment varaible is present or absent. { *Present* | Absent }.
-* **[Boolean] Path** _(Write)_: Defines the environment variable that is being configured. Set this property to $true if the variable is the Path variable; otherwise, set it to $false. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value. The default value is False.
-* **[String[]] Target** _(Write)_: Indicates the target of where to check the environment variable. { *Process, Machine* }.
+* **[String] Value** _(Write)_: The desired value for the environment variable. The default value is an empty string which either indicates that the variable should be removed entirely or that the value does not matter when testing its existence.
+* **[String] Ensure** _(Write)_: Specifies if the environment varaible should exist. { *Present* | Absent }.
+* **[Boolean] Path** _(Write)_: Specifies if the environment variable is the Path variable. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value, otherwise the existing value will be replaced by the new value. The default value is False.
+* **[String[]] Target** _(Write)_: Indicates the target where the environment variable should be set. { Process | Machine | *Process, Machine* }.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Create a non-path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreateNonPathVariable.ps1)
+* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreatePathVariable.ps1)
+* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_Remove.ps1)
 
 ### xScript
 Provides a mechanism to run PowerShell script blocks on a target node.
@@ -384,7 +395,7 @@ Provides a mechanism to manage local users on a target node.
 
 #### Requirements
 
-None
+* Target machine must be running the Server service.
 
 #### Parameters
 
@@ -559,6 +570,14 @@ None
 ## Versions
 
 ### Unreleased
+
+* xEnvironment
+    * Updated resource to follow HQRM guidelines.
+    * Added examples.
+    * Added unit and end-to-end tests.
+    * Significantly cleaned the resource.
+    * Minor Breaking Change where the resource will now throw an error if no value is provided, Ensure is set to present, and the variable does not exist, whereas before it would create an empty registry key on the machine in this case (if this is the desired outcome then use the Registry resource).
+    * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).  
 
 ### 5.2.0.0
 
