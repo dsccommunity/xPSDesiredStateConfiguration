@@ -19,10 +19,16 @@ $script:maxUserEnvVariableLength = 255
 
 <#
     .SYNOPSIS
-        Retrieves the state of the environment variable.
+        Retrieves the state of the environment variable. If both Machine and Process Target are
+        specified, only the machine value will be returned.
 
     .PARAMETER Name
         The name of the environment variable to retrieve.
+
+    .PARAMETER Target
+        Indicates where to retrieve the variable: The machine or the process. If both are indicated
+        then only the value from the machine is returned.
+        The default is both since that is the default for the rest of the resource.
 #>
 function Get-TargetResource
 {
@@ -57,9 +63,9 @@ function Get-TargetResource
     }
     
     $environmentResource = @{
-        Ensure = 'Absent'
         Name = $Name
         Value = $null
+        Ensure = 'Absent'
     }
     
     if ($null -eq $valueToReturn)
@@ -78,16 +84,32 @@ function Get-TargetResource
 
 <#
     .SYNOPSIS
+        Creates, modifies, or removes an environment variable.
         
     .PARAMETER Name
+        The name of the environment variable to create, modify, or update.
 
     .PARAMETER Value
+        The value to set the environment variable to. If not provided, it is assumed that the
+        variable should be removed. In this case if Ensure is set to Present,
+        and the variable does not exist an error will be thrown. If not provided, Ensure is
+        set to present, and the variable does exist, nothing will be changed.
 
     .PARAMETER Ensure
+        Specifies whether the variable should exist or not.
+        To ensure that the variable does exist, set this property to Present.
+        To ensure that the variable does not exist, set this property to Absent.
+        The default value is Present.
 
     .PARAMETER Path
+        Indicates whether or not this is the Path variable. If this property is set to True,
+        the value provided through the Value property will be appended to the existing value.
+        If this property is set to False, the existing value will be replaced by the new Value.
+        The default value is False.
 
-    .PARAMETER Target    
+    .PARAMETER Target
+        Indicates where to set the environment variable: The machine, the process, or both.
+        The default is both: ('Process', 'Machine')
 #>
 function Set-TargetResource
 {
@@ -385,16 +407,31 @@ function Set-TargetResource
 
 <#
     .SYNOPSIS
+        Tests if the environment variable is in the desired state.
         
     .PARAMETER Name
+        The name of the environment variable to test.
 
     .PARAMETER Value
+        The value of the environment variable to test. If no value is specified then only the
+        existence of the variable will be checked.
 
     .PARAMETER Ensure
+        Specifies whether the variable should exist or not.
+        To test that the variable does exist, set this property to Present.
+        To test that the variable does not exist, set this property to Absent.
+        The default value is Present.
 
     .PARAMETER Path
-    
-    .PARAMETER Target   
+        Indicates whether or not this is the Path variable. If this property is set to True,
+        the value(s) provided through the Value property will be checked against all existing
+        values already set in this variable.
+        If this property is set to False, the value will be compared directly to the existing value.
+        The default value is False.
+
+    .PARAMETER Target
+        Indicates where to test the environment variable: The machine, the process, or both.
+        The default is both: ('Process', 'Machine')
 #>
 function Test-TargetResource
 {
@@ -595,10 +632,15 @@ function Test-TargetResource
 
 <#
     .SYNOPSIS
+        Retrieves the value of the environment variable from the given Target.
         
     .PARAMETER Name
+        The name of the environment variable to retrieve the value from.
 
-    .PARAMETER Target       
+    .PARAMETER Target
+        Indicates where to retrieve the environment variable from based on
+        the enum: $script:environmentVariableTarget. Currently, only Process and Machine
+        are being used, but User is included for future extension of this resource.
 #>
 function Get-EnvironmentVariable
 {
@@ -673,13 +715,16 @@ function Get-ProcessEnvironmentVariable
 
 <#
     .SYNOPSIS
-        If there are any paths in NewPaths that aren't in CurrentValue it will add the new
-        paths to the current paths and return the new value with all new paths added in.
-        Otherwise, it will return $null.
+        If there are any paths in NewPaths that aren't in CurrentValue they will be added
+        to the current paths value and a String will be returned containing all old paths
+        and new paths. Otherwise, $null will be returned to indicate that no changes were made.
         
     .PARAMETER CurrentValue
+        A semicolon-separated String containing the current path values.
 
-    .PARAMETER NewPaths      
+    .PARAMETER NewPaths
+        A semicolon-separated String containing any paths that should be added to
+        the current value. If CurrentValue already contains a path, it will not be added.   
 #>
 function Get-PathValueWithAddedPaths
 {
@@ -728,14 +773,18 @@ function Get-PathValueWithAddedPaths
 
 <#
     .SYNOPSIS
-        If there are any paths in PathsToRemove that aren't in CurrentValue it will remove the
-        specified paths and return either the new value if there are still paths that remain or
-        an empty string if all paths were removed. If none of the paths in PathsToRemove are in
-        CurrentValue than this function will return CurrentValue since nothing needs to be changed.
+        If there are any paths in PathsToRemove that aren't in CurrentValue they will be removed
+        from the current paths value and either the new value will be returned if there are still
+        paths that remain, or an empty string will be returned if all paths were removed.
+        If none of the paths in PathsToRemove are in CurrentValue then this function will
+        return CurrentValue since nothing needs to be changed.
         
     .PARAMETER CurrentValue
+        A semicolon-separated String containing the current path values.
 
-    .PARAMETER PathsToRemove      
+    .PARAMETER PathsToRemove
+        A semicolon-separated String containing any paths that should be removed from
+        the current value.
 #>
 function Get-PathValueWithRemovedPaths
 {
@@ -791,12 +840,19 @@ function Get-PathValueWithRemovedPaths
 
 <#
     .SYNOPSIS
+        Sets the value of the environment variable with the given name if a value is specified.
+        If no value is specified, then the environment variable will be removed.
         
     .PARAMETER Name
+        The name of the environment variable to set or remove.
 
     .PARAMETER Value
+        The value to set the environment variable to. If not provided, then the variable will
+        be removed.
     
-    .PARAMETER Target       
+    .PARAMETER Target
+        Indicates where to set or remove the environment variable: The machine, the process, or both.
+        The logic for User is also included here for future expansion of this resource.
 #>
 function Set-EnvironmentVariable
 {
@@ -821,7 +877,8 @@ function Set-EnvironmentVariable
 
     try
     {
-        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [String]::Empty))) #Problem with this check! is it remove or is it an empty value set
+        # If the Value is set to [String]::Empty then nothing should be updated for the process
+        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [String]::Empty)))
         {
             if (-not $valueSpecified)
             {
@@ -842,7 +899,7 @@ function Set-EnvironmentVariable
 
             $path = $script:envVarRegPathMachine
 
-            if (-not $PSBoundParameters.ContainsKey('Value')) 
+            if (-not $valueSpecified) 
             {
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -863,7 +920,8 @@ function Set-EnvironmentVariable
 
                 if ($environmentKey) 
                 {
-                    if ($PSBoundParameters.ContainsKey('Value') -and $Value -ne [String]::Empty) 
+                    # If the Value is set to [String]::Empty then nothing more should be updated for the machine
+                    if ($valueSpecified -and $Value -ne [String]::Empty) 
                     {
                         Set-ItemProperty -Path $path -Name $Name -Value $Value 
                     }
@@ -886,7 +944,7 @@ function Set-EnvironmentVariable
 
             $path = $script:envVarRegPathUser
 
-            if (-not $PSBoundParameters.ContainsKey('Value')) 
+            if (-not $valueSpecified) 
             {
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -907,7 +965,8 @@ function Set-EnvironmentVariable
 
                 if ($environmentKey) 
                 {
-                    if ($PSBoundParameters.ContainsKey('Value') -and $Value -ne [String]::Empty) 
+                    # If the Value is not empty then nothing more should be updated for User
+                    if ($valueSpecified -and $Value -ne [String]::Empty) 
                     {
                         Set-ItemProperty -Path $path -Name $Name -Value $Value 
                     }
@@ -958,8 +1017,14 @@ function Set-ProcessEnvironmentVariable
 
 <#
     .SYNOPSIS
+        Removes an environment variable from the given target(s) by calling Set-EnvironmentVariable
+        with no Value specified.
         
-    .PARAMETER Name        
+    .PARAMETER Name
+        The name of the environment variable to remove.
+
+    .PARAMETER Target
+        Indicates where to remove the environment variable from: The machine, the process, or both.
 #>
 function Remove-EnvironmentVariable
 {
