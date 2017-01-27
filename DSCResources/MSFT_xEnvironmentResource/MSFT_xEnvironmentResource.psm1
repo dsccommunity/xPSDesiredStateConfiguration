@@ -10,7 +10,7 @@ $script:envVarRegPathUser = 'HKCU:\Environment'
 
 $script:environmentVariableTarget = @{ 
     Process = 0
-    User = 1
+    User = 1 # Not currently used in this resource
     Machine = 2 
 }
 
