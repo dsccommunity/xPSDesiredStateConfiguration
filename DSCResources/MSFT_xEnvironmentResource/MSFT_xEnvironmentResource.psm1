@@ -1039,13 +1039,22 @@ function Remove-EnvironmentVariable
 
 <#
     .SYNOPSIS
-        Utility to match environment paths.
+        Tests all of the paths in QueryPaths against those in ExistingPaths.
+        If FindCriteria is set to 'All' then it will only return True if all of the
+        paths in QueryPaths are in ExistingPaths, otherwise it will return False.
+        If FindCriteria is set to 'Any' then it will return True if any of the paths
+        in QueryPaths are in ExistingPaths, otherwise it will return False.
           
     .PARAMETER ExistingPaths
+        A semicolon-separated String containing the path values to test against.
 
     .PARAMETER QueryPaths
+        A semicolon-separated String containing the path values to ensure are either
+        included or not included in ExistingPaths.
 
-    .PARAMETER FindCriteria    
+    .PARAMETER FindCriteria
+        Set to either 'All' or 'Any' to indicate whether all of the paths in QueryPaths
+        should be included in ExistingPaths or any of them.
 #>
 function Test-PathInPathListWithCriteria
 {
@@ -1083,7 +1092,7 @@ function Test-PathInPathListWithCriteria
                 }                             
             }
 
-            # If the control reached here, none of the $QueryPaths were found as part of the $ExistingPaths, return $false
+            # If the control reached here, none of the QueryPaths were found in ExistingPaths
             return $false   
         }
 
@@ -1101,7 +1110,7 @@ function Test-PathInPathListWithCriteria
                 }                
             }
 
-            # If the control reached here, all of the $QueryPaths were found as part of the $ExistingPaths, return $true
+            # If the control reached here, all of the QueryPaths were found in ExistingPaths
             return $true
         }    
     }
@@ -1109,10 +1118,14 @@ function Test-PathInPathListWithCriteria
 
 <#
     .SYNOPSIS
+        Tests whether QueryPath is contained in PathList.
+        Returns True if it is contained, False otherwise.
           
     .PARAMETER QueryPath
+        The path to test if it is included in PathList.
 
-    .PARAMETER PathList   
+    .PARAMETER PathList
+        The list to check the QueryPath against.
 #>
 function Test-PathInPathList
 {
@@ -1143,8 +1156,14 @@ function Test-PathInPathList
 
 <#
     .SYNOPSIS
+        Retrieves the Environment variable with the given name from the registry on the machine.
+        It returns the result as an object containing a Hashtable with the environment variable
+        name and its current value on the machine. This is to most closely represent what the
+        actual API call returns. If an environment variable with the given name is not found, then
+        $null will be returned.
           
-    .PARAMETER Name    
+    .PARAMETER Name
+        The name of the environment variable to retrieve the value of.
 #>
 function Get-EnvironmentVariableWithoutExpanding
 {
@@ -1158,7 +1177,7 @@ function Get-EnvironmentVariableWithoutExpanding
         $Name
     )
 
-    $path = $script:envVarRegPathMachine #'HKLM:\System\CurrentControlSet\Control\Session Manager\Environment'
+    $path = $script:envVarRegPathMachine
     $pathTokens = $path.Split('\',[System.StringSplitOptions]::RemoveEmptyEntries)
     $entry = $pathTokens[1..($pathTokens.Count - 1)] -join '\'
     
@@ -1195,10 +1214,14 @@ function Get-EnvironmentVariableWithoutExpanding
 
 <#
     .SYNOPSIS
+        Wrapper function to get the value of the environment variable with the givben name
+        from the ey.
           
     .PARAMETER Name
+        The name of the environment variable to retrieve the value of.
 
     .PARAMETER Key
+        The key to retrieve the environment variable from.
 #>
 function Get-KeyValue
 {

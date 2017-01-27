@@ -322,7 +322,7 @@ None
 
 #### Parameters
 
-* **[String] Name** _(Key)_: Indicates the name of the environment variable for which you want to ensure a specific state.
+* **[String] Name** _(Key)_: The name of the environment variable for which you want to ensure a specific state.
 * **[String] Value** _(Write)_: The desired value for the environment variable. The default value is an empty string which either indicates that the variable should be removed entirely or that the value does not matter when testing its existence.
 * **[String] Ensure** _(Write)_: Specifies if the environment varaible should exist. { *Present* | Absent }.
 * **[Boolean] Path** _(Write)_: Indicates whether or not the environment variable is the Path variable. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value, otherwise the existing value will be replaced by the new value. The default value is False.
