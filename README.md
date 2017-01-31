@@ -18,7 +18,7 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 
 * **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
-* **xEnvironment** provides a mechanism to configure and manage environment variables on a machine or process.
+* **xEnvironment** provides a mechanism to configure and manage environment variables for a machine or process.
 * **xGroup** provides a mechanism to manage local groups on the target node.
 * **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
@@ -314,7 +314,7 @@ None
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
 
 ### xEnvironment
-Provides a mechanism to configure and manage environment variables on a machine and/or process.
+Provides a mechanism to configure and manage environment variables for a machine or process.
 
 #### Requirements
 
@@ -325,7 +325,7 @@ None
 * **[String] Name** _(Key)_: The name of the environment variable for which you want to ensure a specific state.
 * **[String] Value** _(Write)_: The desired value for the environment variable. The default value is an empty string which either indicates that the variable should be removed entirely or that the value does not matter when testing its existence.
 * **[String] Ensure** _(Write)_: Specifies if the environment varaible should exist. { *Present* | Absent }.
-* **[Boolean] Path** _(Write)_: Indicates whether or not the environment variable is the Path variable. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value, otherwise the existing value will be replaced by the new value. The default value is False.
+* **[Boolean] Path** _(Write)_: Indicates whether or not the environment variable is a path variable. If the variable being configured is a path variable, the value provided will be appended to the existing value, otherwise the existing value will be replaced by the new value. The default value is False.
 * **[String[]] Target** _(Write)_: Indicates the target where the environment variable should be set. { Process | Machine | *Process, Machine* }.
 
 #### Read-Only Properties from Get-TargetResource
@@ -362,7 +362,6 @@ None
 * [Create a file with content through xScript](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xScript.ps1)
 
 ### xRegistry
-
 Provides a mechanism to manage registry keys and values on a target node.
 
 #### Requirements
@@ -395,7 +394,7 @@ Provides a mechanism to manage local users on a target node.
 
 #### Requirements
 
-* Target machine must be running the Server service.
+None
 
 #### Parameters
 

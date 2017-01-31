@@ -1,8 +1,10 @@
 ﻿$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1')
+# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -232,7 +234,7 @@ try
                 }
             }
 
-            Context 'Adde new environment variable with no value specified' {
+            Context 'Add new environment variable with no value specified' {
                 Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $null }
                 Mock -CommandName Get-EnvironmentVariable -MockWith { return $null }
 
@@ -583,7 +585,7 @@ try
                 }
             }
 
-            Context 'Adde new environment variable with no value specified' {
+            Context 'Add new environment variable with no value specified' {
                 Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $null }
                 Mock -CommandName Get-EnvironmentVariable -MockWith { return $null }
 
@@ -919,7 +921,7 @@ try
                 }
             }
 
-            Context 'Adde new environment variable with no value specified' {
+            Context 'Add new environment variable with no value specified' {
                 Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $null }
                 Mock -CommandName Get-EnvironmentVariable -MockWith { return $null }
 
@@ -1661,7 +1663,7 @@ try
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $expectedValue = 'path3;path4;path5'
                 Mock -CommandName Get-EnvironmentVariable -MockWith {
-                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    if ($Target -eq 'Machine')
                     {
                         return $script:mockEnvironmentVar.PATH
                     }
@@ -1689,7 +1691,7 @@ try
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $expectedValue = 'path3;path4;path5'
                 Mock -CommandName Get-EnvironmentVariable -MockWith {
-                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    if ($Target -eq 'Machine')
                     {
                         return $expectedValue
                     }
@@ -1797,7 +1799,7 @@ try
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $existentValue = 'path5;path6;path7'
                 Mock -CommandName Get-EnvironmentVariable -MockWith {
-                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    if ($Target -eq 'Machine')
                     {
                         return $existentValue
                     }
@@ -1825,7 +1827,7 @@ try
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $existentValue = 'path5;path6;path7'
                 Mock -CommandName Get-EnvironmentVariable -MockWith {
-                    if ($Target -eq $script:environmentVariableTarget.Machine)
+                    if ($Target -eq 'Machine')
                     {
                         return $script:mockEnvironmentVar.PATH
                     }
@@ -2196,7 +2198,7 @@ try
 
                 It 'Should return the correct value' {
                     $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'VariableName' `
-                                                            -Target $script:environmentVariableTarget.Process
+                                                            -Target 'Process'
                     $getEnvironmentVariableResult | Should Be $desiredValue
                 }
             }
@@ -2215,45 +2217,14 @@ try
 
                 It 'Should return the correct value' {
                     $getEnvironmentVariableResult = Get-EnvironmentVariable -Name $script:mockEnvironmentVarName `
-                                                            -Target $script:environmentVariableTarget.Machine
+                                                            -Target 'Machine'
                     $getEnvironmentVariableResult | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
                 }
 
                 It 'Should return the null when Name does not exist' {
                     $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'nonExistentName' `
-                                                            -Target $script:environmentVariableTarget.Machine
+                                                            -Target 'Machine'
                     $getEnvironmentVariableResult | Should Be $null
-                }
-            }
-
-            Context 'Get User variable' {
-                Mock -CommandName Get-ItemProperty -MockWith {
-                    if ($Name -eq $script:mockEnvironmentVarName)
-                    {
-                        return $script:mockEnvironmentVar
-                    }
-                    else
-                    {
-                        return $null
-                    }
-                }
-
-                It 'Should return the correct value' {
-                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name $script:mockEnvironmentVarName `
-                                                            -Target $script:environmentVariableTarget.User
-                    $getEnvironmentVariableResult | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
-                }
-
-                It 'Should return the null when Name does not exist' {
-                    $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'nonExistentName' `
-                                                            -Target $script:environmentVariableTarget.User
-                    $getEnvironmentVariableResult | Should Be $null
-                }
-            }
-
-            Context 'Invalid Target passed in' {
-                It 'Should throw an exception' {
-                    { Get-EnvironmentVariable -Name 'variableName' -Target 59 } | Should Throw $script:localizedData.InvalidTarget
                 }
             }
         }

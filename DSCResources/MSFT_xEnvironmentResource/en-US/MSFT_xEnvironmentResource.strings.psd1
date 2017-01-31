@@ -17,6 +17,5 @@ ConvertFrom-StringData @'
     EnvVarFoundWithMisMatchingValue = Environment variable '{0}' with value '{1}' mismatched the specified value '{2}'.
     EnvVarRemoved = Environment variable '{0}' removed.
     GetItemPropertyFailure = Failed to get the item property for variable '{0}' with path '{1}'.
-    InvalidTarget = Invalid environment variable Target Number provided.
-    RemoveNonExistentVarError = Environment variable: '{0}' cannot be removed because it does not exist.
+    RemoveNonExistentVarError = Environment variable '{0}' cannot be removed because it does not exist.
 '@

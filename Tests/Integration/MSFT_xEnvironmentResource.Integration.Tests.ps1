@@ -3,8 +3,10 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1')
+# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `

@@ -1,18 +1,15 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonResourceHelper.psm1')
+# Import CommonResourceHelper for Get-LocalizedData
+$script:dscResourcesFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonResourceHelperFilePath = Join-Path -Path $script:dscResourcesFolderFilePath -ChildPath 'CommonResourceHelper.psm1'
+Import-Module -Name $script:commonResourceHelperFilePath
+
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xEnvironmentResource'
 
 $script:envVarRegPathMachine = 'HKLM:\System\CurrentControlSet\Control\Session Manager\Environment'
 $script:envVarRegPathUser = 'HKCU:\Environment'
-
-$script:environmentVariableTarget = @{ 
-    Process = 0
-    User = 1 # Not currently used in this resource
-    Machine = 2 
-}
 
 $script:maxSystemEnvVariableLength = 1024
 $script:maxUserEnvVariableLength = 255
@@ -42,6 +39,7 @@ function Get-TargetResource
         $Name,
         
         [ValidateSet('Process', 'Machine')]
+        [ValidateNotNullOrEmpty()]
         [String[]]
         $Target = ('Process', 'Machine')      
     )
@@ -87,23 +85,28 @@ function Get-TargetResource
         Creates, modifies, or removes an environment variable.
         
     .PARAMETER Name
-        The name of the environment variable to create, modify, or update.
+        The name of the environment variable to create, modify, or remove.
 
     .PARAMETER Value
-        The value to set the environment variable to. If not provided, it is assumed that the
-        variable should be removed. In this case if Ensure is set to Present,
-        and the variable does not exist an error will be thrown. If not provided, Ensure is
-        set to present, and the variable does exist, nothing will be changed.
+        The value to set the environment variable to.
+        If a value is not provided, the variable cannot be created.
+        If Ensure is set to Present, the variable does not already exist, and a value is not
+        specified, an error will be thrown indicating that the variable cannot be created without
+        a specified value. If Ensure is set to Present, the variable already exists, and no value
+        is specified, nothing will be changed.
+        If Path is set to True, then each value passed in will be checked against the existing value
+        to ensure that the paths exist or not.
 
     .PARAMETER Ensure
         Specifies whether the variable should exist or not.
-        To ensure that the variable does exist, set this property to Present.
-        To ensure that the variable does not exist, set this property to Absent.
+        To ensure that the variable or value does exist, set this property to Present.
+        To ensure that the variable or value does not exist, set this property to Absent.
         The default value is Present.
 
     .PARAMETER Path
-        Indicates whether or not this is the Path variable. If this property is set to True,
-        the value provided through the Value property will be appended to the existing value.
+        Indicates whether or not this is a path variable. If this property is set to True,
+        the value provided through the Value property will be appended to (or removed from if
+        Ensure is set to Absent) the existing value.
         If this property is set to False, the existing value will be replaced by the new Value.
         The default value is False.
 
@@ -133,6 +136,7 @@ function Set-TargetResource
         $Path = $false,
 
         [ValidateSet('Process', 'Machine')]
+        [ValidateNotNullOrEmpty()]
         [String[]]
         $Target = ('Process', 'Machine')
     )
@@ -142,10 +146,10 @@ function Set-TargetResource
     $currentValueFromProcess = $null
     $currentPropertiesFromMachine = $null
 
-    $checkMachineTarget = ($Target -contains 'Machine')
-    $checkProcessTarget = ($Target -contains 'Process')
+    $setMachineVariable = ($Target -contains 'Machine')
+    $setProcessVariable = ($Target -contains 'Process')
 
-    if ($checkMachineTarget)
+    if ($setMachineVariable)
     {
         if ($Path)
         {
@@ -159,22 +163,22 @@ function Set-TargetResource
         else
         {
             $currentPropertiesFromMachine = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
-            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Machine
+            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target 'Machine'
         }
     }
 
-    if ($checkProcessTarget)
+    if ($setProcessVariable)
     {
-        $currentValueFromProcess = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Process
+        $currentValueFromProcess = Get-EnvironmentVariable -Name $Name -Target 'Process'
     }
 
     # A different value of the environment variable needs to be displayed depending on the Target
     $currentValueToDisplay = ''
-    if ($checkMachineTarget -and $checkProcessTarget)
+    if ($setMachineVariable -and $setProcessVariable)
     {
         $currentValueToDisplay = "Machine: $currentValueFromMachine, Process: $currentValueFromProcess"
     }
-    elseif ($checkMachineTarget)
+    elseif ($setMachineVariable)
     {
         $currentValueToDisplay = $currentValueFromMachine
     }
@@ -185,10 +189,10 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $setMachineVariable = ((-not $checkMachineTarget) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
-        $setProcessVariable = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
+        $createMachineVariable = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
+        $createProcessVarialbe = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
 
-        if ($setMachineVariable -and $setProcessVariable)
+        if ($createMachineVariable -and $createProcessVarialbe)
         {
 
             if (-not $valueSpecified)
@@ -226,7 +230,7 @@ function Set-TargetResource
         }
 
         # Check if an empty, whitespace or semi-colon only string has been specified. If yes, return unchanged.
-        $trimmedValue = $Value.Trim(';',' ')
+        $trimmedValue = $Value.Trim(';').Trim()
 
         if ([String]::IsNullOrEmpty($trimmedValue))
         {
@@ -239,8 +243,8 @@ function Set-TargetResource
             # For non-path variables, simply set the specified $Value as the new value of the specified 
             # variable $Name for the given $Target
 
-            if (($checkMachineTarget -and ($Value -cne $currentValueFromMachine)) -or `
-                ($checkProcessTarget -and ($Value -cne $currentValueFromProcess)))
+            if (($setMachineVariable -and ($Value -cne $currentValueFromMachine)) -or `
+                ($setProcessVariable -and ($Value -cne $currentValueFromProcess)))
             {
                 Set-EnvironmentVariable -Name $Name -Value $Value -Target $Target
                 Write-Verbose -Message ($script:localizedData.EnvVarUpdated -f $Name, $currentValueToDisplay, $Value)
@@ -255,7 +259,7 @@ function Set-TargetResource
 
         # If the control reaches here, the specified variable exists, it is a path variable, and a $Value has been specified to be set.
 
-        if ($checkMachineTarget)
+        if ($setMachineVariable)
         {
             $updatedValue = $trimmedValue
             <#
@@ -280,7 +284,7 @@ function Set-TargetResource
             }
         }
 
-        if ($checkProcessTarget)
+        if ($setProcessVariable)
         {
             $updatedValue = $trimmedValue
             <#
@@ -309,8 +313,8 @@ function Set-TargetResource
     # Ensure = 'Absent'
     else
     {
-        $machineVariableRemoved = ((-not $checkMachineTarget) -or ($null -eq $currentPropertiesFromMachine))
-        $processVariableRemoved = ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess))
+        $machineVariableRemoved = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine))
+        $processVariableRemoved = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess))
 
         if ($machineVariableRemoved -and $processVariableRemoved)
         {
@@ -333,7 +337,7 @@ function Set-TargetResource
         }
 
         # Check if an empty string or semi-colon only string has been specified as $Value. If yes, return unchanged as we don't need to remove anything.
-        $trimmedValue = $Value.Trim(';')
+        $trimmedValue = $Value.Trim(';').Trim()
 
         if ([String]::IsNullOrEmpty($trimmedValue))
         {
@@ -343,17 +347,18 @@ function Set-TargetResource
 
         # If the control reaches here: target variable is an existing environment path-variable and a specified $Value needs be removed from it
 
-        if ($checkMachineTarget)
+        if ($setMachineVariable)
         {
             $finalPath = $null
-            <#
-                If this value returns $null or an empty string, than the entire path should be removed.
-                If it returns the same value as the path that was passed in, than nothing needs to be
-                updated, otherwise, only the specified paths were removed but there are still others
-                that need to be left in, so the path variable is updated to remove only the specified paths.
-            #>
+            
             if ($currentValueFromMachine)
             {
+                <#
+                    If this value returns $null or an empty string, than the entire path should be removed.
+                    If it returns the same value as the path that was passed in, than nothing needs to be
+                    updated, otherwise, only the specified paths were removed but there are still others
+                    that need to be left in, so the path variable is updated to remove only the specified paths.
+                #>
                 $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
             }
 
@@ -373,17 +378,18 @@ function Set-TargetResource
             }       
         }
 
-        if ($checkProcessTarget)
+        if ($setProcessVariable)
         {
             $finalPath = $null
-            <#
-                If this value returns $null or an empty string, than the entire path should be removed.
-                If it returns the same value as the path that was passed in, than nothing needs to be
-                updated, otherwise, only the specified paths were removed but there are still others
-                that need to be left in, so the path variable is updated to remove only the specified paths.
-            #>
+            
             if ($currentValueFromProcess)
             {
+                <#
+                    If this value returns $null or an empty string, than the entire path should be removed.
+                    If it returns the same value as the path that was passed in, than nothing needs to be
+                    updated, otherwise, only the specified paths were removed but there are still others
+                    that need to be left in, so the path variable is updated to remove only the specified paths.
+                #>
                 $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
             }
 
@@ -423,7 +429,7 @@ function Set-TargetResource
         The default value is Present.
 
     .PARAMETER Path
-        Indicates whether or not this is the Path variable. If this property is set to True,
+        Indicates whether or not this is a path variable. If this property is set to True,
         the value(s) provided through the Value property will be checked against all existing
         values already set in this variable.
         If this property is set to False, the value will be compared directly to the existing value.
@@ -456,6 +462,7 @@ function Test-TargetResource
         $Path = $false,
 
         [ValidateSet('Process', 'Machine')]
+        [ValidateNotNullOrEmpty()]
         [String[]]
         $Target = ('Process', 'Machine')
     )
@@ -482,13 +489,13 @@ function Test-TargetResource
         else
         {
             $currentPropertiesFromMachine = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
-            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Machine
+            $currentValueFromMachine = Get-EnvironmentVariable -Name $Name -Target 'Machine'
         }
     }
 
     if ($checkProcessTarget)
     {
-        $currentValueFromProcess = Get-EnvironmentVariable -Name $Name -Target $script:environmentVariableTarget.Process
+        $currentValueFromProcess = Get-EnvironmentVariable -Name $Name -Target 'Process'
     }
 
     # A different value of the environment variable needs to be displayed depending on the Target
@@ -505,42 +512,40 @@ function Test-TargetResource
     {
         $currentValueToDisplay = $currentValueFromProcess
     }
+   
+    if (($checkMachineTarget -and ($null -eq $currentPropertiesFromMachine)) -or ($checkProcessTarget -and ($null -eq $currentValueFromProcess)))
+    {
+        # Variable not found
+        Write-Verbose ($script:localizedData.EnvVarNotFound -f $Name)
+        return ($Ensure -eq 'Absent')
+    }
 
-    if ($Ensure -eq 'Present')
-    {        
-        if (($checkMachineTarget -and ($null -eq $currentPropertiesFromMachine)) -or ($checkProcessTarget -and ($null -eq $currentValueFromProcess)))
+    if (-not $valueSpecified)
+    {
+        Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
+        return ($Ensure -eq 'Present')
+    }
+    
+    if (-not $Path)
+    {
+        # For this non-path variable, make sure that the specified $Value matches the current value.
+
+        if (($checkMachineTarget -and ($Value -cne $currentValueFromMachine)) -or `
+           ($checkProcessTarget -and ($Value -cne $currentValueFromProcess)))
         {
-            # Variable not found, return failure
-            Write-Verbose ($script:localizedData.EnvVarNotFound -f $Name)
-            return $false
+            Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
+            return ($Ensure -eq 'Absent')
         }
-
-        if (-not $valueSpecified)
+        else
         {
-            # No value has been specified for test, so the existence of the variable means success
             Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
-            return $true
+            return ($Ensure -eq 'Present')
         }
-        
-        if (-not $Path)
-        {
-            # For this non-path variable, make sure that the specified $Value matches the current value.
-            # Success if it matches, failure otherwise
+    }
 
-            if (($checkMachineTarget -and ($Value -cne $currentValueFromMachine)) -or `
-               ($checkProcessTarget -and ($Value -cne $currentValueFromProcess)))
-            {
-                Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
-                return $false                
-            }
-            else
-            {
-                Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
-                return $true
-            }
-        }             
-                       
-        # If the control reaches here, the expected environment variable exists, it is a path variable and a $Value is specified to test against
+    # If the control reaches here, the expected environment variable exists, it is a path variable and a $Value is specified to test against
+    if ($Ensure -eq 'Present')
+    {                   
         if ($checkMachineTarget)
         {        
             if (-not (Test-PathInPathListWithCriteria -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'All'))
@@ -565,45 +570,9 @@ function Test-TargetResource
         Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
         return $true
     }
-
     # Ensure = 'Absent'
     else
-    {
-        if (((-not $checkMachineTarget) -or ($null -eq $currentPropertiesFromMachine)) -and `
-            ((-not $checkProcessTarget) -or ($null -eq $currentValueFromProcess)))
-        {
-            # Variable not found (path/non-path and $Value both do not matter then), return success
-            return $true
-        }
-
-        if (-not $valueSpecified)
-        {
-            # Given no value has been specified for test, the mere existence of the variable fails the test
-            Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
-            return $false
-        }
-
-        # If the control reaches here: the variable exists and a value has been specified
-                
-        if (-not $Path)
-        {            
-            # For this non-path variable, make sure that the specified value doesn't match the current value
-            # Success if it doesn't match, failure otherwise
-            
-            if (((-not $checkMachineTarget) -or ($Value -cne $currentValueFromMachine)) -and `
-               ((-not $checkProcessTarget) -or ($Value -cne $currentValueFromProcess)))
-            {
-                Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)                
-                return $true                
-            }
-            else
-            {
-                Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
-                return $false
-            }
-        }
-                    
-        # If the control reaches here: the variable exists, it is a path variable, and a value has been specified to test against it                               
+    {                             
         if ($checkMachineTarget)
         {
             if (Test-PathInPathListWithCriteria -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'Any')
@@ -627,7 +596,7 @@ function Test-TargetResource
         # If the control reached here, none of the specified paths were found in the existing path-variable, return success
         Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
         return $true
-    }    
+    }
 }
 
 <#
@@ -638,9 +607,9 @@ function Test-TargetResource
         The name of the environment variable to retrieve the value from.
 
     .PARAMETER Target
-        Indicates where to retrieve the environment variable from based on
-        the enum: $script:environmentVariableTarget. Currently, only Process and Machine
-        are being used, but User is included for future extension of this resource.
+        Indicates where to retrieve the environment variable from. Currently, only
+        Process and Machine are being used, but User is included for future extension
+        of this resource.
 #>
 function Get-EnvironmentVariable
 {
@@ -654,17 +623,18 @@ function Get-EnvironmentVariable
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [Int]
+        [ValidateSet('Process', 'Machine')]
+        [String]
         $Target
     )
 
     $valueToReturn = $null
 
-    if ($Target -eq $script:environmentVariableTarget.Process) 
+    if ($Target -eq 'Process') 
     {
         $valueToReturn = Get-ProcessEnvironmentVariable -Name $Name
     }
-    elseif ($Target -eq $script:environmentVariableTarget.Machine)
+    elseif ($Target -eq 'Machine')
     {
         $retrievedProperty = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -673,7 +643,7 @@ function Get-EnvironmentVariable
             $valueToReturn = $retrievedProperty.$Name
         }
     }
-    elseif ($Target -eq $script:environmentVariableTarget.User)
+    elseif ($Target -eq 'User')
     {
         $retrievedProperty = Get-ItemProperty -Path $script:envVarRegPathUser -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -682,11 +652,7 @@ function Get-EnvironmentVariable
             $valueToReturn = $retrievedProperty.$Name
         }
     }
-    else
-    {
-        New-InvalidArgumentException -Message $script:localizedData.InvalidTarget -ArgumentName $Target
-    }
-
+ 
     return $valueToReturn
 }
 
@@ -1214,8 +1180,8 @@ function Get-EnvironmentVariableWithoutExpanding
 
 <#
     .SYNOPSIS
-        Wrapper function to get the value of the environment variable with the givben name
-        from the ey.
+        Wrapper function to get the value of the environment variable with the given name
+        from the specified registry key.
           
     .PARAMETER Name
         The name of the environment variable to retrieve the value of.
@@ -1236,11 +1202,9 @@ function Get-KeyValue
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [PSObject]
+        [Microsoft.Win32.RegistryKey]
         $Key
     )
 
     return $Key.GetValue($Name, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
 }
-
-Export-ModuleMember -Function *-TargetResource
