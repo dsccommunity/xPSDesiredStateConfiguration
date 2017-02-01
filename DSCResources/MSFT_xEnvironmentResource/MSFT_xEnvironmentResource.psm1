@@ -94,8 +94,6 @@ function Get-TargetResource
         specified, an error will be thrown indicating that the variable cannot be created without
         a specified value. If Ensure is set to Present, the variable already exists, and no value
         is specified, nothing will be changed.
-        If Path is set to True, then each value passed in will be checked against the existing value
-        to ensure that the paths exist or not.
 
     .PARAMETER Ensure
         Specifies whether the variable should exist or not.
@@ -190,9 +188,9 @@ function Set-TargetResource
     if ($Ensure -eq 'Present')
     {
         $createMachineVariable = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
-        $createProcessVarialbe = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
+        $createProcessVariable = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
 
-        if ($createMachineVariable -and $createProcessVarialbe)
+        if ($createMachineVariable -and $createProcessVariable)
         {
 
             if (-not $valueSpecified)
@@ -287,14 +285,15 @@ function Set-TargetResource
         if ($setProcessVariable)
         {
             $updatedValue = $trimmedValue
-            <#
-                If this function returns $null, than all of the paths specified to be added are
-                already listed in the current value so it does not need to be updated, otherwise
-                this function will return the updated value of the variable after any new paths
-                have been added.
-            #>
+            
             if ($currentValueFromProcess)
             {
+                <#
+                    If this function returns $null, than all of the paths specified to be added are
+                    already listed in the current value so it does not need to be updated, otherwise
+                    this function will return the updated value of the variable after any new paths
+                    have been added.
+                #>
                 $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
             }
 
@@ -548,7 +547,7 @@ function Test-TargetResource
     {                   
         if ($checkMachineTarget)
         {        
-            if (-not (Test-PathInPathListWithCriteria -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'All'))
+            if (-not (Test-PathInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'All'))
             {
                 # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure       
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
@@ -558,7 +557,7 @@ function Test-TargetResource
 
         if ($checkProcessTarget)
         {
-            if (-not (Test-PathInPathListWithCriteria -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'All'))
+            if (-not (Test-PathInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'All'))
             {
                 # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure       
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
@@ -575,7 +574,7 @@ function Test-TargetResource
     {                             
         if ($checkMachineTarget)
         {
-            if (Test-PathInPathListWithCriteria -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'Any')
+            if (Test-PathInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'Any')
             {
                 # One of the specified paths in $Value exists in the environment variable path, thus the test fails
                 Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueFromMachine)
@@ -585,7 +584,7 @@ function Test-TargetResource
 
         if ($checkProcessTarget)
         {
-            if (Test-PathInPathListWithCriteria -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'Any')
+            if (Test-PathInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'Any')
             {
                 # One of the specified paths in $Value exists in the environment variable path, thus the test fails
                 Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueFromProcess)
@@ -716,10 +715,12 @@ function Get-PathValueWithAddedPaths
 
     foreach ($path in $newPaths)            
     {            
-        if (-not (Test-PathInPathList -QueryPath $path -PathList $currentPaths))
+        if ($currentPaths -notcontains $path)
         {
-            # If the control reached here, we didn't find this $specifiedPath in the $currentPaths, add it
-            # and mark the environment variable as updated.
+            <#
+                If the control reached here, we didn't find this $specifiedPath in the $currentPaths,
+                add it and mark the environment variable as updated.
+            #>
 
             $varUpdated = $true
             $finalValue += ($path + ';')
@@ -776,7 +777,7 @@ function Get-PathValueWithRemovedPaths
 
     foreach ($subpath in $currentPaths)
     {
-        if (Test-PathInPathList -QueryPath $subpath -PathList $specifiedPaths)
+        if ($specifiedPaths -contains $subpath)
         {
             <#
                 Found this $subpath as one of the $specifiedPaths, skip adding this to the final
@@ -931,8 +932,8 @@ function Set-EnvironmentVariable
     }
     catch 
     {
-        Write-Verbose ($script:localizedData.EnvVarSetError -f $Name, $Value)
-        throw $_
+        New-InvalidOperationException -Message ($script:localizedData.EnvVarSetError -f $Name, $Value) `
+                                      -ErrorRecord $_
     }
 
 }
@@ -998,8 +999,8 @@ function Remove-EnvironmentVariable
     }
     catch 
     {
-        Write-Verbose -Message ($script:localizedData.EnvVarRemoveError -f $Name)
-        throw $_
+        New-InvalidOperationException -Message ($script:localizedData.EnvVarRemoveError -f $Name) `
+                                      -ErrorRecord $_
     }
 }
 
@@ -1022,7 +1023,7 @@ function Remove-EnvironmentVariable
         Set to either 'All' or 'Any' to indicate whether all of the paths in QueryPaths
         should be included in ExistingPaths or any of them.
 #>
-function Test-PathInPathListWithCriteria
+function Test-PathInValue
 {
     [OutputType([Boolean])]  
     [CmdletBinding()]
@@ -1051,7 +1052,7 @@ function Test-PathInPathListWithCriteria
         {
             foreach ($queryPath in $queryPathList)
             {            
-                if (Test-PathInPathList -QueryPath $queryPath -PathList $existingPathList)
+                if ($existingPathList -contains $queryPath)
                 {
                     # Found this $queryPath in the existing paths, return $true
                     return $true
@@ -1068,7 +1069,7 @@ function Test-PathInPathListWithCriteria
             {
                 if ($queryPath) 
                 {
-                    if (-not (Test-PathInPathList -QueryPath $queryPath -PathList $existingPathList))
+                    if ($existingPathList -notcontains $queryPath)
                     {
                         # The current $queryPath wasn't found in any of the $existingPathList, return false                    
                         return $false
@@ -1080,44 +1081,6 @@ function Test-PathInPathListWithCriteria
             return $true
         }    
     }
-}
-
-<#
-    .SYNOPSIS
-        Tests whether QueryPath is contained in PathList.
-        Returns True if it is contained, False otherwise.
-          
-    .PARAMETER QueryPath
-        The path to test if it is included in PathList.
-
-    .PARAMETER PathList
-        The list to check the QueryPath against.
-#>
-function Test-PathInPathList
-{
-    [OutputType([Boolean])]
-    [CmdletBinding()]    
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $QueryPath,
-        
-        [Parameter(Mandatory = $true)]       
-        [String[]]
-        $PathList
-    )
-    
-    foreach ($path in $PathList)
-    {
-        if ($QueryPath -eq $path)
-        {
-            # If the query path matches any of the paths in $PathList, return $true
-            return $true
-        }                
-    }     
-    
-    return $false        
 }
 
 <#
