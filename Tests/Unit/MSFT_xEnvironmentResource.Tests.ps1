@@ -2211,52 +2211,54 @@ try
             }
         }
 
-        Describe 'xEnvironmentResource\Get-PathValueWithAddedPaths' {
+        Describe 'xEnvironmentResource\Add-PathsToValue' {
             Context 'Path is updated' {
                 It 'Should return the updated path value with the new path' {
-                    $getPathValueWithAddedPathsResult = Get-PathValueWithAddedPaths -CurrentValue 'path1;path2;path4' `
+                    $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue 'path1;path2;path4' `
                                                                                     -NewValue 'path3'
                     $getPathValueWithAddedPathsResult | Should Be 'path1;path2;path4;path3'
                 }
 
                 It 'Should return the updated path value with all of the new paths' {
-                    $getPathValueWithAddedPathsResult = Get-PathValueWithAddedPaths -CurrentValue 'path1;path2;path4' `
+                    $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue 'path1;path2;path4' `
                                                                                     -NewValue 'path3;path4;path5;path6;path1'
                     $getPathValueWithAddedPathsResult | Should Be 'path1;path2;path4;path3;path5;path6'
                 }
             }
 
             Context 'Path is not updated' {
-                It 'Should return $null if one path is passed in and it is already in the current value' {
-                    $getPathValueWithAddedPathsResult = Get-PathValueWithAddedPaths -CurrentValue 'path1;path2;path3;path4' `
-                                                                                    -NewValue 'path3'
-                    $getPathValueWithAddedPathsResult | Should Be $null
+                $currentValue = 'path1;path2;path3;path4'
+
+                It 'Should return the original value if one path is passed in and it is already in the current value' {
+                    $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue $currentValue `
+                                                                         -NewValue 'path3'
+                    $getPathValueWithAddedPathsResult | Should Be $currentValue
                 }
 
-                It 'Should return $null if multiple paths are passed in that are already contained in current value' {
-                    $getPathValueWithAddedPathsResult = Get-PathValueWithAddedPaths -CurrentValue 'path1;path2;path3;path4' `
-                                                                                    -NewValue 'path3;path4;path2'
-                    $getPathValueWithAddedPathsResult | Should Be $null
+                It 'Should return $currentValue if multiple paths are passed in that are already contained in current value' {
+                    $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue $currentValue `
+                                                                         -NewValue 'path3;path4;path2'
+                    $getPathValueWithAddedPathsResult | Should Be $currentValue
                 }
             }
         }
         
-        Describe 'xEnvironmentResource\Get-PathValueWithRemovedPaths' {
+        Describe 'xEnvironmentResource\Remove-PathsFromValue' {
             Context 'Path is updated' {
                 It 'Should return the updated path value with the specified path removed' {
-                    $getPathValueWithRemovedPathsResult = Get-PathValueWithRemovedPaths -CurrentValue 'path1;path2;path4' `
+                    $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path4' `
                                                                                     -PathsToRemove 'path2'
                     $getPathValueWithRemovedPathsResult | Should Be 'path1;path4'
                 }
 
                 It 'Should return the updated path value with all of the specified paths removed if they were present' {
-                    $getPathValueWithRemovedPathsResult = Get-PathValueWithRemovedPaths -CurrentValue 'path1;path2;path4' `
+                    $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path4' `
                                                                                     -PathsToRemove 'path3;path4;path5;path6;path1'
                     $getPathValueWithRemovedPathsResult | Should Be 'path2'
                 }
 
                 It 'Should return an empty string if all paths are removed' {
-                    $getPathValueWithRemovedPathsResult = Get-PathValueWithRemovedPaths -CurrentValue 'path1;path2;path4' `
+                    $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path4' `
                                                                                     -PathsToRemove 'path2;path1;path4'
                     $getPathValueWithRemovedPathsResult | Should Be ''
                 }
@@ -2264,7 +2266,7 @@ try
 
             Context 'Path is not updated' {
                 It 'Should return the original path if no paths were removed' {
-                    $getPathValueWithRemovedPathsResult = Get-PathValueWithRemovedPaths -CurrentValue 'path1;path2;path3;path4' `
+                    $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path3;path4' `
                                                                                     -PathsToRemove 'path5;path6;path0'
                     $getPathValueWithRemovedPathsResult | Should Be 'path1;path2;path3;path4'
                 }

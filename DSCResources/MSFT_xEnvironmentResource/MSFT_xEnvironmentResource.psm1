@@ -255,24 +255,15 @@ function Set-TargetResource
             return
         }
 
-        # If the control reaches here, the specified variable exists, it is a path variable, and a $Value has been specified to be set.
+        # If the control reaches here, the specified variable exists, it is a path variable, and a value has been specified to be set.
 
         if ($setMachineVariable)
         {
-            $updatedValue = $trimmedValue
-            <#
-                If this function returns $null, than all of the paths specified to be added are
-                already listed in the current value so it does not need to be updated, otherwise
-                this function will return the updated value of the variable after any new paths
-                have been added.
-            #>
-            if ($currentValueFromMachine)
-            {
-                $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
-            }
+            $valueUnchanged = Test-PathInValue -ExistingPaths $currentValueFromMachine -QueryPaths $trimmedValue -FindCriteria 'All'
 
-            if ($updatedValue)
+            if ($currentValueFromMachine -and -not $valueUnchanged)
             {
+                $updatedValue = Add-PathsToValue -CurrentValue $currentValueFromMachine -NewValue $trimmedValue
                 Set-EnvironmentVariable -Name $Name -Value $updatedValue -Target @('Machine')
                 Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromMachine, $updatedValue)
             }
@@ -284,21 +275,11 @@ function Set-TargetResource
 
         if ($setProcessVariable)
         {
-            $updatedValue = $trimmedValue
+            $valueUnchanged = Test-PathInValue -ExistingPaths $currentValueFromProcess -QueryPaths $trimmedValue -FindCriteria 'All'
             
-            if ($currentValueFromProcess)
+            if ($currentValueFromProcess -and -not $valueUnchanged)
             {
-                <#
-                    If this function returns $null, than all of the paths specified to be added are
-                    already listed in the current value so it does not need to be updated, otherwise
-                    this function will return the updated value of the variable after any new paths
-                    have been added.
-                #>
-                $updatedValue = Get-PathValueWithAddedPaths -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
-            }
-
-            if ($updatedValue)
-            {
+                $updatedValue = Add-PathsToValue -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
                 Set-EnvironmentVariable -Name $Name -Value $updatedValue -Target @('Process')
                 Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromProcess, $updatedValue)
             }
@@ -358,7 +339,7 @@ function Set-TargetResource
                     updated, otherwise, only the specified paths were removed but there are still others
                     that need to be left in, so the path variable is updated to remove only the specified paths.
                 #>
-                $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
+                $finalPath = Remove-PathsFromValue -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
             }
 
             if ([String]::IsNullOrEmpty($finalPath))
@@ -389,7 +370,7 @@ function Set-TargetResource
                     updated, otherwise, only the specified paths were removed but there are still others
                     that need to be left in, so the path variable is updated to remove only the specified paths.
                 #>
-                $finalPath = Get-PathValueWithRemovedPaths -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
+                $finalPath = Remove-PathsFromValue -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
             }
 
             if ([String]::IsNullOrEmpty($finalPath))
@@ -682,7 +663,7 @@ function Get-ProcessEnvironmentVariable
     .SYNOPSIS
         If there are any paths in NewPaths that aren't in CurrentValue they will be added
         to the current paths value and a String will be returned containing all old paths
-        and new paths. Otherwise, $null will be returned to indicate that no changes were made.
+        and new paths. Otherwise the original value will be returned unchanged.
         
     .PARAMETER CurrentValue
         A semicolon-separated String containing the current path values.
@@ -691,7 +672,7 @@ function Get-ProcessEnvironmentVariable
         A semicolon-separated String containing any paths that should be added to
         the current value. If CurrentValue already contains a path, it will not be added.   
 #>
-function Get-PathValueWithAddedPaths
+function Add-PathsToValue
 {
     [CmdletBinding()]
     [OutputType([String])]
@@ -711,7 +692,6 @@ function Get-PathValueWithAddedPaths
     $finalValue = $CurrentValue + ';'
     $currentPaths = $CurrentValue -split ';'
     $newPaths = $NewValue -split ';'
-    $varUpdated = $false
 
     foreach ($path in $newPaths)            
     {            
@@ -719,23 +699,15 @@ function Get-PathValueWithAddedPaths
         {
             <#
                 If the control reached here, we didn't find this $specifiedPath in the $currentPaths,
-                add it and mark the environment variable as updated.
+                so add it.
             #>
 
-            $varUpdated = $true
             $finalValue += ($path + ';')
         }                            
     }  
-       
-    if ($varUpdated)
-    {
-        # Remove any extraneous ';' at the end (and potentially start - as a side-effect) of the value to be set
-        return $finalValue.Trim(';')
-    }
-    else
-    {
-        return $null
-    }
+
+    # Remove any extraneous ';' at the end (and potentially start - as a side-effect) of the value to be set
+    return $finalValue.Trim(';')
 }
 
 <#
@@ -753,7 +725,7 @@ function Get-PathValueWithAddedPaths
         A semicolon-separated String containing any paths that should be removed from
         the current value.
 #>
-function Get-PathValueWithRemovedPaths
+function Remove-PathsFromValue
 {
     [OutputType([String])]
     [CmdletBinding()]
