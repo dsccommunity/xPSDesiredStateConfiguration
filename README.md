@@ -577,12 +577,14 @@ None
     * Significantly cleaned the resource.
     * Minor Breaking Change where the resource will now throw an error if no value is provided, Ensure is set to present, and the variable does not exist, whereas before it would create an empty registry key on the machine in this case (if this is the desired outcome then use the Registry resource).
     * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).  
+* xGroup:
+    * Group members in the "NT Authority" scope should now be resolved without an error. If you were seeing the error "Exception calling ".ctor" with "4" argument(s): "Server names cannot contain a space character."", this fix should resolve that error.
+    * The resource will no longer attempt to resolve group members if Members, MembersToInclude, and MembersToExclude are not specified.
 
 ### 5.2.0.0
 
 * xWindowsProcess
     * Minor updates to integration tests because one of the tests was flaky.
-
 * xRegistry:
     * Added support for forward slashes in registry key names. This resolves issue [#285](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/285).
 

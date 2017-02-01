@@ -546,20 +546,11 @@ function Set-TargetResourceOnFullSKU
 
         if ($Ensure -eq 'Present')
         {
-            $actualMembersAsPrincipals = $null
-
             $shouldProcessTarget = $script:localizedData.GroupWithName -f $GroupName
             if ($groupOriginallyExists)
             {
                 $null = $disposables.Add($group)
                 $whatIfShouldProcess = $PSCmdlet.ShouldProcess($shouldProcessTarget, $script:localizedData.SetOperation)
-
-                $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
-                    -Group $group `
-                    -PrincipalContextCache $principalContextCache `
-                    -Disposables $disposables `
-                    -Credential $Credential
-                )
             }
             else
             {
@@ -591,6 +582,8 @@ function Set-TargetResourceOnFullSKU
                     $saveChanges = $true
                 }
 
+                $actualMembersAsPrincipals = $null
+
                 <#
                     Group members can be updated in two ways:
                     1. Supplying the Members parameter - this causes the membership to be replaced
@@ -614,6 +607,16 @@ function Set-TargetResourceOnFullSKU
                             New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
                                 -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
                         }
+                    }
+
+                    if ($groupOriginallyExists)
+                    {
+                        $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
+                            -Group $group `
+                            -PrincipalContextCache $principalContextCache `
+                            -Disposables $disposables `
+                            -Credential $Credential
+                        )
                     }
 
                     if ($Members.Count -eq 0 -and $null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -ne 0)
@@ -669,8 +672,18 @@ function Set-TargetResourceOnFullSKU
                         Write-Verbose -Message ($script:localizedData.GroupAndMembersEmpty -f $GroupName)
                     }
                 }
-                else
+                elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
                 {
+                    if ($groupOriginallyExists)
+                    {
+                        $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
+                            -Group $group `
+                            -PrincipalContextCache $principalContextCache `
+                            -Disposables $disposables `
+                            -Credential $Credential
+                        )
+                    }
+
                     $membersToIncludeAsPrincipals = $null
                     $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
 
@@ -916,8 +929,6 @@ function Set-TargetResourceOnNanoServer
                 Set-LocalGroup -Name $GroupName -Description $Description
             }
 
-            $groupMembers = Get-MembersOnNanoServer -Group $group
-
             if ($PSBoundParameters.ContainsKey('Members'))
             {
                 foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
@@ -928,6 +939,8 @@ function Set-TargetResourceOnNanoServer
                             -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
                     }
                 }
+
+                $groupMembers = Get-MembersOnNanoServer -Group $group
 
                 # Remove duplicate names as strings.
                 $uniqueMembers = $Members | Select-Object -Unique
@@ -950,8 +963,10 @@ function Set-TargetResourceOnNanoServer
                     }
                 }
             }
-            else
+            elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
             {
+                $groupMembers = Get-MembersOnNanoServer -Group $group
+
                 $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
                 $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
 
@@ -1084,7 +1099,6 @@ function Test-TargetResourceOnFullSKU
         [String]
         $Description,
 
-        [ValidateNotNull()]
         [String[]]
         $Members,
 
@@ -1107,7 +1121,7 @@ function Test-TargetResourceOnFullSKU
     {
         $principalContext = Get-PrincipalContext `
             -PrincipalContextCache $PrincipalContextCache `
-            -Disposables $Disposables `
+            -Disposables $disposables `
             -Scope $env:computerName
 
         $group = Get-Group -GroupName $GroupName -PrincipalContext $principalContext
@@ -1134,13 +1148,6 @@ function Test-TargetResourceOnFullSKU
             return $false
         }
 
-        $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
-            -Group $group `
-            -PrincipalContextCache $principalContextCache `
-            -Disposables $disposables `
-            -Credential $Credential
-        )
-
         if ($PSBoundParameters.ContainsKey('Members'))
         {
             foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
@@ -1151,6 +1158,13 @@ function Test-TargetResourceOnFullSKU
                         -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
                 }
             }
+
+            $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
+                -Group $group `
+                -PrincipalContextCache $principalContextCache `
+                -Disposables $disposables `
+                -Credential $Credential
+            )
 
             $uniqueMembers = $Members | Select-Object -Unique
 
@@ -1192,8 +1206,15 @@ function Test-TargetResourceOnFullSKU
                 }
             }
         }
-        else
+        elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
+            $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
+                -Group $group `
+                -PrincipalContextCache $principalContextCache `
+                -Disposables $disposables `
+                -Credential $Credential
+            )
+
             $membersToIncludeAsPrincipals = $null
             $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
 
@@ -1339,7 +1360,6 @@ function Test-TargetResourceOnNanoServer
         [String]
         $Description,
 
-        [ValidateNotNull()]
         [String[]]
         $Members,
 
@@ -1388,8 +1408,6 @@ function Test-TargetResourceOnNanoServer
         return $false
     }
 
-    $groupMembers = Get-MembersOnNanoServer -Group $group
-
     if ($PSBoundParameters.ContainsKey('Members'))
     {
         foreach ($incompatibleParameterName in @( 'MembersToInclude', 'MembersToExclude' ))
@@ -1400,6 +1418,8 @@ function Test-TargetResourceOnNanoServer
                     -Message ($script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', $incompatibleParameterName)
             }
         }
+
+        $groupMembers = Get-MembersOnNanoServer -Group $group
 
         # Remove duplicate names as strings.
         $uniqueMembers = $Members | Select-Object -Unique
@@ -1424,8 +1444,10 @@ function Test-TargetResourceOnNanoServer
             }
         }
     }
-    else
+    elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
     {
+        $groupMembers = Get-MembersOnNanoServer -Group $group
+
         $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
         $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
 
@@ -2134,7 +2156,7 @@ function Test-IsLocalMachine
         $Scope
     )
 
-    $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1' )
+    $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1', 'NT Authority' )
 
     if ($localMachineScopes -icontains $Scope)
     {
@@ -2547,5 +2569,3 @@ function Remove-DisposableObject
         }
     }
 }
-
-Export-ModuleMember -Function '*-TargetResource'
