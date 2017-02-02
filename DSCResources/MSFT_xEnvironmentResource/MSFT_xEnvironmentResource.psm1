@@ -259,7 +259,7 @@ function Set-TargetResource
 
         if ($setMachineVariable)
         {
-            $valueUnchanged = Test-PathInValue -ExistingPaths $currentValueFromMachine -QueryPaths $trimmedValue -FindCriteria 'All'
+            $valueUnchanged = Test-PathsInValue -ExistingPaths $currentValueFromMachine -QueryPaths $trimmedValue -FindCriteria 'All'
 
             if ($currentValueFromMachine -and -not $valueUnchanged)
             {
@@ -275,7 +275,7 @@ function Set-TargetResource
 
         if ($setProcessVariable)
         {
-            $valueUnchanged = Test-PathInValue -ExistingPaths $currentValueFromProcess -QueryPaths $trimmedValue -FindCriteria 'All'
+            $valueUnchanged = Test-PathsInValue -ExistingPaths $currentValueFromProcess -QueryPaths $trimmedValue -FindCriteria 'All'
             
             if ($currentValueFromProcess -and -not $valueUnchanged)
             {
@@ -528,7 +528,7 @@ function Test-TargetResource
     {                   
         if ($checkMachineTarget)
         {        
-            if (-not (Test-PathInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'All'))
+            if (-not (Test-PathsInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'All'))
             {
                 # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure       
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
@@ -538,7 +538,7 @@ function Test-TargetResource
 
         if ($checkProcessTarget)
         {
-            if (-not (Test-PathInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'All'))
+            if (-not (Test-PathsInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'All'))
             {
                 # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure       
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
@@ -555,7 +555,7 @@ function Test-TargetResource
     {                             
         if ($checkMachineTarget)
         {
-            if (Test-PathInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'Any')
+            if (Test-PathsInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'Any')
             {
                 # One of the specified paths in $Value exists in the environment variable path, thus the test fails
                 Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueFromMachine)
@@ -565,7 +565,7 @@ function Test-TargetResource
 
         if ($checkProcessTarget)
         {
-            if (Test-PathInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'Any')
+            if (Test-PathsInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'Any')
             {
                 # One of the specified paths in $Value exists in the environment variable path, thus the test fails
                 Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueFromProcess)
@@ -995,7 +995,7 @@ function Remove-EnvironmentVariable
         Set to either 'All' or 'Any' to indicate whether all of the paths in QueryPaths
         should be included in ExistingPaths or any of them.
 #>
-function Test-PathInValue
+function Test-PathsInValue
 {
     [OutputType([Boolean])]  
     [CmdletBinding()]
