@@ -20,14 +20,6 @@ try
 {
     Describe 'xEnvironmentResouce Integration Tests - with both Targets specified (default)' {
         BeforeAll {
-            
-            # Import Environment resource module for Get-TargetResource, Test-TargetResource, Set-TargetResource
-            $moduleRootFilePath = Split-Path -Path $script:testFolderPath -Parent
-            $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-            $environmentResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_EnvironmentResource'
-            $environmentResourceModuleFilePath = Join-Path -Path $environmentResourceFolderFilePath -ChildPath 'MSFT_EnvironmentResource.psm1'
-            Import-Module -Name $environmentResourceModuleFilePath -Force
-
             $testEnvironmentVarName = 'TestEnvironmentVariableName'
             $testPathEnvironmentVarName = 'TestPathEnvironmentVariableName'
             $machineEnvironmentRegistryPath = 'HKLM:\System\CurrentControlSet\Control\Session Manager\Environment'
