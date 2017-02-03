@@ -18,13 +18,12 @@ try
 {
     Describe 'xGroup Integration Tests'  {
         BeforeAll {
-            # Import xGroup Test Helper for TestGroupExists, New-Group, Remove-Group, New-User, Remove-User
-            $groupTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xGroupResource.TestHelper.psm1'
-            Import-Module -Name $groupTestHelperFilePath
+            Import-Module -Name (Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xGroupResource.TestHelper.psm1')
 
+            $script:confgurationNoMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xGroupResource_NoMembers.config.ps1'
             $script:confgurationWithMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xGroupResource_Members.config.ps1'
             $script:confgurationWithMembersToIncludeExcludeFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xGroupResource_MembersToIncludeExclude.config.ps1'
-
+                                                                            
             # Fake users for testing
             $testUsername1 = 'TestUser1'
             $testUsername2 = 'TestUser2'
@@ -76,6 +75,47 @@ try
                     Remove-Group -GroupName $testGroupName
                 }
             }
+        }
+
+        It 'Should not change the state of the present built-in Users group when no Members specified' {
+            $configurationName = 'BuiltInGroup'
+            $testGroupName = 'Users'
+
+            $resourceParameters = @{
+                Ensure = 'Present'
+                GroupName = $testGroupName
+            }
+
+            Test-GroupExists -GroupName $testGroupName | Should Be $true
+
+            { 
+                . $script:confgurationNoMembersFilePath -ConfigurationName $configurationName
+                & $configurationName -OutputPath $TestDrive @resourceParameters
+                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+            } | Should Not Throw
+
+            Test-GroupExists -GroupName $testGroupName | Should Be $true
+        }
+
+        It 'Should add a member to the built-in Users group with MembersToInclude' {
+            $configurationName = 'BuiltInGroup'
+            $testGroupName = 'Users'
+
+            $resourceParameters = @{
+                Ensure = 'Present'
+                GroupName = $testGroupName
+                MembersToInclude = $testUsername1
+            }
+
+            Test-GroupExists -GroupName $testGroupName | Should Be $true
+
+            { 
+                . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
+                & $configurationName -OutputPath $TestDrive @resourceParameters
+                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+            } | Should Not Throw
+
+            Test-GroupExists -GroupName $testGroupName -MembersToInclude $testUsername1 | Should Be $true
         }
 
         It 'Should create a group with two test users using Members' {
