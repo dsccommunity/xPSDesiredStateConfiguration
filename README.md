@@ -578,7 +578,7 @@ None
     * Minor Breaking Change where the resource will now throw an error if no value is provided, Ensure is set to present, and the variable does not exist, whereas before it would create an empty registry key on the machine in this case (if this is the desired outcome then use the Registry resource).
     * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).  
 * xGroup:
-    * Group members in the "NT Authority" scope should now be resolved without an error. If you were seeing the error "Exception calling ".ctor" with "4" argument(s): "Server names cannot contain a space character."", this fix should resolve that error.
+    * Group members in the "NT Authority", "BuiltIn" and "NT Service" scopes should now be resolved without an error. If you were seeing the errors "Exception calling ".ctor" with "4" argument(s): "Server names cannot contain a space character."" or "Exception calling ".ctor" with "2" argument(s): "Server names cannot contain a space character."", this fix should resolve those errors. If you are still seeing one of the errors, there is probably another local scope we need to add. Please let us know.
     * The resource will no longer attempt to resolve group members if Members, MembersToInclude, and MembersToExclude are not specified.
 
 ### 5.2.0.0
