@@ -570,6 +570,8 @@ None
 
 ### Unreleased
 
+### 6.0.0.0
+
 * xEnvironment
     * Updated resource to follow HQRM guidelines.
     * Added examples.
