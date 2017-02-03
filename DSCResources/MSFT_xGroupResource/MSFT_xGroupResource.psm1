@@ -2156,7 +2156,7 @@ function Test-IsLocalMachine
         $Scope
     )
 
-    $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1', 'NT Authority' )
+    $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1', 'NT Authority', 'NT Service' )
 
     if ($localMachineScopes -icontains $Scope)
     {
