@@ -22,7 +22,7 @@ Configuration $ConfigurationName
 
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
-    xGroup xGroup1
+    xGroup Group3
     {
         GroupName = $GroupName
         Ensure = $Ensure
