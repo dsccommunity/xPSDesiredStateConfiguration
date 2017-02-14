@@ -184,11 +184,11 @@ function Set-TargetResource
     $esedatabase = "$DatabasePath\Devices.edb";
 
     $culture = Get-Culture
-    $language = $culture.IetfLanguageTag
-
+    $languagePath = $culture.IetfLanguageTag
+    $language = $culture.TwoLetterISOLanguageName
     # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
-    if (-not (Test-Path $pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
-        $language = 'en'
+    if (-not (Test-Path $pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
+        $languagePath = 'en'
     }
 
     $os = [System.Environment]::OSVersion.Version
@@ -239,7 +239,7 @@ function Set-TargetResource
                      -asax "$pathPullServer\Global.asax" `
                      -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
                      -language $language `
-                     -dependentMUIFiles  "$pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
+                     -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
                      -certificateThumbPrint $CertificateThumbPrint `
                      -EnableFirewallException $true -Verbose
 
