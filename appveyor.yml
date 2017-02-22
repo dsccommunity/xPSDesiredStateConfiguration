@@ -6,7 +6,6 @@ install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
         $moduleName = 'xPSDesiredStateConfiguration'
-        $mainModuleFolder = ".\"
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
 
@@ -24,7 +23,6 @@ test_script:
     - ps: |
         Invoke-AppveyorTestScriptTask `
             -Type 'Default' `
-            -MainModulePath $mainModuleFolder `
             -CodeCoverage `
             -CodeCovIo `
             -DisableConsistency
