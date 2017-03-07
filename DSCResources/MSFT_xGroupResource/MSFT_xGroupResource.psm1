@@ -2465,7 +2465,9 @@ function Add-GroupMember
         $MemberAsPrincipal
     )
 
-    $Group.Members.Add($MemberAsPrincipal)
+    [System.DirectoryServices.DirectoryEntry]$groupDE = $Group.GetUnderlyingObject();
+    $nativeGroup = $groupDE.NativeObject;
+    $nativeGroup.Add("WinNT://" + $MemberAsPrincipal.Sid.Value);
 }
 
 <#
@@ -2495,7 +2497,9 @@ function Remove-GroupMember
         $MemberAsPrincipal
     )
 
-    $Group.Members.Remove($MemberAsPrincipal)
+    [System.DirectoryServices.DirectoryEntry]$groupDE = $Group.GetUnderlyingObject();
+    $nativeGroup = $groupDE.NativeObject;
+    $nativeGroup.Remove("WinNT://" + $MemberAsPrincipal.Sid.Value);
 }
 
 <#
