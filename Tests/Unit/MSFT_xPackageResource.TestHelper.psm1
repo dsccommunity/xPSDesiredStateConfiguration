@@ -198,11 +198,17 @@ function New-TestExecutable
                 string self = cmdline.Substring(0, endIndex);
                 string other = cmdline.Substring(self.Length + 1);
                 string msiexecpath = System.IO.Path.Combine(System.Environment.SystemDirectory, "msiexec.exe");
+                
+                var arguments = new List<string>((string[])args);
 
                 self = self.Replace("\"", "");
                 string packagePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(self), "DSCSetupProject.msi");
-
-                string msiexecargs = String.Format("/i {0} {1}", packagePath, other);
+                
+                if (arguments.Contains("/remove"))
+                {
+                    arguments.Remove("/remove");
+                }
+                string msiexecargs = String.Format("/i {0} {1}", packagePath, String.Join(" ", arguments));
                 System.Diagnostics.Process.Start(msiexecpath, msiexecargs).WaitForExit();
             }
         }

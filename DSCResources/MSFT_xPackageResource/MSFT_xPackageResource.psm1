@@ -397,6 +397,9 @@ function Test-TargetResource
         [UInt32[]]
         $ReturnCode = @( 0, 1641, 3010 ),
 
+        [Boolean]
+        $IsMSIPackage = $true,
+
         [String]
         $LogPath,
 
@@ -563,6 +566,9 @@ function Get-TargetResource
         [AllowEmptyString()]
         [String]
         $ProductId,
+
+        [Boolean]
+        $IsMSIPackage = $true,
 
         [Boolean]
         $CreateCheckRegValue = $false,
@@ -1011,6 +1017,9 @@ function Set-TargetResource
         [UInt32[]]
         $ReturnCode = @( 0, 1641, 3010 ),
 
+        [Boolean]
+        $IsMSIPackage = $true,
+
         [String]
         $LogPath,
 
@@ -1299,7 +1308,7 @@ function Set-TargetResource
             # EXE
             Write-Verbose -Message $LocalizedData.TheBinaryIsAnExe
 
-            if ($Ensure -eq 'Present')
+            if ($Ensure -eq 'Present' -or !$IsMSIPackage)
             {
                 $startInfo.FileName = $Path
                 $startInfo.Arguments = $Arguments
@@ -1636,7 +1645,7 @@ function Assert-FileSignatureValid
     if ($null -ne $Thumbprint -and ($signature.SignerCertificate.Thumbprint -ne $Thumbprint))
     {
         throw ($LocalizedData.WrongSignerThumbprint -f $Path, $Thumbprint)
-    }
+    } 
 }
 
 <#
