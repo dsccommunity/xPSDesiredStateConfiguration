@@ -48,7 +48,7 @@ function Get-TargetResource
     
     Write-Verbose -Message ($script:localizedData.QueryFeature -f $Name)
     
-    $feature = WindowsFeatureHelper -Action Get @PSBoundParameters
+    $feature = Invoke-WindowsFeatureAction -Action Get @PSBoundParameters
     
     Assert-SingleFeatureExists -Feature $feature -Name $Name
     
@@ -64,7 +64,7 @@ function Get-TargetResource
         {
             $helperParam = ([hashtable]$PSBoundParameters).Clone()
             $helperParam['Name'] = $currentSubFeatureName
-            $subFeature = WindowsFeatureHelper -Action Get @helperParam
+            $subFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
     
             Assert-SingleFeatureExists -Feature $subFeature -Name $currentSubFeatureName
     
@@ -77,7 +77,7 @@ function Get-TargetResource
     }
 
     $includeManagementTools = $true
-    $managementTools = (GetWindowsFeatureManagementTools -Name $Name).UniqueName
+    $managementTools = Get-WindowsFeatureManagementTools -Name $Name
 
     if($managementTools.Count -eq 0)
     {
@@ -89,7 +89,7 @@ function Get-TargetResource
         {
             $helperParam = ([hashtable]$PSBoundParameters).Clone()
             $helperParam['Name'] = $currentManagementToolName
-            $managementFeature = WindowsFeatureHelper -Action Get @helperParam
+            $managementFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
     
             Assert-SingleFeatureExists -Feature $managementFeature -Name $currentManagementToolName
     
@@ -197,9 +197,9 @@ function Set-TargetResource
            $addWindowsFeatureParameters['LogPath'] = $LogPath 
         }
 
-        Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name)
+        Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name, $IncludeAllSubFeature, $IncludeManagementTools)
 
-        $feature = WindowsFeatureHelper -Action Add @addWindowsFeatureParameters
+        $feature = Invoke-WindowsFeatureAction -Action Add @addWindowsFeatureParameters
 
         if ($null -ne $feature -and $feature.Success)
         {
@@ -230,9 +230,9 @@ function Set-TargetResource
            $removeWindowsFeatureParameters['LogPath'] = $LogPath 
         }
 
-        Write-Verbose -Message ($script:localizedData.UninstallFeature -f $Name)
+        Write-Verbose -Message ($script:localizedData.UninstallFeature -f $Name, $IncludeManagementTools)
 
-        $feature = WindowsFeatureHelper -Action Remove @removeWindowsFeatureParameters
+        $feature = Invoke-WindowsFeatureAction -Action Remove @removeWindowsFeatureParameters
 
         if ($null -ne $feature -and $feature.Success)
         {
@@ -322,9 +322,12 @@ function Test-TargetResource
 
     $testTargetResourceResult = $false
 
-    $helperParam = @{Name=$Name}
-    if($Credential){$helperParam['Credential'] = $Credential}
-    $feature = WindowsFeatureHelper -Action Get @helperParam
+    $helperParam = @{ Name = $Name }
+    if($Credential)
+    {
+        $helperParam['Credential'] = $Credential
+    }
+    $feature = Invoke-WindowsFeatureAction -Action Get @helperParam
     
     Assert-SingleFeatureExists -Feature $feature -Name $Name
     
@@ -339,10 +342,14 @@ function Test-TargetResource
             # Check if each subfeature is in the requested state.
             foreach ($currentSubFeatureName in $feature.SubFeatures)
             {
-                $helperParam = @{Name=$currentSubFeatureName}
-                if($Credential){$helperParam['Credential'] = $Credential}
+                Write-Verbose -Message ($script:localizedData.TestTargetResourceSubFeature -f $currentSubFeatureName)
+                $helperParam = @{ Name = $currentSubFeatureName }
+                if($Credential)
+                {
+                    $helperParam['Credential'] = $Credential
+                }
 
-                $subFeature = WindowsFeatureHelper -Action Get @helperParam
+                $subFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
                 
                 Assert-SingleFeatureExists -Feature $subFeature -Name $currentSubFeatureName
     
@@ -360,16 +367,19 @@ function Test-TargetResource
             }
         }
 
-        If($IncludeManagementTools)
+        if ($IncludeManagementTools)
         {
-            $managementTools = (GetWindowsFeatureManagementTools -Name $Name).UniqueName
+            $managementTools = Get-WindowsFeatureManagementTools -Name $Name
             foreach($currentManagementToolName in $managementTools)
             {
-                Write-Verbose "Testing management tool `"$currentManagementToolName`" is installed"
-                $helperParam = @{Name=$currentManagementToolName}
-                if($Credential){$helperParam['Credential'] = $Credential}
+                Write-Verbose -Message ($script:localizedData.TestTargetResourceManagementTool -f $currentManagementToolName)
+                $helperParam = @{ Name = $currentManagementToolName }
+                if($Credential)
+                {
+                    $helperParam['Credential'] = $Credential
+                }
 
-                $managementFeature = WindowsFeatureHelper -Action Get @helperParam
+                $managementFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
                 
                 Assert-SingleFeatureExists -Feature $managementFeature -Name $currentManagementToolName
     
@@ -497,94 +507,213 @@ function Import-ServerManager
 #>
 function Test-IsWinServer2008R2SP1
 {
-    param
-    ()
+    param ()
 
     return ([Environment]::OSVersion.Version.ToString().Contains('6.1.'))
 }
 
-function NewGuidInstance
+<#
+    .SYNOPSIS
+        Generates an ciminstance of MSFT_ServerManagerRequestGuid for use with cim Class MSFT_ServerManagerDeploymentTasks static methods
+    
+    .NOTES
+        The code for this function has been sourced and translated from the Add-WindowsFeature cmdlet code.
+        
+        For more information about MSFT_ServerManagerRequestGuid please see:
+            https://msdn.microsoft.com/en-us/library/hh872467(v=vs.85).aspx
+
+    .PROPERTY Guid
+        The guid to translate into MSFT_ServerManagerRequestGuid
+#>
+function New-MSFTServerManagerRequestGuid
 {
+    [CmdletBinding(SupportsShouldProcess = $false)]
+
     param(
-        [guid]$guid
+        [Parameter()]
+        [guid]
+        $Guid
     )
-      [byte[]] $byteArray = $guid.ToByteArray()
-      [uint64] $num1 = 0
-      [uint64] $num2 = 0
-      for ($index = $byteArray.Length / 2 - 1; $index -ge 0; --$index)
-      {
+
+    if ( -not $Guid )
+    {
+        $Guid = [guid]::NewGuid()
+    }
+
+    [byte[]] $byteArray = $Guid.ToByteArray()
+    [uint64] $num1 = 0
+    [uint64] $num2 = 0
+    for ($index = $byteArray.Length / 2 - 1; $index -ge 0; --$index)
+    {
         if ($index -lt 7)
         {
-          $num1 = $num1 -shl 8
-          $num2 = $num2 -shl 8
+            $num1 = $num1 -shl 8
+            $num2 = $num2 -shl 8
         }
-        if( -not $num1 ){$num1 = [uint64] $byteArray[$index]}
-        if( -not $num2 ){$num2 = [uint64] $byteArray[$index + 8]}
-      }
+        if( -not $num1 )
+        {
+            $num1 = [uint64] $byteArray[$index]
+        }
+        if( -not $num2 )
+        {
+            $num2 = [uint64] $byteArray[$index + 8]
+        }
+    }
 
-      $ciminst = [ciminstance]::new("MSFT_ServerManagerRequestGuid", "root\Microsoft\Windows\ServerManager")
-      $highHalfProp = [Microsoft.Management.Infrastructure.CimProperty]::Create("HighHalf", $num1, 0)
-      $lowHalfProp = [Microsoft.Management.Infrastructure.CimProperty]::Create("LowHalf", $num2, 0)
-      $ciminst.CimInstanceProperties.Add($highHalfProp)
-      $ciminst.CimInstanceProperties.Add($lowHalfProp)
+    $ciminst = [ciminstance]::new("MSFT_ServerManagerRequestGuid", "root\Microsoft\Windows\ServerManager")
+    $highHalfProp = [Microsoft.Management.Infrastructure.CimProperty]::Create("HighHalf", $num1, 0)
+    $lowHalfProp = [Microsoft.Management.Infrastructure.CimProperty]::Create("LowHalf", $num2, 0)
+    $ciminst.CimInstanceProperties.Add($highHalfProp)
+    $ciminst.CimInstanceProperties.Add($lowHalfProp)
 
-      return $ciminst
+    return $ciminst
 }
 
-function GetServerComponents
+<#
+    .SYNOPSIS
+        Returns a list of Server Components and information relating to them.
+
+    .NOTES
+        A Server Component can be one of the following types:
+            * 0 - Role
+            * 1 - RoleService
+            * 2 - Feature
+
+        For more information on MSFT_ServerManagerServerComponent please see:
+            https://msdn.microsoft.com/en-us/library/hh872469(v=vs.85).aspx
+
+    .OUTPUTS
+        root/Microsoft/Windows/ServerManager/MSFT_ServerManagerServerComponent[]
+#>
+function Get-ServerComponents
 {
+    [CmdletBinding(SupportsShouldProcess = $false)]
+    param ()
+
     $cimParam = @{
         Namespace = "root\Microsoft\Windows\ServerManager"
         ClassName = "MSFT_ServerManagerDeploymentTasks"
         MethodName = "GetServerComponentsAsync"
         Arguments = @{
-            RequestGuid = (NewGuidInstance -guid ([guid]::NewGuid()))
+            RequestGuid = (New-MSFTServerManagerRequestGuid -guid ([guid]::NewGuid()))
         }
     }
 
     return (Invoke-CimMethod @cimParam).ItemValue
 }
 
-function GetWindowsFeatureManagementTools
+<#
+    .SYNOPSIS
+        Returns a list of WindowsFeature Management Tools
+
+    .PROPERTY Name
+        The name of the Windows Feature.
+
+    .OUTPUTS
+        string[]
+
+    .EXAMPLE
+        Get-WindowsFeatureManagementTools -Name 'AD-Domain-Services'
+        
+        Result:
+            GPMC
+            RSAT-AD-AdminCenter
+            RSAT-ADDS-Tools
+            
+#>
+function Get-WindowsFeatureManagementTools
 {
+    [CmdletBinding(SupportsShouldProcess = $false)]
+    [OutputType([string[]])]
     param(
-        [Parameter(Mandatory)]
-        [string]$Name
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Name
     )
 
-    $serverComponents = GetServerComponents
+    $serverComponents = Get-ServerComponents
     $optionalCompanions = $serverComponents.Where{$_.UniqueName -eq $Name}.OptionalCompanions
-    return $serverComponents.Where{$optionalCompanions.CompanionComponentName -contains $_.UniqueName}
+    return $serverComponents.Where{ $optionalCompanions.CompanionComponentName -contains $_.UniqueName }.UniqueName
 }
 
-Enum WindowsFeatureAction
-{
-    Get
-    Add
-    Remove
-}
+<#
+    .SYNOPSIS
+        Invokes either Get-WindowsFeature, Add-WindowsFeature or Remove-WindowsFeature cmdlets based on Action parameter.
 
-function WindowsFeatureHelper
+    .NOTES
+        Takes Server 2008 R2 servers into account.
+
+    .PROPERTY Action
+        The action to perform. Can be:
+            'Get' - Gets the Windows Feature
+            'Add' - Adds the Windows Feature
+            'Remove' - Removes the Windows Feature
+
+    .PROPERTY Name
+        The name of the Windows Feature
+
+    .PROPERTY Credential
+        Optional credentials to be used to install the Windows Feature
+
+    .PROPERTY IncludeAllSubFeatures
+        Optional boolean used to invoke the action with Switch Parameter 'IncludeAllSubFeatures' (Only applies to Action 'Add')
+
+    .PROPERTY IncludeManagementTools
+        Optional boolean used to invoke the action with Switch Parameter 'IncludeManagementTools' (Applies to Actions 'Add' and 'Remove')
+
+    .OUTPUTS
+        Get - Microsoft.Windows.ServerManager.Commands.Feature
+        Add - Null
+        Remove - Null
+
+    .EXAMPLE
+        Invoke-WindowsFeatureAction -Action Get -Name 'Web-Server'
+        
+        Result:
+            Display Name                                            Name                       Install State
+            ------------                                            ----                       -------------
+            [X] Web Server (IIS)                                    Web-Server                     Installed
+
+    .EXAMPLE
+        Invoke-WindowsFeatureAction -Action Add -Name 'Web-Server' -IncludeAllSubFeatures $true
+            
+        Result: Installs feature 'Web-Server' and all sub features
+
+    .EXAMPLE
+        Invoke-WindowsFeatureAction -Action Remove -Name 'DHCP' -IncludeManagementTools $true
+
+        Result: Removes feature 'DHCP' and all of it's management tools
+            
+#>
+function Invoke-WindowsFeatureAction
 {
     param(
-        [Parameter(Mandatory)]
-        [WindowsFeatureAction]$Action,
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Get', 'Add', 'Remove')]
+        [string]
+        $Action,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [string]$Name,
+        [string]
+        $Name,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         [pscredential]$Credential,
 
+        [Parameter()]
         [Boolean]
         $IncludeAllSubFeature,
 
+        [Parameter()]
         [Boolean]
         $IncludeManagementTools,
 
+        [Parameter()]
         [string]
         $LogPath
     )
@@ -601,14 +730,17 @@ function WindowsFeatureHelper
         $windowsFeatureParameters['Credential'] = $Credential 
     }
 
-    if($PSBoundParameters.ContainsKey('LogPath'))
+    if ($PSBoundParameters.ContainsKey('LogPath'))
     {
         $windowsFeatureParameters['LogPath'] = $LogPath
     }
 
-    if($Action -ne 'Get')
+    if ($Action -ne 'Get')
     {
-        if($Action -eq 'Add'){ $windowsFeatureParameters['IncludeAllSubFeature'] = $IncludeAllSubFeature }
+        if ($Action -eq 'Add')
+        {
+            $windowsFeatureParameters['IncludeAllSubFeature'] = $IncludeAllSubFeature
+        }
         $windowsFeatureParameters['IncludeManagementTools'] = $IncludeManagementTools
     }
 
@@ -621,17 +753,20 @@ function WindowsFeatureHelper
         #>
         switch($Action)
         {
-            "Get" {
+            "Get" 
+            {
                 return Invoke-Command -ScriptBlock { Get-WindowsFeature @windowsFeatureParameters } `
                                         -ComputerName . `
                                         -Credential $Credential `
             }
-            "Add" {
+            "Add" 
+            {
                 return Invoke-Command -ScriptBlock { Add-WindowsFeature @windowsFeatureParameters } `
                                         -ComputerName . `
                                         -Credential $Credential `
             }
-            "Remove" {
+            "Remove" 
+            {
                 return Invoke-Command -ScriptBlock { Remove-WindowsFeature @windowsFeatureParameters } `
                                         -ComputerName . `
                                         -Credential $Credential `
@@ -641,11 +776,20 @@ function WindowsFeatureHelper
     }
     else
     {
-        switch($Action)
+        switch ($Action)
         {
-            "Get"{ return Get-WindowsFeature @windowsFeatureParameters }
-            "Add"{ return Add-WindowsFeature @windowsFeatureParameters }
-            "Remove"{ return Remove-WindowsFeature @windowsFeatureParameters }
+            "Get"
+            {
+                return Get-WindowsFeature @windowsFeatureParameters 
+            }
+            "Add"
+            {
+                return Add-WindowsFeature @windowsFeatureParameters
+            }
+            "Remove"
+            { 
+                return Remove-WindowsFeature @windowsFeatureParameters 
+            }
         }
     }
 }
