@@ -2,7 +2,7 @@
     Integration tests for Installing/uninstalling a Windows Feature. Currently Telnet-Client is
     set as the feature to test since it's fairly small and doesn't require a restart. ADRMS
     is set as the feature to test installing/uninstalling a feature with subfeatures 
-    and web-server for management tools, but this takes a good chunk of time, so by default 
+    and management tools, but this takes a good chunk of time, so by default 
     these tests are set to be skipped.
     If there's any major changes to the resource, then set the skipLongTests variable to $false
     and run those tests at least once to test the new functionality more completely. 
