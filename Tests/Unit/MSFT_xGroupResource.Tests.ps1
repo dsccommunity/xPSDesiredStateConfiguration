@@ -1,7 +1,13 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -310,7 +316,7 @@ try
                     
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 2
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Absent'
@@ -334,7 +340,7 @@ try
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Get-MembersOnNanoServer' -ParameterFilter { $Group -eq $script:testLocalGroup }
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -353,7 +359,7 @@ try
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Get-MembersOnNanoServer' -ParameterFilter { $Group -eq $script:testLocalGroup }
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -848,7 +854,7 @@ try
                         Assert-MockCalled -CommandName 'Get-Group' -ParameterFilter { $GroupName -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 2
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Absent'
@@ -865,7 +871,7 @@ try
                         Assert-MockCalled -CommandName 'Get-MembersOnFullSKU' -ParameterFilter { $Group -eq $script:testGroup }
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -885,7 +891,7 @@ try
                         Assert-MockCalled -CommandName 'Get-MembersOnFullSKU' -ParameterFilter { $Group -eq $script:testGroup }
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
 
-                        $getTargetResourceResult.GetType() | Should Be 'Hashtable'
+                        $getTargetResourceResult -is [Hashtable] | Should Be $true
                         $getTargetResourceResult.Keys.Count | Should Be 4
                         $getTargetResourceResult.GroupName | Should Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should Be 'Present'
@@ -1662,8 +1668,9 @@ try
 
                     Mock 'Get-GroupMembersFromDirectoryEntry' { return @( $memberDirectoryEntry3 ) }
 
-                    It 'Should ignore stale members - Expected to write a warning' {
-                        $getMembersResult = Get-MembersAsPrincipalsList -Group $script:testGroup -PrincipalContextCache $principalContextCache -Disposables $disposables | Should Be $null
+                    It 'Should ignore stale members' {
+                        $getMembersResult = Get-MembersAsPrincipalsList -Group $script:testGroup -PrincipalContextCache $principalContextCache -Disposables $disposables -WarningAction 'SilentlyContinue'
+                        $getMembersResult | Should Be $null
 
                         Assert-MockCalled -CommandName 'Get-GroupMembersFromDirectoryEntry' -ParameterFilter { $Group.Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'New-Object' -ParameterFilter { $TypeName -eq 'System.DirectoryServices.DirectoryEntry' }

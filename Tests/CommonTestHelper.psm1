@@ -1,8 +1,14 @@
-﻿$moduleRootFilePath = Split-Path -Path $PSScriptRoot -Parent
-$dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DSCResources'
-$commonResourceHelperFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'CommonResourceHelper.psm1'
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param ()
 
-Import-Module -Name $commonResourceHelperFilePath
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+<#
+    Cache the AppVeyor Administrator credential so that we do not reset the password multiple times
+    if retrieved the credential is requested multiple times.
+#>
+$script:appVeyorAdministratorCredential = $null
 
 <#
     .SYNOPSIS
@@ -54,8 +60,6 @@ function Test-IsLocalMachine
         $Scope
     )
 
-    Set-StrictMode -Version latest
-
     if ($scope -eq '.')
     {
         return $true
@@ -96,409 +100,6 @@ function Test-IsLocalMachine
                 }
             }
         }
-    }
-
-    return $false
-}
-
-<#
-    .SYNOPSIS
-        Creates a user account.
-
-    .DESCRIPTION
-        This function creates a user on the local or remote machine.
-
-    .PARAMETER Credential
-        The credential containing the username and password to use to create the account.
-
-    .PARAMETER Description
-        The optional description to set on the user account.
-
-    .PARAMETER ComputerName
-        The optional name of the computer to update. Omit to create a user on the local machine.
-
-    .NOTES
-        For remote machines, the currently logged on user must have rights to create a user.
-#>
-function New-User
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]
-        $Credential,
-
-        [String]
-        $Description,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    if (Test-IsNanoServer)
-    {
-        New-UserOnNanoServer @PSBoundParameters
-    }
-    else
-    {
-        New-UserOnFullSKU @PSBoundParameters
-    }
-}
-
-<#
-    .SYNOPSIS
-        Creates a user account on a full server.
-
-    .DESCRIPTION
-        This function creates a user on the local or remote machine running a full server.
-
-    .PARAMETER Credential
-        The credential containing the username and password to use to create the account.
-
-    .PARAMETER Description
-        The optional description to set on the user account.
-
-    .PARAMETER ComputerName
-        The optional name of the computer to update. Omit to create a user on the local machine.
-
-    .NOTES
-        For remote machines, the currently logged on user must have rights to create a user.
-#>
-function New-UserOnFullSKU
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]
-        $Credential,
-
-        [String]
-        $Description,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    Set-StrictMode -Version Latest
-
-    $userName = $Credential.UserName
-    $password = $Credential.GetNetworkCredential().Password
-
-    # Remove user if it already exists.
-    Remove-User $userName $ComputerName
-
-    $adComputerEntry = [ADSI] "WinNT://$ComputerName"
-    $adUserEntry = $adComputerEntry.Create('User', $userName)
-    $null = $adUserEntry.SetPassword($password)
-
-    if ($PSBoundParameters.ContainsKey('Description'))
-    {
-        $null = $adUserEntry.Put('Description', $Description)
-    }
-
-    $null = $adUserEntry.SetInfo()
-}
-
-<#
-    .SYNOPSIS
-        Creates a user account on a Nano server.
-
-    .DESCRIPTION
-        This function creates a user on the local machine running a Nano server.
-
-    .PARAMETER Credential
-        The credential containing the username and password to use to create the account.
-
-    .PARAMETER Description
-        The optional description to set on the user account.
-
-    .PARAMETER ComputerName
-        This parameter should not be used on NanoServer.
-#>
-function New-UserOnNanoServer
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.Management.Automation.PSCredential]
-        [System.Management.Automation.Credential()]
-        $Credential,
-
-        [String]
-        $Description,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    Set-StrictMode -Version Latest
-
-    if ($PSBoundParameters.ContainsKey('ComputerName'))
-    {
-        if (-not (Test-IsLocalMachine -Scope $ComputerName))
-        {
-            throw 'Do not specify the ComputerName arguments when running on NanoServer unless it is a local machine.'
-        }
-    }
-
-    $userName = $Credential.UserName
-    $securePassword = $Credential.GetNetworkCredential().SecurePassword
-
-    # Remove user if it already exists.
-    Remove-LocalUser -Name $userName -ErrorAction SilentlyContinue
-
-    New-LocalUser -Name $userName -Password $securePassword
-
-    if ($PSBoundParameters.ContainsKey('Description'))
-    {
-        Set-LocalUser -Name $userName -Description $Description
-    }
-}
-
-<#
-    .SYNOPSIS
-        Removes a user account.
-
-    .DESCRIPTION
-        This function removes a local user from the local or remote machine.
-
-    .PARAMETER UserName
-        The name of the user to remove.
-
-    .PARAMETER ComputerName
-        The optional name of the computer to update. Omit to remove the user on the local machine.
-
-    .NOTES
-        For remote machines, the currently logged on user must have rights to remove a user.
-#>
-function Remove-User
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $UserName,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    if (Test-IsNanoServer)
-    {
-        Remove-UserOnNanoServer @PSBoundParameters
-    }
-    else
-    {
-        Remove-UserOnFullSKU @PSBoundParameters
-    }
-}
-
-<#
-    .SYNOPSIS
-        Removes a user account on a full server.
-
-    .DESCRIPTION
-        This function removes a local user from the local or remote machine running a full server.
-
-    .PARAMETER UserName
-        The name of the user to remove.
-
-    .PARAMETER ComputerName
-        The optional name of the computer to update. Omit to remove the user on the local machine.
-
-    .NOTES
-        For remote machines, the currently logged on user must have rights to remove a user.
-#>
-function Remove-UserOnFullSKU
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $UserName,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    Set-StrictMode -Version Latest
-
-    $adComputerEntry = [ADSI] "WinNT://$ComputerName"
-
-    if ($adComputerEntry.Children | Where-Object Path -like "WinNT://*$ComputerName/$UserName")
-    {
-        $null = $adComputerEntry.Delete('user', $UserName)
-    }
-}
-
-<#
-    .SYNOPSIS
-        Removes a local user account on a Nano server.
-
-    .DESCRIPTION
-        This function removes a local user from the local machine running a Nano Server.
-
-    .PARAMETER UserName
-        The name of the user to remove.
-
-    .PARAMETER ComputerName
-        This parameter should not be used on NanoServer.
-#>
-function Remove-UserOnNanoServer
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $UserName,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    Set-StrictMode -Version Latest
-
-    if ($PSBoundParameters.ContainsKey('ComputerName'))
-    {
-        if (-not (Test-IsLocalMachine -Scope $ComputerName))
-        {
-            throw 'Do not specify the ComputerName arguments when running on NanoServer unless it is a local machine.'
-        }
-    }
-
-    Remove-LocalUser -Name $UserName
-}
-
-<#
-    .SYNOPSIS
-        Determines if a user exists.
-
-    .DESCRIPTION
-        This function determines if a user exists on a local or remote machine.
-
-    .PARAMETER UserName
-        The name of the user to test.
-
-    .PARAMETER ComputerName
-        The optional name of the computer to update.
-#>
-function Test-User
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $UserName,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    if (Test-IsNanoServer)
-    {
-        Test-UserOnNanoServer @PSBoundParameters
-    }
-    else
-    {
-        Test-UserOnFullSKU @PSBoundParameters
-    }
-}
-
-<#
-    .SYNOPSIS
-        Determines if a user exists on a full server.
-
-    .DESCRIPTION
-        This function determines if a user exists on a local or remote machine running a full server.
-
-    .PARAMETER UserName
-        The name of the user to test.
-
-    .PARAMETER ComputerName
-        The optional name of the computer to update.
-#>
-function Test-UserOnFullSKU
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $UserName,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    Set-StrictMode -Version Latest
-
-    $adComputerEntry = [ADSI] "WinNT://$ComputerName"
-
-    if ($adComputerEntry.Children | Where-Object Path -like "WinNT://*$ComputerName/$UserName")
-    {
-        return $true
-    }
-
-    return $false
-}
-
-<#
-    .SYNOPSIS
-        Determines if a user exists on a Nano server.
-
-    .DESCRIPTION
-        This function determines if a user exists on a local or remote machine running a Nano server.
-
-    .PARAMETER UserName
-        The name of the user to test.
-
-    .PARAMETER ComputerName
-        This parameter should not be used on NanoServer.
-#>
-function Test-UserOnNanoServer
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $UserName,
-
-        [String]
-        $ComputerName = $env:COMPUTERNAME
-    )
-
-    if ($PSBoundParameters.ContainsKey('ComputerName'))
-    {
-        if (-not (Test-IsLocalMachine -Scope $ComputerName))
-        {
-            throw 'Do not specify the ComputerName arguments when running on NanoServer unless it is a local machine.'
-        }
-    }
-
-    # Try to find a user by name.
-    try
-    {
-        $null = Get-LocalUser -Name $UserName -ErrorAction Stop
-        return $true
-    }
-    catch [System.Exception]
-    {
-        if ($_.CategoryInfo.ToString().Contains('UserNotFoundException'))
-        {
-            # A user with the provided name does not exist.
-            return $false
-        }
-        throw $_.Exception
     }
 
     return $false
@@ -668,6 +269,50 @@ function Test-SetTargetResourceWithWhatIf
 
 <#
     .SYNOPSIS
+        Retrieves the administrator credential on an AppVeyor machine.
+        The password will be reset so that we know what the password is.
+
+    .NOTES
+        The AppVeyor credential will be cached after the first call to this function so that the
+        password is not reset if this function is called again.
+#>
+function Get-AppVeyorAdministratorCredential
+{
+    [OutputType([System.Management.Automation.PSCredential])]
+    [CmdletBinding()]
+    param ()
+
+    if ($null -eq $script:appVeyorAdministratorCredential)
+    {
+        $password = ''
+
+        $randomGenerator = New-Object -TypeName 'System.Random'
+
+        $passwordLength = Get-Random -Minimum 15 -Maximum 126
+
+        while ($password.Length -lt $passwordLength)
+        {
+            $password = $password + [Char]$randomGenerator.Next(45, 126)
+        }
+
+        # Change password
+        $appVeyorAdministratorUsername = 'appveyor'
+
+        $appVeyorAdministratorUser = [ADSI]("WinNT://$($env:computerName)/$appVeyorAdministratorUsername")
+
+        $null = $appVeyorAdministratorUser.SetPassword($password)
+        [Microsoft.Win32.Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon', 'DefaultPassword', $password)
+
+        $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
+
+        $script:appVeyorAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @( "$($env:computerName)\$appVeyorAdministratorUsername", $securePassword )
+    }
+
+    return $script:appVeyorAdministratorCredential
+}
+
+<#
+    .SYNOPSIS
         Enters a DSC Resource test environment.
 
     .PARAMETER DscResourceModuleName
@@ -762,13 +407,12 @@ function Exit-DscResourceTestEnvironment
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
-Export-ModuleMember -Function `
-    Test-GetTargetResourceResult, `
-    New-User, `
-    Remove-User, `
-    Test-User, `
-    Wait-ScriptBlockReturnTrue, `
-    Test-IsFileLocked, `
-    Test-SetTargetResourceWithWhatIf, `
-    Enter-DscResourceTestEnvironment, `
-    Exit-DscResourceTestEnvironment
+Export-ModuleMember -Function @(
+    'Test-GetTargetResourceResult', `
+    'Wait-ScriptBlockReturnTrue', `
+    'Test-IsFileLocked', `
+    'Test-SetTargetResourceWithWhatIf', `
+    'Get-AppVeyorAdministratorCredential', `
+    'Enter-DscResourceTestEnvironment', `
+    'Exit-DscResourceTestEnvironment'
+)

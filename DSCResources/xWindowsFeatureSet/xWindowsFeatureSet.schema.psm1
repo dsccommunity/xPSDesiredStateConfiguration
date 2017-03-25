@@ -1,44 +1,78 @@
-﻿Import-Module "$PSScriptRoot\..\ResourceSetHelper.psm1"
+﻿$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
 
+# Import ResourceSetHelper for New-ResourceSetConfigurationScriptBlock
+$script:dscResourcesFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
+$script:resourceSetHelperFilePath = Join-Path -Path $script:dscResourcesFolderFilePath -ChildPath 'ResourceSetHelper.psm1'
+Import-Module -Name $script:resourceSetHelperFilePath
+
+<#
+    .SYNOPSIS
+        A composite DSC resource to configure a set of similar xWindowsFeature resources.
+
+    .PARAMETER Name
+        The name of the roles or features to install or uninstall.
+
+    .PARAMETER Ensure
+        Specifies whether the roles or features should be installed or uninstalled.
+
+        To install the features, set this property to Present.
+        To uninstall the features, set this property to Absent.
+
+    .PARAMETER IncludeAllSubFeature
+        Specifies whether or not all subfeatures should be installed or uninstalled alongside the specified roles or features.
+
+        If this property is true and Ensure is set to Present, all subfeatures will be installed.
+        If this property is false and Ensure is set to Present, subfeatures will not be installed or uninstalled.
+        If Ensure is set to Absent, all subfeatures will be uninstalled.
+
+    .PARAMETER Credential
+        The credential of the user account under which to install or uninstall the roles or features.
+
+    .PARAMETER LogPath
+        The custom file path to which to log this operation.
+        If not passed in, the default log path will be used (%windir%\logs\ServerManager.log).
+#>
 Configuration xWindowsFeatureSet
 {
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    param (
+    [CmdletBinding()]
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [System.String[]]
+        [String[]]
         $Name,
 
         [ValidateSet('Present', 'Absent')]
-        [System.String]
+        [String]
         $Ensure,
 
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $Source,
 
-        [System.Boolean]
+        [Boolean]
         $IncludeAllSubFeature,
 
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
         $Credential,
 
         [ValidateNotNullOrEmpty()]
-        [System.String]
+        [String]
         $LogPath
     )
 
-    $commonParameterNames = @("Ensure", "Source", "IncludeAllSubFeature", "Credential", "LogPath")
-    $keyParameterName = "Name"
-    $resourceName = "xWindowsFeature"
+    $newResourceSetConfigurationParams = @{
+        ResourceName = 'xWindowsFeature'
+        ModuleName = 'xPSDesiredStateConfiguration'
+        KeyParameterName = 'Name'
+        Parameters = $PSBoundParameters
+    }
+    
+    $configurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
-    # Build common parameters for all xWindowsFeature resource nodes
-    [string] $commonParameters = New-ResourceCommonParameterString -KeyParameterName $keyParameterName -CommonParameterNames $commonParameterNames -Parameters $PSBoundParameters
-
-    # Build xWindowsFeature resource string
-    [string] $resourceString = New-ResourceString -KeyParameterValues $PSBoundParameters[$keyParameterName] -KeyParameterName $keyParameterName -CommonParameters $commonParameters -ResourceName $resourceName
-
-    $configurationScript = [ScriptBlock]::Create($resourceString)
-    . $configurationScript
+    # This script block must be run directly in this configuration in order to resolve variables
+    . $configurationScriptBlock
 }

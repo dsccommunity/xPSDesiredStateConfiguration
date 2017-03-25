@@ -19,32 +19,34 @@ try
 
                 if (Test-Path -Path $script:testDirectoryPath)
                 {
-                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
                 }
 
-                New-Item -Path $script:testDirectoryPath -ItemType 'Directory' | Out-Null
+                $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
 
                 $script:msiName = 'DSCSetupProject.msi'
                 $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
+                $script:msiArguments = '/NoReboot'
 
                 $script:packageName = 'DSCUnitTestPackage'
                 $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
 
-                New-TestMsi -DestinationPath $script:msiLocation | Out-Null
+                $null = New-TestMsi -DestinationPath $script:msiLocation
 
                 $script:testExecutablePath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestExecutable.exe'
-                New-TestExecutable -DestinationPath $script:testExecutablePath | Out-Null
 
-                Clear-xPackageCache | Out-Null
+                $null = New-TestExecutable -DestinationPath $script:testExecutablePath
+
+                $null = Clear-xPackageCache
             }
 
             BeforeEach {
-                Clear-xPackageCache | Out-Null
+                $null = Clear-xPackageCache
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
                 {
-                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                    Start-Sleep -Seconds 1 | Out-Null
+                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                    $null = Start-Sleep -Seconds 1
                 }
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
@@ -56,15 +58,15 @@ try
             AfterAll {
                 if (Test-Path -Path $script:testDirectoryPath)
                 {
-                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
                 }
 
-                Clear-xPackageCache | Out-Null
+                $null = Clear-xPackageCache
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
                 {
-                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                    Start-Sleep -Seconds 1 | Out-Null
+                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                    $null = Start-Sleep -Seconds 1
                 }
 
                 if (Test-PackageInstalledByName -Name $script:packageName)
@@ -433,7 +435,7 @@ try
                     $msiUrl = "$baseUrl" + "package.msi"
                     New-MockFileServer -FilePath $script:msiLocation -Https
 
-                    # Test pipe connection as testing server readiness
+                    # Test pipe connection as testing server reasdiness
                     $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest1' )
                     $pipe.WaitForConnection()
                     $pipe.Dispose()
@@ -463,6 +465,53 @@ try
 
                     Test-Path -Path $logPath | Should Be $true
                     Get-Content -Path $logPath | Should Not Be $null
+                }
+
+                It 'Should add space after .MSI installation arguments (#195)' {
+                    Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } { return @{ ExitCode = 0 } }
+                    Mock Test-TargetResource { return $false }
+                    Mock Get-ProductEntry { return $script:packageId }
+
+                    $packageParameters = @{
+                        Path = $script:msiLocation
+                        Name = [String]::Empty
+                        ProductId = $script:packageId
+                        Arguments = $script:msiArguments
+                    }
+
+                    Set-TargetResource -Ensure 'Present' @packageParameters
+
+                    Assert-MockCalled Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith(" $script:msiArguments") } -Scope It
+                }
+
+                It 'Should not check for product installation when rebooted is required (#52)' {
+                    Mock Invoke-Process { return [PSCustomObject] @{ ExitCode = 3010 } }
+                    Mock Test-TargetResource { return $false }
+                    Mock Get-ProductEntry { }
+
+                    $packageParameters = @{
+                        Path = $script:msiLocation
+                        Name = [String]::Empty
+                        ProductId = $script:packageId
+                    }
+
+                    { Set-TargetResource -Ensure 'Present' @packageParameters } | Should Not Throw
+                }
+
+                It 'Should install package using user credentials when specified' {
+                    Mock Invoke-PInvoke { }
+                    Mock Test-TargetResource { return $false }
+
+                    $packageCredential = [System.Management.Automation.PSCredential]::Empty
+                    $packageParameters = @{
+                        Path = $script:msiLocation
+                        Name = [String]::Empty
+                        ProductId = $script:packageId
+                        RunAsCredential = $packageCredential
+                    }
+                    Set-TargetResource -Ensure 'Present' @packageParameters
+
+                    Assert-MockCalled Invoke-PInvoke -ParameterFilter { $Credential -eq $packageCredential} -Scope It
                 }
             }
 

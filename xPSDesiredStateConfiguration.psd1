@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '5.0.0.0'
+ModuleVersion = '6.1.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,31 +52,17 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xWindowsFeature:
-    * Cleaned up resource (PSSA issues, formatting, etc.)
-    * Added/Updated Tests and Examples
-    * BREAKING CHANGE: Removed the unused Source parameter
-    * Updated to a high quality resource
-* xDSCWebService:
-    * Add DatabasePath property to specify a custom database path and enable multiple pull server instances on one server.
-    * Rename UseUpToDateSecuritySettings property to UseSecurityBestPractices.
-    * Add DisableSecurityBestPractices property to specify items that are excepted from following best practice security settings.
-* xGroup:
-    * Fixed PSSA issues
-    * Formatting updated as per style guidelines
-    * Missing comment-based help added for Get-/Set-/Test-TargetResource
-    * Typos fixed in Unit test script
-    * Unit test "Get-TargetResource/Should return hashtable with correct values when group has no members" updated to handle the expected empty Members array correctly
-    * Added a lot of unit tests
-    * Cleaned resource
-* xUser:
-    * Fixed PSSA/Style violations
-    * Added/Updated Tests and Examples
-* Added xWindowsPackageCab
-* xService:
-    * Fixed PSSA/Style violations
-    * Updated Tests
-    * Added "Ignore" state
+        ReleaseNotes = '* Moved DSC pull server setup tests to DSCPullServerSetup folder for new common tests
+* xArchive:
+    * Updated the resource to be a high quality resource
+    * Transferred the existing "unit" tests to integration tests
+    * Added unit and end-to-end tests
+    * Updated documentation and examples
+* xUser
+    * Fixed error handling in xUser
+* xRegistry
+    * Fixed bug where an error was thrown when running Get-DscConfiguration if the registry key already existed
+* Updated Test-IsNanoServer cmdlet to properly test for a Nano server rather than the core version of PowerShell
 
 '
 
@@ -84,6 +70,10 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
+
+
+
 
 
 
