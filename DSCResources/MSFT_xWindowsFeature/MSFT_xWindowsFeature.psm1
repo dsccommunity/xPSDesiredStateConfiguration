@@ -48,6 +48,8 @@ function Get-TargetResource
     
     Write-Verbose -Message ($script:localizedData.QueryFeature -f $Name)
     
+    $script:isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+
     $feature = Invoke-WindowsFeatureAction -Action Get @PSBoundParameters
     
     Assert-SingleFeatureExists -Feature $feature -Name $Name
@@ -77,7 +79,7 @@ function Get-TargetResource
     }
 
     $includeManagementTools = $true
-    $managementTools = Get-WindowsFeatureManagementTools -Name $Name
+    $managementTools = Get-WindowsFeatureManagementTool -Name $Name
 
     if($managementTools.Count -eq 0)
     {
@@ -182,6 +184,8 @@ function Set-TargetResource
 
     Write-Verbose -Message ($script:localizedData.SetTargetResourceStartMessage -f $Name)
 
+    $script:isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+
     Import-ServerManager
 
     if ($Ensure -eq 'Present')
@@ -198,7 +202,8 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name, $IncludeAllSubFeature, $IncludeManagementTools)
-
+        
+        
         $feature = Invoke-WindowsFeatureAction -Action Add @addWindowsFeatureParameters
 
         if ($null -ne $feature -and $feature.Success)
@@ -320,6 +325,8 @@ function Test-TargetResource
     
     Import-ServerManager
 
+    $script:isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+
     $testTargetResourceResult = $false
 
     $helperParam = @{ Name = $Name }
@@ -369,7 +376,7 @@ function Test-TargetResource
 
         if ($IncludeManagementTools)
         {
-            $managementTools = Get-WindowsFeatureManagementTools -Name $Name
+            $managementTools = Get-WindowsFeatureManagementTool -Name $Name
             foreach($currentManagementToolName in $managementTools)
             {
                 Write-Verbose -Message ($script:localizedData.TestTargetResourceManagementTool -f $currentManagementToolName)
@@ -613,7 +620,7 @@ function Get-ServerComponents
         string[]
 
     .EXAMPLE
-        Get-WindowsFeatureManagementTools -Name 'AD-Domain-Services'
+        Get-WindowsFeatureManagementTool -Name 'AD-Domain-Services'
         
         Result:
             GPMC
@@ -621,7 +628,7 @@ function Get-ServerComponents
             RSAT-ADDS-Tools
             
 #>
-function Get-WindowsFeatureManagementTools
+function Get-WindowsFeatureManagementTool
 {
     [CmdletBinding(SupportsShouldProcess = $false)]
     [OutputType([string[]])]
@@ -718,14 +725,14 @@ function Invoke-WindowsFeatureAction
         $LogPath
     )
 
-    $isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+    $isWinServer2008R2SP1 = $script:isWinServer2008R2SP1
 
     $windowsFeatureParameters = @{
         Name = $Name
     }
 
     if ($PSBoundParameters.ContainsKey('Credential') -and 
-            -not $isWinServer2008R2SP1)
+            -not $IsWinServer2008R2SP1)
     {
         $windowsFeatureParameters['Credential'] = $Credential 
     }
@@ -736,15 +743,16 @@ function Invoke-WindowsFeatureAction
     }
 
     if ($Action -ne 'Get')
-    {
-        if ($Action -eq 'Add')
-        {
-            $windowsFeatureParameters['IncludeAllSubFeature'] = $IncludeAllSubFeature
-        }
+    {  
         $windowsFeatureParameters['IncludeManagementTools'] = $IncludeManagementTools
     }
 
-    if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
+    if ($Action -eq 'Add')
+    {
+        $windowsFeatureParameters['IncludeAllSubFeature'] = $IncludeAllSubFeature
+    }
+
+    if ($IsWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
     {
         <#
             Calling Get-WindowsFeature through Invoke-Command to start a new process with

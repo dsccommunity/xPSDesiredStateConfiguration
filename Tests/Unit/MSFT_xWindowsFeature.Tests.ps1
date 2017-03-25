@@ -21,9 +21,15 @@ try {
 
         $testWindowsFeatureName1 = 'Test1'
         $testWindowsFeatureName2 = 'Test2'
+        $testWindowsFeatureName3 = 'Test3'
+        $testWindowsFeatureName4 = 'Test4'
         $testSubFeatureName1 = 'SubTest1'
         $testSubFeatureName2 = 'SubTest2'
         $testSubFeatureName3 = 'SubTest3'
+        $testSubFeatureName4 = 'SubTest4'
+        $testMgmtToolName1 = 'MgmtTest1'
+        $testMgmtToolName2 = 'MgmtTest2'
+        $testMgmtToolName3 = 'MgmtTest3'
 
 
         $mockWindowsFeatures = @{
@@ -97,7 +103,7 @@ try {
                 Installed                 = $true
                 InstallState              = 'Available'
                 FeatureType               = 'Role Service'
-                Path                      = 'Test\SubTest3'
+                Path                      = 'Test1\SubTest3'
                 Depth                     = 2
                 DependsOn                 = @()
                 Parent                    = 'Test1'
@@ -114,7 +120,7 @@ try {
             Test2 = @{ 
                 Name                      = 'Test2'
                 DisplayName               = 'Test Feature 2'
-                Description               = 'Test Feature with 0 subfeatures'
+                Description               = 'Test Feature with 0 subfeatures and 0 management tools'
                 Installed                 = $true 
                 InstallState              = 'Available' 
                 FeatureType               = 'Role Service'
@@ -131,11 +137,145 @@ try {
                 PostConfigurationNeeded   = $false
                 AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
             }
+
+            Test3 = @{ 
+                Name                      = 'Test3'
+                DisplayName               = 'Test Feature 3'
+                Description               = 'Test Feature with 0 subfeatures and 2 management tools (one of which is also a subfeature)'
+                Installed                 = $true 
+                InstallState              = 'Available' 
+                FeatureType               = 'Role Service'
+                Path                      = 'Test3'
+                Depth                     = 1
+                DependsOn                 = @()
+                Parent                    = ''
+                ServerComponentDescriptor = 'ServerComponent_Test_Cert_Authority'
+                Subfeatures               = @('MgmtTest2')
+                SystemService             = @()
+                Notification              = @()
+                BestPracticesModelId      = $null
+                EventQuery                = $null
+                PostConfigurationNeeded   = $false
+                AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
+            }
+
+            MgmtTest1 = @{
+                Name                      = 'MgmtTest1'
+                DisplayName               = 'Mgmt Test Feature 1'
+                Description               = 'Mgmt Test Feature with no parent'
+                Installed                 = $true
+                InstallState              = 'Available'
+                FeatureType               = 'Role Service'
+                Path                      = 'MgmtTest1'
+                Depth                     = 1
+                DependsOn                 = @()
+                Parent                    = ''
+                ServerComponentDescriptor = $null
+                Subfeatures               = @()
+                SystemService             = @()
+                Notification              = @()
+                BestPracticesModelId      = $null
+                EventQuery                = $null
+                PostConfigurationNeeded   = $false
+                AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
+            }
+
+            MgmtTest2 = @{
+                Name                      = 'MgmtTest2'
+                DisplayName               = 'Mgmt Test Feature 2'
+                Description               = 'Mgmt Test Feature with parent as Test3'
+                Installed                 = $true
+                InstallState              = 'Available'
+                FeatureType               = 'Role Service'
+                Path                      = 'Test3\MgmtTest1'
+                Depth                     = 2
+                DependsOn                 = @()
+                Parent                    = 'Test3'
+                ServerComponentDescriptor = $null
+                Subfeatures               = @()
+                SystemService             = @()
+                Notification              = @()
+                BestPracticesModelId      = $null
+                EventQuery                = $null
+                PostConfigurationNeeded   = $false
+                AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
+            }
+
+            Test4 = @{ 
+                Name                      = 'Test4'
+                DisplayName               = 'Test Feature 4'
+                Description               = 'Test Feature with 1 subfeatures and 1 management tool'
+                Installed                 = $true 
+                InstallState              = 'Available' 
+                FeatureType               = 'Role Service'
+                Path                      = 'Test4'
+                Depth                     = 1
+                DependsOn                 = @()
+                Parent                    = ''
+                ServerComponentDescriptor = 'ServerComponent_Test_Cert_Authority'
+                Subfeatures               = @('SubTest4')
+                SystemService             = @()
+                Notification              = @()
+                BestPracticesModelId      = $null
+                EventQuery                = $null
+                PostConfigurationNeeded   = $false
+                AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
+            }
+
+            SubTest4 = @{
+                Name                      = 'SubTest4'
+                DisplayName               = 'Sub Test Feature 4'
+                Description               = 'Sub Test Feature with parent as test4'
+                Installed                 = $true
+                InstallState              = 'Available'
+                FeatureType               = 'Role Service'
+                Path                      = 'Test3\SubTest4'
+                Depth                     = 2
+                DependsOn                 = @()
+                Parent                    = 'Test4'
+                ServerComponentDescriptor = $null
+                Subfeatures               = @()
+                SystemService             = @()
+                Notification              = @()
+                BestPracticesModelId      = $null
+                EventQuery                = $null
+                PostConfigurationNeeded   = $false
+                AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
+            }
+
+            MgmtTest3 = @{
+                Name                      = 'MgmtTest3'
+                DisplayName               = 'Mgmt Test Feature 3'
+                Description               = 'Mgmt Test Feature 3'
+                Installed                 = $true
+                InstallState              = 'Available'
+                FeatureType               = 'Role Service'
+                Path                      = 'MgmtTest3'
+                Depth                     = 2
+                DependsOn                 = @()
+                Parent                    = ''
+                ServerComponentDescriptor = $null
+                Subfeatures               = @()
+                SystemService             = @()
+                Notification              = @()
+                BestPracticesModelId      = $null
+                EventQuery                = $null
+                PostConfigurationNeeded   = $false
+                AdditionalInfo            = @('MajorVersion', 'MinorVersion', 'NumericId', 'InstallName')
+            }
         }
 
 
         Describe 'xWindowsFeature/Get-TargetResource' {
             Mock -CommandName Import-ServerManager -MockWith {}
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName1 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName2 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName2]
@@ -145,8 +285,16 @@ try {
                 return $windowsFeatureObject
             }
 
-            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName1 } -MockWith {
-                $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName3 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName3]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName4 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName4]
                 $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
@@ -176,9 +324,46 @@ try {
             
                 return $windowsFeatureObject
             }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testMgmtToolName1 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testMgmtToolName1]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testMgmtToolName2 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testMgmtToolName2]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testMgmtToolName3 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testMgmtToolName3]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeatureManagementTool -ParameterFilter { $Name -eq $testWindowsFeatureName3 } -MockWith {
+                return @(
+                    $testMgmtToolName1,
+                    $testMgmtToolName2
+                )
+            }
+
+            Mock -CommandName Get-WindowsFeatureManagementTool -ParameterFilter { $Name -eq $testWindowsFeatureName4 } -MockWith {
+                return @(
+                    $testMgmtToolName3
+                )
+            }
             
 
-            Context 'Windows Feature exists with no sub features' {
+            Context 'Windows Feature exists with no sub features and no management tools' {
               
                 It 'Should return the correct hashtable when not on a 2008 Server' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
@@ -188,6 +373,7 @@ try {
                     $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
                     $getTargetResourceResult.Ensure | Should Be 'Present'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $false
                 }
 
                 It 'Should return the correct hashtable when on a 2008 Server' {
@@ -198,6 +384,7 @@ try {
                     $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
                     $getTargetResourceResult.Ensure | Should Be 'Present'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $false
                 }
 
                 It 'Should return the correct hashtable when on a 2008 Server and Credential is passed' {
@@ -215,12 +402,13 @@ try {
                     $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName2].DisplayName
                     $getTargetResourceResult.Ensure | Should Be 'Present'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $false
 
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
 
                 }
             }
-            Context 'Windows Feature exists with sub features' {
+            Context 'Windows Feature exists with sub features and no management tools' {
 
                 It 'Should return the correct hashtable when all subfeatures are installed' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
@@ -230,6 +418,7 @@ try {
                     $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName1].DisplayName
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $true
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $false
 
                     Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
                 }
@@ -243,10 +432,28 @@ try {
                     $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName1].DisplayName
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $false
 
                     Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
 
                     $mockWindowsFeatures[$testSubFeatureName3].Installed = $true
+                }
+            }
+
+            Context 'Windows Feature exists with management tools and no subfeatures' {
+
+                It 'Should return the correct hashtable when all management tools are installed' {
+                    Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
+                    
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName3
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName3
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName3].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    # MgmtTools2 is the only subfeature so IncludeAllSubFeatures should be true
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $true
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $true
+
+                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
                 }
             }
 
@@ -362,6 +569,9 @@ try {
             
                     return $windowsFeatureObject
                 }
+
+                Mock -CommandName 'Add-WindowsFeature' -MockWith { }
+                Mock -CommandName 'Remove-WindowsFeature' -MockWith { }
 
                 It 'Should install the feature when Ensure set to Present and Credential passed in' {
 
