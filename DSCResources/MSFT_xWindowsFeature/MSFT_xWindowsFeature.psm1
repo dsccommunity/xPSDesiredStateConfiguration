@@ -201,8 +201,12 @@ function Set-TargetResource
            $addWindowsFeatureParameters['LogPath'] = $LogPath 
         }
 
+        if ($PSBoundParameters.ContainsKey('Credential'))
+        {
+            $addWindowsFeatureParameters['Credential'] = $Credential
+        }
+
         Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name, $IncludeAllSubFeature, $IncludeManagementTools)
-        
         
         $feature = Invoke-WindowsFeatureAction -Action Add @addWindowsFeatureParameters
 
@@ -233,6 +237,11 @@ function Set-TargetResource
         if ($PSBoundParameters.ContainsKey('LogPath'))
         {
            $removeWindowsFeatureParameters['LogPath'] = $LogPath 
+        }
+
+        if ($PSBoundParameters.ContainsKey('Credential'))
+        {
+            $removeWindowsFeatureParameters['Credential'] = $Credential
         }
 
         Write-Verbose -Message ($script:localizedData.UninstallFeature -f $Name, $IncludeManagementTools)

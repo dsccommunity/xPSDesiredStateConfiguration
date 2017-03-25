@@ -150,7 +150,7 @@ try {
                 DependsOn                 = @()
                 Parent                    = ''
                 ServerComponentDescriptor = 'ServerComponent_Test_Cert_Authority'
-                Subfeatures               = @('MgmtTest2')
+                Subfeatures               = @()
                 SystemService             = @()
                 Notification              = @()
                 BestPracticesModelId      = $null
@@ -162,7 +162,7 @@ try {
             MgmtTest1 = @{
                 Name                      = 'MgmtTest1'
                 DisplayName               = 'Mgmt Test Feature 1'
-                Description               = 'Mgmt Test Feature with no parent'
+                Description               = 'Mgmt Test Feature for test3'
                 Installed                 = $true
                 InstallState              = 'Available'
                 FeatureType               = 'Role Service'
@@ -183,14 +183,14 @@ try {
             MgmtTest2 = @{
                 Name                      = 'MgmtTest2'
                 DisplayName               = 'Mgmt Test Feature 2'
-                Description               = 'Mgmt Test Feature with parent as Test3'
+                Description               = 'Mgmt Test Feature for test3'
                 Installed                 = $true
                 InstallState              = 'Available'
                 FeatureType               = 'Role Service'
-                Path                      = 'Test3\MgmtTest1'
+                Path                      = 'MgmtTest1'
                 Depth                     = 2
                 DependsOn                 = @()
-                Parent                    = 'Test3'
+                Parent                    = ''
                 ServerComponentDescriptor = $null
                 Subfeatures               = @()
                 SystemService             = @()
@@ -246,7 +246,7 @@ try {
             MgmtTest3 = @{
                 Name                      = 'MgmtTest3'
                 DisplayName               = 'Mgmt Test Feature 3'
-                Description               = 'Mgmt Test Feature 3'
+                Description               = 'Mgmt Tool for test4'
                 Installed                 = $true
                 InstallState              = 'Available'
                 FeatureType               = 'Role Service'
@@ -319,6 +319,14 @@ try {
 
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName3 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName3]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName4 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testSubFeatureName4]
                 $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
                 $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
             
@@ -449,7 +457,38 @@ try {
                     $getTargetResourceResult.Name | Should Be $testWindowsFeatureName3
                     $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName3].DisplayName
                     $getTargetResourceResult.Ensure | Should Be 'Present'
-                    # MgmtTools2 is the only subfeature so IncludeAllSubFeatures should be true
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $true
+
+                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
+                }
+
+                It 'Should return the correct hashtable when not all management tools are installed' {
+                    Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
+                    $mockWindowsFeatures[$testMgmtToolName2].Installed = $false
+
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName3
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName3
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName3].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.IncludeAllSubFeature | Should Be $false
+                    $getTargetResourceResult.IncludeManagementTools | Should Be $false
+
+                    Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
+
+                    $mockWindowsFeatures[$testMgmtToolName2].Installed = $true
+                }
+            }
+
+            Context 'Windows Feature exists with management tools and subfeatures' {
+
+                It 'Should return the correct hashtable when all management tools and subfeatures are installed' {
+                    Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
+                    
+                    $getTargetResourceResult = Get-TargetResource -Name $testWindowsFeatureName4
+                    $getTargetResourceResult.Name | Should Be $testWindowsFeatureName4
+                    $getTargetResourceResult.DisplayName | Should Be $mockWindowsFeatures[$testWindowsFeatureName4].DisplayName
+                    $getTargetResourceResult.Ensure | Should Be 'Present'
                     $getTargetResourceResult.IncludeAllSubFeature | Should Be $true
                     $getTargetResourceResult.IncludeManagementTools | Should Be $true
 
@@ -608,6 +647,14 @@ try {
                 return $windowsFeatureObject
             }
 
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testWindowsFeatureName3 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName3]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
+
             Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName1 } -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testSubFeatureName1]
                 $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
@@ -632,6 +679,37 @@ try {
                 return $windowsFeatureObject
             }
 
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testSubFeatureName4 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testSubFeatureName4]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testMgmtToolName1 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testMgmtToolName1]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeature -ParameterFilter { $Name -eq $testMgmtToolName2 } -MockWith {
+                $windowsFeature = $mockWindowsFeatures[$testMgmtToolName2]
+                $windowsFeatureObject = New-Object -TypeName PSObject -Property $windowsFeature
+                $windowsFeatureObject.PSTypeNames[0] = 'Microsoft.Windows.ServerManager.Commands.Feature'
+            
+                return $windowsFeatureObject
+            }
+
+            Mock -CommandName Get-WindowsFeatureManagementTool -ParameterFilter { $Name -eq $testWindowsFeatureName3 } -MockWith {
+                return @(
+                    $testMgmtToolName1,
+                    $testMgmtToolName2
+                )
+            }
+
             # Used as Get-WindowsFeature when on R2/SP1 2008
             Mock -CommandName Invoke-Command -MockWith {
                 $windowsFeature = $mockWindowsFeatures[$testWindowsFeatureName1]
@@ -648,18 +726,20 @@ try {
 
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
-                                                  -IncludeAllSubFeature $false
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
-                It 'Should return true when Ensure set to Present and Feature installed not checking subFeatures' {
+                It 'Should return true when Ensure set to Present and Feature installed not checking subFeatures or management tools' {
                     Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
 
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
-                                                  -IncludeAllSubFeature $false
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $true
                     $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
@@ -671,10 +751,25 @@ try {
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
-                                                  -IncludeAllSubFeature $true
+                                                  -IncludeAllSubFeature $true `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 4 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
+                }
+
+                It 'Should return true when Ensure set to Present and Feature and management tools installed' {
+                    Mock -CommandName Test-IsWinServer2008R2SP1 -MockWith { return $false }
+
+                    $mockWindowsFeatures[$testWindowsFeatureName3].Installed = $true
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName3 `
+                                                  -Ensure 'Present' `
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $true
+                    $testTargetResourceResult | Should Be $true
+                    Assert-MockCalled -CommandName Get-WindowsFeature -Times 3 -Exactly -Scope It
+                    Assert-MockCalled -CommandName Get-WindowsFeatureManagementTool -Times 1 -Exactly -Scope It
+                    $mockWindowsFeatures[$testWindowsFeatureName3].Installed = $false
                 }
 
                 It 'Should return true when Ensure set to Absent and Feature not installed and on R2/SP1 2008' {
@@ -683,6 +778,7 @@ try {
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
                                                   -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $false `
                                                   -Credential $testCredential
                     $testTargetResourceResult | Should Be $true
                     Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
@@ -695,16 +791,18 @@ try {
                 It 'Should return false when Ensure set to Present and Feature not installed' {
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
-                                                  -IncludeAllSubFeature $false
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                 }
 
-                It 'Should return false when Ensure set to Absent and Feature installed not checking subFeatures' {
+                It 'Should return false when Ensure set to Absent and Feature installed not checking subFeatures or management tools' {
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
-                                                  -IncludeAllSubFeature $false
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
@@ -713,7 +811,8 @@ try {
                 It 'Should return false when Ensure set to Present, Feature not installed and subFeatures installed' {
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
-                                                  -IncludeAllSubFeature $true
+                                                  -IncludeAllSubFeature $true `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                 }
@@ -721,7 +820,8 @@ try {
                 It 'Should return false when Ensure set to Absent and Feature not installed but subFeatures installed' {
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
-                                                  -IncludeAllSubFeature $true
+                                                  -IncludeAllSubFeature $true `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 2 -Exactly -Scope It
                 }
@@ -730,7 +830,8 @@ try {
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $true
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Absent' `
-                                                  -IncludeAllSubFeature $true
+                                                  -IncludeAllSubFeature $true `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
@@ -741,11 +842,54 @@ try {
                     $mockWindowsFeatures[$testSubFeatureName2].Installed = $false
                     $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName1 `
                                                   -Ensure 'Present' `
-                                                  -IncludeAllSubFeature $true
+                                                  -IncludeAllSubFeature $true `
+                                                  -IncludeManagementTools $false
                     $testTargetResourceResult | Should Be $false
                     Assert-MockCalled -CommandName Get-WindowsFeature -Times 3 -Exactly -Scope It
                     $mockWindowsFeatures[$testWindowsFeatureName1].Installed = $false
                     $mockWindowsFeatures[$testSubFeatureName2].Installed = $true
+                }
+
+                It 'Should return false when Ensure set to Present, Feature not installed and management tools installed' {
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName3 `
+                                                  -Ensure 'Present' `
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $true
+                    $testTargetResourceResult | Should Be $false
+                    Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
+                }
+
+                It 'Should return false when Ensure set to Absent and Feature not installed but management tools installed' {
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName3 `
+                                                  -Ensure 'Absent' `
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $true
+                    $testTargetResourceResult | Should Be $false
+                    Assert-MockCalled -CommandName Get-WindowsFeature -Times 2 -Exactly -Scope It
+                }
+
+                It 'Should return false when Ensure set to Absent and Feature installed and management tools installed' {
+                    $mockWindowsFeatures[$testWindowsFeatureName3].Installed = $true
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName3 `
+                                                  -Ensure 'Absent' `
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $true
+                    $testTargetResourceResult | Should Be $false
+                    Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
+                    $mockWindowsFeatures[$testWindowsFeatureName3].Installed = $false
+                }
+
+                It 'Should return false when Ensure set to Present and Feature installed but not all management tools installed' {
+                    $mockWindowsFeatures[$testWindowsFeatureName3].Installed = $true
+                    $mockWindowsFeatures[$testMgmtToolName1].Installed = $false
+                    $testTargetResourceResult = Test-TargetResource -Name $testWindowsFeatureName3 `
+                                                  -Ensure 'Present' `
+                                                  -IncludeAllSubFeature $false `
+                                                  -IncludeManagementTools $true
+                    $testTargetResourceResult | Should Be $false
+                    Assert-MockCalled -CommandName Get-WindowsFeature -Times 2 -Exactly -Scope It
+                    $mockWindowsFeatures[$testWindowsFeatureName3].Installed = $false
+                    $mockWindowsFeatures[$testMgmtToolName1].Installed = $true
                 }
 
                 It 'Should return false when Ensure set to Present and Feature not installed and on R2/SP1 2008' {
