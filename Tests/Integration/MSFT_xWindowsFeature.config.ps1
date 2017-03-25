@@ -20,7 +20,10 @@ Configuration $ConfigurationName
         $Ensure = 'Present',
 
         [System.Boolean]
-        $IncludeAllSubFeature = $false
+        $IncludeAllSubFeature = $false,
+
+        [System.Boolean]
+        $IncludeManagementTools = $false
     )
     
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
@@ -32,6 +35,7 @@ Configuration $ConfigurationName
             Name = $Name
             Ensure = $Ensure
             IncludeAllSubFeature = $IncludeAllSubFeature
+            IncludeManagementTools = $IncludeManagementTools
         }
     }
 }
