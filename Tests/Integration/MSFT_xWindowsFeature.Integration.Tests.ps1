@@ -1,20 +1,8 @@
 ﻿<#
     Integration tests for Installing/uninstalling a Windows Feature. Currently Telnet-Client is
-<<<<<<< .mine
-    set as the feature to test since it's fairly small and doesn't require a restart. ADRMS
-    is set as the feature to test installing/uninstalling a feature with subfeatures 
-    and management tools, but this takes a good chunk of time, so by default 
-    these tests are set to be skipped.
-    If there's any major changes to the resource, then set the skipLongTests variable to $false
-    and run those tests at least once to test the new functionality more completely. 
-=======
     set as the feature to test since it's fairly small and doesn't require a restart.
     RSAT-File-Services is set as the feature to test installing/uninstalling a feature with
-    subfeatures.
-
-
-
->>>>>>> .theirs
+    subfeatures. AD
 #> 
 
 # Suppressing this rule since we need to create a plaintext password to test this resource
@@ -34,7 +22,7 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -TestType 'Integration'
 
 $script:testFeatureName = 'Telnet-Client'
-$script:testFeatureWithSubFeaturesName = 'ADRMS'
+$script:testFeatureWithSubFeaturesName = 'RSAT-File-Services'
 $script:testFeatureWithMgmtToolsName = 'ADRMS'
 $script:installStateOfTestFeature
 $script:installStateOfTestWithSubFeatures
@@ -57,18 +45,11 @@ try {
 
             $testFeatureWithSubFeatures = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
             $script:installStateOfTestWithSubFeatures = $testFeatureWithSubFeatures.Installed
+            $testFeatureWithMgmtTools = Get-WindowsFeature -Name $script:testFeatureWithMgmtToolsName
+            $script:installStateOfTestWithMgmtTools = $testFeatureWithMgmtTools.Installed
 
-<<<<<<< .mine
-    $testFeatureWithMgmtTools = Get-WindowsFeature -Name $script:testFeatureWithMgmtToolsName
-    $script:installStateOfTestWithMgmtTools = $testFeatureWithMgmtTools.Installed
-
-    $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'
-=======
-            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'
+            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'            
         }
-
-
->>>>>>> .theirs
 
         AfterAll {
             # Ensure that features used for testing are re-installed/uninstalled
@@ -221,6 +202,7 @@ try {
                     . $configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
+                                            -IncludeManagementTools = $testIncludeMgmtTools `
                                             -Ensure 'Present' `
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
@@ -228,41 +210,9 @@ try {
                 } | Should Not Throw
             }
 
-<<<<<<< .mine
-                It 'Should compile without throwing' -Skip:$script:skipLongTests {
-                    {
-                        . $configFile -ConfigurationName $configurationName
-                        & $configurationName -Name $script:testFeatureWithSubFeaturesName `
-                                             -IncludeAllSubFeature $true `
-                                             -IncludeManagementTools $testIncludeMgmtTools `
-                                             -Ensure 'Present' `
-                                             -OutputPath $configurationPath `
-                                             -ErrorAction 'Stop'
-                        Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                    } | Should Not Throw
-                }
-
-                It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
-                }
-=======
             It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
                 
             It 'Should return the correct configuration' -Skip:$script:skipLongTests {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
