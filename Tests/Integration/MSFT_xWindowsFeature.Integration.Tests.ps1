@@ -63,7 +63,6 @@ try {
             {
                 Remove-WindowsFeature -Name $script:testFeatureName
             }
-        $testIncludeMgmtTools = $false
 
             if (-not $script:skipLongTests)
             {
@@ -96,7 +95,7 @@ try {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
                                              -IncludeAllSubFeature $false `
-                                             -IncludeManagementTools $testIncludeMgmtTools `
+                                             -IncludeManagementTools $false `
                                              -Ensure 'Present' `
                                              -OutputPath $configurationPath `
                                              -ErrorAction 'Stop'
@@ -112,7 +111,7 @@ try {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                    $currentConfig.Name | Should Be $script:testFeatureName
                    $currentConfig.IncludeAllSubFeature | Should Be $false
-                   $currentConfig.IncludeManagementTools | Should Be $testIncludeMgmtTools
+                   $currentConfig.IncludeManagementTools | Should Be $false
                    $currentConfig.Ensure | Should Be 'Present'
                 }
 
@@ -147,7 +146,7 @@ try {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
                                              -IncludeAllSubFeature $false `
-                                             -IncludeManagementTools $testIncludeMgmtTools `
+                                             -IncludeManagementTools $false `
                                              -Ensure 'Absent' `
                                              -OutputPath $configurationPath `
                                              -ErrorAction 'Stop'
@@ -163,7 +162,7 @@ try {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                    $currentConfig.Name | Should Be $script:testFeatureName
                    $currentConfig.IncludeAllSubFeature | Should Be $false
-                   $currentConfig.IncludeManagementTools | Should Be $testIncludeMgmtTools
+                   $currentConfig.IncludeManagementTools | Should Be $false
                    $currentConfig.Ensure | Should Be 'Absent'
                 }
 
@@ -202,7 +201,7 @@ try {
                     . $configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
-                                            -IncludeManagementTools = $testIncludeMgmtTools `
+                                            -IncludeManagementTools $false `
                                             -Ensure 'Present' `
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
@@ -244,6 +243,7 @@ try {
                     . $configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
+                                            -IncludeManagementTools $false `
                                             -Ensure 'Absent' `
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
@@ -292,7 +292,7 @@ try {
                     {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureWithMgmtToolsName `
-                                             -IncludeAllSubFeature $testIncludeAllSubFeature `
+                                             -IncludeAllSubFeature $false `
                                              -IncludeManagementTools $true `
                                              -Ensure 'Present' `
                                              -OutputPath $configurationPath `
@@ -350,7 +350,7 @@ try {
                     {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureWithMgmtToolsName `
-                                             -IncludeAllSubFeature $testIncludeAllSubFeature `
+                                             -IncludeAllSubFeature $false `
                                              -IncludeManagementTools $true `
                                              -Ensure 'Absent' `
                                              -OutputPath $configurationPath `
