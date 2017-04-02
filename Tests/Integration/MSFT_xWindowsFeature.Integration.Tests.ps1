@@ -2,7 +2,7 @@
     Integration tests for Installing/uninstalling a Windows Feature. Currently Telnet-Client is
     set as the feature to test since it's fairly small and doesn't require a restart.
     RSAT-File-Services is set as the feature to test installing/uninstalling a feature with
-    subfeatures.
+    subfeatures. AD
 #> 
 
 # Suppressing this rule since we need to create a plaintext password to test this resource
@@ -13,14 +13,23 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
 
+# Import module for Get-WindowsFeatureManagamentTool
+Import-Module -Name "$PSScriptRoot\..\..\DSCResources\MSFT_xWindowsFeature\ManagementToolUtils.psm1"
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xWindowsFeature' `
     -TestType 'Integration'
 
+$script:testFeatureName = 'Telnet-Client'
+$script:testFeatureWithSubFeaturesName = 'RSAT-File-Services'
+$script:testFeatureWithMgmtToolsName = 'ADRMS'
+$script:installStateOfTestFeature
+$script:installStateOfTestWithSubFeatures
+
 <#
     If this is set to $true then the tests that test installing/uninstalling a feature with
-    its subfeatures will not run.
+    its subfeatures or management tools will not run.
 #>
 $script:skipLongTests = $false
 
@@ -36,8 +45,10 @@ try {
 
             $testFeatureWithSubFeatures = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
             $script:installStateOfTestWithSubFeatures = $testFeatureWithSubFeatures.Installed
+            $testFeatureWithMgmtTools = Get-WindowsFeature -Name $script:testFeatureWithMgmtToolsName
+            $script:installStateOfTestWithMgmtTools = $testFeatureWithMgmtTools.Installed
 
-            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'
+            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'            
         }
 
         AfterAll {
@@ -84,6 +95,7 @@ try {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
                                              -IncludeAllSubFeature $false `
+                                             -IncludeManagementTools $false `
                                              -Ensure 'Present' `
                                              -OutputPath $configurationPath `
                                              -ErrorAction 'Stop'
@@ -99,6 +111,7 @@ try {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                    $currentConfig.Name | Should Be $script:testFeatureName
                    $currentConfig.IncludeAllSubFeature | Should Be $false
+                   $currentConfig.IncludeManagementTools | Should Be $false
                    $currentConfig.Ensure | Should Be 'Present'
                 }
 
@@ -133,6 +146,7 @@ try {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
                                              -IncludeAllSubFeature $false `
+                                             -IncludeManagementTools $false `
                                              -Ensure 'Absent' `
                                              -OutputPath $configurationPath `
                                              -ErrorAction 'Stop'
@@ -148,6 +162,7 @@ try {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                    $currentConfig.Name | Should Be $script:testFeatureName
                    $currentConfig.IncludeAllSubFeature | Should Be $false
+                   $currentConfig.IncludeManagementTools | Should Be $false
                    $currentConfig.Ensure | Should Be 'Absent'
                 }
 
@@ -169,7 +184,7 @@ try {
             }
         }
 
-        Context "Should Install the Windows Feature: $script:testFeatureWithSubFeaturesName" {
+        Context "Should Install the Windows Feature: $script:testFeatureWithSubFeaturesName with subfeatures" {
             $configurationName = 'MSFT_xWindowsFeature_InstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
@@ -186,6 +201,7 @@ try {
                     . $configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
+                                            -IncludeManagementTools $false `
                                             -Ensure 'Present' `
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
@@ -227,6 +243,7 @@ try {
                     . $configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
+                                            -IncludeManagementTools $false `
                                             -Ensure 'Absent' `
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
@@ -256,9 +273,161 @@ try {
                 }
             }
         }
+
+        Context "Should Install the Windows Feature: $script:testFeatureWithMgmtToolsName with management tools" {
+            $configurationName = 'MSFT_xWindowsFeature_InstallFeatureWithMgmtTools'
+            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+
+            $logPath = Join-Path -Path $TestDrive -ChildPath 'InstallMgmtToolsTest.log'
+
+            try
+            {
+                if (-not $script:skipLongTests)
+                {
+                    # Ensure that the feature is not already installed
+                    Remove-WindowsFeature -Name $script:testFeatureWithMgmtToolsName -IncludeManagementTools
+                }
+
+                It 'Should compile without throwing' -Skip:$script:skipLongTests {
+                    {
+                        . $configFile -ConfigurationName $configurationName
+                        & $configurationName -Name $script:testFeatureWithMgmtToolsName `
+                                             -IncludeAllSubFeature $false `
+                                             -IncludeManagementTools $true `
+                                             -Ensure 'Present' `
+                                             -OutputPath $configurationPath `
+                                             -ErrorAction 'Stop'
+                        Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
+                    } | Should Not Throw
+                }
+
+                It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
+                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                }
+                
+                It 'Should return the correct configuration' -Skip:$script:skipLongTests {
+                   $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                   $currentConfig.Name | Should Be $script:testFeatureWithMgmtToolsName
+                   $currentConfig.IncludeManagementTools | Should Be $true
+                   $currentConfig.Ensure | Should Be 'Present'
+                }
+
+                It 'Should be Installed (includes check for management tools)' -Skip:$script:skipLongTests {
+                    $feature = Get-WindowsFeature -Name $script:testFeatureWithMgmtToolsName
+                    $feature.Installed | Should Be $true
+                    
+                    $mgmtTools = Get-WindowsFeatureManagementTool -Name $script:testFeatureWithMgmtToolsName
+                    foreach ($mgmtToolName in $mgmtTools)
+                    {
+                        $mgmtTool = Get-WindowsFeature -Name $mgmtToolName
+                        $mgmtTool.Installed | Should Be $true
+                    }
+                }
+
+            }
+            finally
+            {
+                if (Test-Path -Path $logPath) {
+                    Remove-Item -Path $logPath -Recurse -Force
+                }
+
+                if (Test-Path -Path $configurationPath)
+                {
+                    Remove-Item -Path $configurationPath -Recurse -Force
+                }
+            }
+        }
+
+        Context "Should Uninstall the Windows Feature: $script:testFeatureWithMgmtToolsName" {
+            $configurationName = 'MSFT_xWindowsFeature_UninstallFeatureWithMgmtTools'
+            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+
+            $logPath = Join-Path -Path $TestDrive -ChildPath 'UninstallMgmtToolsTest.log'
+
+            try
+            {
+                It 'Should compile without throwing' -Skip:$script:skipLongTests {
+                    {
+                        . $configFile -ConfigurationName $configurationName
+                        & $configurationName -Name $script:testFeatureWithMgmtToolsName `
+                                             -IncludeAllSubFeature $false `
+                                             -IncludeManagementTools $true `
+                                             -Ensure 'Absent' `
+                                             -OutputPath $configurationPath `
+                                             -ErrorAction 'Stop'
+                        Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
+                    } | Should Not Throw
+                }
+
+                It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
+                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                }
+                
+                It 'Should return the correct configuration' -Skip:$script:skipLongTests  {
+                   $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                   $currentConfig.Name | Should Be $script:testFeatureWithMgmtToolsName
+                   $currentConfig.IncludeManagementTools | Should Be $false
+                   $currentConfig.Ensure | Should Be 'Absent'
+                }
+
+                It 'Should not be installed (includes check for management tools)' -Skip:$script:skipLongTests {
+                    $feature = Get-WindowsFeature -Name $script:testFeatureWithMgmtToolsName
+                    $feature.Installed | Should Be $false
+                    
+                    $mgmtTools = Get-WindowsFeatureManagementTool -Name $script:testFeatureWithMgmtToolsName
+                    foreach ($mgmtToolName in $mgmtTools)
+                    {
+                        $mgmtTool = Get-WindowsFeature -Name $mgmtToolName
+                        $mgmtTool.Installed | Should Be $false
+                    }
+                }
+
+            }
+            finally
+            {
+                if (Test-Path -Path $logPath) {
+                    Remove-Item -Path $logPath -Recurse -Force
+                }
+
+                if (Test-Path -Path $configurationPath)
+                {
+                    Remove-Item -Path $configurationPath -Recurse -Force
+                }
+            }
+        }
     }
 }
 finally
 {
+    # Ensure that features used for testing are re-installed/uninstalled
+    if ($script:installStateOfTestFeature)
+    {
+        Add-WindowsFeature -Name $script:testFeatureName
+    }
+    else
+    {
+        Remove-WindowsFeature -Name $script:testFeatureName
+    }
+
+    if (-not $script:skipLongTests)
+    {
+        if ($script:installStateOfTestWithSubFeatures)
+        {
+            Add-WindowsFeature -Name $script:testFeatureWithSubFeaturesName -IncludeAllSubFeature
+        }
+        else
+        {
+            Remove-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
+        }
+
+        if ($script:installStateOfTestWithMgmtTools)
+        {
+            Add-WindowsFeature -Name $script:testFeatureWithMgmtToolsName -IncludeManagementTools
+        }
+        else
+        {
+            Remove-WindowsFeature -Name $script:testFeatureWithMgmtToolsName -IncludeManagementTools
+        }
+    }
     Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
 }

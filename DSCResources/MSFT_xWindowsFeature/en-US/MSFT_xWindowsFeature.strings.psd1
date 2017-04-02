@@ -6,8 +6,8 @@ ConvertFrom-StringData @'
     FeatureInstallationFailureError = Failure to successfully install the feature {0} .
     FeatureUninstallationFailureError = Failure to successfully uninstall the feature {0} .
     QueryFeature = Querying for feature {0} using Server Manager cmdlet Get-WindowsFeature.
-    InstallFeature = Trying to install feature {0} using Server Manager cmdlet Add-WindowsFeature.
-    UninstallFeature = Trying to uninstall feature {0} using Server Manager cmdlet Remove-WindowsFeature.
+    InstallFeature = Trying to install feature {0} using Server Manager cmdlet 'Add-WindowsFeature -IncludeAllSubFeature:${1} -IncludeManagementTools:${2}'.
+    UninstallFeature = Trying to uninstall feature {0} using Server Manager cmdlet 'Remove-WindowsFeature -IncludeManagementTools:${1}'.
     RestartNeeded = The Target machine needs to be restarted.
     GetTargetResourceStartMessage = Begin executing Get functionality on the {0} feature.
     GetTargetResourceEndMessage = End executing Get functionality on the {0} feature.
@@ -15,6 +15,8 @@ ConvertFrom-StringData @'
     SetTargetResourceEndMessage = End executing Set functionality on the {0} feature.
     TestTargetResourceStartMessage = Begin executing Test functionality on the {0} feature.
     TestTargetResourceEndMessage = End executing Test functionality on the {0} feature.
+    TestTargetResourceManagementTool = Testing management tool '{0}' is installed.
+    TestTargetResourceSubFeature = Testing sub feature '{0}' is installed. 
     ServerManagerModuleNotFoundMessage = ServerManager module is not installed on the machine.
     SkuNotSupported = Installing roles and features using PowerShell Desired State Configuration is supported only on Server SKU's. It is not supported on Client SKU.
     EnableServerManagerPSHCmdletsFeature = Windows Server 2008R2 Core operating system detected: ServerManager-PSH-Cmdlets feature has been enabled.

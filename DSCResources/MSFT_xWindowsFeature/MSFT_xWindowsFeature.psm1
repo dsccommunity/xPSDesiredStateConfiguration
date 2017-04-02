@@ -5,6 +5,8 @@ param ()
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonResourceHelper.psm1')
 
+Import-Module -Name "$PSScriptRoot\ManagementToolUtils.psm1"
+
 # Localized messages for verbose and error messages in this resource
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsFeature'
 
@@ -48,17 +50,9 @@ function Get-TargetResource
     
     Write-Verbose -Message ($script:localizedData.QueryFeature -f $Name)
     
-    $isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
-    if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
-    {
-        $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $Name } `
-                                  -ComputerName . `
-                                  -Credential $Credential `
-    }
-    else
-    {
-        $feature = Get-WindowsFeature @PSBoundParameters
-    }
+    $script:isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+
+    $feature = Invoke-WindowsFeatureAction -Action Get @PSBoundParameters
     
     Assert-SingleFeatureExists -Feature $feature -Name $Name
     
@@ -72,37 +66,40 @@ function Get-TargetResource
     {
         foreach ($currentSubFeatureName in $feature.SubFeatures)
         {
-
-            $getWindowsFeatureParameters = @{
-                Name = $currentSubFeatureName
-            }
-
-            if ($PSBoundParameters.ContainsKey('Credential'))
-            {
-               $getWindowsFeatureParameters['Credential'] = $Credential 
-            }
-
-            if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
-            {
-                <#
-                    Calling Get-WindowsFeature through Invoke-Command to start a new process with
-                    the given credential since Get-WindowsFeature doesn't support the Credential
-                    attribute on this server.
-                #>
-                $subFeature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $currentSubFeatureName } `
-                                             -ComputerName . `
-                                             -Credential $Credential `
-            }
-            else
-            {
-                $subFeature = Get-WindowsFeature @getWindowsFeatureParameters
-            }
+            $helperParam = ([hashtable]$PSBoundParameters).Clone()
+            $helperParam['Name'] = $currentSubFeatureName
+            $subFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
     
             Assert-SingleFeatureExists -Feature $subFeature -Name $currentSubFeatureName
     
             if (-not $subFeature.Installed)
             {
                 $includeAllSubFeature = $false
+                break
+            }
+        }
+    }
+
+    $includeManagementTools = $true
+    $managementTools = Get-WindowsFeatureManagementTool -Name $Name
+
+    if($managementTools.Count -eq 0)
+    {
+        $includeManagementTools = $false
+    }
+    else
+    {
+        foreach($currentManagementToolName in $managementTools)
+        {
+            $helperParam = ([hashtable]$PSBoundParameters).Clone()
+            $helperParam['Name'] = $currentManagementToolName
+            $managementFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
+    
+            Assert-SingleFeatureExists -Feature $managementFeature -Name $currentManagementToolName
+    
+            if (-not $managementFeature.Installed)
+            {
+                $includeManagementTools = $false
                 break
             }
         }
@@ -125,6 +122,7 @@ function Get-TargetResource
         DisplayName = $feature.DisplayName
         Ensure = $ensureResult
         IncludeAllSubFeature = $includeAllSubFeature
+        IncludeManagementTools = $includeManagementTools
     }
 }
 
@@ -173,6 +171,9 @@ function Set-TargetResource
        [Boolean]
        $IncludeAllSubFeature = $false,
 
+       [Boolean]
+       $IncludeManagementTools = $false,
+
        [ValidateNotNullOrEmpty()]
        [System.Management.Automation.PSCredential]
        [System.Management.Automation.Credential()]
@@ -185,15 +186,16 @@ function Set-TargetResource
 
     Write-Verbose -Message ($script:localizedData.SetTargetResourceStartMessage -f $Name)
 
-    Import-ServerManager
+    $script:isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
 
-    $isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+    Import-ServerManager
 
     if ($Ensure -eq 'Present')
     {
         $addWindowsFeatureParameters = @{
             Name = $Name
             IncludeAllSubFeature = $IncludeAllSubFeature
+            IncludeManagementTools = $IncludeManagementTools
         }
 
         if ($PSBoundParameters.ContainsKey('LogPath'))
@@ -201,28 +203,14 @@ function Set-TargetResource
            $addWindowsFeatureParameters['LogPath'] = $LogPath 
         }
 
-        Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name)
-
-        if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
+        if ($PSBoundParameters.ContainsKey('Credential'))
         {
-            <#
-                Calling Add-WindowsFeature through Invoke-Command to start a new process with
-                the given credential since Add-WindowsFeature doesn't support the Credential
-                attribute on this server.
-            #>
-            $feature = Invoke-Command -ScriptBlock { Add-WindowsFeature @addWindowsFeatureParameters } `
-                                      -ComputerName . `
-                                      -Credential $Credential
+            $addWindowsFeatureParameters['Credential'] = $Credential
         }
-        else
-        {
-            if ($PSBoundParameters.ContainsKey('Credential'))
-            {
-               $addWindowsFeatureParameters['Credential'] = $Credential 
-            }
 
-            $feature = Add-WindowsFeature @addWindowsFeatureParameters
-        }
+        Write-Verbose -Message ($script:localizedData.InstallFeature -f $Name, $IncludeAllSubFeature, $IncludeManagementTools)
+        
+        $feature = Invoke-WindowsFeatureAction -Action Add @addWindowsFeatureParameters
 
         if ($null -ne $feature -and $feature.Success)
         {
@@ -245,6 +233,7 @@ function Set-TargetResource
     {
         $removeWindowsFeatureParameters = @{
             Name = $Name
+            IncludeManagementTools = $IncludeManagementTools
         }
 
         if ($PSBoundParameters.ContainsKey('LogPath'))
@@ -252,28 +241,14 @@ function Set-TargetResource
            $removeWindowsFeatureParameters['LogPath'] = $LogPath 
         }
 
-        Write-Verbose -Message ($script:localizedData.UninstallFeature -f $Name)
-
-        if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
+        if ($PSBoundParameters.ContainsKey('Credential'))
         {
-            <#
-                Calling Remove-WindowsFeature through Invoke-Command to start a new process with
-                the given credential since Remove-WindowsFeature doesn't support the Credential
-                attribute on this server.
-            #>
-            $feature = Invoke-Command -ScriptBlock { Remove-WindowsFeature @removeWindowsFeatureParameters } `
-                                      -ComputerName . `
-                                      -Credential $Credential
+            $removeWindowsFeatureParameters['Credential'] = $Credential
         }
-        else
-        {
-            if ($PSBoundParameters.ContainsKey('Credential'))
-            {
-               $addWindowsFeatureParameters['Credential'] = $Credential 
-            }
 
-            $feature = Remove-WindowsFeature @removeWindowsFeatureParameters
-        }
+        Write-Verbose -Message ($script:localizedData.UninstallFeature -f $Name, $IncludeManagementTools)
+
+        $feature = Invoke-WindowsFeatureAction -Action Remove @removeWindowsFeatureParameters
 
         if ($null -ne $feature -and $feature.Success)
         {
@@ -343,6 +318,9 @@ function Test-TargetResource
         [Boolean]
         $IncludeAllSubFeature = $false,
 
+        [Boolean]
+        $IncludeManagementTools = $false,
+
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -358,35 +336,16 @@ function Test-TargetResource
     
     Import-ServerManager
 
+    $script:isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
+
     $testTargetResourceResult = $false
 
-    $getWindowsFeatureParameters = @{
-        Name = $Name
-    }
-
-    if ($PSBoundParameters.ContainsKey('Credential'))
+    $helperParam = @{ Name = $Name }
+    if($Credential)
     {
-       $getWindowsFeatureParameters['Credential'] = $Credential 
+        $helperParam['Credential'] = $Credential
     }
-    
-    Write-Verbose -Message ($script:localizedData.QueryFeature -f $Name)
-    
-    $isWinServer2008R2SP1 = Test-IsWinServer2008R2SP1
-    if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
-    {
-        <#
-            Calling Get-WindowsFeature through Invoke-Command to start a new process with
-            the given credential since Get-WindowsFeature doesn't support the Credential
-            attribute on this server.
-        #>
-        $feature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $Name } `
-                                  -ComputerName . `
-                                  -Credential $Credential
-    }
-    else
-    {
-        $feature = Get-WindowsFeature @getWindowsFeatureParameters
-    }
+    $feature = Invoke-WindowsFeatureAction -Action Get @helperParam
     
     Assert-SingleFeatureExists -Feature $feature -Name $Name
     
@@ -401,23 +360,14 @@ function Test-TargetResource
             # Check if each subfeature is in the requested state.
             foreach ($currentSubFeatureName in $feature.SubFeatures)
             {
-                $getWindowsFeatureParameters['Name'] = $currentSubFeatureName
-    
-                if ($isWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
+                Write-Verbose -Message ($script:localizedData.TestTargetResourceSubFeature -f $currentSubFeatureName)
+                $helperParam = @{ Name = $currentSubFeatureName }
+                if($Credential)
                 {
-                    <#
-                        Calling Get-WindowsFeature through Invoke-Command to start a new process with
-                        the given credential since Get-WindowsFeature doesn't support the Credential
-                        attribute on this server.
-                    #>
-                    $subFeature = Invoke-Command -ScriptBlock { Get-WindowsFeature -Name $currentSubFeatureName } `
-                                                 -ComputerName . `
-                                                 -Credential $Credential
+                    $helperParam['Credential'] = $Credential
                 }
-                else
-                {
-                    $subFeature = Get-WindowsFeature @getWindowsFeatureParameters
-                }
+
+                $subFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
                 
                 Assert-SingleFeatureExists -Feature $subFeature -Name $currentSubFeatureName
     
@@ -428,6 +378,36 @@ function Test-TargetResource
                 }
     
                 if ($subFeature.Installed -and $Ensure -eq 'Absent')
+                {
+                    $testTargetResourceResult = $false
+                    break
+                }
+            }
+        }
+
+        if ($IncludeManagementTools)
+        {
+            $managementTools = Get-WindowsFeatureManagementTool -Name $Name
+            foreach($currentManagementToolName in $managementTools)
+            {
+                Write-Verbose -Message ($script:localizedData.TestTargetResourceManagementTool -f $currentManagementToolName)
+                $helperParam = @{ Name = $currentManagementToolName }
+                if($Credential)
+                {
+                    $helperParam['Credential'] = $Credential
+                }
+
+                $managementFeature = Invoke-WindowsFeatureAction -Action Get @helperParam
+                
+                Assert-SingleFeatureExists -Feature $managementFeature -Name $currentManagementToolName
+    
+                if (-not $managementFeature.Installed -and $Ensure -eq 'Present')
+                {
+                    $testTargetResourceResult = $false
+                    break
+                }
+    
+                if ($managementFeature.Installed -and $Ensure -eq 'Absent')
                 {
                     $testTargetResourceResult = $false
                     break
@@ -545,10 +525,167 @@ function Import-ServerManager
 #>
 function Test-IsWinServer2008R2SP1
 {
-    param
-    ()
+    param ()
 
     return ([Environment]::OSVersion.Version.ToString().Contains('6.1.'))
+}
+
+<#
+    .SYNOPSIS
+        Invokes either Get-WindowsFeature, Add-WindowsFeature or Remove-WindowsFeature cmdlets based on Action parameter.
+
+    .NOTES
+        Takes Server 2008 R2 servers into account.
+
+    .PROPERTY Action
+        The action to perform. Can be:
+            'Get' - Gets the Windows Feature
+            'Add' - Adds the Windows Feature
+            'Remove' - Removes the Windows Feature
+
+    .PROPERTY Name
+        The name of the Windows Feature
+
+    .PROPERTY Credential
+        Optional credentials to be used to install the Windows Feature
+
+    .PROPERTY IncludeAllSubFeatures
+        Optional boolean used to invoke the action with Switch Parameter 'IncludeAllSubFeatures' (Only applies to Action 'Add')
+
+    .PROPERTY IncludeManagementTools
+        Optional boolean used to invoke the action with Switch Parameter 'IncludeManagementTools' (Applies to Actions 'Add' and 'Remove')
+
+    .OUTPUTS
+        Get - Microsoft.Windows.ServerManager.Commands.Feature
+        Add - Null
+        Remove - Null
+
+    .EXAMPLE
+        Invoke-WindowsFeatureAction -Action Get -Name 'Web-Server'
+        
+        Result:
+            Display Name                                            Name                       Install State
+            ------------                                            ----                       -------------
+            [X] Web Server (IIS)                                    Web-Server                     Installed
+
+    .EXAMPLE
+        Invoke-WindowsFeatureAction -Action Add -Name 'Web-Server' -IncludeAllSubFeatures $true
+            
+        Result: Installs feature 'Web-Server' and all sub features
+
+    .EXAMPLE
+        Invoke-WindowsFeatureAction -Action Remove -Name 'DHCP' -IncludeManagementTools $true
+
+        Result: Removes feature 'DHCP' and all of it's management tools
+            
+#>
+function Invoke-WindowsFeatureAction
+{
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Get', 'Add', 'Remove')]
+        [string]
+        $Action,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $Name,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        [pscredential]$Credential,
+
+        [Parameter()]
+        [Boolean]
+        $IncludeAllSubFeature,
+
+        [Parameter()]
+        [Boolean]
+        $IncludeManagementTools,
+
+        [Parameter()]
+        [string]
+        $LogPath
+    )
+
+    $isWinServer2008R2SP1 = $script:isWinServer2008R2SP1
+
+    $windowsFeatureParameters = @{
+        Name = $Name
+    }
+
+    if ($PSBoundParameters.ContainsKey('Credential') -and 
+            -not $IsWinServer2008R2SP1)
+    {
+        $windowsFeatureParameters['Credential'] = $Credential 
+    }
+
+    if ($PSBoundParameters.ContainsKey('LogPath'))
+    {
+        $windowsFeatureParameters['LogPath'] = $LogPath
+    }
+
+    if ($Action -ne 'Get')
+    {  
+        $windowsFeatureParameters['IncludeManagementTools'] = $IncludeManagementTools
+    }
+
+    if ($Action -eq 'Add')
+    {
+        $windowsFeatureParameters['IncludeAllSubFeature'] = $IncludeAllSubFeature
+    }
+
+    if ($IsWinServer2008R2SP1 -and $PSBoundParameters.ContainsKey('Credential'))
+    {
+        <#
+            Calling Get-WindowsFeature through Invoke-Command to start a new process with
+            the given credential since Get-WindowsFeature doesn't support the Credential
+            attribute on this server.
+        #>
+        switch($Action)
+        {
+            "Get" 
+            {
+                return Invoke-Command -ScriptBlock { Get-WindowsFeature @windowsFeatureParameters } `
+                                        -ComputerName . `
+                                        -Credential $Credential `
+            }
+            "Add" 
+            {
+                return Invoke-Command -ScriptBlock { Add-WindowsFeature @windowsFeatureParameters } `
+                                        -ComputerName . `
+                                        -Credential $Credential `
+            }
+            "Remove" 
+            {
+                return Invoke-Command -ScriptBlock { Remove-WindowsFeature @windowsFeatureParameters } `
+                                        -ComputerName . `
+                                        -Credential $Credential `
+            }
+        }
+        
+    }
+    else
+    {
+        switch ($Action)
+        {
+            "Get"
+            {
+                return Get-WindowsFeature @windowsFeatureParameters 
+            }
+            "Add"
+            {
+                return Add-WindowsFeature @windowsFeatureParameters
+            }
+            "Remove"
+            { 
+                return Remove-WindowsFeature @windowsFeatureParameters 
+            }
+        }
+    }
 }
 
 Export-ModuleMember -Function *-TargetResource

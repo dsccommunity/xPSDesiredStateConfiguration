@@ -593,6 +593,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* xWindowsFeature
+    * Added IncludeManagementTools option
 
 ### 6.1.0.0
 
