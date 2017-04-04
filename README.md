@@ -594,6 +594,11 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* xArchive:
+    * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
+* xWindowsFeatureSet:
+    * Had the wrong parameter name in one test case.
+
 ### 6.1.0.0
 
 * Moved DSC pull server setup tests to DSCPullServerSetup folder for new common tests
