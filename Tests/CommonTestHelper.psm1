@@ -1,4 +1,4 @@
-﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
 $errorActionPreference = 'Stop'
@@ -9,6 +9,368 @@ Set-StrictMode -Version 'Latest'
     if retrieved the credential is requested multiple times.
 #>
 $script:appVeyorAdministratorCredential = $null
+
+data testStrings
+{
+    ConvertFrom-StringData -StringData @'
+Assert-FileHashValid = assert that the file hash is valid
+Assert-FileSignatureValid = assert that the file signature is valid
+Assert-FileValid = assert that the file is valid
+Assert-PathExtensionValid = assert that the specified path extension is valid
+Close-Stream = close the stream
+Convert-PathToUri = convert the path to a URI
+Convert-ProductIdToIdentifyingNumber = convert the product ID to the identifying number
+Copy-ResponseStreamToFileStream = copy the response to the outstream
+Get-ItemProperty = retrieve {0}
+Get-MsiProductCode = retrieve the MSI product code
+Get-ProductEntry = retrieve the product entry
+Get-ProductEntryInfo = retrieve the product entry info
+Get-ProductEntryValue = retrieve the value of the product entry property
+Get-ScriptBlock = retrieve the script block
+Get-WebRequest = retrieve the WebRequest object
+Get-WebRequestResponse = retrieve the web request response
+Get-WebRequestResponseStream = retrieve the WebRequest response stream
+Invoke-CimMethod = attempt to invoke a cim method to check if reboot is required
+Invoke-PInvoke = attempt to {0} the MSI package under the user
+Invoke-Process = attempt to {0} the MSI package under the process
+New-Item = create a new {0}
+New-LogFile = create a new log file
+New-Object = create a new {0}
+New-PSDrive = create a new PS Drive
+Remove-Item = remove {0}
+Remove-PSDrive = remove the PS drive
+Start-MsiProcess = start the MSI process
+Test-Path = test that the path {0} exists
+'@
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the name of the test for asserting that the given function is called.
+
+    .PARAMETER IsCalled
+        Indicates whether the function should be called or not.
+
+    .PARAMETER Custom
+        An optional string to include in the test name to make the name more descriptive.
+#>
+function Get-TestName
+{
+    [OutputType([String])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Command,
+
+        [Boolean]
+        $IsCalled = $true,
+
+        [String]
+        $Custom = ''
+    )
+
+    $testName = ''
+
+    if (-not [String]::IsNullOrEmpty($Custom))
+    {
+        $testName = ($testStrings.$Command -f $Custom)
+    }
+    else
+    {
+        $testName = $testStrings.$Command
+    }
+
+    if ($IsCalled)
+    {
+        return 'Should ' + $testName
+    }
+    else
+    {
+        return 'Should not ' + $testName
+    }
+}
+
+<#
+    .SYNOPSIS
+        Tests that each mock in MocksCalled is called the expected number of times.
+
+    .PARAMETER MocksCalled
+        An array of the mocked commands that should be called or not called.
+        Each item in the array is a hashtable that contains the name of the command
+        being mocked and the number of times it is called (can be 0).
+#>
+function Invoke-ExpectedMocksAreCalledTest
+{
+    [CmdletBinding()]
+    param
+    (
+        [Hashtable[]]
+        $MocksCalled
+    )
+
+    foreach ($mock in $MocksCalled)
+    {
+        $testName = Get-TestName -Command $mock.Command -IsCalled $mock.Times
+
+        if ($mock.Keys -contains 'Custom')
+        {
+            $testName = Get-TestName -Command $mock.Command -IsCalled $mock.Times -Custom $mock.Custom
+        }
+
+        It $testName {
+            Assert-MockCalled -CommandName $mock.Command -Exactly $mock.Times -Scope 'Context'
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Performs generic tests for the given function, including checking that the
+        function does not throw and checking that all mocks are called the expected
+        number of times.
+
+    .PARAMETER Function
+        The function to be called. Must be in format:
+        { Param($hashTableOfParamsToPass) Function-Name @hashTableOfParamsToPass }
+        For example:
+        { Param($testLogPath) New-LogFile $script:testPath }
+        or
+        { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters }
+
+    .PARAMETER FunctionParameters
+        The parameters that should be passed to the function for this test.
+
+    .PARAMETER MocksCalled
+        An array of the mocked commands that should be called for this test.
+        Each item in the array is a hashtable that contains the name of the command
+        being mocked, the number of times it is called (can be 0) and, optionally,
+        an extra custom string to make the test name more descriptive.
+
+    .PARAMETER ShouldThrow
+        Indicates whether the function should throw or not. If this is set to True
+        then ErrorMessage and ErrorTestName should also be passed.
+
+    .PARAMETER ErrorMessage
+        The error message that should be thrown if the function is supposed to throw.
+
+    .PARAMETER ErrorTestName
+        The string that should be used to create the name of the test that checks for
+        the correct error being thrown.
+#>
+function Invoke-GenericUnitTest {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ScriptBlock]
+        $Function,
+
+        [Parameter(Mandatory = $true)]
+        [Hashtable]
+        $FunctionParameters,
+
+        [Hashtable[]]
+        $MocksCalled,
+
+        [Boolean]
+        $ShouldThrow = $false,
+
+        [String]
+        $ErrorMessage = '',
+
+        [String]
+        $ErrorTestName = ''
+    )
+
+    if ($ShouldThrow)
+    {
+        It "Should throw an error for $ErrorTestName" {
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should Throw $ErrorMessage
+        }
+    }
+    else
+    {
+        It 'Should not throw' {
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should Not Throw
+        }
+    }
+
+    Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
+}
+
+<#
+    .SYNOPSIS
+        Performs generic tests for Get-TargetResource, including checking that the
+        function does not throw, checking that all mocks are called the expected
+        number of times, and checking that the correct result is returned. If the function
+        is expected to throw, then this function should not be used.
+
+    .PARAMETER GetTargetResourceParameters
+        The parameters that should be passed to Get-TargetResource for this test.
+
+    .PARAMETER MocksCalled
+        An array of the mocked commands that should be called for this test.
+        Each item in the array is a hashtable that contains the name of the command
+        being mocked and the number of times it is called (can be 0).
+
+    .PARAMETER ExpectedReturnValue
+        The expected hashtable that Get-TargetResource should return for this test.
+#>
+function Invoke-GetTargetResourceTest
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Hashtable]
+        $GetTargetResourceParameters,
+
+        [Hashtable[]]
+        $MocksCalled,
+
+        [Parameter(Mandatory = $true)]
+        [Hashtable]
+        $ExpectedReturnValue
+    )
+
+    It 'Should not throw' {
+        { $null = Get-TargetResource @GetTargetResourceParameters } | Should Not Throw
+    }
+
+    Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
+
+    $getTargetResourceResult = Get-TargetResource @GetTargetResourceParameters
+
+    It 'Should return a Hashtable' {
+        $getTargetResourceResult -is [Hashtable] | Should Be $true
+    }
+
+    It "Should return a Hashtable with $($ExpectedReturnValue.Keys.Count) properties" {
+        $getTargetResourceResult.Keys.Count | Should Be $ExpectedReturnValue.Keys.Count
+    }
+
+    foreach ($key in $ExpectedReturnValue.Keys)
+    {
+        It "Should return a Hashtable with the $key property as $($ExpectedReturnValue.$key)" {
+           $getTargetResourceResult.$key | Should Be $ExpectedReturnValue.$key
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Performs generic tests for Set-TargetResource, including checking that the
+        function does not throw and checking that all mocks are called the expected
+        number of times.
+
+    .PARAMETER SetTargetResourceParameters
+        The parameters that should be passed to Set-TargetResource for this test.
+
+    .PARAMETER MocksCalled
+        An array of the mocked commands that should be called for this test.
+        Each item in the array is a hashtable that contains the name of the command
+        being mocked, the number of times it is called (can be 0) and, optionally,
+        an extra custom string to make the test name more descriptive.
+
+    .PARAMETER ShouldThrow
+        Indicates whether Set-TargetResource should throw or not. If this is set to True
+        then ErrorMessage and ErrorTestName should also be passed.
+
+    .PARAMETER ErrorMessage
+        The error message that should be thrown if Set-TargetResource is supposed to throw.
+
+    .PARAMETER ErrorTestName
+        The string that should be used to create the name of the test that checks for
+        the correct error being thrown.
+#>
+function Invoke-SetTargetResourceTest {
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Hashtable]
+        $SetTargetResourceParameters,
+
+        [Hashtable[]]
+        $MocksCalled,
+
+        [Boolean]
+        $ShouldThrow = $false,
+
+        [String]
+        $ErrorMessage = '',
+
+        [String]
+        $ErrorTestName = ''
+    )
+
+    if ($ShouldThrow)
+    {
+        It "Should throw an error for $ErrorTestName" {
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should Throw $ErrorMessage
+        }
+    }
+    else
+    {
+        It 'Should not throw' {
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should Not Throw
+        }
+    }
+
+    Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
+}
+
+<#
+    .SYNOPSIS
+        Performs generic tests for Test-TargetResource, including checking that the
+        function does not throw, checking that all mocks are called the expected
+        number of times, and checking that the correct result is returned. If the function
+        is expected to throw, then this function should not be used.
+
+    .PARAMETER TestTargetResourceParameters
+        The parameters that should be passed to Test-TargetResource for this test.
+
+    .PARAMETER MocksCalled
+        An array of the mocked commands that should be called for this test.
+        Each item in the array is a hashtable that contains the name of the command
+        being mocked and the number of times it is called (can be 0).
+
+    .PARAMETER ExpectedReturnValue
+        The expected boolean value that should be returned
+#>
+function Invoke-TestTargetResourceTest
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Hashtable]
+        $TestTargetResourceParameters,
+
+        [Hashtable[]]
+        $MocksCalled,
+
+        [Parameter(Mandatory = $true)]
+        [Boolean]
+        $ExpectedReturnValue
+    )
+
+    It 'Should not throw' {
+        { $null = Test-TargetResource @TestTargetResourceParameters } | Should Not Throw
+    }
+
+    Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
+
+    $testTargetResourceResult = Test-TargetResource @TestTargetResourceParameters
+
+    It "Should return $ExpectedReturnValue" {
+        $testTargetResourceResult | Should Be $ExpectedReturnValue
+    }
+}
+
+
 
 <#
     .SYNOPSIS
@@ -414,5 +776,10 @@ Export-ModuleMember -Function @(
     'Test-SetTargetResourceWithWhatIf', `
     'Get-AppVeyorAdministratorCredential', `
     'Enter-DscResourceTestEnvironment', `
-    'Exit-DscResourceTestEnvironment'
+    'Exit-DscResourceTestEnvironment', `
+    'Invoke-GetTargetResourceTest', `
+    'Invoke-SetTargetResourceTest', `
+    'Invoke-TestTargetResourceTest', `
+    'Invoke-ExpectedMocksAreCalledTest', `
+    'Invoke-GenericUnitTest'
 )
