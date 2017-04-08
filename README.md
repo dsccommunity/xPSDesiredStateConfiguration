@@ -19,9 +19,10 @@ If you would like to contribute to this module, please review the common DSC Res
 * **xArchive** provides a mechanism to expand an archive (.zip) file to a specific path or remove an expanded archive (.zip) file from a specific path on a target node.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
 * **xEnvironment** provides a mechanism to configure and manage environment variables for a machine or process.
+* **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
 * **xGroup** provides a mechanism to manage local groups on a target node.
 * **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
-* **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
+* **xMsiPackage** provides a mechanism to install and uninstall .msi packages.
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
@@ -324,6 +325,46 @@ None
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
 
+### xMsiPackage
+
+provides a mechanism to install and uninstall .msi packages.
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String] ProductId** _(Key)_: The identifying number used to find the package, usually a GUID.
+* **[String] Path** _(Required)_: The path to the MSI file that should be installed or uninstalled.
+* **[String] Ensure** _(Write)_: Specifies whether or not the MSI file should be installed or not. To install the MSI file, specify this property as Present. To uninstall the .msi file, specify this property as Absent. The default value is Present. { *Present* | Absent }.
+* **[String] Arguments** _(Write)_: The arguments to be passed to the MSI package during installation or uninstallation if needed.
+* **[System.Management.Automation.PSCredential] Credential** _(Write)_: The credential of a user account to be used to mount a UNC path if needed.
+* **[String] LogPath** _(Write)_: The path to the log file to log the output from the MSI execution.
+* **[String] FileHash** _(Write)_: The expected hash value of the MSI file at the given path.
+* **[String] HashAlgorithm** _(Write)_: The algorithm used to generate the given hash value.
+* **[String] SignerSubject** _(Write)_: The subject that should match the signer certificate of the digital signature of the MSI file.
+* **[String] SignerThumbprint** _(Write)_: The certificate thumbprint that should match the signer certificate of the digital signature of the MSI file.
+* **[String] ServerCertificateValidationCallback** _(Write)_: PowerShell code that should be used to validate SSL certificates for paths using HTTPS.
+* **[System.Management.Automation.PSCredential] RunAsCredential** _(Write)_: The credential of a user account under which to run the installation or uninstallation of the MSI package.
+
+#### Read-Only Properties from Get-TargetResource
+
+* **[String] Name** _(Read)_: The display name of the MSI package.
+* **[String] InstallSource** _(Read)_: The path to the MSI package.
+* **[String] InstalledOn** _(Read)_: The date that the MSI package was installed on or serviced on, whichever is later.
+* **[UInt32] Size** _(Read)_: The size of the MSI package in MB.
+* **[String] Version** _(Read)_: The version number of the MSI package.
+* **[String] PackageDescription** _(Read)_: The description of the MSI package.
+* **[String] Publisher** _(Read)_: The publisher of the MSI package.
+
+#### Examples
+
+* [Install the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromFile.ps1)
+* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UninstallPackageFromFile.ps1)
+* [Install the MSI file with the given ID at the given HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromHttp.ps1)
+* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UnstallPackageFromHttps.ps1)
+
 ### xFileUpload
 
 * **DestinationPath**: Path where the local file should be uploaded.
@@ -594,6 +635,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* xMsiPackage:
+    * Created high quality MSI package manager resource 
 * xArchive:
     * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
 * xWindowsFeatureSet:
