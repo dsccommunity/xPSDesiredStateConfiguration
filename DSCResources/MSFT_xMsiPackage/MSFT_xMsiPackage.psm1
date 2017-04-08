@@ -23,10 +23,10 @@ $script:msiTools = $null
         Retrieves the current state of the MSI file with the given Product ID.
 
     .PARAMETER ProductId
-        The ID of the MSI file to retrieve the state of.
+        The ID of the MSI file to retrieve the state of, usually a GUID.
 
     .PARAMETER Path
-        Not used in Get-TargetResource
+        Not used in Get-TargetResource.
 #>
 function Get-TargetResource
 {
