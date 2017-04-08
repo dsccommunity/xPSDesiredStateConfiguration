@@ -132,7 +132,7 @@ function Start-Server
                     }
                 }
 
-                Throw $errorMessage
+                throw $errorMessage
             }
 
             if ($HttpListener.IsListening)
@@ -173,8 +173,8 @@ function Start-Server
             $certPassword = ConvertTo-SecureString -String 'password12345' -AsPlainText -Force
             $tempPath = 'C:\certForTesting'
 
-            Export-PfxCertificate -Cert $certificate -FilePath $tempPath -Password $certPassword
-            Import-PfxCertificate -CertStoreLocation 'Cert:\LocalMachine\Root' -FilePath 'C:\certForTesting' -Password $certPassword
+            $null = Export-PfxCertificate -Cert $certificate -FilePath $tempPath -Password $certPassword
+            $null = Import-PfxCertificate -CertStoreLocation 'Cert:\LocalMachine\Root' -FilePath 'C:\certForTesting' -Password $certPassword
             Remove-Item -Path $tempPath
             
             Write-Log -LogFile $LogPath -Message 'Finished importing certificate into root. About to bind it to port.'
@@ -317,7 +317,7 @@ function Start-Server
 
         if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
         {
-            New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
+            $null = New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
         }
 
         $null = netsh advfirewall set allprofiles state off
@@ -342,7 +342,7 @@ function Start-Server
                 {
                     $errorMessage = "Unable to bind SSL certificate to port. Error: $_"
                     Write-Log -LogFile $LogPath -Message $errorMessage
-                    Throw $errorMessage
+                    throw $errorMessage
                 }
 
                 Write-Log -LogFile $LogPath -Message 'Certificate is registered'
@@ -426,7 +426,7 @@ function Start-Server
                 {
                     $errorMessage = "error writing response: $_"
                     Write-Log -LogFile $LogPath -Message $errorMessage
-                    Throw $errorMessage
+                    throw $errorMessage
                 }
                 finally
                 {
@@ -451,7 +451,7 @@ function Start-Server
         {
             $errorMessage = "There were problems setting up the HTTP(s) listener. Error: $_"
             Write-Log -LogFile $LogPath -Message $errorMessage
-            Throw $errorMessage
+            throw $errorMessage
         }
         finally
         {
@@ -1170,7 +1170,7 @@ function New-MockFileServer
 
     if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
     {
-        New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
+        $null = New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
     }
 
     netsh advfirewall set allprofiles state off

@@ -191,6 +191,8 @@ function Set-TargetResource
     $psDrive = $null
     $downloadedFileName = $null
 
+    $exitCode = 0
+
     try
     {
         if ($PSBoundParameters.ContainsKey('LogPath'))
@@ -237,8 +239,6 @@ function Set-TargetResource
                     }
 
                     $destinationPath = Join-Path -Path $script:packageCacheLocation -ChildPath (Split-Path -Path $localPath -Leaf)
-
-                    Write-Verbose -Message ($script:localizedData.NeedtodownloadfilefromschemedestinationwillbedestName -f $uri.Scheme, $destinationPath)
 
                     try
                     {
@@ -774,7 +774,7 @@ function Get-WebRequestResponse
             $webRequest.ServerCertificateValidationCallBack = (Get-ScriptBlock -FunctionName $ServerCertificateValidationCallback)
         }
     
-        Write-Verbose -Message ($script:localizedData.Gettingtheschemeresponsestream -f $uriScheme)
+        Write-Verbose -Message ($script:localizedData.GettingTheSchemeResponseStream -f $uriScheme)
         $responseStream = Get-WebRequestResponseStream -WebRequest $webRequest
 
         return $responseStream

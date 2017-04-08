@@ -3,7 +3,7 @@ Set-StrictMode -Version 'Latest'
 
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $script:commonTestHelperFilePath -force
+Import-Module -Name $script:commonTestHelperFilePath
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -13,7 +13,7 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 try
 {
     InModuleScope 'MSFT_xMsiPackage' {
-        Describe 'MSFT_xMsiPackage integration Tests' {
+        Describe 'MSFT_xMsiPackage Integration Tests' {
             BeforeAll {
                 $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
                 $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'MSFT_xPackageResource.TestHelper.psm1'
@@ -25,18 +25,15 @@ try
                 Import-Module -Name $commonTestHelperFilePath
 
                 $script:skipHttpsTest = $false
-                $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xPackageResourceTests'
+
+                <#
+                    This log file is used to log messages from the mock server which is important for debugging since
+                    most of the work of the mock server is done within a separate process. 
+                #>
                 $script:logFile = Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'
 
-                if (Test-Path -Path $script:testDirectoryPath)
-                {
-                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
-                }
-
-                $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
-
                 $script:msiName = 'DSCSetupProject.msi'
-                $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
+                $script:msiLocation = Join-Path -Path $TestDrive -ChildPath $script:msiName
                 $script:msiArguments = '/NoReboot'
 
                 $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
@@ -56,16 +53,11 @@ try
 
                 if (Test-PackageInstalledById -ProductId $script:packageId)
                 {
-                    Throw 'Package could not be removed.'
+                    throw 'Test package could not be uninstalled after running all tests. It may cause errors in subsequent test runs.'
                 }
             }
 
             AfterAll {
-                if (Test-Path -Path $script:testDirectoryPath)
-                {
-                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
-                }
-
                 if (Test-PackageInstalledById -ProductId $script:packageId)
                 {
                     $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
@@ -74,7 +66,7 @@ try
 
                 if (Test-PackageInstalledById -ProductId $script:packageId)
                 {
-                    throw 'Test output will not be valid - package could not be removed.'
+                    throw 'Test package could not be uninstalled after running test'
                 }
             }
 
@@ -243,7 +235,7 @@ try
                 }
 
                 It 'Should write to the specified log path' {
-                    $logPath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestMsiLog.txt'
+                    $logPath = Join-Path -Path $TestDrive -ChildPath 'TestMsiLog.txt'
 
                     if (Test-Path -Path $logPath)
                     {
@@ -258,7 +250,6 @@ try
 
                 It 'Should add space after .MSI installation arguments' {
                     Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } { return @{ ExitCode = 0 } }
-                    Mock Test-TargetResource { return $false }
                     Mock Get-ProductEntry { return $script:packageId }
 
                     $packageParameters = @{
@@ -273,8 +264,7 @@ try
                 }
 
                 It 'Should not check for product installation when rebooted is required' {
-                    Mock Invoke-Process { return [PSCustomObject] @{ ExitCode = 3010 } }
-                    Mock Test-TargetResource { return $false }
+                    Mock Invoke-Process { return 3010 }
                     Mock Get-ProductEntry { }
 
                     $packageParameters = @{
@@ -287,7 +277,6 @@ try
 
                 It 'Should install package using user credentials when specified' {
                     Mock Invoke-PInvoke { }
-                    Mock Test-TargetResource { return $false }
                     Mock Get-ProductEntry { return $script:packageId }
 
                     $packageCredential = [System.Management.Automation.PSCredential]::Empty
@@ -300,29 +289,6 @@ try
                     Set-TargetResource -Ensure 'Present' @packageParameters
 
                     Assert-MockCalled Invoke-PInvoke -ParameterFilter { $RunAsCredential -eq $packageCredential} -Scope It
-                }
-            }
-
-            Context 'Get-MsiTool' {
-                It 'Should add MSI tools in the Microsoft.Windows.DesiredStateConfiguration.xPackageResource namespace' {
-                    $addTypeResult = @{ Namespace = 'Mock not called' }
-                    Mock -CommandName 'Add-Type' -MockWith { $addTypeResult['Namespace'] = $Namespace }
-
-                    $msiTool = Get-MsiTool
-
-                    if (([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type)
-                    {
-                        Assert-MockCalled -CommandName 'Add-Type' -Times 0
-
-                        $msiTool | Should Be ([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type
-                    }
-                    else
-                    {
-                        Assert-MockCalled -CommandName 'Add-Type' -Times 1
-
-                        $addTypeResult['Namespace'] | Should Be 'Microsoft.Windows.DesiredStateConfiguration.xPackageResource'
-                        $msiTool | Should Be $null
-                    }
                 }
             }
         }

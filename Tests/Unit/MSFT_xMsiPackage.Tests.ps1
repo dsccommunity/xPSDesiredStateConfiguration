@@ -94,7 +94,7 @@ Describe 'xMsiPackage Unit Tests' {
                     ProductId = $script:testIdentifyingNumber
                 }
 
-                Invoke-GetTargetResourceTest -GetTargetResourceParameters $getTargetResourceParameters `
+                Invoke-GetTargetResourceUnitTest -GetTargetResourceParameters $getTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ExpectedReturnValue $expectedReturnValue
             }
@@ -115,7 +115,7 @@ Describe 'xMsiPackage Unit Tests' {
 
                 $expectedReturnValue = $script:mockProductEntryInfo
 
-                Invoke-GetTargetResourceTest -GetTargetResourceParameters $getTargetResourceParameters `
+                Invoke-GetTargetResourceUnitTest -GetTargetResourceParameters $getTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ExpectedReturnValue $expectedReturnValue
             }
@@ -175,7 +175,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntry'; Times = 1 }
                 )
 
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ShouldThrow $false
             }
@@ -202,7 +202,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntry'; Times = 1 }
                 )
 
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ShouldThrow $false
             }
@@ -233,7 +233,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntry'; Times = 1 }
                 )
 
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ShouldThrow $false
             }
@@ -264,7 +264,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntry'; Times = 1 }
                 )
 
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ShouldThrow $false
             }
@@ -291,7 +291,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntry'; Times = 0 }
                 )
 
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled $mocksCalled `
                                              -ShouldThrow $false
             }
@@ -299,7 +299,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriQuery }
 
             Context 'Path is a query path' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -ShouldThrow $false
 
                 It 'Should assert that the file without the query string has a valid extension' {
@@ -310,7 +310,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriOnlyFile }
 
             Context 'Converted URI does not have a local path' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -ShouldThrow $false
 
                 It 'Should assert that the original path has a valid extension' {
@@ -321,7 +321,7 @@ Describe 'xMsiPackage Unit Tests' {
             $setTargetResourceParameters.Remove('LogPath')
 
             Context 'Converted URI does not have a local path' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled @(@{ Command = 'New-LogFile'; Times = 0 }) `
                                              -ShouldThrow $false
             }
@@ -331,7 +331,7 @@ Describe 'xMsiPackage Unit Tests' {
             $setTargetResourceParameters.Ensure = 'Present'
 
             Context 'URI scheme is Http and package cache location does not exist yet' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -MocksCalled @(@{ Command = 'New-Item'; Times = 1; Custom = 'directory for the package cache' }) `
                                              -ShouldThrow $false
             }
@@ -341,7 +341,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
 
             Context 'Package could not be found after installation' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -ShouldThrow $true `
                                              -ErrorMessage ($script:localizedData.PostValidationError -f $setTargetResourceParameters.Path) `
                                              -ErrorTestName $script:errorMessageTitles.PostValidationError
@@ -350,7 +350,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'Get-MsiProductCode' -MockWith { return $script:testWrongProductId }
 
             Context 'Product code from downloaded MSI package does not match specified ID' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -ShouldThrow $true `
                                              -ErrorMessage ($script:localizedData.InvalidId -f $script:testIdentifyingNumber, $script:testWrongProductId) `
                                              -ErrorTestName $script:errorMessageTitles.InvalidId
@@ -359,7 +359,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'New-Object' -MockWith { Throw }
 
             Context 'Failure while creating the file stream object to download to' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -ShouldThrow $true `
                                              -ErrorMessage ($script:localizedData.CouldNotOpenDestFile -f $script:destinationPath) `
                                              -ErrorTestName $script:errorMessageTitles.CouldNotOpenDestFile
@@ -369,7 +369,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'Test-Path' -MockWith { return $false } -ParameterFilter { $Path -eq $script:testPath }
 
             Context 'Invalid path was passed in' {
-                Invoke-SetTargetResourceTest -SetTargetResourceParameters $setTargetResourceParameters `
+                Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
                                              -ShouldThrow $true `
                                              -ErrorMessage ($script:localizedData.PathDoesNotExist -f $script:testPath) `
                                              -ErrorTestName $script:errorMessageTitles.PathDoesNotExist
@@ -394,7 +394,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntryValue'; Times = 1 }
                 )
 
-                Invoke-TestTargetResourceTest -TestTargetResourceParameters $testTargetResourceParameters `
+                Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
                                               -MocksCalled $mocksCalled `
                                               -ExpectedReturnValue $true
             }
@@ -412,7 +412,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntryValue'; Times = 1 }
                 )
 
-                Invoke-TestTargetResourceTest -TestTargetResourceParameters $testTargetResourceParameters `
+                Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
                                               -MocksCalled $mocksCalled `
                                               -ExpectedReturnValue $false
             }
@@ -432,7 +432,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntryValue'; Times = 0 }
                 )
 
-                Invoke-TestTargetResourceTest -TestTargetResourceParameters $testTargetResourceParameters `
+                Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
                                               -MocksCalled $mocksCalled `
                                               -ExpectedReturnValue $false
             }
@@ -450,7 +450,7 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Get-ProductEntryValue'; Times = 0 }
                 )
 
-                Invoke-TestTargetResourceTest -TestTargetResourceParameters $testTargetResourceParameters `
+                Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
                                               -MocksCalled $mocksCalled `
                                               -ExpectedReturnValue $true
             }

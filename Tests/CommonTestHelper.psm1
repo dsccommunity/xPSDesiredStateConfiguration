@@ -218,7 +218,7 @@ function Invoke-GenericUnitTest {
     .PARAMETER ExpectedReturnValue
         The expected hashtable that Get-TargetResource should return for this test.
 #>
-function Invoke-GetTargetResourceTest
+function Invoke-GetTargetResourceUnitTest
 {
     [CmdletBinding()]
     param
@@ -285,7 +285,7 @@ function Invoke-GetTargetResourceTest
         The string that should be used to create the name of the test that checks for
         the correct error being thrown.
 #>
-function Invoke-SetTargetResourceTest {
+function Invoke-SetTargetResourceUnitTest {
     [CmdletBinding()]
     param
     (
@@ -340,7 +340,7 @@ function Invoke-SetTargetResourceTest {
     .PARAMETER ExpectedReturnValue
         The expected boolean value that should be returned
 #>
-function Invoke-TestTargetResourceTest
+function Invoke-TestTargetResourceUnitTest
 {
     [CmdletBinding()]
     param
@@ -777,9 +777,9 @@ Export-ModuleMember -Function @(
     'Get-AppVeyorAdministratorCredential', `
     'Enter-DscResourceTestEnvironment', `
     'Exit-DscResourceTestEnvironment', `
-    'Invoke-GetTargetResourceTest', `
-    'Invoke-SetTargetResourceTest', `
-    'Invoke-TestTargetResourceTest', `
+    'Invoke-GetTargetResourceUnitTest', `
+    'Invoke-SetTargetResourceUnitTest', `
+    'Invoke-TestTargetResourceUnitTest', `
     'Invoke-ExpectedMocksAreCalledTest', `
     'Invoke-GenericUnitTest'
 )
