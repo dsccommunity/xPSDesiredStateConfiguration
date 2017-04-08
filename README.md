@@ -361,6 +361,9 @@ None
 #### Examples
 
 * [Install the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromFile.ps1)
+* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UninstallPackageFromFile.ps1)
+* [Install the MSI file with the given ID at the given HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromHttp.ps1)
+* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UnstallPackageFromHttps.ps1)
 
 ### xFileUpload
 

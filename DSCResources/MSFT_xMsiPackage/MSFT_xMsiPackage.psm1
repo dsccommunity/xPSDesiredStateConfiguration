@@ -77,34 +77,43 @@ function Get-TargetResource
         Installs or uninstalls the MSI file at the given path.
 
     .PARAMETER ProductId
-        The product ID of the MSI file to install or uninstall.
+         The identifying number used to find the package, usually a GUID.
 
     .PARAMETER Path
         The path to the MSI file to install or uninstall.
 
     .PARAMETER Ensure
-        Indicates whether to given MSI should be installed or uninstalled.
+        Indicates whether the given MSI file should be installed or uninstalled.
         Set this property to Present to install the MSI, and Absent to uninstall
         the MSI.
 
     .PARAMETER Arguments
+        The arguments to pass to the MSI package during installation or uninstallation
+        if needed.
         
     .PARAMETER Credential
+        The credential of a user account to be used to mount a UNC path if needed.
 
     .PARAMETER LogPath
+        The path to the log file to log the output from the MSI execution.
 
     .PARAMETER FileHash
+        The expected hash value of the MSI file at the given path.
 
     .PARAMETER HashAlgorithm
+        The algorithm used to generate the given hash value.
 
     .PARAMETER SignerSubject
+        The subject that should match the signer certificate of the digital signature of the MSI file.
 
     .PARAMETER SignerThumbprint
+        The certificate thumbprint that should match the signer certificate of the digital signature of the MSI file.
 
     .PARAMETER ServerCertificateValidationCallback
+        PowerShell code to be used to validate SSL certificates for paths using HTTPS.
 
     .PARAMETER RunAsCredential
-
+        The credential of a user account under which to run the installation or uninstallation of the MSI package.
 #>
 function Set-TargetResource
 {
@@ -349,7 +358,7 @@ function Set-TargetResource
         Tests if the MSI file with the given product ID is installed or uninstalled.
 
     .PARAMETER ProductId
-        The product ID of the MSI file to check the state of.
+        The identifying number used to find the package, usually a GUID.
           
     .PARAMETER Path
         Not Used in Test-TargetResource
@@ -726,7 +735,7 @@ function New-LogFile
         The Uri to retrieve the WebRequest from.
 
     .PARAMETER ServerCertificationValidationCallback
-        The callback ....
+        The callback code to validate the SSL certificate for HTTPS URI schemes.
 #>
 function Get-WebRequestResponse
 {
@@ -1050,7 +1059,27 @@ function Assert-FileSignatureValid
 }
 
 <#
+    .SYNOPSIS
+        Starts the given MSI installation or uninstallation either as a process or
+        under a user credential if RunAsCredential is specified.
 
+    .PARAMETER IdentifyingNumber
+        The identifying number used to find the package.
+
+    .PARAMETER Path
+        The path to the MSI file to install or uninstall.
+
+    .PARAMETER Ensure
+        Indicates whether the given MSI file should be installed or uninstalled.
+
+    .PARAMETER Arguments
+        The arguments to pass to the MSI package.
+
+    .PARAMETER LogPath
+        The path to the log file to log the output from the MSI execution.
+
+    .PARAMETER RunAsCredential
+        The credential of a user account under which to run the installation or uninstallation.
 #>
 function Start-MsiProcess
 {
