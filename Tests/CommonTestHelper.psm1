@@ -10,7 +10,14 @@ Set-StrictMode -Version 'Latest'
 #>
 $script:appVeyorAdministratorCredential = $null
 
-data testStrings
+<#
+    String data for xMsiPackage unit test names to be used with the generic test functions.
+    Maps command names to the appropriate test names to insert when checking that
+    the correct mocks are called.
+    In the future we will move this data out of the commonTestHelper file and into the
+    corresponding test file or its own file.
+#>
+data msiPackageTestStrings
 {
     ConvertFrom-StringData -StringData @'
 Assert-FileHashValid = assert that the file hash is valid
@@ -53,6 +60,7 @@ Test-Path = test that the path {0} exists
 
     .PARAMETER Custom
         An optional string to include in the test name to make the name more descriptive.
+        Can only be used by commands that have a variable in their string data name.
 #>
 function Get-TestName
 {
@@ -140,13 +148,16 @@ function Invoke-ExpectedMocksAreCalledTest
         { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters }
 
     .PARAMETER FunctionParameters
-        The parameters that should be passed to the function for this test.
+        The parameters that should be passed to the function for this test. Should match
+        what is passed in the Function parameter.
 
     .PARAMETER MocksCalled
         An array of the mocked commands that should be called for this test.
         Each item in the array is a hashtable that contains the name of the command
         being mocked, the number of times it is called (can be 0) and, optionally,
-        an extra custom string to make the test name more descriptive.
+        an extra custom string to make the test name more descriptive. The custom
+        string will only work if the command has a corresponding variable in the 
+        string data name.
 
     .PARAMETER ShouldThrow
         Indicates whether the function should throw or not. If this is set to True
@@ -213,7 +224,10 @@ function Invoke-GenericUnitTest {
     .PARAMETER MocksCalled
         An array of the mocked commands that should be called for this test.
         Each item in the array is a hashtable that contains the name of the command
-        being mocked and the number of times it is called (can be 0).
+        being mocked, the number of times it is called (can be 0) and, optionally,
+        an extra custom string to make the test name more descriptive. The custom
+        string will only work if the command has a corresponding variable in the 
+        string data name.
 
     .PARAMETER ExpectedReturnValue
         The expected hashtable that Get-TargetResource should return for this test.
@@ -272,7 +286,9 @@ function Invoke-GetTargetResourceUnitTest
         An array of the mocked commands that should be called for this test.
         Each item in the array is a hashtable that contains the name of the command
         being mocked, the number of times it is called (can be 0) and, optionally,
-        an extra custom string to make the test name more descriptive.
+        an extra custom string to make the test name more descriptive. The custom
+        string will only work if the command has a corresponding variable in the 
+        string data name.
 
     .PARAMETER ShouldThrow
         Indicates whether Set-TargetResource should throw or not. If this is set to True
@@ -335,7 +351,10 @@ function Invoke-SetTargetResourceUnitTest {
     .PARAMETER MocksCalled
         An array of the mocked commands that should be called for this test.
         Each item in the array is a hashtable that contains the name of the command
-        being mocked and the number of times it is called (can be 0).
+        being mocked, the number of times it is called (can be 0) and, optionally,
+        an extra custom string to make the test name more descriptive. The custom
+        string will only work if the command has a corresponding variable in the 
+        string data name.
 
     .PARAMETER ExpectedReturnValue
         The expected boolean value that should be returned

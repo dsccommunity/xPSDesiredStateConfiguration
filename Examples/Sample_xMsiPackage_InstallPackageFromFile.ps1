@@ -6,7 +6,7 @@
         already exist at the specified path.
 
         You can run the following command to get a list of all available MSIs on
-        the system with the correct path and ProductId:
+        your system with the correct Path (LocalPackage) and ProductId (IdentifyingNumber):
 
         Get-WmiObject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage
 #>

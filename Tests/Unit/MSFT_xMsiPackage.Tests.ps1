@@ -13,6 +13,7 @@ Describe 'xMsiPackage Unit Tests' {
             -DscResourceName 'MSFT_xMsiPackage' `
             -TestType 'Unit'
     }
+
     AfterAll {
         Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
     }

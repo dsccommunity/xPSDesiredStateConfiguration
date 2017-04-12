@@ -532,10 +532,10 @@ function Convert-PathToUri
 
 <#
     .SYNOPSIS
-        Retrieves the product ID as an identifying number.
+        Converts the product ID to the identifying number format.
 
     .PARAMETER ProductId
-        The product ID to retrieve as an identifying number.
+        The product ID to convert to an identifying number.
 #>
 function Convert-ProductIdToIdentifyingNumber
 {
@@ -693,10 +693,11 @@ function Get-ProductEntryValue
 
 <#
     .SYNOPSIS
-        Removes the file at the given path if it exists and creates a new file.
+        Removes the file at the given path if it exists and creates a new file
+        to be written to.
 
     .PARAMETER LogPath
-        The path where the logfile should be created.
+        The path where the log file should be created.
 #>
 function New-LogFile
 {
