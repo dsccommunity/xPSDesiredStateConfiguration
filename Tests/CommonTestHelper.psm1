@@ -11,13 +11,14 @@ Set-StrictMode -Version 'Latest'
 $script:appVeyorAdministratorCredential = $null
 
 <#
-    String data for xMsiPackage unit test names to be used with the generic test functions.
+    String data for unit test names to be used with the generic test functions.
     Maps command names to the appropriate test names to insert when checking that
     the correct mocks are called.
     In the future we will move this data out of the commonTestHelper file and into the
-    corresponding test file or its own file.
+    corresponding test file or its own file. For now, it is much easier to access this
+    way rather than passing it around.
 #>
-data msiPackageTestStrings
+data testStrings
 {
     ConvertFrom-StringData -StringData @'
 Assert-FileHashValid = assert that the file hash is valid
