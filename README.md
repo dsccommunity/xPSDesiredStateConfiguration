@@ -327,7 +327,7 @@ None
 
 ### xMsiPackage
 
-provides a mechanism to install and uninstall .msi packages.
+Provides a mechanism to install and uninstall .msi packages.
 
 #### Requirements
 

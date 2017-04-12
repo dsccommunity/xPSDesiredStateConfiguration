@@ -92,6 +92,10 @@ Describe 'xMsiPackage End to End Tests' {
             }
         }
 
+        It 'Package should not exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
+        }
+
         It 'Should compile and run configuration' {
             { 
                 . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
@@ -131,6 +135,10 @@ Describe 'xMsiPackage End to End Tests' {
                 #>
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
+        }
+
+        It 'Package should not exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
         }
 
         It 'Should compile and run configuration' {
@@ -174,6 +182,10 @@ Describe 'xMsiPackage End to End Tests' {
             }
         }
 
+        It 'Package should exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+        }
+
         It 'Should compile and run configuration' {
             { 
                 . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
@@ -213,6 +225,10 @@ Describe 'xMsiPackage End to End Tests' {
                 #>
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
+        }
+
+        It 'Package should exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
         }
 
         It 'Should compile and run configuration' {
@@ -262,6 +278,10 @@ Describe 'xMsiPackage End to End Tests' {
                 #>
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
+        }
+
+        It 'Package should not exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
         }
 
         It 'Should compile and run configuration' {
@@ -317,6 +337,10 @@ Describe 'xMsiPackage End to End Tests' {
             }
         }
 
+        It 'Package should exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+        }
+
         It 'Should compile and run configuration' {
             { 
                 . $script:configurationFilePathLogPath -ConfigurationName $configurationName
@@ -366,6 +390,10 @@ Describe 'xMsiPackage End to End Tests' {
                 #>
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
+        }
+
+        It 'Package should not exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
         }
 
         try
@@ -431,6 +459,10 @@ Describe 'xMsiPackage End to End Tests' {
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
         }
+
+        It 'Package should exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+        }
         
         try
         {
@@ -495,6 +527,10 @@ Describe 'xMsiPackage End to End Tests' {
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
         }
+
+        It 'Package should not exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
+        }
         
         try
         {
@@ -558,6 +594,10 @@ Describe 'xMsiPackage End to End Tests' {
                 #>
                 Write-Error -Message $script:environmentInIncorrectStateErrorMessage
             }
+        }
+
+        It 'Package should exist on the machine before configuration is run' {
+            Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
         }
 
         try

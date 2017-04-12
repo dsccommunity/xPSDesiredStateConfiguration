@@ -2,7 +2,13 @@
     .SYNOPSIS
         Installs the MSI file with the given ID at the given path.
 
-        Note that the MSI file with the given Product ID (GUID) must already exist at the specified path
+        Note that the MSI file with the given Product ID (GUID) must
+        already exist at the specified path.
+
+        You can run the following command to get a list of all available MSIs on
+        the system with the correct path and ProductId:
+
+        Get-WmiObject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage
 #>
 Configuration Sample_xMsiPackage_InstallPackageFromFile
 {

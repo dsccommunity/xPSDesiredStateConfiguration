@@ -4,6 +4,11 @@
 
         Note that the MSI file with the given Product ID (GUID) must already exist
         on the server.
+
+        You can run the following command to get a list of all available MSIs on
+        the system with the correct path and ProductId:
+
+        Get-WmiObject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage
 #>
 Configuration Sample_xMsiPackage_UninstallPackageFromHttps
 {
