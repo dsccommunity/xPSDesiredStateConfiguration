@@ -635,6 +635,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 6.2.0.0
+
 * xMsiPackage:
     * Created high quality MSI package manager resource 
 * xArchive:
