@@ -62,7 +62,7 @@ try {
                 if ($windowsFeature.Installed)
                 {
                     $null = Remove-WindowsFeature -Name $windowsFeatureName
-                    $windowsFeature = Get-WindowsFeature -FeatureName $windowsFeatureName
+                    $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
 
                     # May need to wait a moment for the correct state to populate
                     $millisecondsElapsed = 0
@@ -141,7 +141,7 @@ try {
                 if (-not $windowsFeature.Installed)
                 {
                     $null = Add-WindowsFeature -Name $windowsFeatureName
-                    $windowsFeature = Get-WindowsFeature -FeatureName $windowsFeatureName
+                    $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
 
                     # May need to wait a moment for the correct state to populate
                     $millisecondsElapsed = 0

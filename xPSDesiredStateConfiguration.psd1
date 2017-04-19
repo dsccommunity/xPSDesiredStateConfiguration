@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '6.1.0.0'
+ModuleVersion = '6.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,17 +52,12 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Moved DSC pull server setup tests to DSCPullServerSetup folder for new common tests
+        ReleaseNotes = '* xMsiPackage:
+    * Created high quality MSI package manager resource 
 * xArchive:
-    * Updated the resource to be a high quality resource
-    * Transferred the existing "unit" tests to integration tests
-    * Added unit and end-to-end tests
-    * Updated documentation and examples
-* xUser
-    * Fixed error handling in xUser
-* xRegistry
-    * Fixed bug where an error was thrown when running Get-DscConfiguration if the registry key already existed
-* Updated Test-IsNanoServer cmdlet to properly test for a Nano server rather than the core version of PowerShell
+    * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
+* xWindowsFeatureSet:
+    * Had the wrong parameter name in one test case.
 
 '
 
@@ -70,6 +65,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 

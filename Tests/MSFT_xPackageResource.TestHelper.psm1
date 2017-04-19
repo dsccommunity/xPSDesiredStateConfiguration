@@ -1,33 +1,21 @@
-﻿<#
-    .SYNOPSIS
-        Clears the xPackage cache.
-#>
-function Clear-xPackageCache
-{
-    [CmdletBinding()]
-    param ()
-
-    $xPackageCacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\" + `
-        "BuiltinProvCache\MSFT_xPackageResource"
-
-    Remove-Item -Path $xPackageCacheLocation -ErrorAction 'SilentlyContinue' -Recurse
-}
+﻿$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
 
 <#
     .SYNOPSIS
-        Tests if the package with the given name is installed.
+        Tests if the package with the given Id is installed.
 
-    .PARAMETER Name
-        The name of the package to test for.
+    .PARAMETER ProductId
+        The ID of the package to test for.
 #>
-function Test-PackageInstalledByName
+function Test-PackageInstalledById
 {
     [OutputType([Boolean])]
     [CmdletBinding()]
     param
     (
         [String]
-        $Name
+        $ProductId
     )
 
     $uninstallRegistryKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
@@ -35,12 +23,15 @@ function Test-PackageInstalledByName
 
     $productEntry = $null
 
-    foreach ($registryKeyEntry in (Get-ChildItem -Path @( $uninstallRegistryKey, $uninstallRegistryKeyWow64) -ErrorAction 'Ignore' ))
+    if (-not [String]::IsNullOrEmpty($ProductId))
     {
-        if ($Name -eq (Get-LocalizedRegistryKeyValue -RegistryKey $registryKeyEntry -ValueName 'DisplayName'))
+        $productEntryKeyLocation = Join-Path -Path $uninstallRegistryKey -ChildPath $ProductId
+        $productEntry = Get-Item -Path $productEntryKeyLocation -ErrorAction 'SilentlyContinue'
+
+        if ($null -eq $productEntry)
         {
-            $productEntry = $registryKeyEntry
-            break
+            $productEntryKeyLocation = Join-Path -Path $uninstallRegistryKeyWow64 -ChildPath $ProductId
+            $productEntry = Get-Item $productEntryKeyLocation -ErrorAction 'SilentlyContinue'
         }
     }
 
@@ -49,17 +40,28 @@ function Test-PackageInstalledByName
 
 <#
     .SYNOPSIS
-        Mimics a simple http or https file server.
+        Starts a simple mock http or https file server. Server will stay on and continue to be able
+        to receive requests until the client calls Stop-Server. The server returns the job object
+        and an EventWaitHandle object that the client will need to dispose of (by calling Stop-Server)
+        once it is done sending requests.
 
     .PARAMETER FilePath
-        The path to the file to add on the mock file server.
+        The path to the file to add on to the mock file server. Should be an MSI file.
+
+    .PARAMETER LogPath
+        The path to the log file to write output to. This is important for debugging since
+        most of the work of this function is done within a separate process. Default value
+        will be in PSScriptRoot.
 
     .PARAMETER Https
-        Indicates that the new file server should use https.
-        Otherwise the new file server will use http.
+        Indicates whether the server should use Https. If True then the file server will use Https
+        and listen on port 'https://localhost:1243'. Otherwise the file server will use Http and
+        listen on port 'http://localhost:1242'
+        Default value is False (Http).
 #>
-function New-MockFileServer
+function Start-Server
 {
+    [OutputType([Hashtable])]
     [CmdletBinding()]
     param
     (
@@ -68,148 +70,450 @@ function New-MockFileServer
         [String]
         $FilePath,
 
-        [Switch]
-        $Https
+        [String]
+        $LogPath = (Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'),
+
+        [System.Boolean]
+        $Https = $false
     )
 
-    if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
+    # Create an event object to let the client know when the server is ready to begin receiving requests.
+    $fileServerStarted = New-Object -TypeName 'System.Threading.EventWaitHandle' -ArgumentList @($false, [System.Threading.EventResetMode]::ManualReset,
+                                    'HttpIntegrationTest.FileServerStarted')
+    $null = $fileServerStarted.Reset()
+
+    <# 
+        The server is run on a separate process so that it can receive requests
+        while the tests continue to run. It takes in the same parameterss that are passed
+        in to this function. All helper functions that the server uses have to be
+        defined within the scope of this script.
+    #>
+    $server =
     {
-        New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
-    }
+        param($FilePath, $LogPath, $Https)
 
-    netsh advfirewall set allprofiles state off
+        <#
+            .SYNOPSIS
+                Stops the listener, removes the SSL binding if applicable, and closes the listener.
 
-    Start-Job -ArgumentList @( $FilePath ) -ScriptBlock {
-        
-        # Create certificate
-        $certificate = Get-ChildItem -Path 'Cert:\LocalMachine\My' -Recurse | Where-Object { $_.EnhancedKeyUsageList.FriendlyName -eq 'Server Authentication' }
+            .PARAMETER HttpListener
+                The listner to stop and close.
 
-        if ($certificate.Count -gt 1)
+            .PARAMETER Https
+                Indicates whether https was used and if so, removes the SSL binding.
+        #>
+        function Stop-Listener
         {
-            # Just use the first one
-            $certificate = $certificate[0]
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [System.Net.HttpListener]
+                $HttpListener, 
+
+                [Parameter(Mandatory = $true)]
+                [System.Boolean]
+                $Https
+            )
+
+            Write-Log -LogFile $LogPath -Message 'Finished listening for requests. Shutting down HTTP server.'
+            
+            $ipPort = '0.0.0.0:1243'
+
+            if ($null -eq $HttpListener)
+            {
+                $errorMessage = 'HttpListener was null when trying to close'
+                Write-Log -LogFile $LogPath -Message $errorMessage
+
+                if ($Https)
+                {
+                    Invoke-ConsoleCommand -Target $ipPort -Action 'removing SSL certificate binding' -ScriptBlock {
+                       netsh http delete sslcert ipPort="$ipPort"
+                    }
+                }
+
+                throw $errorMessage
+            }
+
+            if ($HttpListener.IsListening)
+            {
+                Write-Log -LogFile $LogPath -Message 'HttpListener is about to be stopped'
+                $HttpListener.Stop()
+            }
+
+            if ($Https)
+            {
+                Write-Log -LogFile $LogPath -Message 'Removing SSL binding'
+                # Remove SSL Binding
+                Invoke-ConsoleCommand -Target $ipPort -Action 'removing SSL certificate binding' -ScriptBlock {
+                   netsh http delete sslcert ipPort="$ipPort"
+                }
+            }
+
+            Write-Log -LogFile $LogPath -Message 'Closing listener'
+            $HttpListener.Close()
+
+            $null = netsh advfirewall set allprofiles state on
         }
-        elseif ($certificate.count -eq 0)
+
+        <#
+            .SYNOPSIS
+                Creates and registers an SSL certificate for Https connections.
+        #>
+        function Register-Ssl
         {
-            # Create a self-signed one
-            $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName $env:computerName
+            [CmdletBinding()]
+            param()
+
+            # Create certificate
+            $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName localhost
+            Write-Log -LogFile $LogPath -Message 'Created certificate'
+            
+            $hash = $certificate.Thumbprint
+            $certPassword = ConvertTo-SecureString -String 'password12345' -AsPlainText -Force
+            $tempPath = 'C:\certForTesting'
+
+            $null = Export-PfxCertificate -Cert $certificate -FilePath $tempPath -Password $certPassword
+            $null = Import-PfxCertificate -CertStoreLocation 'Cert:\LocalMachine\Root' -FilePath 'C:\certForTesting' -Password $certPassword
+            Remove-Item -Path $tempPath
+            
+            Write-Log -LogFile $LogPath -Message 'Finished importing certificate into root. About to bind it to port.'
+             
+            # Use net shell command to directly bind certificate to designated testing port
+            $null = netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
         }
 
-        $hash = $certificate.Thumbprint
+        <#
+            .SYNOPSIS
+                Defines the callback function required for BeginGetContext.
 
-        # Use net shell command to directly bind certificate to designated testing port
-        netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
-
-        # Start listening endpoints
-        $httpListener = New-Object -TypeName 'System.Net.HttpListener'
-
-        if ($Https)
+            .PARAMETER Callback
+                The callback script - in this case the requestListener script defined below.
+        #>
+        function New-ScriptBlockCallback
         {
-            $httpListener.Prefixes.Add([Uri]'https://localhost:1243')
-        }
-        else
-        {
-            $httpListener.Prefixes.Add([Uri]'http://localhost:1242')
-        }
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [ValidateNotNullOrEmpty()]
+                [ScriptBlock]
+                $Callback
+            )
 
-        $httpListener.AuthenticationSchemes = [System.Net.AuthenticationSchemes]::Negotiate
-        $httpListener.Start()
-
-        # Create a pipe to flag http/https client
-        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest1' )
-        $pipe.Connect()
-        $pipe.Dispose()
-        
-        # Prepare binary buffer for http/https response
-        $fileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $args[0] )
-        $numBytes = $fileInfo.Length
-        $fileStream = New-Object -TypeName 'System.IO.FileStream' -ArgumentList @(  $args[0], 'Open' )
-        $binaryReader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList @( $fileStream )
-        [Byte[]] $buf = $binaryReader.ReadBytes($numBytes)
-        $fileStream.Close()
-
-        # Send response
-        $response = ($httpListener.GetContext()).Response
-        $response.ContentType = 'application/octet-stream'
-        $response.ContentLength64 = $buf.Length
-        $response.OutputStream.Write($buf, 0, $buf.Length)
-        $response.OutputStream.Flush()
-
-        # Wait for client to finish downloading
-        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest2' )
-        $pipe.WaitForConnection()
-        $pipe.Dispose()
-
-        $response.Dispose()
-        $httpListener.Stop()
-        $httpListener.Close()
-
-        # Close pipe
+            # Add the CallbackEventBridge type if it's not already defined
+            if (-not ('CallbackEventBridge' -as [Type]))
+            {
+                Add-Type @' 
+                    using System; 
+ 
+                    public sealed class CallbackEventBridge { 
+                        public event AsyncCallback CallbackComplete = delegate { }; 
+ 
+                        private CallbackEventBridge() {} 
+ 
+                        private void CallbackInternal(IAsyncResult result)
+                        { 
+                            CallbackComplete(result); 
+                        } 
+ 
+                        public AsyncCallback Callback
+                        { 
+                            get { return new AsyncCallback(CallbackInternal); } 
+                        } 
+ 
+                        public static CallbackEventBridge Create()
+                        { 
+                            return new CallbackEventBridge(); 
+                        } 
+                    } 
+'@
+            }
     
-        # Use net shell command to clean up the certificate binding
-        netsh http delete sslcert ipport=0.0.0.0:1243
+            $bridge = [CallbackEventBridge]::Create()
+            Register-ObjectEvent -InputObject $bridge -EventName 'CallbackComplete' -Action $Callback -MessageData $args > $null
+            $bridge.Callback
+
+            Write-Log -LogFile $LogPath -Message 'Finished callback function'
+        }
+
+        <#
+            .SYNOPSIS
+                Invokes a console command and captures the exit code.
+
+            .PARAMETER Target
+                Where the command is being executed.
+
+            .PARAMETER Action
+                A description of the action being performed.
+
+            .PARAMETER ScriptBlock
+                The code to execute.
+                
+        #>
+        function Invoke-ConsoleCommand
+        {
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [String]
+                $Target,
+
+                [Parameter(Mandatory = $true)]
+                [String]
+                $Action,
+
+                [Parameter(Mandatory = $true)]
+                [ScriptBlock]
+                $ScriptBlock
+            )
+
+            $output = Invoke-Command -ScriptBlock $ScriptBlock
+
+            if ($LASTEXITCODE)
+            {
+                $output = $output -join [Environment]::NewLine
+                $message = ('Failed action ''{0}'' on target ''{1}'' (exit code {2}): {3}' -f $Action,$Target,$LASTEXITCODE,$output)
+                Write-Error -Message $message
+                Write-Log -LogFile $LogPath -Message "Error from Invoke-ConsoleCommand: $message"
+            } 
+            else
+            {
+                $nonNullOutput = $output | Where-Object { $_ -ne $null }
+                Write-Log -LogFile $LogPath -Message "Output from Invoke-ConsoleCommand: $nonNullOutput"
+            }
+        }
+
+        <#
+            .SYNOPSIS
+                Writes the specified message to the specified log file.
+                Does NOT overwrite what is already written there.
+
+            .PARAMETER LogFile
+                The path to the file to write to.
+
+            .PARAMETER Message
+                The message to write to the file.
+        #>
+        function Write-Log
+        {
+            [CmdletBinding()]
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [String]
+                $LogFile,
+
+                [Parameter(Mandatory = $true)]
+                [String]
+                $Message
+            )
+            
+            $Message >> $LogFile
+        }
+
+        # End of function declarations - Beginning of function execution
+
+        if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
+        {
+            $null = New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
+        }
+
+        $null = netsh advfirewall set allprofiles state off
+
+        Write-Log -LogFile $LogPath -Message (Get-Date)
+
+        $HttpListener = New-Object 'System.Net.HttpListener'
+        $fileServerStarted = $null
+
+        try
+        {
+            # Set up the listener
+            if ($Https)
+            {
+                $HttpListener.Prefixes.Add([Uri]'https://localhost:1243')
+            
+                try
+                {
+                    Register-SSL
+                }
+                catch
+                {
+                    $errorMessage = "Unable to bind SSL certificate to port. Error: $_"
+                    Write-Log -LogFile $LogPath -Message $errorMessage
+                    throw $errorMessage
+                }
+
+                Write-Log -LogFile $LogPath -Message 'Certificate is registered'
+            }
+            else
+            {
+                $HttpListener.Prefixes.Add([Uri]'http://localhost:1242')
+            }
+
+            Write-Log -LogFile $LogPath -Message 'Finished listener setup - about to start listener'
+
+            $HttpListener.Start()
+
+            # Cue the tests that the listener is started and can begin receiving requests
+            $fileServerStarted = New-Object -TypeName 'System.Threading.EventWaitHandle' `
+                                            -ArgumentList @($false,
+                                                            [System.Threading.EventResetMode]::AutoReset,
+                                                            'HttpIntegrationTest.FileServerStarted'
+                                                           )
+            $fileServerStarted.Set()
+
+            Write-Log -LogFile $LogPath -Message 'Listener is started'
+
+            <#
+                .SYNOPSIS
+                    Script block called by the callback function for BeginGetContext.
+                    Ends the current BeginGetContext, copies the response, and calls BeginGetContext again
+                    to continue receiving requests.
+
+                .PARAMETER Result
+                    th IAsyncResult containing the listener object and path to the MSI file.
+                    
+            #>
+            $requestListener =
+            {
+                [CmdletBinding()]
+                param
+                (
+                    [IAsyncResult]
+                    $Result
+                )
+
+                Write-Log -LogFile $LogPath -Message 'Starting request listener'
+
+                $asyncState = $Result.AsyncState
+                [System.Net.HttpListener]$listener = $asyncState.Listener
+                $filepath = $asyncState.FilePath
+
+                Write-Log -LogFile $LogPath -Message (ConvertTo-Json $asyncState)
+
+                # Call EndGetContext to complete the asynchronous operation.
+                $context = $listener.EndGetContext($Result)
+
+                $response = $null
+
+                try
+                {
+                    # Prepare binary buffer for http/https response
+                    $fileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $filePath )
+                    $numBytes = $fileInfo.Length
+                    $fileStream = New-Object -TypeName 'System.IO.FileStream' -ArgumentList @( $filePath, 'Open' )
+                    $binaryReader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList @( $fileStream )
+                    [Byte[]] $buf = $binaryReader.ReadBytes($numBytes)
+                    $fileStream.Close()
+
+                    Write-Log -LogFile $LogPath -Message 'Buffer prepared for response'
+
+                    $response = $context.Response
+                    $response.ContentType = 'application/octet-stream'
+                    $response.ContentLength64 = $buf.Length
+                    $response.OutputStream.Write($buf, 0, $buf.Length)
+
+                    Write-Log -LogFile $LogPath -Message 'Response written'
+
+                    $response.OutputStream.Flush()
+
+                    # Open the response stream again to receive more requests
+                    $listener.BeginGetContext((New-ScriptBlockCallback -Callback $requestListener), $asyncState)
+                }
+                catch
+                {
+                    $errorMessage = "error writing response: $_"
+                    Write-Log -LogFile $LogPath -Message $errorMessage
+                    throw $errorMessage
+                }
+                finally
+                {
+                    if ($null -ne $response)
+                    {
+                        $response.Dispose()
+                    }
+                }
+            }
+
+            # Register the request listener scriptblock as the async callback
+            $HttpListener.BeginGetContext((New-ScriptBlockCallback -Callback $requestListener), @{ Listener = $Httplistener; FilePath = $FilePath }) | Out-Null
+            Write-Log -LogFile $LogPath -Message 'First BeginGetContext called'
+
+            # Ensure that the request listener stays on until the server is done receiving responses - client is responsible for stopping the server.
+            while ($true)
+            {
+                Start-Sleep -Milliseconds 100
+            }
+        }
+        catch
+        {
+            $errorMessage = "There were problems setting up the HTTP(s) listener. Error: $_"
+            Write-Log -LogFile $LogPath -Message $errorMessage
+            throw $errorMessage
+        }
+        finally
+        {
+            if ($fileServerStarted)
+            {
+                $fileServerStarted.Dispose()
+            }
+            
+            Write-Log -LogFile $LogPath -Message 'Stopping the Server'
+            Stop-Listener -HttpListener $HttpListener -Https $Https
+        }
     }
 
-    netsh advfirewall set allprofiles state on
+    $job = Start-Job -ScriptBlock $server -ArgumentList @( $FilePath, $LogPath, $Https )
+
+    <#
+        Return the event object so that client knows when it can start sending requests and 
+        the job object so that the client can stop the job once it is done sending requests.
+    #>
+    return @{ 
+        FileServerStarted = $fileServerStarted
+        Job = $job
+    }
 }
 
 <#
     .SYNOPSIS
-        Creates a new test executable.
+        Disposes the EventWaitHandle object and stops and removes the job to ensure that proper
+        cleanup is done for the listener. If this function is not called after Start-Server then
+        the listening port will remain open until the job is stopped or the machine is rebooted.
 
-    .PARAMETER DestinationPath
-        The path at which to create the test executable.
+    .PARAMETER FileServerStarted
+        The EventWaitHandle object returned by Start-Server to let the client know that it is ready
+        to receive requests. The client is responsible for calling this function to ensure that
+        this object is disposed of once the client is done sending requests.
+
+    .PARAMETER Job
+        The job object returned by Start-Server that needs to be stopped so that the server will
+        close the listening port.
 #>
-function New-TestExecutable
+function Stop-Server
 {
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$DestinationPath
+        [System.Threading.EventWaitHandle]
+        $FileServerStarted,
+
+        [System.Management.Automation.Job]
+        $Job  
     )
-    
-    if (Test-Path -Path $DestinationPath)
+
+    if ($null -ne $FileServerStarted)
     {
-        Write-Verbose -Message "Removing old executable at $DestinationPath..."
-        Remove-Item -Path $DestinationPath -Force
+        $FileServerStarted.Dispose()
     }
 
-    $testExecutableCode = @'
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Management;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Management.Automation;
-    using System.Management.Automation.Runspaces;
-    using System.Runtime.InteropServices;
-    namespace Providers.Package.UnitTests.MySuite
+    if ($null -ne $Job)
     {
-        class ExeTestClass
-        {
-            public static void Main(string[] args)
-            {
-                string cmdline = System.Environment.CommandLine;
-                Console.WriteLine("Cmdline was " + cmdline);
-                int endIndex = cmdline.IndexOf("\"", 1);
-                string self = cmdline.Substring(0, endIndex);
-                string other = cmdline.Substring(self.Length + 1);
-                string msiexecpath = System.IO.Path.Combine(System.Environment.SystemDirectory, "msiexec.exe");
-
-                self = self.Replace("\"", "");
-                string packagePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(self), "DSCSetupProject.msi");
-
-                string msiexecargs = String.Format("/i {0} {1}", packagePath, other);
-                System.Diagnostics.Process.Start(msiexecpath, msiexecargs).WaitForExit();
-            }
-        }
+        Stop-Job -Job $Job
+        Remove-Job -Job $Job
     }
-'@
-
-    Add-Type -TypeDefinition $testExecutableCode -OutputAssembly $DestinationPath -OutputType 'ConsoleApplication'
 }
 
 <#
@@ -755,6 +1059,55 @@ function New-TestMsi
 
 <#
     .SYNOPSIS
+        Clears the Package cache where files are downloaded from the file server when applicable.
+#>
+function Clear-PackageCache
+{
+    [CmdletBinding()]
+    param ()
+
+    $packageCacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\" + `
+        'BuiltinProvCache\MSFT_xPackageResource'
+
+    Remove-Item -Path $packageCacheLocation -ErrorAction 'SilentlyContinue' -Recurse
+}
+
+<#
+    .SYNOPSIS
+        Tests if the package with the given name is installed.
+
+    .PARAMETER Name
+        The name of the package to test for.
+#>
+function Test-PackageInstalledByName
+{
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [String]
+        $Name
+    )
+
+    $uninstallRegistryKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+    $uninstallRegistryKeyWow64 = 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+
+    $productEntry = $null
+
+    foreach ($registryKeyEntry in (Get-ChildItem -Path @( $uninstallRegistryKey, $uninstallRegistryKeyWow64) -ErrorAction 'Ignore' ))
+    {
+        if ($Name -eq (Get-LocalizedRegistryKeyValue -RegistryKey $registryKeyEntry -ValueName 'DisplayName'))
+        {
+            $productEntry = $registryKeyEntry
+            break
+        }
+    }
+
+    return ($null -ne $productEntry)
+}
+
+<#
+    .SYNOPSIS
         Retrieves a localized registry key value.
 
     .PARAMETER RegistryKey
@@ -787,9 +1140,180 @@ function Get-LocalizedRegistryKeyValue
     return $localizedRegistryKeyValue
 }
 
+<#
+    .SYNOPSIS
+        Mimics a simple http or https file server.
+        Used only by the xPackage resource - xMsiPackage uses Start-Server instead
+
+    .PARAMETER FilePath
+        The path to the file to add on the mock file server.
+
+    .PARAMETER Https
+        Indicates that the new file server should use https.
+        Otherwise the new file server will use http.
+        Https functionality is not currently implemented in
+        this function - Start-Server should be used instead.
+#>
+function New-MockFileServer
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $FilePath,
+
+        [Switch]
+        $Https
+    )
+
+    if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
+    {
+        $null = New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
+    }
+
+    netsh advfirewall set allprofiles state off
+
+    Start-Job -ArgumentList @( $FilePath ) -ScriptBlock {
+        
+        # Create certificate
+        $certificate = Get-ChildItem -Path 'Cert:\LocalMachine\My' -Recurse | Where-Object { $_.EnhancedKeyUsageList.FriendlyName -eq 'Server Authentication' }
+
+        if ($certificate.Count -gt 1)
+        {
+            # Just use the first one
+            $certificate = $certificate[0]
+        }
+        elseif ($certificate.count -eq 0)
+        {
+            # Create a self-signed one
+            $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName $env:computerName
+        }
+
+        $hash = $certificate.Thumbprint
+
+        # Use net shell command to directly bind certificate to designated testing port
+        netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
+
+        # Start listening endpoints
+        $httpListener = New-Object -TypeName 'System.Net.HttpListener'
+
+        if ($Https)
+        {
+            $httpListener.Prefixes.Add([Uri]'https://localhost:1243')
+        }
+        else
+        {
+            $httpListener.Prefixes.Add([Uri]'http://localhost:1242')
+        }
+
+        $httpListener.AuthenticationSchemes = [System.Net.AuthenticationSchemes]::Negotiate
+        $httpListener.Start()
+
+        # Create a pipe to flag http/https client
+        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest1' )
+        $pipe.Connect()
+        $pipe.Dispose()
+        
+        # Prepare binary buffer for http/https response
+        $fileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $args[0] )
+        $numBytes = $fileInfo.Length
+        $fileStream = New-Object -TypeName 'System.IO.FileStream' -ArgumentList @(  $args[0], 'Open' )
+        $binaryReader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList @( $fileStream )
+        [Byte[]] $buf = $binaryReader.ReadBytes($numBytes)
+        $fileStream.Close()
+
+        # Send response
+        $response = ($httpListener.GetContext()).Response
+        $response.ContentType = 'application/octet-stream'
+        $response.ContentLength64 = $buf.Length
+        $response.OutputStream.Write($buf, 0, $buf.Length)
+        $response.OutputStream.Flush()
+
+        # Wait for client to finish downloading
+        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest2' )
+        $pipe.WaitForConnection()
+        $pipe.Dispose()
+
+        $response.Dispose()
+        $httpListener.Stop()
+        $httpListener.Close()
+
+        # Close pipe
+    
+        # Use net shell command to clean up the certificate binding
+        netsh http delete sslcert ipport=0.0.0.0:1243
+    }
+
+    netsh advfirewall set allprofiles state on
+}
+
+<#
+    .SYNOPSIS
+        Creates a new test executable.
+
+    .PARAMETER DestinationPath
+        The path at which to create the test executable.
+#>
+function New-TestExecutable
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]$DestinationPath
+    )
+    
+    if (Test-Path -Path $DestinationPath)
+    {
+        Write-Verbose -Message "Removing old executable at $DestinationPath..."
+        Remove-Item -Path $DestinationPath -Force
+    }
+
+    $testExecutableCode = @'
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Management;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Management.Automation;
+    using System.Management.Automation.Runspaces;
+    using System.Runtime.InteropServices;
+    namespace Providers.Package.UnitTests.MySuite
+    {
+        class ExeTestClass
+        {
+            public static void Main(string[] args)
+            {
+                string cmdline = System.Environment.CommandLine;
+                Console.WriteLine("Cmdline was " + cmdline);
+                int endIndex = cmdline.IndexOf("\"", 1);
+                string self = cmdline.Substring(0, endIndex);
+                string other = cmdline.Substring(self.Length + 1);
+                string msiexecpath = System.IO.Path.Combine(System.Environment.SystemDirectory, "msiexec.exe");
+
+                self = self.Replace("\"", "");
+                string packagePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(self), "DSCSetupProject.msi");
+
+                string msiexecargs = String.Format("/i {0} {1}", packagePath, other);
+                System.Diagnostics.Process.Start(msiexecpath, msiexecargs).WaitForExit();
+            }
+        }
+    }
+'@
+
+    Add-Type -TypeDefinition $testExecutableCode -OutputAssembly $DestinationPath -OutputType 'ConsoleApplication'
+}
+
 Export-ModuleMember -Function `
     New-TestMsi, `
-    Clear-xPackageCache, `
-    New-MockFileServer, `
+    Clear-PackageCache, `
     New-TestExecutable, `
-    Test-PackageInstalledByName
+    New-MockFileServer, `
+    Start-Server, `
+    Stop-Server, `
+    Test-PackageInstalledByName, `
+    Test-PackageInstalledById
