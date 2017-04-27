@@ -296,7 +296,7 @@ function Set-TargetResource
         Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
         Copy-Item "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\SysWOW64\inetsrv -Force
 
-        & $script:appCmd install module /name:"IISSelfSignedCertModule(32bit)" /image:$env:windir\SysWOW64\inetsrv\IISSelfSignedCertModule.dll /add:false /lock:false
+        & $script:appCmd install module /name:"IISSelfSignedCertModule(32bit)" /image:$env:windir\SysWOW64\inetsrv\IISSelfSignedCertModule.dll /add:false /lock:false /preCondition:bitness32
         & $script:appCmd add module /name:"IISSelfSignedCertModule(32bit)"  /app.name:"PSDSCPullServer/"
     }
     else
