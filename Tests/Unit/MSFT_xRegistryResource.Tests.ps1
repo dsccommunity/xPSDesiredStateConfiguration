@@ -334,10 +334,10 @@ try
             $testRegistryKeyValueNames = "One", "Two", "Three"
             Mock -CommandName 'Get-RegistryKeyValueNames' -MockWith { return $testRegistryKeyValueNames }
             
-            Context 'ValueName specified was **delval' {
+            Context 'ValueName specified was **delvals' {
                 $getTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
-                    ValueName = '**delval'
+                    ValueName = '**delvals'
                 }
                 
                 It 'Should not throw' {
@@ -671,6 +671,7 @@ try
             }
 
             Context '**delvals specified with Ensure -eq Absent' {
+                Mock -CommandName 'Get-RegistryKey' -MockWith { return $script:testRegistryKey }
                 $setTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = '**delvals'
@@ -731,7 +732,7 @@ try
                 }
 
                 It 'Should remove all registry key values' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 2 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not return' {

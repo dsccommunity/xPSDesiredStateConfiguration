@@ -253,7 +253,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message ($script:localizedData.RegistryKeyExists -f $Key)
 
-        $valueNameSpecified = ((-not [String]::IsNullOrEmpty($ValueName)) -and $ValueName -match "\*\*delval") -or $PSBoundParameters.ContainsKey('ValueType') -or $PSBoundParameters.ContainsKey('ValueData')
+        $valueNameSpecified = ((-not [String]::IsNullOrEmpty($ValueName)) -and $ValueName -notmatch "\*\*delval") -or $PSBoundParameters.ContainsKey('ValueType') -or $PSBoundParameters.ContainsKey('ValueData')
 
         # Check if the user wants to set a registry key value
         if ($valueNameSpecified)
@@ -341,7 +341,7 @@ function Set-TargetResource
                 if ($ValueName -match "\*\*delval")
                 {
                     Write-Verbose -Message ($script:localizedData.RemovingAllRegistryKeyValues -f $Key)
-                    Remove-ItemProperty -Path .\ -Name *
+                    Remove-ItemProperty -Path $key -Name *
                 }
                 else
                 {
@@ -464,7 +464,7 @@ function Test-TargetResource
     $registryResource = Get-TargetResource @getTargetResourceParameters
 
     # Check if the user specified a value name to retrieve
-    $valueNameSpecified = ((-not [String]::IsNullOrEmpty($ValueName)) -and $ValueName -match "\*\*delval") -or $PSBoundParameters.ContainsKey('ValueData')
+    $valueNameSpecified = ((-not [String]::IsNullOrEmpty($ValueName)) -and $ValueName -notmatch "\*\*delval") -or $PSBoundParameters.ContainsKey('ValueType') -or $PSBoundParameters.ContainsKey('ValueData')
 
     if ($valueNameSpecified)
     {
