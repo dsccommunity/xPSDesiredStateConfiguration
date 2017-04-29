@@ -35,4 +35,8 @@ ConvertFrom-StringData @'
     InvalidRegistryDrive = The registry drive {0} is invalid. Please update the Key parameter to include a valid registry drive.
     InvalidRegistryDriveAbbreviation = The registry drive abbreviation {0} is invalid. Please update the Key parameter to include a valid registry drive.
     RegistryDriveCouldNotBeMounted = The registry drive with the abbreviation {0} could not be mounted.
+    DelValsSpecified = **delvals specified! Determinme if any Values exist under key {0}.
+    RemovingAllRegistryValues = **delvals specified Remove All Registry Values for key {0}.
+    ValueNamesDoNotExist = Registry Key {0} has no ValueNames.
+    ValueNamesExist = Registry Key {0} has ValueNames.
 '@

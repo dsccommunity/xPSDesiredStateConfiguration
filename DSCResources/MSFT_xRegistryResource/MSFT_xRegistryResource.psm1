@@ -88,30 +88,51 @@ function Get-TargetResource
 
         if ($valueNameSpecified)
         {
-            $valueDisplayName = Get-RegistryKeyValueDisplayName -RegistryKeyValueName $ValueName
-            $registryResource['ValueName'] = $valueDisplayName
-
-            # If a value name was specified, retrieve the value with the specified name from the retrieved registry key
-            $registryKeyValue = Get-RegistryKeyValue -RegistryKey $registryKey -RegistryKeyValueName $ValueName
-
-            # Check if the registry key value exists
-            if ($null -eq $registryKeyValue)
+            if ($ValueName -match "\*\*delvals")
             {
-                Write-Verbose -Message ($script:localizedData.RegistryKeyValueDoesNotExist -f $Key, $valueDisplayName)
+                Write-Verbose -Message ($script:localizedData.DelValsSpecified -f $Key)
+                $ValueNames = Get-RegistryKeyValueNames -RegistryKey $registryKey
+
+                if ($ValueNames.count -gt 0)
+                {
+                    Write-Verbose -Message ($script:localizedData.ValueNamesExist -f $Key)
+                    $registryResource['ValueName'] = $ValueName
+                    $registryResource['Ensure'] = "Present"
+                }
+                else
+                {
+                    Write-Verbose -Message ($script:localizedData.ValueNamesDoNotExist -f $Key)
+                    $registryResource['ValueName'] = $ValueName
+                    $registryResource['Ensure'] = "Absent"
+                }
             }
             else
             {
-                Write-Verbose -Message ($script:localizedData.RegistryKeyValueExists -f $Key, $valueDisplayName)
+                $valueDisplayName = Get-RegistryKeyValueDisplayName -RegistryKeyValueName $ValueName
+                $registryResource['ValueName'] = $valueDisplayName
 
-                # If the registry key value exists, retrieve its type
-                $actualValueType = Get-RegistryKeyValueType -RegistryKey $registryKey -RegistryKeyValueName $ValueName
+                # If a value name was specified, retrieve the value with the specified name from the retrieved registry key
+                $registryKeyValue = Get-RegistryKeyValue -RegistryKey $registryKey -RegistryKeyValueName $ValueName
 
-                # If the registry key value exists, convert it to a readable string
-                $registryKeyValueAsReadableString = @() + (ConvertTo-ReadableString -RegistryKeyValue $registryKeyValue -RegistryKeyValueType $actualValueType)
+                # Check if the registry key value exists
+                if ($null -eq $registryKeyValue)
+                {
+                    Write-Verbose -Message ($script:localizedData.RegistryKeyValueDoesNotExist -f $Key, $valueDisplayName)
+                }
+                else
+                {
+                    Write-Verbose -Message ($script:localizedData.RegistryKeyValueExists -f $Key, $valueDisplayName)
 
-                $registryResource['Ensure'] = 'Present'
-                $registryResource['ValueType'] = $actualValueType
-                $registryResource['ValueData'] = $registryKeyValueAsReadableString
+                    # If the registry key value exists, retrieve its type
+                    $actualValueType = Get-RegistryKeyValueType -RegistryKey $registryKey -RegistryKeyValueName $ValueName
+
+                    # If the registry key value exists, convert it to a readable string
+                    $registryKeyValueAsReadableString = @() + (ConvertTo-ReadableString -RegistryKeyValue $registryKeyValue -RegistryKeyValueType $actualValueType)
+
+                    $registryResource['Ensure'] = 'Present'
+                    $registryResource['ValueType'] = $actualValueType
+                    $registryResource['ValueData'] = $registryKeyValueAsReadableString
+                }
             }
         }
         else
@@ -232,7 +253,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message ($script:localizedData.RegistryKeyExists -f $Key)
 
-        $valueNameSpecified = (-not [String]::IsNullOrEmpty($ValueName)) -or $PSBoundParameters.ContainsKey('ValueType') -or $PSBoundParameters.ContainsKey('ValueData')
+        $valueNameSpecified = ((-not [String]::IsNullOrEmpty($ValueName)) -and $ValueName -match "\*\*delval") -or $PSBoundParameters.ContainsKey('ValueType') -or $PSBoundParameters.ContainsKey('ValueData')
 
         # Check if the user wants to set a registry key value
         if ($valueNameSpecified)
@@ -317,19 +338,27 @@ function Set-TargetResource
             # Check if the user wants to remove the registry key
             if ($Ensure -eq 'Absent')
             {
-                # Retrieve the number of subkeys the registry key has
-                $registryKeySubKeyCount = Get-RegistryKeySubKeyCount -RegistryKey $registryKey
-
-                # Check if the registry key has subkeys and the user does not want to forcibly remove the registry key
-                if ($registryKeySubKeyCount -gt 0 -and -not $Force)
+                if ($ValueName -match "\*\*delval")
                 {
-                    New-InvalidOperationException -Message ($script:localizedData.CannotRemoveExistingRegistryKeyWithSubKeysWithoutForce -f $Key)
+                    Write-Verbose -Message ($script:localizedData.RemovingAllRegistryKeyValues -f $Key)
+                    Remove-ItemProperty -Path .\ -Name *
                 }
                 else
                 {
-                    # Remove the registry key
-                    Write-Verbose -Message ($script:localizedData.RemovingRegistryKey -f $Key)
-                    $null = Remove-Item -Path $Key -Recurse -Force
+                    # Retrieve the number of subkeys the registry key has
+                    $registryKeySubKeyCount = Get-RegistryKeySubKeyCount -RegistryKey $registryKey
+
+                    # Check if the registry key has subkeys and the user does not want to forcibly remove the registry key
+                    if ($registryKeySubKeyCount -gt 0 -and -not $Force)
+                    {
+                        New-InvalidOperationException -Message ($script:localizedData.CannotRemoveExistingRegistryKeyWithSubKeysWithoutForce -f $Key)
+                    }
+                    else
+                    {
+                        # Remove the registry key
+                        Write-Verbose -Message ($script:localizedData.RemovingRegistryKey -f $Key)
+                        $null = Remove-Item -Path $Key -Recurse -Force
+                    }
                 }
             }
         }
@@ -435,7 +464,7 @@ function Test-TargetResource
     $registryResource = Get-TargetResource @getTargetResourceParameters
 
     # Check if the user specified a value name to retrieve
-    $valueNameSpecified = (-not [String]::IsNullOrEmpty($ValueName)) -or $PSBoundParameters.ContainsKey('ValueType') -or $PSBoundParameters.ContainsKey('ValueData')
+    $valueNameSpecified = ((-not [String]::IsNullOrEmpty($ValueName)) -and $ValueName -match "\*\*delval") -or $PSBoundParameters.ContainsKey('ValueData')
 
     if ($valueNameSpecified)
     {
@@ -500,15 +529,31 @@ function Test-TargetResource
     }
     else
     {
-        if ($registryResource.Ensure -eq 'Present')
+        if ($ValueName -match "\*\*delvals")
         {
-            Write-Verbose -Message ($script:localizedData.RegistryKeyExists -f $Key)
-            $registryResourceInDesiredState = $Ensure -eq 'Present'
+            if ($registryResource.Ensure -eq 'Present')
+            {
+                Write-Verbose -Message ($script:localizedData.ValueNamesExist -f $Key)
+                $registryResourceInDesiredState = $Ensure -eq 'Present'
+            }
+            else
+            {
+                Write-Verbose -Message ($script:localizedData.ValueNamesDoNotExist -f $Key)
+                $registryResourceInDesiredState = $Ensure -eq 'Absent'
+            }
         }
         else
-        {
-            Write-Verbose -Message ($script:localizedData.RegistryKeyDoesNotExist -f $Key)
-            $registryResourceInDesiredState = $Ensure -eq 'Absent'
+        {   
+            if ($registryResource.Ensure -eq 'Present')
+            {
+                Write-Verbose -Message ($script:localizedData.RegistryKeyExists -f $Key)
+                $registryResourceInDesiredState = $Ensure -eq 'Present'
+            }
+            else
+            {
+                Write-Verbose -Message ($script:localizedData.RegistryKeyDoesNotExist -f $Key)
+                $registryResourceInDesiredState = $Ensure -eq 'Absent'
+            }
         }
     }
 
@@ -826,6 +871,27 @@ function Get-RegistryKeyValue
     return ,$registryKeyValue
 }
 
+<#
+    .SYNOPSIS
+        Retrieves all the values in a Registry Key.
+
+    .PARAMETER RegistryKey
+        The registry key to retrieve the values from.
+#>
+function Get-RegistryKeyValueNames
+{
+    [OutputType([Object[]])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryKey]
+        $RegistryKey
+    )
+
+    $registryKeyValue = $RegistryKey.GetValueNames()
+    return ,$registryKeyValue
+}
 <#
     .SYNOPSIS
         Retrieves the type of the registry key value with the specified name from the the specified

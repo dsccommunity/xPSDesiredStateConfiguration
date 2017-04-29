@@ -276,6 +276,41 @@ try
             }
         }
 
+        Context 'Remove all registry key value Names using **delvals' {
+            $configurationName = 'RemoveRegistryKeyValueNames'
+
+            New-ItemProperty -Path $script:testRegistryKeyPath -Name "Test" -Value 1
+            New-ItemProperty -Path $script:testRegistryKeyPath -Name "Test2" -Value 1
+
+            $registryParameters = @{
+                Key = $script:testRegistryKeyPath
+                Ensure = 'Absent'
+                ValueName = '**delvals'
+            }
+
+            It 'Should compile and run configuration' {
+                { 
+                    . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
+                    & $configurationName -OutputPath $TestDrive @registryParameters
+                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                } | Should Not Throw
+            }
+
+            It 'Should be able to call Get-DscConfiguration without throwing' {
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+            }
+
+            $registryKeyValues = Get-ItemProperty -Path $registryParameters.Key -Name * -ErrorAction 'SilentlyContinue'
+
+            It 'Should have removed all the registry key value names' {
+                $registryKeyValues | Should Be $null
+            }
+
+            It 'Should return true from Test-TargetResource with the same parameters' {
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+            }
+        }
+
         Context 'Remove a default registry key value' {
             $configurationName = 'RemoveDefaultRegistryKeyValue'
 
