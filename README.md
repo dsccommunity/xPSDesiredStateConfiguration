@@ -635,6 +635,10 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 6.3.0.0
+* xDSCWebService
+    * Fixed an issue where all 64bit IIS application pools stop working after installing DSC Pull Server, because IISSelfSignedCertModule(32bit) module was registered without bitness32 precondition.
+
 ### 6.2.0.0
 
 * xMsiPackage:
