@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '6.2.0.0'
+ModuleVersion = '6.3.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,12 +52,8 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xMsiPackage:
-    * Created high quality MSI package manager resource 
-* xArchive:
-    * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
-* xWindowsFeatureSet:
-    * Had the wrong parameter name in one test case.
+        ReleaseNotes = '* xDSCWebService
+    * Fixed an issue where all 64bit IIS application pools stop working after installing DSC Pull Server, because IISSelfSignedCertModule(32bit) module was registered without bitness32 precondition.
 
 '
 
@@ -65,6 +61,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
