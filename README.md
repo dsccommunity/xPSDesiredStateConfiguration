@@ -635,6 +635,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 6.4.0.0
+
 * xGroup:
     * Added updates from PSDscResources:
         * Added support for domain based group members on Nano server
