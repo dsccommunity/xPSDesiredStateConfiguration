@@ -965,7 +965,7 @@ function Set-TargetResourceOnNanoServer
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
             {
-                $groupMembers = Get-MembersOnNanoServer -Group $group
+                [array]$groupMembers = Get-MembersOnNanoServer -Group $group
 
                 $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
                 $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
@@ -1419,7 +1419,7 @@ function Test-TargetResourceOnNanoServer
             }
         }
 
-        $groupMembers = Get-MembersOnNanoServer -Group $group
+        [array]$groupMembers = Get-MembersOnNanoServer -Group $group
 
         # Remove duplicate names as strings.
         $uniqueMembers = $Members | Select-Object -Unique
@@ -1508,7 +1508,7 @@ function Get-MembersOnNanoServer
         $Group
     )
 
-    $localMemberNames = New-Object -TypeName 'System.Collections.ArrayList'
+    $memberNames = New-Object -TypeName 'System.Collections.ArrayList'
 
     # Get the group members.
     $groupMembers = Get-LocalGroupMember -Group $Group
@@ -1518,16 +1518,17 @@ function Get-MembersOnNanoServer
         if ($groupMember.PrincipalSource -ieq 'Local')
         {
             $localMemberName = $groupMember.Name.Substring($groupMember.Name.IndexOf('\') + 1)
-            $null = $localMemberNames.Add($localMemberName)
+            $null = $memberNames.Add($localMemberName)
         }
         else
         {
-            Write-Verbose -Message ($script:localizedData.MemberIsNotALocalUser -f $groupMember.Name,
-                $groupMember.PrincipalSource)
+            Write-Verbose -Message ($script:localizedData.MemberIsNotALocalUser -f $groupMember.Name,$groupMember.PrincipalSource)
+            $domainMemberName = $groupMember.Name
+            $null = $memberNames.Add($domainMemberName)
         }
     }
 
-    return $localMemberNames.ToArray()
+    return $memberNames.ToArray()
 }
 
 <#

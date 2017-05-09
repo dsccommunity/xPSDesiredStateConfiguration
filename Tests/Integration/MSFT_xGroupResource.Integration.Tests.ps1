@@ -163,9 +163,14 @@ try
                 MembersToInclude = $groupMembers
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $false
-
-            New-Group -GroupName $testGroupName
+            try
+            {
+                New-Group -GroupName $testGroupName
+            }
+            catch
+            {
+                Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
+            }
 
             Test-GroupExists -GroupName $testGroupName | Should Be $true
 
@@ -200,9 +205,14 @@ try
                 MembersToExclude = $groupMembersToExclude
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $false
-
-            New-Group -GroupName $testGroupName -Members $groupMembersToExclude
+            try
+            {
+                New-Group -GroupName $testGroupName -Members $groupMembersToExclude
+            }
+            catch
+            {
+                Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
+            }
 
             Test-GroupExists -GroupName $testGroupName | Should Be $true
 
