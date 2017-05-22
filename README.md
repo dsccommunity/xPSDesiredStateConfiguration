@@ -14,6 +14,15 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 If you would like to contribute to this module, please review the common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
+## Installation
+
+These resources can be installed by running the following PowerShell commands:
+
+```powershell
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+Install-Module -Name xPSDesiredStateConfiguration -Force
+```
+
 ## Resources
 
 * **xArchive** provides a mechanism to expand an archive (.zip) file to a specific path or remove an expanded archive (.zip) file from a specific path on a target node.
