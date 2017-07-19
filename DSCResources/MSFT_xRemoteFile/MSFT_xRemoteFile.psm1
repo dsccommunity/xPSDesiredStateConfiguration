@@ -210,11 +210,12 @@ function Set-TargetResource
     }
 
     # Invoke web request
+	$responseHeaders = $null
     try
     {
         Write-Verbose -Message $($LocalizedData.DownloadingURI `
             -f ${DestinationPath},${URI})
-        Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -outFile $DestinationPath
+        $responseHeaders = (Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -outFile $DestinationPath -PassThru).Headers
     }
     catch [System.OutOfMemoryException]
     {
@@ -242,6 +243,14 @@ function Set-TargetResource
         $inputObject = @{}
         $inputObject["LastWriteTime"] = $lastWriteTime
         $inputObject["FileSize"] = $filesize
+		if ($responseHeaders.ContainsKey("ETag"))
+		{
+			$inputObject["ETag"] = $responseHeaders.ETag
+		}
+		if ($responseHeaders.ContainsKey("Last-Modified"))
+		{
+			$inputObject["Last-Modified"] = [DateTime]$responseHeaders."Last-Modified"
+		}
         Update-Cache -DestinationPath $DestinationPath -Uri $Uri -InputObject $inputObject
     }
 }
@@ -293,6 +302,20 @@ function Test-TargetResource
     $fileExists = $false
     $uriFileName = Split-Path $Uri -Leaf
     $pathItemType = Get-PathItemType -Path $DestinationPath
+
+	# Remove DestinationPath and MatchSource from parameters as they are not parameters of Invoke-WebRequest
+    $null = $PSBoundParameters.Remove("DestinationPath")
+    $null = $PSBoundParameters.Remove("MatchSource")
+
+    # Convert headers to hashtable
+    $null = $PSBoundParameters.Remove("Headers")
+    $headersHashtable = $null
+
+    if ($Headers -ne $null)
+    {
+        $headersHashtable = Convert-KeyValuePairArrayToHashtable -array $Headers
+    }
+
     switch($pathItemType)
     {
         "File"
@@ -305,9 +328,7 @@ function Test-TargetResource
                 # Getting cache. It's cleared every time user runs Start-DscConfiguration
                 $cache = Get-Cache -DestinationPath $DestinationPath -Uri $Uri
 
-                if ($cache -ne $null `
-                    -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc) `
-                    -and ($cache.FileSize -eq $file.Length))
+                if (($cache -ne $null) -and (Test-CacheValidity -Cache $cache -File $file -RequestParameters $PSBoundParameters -Headers $headersHashtable))
                 {
                     Write-Verbose -Message $($LocalizedData.CacheReflectsCurrentState)
                     $fileExists = $true
@@ -337,7 +358,8 @@ function Test-TargetResource
                 {
                     $file = Get-Item -Path $expectedDestinationPath
                     $cache = Get-Cache -DestinationPath $expectedDestinationPath -Uri $Uri
-                    if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
+
+                    if (($cache -ne $null) -and (Test-CacheValidity -Cache $cache -File $file -RequestParameters $PSBoundParameters -Headers $headersHashtable))
                     {
                         Write-Verbose -Message $($LocalizedData.CacheReflectsCurrentState)
                         $fileExists = $true
@@ -483,6 +505,85 @@ function Convert-KeyValuePairArrayToHashtable
     }
 
     return $hashtable
+}
+
+<#
+.Synopsis
+Checks that the provided Cache is not stale for specific File and Uri
+#>
+function Test-CacheValidity
+{
+	param (
+		[parameter(Mandatory = $true)]
+        [Object]
+        $Cache,
+
+		[parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [System.IO.FileSystemInfo]
+        $File,
+
+		[parameter(Mandatory = $true)]
+		[ValidateNotNull()]
+		[System.Collections.Generic.Dictionary`2[System.String,System.Object]]
+		$RequestParameters,
+
+		[Hashtable]
+		$HeadersHashtable
+	)
+
+	Write-Verbose -Message "Cache_LastWriteTime: $($Cache.LastWriteTime), File_LastWriteTime: $($File.LastWriteTimeUtc), Cache_FileSize: $($Cache.FileSize), File_FileSize: $($File.Length)"
+	# Check if File is locally modified
+	if (($Cache.LastWriteTime -ne $File.LastWriteTimeUtc) -or ($Cache.FileSize -ne $File.Length))
+	{
+		return $false
+	}
+
+	# Get the server's current state for this Uri
+	$headers = (Invoke-WebRequest @RequestParameters -Headers $HeadersHashtable -Method Head).Headers
+
+	# Does the server return ETags?
+	if ($headers.ContainsKey("ETag"))
+	{
+		# Do we have an ETag stored?
+		if ($Cache.ETag -ne $null)
+		{
+			Write-Verbose -Message "Cache_ETag: $($Cache.ETag), HTTP_ETag: $($headers.ETag)"
+			# and is it the same?
+			if ($Cache.ETag -eq $headers.ETag)
+			{
+				return $true
+			}
+		} else
+		{
+			# The server returns ETags but we don't have one, consider invalid
+			Write-Verbose -Message "The server returns ETags but we don't have one."
+			return $false
+		}
+	} else
+	{
+		# Fall back to matching Last-Modified
+		if ($headers.ContainsKey("Last-Modified"))
+		{
+			# Do we have Last-Modified stored?
+			if ($Cache.LastModified -ne $null)
+			{
+				Write-Verbose -Message "Cache_LastModified: $($Cache.LastModified), HTTP_LastModified: $($headers.'Last-Modified')"
+				# and is it the same?
+				if ($Cache.LastModified -eq [DateTime]$headers."Last-Modified")
+				{
+					return $true
+				}
+			} else
+			{
+				# The server returns Last-Modified but we don't have it, consider invalid
+				Write-Verbose "The server returns Last-Modified but we don't have it."
+				return $false
+			}
+		}
+	}
+
+	return $false
 }
 
 <#
