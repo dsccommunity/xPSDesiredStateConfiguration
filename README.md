@@ -634,9 +634,11 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
-- xService
-    - Fixed an issue where services that are not installed but StartupType is "Disabled" in resource will error for not being installed. Change will now return as being in compliance.
-    
+
+* xService
+    * BREAKING CHANGE: The service will now return as compliant if the service is not installed and the StartupType is set to Disabled regardless of the value of the Ensure property.
+* Fixed misnamed certificate thumbprint variable in example Sample_xDscWebServiceRegistrationWithSecurityBestPractices
+
 ### 6.4.0.0
 
 * xGroup:
