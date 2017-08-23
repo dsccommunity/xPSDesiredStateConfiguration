@@ -1005,6 +1005,38 @@ try
                 }
             }
 
+        Context 'Service does not exist, Ensure set to Present, and StartupType is set to Disabled' {
+                $testTargetResourceParameters = @{
+                    Name = $script:testServiceName
+                    Ensure = 'Present'
+                    StartupType = 'Disabled'
+                }
+                
+                It 'Should not throw' {
+                    { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                }
+
+                It 'Should not check for a startup type and state conflict' {
+                    Assert-MockCalled -CommandName 'Assert-NoStartupTypeStateConflict' -ParameterFilter { $ServiceName -eq $testTargetResourceParameters.Name -and $StartupType -eq $testTargetResourceParameters.StartupType } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should attempt retrieve the service' {
+                    Assert-MockCalled -CommandName 'Get-TargetResource' -ParameterFilter { $Name -eq $testTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to test if the service path matches the specified path' {
+                    Assert-MockCalled -CommandName 'Test-PathsMatch' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to convert a credential username to a service start name' {
+                    Assert-MockCalled -CommandName 'ConvertTo-StartName' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should return true' {
+                    Test-TargetResource @testTargetResourceParameters | Should Be $true
+                }
+            }
+
             $serviceResourceWithAllProperties = @{
                 Name            = $script:testServiceName
                 Ensure          = 'Present'
