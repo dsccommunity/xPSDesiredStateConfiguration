@@ -83,11 +83,11 @@ function Get-TargetResource
             }           
 
             # This is the 32 bit module
-            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" 
+            <#$certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" 
             if($certNativeModule)
             {
                 $AcceptSelfSignedCertificates = $true
-            }           
+            } #>          
         }
     else
     {
@@ -293,17 +293,20 @@ function Set-TargetResource
 
     if($AcceptSelfSignedCertificates)
     {
-        Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
-        Copy-Item "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\SysWOW64\inetsrv -Force
+        #Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
+        #Copy-Item "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\SysWOW64\inetsrv -Force
 
-        & $script:appCmd install module /name:"IISSelfSignedCertModule(32bit)" /image:$env:windir\SysWOW64\inetsrv\IISSelfSignedCertModule.dll /add:false /lock:false /preCondition:bitness32
-        & $script:appCmd add module /name:"IISSelfSignedCertModule(32bit)"  /app.name:"PSDSCPullServer/"
+        Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
+        Copy-Item "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
+
+        & $script:appCmd install module /name:"IISSelfSignedCertModule" /image:$env:windir\System32\inetsrv\IISSelfSignedCertModule.dll /add:false /lock:false   #/preCondition:bitness32
+        & $script:appCmd add module /name:"IISSelfSignedCertModule"  /app.name:"PSDSCPullServer/"
     }
     else
     {
         if($AcceptSelfSignedCertificates -and ($AcceptSelfSignedCertificates -eq $false))
         {
-            & $script:appCmd delete module /name:"IISSelfSignedCertModule(32bit)"  /app.name:"PSDSCPullServer/"
+            & $script:appCmd delete module /name:"IISSelfSignedCertModule"  /app.name:"PSDSCPullServer/"
         }
     }
 
@@ -484,7 +487,7 @@ function Test-TargetResource
             Write-Verbose "Check AcceptSelfSignedCertificates"
             if ($AcceptSelfSignedCertificates)
             {
-                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" -ExpectedInstallationStatus $AcceptSelfSignedCertificates))
+                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule" -ExpectedInstallationStatus $AcceptSelfSignedCertificates))
                 {
                     $DesiredConfigurationMatch = $false
                     break
