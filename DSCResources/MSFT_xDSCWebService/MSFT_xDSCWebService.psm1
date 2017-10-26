@@ -25,7 +25,10 @@ function Get-TargetResource
 
         # Exceptions of security best practices
         [ValidateSet("SecureTLSProtocols")]
-        [string[]] $DisableSecurityBestPractices
+        [string[]] $DisableSecurityBestPractices,
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [bool]$Enable32BitAppOnWin64
     )
 
     $webSite = Get-Website -Name $EndpointName
@@ -75,19 +78,17 @@ function Get-TargetResource
 
             $webBinding = Get-WebBinding -Name $EndpointName
 
-            # This is the 64 bit module
-            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule" 
+            $iisSelfSignedModuleName = "IISSelfSignedCertModule"
+            if ($Enable32BitAppOnWin64 -eq $true)
+            {
+                $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
+            }
+            
+            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName 
             if($certNativeModule)
             {
                 $AcceptSelfSignedCertificates = $true
-            }           
-
-            # This is the 32 bit module
-            <#$certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" 
-            if($certNativeModule)
-            {
-                $AcceptSelfSignedCertificates = $true
-            } #>          
+            }                        
         }
     else
     {
@@ -109,6 +110,7 @@ function Get-TargetResource
         AcceptSelfSignedCertificates    = $AcceptSelfSignedCertificates
         UseSecurityBestPractices        = $UseSecurityBestPractices
         DisableSecurityBestPractices    = $DisableSecurityBestPractices
+        Enable32BitAppOnWin64           = $Enable32BitAppOnWin64
     }
 }
 
@@ -163,7 +165,10 @@ function Set-TargetResource
 
         # Exceptions of security best practices
         [ValidateSet("SecureTLSProtocols")]
-        [string[]] $DisableSecurityBestPractices
+        [string[]] $DisableSecurityBestPractices,
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [boolean]$Enable32BitAppOnWin64 = $false
     )
 
     # Check parameter values
@@ -240,7 +245,9 @@ function Set-TargetResource
                      -language $language `
                      -dependentMUIFiles  "$pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
                      -certificateThumbPrint $CertificateThumbPrint `
-                     -EnableFirewallException $true -Verbose
+                     -EnableFirewallException $true `
+                     -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
+                     -Verbose
 
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
@@ -291,22 +298,34 @@ function Set-TargetResource
 
     PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "RegistrationKeyPath" -value $RegistrationKeyPath
 
-    if($AcceptSelfSignedCertificates)
+    $iisSelfSignedModuleAssemblyName = "IISSelfSignedCertModule.dll"
+    $iisSelfSignedModuleName = "IISSelfSignedCertModule"
+    if ($Enable32BitAppOnWin64 -eq $true)
     {
-        #Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
-        #Copy-Item "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\SysWOW64\inetsrv -Force
-
-        Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
-        Copy-Item "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
-
-        & $script:appCmd install module /name:"IISSelfSignedCertModule" /image:$env:windir\System32\inetsrv\IISSelfSignedCertModule.dll /add:false /lock:false   #/preCondition:bitness32
-        & $script:appCmd add module /name:"IISSelfSignedCertModule"  /app.name:"PSDSCPullServer/"
+        $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
+    }
+    if($AcceptSelfSignedCertificates)
+    {        
+        $sourceFilePath = Join-Path "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
+        $destinationFolderPath = "$env:windir\System32\inetsrv"
+        $preConditionBitnessArgumentFor32BitInstall=""
+        if ($Enable32BitAppOnWin64 -eq $true)
+        {
+            $sourceFilePath = Join-Path "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
+            $destinationFolderPath = "$env:windir\SysWOW64\inetsrv"
+            $preConditionBitnessArgumentFor32BitInstall = "/preCondition:bitness32"
+        }
+        $destinationFilePath = Join-Path $destinationFolderPath $iisSelfSignedModuleAssemblyName
+        Copy-Item $sourceFilePath $destinationFolderPath -Force
+        
+        & $script:appCmd install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false
+        & $script:appCmd add module /name:$iisSelfSignedModuleName  /app.name:"PSDSCPullServer/" $preConditionBitnessArgumentFor32BitInstall
     }
     else
     {
         if($AcceptSelfSignedCertificates -and ($AcceptSelfSignedCertificates -eq $false))
         {
-            & $script:appCmd delete module /name:"IISSelfSignedCertModule"  /app.name:"PSDSCPullServer/"
+            & $script:appCmd delete module /name:$iisSelfSignedModuleName  /app.name:"PSDSCPullServer/"
         }
     }
 
@@ -368,7 +387,10 @@ function Test-TargetResource
 
         # Exceptions of security best practices
         [ValidateSet("SecureTLSProtocols")]
-        [string[]] $DisableSecurityBestPractices
+        [string[]] $DisableSecurityBestPractices,
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [bool]$Enable32BitAppOnWin64
     )
 
     $desiredConfigurationMatch = $true;
