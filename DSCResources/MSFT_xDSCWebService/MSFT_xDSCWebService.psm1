@@ -299,25 +299,26 @@ function Set-TargetResource
     PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "RegistrationKeyPath" -value $RegistrationKeyPath
 
     $iisSelfSignedModuleAssemblyName = "IISSelfSignedCertModule.dll"
-    $iisSelfSignedModuleName = "IISSelfSignedCertModule"
-    if ($Enable32BitAppOnWin64 -eq $true)
-    {
-        $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
-    }
+    $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
     if($AcceptSelfSignedCertificates)
     {        
-        $sourceFilePath = Join-Path "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
-        $destinationFolderPath = "$env:windir\System32\inetsrv"
         $preConditionBitnessArgumentFor32BitInstall=""
         if ($Enable32BitAppOnWin64 -eq $true)
         {
+            Write-Verbose "Enabling Pull Server to run in a 32 bit process"
             $sourceFilePath = Join-Path "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
             $destinationFolderPath = "$env:windir\SysWOW64\inetsrv"
+            Copy-Item $sourceFilePath $destinationFolderPath -Force
             $preConditionBitnessArgumentFor32BitInstall = "/preCondition:bitness32"
         }
+        else {
+            Write-Verbose "Enabling Pull Server to run in a 64 bit process"
+        }
+        $sourceFilePath = Join-Path "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
+        $destinationFolderPath = "$env:windir\System32\inetsrv"
         $destinationFilePath = Join-Path $destinationFolderPath $iisSelfSignedModuleAssemblyName
         Copy-Item $sourceFilePath $destinationFolderPath -Force
-        
+
         & $script:appCmd install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false
         & $script:appCmd add module /name:$iisSelfSignedModuleName  /app.name:"PSDSCPullServer/" $preConditionBitnessArgumentFor32BitInstall
     }
