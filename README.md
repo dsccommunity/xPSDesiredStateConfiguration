@@ -95,6 +95,7 @@ None
 * **UseSecurityBestPractices**: Whether to use best practice security settings for the node where pull server resides on.
 Caution: Setting this property to $true will reset registry values under "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL". This environment change enforces the use of stronger encryption cypher and may affect legacy applications. More information can be found at https://support.microsoft.com/en-us/kb/245030 and https://technet.microsoft.com/en-us/library/dn786418(v=ws.11).aspx.
 * **DisableSecurityBestPractices**: The items that are excepted from following best practice security settings.
+* **Enable32BitAppOnWin64**: When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine.
 
 ### xGroup
 

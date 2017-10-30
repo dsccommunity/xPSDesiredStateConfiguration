@@ -300,7 +300,7 @@ function New-IISWebSite
         $app,
         $appPool,        
         $applicationPoolIdentityType,
-        $certificateThumbPrin,
+        $certificateThumbPrint,
         $enable32BitAppOnWin64)    
     
     $siteID = New-SiteID

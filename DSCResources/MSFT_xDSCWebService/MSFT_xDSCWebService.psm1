@@ -28,7 +28,7 @@ function Get-TargetResource
         [string[]] $DisableSecurityBestPractices,
 
         # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
-        [bool]$Enable32BitAppOnWin64
+        [bool]$Enable32BitAppOnWin64 = $false
     )
 
     $webSite = Get-Website -Name $EndpointName
@@ -78,17 +78,12 @@ function Get-TargetResource
 
             $webBinding = Get-WebBinding -Name $EndpointName
 
-            $iisSelfSignedModuleName = "IISSelfSignedCertModule"
-            if ($Enable32BitAppOnWin64 -eq $true)
-            {
-                $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
-            }
-            
-            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName 
+            $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"            
+            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName $iisSelfSignedModuleName
             if($certNativeModule)
             {
                 $AcceptSelfSignedCertificates = $true
-            }                        
+            }
         }
     else
     {
@@ -391,7 +386,7 @@ function Test-TargetResource
         [string[]] $DisableSecurityBestPractices,
 
         # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
-        [bool]$Enable32BitAppOnWin64
+        [bool]$Enable32BitAppOnWin64 = $false
     )
 
     $desiredConfigurationMatch = $true;
@@ -510,7 +505,7 @@ function Test-TargetResource
             Write-Verbose "Check AcceptSelfSignedCertificates"
             if ($AcceptSelfSignedCertificates)
             {
-                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule" -ExpectedInstallationStatus $AcceptSelfSignedCertificates))
+                if (-not (Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" -ExpectedInstallationStatus $AcceptSelfSignedCertificates))
                 {
                     $DesiredConfigurationMatch = $false
                     break
