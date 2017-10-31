@@ -242,7 +242,7 @@ None
 * **[String] BuiltInAccount** _(Write)_: The built-in account the service should start under. Cannot be specified at the same time as Credential. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. { LocalService | LocalSystem | NetworkService }.
 * **[PSCredential] Credential** _(Write)_: The credential of the user account the service should start under. Cannot be specified at the same time as BuiltInAccount. The user specified by this credential will automatically be granted the Log on as a Service right. The user account specified by this property must have access to the service executable path defined by Path in order to start the service.
 * **[Boolean] DesktopInteract** _(Write)_: Indicates whether or not the service should be able to communicate with a window on the desktop. Must be false for services not running as LocalSystem. The default value is False.
-* **[String] StartupType** _(Write)_: The startup type of the service. { Automatic | Disabled | Manual }.
+* **[String] StartupType** _(Write)_: The startup type of the service. { Automatic | Disabled | Manual }. If StartupType is "Disabled" and Service is not installed the resource will complete as being DSC compliant.
 * **[String] State** _(Write)_: The state of the service. { *Running* | Stopped | Ignore }.
 * **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000 (30 seconds).
 * **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000 (30 seconds).
@@ -635,6 +635,12 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+
+### 7.0.0.0
+
+* xService
+    * BREAKING CHANGE: The service will now return as compliant if the service is not installed and the StartupType is set to Disabled regardless of the value of the Ensure property.
+* Fixed misnamed certificate thumbprint variable in example Sample_xDscWebServiceRegistrationWithSecurityBestPractices
 
 ### 6.4.0.0
 

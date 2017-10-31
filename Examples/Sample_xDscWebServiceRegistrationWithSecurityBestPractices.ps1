@@ -65,7 +65,7 @@ configuration Sample_xDscWebServiceRegistrationWithSecurityBestPractices
         }
     }
 }
-Sample_xDscWebServiceRegistrationWithSecurityBestPractices -RegistrationKey $registrationkey -certificateThumbPrint $thumbprint
+Sample_xDscWebServiceRegistrationWithSecurityBestPractices -RegistrationKey $registrationkey -certificateThumbPrint $certificateThumbPrint
 # =================================== Section Pull Server =================================== #
 
 # =================================== Section DSC Client =================================== #
