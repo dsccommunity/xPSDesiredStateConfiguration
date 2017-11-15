@@ -636,6 +636,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 8.0.0.0
+
 * xDSCWebService
     * BREAKING CHANGE: The Pull Server will now run in a 64 bit IIS process by default. Enable32BitAppOnWin64 needs to be set to TRUE for the Pull Server to run in a 32 bit process.
 
