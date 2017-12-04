@@ -2119,7 +2119,7 @@ try
                     }
 
                     It 'Should change service' {
-                        Assert-MockCalled -CommandName 'Invoke-CimMethod' -ParameterFilter { $InputObject -eq $testServiceCimInstance -and $MethodName -eq 'Change' -and $Arguments.StartName -eq $setServiceAccountPropertyParameters.Credential.UserName -and $Arguments.StartPassword -eq $null } -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Invoke-CimMethod' -ParameterFilter { $InputObject -eq $testServiceCimInstance -and $MethodName -eq 'Change' -and $Arguments.StartName -eq $setServiceAccountPropertyParameters.Credential.UserName -and ($Arguments | gm).Name -notcontains "StartPassword" } -Times 1 -Scope 'Context'
                     }
                 }
 
