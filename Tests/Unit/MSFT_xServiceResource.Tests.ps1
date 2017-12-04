@@ -25,12 +25,16 @@ try
         
         $script:testUsername1 = 'TestUser1'
         $script:testUsername2 = 'TestUser2'
+        $script:testServiceAccount1 = 'TestServiceAccount1$'
+        $script:testServiceAccount2 = 'TestServiceAccount2$'
 
         $script:testPassword = 'DummyPassword'
         $secureTestPassword = ConvertTo-SecureString $script:testPassword -AsPlainText -Force
 
         $script:testCredential1 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList ($script:testUsername1, $secureTestPassword)
         $script:testCredential2 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList ($script:testUsername2, $secureTestPassword)
+        $script:testServiceAccount1 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList ($script:testUsername1, $secureTestPassword)
+        $script:testServiceAccount2 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList ($script:testUsername2, $secureTestPassword)
 
         Describe 'xService\Get-TargetResource' {
             Mock -CommandName 'Get-Service' -MockWith { }
@@ -2092,6 +2096,34 @@ try
                     }
                 }
 
+                Context 'Mismatching ServiceAccount specified and service change succeeds' {
+                    $setServiceAccountPropertyParameters = @{
+                        ServiceName = $script:testServiceName
+                        Credential  = $script:testServiceAccount1
+                    }
+
+                    It 'Should not throw' {
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should Not Throw
+                    }
+
+                    It 'Should retrieve service CIM instance' {
+                        Assert-MockCalled -CommandName 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $setServiceAccountPropertyParameters.ServiceName } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should convert the credential username to a service start name' {
+                        Assert-MockCalled -CommandName 'ConvertTo-StartName' -ParameterFilter { $Username -eq $setServiceAccountPropertyParameters.Credential.UserName } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should grant Log on As a Service right' {
+                        Assert-MockCalled -CommandName 'Grant-LogOnAsServiceRight' -ParameterFilter { $Username -eq $setServiceAccountPropertyParameters.Credential.UserName } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should change service' {
+                        Assert-MockCalled -CommandName 'Invoke-CimMethod' -ParameterFilter { $InputObject -eq $testServiceCimInstance -and $MethodName -eq 'Change' -and $Arguments.StartName -eq $setServiceAccountPropertyParameters.Credential.UserName -and $Arguments.StartPassword -eq $null } -Times 1 -Scope 'Context'
+                    }
+                }
+
+
                 $invokeCimMethodFailResult = @{
                     ReturnValue = 1
                 }
@@ -2128,6 +2160,19 @@ try
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         BuiltInAccount = 'NetworkService'
+                    }
+
+                    It 'Should throw an error for service change failure' {
+                        $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServiceAccountPropertyParameters.ServiceName, 'StartName, StartPassword', $invokeCimMethodFailResult.ReturnValue
+
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should Throw $errorMessage
+                    }
+                }
+
+                Context 'Credential with mismatching Service Account specified and service change fails' {
+                    $setServiceAccountPropertyParameters = @{
+                        ServiceName = $script:testServiceName
+                        Credential = $script:testServiceAccount1
                     }
 
                     It 'Should throw an error for service change failure' {

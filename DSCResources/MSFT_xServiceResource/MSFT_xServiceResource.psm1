@@ -1356,7 +1356,11 @@ function Set-ServiceAccountProperty
             Grant-LogOnAsServiceRight -Username $startName
 
             $changeServiceArguments['StartName'] = $startName
-            $changeServiceArguments['StartPassword'] = $Credential.GetNetworkCredential().Password
+            if($startname -match '\$$') {
+
+            } else {
+                $changeServiceArguments['StartPassword'] = $Credential.GetNetworkCredential().Password
+            }
         }
     }
 
