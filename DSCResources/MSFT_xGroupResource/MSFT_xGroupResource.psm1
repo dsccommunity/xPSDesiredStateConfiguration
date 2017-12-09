@@ -1251,22 +1251,37 @@ function Test-TargetResourceOnFullSKU
                 )
             }
 
-            foreach ($includedPrincipal in $membersToIncludeAsPrincipals)
-            {
-                <#
-                    Throw an error if any common principals were provided in MembersToInclude
-                    and MembersToExclude.
-                #>
-                if ($membersToExcludeAsPrincipals -contains $includedPrincipal)
-                {
-                    New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
-                        -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,
-                            'MembersToInclude', 'MembersToExclude')
-                }
-
-                if ($actualMembersAsPrincipals -notcontains $includedPrincipal)
+            <# 
+                We could have a scenario where the list of members in a group corresponds to some accounts that have been deleted
+                We need to check that MembersToInclude MATCHES MembersToIncludeAsPrincipals at least on a Account Name basis
+                to do that we need to check our original List first and see if any item is missing
+            #>
+            foreach ($MemberToInclude in $MembersToInclude) 
+            { 
+                # Either we found no actual User Principal objects Or we didn't find one that matches a user in MemberToInclude
+                if ($membersToIncludeAsPrincipals.Count -eq 0 -or !$membersToIncludeAsPrincipals.Name -contains $MemberToInclude)
                 {
                     return $false
+                }
+                else
+                {
+                    # Grab the user's Principal object from the list we collected
+                    $includedPrincipal = $membersToIncludeAsPrincipals | Where-Object { $_.Name.ToLower() -eq $MemberToInclude.ToLower() }
+                    <#
+                        Throw an error if any common principals were provided in MembersToInclude
+                        and MembersToExclude.
+                    #>
+                    if ($membersToExcludeAsPrincipals -contains $includedPrincipal)
+                    {
+                        New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
+                            -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,
+                                'MembersToInclude', 'MembersToExclude')
+                    }
+
+                    if ($actualMembersAsPrincipals -notcontains $includedPrincipal)
+                    {
+                        return $false
+                    }
                 }
             }
 
@@ -1972,7 +1987,13 @@ function ConvertTo-Principal
 
     if ($null -eq $principal)
     {
-        New-InvalidArgumentException -ArgumentName $MemberName -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
+        <# 
+            Instead of throwing an error and causing the Configuration to stop instead of succeeding or failing
+            instead we use a verbose message to indicate we could not find the principal this way the rest
+            of the Configuration can continue
+        #>
+        Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
+        #New-InvalidArgumentException -ArgumentName $MemberName -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
     }
 
     return $principal
