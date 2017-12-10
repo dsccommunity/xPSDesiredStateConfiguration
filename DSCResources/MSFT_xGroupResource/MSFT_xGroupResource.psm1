@@ -1756,9 +1756,13 @@ function Get-MembersAsPrincipalsList
             -ArgumentList @( $memberSidBytes, 0 )
 
         $principal = Resolve-SidToPrincipal -PrincipalContext $principalContext -Sid $memberSid -Scope $scope
-        $null = $disposables.Add($principal)
+        # If we got back null don't add to the disposables and principals collections
+        if ($null -ne $principal)
+        {
+            $null = $disposables.Add($principal)
 
-        $null = $principals.Add($principal)
+            $null = $principals.Add($principal)
+        }
     }
 
     return $principals.ToArray()
@@ -1989,7 +1993,7 @@ function ConvertTo-Principal
     {
         <# 
             Instead of throwing an error and causing the Configuration to stop instead of succeeding or failing
-            instead we use a verbose message to indicate we could not find the principal this way the rest
+            we use a verbose message to indicate we could not find the principal this way the rest
             of the Configuration can continue
         #>
         Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
@@ -2039,11 +2043,13 @@ function Resolve-SidToPrincipal
     {
         if (Test-IsLocalMachine -Scope $Scope)
         {
-            New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, or MembersToExclude' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
+            # New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, or MembersToExclude' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
+            Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
         }
         else
         {
-            New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, MembersToExclude, or Credential' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
+            # New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, MembersToExclude, or Credential' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
+            Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
         }
     }
 

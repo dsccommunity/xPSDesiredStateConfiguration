@@ -1863,19 +1863,36 @@ try
 
                     $sidIdentityType = [System.DirectoryServices.AccountManagement.IdentityType]::Sid
 
-                    It 'Should throw when principal not found and scope is local' {
-                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $script:localDomain } | Should Throw ($script:localizedData.CouldNotFindPrincipal -f $testSidValue)
+                    It 'Should not throw when principal not found and scope is local' {
+                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $script:localDomain } | Should Not Throw
 
                         Assert-MockCalled -CommandName 'Find-Principal' -ParameterFilter { $PrincipalContext -eq $script:testPrincipalContext -and $IdentityType -eq $sidIdentityType -and $IdentityValue -eq $testSidValue }
                         Assert-MockCalled -CommandName 'Test-IsLocalMachine' -ParameterFilter { $Scope -eq $script:localDomain }
                     }
 
+                    It 'Should Return Null when principal is not found' {
+                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $script:localDomain } | Should -BeNullOrEmpty
+                        
+                        Assert-MockCalled -CommandName 'Find-Principal' -ParameterFilter { $PrincipalContext -eq $script:testPrincipalContext -and $IdentityType -eq $sidIdentityType -and $IdentityValue -eq $testSidValue }
+                        Assert-MockCalled -CommandName 'Test-IsLocalMachine' -ParameterFilter { $Scope -eq $script:localDomain }
+                                                
+                    }
+
                     Mock -CommandName 'Test-IsLocalMachine' -MockWith { return $false }
 
-                    It 'Should throw when principal not found and scope is custom' {
+                    It 'Should not throw when principal not found and scope is custom' {
                         $customDomain = 'CustomDomain'
 
-                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $customDomain } | Should Throw ($script:localizedData.CouldNotFindPrincipal -f $testSidValue)
+                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $customDomain } | Should Not Throw
+
+                        Assert-MockCalled -CommandName 'Find-Principal' -ParameterFilter { $PrincipalContext -eq $script:testPrincipalContext -and $IdentityType -eq $sidIdentityType -and $IdentityValue -eq $testSidValue }
+                        Assert-MockCalled -CommandName 'Test-IsLocalMachine' -ParameterFilter { $Scope -eq $customDomain }
+                    }
+
+                    It 'Should return null when principal not found and scope is custom' {
+                        $customDomain = 'CustomDomain'
+
+                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $customDomain } | Should -BeNullOrEmpty
 
                         Assert-MockCalled -CommandName 'Find-Principal' -ParameterFilter { $PrincipalContext -eq $script:testPrincipalContext -and $IdentityType -eq $sidIdentityType -and $IdentityValue -eq $testSidValue }
                         Assert-MockCalled -CommandName 'Test-IsLocalMachine' -ParameterFilter { $Scope -eq $customDomain }
