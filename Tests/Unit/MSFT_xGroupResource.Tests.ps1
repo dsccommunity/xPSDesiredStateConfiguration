@@ -1838,13 +1838,19 @@ try
 
                     Mock -CommandName 'Find-Principal' -MockWith { }
 
-                    It 'Should throw if principal cannot be found' {
-                        $errorMessage = ($script:localizedData.CouldNotFindPrincipal -f $script:testUserPrincipal1.Name)
+                    It 'Should not throw if principal cannot be found' {
                     
                         { $convertToPrincipalResult = ConvertTo-Principal `
                             -MemberName $script:testUserPrincipal1.Name `
                             -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables } | Should Throw $errorMessage
+                            -Disposables $disposables } | Should not throw
+                    }
+
+                    It 'Should return null if principal cannot be found' {
+                        { $convertToPrincipalResult = ConvertTo-Principal `
+                            -MemberName $script:testUserPrincipal1.Name `
+                            -PrincipalContextCache $principalContextCache `
+                            -Disposables $disposables} | Should -BeNullOrEmpty
                     }
                 }
 
