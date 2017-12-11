@@ -1871,7 +1871,7 @@ try
                     }
 
                     It 'Should Return Null when principal is not found' {
-                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $script:localDomain } | Should -BeNullOrEmpty
+                        Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $script:localDomain | Should -BeNullOrEmpty
                         
                         Assert-MockCalled -CommandName 'Find-Principal' -ParameterFilter { $PrincipalContext -eq $script:testPrincipalContext -and $IdentityType -eq $sidIdentityType -and $IdentityValue -eq $testSidValue }
                         Assert-MockCalled -CommandName 'Test-IsLocalMachine' -ParameterFilter { $Scope -eq $script:localDomain }
@@ -1892,7 +1892,7 @@ try
                     It 'Should return null when principal not found and scope is custom' {
                         $customDomain = 'CustomDomain'
 
-                        { Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $customDomain } | Should -BeNullOrEmpty
+                        Resolve-SidToPrincipal -Sid $testSid -PrincipalContext $script:testPrincipalContext -Scope $customDomain | Should -BeNullOrEmpty
 
                         Assert-MockCalled -CommandName 'Find-Principal' -ParameterFilter { $PrincipalContext -eq $script:testPrincipalContext -and $IdentityType -eq $sidIdentityType -and $IdentityValue -eq $testSidValue }
                         Assert-MockCalled -CommandName 'Test-IsLocalMachine' -ParameterFilter { $Scope -eq $customDomain }
