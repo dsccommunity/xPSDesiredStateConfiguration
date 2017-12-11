@@ -1847,10 +1847,10 @@ try
                     }
 
                     It 'Should return null if principal cannot be found' {
-                        { $convertToPrincipalResult = ConvertTo-Principal `
+                        ConvertTo-Principal `
                             -MemberName $script:testUserPrincipal1.Name `
                             -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables} | Should -BeNullOrEmpty
+                            -Disposables $disposables | Should -BeNullOrEmpty
                     }
                 }
 
