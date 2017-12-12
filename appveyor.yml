@@ -8,7 +8,7 @@ install:
     - docker images
     - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
     - docker ps -a
-    - docker run -i -t -n TestNanoServer powershell
+    - docker run -it --name TestNanoServer powershell
     #- docker start -i TestNanoServer
     - docker exec -i -t TestNanoServer git clone https://github.com/PowerShell/DscResource.Tests
     - docker exec -i -t TestNanoServer PowerShell
