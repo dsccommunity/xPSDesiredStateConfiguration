@@ -6,13 +6,14 @@ image:
     - Visual Studio 2017
 install:
     - docker images
+    - docker ps -a
     - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
-    - docker git clone https://github.com/PowerShell/DscResource.Tests
-    - docker PowerShell
-    - docker Get-ComputerInfo -Verbose
-    - docker $moduleName = 'xPSDesiredStateConfiguration'
-    - docker Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-    - docker Invoke-AppveyorInstallTask
+    - docker exec -i -t TestNanoServer git clone https://github.com/PowerShell/DscResource.Tests
+    - docker exec -i -t TestNanoServer PowerShell
+    - docker exec -i -t TestNanoServer Get-ComputerInfo -Verbose
+    - docker exec -i -t TestNanoServer $moduleName = 'xPSDesiredStateConfiguration'
+    - docker exec -i -t TestNanoServer Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+    - docker exec -i -t TestNanoServer Invoke-AppveyorInstallTask
     - docker start -i TestNanoServer
     - docker stop TestNanoServer
 
