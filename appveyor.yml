@@ -4,7 +4,6 @@
 version: 6.0.{build}.0
 image:
     - Visual Studio 2017
-    - Visual Studio 2015
 install:
     - docker images
     - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
