@@ -10,8 +10,8 @@ install:
     - docker start -i TestNanoServer
     - docker git clone https://github.com/PowerShell/DscResource.Tests
     - docker PowerShell
+    - docker Get-ComputerInfo -Verbose
     - ps: |
-        Get-ComputerInfo -Verbose
         $moduleName = 'xPSDesiredStateConfiguration'
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
