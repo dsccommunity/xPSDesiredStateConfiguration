@@ -4,7 +4,6 @@
 version: 6.0.{build}.0
 image:
     - Visual Studio 2017
-    - Visual Studio 2015
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
