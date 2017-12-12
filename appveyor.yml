@@ -8,6 +8,7 @@ image:
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
+        Get-SystemInfo -Verbose
         $moduleName = 'xPSDesiredStateConfiguration'
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
