@@ -17,7 +17,9 @@ install:
 #      build configuration        #
 #---------------------------------#
 
-build: false
+# build: false
+build_script:
+  - docker pull microsoft/nanoserver
 
 #---------------------------------#
 #      test configuration         #
