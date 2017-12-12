@@ -1996,8 +1996,9 @@ function ConvertTo-Principal
             we use a verbose message to indicate we could not find the principal this way the rest
             of the Configuration can continue
         #>
-        Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
         #New-InvalidArgumentException -ArgumentName $MemberName -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
+        Write-Verbose -Message "$MemberName"
+        Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $MemberName)
     }
 
     return $principal
@@ -2043,12 +2044,24 @@ function Resolve-SidToPrincipal
     {
         if (Test-IsLocalMachine -Scope $Scope)
         {
+            <# 
+                Instead of throwing an error and causing the Configuration to stop instead of succeeding or failing
+                we use a verbose message to indicate we could not find the principal this way the rest
+                of the Configuration can continue
+            #>
             # New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, or MembersToExclude' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
+            Write-Verbose -Message "Members, MembersToInclude, or MembersToExclude"
             Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
         }
         else
         {
+            <# 
+                Instead of throwing an error and causing the Configuration to stop instead of succeeding or failing
+                we use a verbose message to indicate we could not find the principal this way the rest
+                of the Configuration can continue
+            #>
             # New-InvalidArgumentException -ArgumentName 'Members, MembersToInclude, MembersToExclude, or Credential' -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
+            Write-Verbose -Message "Members, MembersToInclude, MembersToExclude, or Credential"
             Write-Verbose -Message ($script:localizedData.CouldNotFindPrincipal -f $Sid.Value)
         }
     }
