@@ -613,7 +613,7 @@ function Set-TargetResource
             This is deliberately not in the finally block because we want to leave the downloaded
             file on disk if an error occurred as a debugging aid for the user.
         #>
-        Remove-Item -Path $downloadedFileName
+        Remove-Item -Path $downloadedFileName -ErrorAction SilentlyContinue
     }
 
     $operationMessageString = $script:localizedData.PackageUninstalled
