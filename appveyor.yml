@@ -6,13 +6,16 @@ image:
     - Visual Studio 2017
     - Visual Studio 2015
 install:
+    - docker images
+    - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
+    - docker start -i TestNanoServer
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
         Get-ComputerInfo -Verbose
         $moduleName = 'xPSDesiredStateConfiguration'
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
         Invoke-AppveyorInstallTask
-
+    - docker stop TestNanoServer
 #---------------------------------#
 #      build configuration        #
 #---------------------------------#
