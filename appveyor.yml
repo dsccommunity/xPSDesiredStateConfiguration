@@ -7,14 +7,13 @@ image:
 install:
     - docker images
     - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
-    - docker start -i TestNanoServer
     - docker git clone https://github.com/PowerShell/DscResource.Tests
     - docker PowerShell
     - docker Get-ComputerInfo -Verbose
-    - ps: |
-        $moduleName = 'xPSDesiredStateConfiguration'
-        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-        Invoke-AppveyorInstallTask
+    - docker $moduleName = 'xPSDesiredStateConfiguration'
+    - docker Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+    - docker Invoke-AppveyorInstallTask
+    - docker start -i TestNanoServer
     - docker stop TestNanoServer
 
 #---------------------------------#
