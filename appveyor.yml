@@ -8,7 +8,7 @@ install:
     - docker images
     - docker create -t --name testnanoserver -h NanoServer -i microsoft/nanoserver
     - docker ps -a
-    - docker cp testnanoserver . /Install
+    - docker cp testnanoserver:/Install .
     - docker start -i testnanoserver
     - docker run testnanoserver powershell -noprofile -command "get-computerInfo -verbose"
     #- docker start -i TestNanoServer
