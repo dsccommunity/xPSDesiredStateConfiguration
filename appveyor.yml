@@ -8,6 +8,7 @@ install:
     - docker images
     - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
     - docker ps -a
+    - docker run powershell -noprofile -command "get-computerInfo -verbose"
     #- docker start -i TestNanoServer
     - docker exec -i -t TestNanoServer git clone https://github.com/PowerShell/DscResource.Tests
     - docker exec -i -t TestNanoServer PowerShell
@@ -21,9 +22,9 @@ install:
 #      build configuration        #
 #---------------------------------#
 
-# build: false
-build_script:
-  - docker pull microsoft/nanoserver
+build: false
+# build_script:
+  
 
 #---------------------------------#
 #      test configuration         #
