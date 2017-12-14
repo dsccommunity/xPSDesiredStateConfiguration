@@ -6,11 +6,12 @@ image:
     - Visual Studio 2017
 install:
     - docker images
-    - docker run --name testnanoserver microsoft/nanoserver
+    #- docker run --name testnanoserver microsoft/nanoserver
+    - docker create -t --name testnanoserver -h NanoServer -i microsoft/nanoserver
     - docker ps -a
     - docker cp C:\projects\xpsdesiredstateconfiguration\. testnanoserver:/Install
     - docker exec -it testnanoserver powershell -noprofile -command "get-computerInfo -verbose"
-    #- docker start -i TestNanoServer
+    # docker start -i testnanoserver
     - docker exec -i -t testnanoserver git clone https://github.com/PowerShell/DscResource.Tests
     - docker exec -i -t testnanoserver PowerShell
     - docker exec -i -t testnanoserver Get-ComputerInfo -Verbose
