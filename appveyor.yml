@@ -6,7 +6,7 @@ image:
     - Visual Studio 2017
 install:
     - docker images
-    - docker run -d -p 80 --name testnanoserver microsoft/nanoserver
+    - docker run --name testnanoserver microsoft/nanoserver
     - docker ps -a
     - docker cp C:\projects\xpsdesiredstateconfiguration\. testnanoserver:/Install
     - docker start -i testnanoserver
