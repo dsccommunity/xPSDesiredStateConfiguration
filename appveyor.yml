@@ -6,9 +6,9 @@ image:
     - Visual Studio 2017
 install:
     - docker images
-    - docker create -t --name TestNanoServer -h NanoServer -i microsoft/nanoserver
+    - docker create -t --name testnanoserver -h NanoServer -i microsoft/nanoserver
     - docker ps -a
-    - docker run TestNanoServer powershell -noprofile -command "get-computerInfo -verbose"
+    - docker run testnanoserver powershell -noprofile -command "get-computerInfo -verbose"
     #- docker start -i TestNanoServer
     - docker exec -i -t TestNanoServer git clone https://github.com/PowerShell/DscResource.Tests
     - docker exec -i -t TestNanoServer PowerShell
