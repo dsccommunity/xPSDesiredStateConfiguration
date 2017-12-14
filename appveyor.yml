@@ -10,15 +10,15 @@ install:
     - docker ps -a
     - docker cp C:\projects\xpsdesiredstateconfiguration\. testnanoserver:/Install
     - docker start -i testnanoserver
-    - docker exec -it powershell -noprofile -command "get-computerInfo -verbose"
+    - docker exec -it testnanoserver powershell -noprofile -command "get-computerInfo -verbose"
     #- docker start -i TestNanoServer
-    - docker exec -i -t TestNanoServer git clone https://github.com/PowerShell/DscResource.Tests
-    - docker exec -i -t TestNanoServer PowerShell
-    - docker exec -i -t TestNanoServer Get-ComputerInfo -Verbose
-    - docker exec -i -t TestNanoServer $moduleName = 'xPSDesiredStateConfiguration'
-    - docker exec -i -t TestNanoServer Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-    - docker exec -i -t TestNanoServer Invoke-AppveyorInstallTask
-    - docker stop TestNanoServer
+    - docker exec -i -t testnanoserver git clone https://github.com/PowerShell/DscResource.Tests
+    - docker exec -i -t testnanoserver PowerShell
+    - docker exec -i -t testnanoserver Get-ComputerInfo -Verbose
+    - docker exec -i -t testnanoserver $moduleName = 'xPSDesiredStateConfiguration'
+    - docker exec -i -t testnanoserver Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+    - docker exec -i -t testnanoserver Invoke-AppveyorInstallTask
+    - docker stop testnanoserver
 
 #---------------------------------#
 #      build configuration        #
