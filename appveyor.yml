@@ -10,7 +10,7 @@ install:
     - docker ps -a
     - docker cp C:\projects\xpsdesiredstateconfiguration\. testnanoserver:/Install
     - docker start -i testnanoserver
-    - docker run testnanoserver powershell -noprofile -command "get-computerInfo -verbose"
+    - docker powershell -noprofile -command "get-computerInfo -verbose"
     #- docker start -i TestNanoServer
     - docker exec -i -t TestNanoServer git clone https://github.com/PowerShell/DscResource.Tests
     - docker exec -i -t TestNanoServer PowerShell
