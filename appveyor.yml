@@ -6,9 +6,9 @@ image:
     - Visual Studio 2017
 install:
     - docker images
-    - docker create -t --name testnanoserver -h NanoServer -i microsoft/nanoserver
+    - docker run -d -p 80 --name testnanoserver microsoft/nanoserver
     - docker ps -a
-    - docker cp testnanoserver:/Install C:\projects\xpsdesiredstateconfiguration\.
+    - docker cp C:\projects\xpsdesiredstateconfiguration\. testnanoserver:/Install
     - docker start -i testnanoserver
     - docker run testnanoserver powershell -noprofile -command "get-computerInfo -verbose"
     #- docker start -i TestNanoServer
