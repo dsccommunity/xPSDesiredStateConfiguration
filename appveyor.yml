@@ -10,7 +10,8 @@ environment:
 image:
     - Visual Studio 2017
 install:
-    - docker build .
+    - docker pull microsoft/nanoserver
+    - docker build -t testnanoserver .
     - docker images
 #---------------------------------#
 #      build configuration        #
