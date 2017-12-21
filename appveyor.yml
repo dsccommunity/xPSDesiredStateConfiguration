@@ -10,7 +10,7 @@ environment:
 image:
     - Visual Studio 2017
 install:
-    - docker build
+    - docker build .
     - docker images
 #---------------------------------#
 #      build configuration        #
