@@ -10,7 +10,7 @@ environment:
 image:
     - Visual Studio 2017
 install:
-    - docker build testnano
+    - docker build
     - docker images
 #---------------------------------#
 #      build configuration        #
