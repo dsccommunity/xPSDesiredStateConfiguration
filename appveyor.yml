@@ -14,9 +14,10 @@ install:
     - docker pull microsoft/nanoserver
     - docker build -t testnanoserver .
     - docker images
-    - ps: $moduleName = 'xPSDesiredStateConfiguration'
-          Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-          Invoke-AppveyorInstallTask
+    - ps: |
+        $moduleName = 'xPSDesiredStateConfiguration'
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Invoke-AppveyorInstallTask
 
 #---------------------------------#
 #      build configuration        #
