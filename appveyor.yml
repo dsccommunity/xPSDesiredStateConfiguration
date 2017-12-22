@@ -1,6 +1,6 @@
-#---------------------------------#
-#      environment configuration  #
-#---------------------------------#
+#----------------------------------#
+#      environment configuration   #
+#----------------------------------#
 version: 6.0.{build}.0
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
