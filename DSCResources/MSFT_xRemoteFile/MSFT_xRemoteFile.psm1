@@ -212,6 +212,7 @@ function Set-TargetResource
     # Invoke web request
     try
     {
+        $ProgressPreference = 'SilentlyContinue'
         Write-Verbose -Message $($LocalizedData.DownloadingURI `
             -f ${DestinationPath},${URI})
         Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -outFile $DestinationPath

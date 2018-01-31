@@ -371,6 +371,8 @@ These parameters will be the same for each Windows optional feature in the set. 
     * Merged with in-box Registry
     * Fixed registry key and value removal
     * Added unit tests
+* xRemoteFile:
+    * Remove progress bar for file download
 * xService:
     * Added descriptions to MOF file.
     * Added additional details to parameters in Readme.md in a format that can be generated from the MOF.
