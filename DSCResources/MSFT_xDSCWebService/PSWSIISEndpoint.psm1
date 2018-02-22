@@ -30,7 +30,8 @@ function Initialize-Endpoint
         $dependentMUIFiles,
         $psFiles,
         $removeSiteFiles = $false,
-        $certificateThumbPrint)
+        $certificateThumbPrint,
+        $enable32BitAppOnWin64)
     
     if (!(Test-Path $cfgfile))
     {        
@@ -89,7 +90,7 @@ function Initialize-Endpoint
     
     Copy-Files -path $path -cfgfile $cfgfile -svc $svc -mof $mof -dispatch $dispatch -asax $asax -dependentBinaries $dependentBinaries -language $language -dependentMUIFiles $dependentMUIFiles -psFiles $psFiles
    
-    New-IISWebSite -site $site -path $path -port $port -app $app -apppool $appPool -applicationPoolIdentityType $applicationPoolIdentityType -certificateThumbPrint $certificateThumbPrint
+    New-IISWebSite -site $site -path $path -port $port -app $app -apppool $appPool -applicationPoolIdentityType $applicationPoolIdentityType -certificateThumbPrint $certificateThumbPrint -enable32BitAppOnWin64 $enable32BitAppOnWin64
 }
 
 # Validate if IIS and all required dependencies are installed on the target machine
@@ -299,7 +300,8 @@ function New-IISWebSite
         $app,
         $appPool,        
         $applicationPoolIdentityType,
-        $certificateThumbPrint)    
+        $certificateThumbPrint,
+        $enable32BitAppOnWin64)    
     
     $siteID = New-SiteID
     
@@ -327,7 +329,7 @@ function New-IISWebSite
 
     $appPoolItem = Get-Item IIS:\AppPools\$appPool
     $appPoolItem.managedRuntimeVersion = "v4.0"
-    $appPoolItem.enable32BitAppOnWin64 = $true
+    $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
     $appPoolItem.processModel.identityType = $appPoolIdentity
     $appPoolItem | Set-Item
     
@@ -463,7 +465,10 @@ function New-PSWSEndpoint
         [switch] $EnablePSWSETW,
         
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
-        [String] $certificateThumbPrint = "AllowUnencryptedTraffic")
+        [String] $certificateThumbPrint = "AllowUnencryptedTraffic",
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [boolean]$Enable32BitAppOnWin64 = $false)
     
     $script:wevtutil = "$env:windir\system32\Wevtutil.exe"
        
@@ -482,7 +487,8 @@ function New-PSWSEndpoint
                         -applicationPoolIdentityType $applicationPoolIdentityType -svc $svc -mof $mof `
                         -dispatch $dispatch -asax $asax -dependentBinaries $dependentBinaries `
                         -language $language -dependentMUIFiles $dependentMUIFiles -psFiles $psFiles `
-                        -removeSiteFiles $removeSiteFiles -certificateThumbPrint $certificateThumbPrint
+                        -removeSiteFiles $removeSiteFiles -certificateThumbPrint $certificateThumbPrint `
+                        -enable32BitAppOnWin64 $Enable32BitAppOnWin64
     
     if ($EnableFirewallException -eq $true)
     {

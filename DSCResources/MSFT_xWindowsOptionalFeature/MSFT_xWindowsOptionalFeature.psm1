@@ -127,11 +127,11 @@ function Set-TargetResource
 
     Assert-ResourcePrerequisitesValid
 
-    switch ($LogLevel)
+    $dismLogLevel = switch ($LogLevel)
     {
-        'ErrorsOnly' { $dismLogLevel = 'Errors' }
-        'ErrorsAndWarning' { $dismLogLevel = 'Warnings' }
-        'ErrorsAndWarningAndInformation' { $dismLogLevel = 'WarningsInfo' }
+        'ErrorsOnly' {  'Errors'; break }
+        'ErrorsAndWarning' { 'Warnings'; break }
+        'ErrorsAndWarningAndInformation' { 'WarningsInfo'; break }
     }
 
     # Construct splatting hashtable for DISM cmdlets
@@ -344,7 +344,7 @@ function Convert-FeatureStateToEnsure
         target machine.
 
         Current prerequisites are:
-            - Must be running either a Windows client or at least Windows Server 2012
+            - Must be running either a Windows client, at least Windows Server 2012, or Nano Server
             - Must be running as an administrator
             - The DISM PowerShell module must be available for import
 #>

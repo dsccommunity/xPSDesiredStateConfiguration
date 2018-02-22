@@ -21,7 +21,8 @@ configuration Sample_xDscWebService
         {
             Ensure                  = "Absent"
             EndpointName            = "PSDSCPullServer"
-            CertificateThumbPrint   = "notNeededForRemoval"                              
+            CertificateThumbPrint   = "notNeededForRemoval"
+            UseSecurityBestPractices = $false
         }
     }
  }

@@ -1,4 +1,4 @@
-Import-Module -Name "$PSScriptRoot\..\CommonTestHelper.psm1"
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -22,6 +22,72 @@ try
                 $script:fakeDisabledFeature = [PSCustomObject] @{
                     Name = $testFeatureName
                     State = 'Disabled'
+                }
+            }
+
+            <#
+                This context block needs to stay at the top because of a bug in Pester on Nano server.
+                
+                Assert-ResourcePrerequisitesValid is mocked in most of the other contexts blocks.
+                This causes errors to throw from the script blocks in this context since this function does
+                not take any parameters, but Pester tries to pipe something into it.
+
+                This bug does not occur on full server machines.
+            #>
+            Context 'Assert-ResourcePrerequisitesValid' {
+                $fakeWin32OSObjects = @{
+                    '7' = [PSCustomObject] @{
+                        ProductType = 1
+                        BuildNumber = 7601
+                    }
+                    'Server2008R2' = [PSCustomObject] @{
+                        ProductType = 2
+                        BuildNumber = 7601
+                    }
+                    'Server2012' = [PSCustomObject] @{
+                        ProductType = 2
+                        BuildNumber = 9200
+                    }
+                    '8.1' = [PSCustomObject] @{
+                        ProductType = 1
+                        BuildNumber = 9600
+                    }
+                    'Server2012R2' = [PSCustomObject] @{
+                        ProductType = 2
+                        BuildNumber = 9600
+                    }
+                }
+                
+                It 'Should throw when the DISM module is not available' {
+                    Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { Write-Error 'Cannot find module' }
+                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.DismNotAvailable
+                }
+
+                Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { }
+
+                It 'Should throw when operating system is Server 2008 R2' {
+                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2008R2'] }
+                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.NotSupportedSku
+                }
+
+                It 'Should throw when operating system is Server 2012' {
+                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012'] }
+                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.NotSupportedSku
+                }
+
+                It 'Should not throw when operating system is Windows 7' {
+                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['7'] }
+                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
+                }
+
+                It 'Should not throw when operating system is Windows 8.1' {
+                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['8.1'] }
+                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
+                }
+
+                It 'Should not throw when operating system is Server 2012 R2' {
+                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012R2'] }
+                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
                 }
             }
 
@@ -210,63 +276,6 @@ try
                     {
                         $WarningPreference = $originalWarningPreference
                     }
-                }
-            }
-
-            Context 'Assert-ResourcePrerequisitesValid' {
-                $fakeWin32OSObjects = @{
-                    '7' = [PSCustomObject] @{
-                        ProductType = 1
-                        BuildNumber = 7601
-                    }
-                    'Server2008R2' = [PSCustomObject] @{
-                        ProductType = 2
-                        BuildNumber = 7601
-                    }
-                    'Server2012' = [PSCustomObject] @{
-                        ProductType = 2
-                        BuildNumber = 9200
-                    }
-                    '8.1' = [PSCustomObject] @{
-                        ProductType = 1
-                        BuildNumber = 9600
-                    }
-                    'Server2012R2' = [PSCustomObject] @{
-                        ProductType = 2
-                        BuildNumber = 9600
-                    }
-                }
-                
-                It 'Should throw when the DISM module is not available' {
-                    Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { Write-Error 'Cannot find module' }
-                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.DismNotAvailable
-                }
-
-                Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { }
-
-                It 'Should throw when operating system is Server 2008 R2' {
-                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2008R2'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.NotSupportedSku
-                }
-
-                It 'Should throw when operating system is Server 2012' {
-                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.NotSupportedSku
-                }
-
-                It 'Should not throw when operating system is Windows 7' {
-                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['7'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
-                }
-
-                It 'Should not throw when operating system is Windows 8.1' {
-                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['8.1'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
-                }
-
-                It 'Should not throw when operating system is Server 2012 R2' {
-                    Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012R2'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
                 }
             }
 

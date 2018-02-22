@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '3.13.0.0'
+ModuleVersion = '8.0.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,22 +52,8 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* Converted appveyor.yml to install Pester from PSGallery instead of from Chocolatey.
-* Updated appveyor.yml to use the default image.
-* Merged xPackage with in-box Package resource and added tests.
-* xPackage: Re-implemented parameters for installation check from registry key value.
-* xGroup:
-    * Fixed Verbose output in Get-MembersAsPrincipals function.
-    * Fixed bug when credential parameter passed does not contain local or domain context.
-    * Fixed logic bug in MembersToInclude and MembersToExclude.
-    * Fixed bug when trying to include the built-in Administrator in Members.
-    * Fixed bug where Test-TargetResource would check for members when none specified.
-    * Fix bug in Test-TargetResourceOnFullSKU function when group being set to a single member.
-    * Fix bug in Set-TargetResourceOnFullSKU function when group being set to a single member.
-    * Fix bugs in Assert-GroupNameValid to throw correct exception.
-* xService
-    * Updated xService resource to allow empty string for Description parameter.
-* Merged xProcess with in-box Process resource and added tests.
+        ReleaseNotes = '* xDSCWebService
+    * BREAKING CHANGE: The Pull Server will now run in a 64 bit IIS process by default. Enable32BitAppOnWin64 needs to be set to TRUE for the Pull Server to run in a 32 bit process.
 
 '
 
@@ -75,6 +61,17 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
