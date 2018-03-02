@@ -59,6 +59,10 @@ function Get-TargetResource
                     {
                         $databasePath = $Matches[0]
                     }
+                    else 
+                    {
+                        $databasePath = $connectionString
+                    }
                 }
             }
 
@@ -152,6 +156,12 @@ function Set-TargetResource
 
         # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
         [boolean]$AcceptSelfSignedCertificates = $true,
+        
+       # Required Field when user want to enable DSC to use SQL server as backend DB
+       [boolean]$SqlProvider = $false,
+
+       # User is required to provide the SQL Connection String with the ServerProvider , ServerName , UserID , and Passwords fields  to enable DSC to use SQL server as backend DB
+       [string]$SqlConnectionString,
 
         # Pull Server is created with the most secure practices
         [Parameter(Mandatory)]
@@ -247,17 +257,32 @@ function Set-TargetResource
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "windows"
-        
+    
     if ($IsBlue)
     {
-        Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+        if($SqlProvider)
+        {
+             Write-Verbose "Set values into the web.config that define the SQL Connection "
+             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+        }
+        else
+        {
+            Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+        }
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
     {
-        if($isDownlevelOfBlue)
+        if($SqlProvider)
+        {
+             Write-Verbose "Set values into the web.config that define the SQL Connection "
+             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+        }
+        elseif($isDownlevelOfBlue)
         {
             Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
             $repository = Join-Path "$DatabasePath" "Devices.mdb"
@@ -376,6 +401,12 @@ function Test-TargetResource
         # Are self-signed certs being accepted for client auth.
         [boolean]$AcceptSelfSignedCertificates,
 
+        # Required Field when user want to enable DSC to use SQL server as backend DB
+        [boolean]$SqlProvider = $false,
+
+        # User is required to provide the SQL Connection String with the ServerProvider , ServerName , UserID , and Passwords fields  to enable DSC to use SQL server as backend DB
+        [string]$SqlConnectionString,
+
         # Pull Server is created with the most secure practices
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -459,6 +490,11 @@ function Test-TargetResource
                     $expectedConnectionString = [System.String]::Empty
                 }
             }
+            if($SqlProvider)
+            {
+                $expectedConnectionString = $SqlConnectionString
+            }
+
             if (([System.String]::IsNullOrEmpty($expectedConnectionString)))
             {
                 $DesiredConfigurationMatch = $false
