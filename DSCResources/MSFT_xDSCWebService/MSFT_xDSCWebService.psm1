@@ -282,22 +282,25 @@ function Set-TargetResource
              PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
              PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
         }
-        elseif($isDownlevelOfBlue)
-        {
-            Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
-            $repository = Join-Path "$DatabasePath" "Devices.mdb"
-            Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
-
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
-        }
         else
         {
-            Write-Verbose "Set values into the web.config that define the repository later than BLUE OS"
-            Write-Verbose "Only ESENT is supported on Windows Server 2016"
+            if($isDownlevelOfBlue)
+            {
+                Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
+                $repository = Join-Path "$DatabasePath" "Devices.mdb"
+                Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
 
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
+            }
+            else
+            {
+                Write-Verbose "Set values into the web.config that define the repository later than BLUE OS"
+                Write-Verbose "Only ESENT is supported on Windows Server 2016"
+
+                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+            }
         }
     }
 
