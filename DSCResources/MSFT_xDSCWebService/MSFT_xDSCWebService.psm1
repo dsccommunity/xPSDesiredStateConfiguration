@@ -258,50 +258,44 @@ function Set-TargetResource
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "windows"
     
-    if ($IsBlue)
+    if($SqlProvider)
     {
-        if($SqlProvider)
-        {
-             Write-Verbose "Set values into the web.config that define the SQL Connection "
-             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
-        }
-        else
-        {
-            Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
-        }
+            Write-Verbose "Set values into the web.config that define the SQL Connection "
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+            if ($IsBlue)
+            {       
+                Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
+            }
+    }
+    elseif ($IsBlue)
+    {
+        Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+     
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
     {
-        if($SqlProvider)
+       if($isDownlevelOfBlue)
         {
-             Write-Verbose "Set values into the web.config that define the SQL Connection "
-             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+            Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
+            $repository = Join-Path "$DatabasePath" "Devices.mdb"
+            Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
+
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
         }
         else
         {
-            if($isDownlevelOfBlue)
-            {
-                Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
-                $repository = Join-Path "$DatabasePath" "Devices.mdb"
-                Copy-Item "$pathPullServer\Devices.mdb" $repository -Force
+            Write-Verbose "Set values into the web.config that define the repository later than BLUE OS"
+            Write-Verbose "Only ESENT is supported on Windows Server 2016"
 
-                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
-            }
-            else
-            {
-                Write-Verbose "Set values into the web.config that define the repository later than BLUE OS"
-                Write-Verbose "Only ESENT is supported on Windows Server 2016"
-
-                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-                PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
-            }
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
         }
+        
     }
 
     Write-Verbose "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
