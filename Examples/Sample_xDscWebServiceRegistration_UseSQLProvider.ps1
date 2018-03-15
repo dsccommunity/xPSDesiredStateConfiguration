@@ -25,7 +25,7 @@
 
 # ======================================== Arguments ======================================== #
 
-$thumbprint = (New-SelfSignedCertificate -Subject "PullServerCert").Thumbprint
+$thumbprint = (New-SelfSignedCertificate -Subject $env:COMPUTERNAME).Thumbprint
 
 $registrationkey = [guid]::NewGuid()
 
@@ -111,7 +111,7 @@ configuration Sample_xDscWebServiceRegistration_UseSQLProvider
 
             SqlProvider = $true 
 
-            SqlConnectionString = "Provider=SQLNCLI11;Server=(local)\SQLExpress;User ID=SA;Password=Password;Initial Catalog=master;"
+            SqlConnectionString = "Provider=SQLNCLI11;Data Source=(local)\SQLExpress;User ID=SA;Password=Password12!;Initial Catalog=master;"
 
         }
 
