@@ -93,8 +93,7 @@ configuration Sample_xDscWebServiceRegistration_UseSQLProvider
 
             PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCPullServer"
 
-            CertificateThumbPrint   = $certificateThumbPrint
-            #CertificateThumbPrint    = "AllowUnencryptedTraffic"           
+            CertificateThumbPrint   = $certificateThumbPrint             
 
             ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
 
