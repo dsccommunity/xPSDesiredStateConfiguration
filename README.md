@@ -636,6 +636,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* xDSCWebService: Enable SQL provider configuration
+
 ### 8.0.0.0
 
 * xDSCWebService
