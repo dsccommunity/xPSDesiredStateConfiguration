@@ -253,7 +253,7 @@ function Copy-Files
     $null = New-Item -path $binFolderPath  -itemType "directory" -Force
     Copy-Item $dependentBinaries $binFolderPath -Force
 
-    if ($language)
+    <#if ($language)
     {
         $muiPath = Join-Path $binFolderPath $language
 
@@ -261,8 +261,8 @@ function Copy-Files
         {
             $null = New-Item -ItemType container $muiPath        
         }
-        #Copy-Item $dependentMUIFiles $muiPath -Force
-    }
+        Copy-Item $dependentMUIFiles $muiPath -Force
+    }#>
 
     foreach ($psFile in $psFiles)
     {
