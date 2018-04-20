@@ -636,6 +636,10 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 8.2.0.0
+
+* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
+
 ### 8.1.0.0
 
 * xDSCWebService: Enable SQL provider configuration
