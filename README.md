@@ -636,8 +636,6 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
-### 8.2.0.1
-
 * README.md: Fixed typo
 
 ### 8.2.0.0
