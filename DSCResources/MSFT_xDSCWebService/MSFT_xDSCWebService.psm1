@@ -25,7 +25,10 @@ function Get-TargetResource
 
         # Exceptions of security best practices
         [ValidateSet("SecureTLSProtocols")]
-        [string[]] $DisableSecurityBestPractices
+        [string[]] $DisableSecurityBestPractices,
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [bool]$Enable32BitAppOnWin64 = $false
     )
 
     $webSite = Get-Website -Name $EndpointName
@@ -56,6 +59,10 @@ function Get-TargetResource
                     {
                         $databasePath = $Matches[0]
                     }
+                    else 
+                    {
+                        $databasePath = $connectionString
+                    }
                 }
             }
 
@@ -75,19 +82,12 @@ function Get-TargetResource
 
             $webBinding = Get-WebBinding -Name $EndpointName
 
-            # This is the 64 bit module
-            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule" 
+            $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"            
+            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName $iisSelfSignedModuleName
             if($certNativeModule)
             {
                 $AcceptSelfSignedCertificates = $true
-            }           
-
-            # This is the 32 bit module
-            $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName "IISSelfSignedCertModule(32bit)" 
-            if($certNativeModule)
-            {
-                $AcceptSelfSignedCertificates = $true
-            }           
+            }
         }
     else
     {
@@ -109,6 +109,7 @@ function Get-TargetResource
         AcceptSelfSignedCertificates    = $AcceptSelfSignedCertificates
         UseSecurityBestPractices        = $UseSecurityBestPractices
         DisableSecurityBestPractices    = $DisableSecurityBestPractices
+        Enable32BitAppOnWin64           = $Enable32BitAppOnWin64
     }
 }
 
@@ -155,6 +156,12 @@ function Set-TargetResource
 
         # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
         [boolean]$AcceptSelfSignedCertificates = $true,
+        
+       # Required Field when user want to enable DSC to use SQL server as backend DB
+       [boolean]$SqlProvider = $false,
+
+       # User is required to provide the SQL Connection String with the ServerProvider , ServerName , UserID , and Passwords fields  to enable DSC to use SQL server as backend DB
+       [string]$SqlConnectionString,
 
         # Pull Server is created with the most secure practices
         [Parameter(Mandatory)]
@@ -163,7 +170,10 @@ function Set-TargetResource
 
         # Exceptions of security best practices
         [ValidateSet("SecureTLSProtocols")]
-        [string[]] $DisableSecurityBestPractices
+        [string[]] $DisableSecurityBestPractices,
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [boolean]$Enable32BitAppOnWin64 = $false
     )
 
     # Check parameter values
@@ -241,22 +251,35 @@ function Set-TargetResource
                      -language $language `
                      -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
                      -certificateThumbPrint $CertificateThumbPrint `
-                     -EnableFirewallException $true -Verbose
+                     -EnableFirewallException $true `
+                     -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
+                     -Verbose
 
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "windows"
-        
-    if ($IsBlue)
+    
+    if($SqlProvider)
+    {
+            Write-Verbose "Set values into the web.config that define the SQL Connection "
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+            if ($IsBlue)
+            {       
+                Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
+            }
+    }
+    elseif ($IsBlue)
     {
         Write-Verbose "Set values into the web.config that define the repository for BLUE OS"
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+     
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
     {
-        if($isDownlevelOfBlue)
+       if($isDownlevelOfBlue)
         {
             Write-Verbose "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
             $repository = Join-Path "$DatabasePath" "Devices.mdb"
@@ -273,6 +296,7 @@ function Set-TargetResource
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
         }
+        
     }
 
     Write-Verbose "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
@@ -292,19 +316,35 @@ function Set-TargetResource
 
     PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "RegistrationKeyPath" -value $RegistrationKeyPath
 
+    $iisSelfSignedModuleAssemblyName = "IISSelfSignedCertModule.dll"
+    $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
     if($AcceptSelfSignedCertificates)
-    {
-        Copy-Item "$pathPullServer\IISSelfSignedCertModule.dll" $env:windir\System32\inetsrv -Force
-        Copy-Item "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer\IISSelfSignedCertModule.dll" $env:windir\SysWOW64\inetsrv -Force
+    {        
+        $preConditionBitnessArgumentFor32BitInstall=""
+        if ($Enable32BitAppOnWin64 -eq $true)
+        {
+            Write-Verbose "Enabling Pull Server to run in a 32 bit process"
+            $sourceFilePath = Join-Path "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
+            $destinationFolderPath = "$env:windir\SysWOW64\inetsrv"
+            Copy-Item $sourceFilePath $destinationFolderPath -Force
+            $preConditionBitnessArgumentFor32BitInstall = "/preCondition:bitness32"
+        }
+        else {
+            Write-Verbose "Enabling Pull Server to run in a 64 bit process"
+        }
+        $sourceFilePath = Join-Path "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" $iisSelfSignedModuleAssemblyName
+        $destinationFolderPath = "$env:windir\System32\inetsrv"
+        $destinationFilePath = Join-Path $destinationFolderPath $iisSelfSignedModuleAssemblyName
+        Copy-Item $sourceFilePath $destinationFolderPath -Force
 
-        & $script:appCmd install module /name:"IISSelfSignedCertModule(32bit)" /image:$env:windir\SysWOW64\inetsrv\IISSelfSignedCertModule.dll /add:false /lock:false
-        & $script:appCmd add module /name:"IISSelfSignedCertModule(32bit)"  /app.name:"PSDSCPullServer/"
+        & $script:appCmd install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false
+        & $script:appCmd add module /name:$iisSelfSignedModuleName  /app.name:"PSDSCPullServer/" $preConditionBitnessArgumentFor32BitInstall
     }
     else
     {
         if($AcceptSelfSignedCertificates -and ($AcceptSelfSignedCertificates -eq $false))
         {
-            & $script:appCmd delete module /name:"IISSelfSignedCertModule(32bit)"  /app.name:"PSDSCPullServer/"
+            & $script:appCmd delete module /name:$iisSelfSignedModuleName  /app.name:"PSDSCPullServer/"
         }
     }
 
@@ -359,6 +399,12 @@ function Test-TargetResource
         # Are self-signed certs being accepted for client auth.
         [boolean]$AcceptSelfSignedCertificates,
 
+        # Required Field when user want to enable DSC to use SQL server as backend DB
+        [boolean]$SqlProvider = $false,
+
+        # User is required to provide the SQL Connection String with the ServerProvider , ServerName , UserID , and Passwords fields  to enable DSC to use SQL server as backend DB
+        [string]$SqlConnectionString,
+
         # Pull Server is created with the most secure practices
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -366,7 +412,10 @@ function Test-TargetResource
 
         # Exceptions of security best practices
         [ValidateSet("SecureTLSProtocols")]
-        [string[]] $DisableSecurityBestPractices
+        [string[]] $DisableSecurityBestPractices,
+
+        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
+        [bool]$Enable32BitAppOnWin64 = $false
     )
 
     $desiredConfigurationMatch = $true;
@@ -439,6 +488,11 @@ function Test-TargetResource
                     $expectedConnectionString = [System.String]::Empty
                 }
             }
+            if($SqlProvider)
+            {
+                $expectedConnectionString = $SqlConnectionString
+            }
+
             if (([System.String]::IsNullOrEmpty($expectedConnectionString)))
             {
                 $DesiredConfigurationMatch = $false

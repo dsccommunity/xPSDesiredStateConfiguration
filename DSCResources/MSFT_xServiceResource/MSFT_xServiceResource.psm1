@@ -456,6 +456,10 @@ function Test-TargetResource
     if ($serviceResource.Ensure -eq 'Absent')
     {
         Write-Verbose -Message ($script:localizedData.ServiceDoesNotExist -f $Name)
+        if($StartupType -eq 'Disabled')
+        {
+            return $true
+        }
         return ($Ensure -eq 'Absent')
     }
     else

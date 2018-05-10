@@ -107,7 +107,7 @@ function Get-TargetResource
                 $actualValueType = Get-RegistryKeyValueType -RegistryKey $registryKey -RegistryKeyValueName $ValueName
 
                 # If the registry key value exists, convert it to a readable string
-                $registryKeyValueAsReadableString = ConvertTo-ReadableString -RegistryKeyValue $registryKeyValue -RegistryKeyValueType $actualValueType
+                $registryKeyValueAsReadableString = @() + (ConvertTo-ReadableString -RegistryKeyValue $registryKeyValue -RegistryKeyValueType $actualValueType)
 
                 $registryResource['Ensure'] = 'Present'
                 $registryResource['ValueType'] = $actualValueType
@@ -994,8 +994,10 @@ function New-RegistryKey
         $RegistryKeyPath
     )
 
-    $parentRegistryKeyPath = Split-Path -Path $RegistryKeyPath -Parent
-    $newRegistryKeyName = Split-Path -Path $RegistryKeyPath -Leaf
+    # registry key names can contain forward slashes, so we can't use Split-Path here (it will split on /)
+    $lastSep = $RegistryKeyPath.LastIndexOf('\')
+    $parentRegistryKeyPath = $RegistryKeyPath.Substring(0, $lastSep)
+    $newRegistryKeyName = $RegistryKeyPath.Substring($lastSep + 1)
 
     $parentRegistryKey = Get-RegistryKey -RegistryKeyPath $parentRegistryKeyPath -WriteAccessAllowed
 

@@ -6,9 +6,9 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -TestType 'Integration'
 try
 {
-    Describe "xPackage Integration Tests" {
+    Describe 'xPackage Integration Tests' {
         BeforeAll {
-            Import-Module "$PSScriptRoot\..\Unit\MSFT_xPackageResource.TestHelper.psm1" -Force
+            Import-Module "$PSScriptRoot\..\MSFT_xPackageResource.TestHelper.psm1" -Force
 
             $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xPackageResourceTests'
 
@@ -27,11 +27,11 @@ try
 
             New-TestMsi -DestinationPath $script:msiLocation | Out-Null
 
-            Clear-xPackageCache | Out-Null
+            Clear-PackageCache | Out-Null
         }
 
         BeforeEach {
-            Clear-xPackageCache | Out-Null
+            Clear-PackageCache | Out-Null
 
             if (Test-PackageInstalledByName -Name $script:packageName)
             {
@@ -51,7 +51,7 @@ try
                 Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
             }
 
-            Clear-xPackageCache | Out-Null
+            Clear-PackageCache | Out-Null
 
             if (Test-PackageInstalledByName -Name $script:packageName)
             {
@@ -65,26 +65,29 @@ try
             }
         }
 
-        It "Install a .msi package" {
-            $configurationName = "EnsurePackageIsPresent"
+        It 'Install a .msi package' {
+            $configurationName = 'EnsurePackageIsPresent'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-            $errorPath = Join-Path -Path $TestDrive -ChildPath "StdErrorPath.txt"
-            $outputPath = Join-Path -Path $TestDrive -ChildPath "StdOutputPath.txt"
+            $errorPath = Join-Path -Path $TestDrive -ChildPath 'StdErrorPath.txt'
+            $outputPath = Join-Path -Path $TestDrive -ChildPath 'StdOutputPath.txt'
 
             try
             {
+                $configurationScriptText = @"
                 Configuration $configurationName
                 {
                     Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
                     xPackage Package1
                     {
-                        Path = $script:msiLocation
+                        Path = '$script:msiLocation'
                         Ensure = "Present"
-                        Name = $script:packageName
-                        ProductId = $script:packageId
+                        Name = '$script:packageName'
+                        ProductId = '$script:packageId'
                     }
                 }
+"@
+                .([scriptblock]::Create($configurationScriptText))
 
                 & $configurationName -OutputPath $configurationPath
 

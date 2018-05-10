@@ -5,23 +5,24 @@ dev : [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8y
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
 
-**This module is currently in the process of becoming one of our first experimental High Quality Resource Modules (HQRMs). The plan for updating this module is available [here](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/HighQualityResourceModulePlan.md). Any comments or questions about this process/plan can be submitted under issue [#160](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/160).**
+The high quality, supported version of this module is available as [PSDscResources](https://github.com/PowerShell/PSDscResources).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## Contributing
 
-Please check out common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
+If you would like to contribute to this module, please review the common DSC Resources [contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
 
 ## Resources
 
-* **xArchive** provides a mechanism to unpack archive (.zip) files or removed unpacked archive (.zip) files at a specific path.
+* **xArchive** provides a mechanism to expand an archive (.zip) file to a specific path or remove an expanded archive (.zip) file from a specific path on a target node.
 * **xDscWebService** configures an OData endpoint for DSC service to make a node a DSC pull server.
-* **xEnvironment** configures and manages environment variables.
-* **xGroup** provides a mechanism to manage local groups on the target node.
-* **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
+* **xEnvironment** provides a mechanism to configure and manage environment variables for a machine or process.
 * **xFileUpload** is a composite resource which ensures that local files exist on an SMB share.
+* **xGroup** provides a mechanism to manage local groups on a target node.
+* **xGroupSet** provides a mechanism to configure and manage multiple xGroup resources with common settings but different names.
+* **xMsiPackage** provides a mechanism to install and uninstall .msi packages.
 * **xPackage** manages the installation of .msi and .exe packages.
 * **xRegistry** provides a mechanism to manage registry keys and values on a target node.
 * **xRemoteFile** ensures the presence of remote files on a local machine.
@@ -49,20 +50,35 @@ Resources that work on Nano Server:
 
 ### xArchive
 
-* **Destination**: (Key) Specifies the location where you want to ensure the archive contents are extracted.
-* **Path**: (Key) Specifies the source path of the archive file.
-* **Ensure**: Determines whether to check if the content of the archive exists at the Destination. Set this property to Present to ensure the contents exist. Set it to Absent to ensure they do not exist.
-   - Supported values: Present, Absent
-   - Default Value: Present
-* **Validate**: Uses the Checksum property to determine if the archive matches the signature. If Validate is false, only the file or directory name is used for comparison. If you specify Checksum without Validate, the configuration will fail. If you specify Validate without Checksum, a SHA-256 checksum is used by default.
-   - Supported values: true, false
-   - Default Value: false
-* **Checksum**: Defines the type to use when determining whether two files are the same. If you specify Checksum without Validate, the configuration will fail.
-   - Suported values: CreatedDate, ModifiedDate, SHA-1, SHA-256, SHA-512
-   - Default value: SHA-256
-* **Force**: Setting Force to true with override certain file operations (such as overwriting a file or deleting a directory that is not empty) that would normally result in an error.
-   - Supported values: true, false
-   - Default Value: false
+Provides a mechanism to expand an archive (.zip) file to a specific path or remove an expanded archive (.zip) file from a specific path on a target node.
+
+#### Requirements
+
+* The System.IO.Compression type assembly must be available on the machine.
+* The System.IO.Compression.FileSystem type assembly must be available on the machine.
+
+#### Parameters
+
+* **[String] Path** _(Key)_: The path to the archive file that should be expanded to or removed from the specified destination.
+* **[String] Destination** _(Key)_: The path where the specified archive file should be expanded to or removed from.
+* **[String] Ensure** _(Write)_: Specifies whether or not the expanded content of the archive file at the specified path should exist at the specified destination. To update the specified destination to have the expanded content of the archive file at the specified path, specify this property as Present. To remove the expanded content of the archive file at the specified path from the specified destination, specify this property as Absent. The default value is Present. { *Present* | Absent }.
+* **[Boolean] Validate** _(Write)_: Specifies whether or not to validate that a file at the destination with the same name as a file in the archive actually matches that corresponding file in the archive by the specified checksum method. If the file does not match and Ensure is specified as Present and Force is not specified, the resource will throw an error that the file at the desintation cannot be overwritten. If the file does not match and Ensure is specified as Present and Force is specified, the file at the desintation will be overwritten. If the file does not match and Ensure is specified as Absent, the file at the desintation will not be removed. The default Checksum method is ModifiedDate. The default value is false.
+* **[String] Checksum** _(Write)_: The Checksum method to use to validate whether or not a file at the destination with the same name as a file in the archive actually matches that corresponding file in the archive. An invalid argument exception will be thrown if Checksum is specified while Validate is specified as false. ModifiedDate will check that the LastWriteTime property of the file at the destination matches the LastWriteTime property of the file in the archive. CreatedDate will check that the CreationTime property of the file at the destination matches the CreationTime property of the file in the archive. SHA-1, SHA-256, and SHA-512 will check that the hash of the file at the destination by the specified SHA method matches the hash of the file in the archive by the specified SHA method. The default value is ModifiedDate. { *ModifiedDate* | CreatedDate | SHA-1 | SHA-256 | SHA-512 }
+* **[System.Management.Automation.PSCredential] Credential** _(Write)_: The credential of a user account with permissions to access the specified archive path and destination if needed.
+* **[Boolean] Force** _(Write)_: Specifies whether or not any existing files or directories at the destination with the same name as a file or directory in the archive should be overwritten to match the file or directory in the archive. When this property is false, an error will be thrown if an item at the destination needs to be overwritten. The default value is false.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Expand an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveNoValidation.ps1)
+* [Expand an archive under a credential without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveNoValidationCredential.ps1)
+* [Expand an archive with default file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveDefaultValidationAndForce.ps1)
+* [Expand an archive with SHA-256 file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveChecksumAndForce.ps1)
+* [Remove an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_RemoveArchiveNoValidation.ps1)
+* [Remove an archive with SHA-256 file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_RemoveArchiveChecksum.ps1)
 
 ### xDscWebService
 
@@ -79,8 +95,10 @@ Resources that work on Nano Server:
 * **UseSecurityBestPractices**: Whether to use best practice security settings for the node where pull server resides on.
 Caution: Setting this property to $true will reset registry values under "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL". This environment change enforces the use of stronger encryption cypher and may affect legacy applications. More information can be found at https://support.microsoft.com/en-us/kb/245030 and https://technet.microsoft.com/en-us/library/dn786418(v=ws.11).aspx.
 * **DisableSecurityBestPractices**: The items that are excepted from following best practice security settings.
+* **Enable32BitAppOnWin64**: When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine.
 
 ### xGroup
+
 Provides a mechanism to manage local groups on the target node.
 This resource works on Nano Server.
 
@@ -89,6 +107,7 @@ This resource works on Nano Server.
 None
 
 #### Parameters
+
 * **[String] GroupName** _(Key)_: The name of the group to create, modify, or remove.
 * **[String] Ensure** _(Write)_: Indicates if the group should exist or not. To add a group or modify an existing group, set this property to Present. To remove a group, set this property to Absent. The default value is Present. { *Present* | Absent }.
 * **[String] Description** _(Write)_: The description the group should have.
@@ -204,6 +223,7 @@ The following parameters will be the same for each process in the set:
 * [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Stop.ps1)
 
 ### xService
+
 Provides a mechanism to configure and manage Windows services.
 This resource works on Nano Server.
 
@@ -222,7 +242,7 @@ None
 * **[String] BuiltInAccount** _(Write)_: The built-in account the service should start under. Cannot be specified at the same time as Credential. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. { LocalService | LocalSystem | NetworkService }.
 * **[PSCredential] Credential** _(Write)_: The credential of the user account the service should start under. Cannot be specified at the same time as BuiltInAccount. The user specified by this credential will automatically be granted the Log on as a Service right. The user account specified by this property must have access to the service executable path defined by Path in order to start the service.
 * **[Boolean] DesktopInteract** _(Write)_: Indicates whether or not the service should be able to communicate with a window on the desktop. Must be false for services not running as LocalSystem. The default value is False.
-* **[String] StartupType** _(Write)_: The startup type of the service. { Automatic | Disabled | Manual }.
+* **[String] StartupType** _(Write)_: The startup type of the service. { Automatic | Disabled | Manual }. If StartupType is "Disabled" and Service is not installed the resource will complete as being DSC compliant.
 * **[String] State** _(Write)_: The state of the service. { *Running* | Stopped | Ignore }.
 * **[Uint32] StartupTimeout** _(Write)_: The time to wait for the service to start in milliseconds. Defaults to 30000 (30 seconds).
 * **[Uint32] TerminateTimeout** _(Write)_: The time to wait for the service to stop in milliseconds. Defaults to 30000 (30 seconds).
@@ -297,13 +317,54 @@ None
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
 * **RunAsCredential**: Credential used to install the package on the local system.
 
-Read-Only Properties:
+### Read-Only Properties from Get-TargetResource
+
 * **PackageDescription**: A text description of the package being installed.
 * **Publisher**: Publisher's name.
 * **InstalledOn**: Date of installation.
 * **Size**: Size of the installation.
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
+
+### xMsiPackage
+
+Provides a mechanism to install and uninstall .msi packages.
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String] ProductId** _(Key)_: The identifying number used to find the package, usually a GUID.
+* **[String] Path** _(Required)_: The path to the MSI file that should be installed or uninstalled.
+* **[String] Ensure** _(Write)_: Specifies whether or not the MSI file should be installed or not. To install the MSI file, specify this property as Present. To uninstall the .msi file, specify this property as Absent. The default value is Present. { *Present* | Absent }.
+* **[String] Arguments** _(Write)_: The arguments to be passed to the MSI package during installation or uninstallation if needed.
+* **[System.Management.Automation.PSCredential] Credential** _(Write)_: The credential of a user account to be used to mount a UNC path if needed.
+* **[String] LogPath** _(Write)_: The path to the log file to log the output from the MSI execution.
+* **[String] FileHash** _(Write)_: The expected hash value of the MSI file at the given path.
+* **[String] HashAlgorithm** _(Write)_: The algorithm used to generate the given hash value.
+* **[String] SignerSubject** _(Write)_: The subject that should match the signer certificate of the digital signature of the MSI file.
+* **[String] SignerThumbprint** _(Write)_: The certificate thumbprint that should match the signer certificate of the digital signature of the MSI file.
+* **[String] ServerCertificateValidationCallback** _(Write)_: PowerShell code that should be used to validate SSL certificates for paths using HTTPS.
+* **[System.Management.Automation.PSCredential] RunAsCredential** _(Write)_: The credential of a user account under which to run the installation or uninstallation of the MSI package.
+
+#### Read-Only Properties from Get-TargetResource
+
+* **[String] Name** _(Read)_: The display name of the MSI package.
+* **[String] InstallSource** _(Read)_: The path to the MSI package.
+* **[String] InstalledOn** _(Read)_: The date that the MSI package was installed on or serviced on, whichever is later.
+* **[UInt32] Size** _(Read)_: The size of the MSI package in MB.
+* **[String] Version** _(Read)_: The version number of the MSI package.
+* **[String] PackageDescription** _(Read)_: The description of the MSI package.
+* **[String] Publisher** _(Read)_: The publisher of the MSI package.
+
+#### Examples
+
+* [Install the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromFile.ps1)
+* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UninstallPackageFromFile.ps1)
+* [Install the MSI file with the given ID at the given HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromHttp.ps1)
+* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UnstallPackageFromHttps.ps1)
 
 ### xFileUpload
 
@@ -314,18 +375,32 @@ Read-Only Properties:
 
 ### xEnvironment
 
-* **Name**: Indicates the name of the environment variable for which you want to ensure a specific state.
-* **Value**: The value to assign to the environment variable.
-   - Supported values: Non-null strings
-   - Default Value: [String]::Empty
-* **Ensure**: Ensures that the feature is present or absent.
-   - Supported values: Present, Absent.
-   - Default Value: Present.
-* **Path**: Defines the environment variable that is being configured. Set this property to $true if the variable is the Path variable; otherwise, set it to $false. If the variable being configured is the Path variable, the value provided through the Value property will be appended to the existing value.
-   - Suported values: $true, $false.
-   - Default value: $false.
+Provides a mechanism to configure and manage environment variables for a machine or process.
+
+#### Requirements
+
+None
+
+#### Parameters
+
+* **[String] Name** _(Key)_: The name of the environment variable to create, modify, or remove.
+* **[String] Value** _(Write)_: The desired value for the environment variable. The default value is an empty string which either indicates that the variable should be removed entirely or that the value does not matter when testing its existence.
+* **[String] Ensure** _(Write)_: Specifies if the environment varaible should exist. { *Present* | Absent }.
+* **[Boolean] Path** _(Write)_: Indicates whether or not the environment variable is a path variable. If the variable being configured is a path variable, the value provided will be appended to or removed from the existing value, otherwise the existing value will be replaced by the new value. The default value is False.
+* **[String[]] Target** _(Write)_: Indicates the target where the environment variable should be set. { Process | Machine | *Process, Machine* }.
+
+#### Read-Only Properties from Get-TargetResource
+
+None
+
+#### Examples
+
+* [Create a non-path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreateNonPathVariable.ps1)
+* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreatePathVariable.ps1)
+* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_Remove.ps1)
 
 ### xScript
+
 Provides a mechanism to run PowerShell script blocks on a target node.
 This resource works on Nano Server.
 
@@ -378,6 +453,7 @@ None
 * [Remove a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_RemoveKey.ps1)
 
 ### xUser
+
 Provides a mechanism to manage local users on a target node.
 
 #### Requirements
@@ -549,17 +625,91 @@ None
 ## Functions
 
 ### Publish-ModuleToPullServer
-    Publishes a 'ModuleInfo' object(s) to the pullserver module repository or user provided path. It accepts its input from a pipeline so it can be used in conjunction with Get-Module as Get-Module <ModuleName> | Publish-Module
+
+Publishes a 'ModuleInfo' object(s) to the pullserver module repository or user provided path. It accepts its input from a pipeline so it can be used in conjunction with Get-Module as Get-Module <ModuleName> | Publish-Module
 
 ### Publish-MOFToPullServer
-    Publishes a 'FileInfo' object(s) to the pullserver configuration repository. Its accepts FileInfo input from a pipeline so it can be used in conjunction with Get-ChildItem .*.mof | Publish-MOFToPullServer
+
+Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It accepts FileInfo input from a pipeline so it can be used in conjunction with Get-ChildItem .*.mof | Publish-MOFToPullServer
 
 ## Versions
 
 ### Unreleased
 
+* README.md: Fixed typo
+
+### 8.2.0.0
+
+* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
+
+### 8.1.0.0
+
+* xDSCWebService: Enable SQL provider configuration
+
+### 8.0.0.0
+
+* xDSCWebService
+    * BREAKING CHANGE: The Pull Server will now run in a 64 bit IIS process by default. Enable32BitAppOnWin64 needs to be set to TRUE for the Pull Server to run in a 32 bit process.
+
+### 7.0.0.0
+
+* xService
+    * BREAKING CHANGE: The service will now return as compliant if the service is not installed and the StartupType is set to Disabled regardless of the value of the Ensure property.
+* Fixed misnamed certificate thumbprint variable in example Sample_xDscWebServiceRegistrationWithSecurityBestPractices
+
+### 6.4.0.0
+
+* xGroup:
+    * Added updates from PSDscResources:
+        * Added support for domain based group members on Nano server
+
+### 6.3.0.0
+
+* xDSCWebService
+    * Fixed an issue where all 64bit IIS application pools stop working after installing DSC Pull Server, because IISSelfSignedCertModule(32bit) module was registered without bitness32 precondition.
+
+### 6.2.0.0
+
+* xMsiPackage:
+    * Created high quality MSI package manager resource 
+* xArchive:
+    * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
+* xWindowsFeatureSet:
+    * Had the wrong parameter name in one test case.
+
+### 6.1.0.0
+
+* Moved DSC pull server setup tests to DSCPullServerSetup folder for new common tests
+* xArchive:
+    * Updated the resource to be a high quality resource
+    * Transferred the existing "unit" tests to integration tests
+    * Added unit and end-to-end tests
+    * Updated documentation and examples
+* xUser
+    * Fixed error handling in xUser
+* xRegistry
+    * Fixed bug where an error was thrown when running Get-DscConfiguration if the registry key already existed
+* Updated Test-IsNanoServer cmdlet to properly test for a Nano server rather than the core version of PowerShell
+
+### 6.0.0.0
+
+* xEnvironment
+    * Updated resource to follow HQRM guidelines.
+    * Added examples.
+    * Added unit and end-to-end tests.
+    * Significantly cleaned the resource.
+    * Minor Breaking Change where the resource will now throw an error if no value is provided, Ensure is set to present, and the variable does not exist, whereas before it would create an empty registry key on the machine in this case (if this is the desired outcome then use the Registry resource).
+    * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).  
+* xGroup:
+    * Group members in the "NT Authority", "BuiltIn" and "NT Service" scopes should now be resolved without an error. If you were seeing the errors "Exception calling ".ctor" with "4" argument(s): "Server names cannot contain a space character."" or "Exception calling ".ctor" with "2" argument(s): "Server names cannot contain a space character."", this fix should resolve those errors. If you are still seeing one of the errors, there is probably another local scope we need to add. Please let us know.
+    * The resource will no longer attempt to resolve group members if Members, MembersToInclude, and MembersToExclude are not specified.
+
+### 5.2.0.0
+
 * xWindowsProcess
     * Minor updates to integration tests because one of the tests was flaky.
+* xRegistry:
+    * Added support for forward slashes in registry key names. This resolves issue [#285](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/285).
 
 ### 5.1.0.0
 
@@ -572,9 +722,9 @@ None
     * Adds RunAsCredential parameter to permit installing packages with specific user account. This resolves issue [#221](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/221).
     * Fixes null verbose log output error. This resolves issue [#224](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/224).
 * xDSCWebService
-	* Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
+    * Fixed issue where resource would fail to read redirection.config file. This resolves issue [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
 * xArchive
-	* Fixed issue where resource would throw exception when file name contains brackets. This resolves issue [#255](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/255).
+    * Fixed issue where resource would throw exception when file name contains brackets. This resolves issue [#255](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/255).
 * xScript
     * Cleaned resource for high quality requirements
     * Added unit tests
@@ -594,7 +744,7 @@ None
     * Added integration tests for BuiltInAccount and Credential.
 * xServiceSet:
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-    * Updated documentation and example	
+    * Updated documentation and example 
 * xWindowsProcess
     * Cleaned resource as per high quality guidelines.
     * Added unit tests.
@@ -801,6 +951,7 @@ because they were unavailable to Get-DscResource and Import-DscResource.
 * Added xRegistry resource
 
 ### 3.6.0.0
+
 * Added CreateCheckRegValue parameter to xPackage resource
 * Added MatchSource parameter to xRemoteFile resource
 
@@ -872,6 +1023,7 @@ because they were unavailable to Get-DscResource and Import-DscResource.
     * DscWebService
 
 ## Examples
+
 ### Change the name and the workgroup name
 
 This configuration will set a machine name and change its workgroup.
@@ -913,7 +1065,7 @@ This configuration will install a .exe package, verifying the package using the 
 
 This configuration will install a .exe package and verify the package using the product ID and package name.
 
-### Sample1.ps3 installs a package that uses an .msi file.
+### Sample1.ps3 installs a package that uses an .msi file
 
 This configuration will install a .msi package and verify the package using the product ID and package name and requires credentials to read the share and install the package.
 
@@ -921,7 +1073,8 @@ This configuration will install a .msi package and verify the package using the 
 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
 
-### Validate pullserver deployement.
+### Validate pullserver deployment
+
 If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in PowerShell or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
 
-[Pullserver Validation Pester Tests](Examples/PullServerDeploymentVerificationTest)
+[Pullserver Validation Pester Tests](DSCPullServerSetup/PullServerDeploymentVerificationTest)

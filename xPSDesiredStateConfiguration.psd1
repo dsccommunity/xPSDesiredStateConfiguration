@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '5.1.0.0'
+moduleVersion = '8.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,13 +52,24 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xWindowsFeature:
-    * Added Catch to ignore RuntimeException when importing ServerManager module. This resolves issue ['
+        ReleaseNotes = '* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
+
+'
 
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
