@@ -14,6 +14,8 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [read] string DSCServerUrl;  
   [write] string RegistrationKeyPath;
   [write] boolean AcceptSelfSignedCertificates;
+  [write] boolean SqlProvider;
+  [write] string SqlConnectionString;
   [required, Description("This property will ensure that the Pull Server is created with the most secure practices")] boolean UseSecurityBestPractices;
   [write,ValueMap{"SecureTLSProtocols"},Values{"SecureTLSProtocols"}] string DisableSecurityBestPractices [];
   [write, Description("When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine")] boolean Enable32BitAppOnWin64;

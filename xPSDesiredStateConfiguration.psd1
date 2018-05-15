@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-ModuleVersion = '8.0.0.0'
+moduleVersion = '8.2.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,8 +52,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xDSCWebService
-    * BREAKING CHANGE: The Pull Server will now run in a 64 bit IIS process by default. Enable32BitAppOnWin64 needs to be set to TRUE for the Pull Server to run in a 32 bit process.
+        ReleaseNotes = '* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
 
 '
 
@@ -61,6 +60,8 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
+
 
 
 

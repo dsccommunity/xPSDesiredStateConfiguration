@@ -240,20 +240,20 @@ function Copy-Files
         }
     }
 
-    foreach ($dependentMUIFile in $dependentMUIFiles)
+    <#foreach ($dependentMUIFile in $dependentMUIFiles)
     {
         if (!(Test-Path $dependentMUIFile))
         {
             throw "ERROR: $dependentMUIFile does not exist"  
         }
-    }
+    }#>
     
     Write-Verbose "Create the bin folder for deploying custom dependent binaries required by the endpoint"
     $binFolderPath = Join-Path $path "bin"
     $null = New-Item -path $binFolderPath  -itemType "directory" -Force
     Copy-Item $dependentBinaries $binFolderPath -Force
 
-    if ($language)
+    <#if ($language)
     {
         $muiPath = Join-Path $binFolderPath $language
 
@@ -262,7 +262,7 @@ function Copy-Files
             $null = New-Item -ItemType container $muiPath        
         }
         Copy-Item $dependentMUIFiles $muiPath -Force
-    }
+    }#>
 
     foreach ($psFile in $psFiles)
     {

@@ -636,6 +636,18 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* README.md: Fixed typo
+* xRemoteFile: Remove progress bar for file download. This resolves issue [#165]
+(https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/165).
+
+### 8.2.0.0
+
+* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
+
+### 8.1.0.0
+
+* xDSCWebService: Enable SQL provider configuration
+
 ### 8.0.0.0
 
 * xDSCWebService
@@ -1063,7 +1075,7 @@ This configuration will install a .msi package and verify the package using the 
 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
 
-### Validate pullserver deployement
+### Validate pullserver deployment
 
 If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in PowerShell or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
 
