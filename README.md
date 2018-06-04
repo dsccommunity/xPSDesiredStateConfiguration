@@ -664,6 +664,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Added the option to use a certificate based on it's subject and template name instead of it's thumbprint. Resolves [issue #205](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/205).
     * xDSCWebService: Fixed an issue where Test-WebConfigModulesSetting would return $true when web.config contains a module and the desired state was for it to be absent. Resolves [issue #418](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/418).
 * Updated the main DSCPullServerSetup readme to read easier, then updates the PowerShell comment based help for each function to follow normal help standards. [James Pogran (@jpogran)](https://github.com/jpogran)
+* xRemoteFile: Remove progress bar for file download. This resolves issues [#165](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/165) and [#383](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/383) [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
 
 ### 8.2.0.0
 
