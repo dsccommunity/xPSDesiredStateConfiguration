@@ -2,6 +2,15 @@
 #      environment configuration  #
 #---------------------------------#
 version: 6.0.{build}.0
+# TODO: Environment variable must be the real one.
+environment:
+  gallery_api:
+    secure: uwd5h4xufRG6/4wEOUIrdEeTkXYIiLFydKXhP5ZKv5j8rR2acKOHrsL7c2UoYmZQ
+
+init:
+  # Needed for publishing of examples, build worker defaults to core.autocrlf=input.
+  - git config --global core.autocrlf true
+
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
@@ -28,12 +37,16 @@ test_script:
             -DisableConsistency `
             -ExcludeTag @()
 
+after_test:
+  - ps: |
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Invoke-AppveyorAfterTestTask `
+            -ResourceModuleName $moduleName
+
 #---------------------------------#
 #      deployment configuration   #
 #---------------------------------#
 
-# scripts to run before deployment
 deploy_script:
   - ps: |
-        Invoke-AppveyorAfterTestTask `
-            -ResourceModuleName $moduleName
+        Invoke-AppVeyorDeployTask
