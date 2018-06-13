@@ -653,6 +653,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 8.3.0.0
+
 * Changes to xPSDesiredStateConfiguration
   * README.md: Fixed typo. [Steve Banik (@stevebanik-ndsc)](https://github.com/stevebanik-ndsc)
   * Adding a Branches section to the README.md with Codecov badges for both
