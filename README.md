@@ -1,14 +1,31 @@
 # xPSDesiredStateConfiguration
 
-master: [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/master)
-dev : [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/dev)
-
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
 
 The high quality, supported version of this module is available as [PSDscResources](https://github.com/PowerShell/PSDscResources).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Branches
+
+### master
+
+[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xPSDesiredStateConfiguration/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/master)
+
+This is the branch containing the latest release -
+no contributions should be made directly to this branch.
+
+### dev
+
+[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xPSDesiredStateConfiguration/branch/dev)
+[![codecov](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/dev)
+
+This is the development branch
+to which contributions should be proposed by contributors as pull requests.
+This development branch will periodically be merged to the master branch,
+and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 ## Contributing
 
@@ -481,7 +498,7 @@ None
 * **[Boolean] PasswordNeverExpires** _(Write)_: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
    - Suported values: $true, $false
    - Default value: $false
-   
+
 #### Examples
 
 * [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
@@ -636,6 +653,21 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 8.3.0.0
+
+* Changes to xPSDesiredStateConfiguration
+  * README.md: Fixed typo. [Steve Banik (@stevebanik-ndsc)](https://github.com/stevebanik-ndsc)
+  * Adding a Branches section to the README.md with Codecov badges for both
+    master and dev branch ([issue #416](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/416)).
+* Changes to xWindowsProcess
+  * Integration tests for this resource should no longer fail randomly. A timing
+    issue made the tests fail in certain scenarios ([issue #420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
+* Changes to xDSCWebService
+    * Added the option to use a certificate based on it's subject and template name instead of it's thumbprint. Resolves [issue #205](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/205).
+    * xDSCWebService: Fixed an issue where Test-WebConfigModulesSetting would return $true when web.config contains a module and the desired state was for it to be absent. Resolves [issue #418](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/418).
+* Updated the main DSCPullServerSetup readme to read easier, then updates the PowerShell comment based help for each function to follow normal help standards. [James Pogran (@jpogran)](https://github.com/jpogran)
+* xRemoteFile: Remove progress bar for file download. This resolves issues [#165](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/165) and [#383](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/383) [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
+
 ### 8.2.0.0
 
 * xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
@@ -669,7 +701,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ### 6.2.0.0
 
 * xMsiPackage:
-    * Created high quality MSI package manager resource 
+    * Created high quality MSI package manager resource
 * xArchive:
     * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
 * xWindowsFeatureSet:
@@ -697,7 +729,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Added unit and end-to-end tests.
     * Significantly cleaned the resource.
     * Minor Breaking Change where the resource will now throw an error if no value is provided, Ensure is set to present, and the variable does not exist, whereas before it would create an empty registry key on the machine in this case (if this is the desired outcome then use the Registry resource).
-    * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).  
+    * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).
 * xGroup:
     * Group members in the "NT Authority", "BuiltIn" and "NT Service" scopes should now be resolved without an error. If you were seeing the errors "Exception calling ".ctor" with "4" argument(s): "Server names cannot contain a space character."" or "Exception calling ".ctor" with "2" argument(s): "Server names cannot contain a space character."", this fix should resolve those errors. If you are still seeing one of the errors, there is probably another local scope we need to add. Please let us know.
     * The resource will no longer attempt to resolve group members if Members, MembersToInclude, and MembersToExclude are not specified.
@@ -742,7 +774,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Added integration tests for BuiltInAccount and Credential.
 * xServiceSet:
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-    * Updated documentation and example 
+    * Updated documentation and example
 * xWindowsProcess
     * Cleaned resource as per high quality guidelines.
     * Added unit tests.
@@ -767,7 +799,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Fixed bug in which the user could not set a Binary registry value to 0
     * Added unit and integration tests
     * Added examples and updated documentation
-    
+
 ### 5.0.0.0
 
 * xWindowsFeature:
@@ -1071,7 +1103,7 @@ This configuration will install a .msi package and verify the package using the 
 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
 
-### Validate pullserver deployement
+### Validate pullserver deployment
 
 If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in PowerShell or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
 

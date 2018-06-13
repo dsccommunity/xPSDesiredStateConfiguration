@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '8.2.0.0'
+moduleVersion = '8.3.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,7 +52,18 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
+        ReleaseNotes = '* Changes to xPSDesiredStateConfiguration
+  * README.md: Fixed typo. [Steve Banik (@stevebanik-ndsc)](https://github.com/stevebanik-ndsc)
+  * Adding a Branches section to the README.md with Codecov badges for both
+    master and dev branch ([issue 416](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/416)).
+* Changes to xWindowsProcess
+  * Integration tests for this resource should no longer fail randomly. A timing
+    issue made the tests fail in certain scenarios ([issue 420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
+* Changes to xDSCWebService
+    * Added the option to use a certificate based on it"s subject and template name instead of it"s thumbprint. Resolves [issue 205](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/205).
+    * xDSCWebService: Fixed an issue where Test-WebConfigModulesSetting would return $true when web.config contains a module and the desired state was for it to be absent. Resolves [issue 418](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/418).
+* Updated the main DSCPullServerSetup readme to read easier, then updates the PowerShell comment based help for each function to follow normal help standards. [James Pogran (@jpogran)](https://github.com/jpogran)
+* xRemoteFile: Remove progress bar for file download. This resolves issues [165](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/165) and [383](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/383) [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
 
 '
 
@@ -60,6 +71,7 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
+
 
 
 
