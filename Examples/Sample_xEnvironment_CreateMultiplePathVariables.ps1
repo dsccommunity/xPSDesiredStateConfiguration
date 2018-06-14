@@ -7,7 +7,7 @@
         replace the Path environment variable.
 
 #>
-Configuration Sample_xEnvironment_CreatePathVariable 
+Configuration Sample_xEnvironment_CreateMultiplePathVariables 
 {
     param ()
 
@@ -26,4 +26,4 @@ Configuration Sample_xEnvironment_CreatePathVariable
     }
 }
 
-Sample_xEnvironment_CreatePathVariable
+Sample_xEnvironment_CreateMultiplePathVariables

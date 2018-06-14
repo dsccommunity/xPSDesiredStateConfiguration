@@ -6,7 +6,7 @@
         would be left intact. Ensure that Path is set to $true in order to append/remove
         values and not completely replace the Path environment variable.
 #>
-Configuration Sample_xEnvironment_Remove 
+Configuration Sample_xEnvironment_Path_Remove 
 {
     param ()
 
@@ -25,4 +25,4 @@ Configuration Sample_xEnvironment_Remove
     }
 }
 
-Sample_xEnvironment_Remove
+Sample_xEnvironment_Path_Remove
