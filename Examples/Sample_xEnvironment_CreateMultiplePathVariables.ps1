@@ -15,7 +15,7 @@ Configuration Sample_xEnvironment_CreatePathVariable
 
     Node localhost
     {
-        xEnvironment CreatePathEnvironmentVariable
+        xEnvironment CreateMultiplePathEnvironmentVariables
         {
             Name = 'Path'
             Value = 'C:\test123;C:\test456;C:\test789'

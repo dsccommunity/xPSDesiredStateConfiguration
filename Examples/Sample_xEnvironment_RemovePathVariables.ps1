@@ -14,7 +14,7 @@ Configuration Sample_xEnvironment_Remove
 
     Node localhost
     {
-        xEnvironment RemoveEnvironmentVariable
+        xEnvironment RemovePathEnvironmentVariables
         {
             Name = 'Path'
             Ensure = 'Absent'
