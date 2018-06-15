@@ -653,6 +653,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* xEnvironment path documentation update demonstrating usage with multiple values  ([issue #415](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/415). [Alex Kokkinos (@alexkokkinos)](https://github.com/alexkokkinos)
+
 ### 8.3.0.0
 
 * Changes to xPSDesiredStateConfiguration

@@ -1,9 +1,8 @@
 ﻿<#
     .SYNOPSIS
-        Modifies the 'Path' environment variable, appending the value
-        'C:\TestValue' if it doesn't already exist. Ensure that Path is
-        set to $true in order to append/remove values and not completely
-        replace the Path environment variable.
+        Creates the environment variable 'TestPathEnvironmentVariable' and sets the value to 'TestValue'
+        if it doesn't already exist or appends the value 'TestValue' to the existing path if it does
+        already exist on the machine and within the process.
 #>
 Configuration Sample_xEnvironment_CreatePathVariable 
 {
@@ -15,8 +14,8 @@ Configuration Sample_xEnvironment_CreatePathVariable
     {
         xEnvironment CreatePathEnvironmentVariable
         {
-            Name = 'Path'
-            Value = 'C:\TestValue'
+            Name = 'TestPathEnvironmentVariable'
+            Value = 'TestValue'
             Ensure = 'Present'
             Path = $true
             Target = @('Process', 'Machine')
