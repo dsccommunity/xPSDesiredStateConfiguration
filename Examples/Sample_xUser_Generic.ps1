@@ -1,10 +1,10 @@
-﻿param 
+param
 (
     [Parameter(Mandatory)]
     [System.String]
     $ConfigurationName
 )
-        
+
 <#
     Create a custom configuration by passing in whatever
     values you need. $Password is the only param that is
@@ -16,25 +16,25 @@
 
 Configuration $ConfigurationName
 {
-    param 
-    (        
+    param
+    (
         [System.String]
         $UserName = 'Test UserName',
-        
+
         [System.String]
         $Description = 'Test Description',
-        
+
         [System.String]
         $FullName = 'Test Full Name',
-        
+
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
-        
+
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]
         $Password,
-        
+
         [System.Boolean]
         $Disabled = $false,
 
@@ -47,9 +47,9 @@ Configuration $ConfigurationName
         [System.Boolean]
         $PasswordChangeNotAllowed = $false
     )
-    
+
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
-    
+
     Node Localhost {
 
         xUser UserResource1

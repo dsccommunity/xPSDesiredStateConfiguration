@@ -25,7 +25,8 @@ test_script:
             -Type 'Default' `
             -CodeCoverage `
             -CodeCovIo `
-            -DisableConsistency
+            -DisableConsistency `
+            -ExcludeTag @()
 
 #---------------------------------#
 #      deployment configuration   #

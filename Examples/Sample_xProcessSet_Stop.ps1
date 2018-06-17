@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Stops the processes with the executables at the file paths C:\Windows\cmd.exe and
         C:\TestPath\TestProcess.exe with no arguments and logs any output to the path

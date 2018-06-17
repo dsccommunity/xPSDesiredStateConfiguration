@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
@@ -52,7 +52,7 @@ try
             # Cannot use $TestDrive here because script is run outside of Pester
             $resourceParameters = @{
                 FilePath = $script:testFilePath
-                FileContent = 'Test file content' 
+                FileContent = 'Test file content'
             }
 
             It 'Should have removed test file before config runs' {
@@ -60,7 +60,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationNoCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -83,7 +83,7 @@ try
             }
 
             $configurationName = 'TestScriptWithCredential'
-            
+
             # Cannot use $TestDrive here because script is run outside of Pester
             $resourceParameters = @{
                 FilePath = $script:testFilePath
@@ -106,7 +106,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationWithCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive -ConfigurationData $configData @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force

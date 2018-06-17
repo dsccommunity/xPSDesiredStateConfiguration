@@ -1,4 +1,4 @@
-﻿# Suppress Global Vars PSSA Error because $global:DSCMachineStatus must be allowed
+# Suppress Global Vars PSSA Error because $global:DSCMachineStatus must be allowed
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 param()
@@ -90,7 +90,7 @@ function Get-TargetResource
     .PARAMETER Arguments
         The arguments to pass to the MSI package during installation or uninstallation
         if needed.
-        
+
     .PARAMETER Credential
         The credential of a user account to be used to mount a UNC path if needed.
 
@@ -288,7 +288,7 @@ function Set-TargetResource
 
             # Check if the MSI package specifies the ProductCode, and if so make sure they match
             $productCode = Get-MsiProductCode -Path $Path
-            
+
             if ((-not [String]::IsNullOrEmpty($identifyingNumber)) -and ($identifyingNumber -ne $productCode))
             {
                 New-InvalidArgumentException -ArgumentName 'ProductId' -Message ($script:localizedData.InvalidId -f $identifyingNumber, $productCode)
@@ -359,7 +359,7 @@ function Set-TargetResource
 
     .PARAMETER ProductId
         The identifying number used to find the package, usually a GUID.
-          
+
     .PARAMETER Path
         Not Used in Test-TargetResource
 
@@ -758,11 +758,11 @@ function Get-WebRequestResponse
 
         Write-Verbose -Message ($script:localizedData.CreatingTheSchemeStream -f $uriScheme)
         $webRequest = Get-WebRequest -Uri $Uri
-    
+
         Write-Verbose -Message ($script:localizedData.SettingDefaultCredential)
         $webRequest.Credentials = [System.Net.CredentialCache]::DefaultCredentials
         $webRequest.AuthenticationLevel = [System.Net.Security.AuthenticationLevel]::None
-    
+
         if ($uriScheme -eq 'http')
         {
             # Default value is MutualAuthRequested, which applies to the https scheme
@@ -774,7 +774,7 @@ function Get-WebRequestResponse
             Write-Verbose -Message $script:localizedData.SettingCertificateValidationCallback
             $webRequest.ServerCertificateValidationCallBack = (Get-ScriptBlock -FunctionName $ServerCertificateValidationCallback)
         }
-    
+
         Write-Verbose -Message ($script:localizedData.GettingTheSchemeResponseStream -f $uriScheme)
         $responseStream = Get-WebRequestResponseStream -WebRequest $webRequest
 
@@ -1117,9 +1117,9 @@ function Start-MsiProcess
 
     # Necessary for I/O redirection
     $startInfo.UseShellExecute = $false
-    
+
     $startInfo.FileName = "$env:winDir\system32\msiexec.exe"
-    
+
     if ($Ensure -eq 'Present')
     {
         $startInfo.Arguments = '/i "{0}"' -f $Path
@@ -1128,28 +1128,28 @@ function Start-MsiProcess
     else
     {
         $productEntry = Get-ProductEntry -IdentifyingNumber $identifyingNumber
-    
+
         $id = Split-Path -Path $productEntry.Name -Leaf
         $startInfo.Arguments = ('/x{0}' -f $id)
     }
-    
+
     if (-not [String]::IsNullOrEmpty($LogPath))
     {
         $startInfo.Arguments += (' /log "{0}"' -f $LogPath)
     }
-    
+
     $startInfo.Arguments += ' /quiet /norestart'
-    
+
     if (-not [String]::IsNullOrEmpty($Arguments))
     {
         # Append any specified arguments with a space
         $startInfo.Arguments += (' {0}' -f $Arguments)
     }
-    
+
     Write-Verbose -Message ($script:localizedData.StartingWithStartInfoFileNameStartInfoArguments -f $startInfo.FileName, $startInfo.Arguments)
-    
+
     $exitCode = 0
-    
+
     try
     {
         if (-not [String]::IsNullOrEmpty($RunAsCredential))
@@ -1317,7 +1317,7 @@ function Get-MsiTool
         return GetPackageProperty(msi, "ProductName");
     }
 '@
-    
+
     # Check if the the type is already defined
     if (([System.Management.Automation.PSTypeName]'Microsoft.Windows.DesiredStateConfiguration.xPackageResource.MsiTools').Type)
     {

@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Installs the TelnetClient and RSAT-File-Services Windows features, including all their
         subfeatures. Logs the operation to the file at 'C:\LogPath\Log.log'.

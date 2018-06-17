@@ -1,4 +1,4 @@
-﻿$script:dscModuleName   = 'xPSDesiredStateConfiguration'
+$script:dscModuleName   = 'xPSDesiredStateConfiguration'
 $script:dscResourceName = 'MSFT_xDSCWebService'
 
 #region HEADER
@@ -171,7 +171,7 @@ try
             Context -Name 'DSC Web Service is installed without certificate' -Fixture {
                 $script:result = $null
 
-                $ipProperties = [Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties() 
+                $ipProperties = [Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()
 
                 if ($ipProperties.DomainName)
                 {
@@ -213,8 +213,8 @@ try
                     }
                     @{
                         Variable = 'DSCServerURL'
-                        Data     = '{0}://{1}:{2}/{3}' -f $websiteDataHTTP.bindings.collection[0].protocol, 
-                                                              $fqdnComputerName, 
+                        Data     = '{0}://{1}:{2}/{3}' -f $websiteDataHTTP.bindings.collection[0].protocol,
+                                                              $fqdnComputerName,
                                                               ($websiteDataHTTP.bindings.collection[0].bindingInformation -split ':')[1],
                                                               $serviceData.ServiceName
                     }
@@ -430,14 +430,14 @@ try
                 It 'Should throw if CertificateThumbprint and CertificateSubject are not specifed' {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Remove('CertificateThumbPrint')
-                    
-                    {$script:result = Get-TargetResource @altTestParameters} | Should Throw 
+
+                    {$script:result = Get-TargetResource @altTestParameters} | Should Throw
                 }
                 It 'Should throw if CertificateThumbprint and CertificateSubject are both specifed' {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Add('CertificateSubject', $certificateData[0].Subject)
 
-                    {$script:result = Get-TargetResource @altTestParameters} | Should Throw 
+                    {$script:result = Get-TargetResource @altTestParameters} | Should Throw
                 }
             }
         }
@@ -445,7 +445,7 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-            
+
             #region Mocks
             $testArguments = 'if ($allowedArgs -notcontains $MyInvocation.Line.Trim()) {throw ''Mock test failed.''}'
 
@@ -498,9 +498,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
@@ -524,7 +524,7 @@ try
                         [Parameter(Mandatory)]
                         [String]
                         $Name,
-                    
+
                         [Parameter(Mandatory)]
                         [String]
                         $Value
@@ -537,7 +537,7 @@ try
             }
 
             Context -Name 'Ensure is Present - isDownLevelOfBlue' -Fixture {
-                
+
                 #region Mocks
                 Mock -CommandName Get-OSVersion -MockWith {@{Major = 6; Minor = 2}}
                 #endregion
@@ -546,9 +546,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
@@ -566,7 +566,7 @@ try
             }
 
             Context -Name 'Ensure is Present - isUpLevelOfBlue' -Fixture {
-                
+
                 #region Mocks
                 Mock -CommandName Get-OSVersion -MockWith {@{Major = 10; Minor = 0}}
                 #endregion
@@ -575,9 +575,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
@@ -599,9 +599,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present -Enable32BitAppOnWin64 $true
 
@@ -629,9 +629,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
 
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present -AcceptSelfSignedCertificates $false
@@ -671,9 +671,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
                 It 'Should call expected mocks' {
                     Set-TargetResource @altTestParameters @setTargetPaths -Ensure Present -CertificateSubject 'PesterTestCertificate'
 
@@ -694,9 +694,9 @@ try
                     DatabasePath        = 'TestDrive:\Database'
                     ConfigurationPath   = 'TestDrive:\Configuration'
                     ModulePath          = 'TestDrive:\Module'
-                    RegistrationKeyPath = 'TestDrive:\RegistrationKey' 
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
                 }
-                
+
                 It 'Should not throw an error' {
                     {Set-TargetResource @altTestParameters @setTargetPaths -Ensure Present} | Should not throw
                 }
@@ -711,8 +711,8 @@ try
                 It 'Should throw if CertificateThumbprint and CertificateSubject are not specifed' {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Remove('CertificateThumbPrint')
-                    
-                    {$result = Set-TargetResource @altTestParameters} | Should Throw 
+
+                    {$result = Set-TargetResource @altTestParameters} | Should Throw
                 }
             }
         }
@@ -775,7 +775,7 @@ try
 
                 It 'Should return $true when dbProvider is set to ESENT and ConnectionString does not match the value in web.config' {
                     $DatabasePath = 'TestDrive:\DatabasePath'
-                    
+
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (ESENT)'; ('{0}\Devices.edb' -f $DatabasePath) -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
 
@@ -793,7 +793,7 @@ try
                 }
                 It 'Should return $true when dbProvider is set to System.Data.OleDb and ConnectionString does not match the value in web.config' {
                     $DatabasePath = 'TestDrive:\DatabasePath'
-                    
+
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {'System.Data.OleDb'} -Verifiable
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (OLE)'; ('Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0}\Devices.mdb;' -f $DatabasePath) -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
 
@@ -809,13 +809,13 @@ try
 
                     Assert-VerifiableMock
                 }
- 
+
                 Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
                 Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
 
                 It 'Should return $true when ModulePath is set the same as in web.config' {
                     $modulePath = 'TestDrive:\ModulePath'
-                    
+
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - ModulePath'; $modulePath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -ModulePath $modulePath | Should Be $true
@@ -829,12 +829,12 @@ try
 
                     Assert-VerifiableMock
                 }
- 
+
                 Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
 
                 It 'Should return $true when ConfigurationPath is set the same as in web.config' {
                     $configurationPath = 'TestDrive:\ConfigurationPath'
-                    
+
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - ConfigurationPath';  $configurationPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should Be $true
@@ -843,19 +843,19 @@ try
                 }
                 It 'Should return $false when ConfigurationPath is not set the same as in web.config' {
                     $configurationPath = 'TestDrive:\ConfigurationPath'
-                    
+
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting - ConfigurationPath'; $false} -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should Be $false
 
                     Assert-VerifiableMock
                 }
- 
+
                 Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
 
                 It 'Should return $true when RegistrationKeyPath is set the same as in web.config' {
                     $registrationKeyPath = 'TestDrive:\RegistrationKeyPath'
-                    
+
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath';  $registrationKeyPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'} -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should Be $true
@@ -864,7 +864,7 @@ try
                 }
                 It 'Should return $false when RegistrationKeyPath is not set the same as in web.config' {
                     $registrationKeyPath = 'TestDrive:\RegistrationKeyPath'
-                    
+
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath'; $false} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'} -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should Be $false
@@ -873,7 +873,7 @@ try
                 }
                 It 'Should return $true when AcceptSelfSignedCertificates is set the same as in web.config' {
                     $acceptSelfSignedCertificates = $true
-                    
+
                     Mock -CommandName Test-WebConfigModulesSetting -MockWith {param ($ExpectedInstallationStatus) Write-Verbose -Message 'Test-WebConfigAppSetting - IISSelfSignedCertModule'; $acceptSelfSignedCertificates -eq $ExpectedInstallationStatus} -ParameterFilter {$ModuleName -eq 'IISSelfSignedCertModule(32bit)'} -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should Be $true
@@ -899,7 +899,7 @@ try
                 It 'Should return $false if Certificate Thumbprint is set to AllowUnencryptedTraffic' {
                     Test-TargetResource @testParameters -Ensure Present | Should Be $false
                 }
-                
+
                 It 'Should return $false if Certificate Subject does not match the current certificate' {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Remove('CertificateThumbprint')
@@ -908,7 +908,7 @@ try
 
                     Test-TargetResource @altTestParameters -Ensure Present -CertificateSubject 'Invalid Certifcate' | Should Be $false
                 }
-                
+
                 Mock -CommandName Test-WebsitePath -MockWith {$false} -Verifiable
 
                 It 'Should return $false when UseSecurityBestPractices and insecure protocols are enabled' {
@@ -925,15 +925,15 @@ try
 
                     Assert-VerifiableMock
                 }
-            
+
             }
- 
+
             Context -Name 'Function parameters contain invalid data' -Fixture {
                 It 'Should throw if CertificateThumbprint and CertificateSubject are not specifed' {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Remove('CertificateThumbPrint')
-                    
-                    {$result = Test-TargetResource @altTestParameters} | Should Throw 
+
+                    {$result = Test-TargetResource @altTestParameters} | Should Throw
                 }
             }
         }

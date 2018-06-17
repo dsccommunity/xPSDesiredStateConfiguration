@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 #Import CommonResourceHelper for Test-IsNanoServer

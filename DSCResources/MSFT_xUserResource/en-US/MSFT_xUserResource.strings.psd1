@@ -1,4 +1,4 @@
-﻿# Localized resources for xUser
+# Localized resources for xUser
 
 ConvertFrom-StringData @'
     UserWithName = User: {0}

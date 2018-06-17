@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Describe 'xMsiPackage Unit Tests' {
@@ -121,7 +121,7 @@ Describe 'xMsiPackage Unit Tests' {
                                              -ExpectedReturnValue $expectedReturnValue
             }
         }
-           
+
         Describe 'Set-TargetResource' {
             $setTargetResourceParameters = @{
                 ProductId = 'TestProductId'
@@ -136,7 +136,7 @@ Describe 'xMsiPackage Unit Tests' {
                 ServerCertificateValidationCallback = 'TestValidationCallback'
                 RunAsCredential = $script:testCredential
             }
-            
+
             Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriNonUnc }
             Mock -CommandName 'Convert-ProductIdToIdentifyingNumber' -MockWith { return $script:testIdentifyingNumber }
             Mock -CommandName 'Assert-PathExtensionValid' -MockWith {}
@@ -156,7 +156,7 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName 'Invoke-CimMethod' -MockWith {}
             Mock -CommandName 'Get-ItemProperty' -MockWith { return $null }
             Mock -CommandName 'Get-ProductEntry' -MockWith { return $script:mockProductEntry }
-            
+
             Context 'Uri scheme is non-UNC file and installation succeeds' {
                 $mocksCalled = @(
                     @{ Command = 'Convert-PathToUri'; Times = 1 }
@@ -347,7 +347,7 @@ Describe 'xMsiPackage Unit Tests' {
                                              -ErrorMessage ($script:localizedData.PostValidationError -f $setTargetResourceParameters.Path) `
                                              -ErrorTestName $script:errorMessageTitles.PostValidationError
             }
-            
+
             Mock -CommandName 'Get-MsiProductCode' -MockWith { return $script:testWrongProductId }
 
             Context 'Product code from downloaded MSI package does not match specified ID' {
@@ -489,7 +489,7 @@ Describe 'xMsiPackage Unit Tests' {
 
                     Convert-PathToUri -Path $filePath | Should Be $expectedReturnValue
                 }
-                
+
                 It 'Should return the expected URI when scheme is http' {
                     $filePath = 'http://localhost:1242/testMsi.msi'
                     $expectedReturnValue = [Uri] $filePath
@@ -684,7 +684,7 @@ Describe 'xMsiPackage Unit Tests' {
                                        -ErrorTestName $script:errorMessageTitles.CouldNotOpenLog
             }
         }
-        
+
         Describe 'Get-WebRequestResponse' {
             Mock -CommandName 'Get-WebRequest' -MockWith { return $script:mockWebRequest }
             Mock -CommandName 'Get-ScriptBlock' -MockWith { return { Write-Verbose 'Hello World' } }
@@ -700,7 +700,7 @@ Describe 'xMsiPackage Unit Tests' {
                 It 'Should return the expected response stream' {
                     Get-WebRequestResponse -Uri $script:testUriHttp | Should Be $script:mockStream
                 }
-                
+
                 Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
             }
 
@@ -714,7 +714,7 @@ Describe 'xMsiPackage Unit Tests' {
                 It 'Should return the expected response stream' {
                     Get-WebRequestResponse -Uri $script:testUriHttps | Should Be $script:mockStream
                 }
-                
+
                 Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
             }
 
@@ -857,7 +857,7 @@ Describe 'xMsiPackage Unit Tests' {
         Describe 'Assert-FileSignatureValid' {
             $mockThumbprint = 'mockThumbprint'
             $mockSubject = 'mockSubject'
-            $mockSignature = @{ 
+            $mockSignature = @{
                 Status = [System.Management.Automation.SignatureStatus]::Valid
                 SignerCertificate = @{ Thumbprint = $mockThumbprint; Subject = $mockSubject }
             }

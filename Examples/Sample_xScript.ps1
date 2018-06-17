@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Creates a file at the given file path with the specified content through the xScript resource.
 

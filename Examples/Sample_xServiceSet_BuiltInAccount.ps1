@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Sets the Secure Socket Tunneling Protocol and DHCP Client services to run under the
         built-in account LocalService.

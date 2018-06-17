@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Ensures that the DHCP Client and Windows Firewall services are running.
 #>

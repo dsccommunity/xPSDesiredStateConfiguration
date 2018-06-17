@@ -1,17 +1,17 @@
-﻿
-param 
+
+param
 (
     [Parameter(Mandatory)]
     [System.String]
     $ConfigurationName
 )
-        
+
 
 Configuration $ConfigurationName
 {
-    param 
-    (   
-        [Parameter(Mandatory = $true)]     
+    param
+    (
+        [Parameter(Mandatory = $true)]
         [System.String]
         $Name,
 
@@ -22,9 +22,9 @@ Configuration $ConfigurationName
         [System.Boolean]
         $IncludeAllSubFeature = $false
     )
-    
+
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
-    
+
     Node Localhost {
 
         xWindowsFeature WindowsFeatureTest
