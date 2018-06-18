@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Tests if the current machine is a Nano server.
 #>
@@ -9,7 +9,7 @@ function Test-IsNanoServer
     param ()
 
     $isNanoServer = $false
-    
+
     if (Test-CommandExists -Name 'Get-ComputerInfo')
     {
         $computerInfo = Get-ComputerInfo
@@ -36,12 +36,12 @@ function Test-CommandExists
 {
     [OutputType([Boolean])]
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
-        $Name 
+        $Name
     )
 
     $command = Get-Command -Name $Name -ErrorAction 'SilentlyContinue'

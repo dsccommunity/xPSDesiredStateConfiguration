@@ -1,4 +1,4 @@
-﻿Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
+Import-Module "$PSScriptRoot\..\..\DSCResources\CommonResourceHelper.psm1" -Force
 
 <#
     .SYNOPSIS

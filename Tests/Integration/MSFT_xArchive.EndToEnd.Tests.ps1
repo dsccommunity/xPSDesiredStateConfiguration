@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Describe 'xArchive End to End Tests' {
@@ -147,7 +147,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -229,7 +229,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -272,7 +272,7 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should Be $true
         }
     }
-    
+
     Context 'Expand an archive to an existing destination that already contains the same archive files' {
         $configurationName = 'ExpandArchiveToDestinationWithArchive'
 
@@ -300,7 +300,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -355,7 +355,7 @@ Describe 'xArchive End to End Tests' {
 
         It 'Should compile and run configuration and throw an error for attempting to overwrite files without Force specified' {
             # We don't know which file will throw the error, so we will only check that an error was thrown rather than checking the specific error message
-            { 
+            {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -413,7 +413,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -471,7 +471,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -494,7 +494,7 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should Be $true
         }
     }
-    
+
     Context 'Remove an expanded archive from an existing destination that contains only the expanded archive' {
         $configurationName = 'RemoveArchiveAtDestinationWithArchive'
 
@@ -522,7 +522,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -610,7 +610,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -679,7 +679,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -719,7 +719,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -769,7 +769,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -823,7 +823,7 @@ Describe 'xArchive End to End Tests' {
         }
 
         It 'Should compile and run configuration' {
-            { 
+            {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force

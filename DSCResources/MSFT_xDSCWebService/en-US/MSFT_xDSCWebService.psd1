@@ -1,4 +1,4 @@
-﻿# culture="en-US"
+# culture="en-US"
 ConvertFrom-StringData -StringData @'
     ThrowCertificateThumbprint       = CertificateThumbprint must contain a certificate thumbprint, or "AllowUnencryptedTraffic" to opt-out from being secure.
     ThrowUseSecurityBestPractice     = Error: Cannot use best practice security settings with unencrypted traffic. Please set UseSecurityBestPractices to $false or use a certificate to encrypt pull server traffic.

@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Enables the Windows optional features MicrosoftWindowsPowerShellV2 and
         Internet-Explorer-Optional-amd64 and outputs a log of the operations to a file at the path

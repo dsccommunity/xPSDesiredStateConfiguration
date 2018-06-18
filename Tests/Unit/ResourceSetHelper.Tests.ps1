@@ -1,4 +1,4 @@
-﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
 $errorActionPreference = 'Stop'
@@ -17,7 +17,7 @@ InModuleScope 'ResourceSetHelper' {
                 Name = 'Name'
                 CommonStringParameter1 = 'CommonParameter1'
             }
-        
+
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
@@ -27,12 +27,12 @@ InModuleScope 'ResourceSetHelper' {
         It 'Should return string containing one variable reference for one credential common parameter' {
             $testUserName = 'testUserName'
             $secureTestPassword = ConvertTo-SecureString -String 'testPassword' -AsPlainText -Force
-            
+
             $parameters = @{
                 Name = 'Name'
                 CommonCredentialParameter1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUsername, $secureTestPassword )
             }
-        
+
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
@@ -100,7 +100,7 @@ InModuleScope 'ResourceSetHelper' {
                 CommonParameter2 = 'CommonParameterValue2'
             }
         }
-        
+
         $newResourceSetConfigurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
         It 'Should return a ScriptBlock' {

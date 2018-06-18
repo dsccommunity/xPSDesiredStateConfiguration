@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Describe 'CommonResourceHelper Unit Tests' {
@@ -62,7 +62,7 @@ Describe 'CommonResourceHelper Unit Tests' {
 
                 Context 'Computer OS type is Server and OS server level is not NanoServer' {
                     Mock -CommandName 'Get-ComputerInfo' -MockWith { return $testComputerInfoServerNotNano }
-                    
+
                     It 'Should not throw' {
                         { $null = Test-IsNanoServer } | Should Not Throw
                     }

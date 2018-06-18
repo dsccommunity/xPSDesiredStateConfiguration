@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 # Import ResourceSetHelper for New-ResourceSetConfigurationScriptBlock
@@ -15,7 +15,7 @@ Import-Module -Name $script:resourceSetHelperFilePath
 
     .PARAMETER Ensure
         Specifies whether or not the set of groups should exist.
-        
+
         Set this property to Present to create or modify a set of groups.
         Set this property to Absent to remove a set of groups.
 

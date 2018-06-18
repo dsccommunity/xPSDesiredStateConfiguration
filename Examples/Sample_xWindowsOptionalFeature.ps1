@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Enables the Windows optional feature with the specified name and outputs a log to the specified path.
 

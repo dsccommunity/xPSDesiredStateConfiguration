@@ -1,4 +1,4 @@
-﻿Configuration xUserExample
+Configuration xUserExample
 {
     param (
         [System.Management.Automation.PSCredential]

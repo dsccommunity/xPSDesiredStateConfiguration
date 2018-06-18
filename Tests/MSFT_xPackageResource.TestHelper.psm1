@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 <#
@@ -82,7 +82,7 @@ function Start-Server
                                     'HttpIntegrationTest.FileServerStarted')
     $null = $fileServerStarted.Reset()
 
-    <# 
+    <#
         The server is run on a separate process so that it can receive requests
         while the tests continue to run. It takes in the same parameterss that are passed
         in to this function. All helper functions that the server uses have to be
@@ -109,7 +109,7 @@ function Start-Server
             (
                 [Parameter(Mandatory = $true)]
                 [System.Net.HttpListener]
-                $HttpListener, 
+                $HttpListener,
 
                 [Parameter(Mandatory = $true)]
                 [System.Boolean]
@@ -117,7 +117,7 @@ function Start-Server
             )
 
             Write-Log -LogFile $LogPath -Message 'Finished listening for requests. Shutting down HTTP server.'
-            
+
             $ipPort = '0.0.0.0:1243'
 
             if ($null -eq $HttpListener)
@@ -168,7 +168,7 @@ function Start-Server
             # Create certificate
             $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName localhost
             Write-Log -LogFile $LogPath -Message 'Created certificate'
-            
+
             $hash = $certificate.Thumbprint
             $certPassword = ConvertTo-SecureString -String 'password12345' -AsPlainText -Force
             $tempPath = 'C:\certForTesting'
@@ -176,9 +176,9 @@ function Start-Server
             $null = Export-PfxCertificate -Cert $certificate -FilePath $tempPath -Password $certPassword
             $null = Import-PfxCertificate -CertStoreLocation 'Cert:\LocalMachine\Root' -FilePath 'C:\certForTesting' -Password $certPassword
             Remove-Item -Path $tempPath
-            
+
             Write-Log -LogFile $LogPath -Message 'Finished importing certificate into root. About to bind it to port.'
-             
+
             # Use net shell command to directly bind certificate to designated testing port
             $null = netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
         }
@@ -204,32 +204,32 @@ function Start-Server
             # Add the CallbackEventBridge type if it's not already defined
             if (-not ('CallbackEventBridge' -as [Type]))
             {
-                Add-Type @' 
-                    using System; 
- 
-                    public sealed class CallbackEventBridge { 
-                        public event AsyncCallback CallbackComplete = delegate { }; 
- 
-                        private CallbackEventBridge() {} 
- 
+                Add-Type @'
+                    using System;
+
+                    public sealed class CallbackEventBridge {
+                        public event AsyncCallback CallbackComplete = delegate { };
+
+                        private CallbackEventBridge() {}
+
                         private void CallbackInternal(IAsyncResult result)
-                        { 
-                            CallbackComplete(result); 
-                        } 
- 
+                        {
+                            CallbackComplete(result);
+                        }
+
                         public AsyncCallback Callback
-                        { 
-                            get { return new AsyncCallback(CallbackInternal); } 
-                        } 
- 
+                        {
+                            get { return new AsyncCallback(CallbackInternal); }
+                        }
+
                         public static CallbackEventBridge Create()
-                        { 
-                            return new CallbackEventBridge(); 
-                        } 
-                    } 
+                        {
+                            return new CallbackEventBridge();
+                        }
+                    }
 '@
             }
-    
+
             $bridge = [CallbackEventBridge]::Create()
             Register-ObjectEvent -InputObject $bridge -EventName 'CallbackComplete' -Action $Callback -MessageData $args > $null
             $bridge.Callback
@@ -249,7 +249,7 @@ function Start-Server
 
             .PARAMETER ScriptBlock
                 The code to execute.
-                
+
         #>
         function Invoke-ConsoleCommand
         {
@@ -277,7 +277,7 @@ function Start-Server
                 $message = ('Failed action ''{0}'' on target ''{1}'' (exit code {2}): {3}' -f $Action,$Target,$LASTEXITCODE,$output)
                 Write-Error -Message $message
                 Write-Log -LogFile $LogPath -Message "Error from Invoke-ConsoleCommand: $message"
-            } 
+            }
             else
             {
                 $nonNullOutput = $output | Where-Object { $_ -ne $null }
@@ -309,7 +309,7 @@ function Start-Server
                 [String]
                 $Message
             )
-            
+
             $Message >> $LogFile
         }
 
@@ -333,7 +333,7 @@ function Start-Server
             if ($Https)
             {
                 $HttpListener.Prefixes.Add([Uri]'https://localhost:1243')
-            
+
                 try
                 {
                     Register-SSL
@@ -374,7 +374,7 @@ function Start-Server
 
                 .PARAMETER Result
                     th IAsyncResult containing the listener object and path to the MSI file.
-                    
+
             #>
             $requestListener =
             {
@@ -459,7 +459,7 @@ function Start-Server
             {
                 $fileServerStarted.Dispose()
             }
-            
+
             Write-Log -LogFile $LogPath -Message 'Stopping the Server'
             Stop-Listener -HttpListener $HttpListener -Https $Https
         }
@@ -468,10 +468,10 @@ function Start-Server
     $job = Start-Job -ScriptBlock $server -ArgumentList @( $FilePath, $LogPath, $Https )
 
     <#
-        Return the event object so that client knows when it can start sending requests and 
+        Return the event object so that client knows when it can start sending requests and
         the job object so that the client can stop the job once it is done sending requests.
     #>
-    return @{ 
+    return @{
         FileServerStarted = $fileServerStarted
         Job = $job
     }
@@ -501,7 +501,7 @@ function Stop-Server
         $FileServerStarted,
 
         [System.Management.Automation.Job]
-        $Job  
+        $Job
     )
 
     if ($null -ne $FileServerStarted)
@@ -526,7 +526,7 @@ function Stop-Server
 function New-TestMsi
 {
     [CmdletBinding()]
-    param    
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -1131,7 +1131,7 @@ function Get-LocalizedRegistryKeyValue
     )
 
     $localizedRegistryKeyValue = $RegistryKey.GetValue('{0}_Localized' -f $ValueName)
-    
+
     if ($null -eq $localizedRegistryKeyValue)
     {
         $localizedRegistryKeyValue = $RegistryKey.GetValue($ValueName)
@@ -1176,7 +1176,7 @@ function New-MockFileServer
     netsh advfirewall set allprofiles state off
 
     Start-Job -ArgumentList @( $FilePath ) -ScriptBlock {
-        
+
         # Create certificate
         $certificate = Get-ChildItem -Path 'Cert:\LocalMachine\My' -Recurse | Where-Object { $_.EnhancedKeyUsageList.FriendlyName -eq 'Server Authentication' }
 
@@ -1215,7 +1215,7 @@ function New-MockFileServer
         $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest1' )
         $pipe.Connect()
         $pipe.Dispose()
-        
+
         # Prepare binary buffer for http/https response
         $fileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $args[0] )
         $numBytes = $fileInfo.Length
@@ -1241,7 +1241,7 @@ function New-MockFileServer
         $httpListener.Close()
 
         # Close pipe
-    
+
         # Use net shell command to clean up the certificate binding
         netsh http delete sslcert ipport=0.0.0.0:1243
     }
@@ -1265,7 +1265,7 @@ function New-TestExecutable
         [ValidateNotNullOrEmpty()]
         [String]$DestinationPath
     )
-    
+
     if (Test-Path -Path $DestinationPath)
     {
         Write-Verbose -Message "Removing old executable at $DestinationPath..."

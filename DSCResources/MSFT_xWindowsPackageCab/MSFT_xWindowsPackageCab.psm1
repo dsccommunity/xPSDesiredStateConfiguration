@@ -1,4 +1,4 @@
-﻿Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonResourceHelper.psm1')
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonResourceHelper.psm1')
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsPackageCab'
 
 Import-Module -Name 'Dism'
@@ -67,7 +67,7 @@ function Get-TargetResource
     }
 
     Write-Verbose -Message ($script:localizedData.RetrievingPackage -f $Name)
-    
+
     try
     {
         $windowsPackageInfo = Dism\Get-WindowsPackage @getWindowsPackageParams
@@ -137,10 +137,10 @@ function Set-TargetResource
     {
         New-InvalidArgumentException -ArgumentName 'SourcePath' -Message ($script:localizedData.SourcePathDoesNotExist -f $SourcePath)
     }
-        
+
     if ($Ensure -ieq 'Present')
     {
-        Write-Verbose -Message ($script:localizedData.AddingPackage -f $SourcePath) 
+        Write-Verbose -Message ($script:localizedData.AddingPackage -f $SourcePath)
         Dism\Add-WindowsPackage -PackagePath $SourcePath -LogPath $LogPath -Online
     }
     else
@@ -219,7 +219,7 @@ function Test-TargetResource
     {
         Write-Verbose -Message ($script:localizedData.EnsureStatesDoNotMatch -f $Name)
         return $false
-    } 
+    }
 }
 
 Export-ModuleMember -Function '*-TargetResource'

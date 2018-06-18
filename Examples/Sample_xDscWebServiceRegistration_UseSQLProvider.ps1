@@ -1,4 +1,4 @@
-﻿# DSC configuration for Pull Server using registration with enhanced security settings
+# DSC configuration for Pull Server using registration with enhanced security settings
 
 
 
@@ -16,7 +16,7 @@
 
 #               Registration only works over https protocols. So to use registration feature, a secure pull server setup with certificate is necessary
 
-#              2- Install and Configure SQL Server 
+#              2- Install and Configure SQL Server
 
 
 # The Sample_MetaConfigurationToRegisterWithSecurePullServer register a DSC client node with the pull server
@@ -39,7 +39,7 @@ configuration Sample_xDscWebServiceRegistration_UseSQLProvider
 
 {
 
-    param 
+    param
 
     (
 
@@ -61,10 +61,10 @@ configuration Sample_xDscWebServiceRegistration_UseSQLProvider
 
     )
 
-    
+
 
     Import-DSCResource -ModuleName xPSDesiredStateConfiguration
-    
+
     Node $NodeName
 
     {
@@ -75,7 +75,7 @@ configuration Sample_xDscWebServiceRegistration_UseSQLProvider
 
             Ensure = "Present"
 
-            Name   = "DSC-Service"            
+            Name   = "DSC-Service"
 
         }
 
@@ -93,23 +93,23 @@ configuration Sample_xDscWebServiceRegistration_UseSQLProvider
 
             PhysicalPath            = "$env:SystemDrive\inetpub\PSDSCPullServer"
 
-            CertificateThumbPrint   = $certificateThumbPrint         
+            CertificateThumbPrint   = $certificateThumbPrint
 
             ModulePath              = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
 
-            ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"            
+            ConfigurationPath       = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"
 
             State                   = "Started"
 
-            DependsOn               = "[WindowsFeature]DSCServiceFeature" 
+            DependsOn               = "[WindowsFeature]DSCServiceFeature"
 
-            RegistrationKeyPath     = "$env:PROGRAMFILES\WindowsPowerShell\DscService"   
+            RegistrationKeyPath     = "$env:PROGRAMFILES\WindowsPowerShell\DscService"
 
             AcceptSelfSignedCertificates = $true
 
             UseSecurityBestPractices = $true
 
-            SqlProvider = $true 
+            SqlProvider = $true
 
             SqlConnectionString = "Provider=SQLNCLI11;Data Source=(local)\SQLExpress;User ID=SA;Password=Password12!;Initial Catalog=master;"
 
@@ -197,7 +197,7 @@ configuration Sample_MetaConfigurationToRegisterWithSecurePullServer
 
             ConfigurationNames = @('ClientConfig')
 
-        }   
+        }
 
 
 

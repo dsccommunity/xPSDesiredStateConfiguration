@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Removes the registry key called MyNewKey under the parent key
         'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'.

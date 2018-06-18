@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         If the registry key value MyValue under the key
         'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' does not exist,

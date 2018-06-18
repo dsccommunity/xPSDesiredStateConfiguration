@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Removes the registry key value MyValue from the key
         'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'.

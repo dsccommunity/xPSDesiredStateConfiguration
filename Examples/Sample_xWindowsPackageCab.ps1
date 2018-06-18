@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Installs a package from the cab file with the specified name from the specified source path
         and outputs a log to the specified log path.

@@ -1,4 +1,4 @@
-﻿# Localized MSFT_xArchive.strings.psd1
+# Localized MSFT_xArchive.strings.psd1
 
 ConvertFrom-StringData @'
     RetrievingArchiveState = Retrieving the state of the archive with path {0} and destination {1}...
@@ -13,10 +13,10 @@ ConvertFrom-StringData @'
     DestinationExists = A directory already exists at the destination path {0}.
     DestinationDoesNotExist = A directory does not exist at the destination path {0}.
     CreatingDirectoryAtDestination = Creating the root directory at the destination path {0}...
-    
+
     TestingIfArchiveExistsAtDestination = Testing if the archive at the destination path {0} exists...
     ArchiveExistsAtDestination = The archive at path {0} exists at the destination {1}.
-    ArchiveDoesNotExistAtDestination = The archive at path {0} does not exist at the destination {1}. 
+    ArchiveDoesNotExistAtDestination = The archive at path {0} does not exist at the destination {1}.
 
     OpeningArchive = Opening the archive at path {0}...
     ClosingArchive = Closing the archive at path {0}...
@@ -43,7 +43,7 @@ ConvertFrom-StringData @'
     RemovingFile = Removing the file at path {0}...
     CouldNotRemoveItemOfIncorrectType = The file at {0} does not match the item type (file, directory, or other) or the archive entry at {1}, so it will not be removed.
     ArchiveRemovedFromDestination = Archive removed from the destination path {0}.
-    
+
     ChecksumSpecifiedAndValidateFalse = The Checksum parameter was specified as {0} but the Validate parameter is set to false for the archive with path {1} and destination {2}. Please specify the Validate parameter as true to use the Checksum parameter.
     PathDoesNotContainValidPSDriveRoot = The path {0} cannot be accessed because it does not contain any directories to use as the root of a PSDrive.
     ErrorCreatingPSDrive = An error occurred while attempting to create a PSDrive to access the path {0} under the user {1}.

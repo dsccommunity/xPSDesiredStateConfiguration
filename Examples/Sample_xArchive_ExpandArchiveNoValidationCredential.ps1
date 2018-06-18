@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Expands the archive located at 'C:\ExampleArchivePath\Archive.zip' to the destination path
         'C:\ExampleDestinationPath\Destination'.
@@ -6,7 +6,7 @@
         The added specification of a Credential here allows you to provide the credential of a user
         to provide the resource access to the archive and destination paths.
 
-        The resource will only check if the expanded archive files exist at the destination. 
+        The resource will only check if the expanded archive files exist at the destination.
         No validation is performed on any existing files at the destination to ensure that they
         match the files in the archive.
 #>
