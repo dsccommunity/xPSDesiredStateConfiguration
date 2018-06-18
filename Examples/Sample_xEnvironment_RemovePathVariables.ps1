@@ -1,11 +1,11 @@
-﻿<#
+<#
     .SYNOPSIS
         Removes one or more values from the 'TestPathEnvironmentVariable' environment variable if the values exist.
         Other values of the 'TestPathEnvironmentVariable' environment variable will not be modified. In this
         example, the values 'C:\test456' and 'C:\test123' will be removed, but all other entries
         will be left intact. In this example changes are made to applied the machine and the process.
 #>
-Configuration Sample_xEnvironment_Path_Remove 
+Configuration Sample_xEnvironment_Path_Remove
 {
     param ()
 

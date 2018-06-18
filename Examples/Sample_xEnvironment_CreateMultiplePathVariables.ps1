@@ -1,4 +1,4 @@
-﻿<#
+<#
     .SYNOPSIS
         Ensures that the 'TestPathEnvironmentVariable' environment variable exists and that
         its value includes both "C:\test123" and "C:\test456". If one or both of these values do not exist
@@ -6,7 +6,7 @@
         In this example changes are made to both the machine and the process.
 
 #>
-Configuration Sample_xEnvironment_CreateMultiplePathVariables 
+Configuration Sample_xEnvironment_CreateMultiplePathVariables
 {
     param ()
 
