@@ -26,10 +26,10 @@ Configuration Sample_xArchive_ExpandArchiveNoValidationCredential
     {
         xArchive Archive2
         {
-            Path = 'C:\ExampleArchivePath\Archive.zip'
+            Path        = 'C:\ExampleArchivePath\Archive.zip'
             Destination = 'C:\ExampleDestinationPath\Destination'
-            Credential = $Credential
-            Ensure = 'Present'
+            Credential  = $Credential
+            Ensure      = 'Present'
         }
     }
 }

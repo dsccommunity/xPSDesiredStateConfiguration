@@ -16,8 +16,8 @@ Configuration Sample_xMsiPackage_InstallPackageFromHttp
         xMsiPackage MsiPackage1
         {
             ProductId = '{DEADBEEF-80C6-41E6-A1B9-8BDB8A05027F}'
-            Path = 'http://Examples/example.msi'
-            Ensure = 'Present'
+            Path      = 'http://Examples/example.msi'
+            Ensure    = 'Present'
         }
     }
 }

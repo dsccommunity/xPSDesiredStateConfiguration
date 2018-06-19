@@ -37,13 +37,14 @@ Configuration Sample_xWindowsPackageCab
 
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
-    xWindowsPackageCab WindowsPackageCab1
+    Node localhost
     {
-        Name = $Name
-        Ensure = 'Present'
-        SourcePath = $SourcePath
-        LogPath = $LogPath
+        xWindowsPackageCab WindowsPackageCab1
+        {
+            Name       = $Name
+            Ensure     = 'Present'
+            SourcePath = $SourcePath
+            LogPath    = $LogPath
+        }
     }
 }
-
-Sample_xWindowsPackageCab

@@ -19,11 +19,11 @@ Configuration Sample_xArchive_ExpandArchiveDefaultValidationAndForce
     {
         xArchive Archive3
         {
-            Path = 'C:\ExampleArchivePath\Archive.zip'
+            Path        = 'C:\ExampleArchivePath\Archive.zip'
             Destination = 'C:\ExampleDestinationPath\Destination'
-            Validate = $true
-            Force = $true
-            Ensure = 'Present'
+            Validate    = $true
+            Force       = $true
+            Ensure      = 'Present'
         }
     }
 }

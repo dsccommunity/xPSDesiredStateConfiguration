@@ -19,12 +19,12 @@ Configuration Sample_xArchive_ExpandArchiveChecksumAndForce
     {
         xArchive Archive4
         {
-            Path = 'C:\ExampleArchivePath\Archive.zip'
+            Path        = 'C:\ExampleArchivePath\Archive.zip'
             Destination = 'C:\ExampleDestinationPath\Destination'
-            Validate = $true
-            Checksum = 'SHA-256'
-            Force = $true
-            Ensure = 'Present'
+            Validate    = $true
+            Checksum    = 'SHA-256'
+            Force       = $true
+            Ensure      = 'Present'
         }
     }
 }

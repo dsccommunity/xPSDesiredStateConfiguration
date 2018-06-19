@@ -1,16 +1,20 @@
-Configuration xUserExample
+Configuration Sample_xUser_CreateUser
 {
-    param (
+    param
+    (
         [System.Management.Automation.PSCredential]
         $PasswordCredential
     )
 
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
-    xUser xUserExample
+    Node localhost
     {
-        Ensure = 'Present'  # To ensure the user account does not exist, set Ensure to "Absent"
-        UserName = 'SomeUserName'
-        Password = $PasswordCredential # This needs to be a credential object
+        xUser xUserExample
+        {
+            Ensure   = 'Present'  # To ensure the user account does not exist, set Ensure to "Absent"
+            UserName = 'SomeUserName'
+            Password = $PasswordCredential # This needs to be a credential object
+        }
     }
 }

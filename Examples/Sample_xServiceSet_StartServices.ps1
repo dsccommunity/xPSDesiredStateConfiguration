@@ -2,14 +2,17 @@
     .SYNOPSIS
         Ensures that the DHCP Client and Windows Firewall services are running.
 #>
-Configuration xServiceSetStartExample
+Configuration Sample_xServiceSet_StartServices
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
-    xServiceSet ServiceSet1
+    Node localhost
     {
-        Name   = @( 'Dhcp', 'MpsSvc' )
-        Ensure = 'Present'
-        State  = 'Running'
+        xServiceSet ServiceSet1
+        {
+            Name   = @( 'Dhcp', 'MpsSvc' )
+            Ensure = 'Present'
+            State  = 'Running'
+        }
     }
 }

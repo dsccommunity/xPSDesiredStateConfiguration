@@ -656,6 +656,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 * Changes to xPSDesiredStateConfiguration
   * Opt-in for the common tests validate module files and script files.
   * All files change to encoding UTF-8 (without byte order mark).
+  * Opt-in for the common test for example validation.
 * xEnvironment path documentation update demonstrating usage with multiple values  ([issue #415](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/415). [Alex Kokkinos (@alexkokkinos)](https://github.com/alexkokkinos)
 
 ### 8.3.0.0

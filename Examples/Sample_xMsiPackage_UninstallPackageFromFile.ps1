@@ -21,8 +21,8 @@ Configuration Sample_xMsiPackage_UninstallPackageFromFile
         xMsiPackage MsiPackage1
         {
             ProductId = '{DEADBEEF-80C6-41E6-A1B9-8BDB8A05027F}'
-            Path = 'file://Examples/example.msi'
-            Ensure = 'Absent'
+            Path      = 'file://Examples/example.msi'
+            Ensure    = 'Absent'
         }
     }
 }

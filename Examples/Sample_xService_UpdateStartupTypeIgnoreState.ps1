@@ -10,19 +10,16 @@
 #>
 Configuration Sample_xService_UpdateStartupTypeIgnoreState
 {
-    [CmdletBinding()]
-    param ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     Node localhost
     {
         xService ServiceResource1
         {
-            Name = 'Service1'
-            Ensure = 'Present'
+            Name        = 'Service1'
+            Ensure      = 'Present'
             StartupType = 'Manual'
-            State = 'Ignore'
+            State       = 'Ignore'
         }
     }
 }

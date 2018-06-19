@@ -1,14 +1,20 @@
 <#
     .SYNOPSIS
-        Creates a file at the given file path with the specified content through the xScript resource.
+        Creates a file at the given file path with the specified content through
+        the xScript resource.
+
+    .DESCRIPTION
+        Creates a file at the given file path with the specified content through
+        the xScript resource.
 
     .PARAMETER FilePath
-        The path at which to create the file.
+        The path at which to create the file. Defaults to $env:TEMP.
 
     .PARAMETER FileContent
         The content to set for the new file.
+        Defaults to 'Just some sample text to write to the file'.
 #>
-Configuration xScriptExample {
+Configuration Sample_xScript {
     [CmdletBinding()]
     param
     (
@@ -29,11 +35,12 @@ Configuration xScriptExample {
     {
         xScript ScriptExample
         {
-            SetScript = {
+            SetScript  = {
                 $streamWriter = New-Object -TypeName 'System.IO.StreamWriter' -ArgumentList @( $using:FilePath )
                 $streamWriter.WriteLine($using:FileContent)
                 $streamWriter.Close()
             }
+
             TestScript = {
                 if (Test-Path -Path $using:FilePath)
                 {
@@ -45,7 +52,8 @@ Configuration xScriptExample {
                     return $false
                 }
             }
-            GetScript = {
+
+            GetScript  = {
                 $fileContent = $null
 
                 if (Test-Path -Path $using:FilePath)

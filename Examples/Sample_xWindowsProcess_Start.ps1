@@ -5,21 +5,15 @@
 #>
 Configuration Sample_xWindowsProcess_Start
 {
-    param
-    ()
-
     Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
 
     Node localhost
     {
         xWindowsProcess GPresult
         {
-            Path = 'C:\Windows\System32\gpresult.exe'
+            Path      = 'C:\Windows\System32\gpresult.exe'
             Arguments = '/h C:\gp2.htm'
-            Ensure = 'Present'
+            Ensure    = 'Present'
         }
     }
 }
-
-Sample_xWindowsProcess_Start
-

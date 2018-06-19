@@ -9,15 +9,12 @@
 #>
 Configuration Sample_xGroupSet_AddMembers
 {
-    [CmdletBinding()]
-    param ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     xGroupSet GroupSet
     {
-        GroupName = @( 'Administrators', 'GroupName1' )
-        Ensure = 'Present'
+        GroupName        = @( 'Administrators', 'GroupName1' )
+        Ensure           = 'Present'
         MembersToInclude = @( 'Username1', 'Username2' )
     }
 }
