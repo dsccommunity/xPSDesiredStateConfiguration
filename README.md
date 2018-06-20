@@ -659,6 +659,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Opt-in for the common test for example validation.
   * Added Visual Studio Code workspace settings that helps with formatting
     against the style guideline.
+  * Update all examples for them to be able pass the common test validation.
 * xEnvironment path documentation update demonstrating usage with multiple values  ([issue #415](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/415). [Alex Kokkinos (@alexkokkinos)](https://github.com/alexkokkinos)
 
 ### 8.3.0.0
