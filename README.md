@@ -661,6 +661,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     against the style guideline.
   * Update all examples for them to be able pass the common test validation.
 * xEnvironment path documentation update demonstrating usage with multiple values  ([issue #415](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/415). [Alex Kokkinos (@alexkokkinos)](https://github.com/alexkokkinos)
+* Changes to xWindowsProcess
+  * Increased the wait time in the integration tests since the tests
+    still failed randomly ([issue #420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
 
 ### 8.3.0.0
 
