@@ -14,7 +14,7 @@ Configuration Example
         [String] $SourcePath
     )
 
-    Import-DscResource -Module xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {

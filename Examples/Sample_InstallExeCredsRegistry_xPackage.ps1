@@ -45,7 +45,7 @@ Configuration Example
         [String] $Arguments
     )
 
-    Import-DscResource -Module xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {
