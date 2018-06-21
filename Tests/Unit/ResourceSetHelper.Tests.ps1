@@ -8,7 +8,11 @@ $script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
 $script:moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
 $script:dscResourcesFolderFilePath = Join-Path -Path $script:moduleRootFilePath -ChildPath 'DscResources'
 $script:resourceSetHelperFilePath = Join-Path -Path $script:dscResourcesFolderFilePath -ChildPath "ResourceSetHelper.psm1"
-Import-Module -Name $script:resourceSetHelperFilePath
+
+# Make sure that any lingering copies of the module that is tested are removed.
+Get-Module -Name 'ResourceSetHelper' -All | Remove-Module -Force -ErrorAction SilentlyContinue
+# Import the module that is being tested.
+Import-Module -Name $script:resourceSetHelperFilePath -Force
 
 InModuleScope 'ResourceSetHelper' {
     Describe 'ResourceSetHelper\New-ResourceSetCommonParameterString' {

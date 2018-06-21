@@ -1,22 +1,28 @@
-configuration Sample_xRemoteFile_DownloadFileUsingProxy
+configuration Sample_xRemoteFileUsingProxy
 {
     param
     (
-        [string[]] $nodeName = 'localhost',
+        [string[]]
+        $nodeName = 'localhost',
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $destinationPath,
+        [String]
+        $destinationPath,
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $uri,
+        [String]
+        $uri,
 
-        [String] $userAgent,
+        [String]
+        $userAgent,
 
-        [Hashtable] $headers,
+        [Hashtable]
+        $headers,
 
-        [String] $proxy
+        [String]
+        $proxy
     )
 
     Import-DscResource -Name MSFT_xRemoteFile -ModuleName xPSDesiredStateConfiguration

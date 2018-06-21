@@ -8,21 +8,17 @@
 #>
 Configuration Sample_xEnvironment_CreateMultiplePathVariables
 {
-    param ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     Node localhost
     {
         xEnvironment CreateMultiplePathEnvironmentVariables
         {
-            Name = 'TestPathEnvironmentVariable'
-            Value = 'C:\test123;C:\test456;C:\test789'
+            Name   = 'TestPathEnvironmentVariable'
+            Value  = 'C:\test123;C:\test456;C:\test789'
             Ensure = 'Present'
-            Path = $true
+            Path   = $true
             Target = @('Process', 'Machine')
         }
     }
 }
-
-Sample_xEnvironment_CreateMultiplePathVariables

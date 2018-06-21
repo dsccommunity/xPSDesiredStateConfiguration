@@ -1,34 +1,34 @@
-<# 
+<#
 Simple installer for an msi package that matches via the Name.
 #>
-
-param
-(
-    [String]$OutputPath = ".",
-
-    [parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String] $PackageName,
-
-    [parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String] $SourcePath
-)
-
-Configuration Sample
+Configuration Example
 {
-    Import-DscResource -Module xPSDesiredStateConfiguration
+    param
+    (
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $PackageName,
 
-    xPackage t1
+        [parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String] $SourcePath
+    )
+
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
+    Node localhost
     {
-        Ensure="Present"
-    Name = $PackageName
-        Path = $SourcePath
-        ProductId = ""
+        xPackage t1
+        {
+            Ensure    = "Present"
+            Name      = $PackageName
+            Path      = $SourcePath
+            ProductId = ""
+        }
     }
 }
 
-<# 
+<#
 Sample use (parameter values need to be changed according to your scenario):
 
 # Create the MOF file using the configuration data

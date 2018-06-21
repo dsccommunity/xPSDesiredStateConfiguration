@@ -10,19 +10,15 @@
 #>
 Configuration Sample_xService_CreateService
 {
-    [CmdletBinding()]
-    param
-    ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     Node localhost
     {
         xService ServiceResource1
         {
-            Name = 'Service1'
+            Name   = 'Service1'
             Ensure = 'Present'
-            Path = 'C:\FilePath\MyServiceExecutable.exe'
+            Path   = 'C:\FilePath\MyServiceExecutable.exe'
         }
     }
 }

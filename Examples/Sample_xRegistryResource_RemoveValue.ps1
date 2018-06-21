@@ -11,8 +11,8 @@ Configuration Sample_xRegistryResource_RemoveValue
     {
         xRegistry Registry1
         {
-            Key = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-            Ensure = 'Absent'
+            Key       = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+            Ensure    = 'Absent'
             ValueName = 'MyValue'
         }
     }

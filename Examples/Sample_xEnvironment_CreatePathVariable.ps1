@@ -6,21 +6,17 @@
 #>
 Configuration Sample_xEnvironment_CreatePathVariable
 {
-    param ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     Node localhost
     {
         xEnvironment CreatePathEnvironmentVariable
         {
-            Name = 'TestPathEnvironmentVariable'
-            Value = 'TestValue'
+            Name   = 'TestPathEnvironmentVariable'
+            Value  = 'TestValue'
             Ensure = 'Present'
-            Path = $true
+            Path   = $true
             Target = @('Process', 'Machine')
         }
     }
 }
-
-Sample_xEnvironment_CreatePathVariable

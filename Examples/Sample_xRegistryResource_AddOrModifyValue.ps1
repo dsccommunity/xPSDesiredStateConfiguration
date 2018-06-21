@@ -16,12 +16,12 @@ Configuration Sample_xRegistryResource_AddOrModifyValue
     {
         xRegistry Registry1
         {
-            Key = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-            Ensure = 'Present'
+            Key       = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+            Ensure    = 'Present'
             ValueName = 'MyValue'
             ValueType = 'Binary'
             ValueData = '0x00'
-            Force = $true
+            Force     = $true
         }
     }
 }

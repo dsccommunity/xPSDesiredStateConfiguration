@@ -1,20 +1,29 @@
-configuration Sample_xRemoteFile_DownloadFile
+<#
+    .EXAMPLE
+    Sample_xRemoteFile_DownloadFile
+#>
+configuration Sample_xRemoteFile
 {
     param
     (
-        [string[]] $nodeName = 'localhost',
+        [string[]]
+        $nodeName = 'localhost',
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $destinationPath,
+        [String]
+        $destinationPath,
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String] $uri,
+        [String]
+        $uri,
 
-        [String] $userAgent,
+        [String]
+        $userAgent,
 
-        [Hashtable] $headers
+        [Hashtable]
+        $headers
     )
 
     Import-DscResource -Name MSFT_xRemoteFile -ModuleName xPSDesiredStateConfiguration
@@ -24,14 +33,14 @@ configuration Sample_xRemoteFile_DownloadFile
         xRemoteFile DownloadFile
         {
             DestinationPath = $destinationPath
-            Uri = $uri
-            UserAgent = $userAgent
-            Headers = $headers
+            Uri             = $uri
+            UserAgent       = $userAgent
+            Headers         = $headers
         }
     }
 }
 
-<# 
+<#
 Sample use (parameter values need to be changed according to your scenario):
 
 Sample_xRemoteFile_DownloadFile -destinationPath "$env:SystemDrive\fileName.jpg" -uri "http://www.contoso.com/image.jpg"

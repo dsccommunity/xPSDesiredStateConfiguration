@@ -15,11 +15,11 @@ Configuration Sample_xArchive_RemoveArchiveChecksum
     {
         xArchive Archive6
         {
-            Path = 'C:\ExampleArchivePath\Archive.zip'
+            Path        = 'C:\ExampleArchivePath\Archive.zip'
             Destination = 'C:\ExampleDestinationPath\Destination'
-            Validate = $true
-            Checksum = 'SHA-256'
-            Ensure = 'Absent'
+            Validate    = $true
+            Checksum    = 'SHA-256'
+            Ensure      = 'Absent'
         }
     }
 }

@@ -7,15 +7,12 @@
 #>
 Configuration Sample_xGroup_RemoveMembers
 {
-    [CmdletBinding()]
-    param ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     xGroup Group1
     {
-        GroupName = 'GroupName1'
-        Ensure = 'Present'
+        GroupName        = 'GroupName1'
+        Ensure           = 'Present'
         MembersToExclude = @( 'Username1', 'Username2' )
     }
 }

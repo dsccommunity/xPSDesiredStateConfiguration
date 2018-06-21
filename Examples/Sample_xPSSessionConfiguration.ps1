@@ -1,16 +1,21 @@
-configuration Sample_xPSEndpoint_NewWithDefaults
+<#
+    .SYNOPSIS
+        Creates a new xPSEndpoint using default values.
+#>
+configuration Example # Sample_xPSEndpoint_NewWithDefaults
 {
     param
     (
         [Parameter(Mandatory)]
-        [String]$Name
+        [String]
+        $Name
     )
 
     Import-DscResource -module xPSDesiredStateConfiguration
 
     xPSEndpoint PSSessionConfiguration
     {
-        Name = $Name
+        Name   = $Name
         Ensure = 'Present'
     }
 }
@@ -32,32 +37,36 @@ configuration Sample_xPSEndpoint_RemoveEP
     param
     (
         [Parameter(Mandatory)]
-        [String]$Name
+        [String]
+        $Name
     )
     Import-DscResource -module xPSDesiredStateConfiguration
 
     xPSEndpoint PSSessionConfiguration
     {
-        Name       = $Name
-        Ensure     = 'Absent'
+        Name   = $Name
+        Ensure = 'Absent'
     }
 }
-
 
 configuration Sample_xPSEndpoint_NewWithRunAsandStartupAndCustomSDDLAndLocalAccess
 {
     param
     (
         [Parameter(Mandatory)]
-        [String]$Name,
+        [String]
+        $Name,
 
         [Parameter(Mandatory)]
-        [PSCredential]$RunAs,
+        [PSCredential]
+        $RunAs,
 
-        [String]$SDDL = 'Default',
+        [String]
+        $SDDL = 'Default',
 
         [Parameter(Mandatory)]
-        [String]$StartupScript
+        [String]
+        $StartupScript
     )
     Import-DscResource -module xPSDesiredStateConfiguration
 
@@ -70,7 +79,7 @@ configuration Sample_xPSEndpoint_NewWithRunAsandStartupAndCustomSDDLAndLocalAcce
             AccessMode             = 'Local'
             RunAsCredential        = $RunAs
             SecurityDescriptorSDDL = $SDDL
-            StartupScriptPath      = $StartupScript 
+            StartupScript          = $StartupScript
         }
     }
 }

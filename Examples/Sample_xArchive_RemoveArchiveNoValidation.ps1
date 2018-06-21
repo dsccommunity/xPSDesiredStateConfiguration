@@ -15,9 +15,9 @@ Configuration Sample_xArchive_RemoveArchiveNoValidation
     {
         xArchive Archive5
         {
-            Path = 'C:\ExampleArchivePath\Archive.zip'
+            Path        = 'C:\ExampleArchivePath\Archive.zip'
             Destination = 'C:\ExampleDestinationPath\Destination'
-            Ensure = 'Absent'
+            Ensure      = 'Absent'
         }
     }
 }

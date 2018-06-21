@@ -27,12 +27,13 @@ Configuration Sample_xWindowsOptionalFeature
 
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
-    xWindowsOptionalFeature TelnetClient
+    Node localhost
     {
-        Name = $FeatureName
-        Ensure = 'Present'
-        LogPath = $LogPath
+        xWindowsOptionalFeature TelnetClient
+        {
+            Name    = $FeatureName
+            Ensure  = 'Present'
+            LogPath = $LogPath
+        }
     }
 }
-
-Sample_xWindowsOptionalFeature

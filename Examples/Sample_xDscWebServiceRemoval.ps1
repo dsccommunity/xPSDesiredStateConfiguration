@@ -1,10 +1,11 @@
 # DSC configuration for removal of Pull Server and Compliance Server
 
-configuration Sample_xDscWebService
+configuration Sample_xDscWebServiceRemoval
 {
-    param 
+    param
     (
-        [string[]]$NodeName = 'localhost'
+        [string[]]
+        $NodeName = 'localhost'
     )
 
     Import-DSCResource -ModuleName xPSDesiredStateConfiguration
@@ -14,15 +15,15 @@ configuration Sample_xDscWebService
         WindowsFeature DSCServiceFeature
         {
             Ensure = "Present"
-            Name   = "DSC-Service"            
+            Name   = "DSC-Service"
         }
 
         xDscWebService PSDSCPullServer
         {
-            Ensure                  = "Absent"
-            EndpointName            = "PSDSCPullServer"
-            CertificateThumbPrint   = "notNeededForRemoval"
+            Ensure                   = "Absent"
+            EndpointName             = "PSDSCPullServer"
+            CertificateThumbPrint    = "notNeededForRemoval"
             UseSecurityBestPractices = $false
         }
     }
- }
+}

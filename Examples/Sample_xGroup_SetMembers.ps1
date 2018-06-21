@@ -9,15 +9,12 @@
 #>
 Configuration Sample_xGroup_SetMembers
 {
-    [CmdletBinding()]
-    param ()
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
     xGroup Group1
     {
         GroupName = 'GroupName1'
-        Ensure = 'Present'
-        Members = @( 'Username1', 'Username2' )
+        Ensure    = 'Present'
+        Members   = @( 'Username1', 'Username2' )
     }
 }

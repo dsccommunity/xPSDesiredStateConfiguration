@@ -1,26 +1,31 @@
-Configuration FileUploadConfiguration
+Configuration Sample_xFileUpload
 {
-param (
-    [parameter(Mandatory = $true)]
-    [String] $destinationPath,
-    [parameter(Mandatory = $true)]
-    [String] $sourcePath,
-    [PSCredential] $credential,
-    [String] $certificateThumbprint
-)
+    param (
+        [parameter(Mandatory = $true)]
+        [String]
+        $destinationPath,
 
-Import-DscResource -modulename xPSDesiredStateConfiguration
-node localhost 
-{
-    xFileUpload fileUpload 
+        [parameter(Mandatory = $true)]
+        [String]
+        $sourcePath,
+
+        [PSCredential] $credential,
+        [String]
+        $certificateThumbprint
+    )
+
+    Import-DscResource -modulename xPSDesiredStateConfiguration
+
+    node localhost
     {
-        destinationPath = $destinationPath
-        sourcePath = $sourcePath
-        credential = $credential
-        certificateThumbprint = $certificateThumbprint
+        xFileUpload fileUpload
+        {
+            destinationPath       = $destinationPath
+            sourcePath            = $sourcePath
+            credential            = $credential
+            certificateThumbprint = $certificateThumbprint
+        }
     }
-}
-
 }
 
 #Sample use (please change values of parameters according to your scenario):

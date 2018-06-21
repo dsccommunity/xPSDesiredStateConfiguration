@@ -1,8 +1,8 @@
 param
 (
-    [Parameter(Mandatory)]
+    [Parameter()]
     [System.String]
-    $ConfigurationName
+    $ConfigurationName = 'Sample_xUser_Generic'
 )
 
 <#
@@ -13,7 +13,6 @@ param
     every param except username can be deleted since they
     are optional.
 #>
-
 Configuration $ConfigurationName
 {
     param
@@ -31,7 +30,7 @@ Configuration $ConfigurationName
         [System.String]
         $Ensure = 'Present',
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.PSCredential]
         $Password,
 
@@ -50,18 +49,18 @@ Configuration $ConfigurationName
 
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
-    Node Localhost {
-
+    Node localhost
+    {
         xUser UserResource1
         {
-            UserName = $UserName
-            Ensure = $Ensure
-            FullName = $FullName
-            Description = $Description
-            Password = $Password
-            Disabled = $Disabled
-            PasswordNeverExpires = $PasswordNeverExpires
-            PasswordChangeRequired = $PasswordChangeRequired
+            UserName                 = $UserName
+            Ensure                   = $Ensure
+            FullName                 = $FullName
+            Description              = $Description
+            Password                 = $Password
+            Disabled                 = $Disabled
+            PasswordNeverExpires     = $PasswordNeverExpires
+            PasswordChangeRequired   = $PasswordChangeRequired
             PasswordChangeNotAllowed = $PasswordChangeNotAllowed
         }
     }
