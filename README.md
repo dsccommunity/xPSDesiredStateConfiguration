@@ -664,6 +664,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 * Changes to xWindowsProcess
   * Increased the wait time in the integration tests since the tests
     still failed randomly ([issue #420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
+* Renamed and updated examples to be able to publish them to PowerShell Gallery.
+  * Sample_xScript.ps1 → xScript_WatchFileContentConfig.ps1
+  * Sample_xService_UpdateStartupTypeIgnoreState.ps1 → xService_UpdateStartupTypeIgnoreStateConfig.ps1
 
 ### 8.3.0.0
 
