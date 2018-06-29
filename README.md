@@ -199,10 +199,10 @@ None
 
 #### Examples
 
-* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Start.ps1)
-* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Stop.ps1)
-* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StartUnderUser.ps1)
-* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StopUnderUser.ps1)
+* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StartProcessConfig.ps1)
+* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StopProcessConfig.ps1)
+* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StartProcessUnderUserConfig.ps1)
+* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StopProcessUnderUserConfig.ps1)
 
 ### xProcessSet
 
@@ -502,7 +502,9 @@ None
 
 #### Examples
 
-* [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
+* [Create a new local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_CreateUserConfig.ps1)
+* [Remove a local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_RemoveUserConfig.ps1)
+* [Create a new detailed local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_CreateUserDetailedConfig.ps1)
 
 ### xWindowsFeature
 
@@ -528,7 +530,10 @@ Provides a mechanism to install or uninstall Windows roles or features on a targ
 
 #### Examples
 
-* [Install or uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeature.ps1)
+* [Install a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureConfig.ps1)
+* [Uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_RemoveFeatureConfig.ps1)
+* [Install a Windows feature using credentials](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureUsingCredentialConfig.ps1)
+* [Install a Windows feature, output the log to file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureWithLogPathConfig.ps1)
 
 ### xWindowsFeatureSet
 
@@ -554,8 +559,8 @@ Provides a mechanism to configure and manage multiple xWindowsFeature resources 
 
 #### Examples
 
-* [Install multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeatureSet_Install.ps1)
-* [Uninstall multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeatureSet_Uninstall.ps1)
+* [Install multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeatureSet_AddFeaturesConfig.ps1)
+* [Uninstall multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeatureSet_RemoveFeaturesConfig.ps1)
 
 ### xWindowsOptionalFeature
 
@@ -668,6 +673,20 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 * Renamed and updated examples to be able to publish them to PowerShell Gallery.
   * Sample\_xScript.ps1 → xScript\_WatchFileContentConfig.ps1
   * Sample\_xService\_UpdateStartupTypeIgnoreState.ps1 → xService\_UpdateStartupTypeIgnoreStateConfig.ps1
+  * Sample_xWindowsProcess_Start.ps1 → xWindowsProcess_StartProcessConfig.ps1
+  * Sample_xWindowsProcess_StartUnderUser.ps1 → xWindowsProcess_StartProcessUnderUserConfig.ps1
+  * Sample_xWindowsProcess_Stop.ps1 → xWindowsProcess_StopProcessConfig.ps1
+  * Sample_xWindowsProcess_StopUnderUser.ps1 → xWindowsProcess_StopProcessUnderUserConfig.ps1
+  * Sample_xUser_CreateUser.ps1.ps1 → xUser_CreateUserConfig.ps1
+  * Sample_xUser_Generic.ps1.ps1 → xUser_CreateUserDetailedConfig.ps1
+  * Sample_xWindowsFeature.ps1 → xWindowsFeature_AddFeature.ps1
+  * Sample_xWindowsFeatureSet_Install.ps1 → xWindowsFeatureSet_AddFeaturesConfig.ps1
+  * Sample_xWindowsFeatureSet_Uninstall.ps1 → xWindowsFeatureSet_RemoveFeaturesConfig.ps1
+* New examples:
+  * xUser_RemoveUserConfig.ps1
+  * xWindowsFeature_AddFeatureUsingCredentialConfig.ps1
+  * xWindowsFeature_AddFeatureWithLogPathConfig.ps1
+  * xWindowsFeature_RemoveFeatureConfig.ps1
 
 ### 8.3.0.0
 
