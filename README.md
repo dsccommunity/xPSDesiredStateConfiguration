@@ -270,8 +270,9 @@ None
 
 #### Examples
 
-* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_CreateService.ps1)
-* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_DeleteService.ps1)
+* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_CreateServiceConfig.ps1)
+* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_RemoveServiceConfig.ps1)
+* [Change the state of a service to started or stopped](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_ChangeServiceStateConfig.ps1.ps1)
 * [Update startup type for a service, and ignoring the current state](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_UpdateStartupTypeIgnoreStateConfig.ps1)
 
 ### xServiceSet
@@ -300,8 +301,8 @@ None
 
 #### Examples
 
-* [Ensure that multiple services are running](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xServiceSet_StartServices.ps1)
-* [Set multiple services to run under the built-in account LocalService](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xServiceSet_BuiltInAccount.ps1)
+* [Ensure that multiple services are running](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xServiceSet_StartServicesConfig.ps1)
+* [Set multiple services to run under the built-in account LocalService](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xServiceSet_EnsureBuiltInAccountConfig.ps1)
 
 ### xRemoteFile
 
@@ -465,10 +466,10 @@ None
 
 #### Examples
 
-* [Add a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_AddKey.ps1)
-* [Add or modify a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_AddOrModifyValue.ps1)
-* [Remove a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_RemoveValue.ps1)
-* [Remove a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_RemoveKey.ps1)
+* [Add a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_AddKeyConfig.ps1)
+* [Add or modify a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_AddOrModifyValueConfig.ps1)
+* [Remove a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_RemoveValueConfig.ps1)
+* [Remove a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_RemoveKeyConfig.ps1)
 
 ### xUser
 
@@ -682,11 +683,20 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Sample_xWindowsFeature.ps1 → xWindowsFeature_AddFeature.ps1
   * Sample_xWindowsFeatureSet_Install.ps1 → xWindowsFeatureSet_AddFeaturesConfig.ps1
   * Sample_xWindowsFeatureSet_Uninstall.ps1 → xWindowsFeatureSet_RemoveFeaturesConfig.ps1
+  * Sample_xRegistryResource_AddKey.ps1 → xRegistryResource_AddKeyConfig.ps1
+  * Sample_xRegistryResource_RemoveKey.ps1 → xRegistryResource_RemoveKeyConfig.ps1
+  * Sample_xRegistryResource_AddOrModifyValue.ps1 → xRegistryResource_AddOrModifyValueConfig.ps1
+  * Sample_xRegistryResource_RemoveValue.ps1 → xRegistryResource_RemoveValueConfig.ps1
+  * Sample_xService_CreateService.ps1 → xService_CreateServiceConfig.ps1
+  * Sample_xService_DeleteService.ps1 → xService_RemoveServiceConfig.ps1
+  * Sample_xServiceSet_StartServices.ps1 → xServiceSet_StartServicesConfig.ps1
+  * Sample_xServiceSet_BuiltInAccount → xServiceSet_EnsureBuiltInAccountConfig.ps1
 * New examples:
   * xUser_RemoveUserConfig.ps1
   * xWindowsFeature_AddFeatureUsingCredentialConfig.ps1
   * xWindowsFeature_AddFeatureWithLogPathConfig.ps1
   * xWindowsFeature_RemoveFeatureConfig.ps1
+  * xService_ChangeServiceStateConfig.ps1
 
 ### 8.3.0.0
 
