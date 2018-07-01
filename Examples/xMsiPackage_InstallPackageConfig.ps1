@@ -42,7 +42,7 @@
         The product ID and path value in this file are provided for example
         purposes only and will need to be replaced with valid values.
 
-        You can run the following command to get a list of all available MSIs on
+        You can run the following command to get a list of all available MSI's on
         your system with the correct Path (LocalPackage) and product ID (IdentifyingNumber):
 
         Get-WmiObject Win32_Product | Format-Table IdentifyingNumber, Name, LocalPackage
