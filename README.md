@@ -139,8 +139,8 @@ None
 
 #### Examples
 
-* [Remove members from a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_RemoveMembers.ps1)
-* [Set the members of a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_SetMembers.ps1)
+* [Remove members from a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroup_RemoveMembersConfig.ps1)
+* [Set the members of a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroup_SetMembersConfig.ps1)
 
 ### xGroupSet
 
@@ -167,7 +167,7 @@ None
 
 #### Examples
 
-* [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroupSet_AddMembers.ps1)
+* [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroupSet_AddMembersConfig.ps1)
 
 ### xWindowsProcess
 
@@ -737,6 +737,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Sample_xMsiPackage_UninstallPackageFromHttps.ps1 → xMsiPackage_UninstallPackageFromHttpsConfig.ps1
   * Sample_xMsiPackage_UninstallPackageFromFile.ps1 → xMsiPackage_UninstallPackageFromFileConfig.ps1
   * Sample_xMsiPackage_InstallPackageFromFile → xMsiPackage_InstallPackageConfig.ps1
+  * Sample_xGroup_SetMembers.ps1 → xGroup_SetMembersConfig.ps1
+  * Sample_xGroup_RemoveMembers.ps1 → xGroup_RemoveMembersConfig.ps1
+  * Sample_xGroupSet_AddMembers.ps1 → xGroupSet_AddMembersConfig.ps1
 * New examples
   * xUser_RemoveUserConfig.ps1
   * xWindowsFeature_AddFeatureUsingCredentialConfig.ps1

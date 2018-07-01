@@ -46,10 +46,10 @@ Configuration xService_ChangeServiceStateConfig
         [System.String]
         $Name,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateSet('Running', 'Stopped')]
         [System.String]
-        $State
+        $State = 'Running'
     )
 
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'

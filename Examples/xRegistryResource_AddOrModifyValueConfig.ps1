@@ -103,11 +103,11 @@ Configuration xRegistryResource_AddOrModifyValueConfig
 
         [Parameter()]
         [System.Boolean]
-        $HexValue,
+        $HexValue = $false,
 
         [Parameter()]
         [System.Boolean]
-        $OverwriteExisting
+        $OverwriteExisting = $false
     )
 
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'

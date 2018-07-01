@@ -101,7 +101,6 @@ configuration xRemoteFile_DownloadFileConfig
             Uri             = $Uri
             UserAgent       = $UserAgent
             Headers         = $Headers
-            Proxy           = $Proxy
         }
     }
 }
