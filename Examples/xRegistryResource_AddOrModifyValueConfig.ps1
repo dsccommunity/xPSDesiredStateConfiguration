@@ -36,7 +36,7 @@
         The data to set as the registry key value.
 
     .PARAMETER ValueType
-        The type of the value to set.
+        The type of the value to set. Defaults to 'String'.
         { String | Binary | DWord | QWord | MultiString | ExpandString }
 
     .PARAMETER Hex
@@ -99,7 +99,7 @@ Configuration xRegistryResource_AddOrModifyValueConfig
         [Parameter()]
         [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [System.String]
-        $ValueType,
+        $ValueType = 'String',
 
         [Parameter()]
         [System.Boolean]

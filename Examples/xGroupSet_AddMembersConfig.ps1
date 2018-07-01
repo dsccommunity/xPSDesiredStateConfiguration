@@ -73,11 +73,11 @@ Configuration xGroupSet_AddMembersConfig
 
     Node localhost
     {
-        xGroup 'AddMembers'
+        xGroupSet 'AddMembers'
         {
-            GroupName = $Name
-            Ensure    = 'Present'
-            MembersToInclude   = $MembersToInclude
+            GroupName        = $Name
+            Ensure           = 'Present'
+            MembersToInclude = $MembersToInclude
         }
     }
 }
