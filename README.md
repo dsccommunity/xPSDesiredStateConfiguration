@@ -236,8 +236,8 @@ The following parameters will be the same for each process in the set:
 
 #### Examples
 
-* [Start multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Start.ps1)
-* [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Stop.ps1)
+* [Start multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xProcessSet_StartProcessConfig.ps1)
+* [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xProcessSet_StopProcessConfig.ps1)
 
 ### xService
 
@@ -317,6 +317,11 @@ None
 * **ProxyCredential**: Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter. Optional.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read only property.
 
+#### Examples
+
+* [Download a file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileConfig.ps1)
+* [Download a file using proxy](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileUsingProxy.ps1)
+
 ### xPackage
 
 * **Ensure**: Ensures that the package is **Present** or **Absent**.
@@ -344,6 +349,36 @@ None
 * **Size**: Size of the installation.
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
+
+### xPSEndpoint (xPSSessionConfiguration)
+
+Creates and registers a new session configuration endpoint.
+
+* **Ensure**: Indicates if the session configuration is **Present** or **Absent**.
+* **Name**: Specifies the name of the session configuration.
+* **StartupScript**: Specifies the startup script for the configuration. Enter
+  the fully qualified path of a Windows PowerShell script.
+* **RunAsCredential**: Specifies the credential for commands of this session
+  configuration. By default, commands run with the permissions of the current user.
+* **SecurityDescriptorSDDL**: Specifies the Security Descriptor Definition
+  Language (SDDL) string for the configuration. This string determines the
+  permissions that are required to use the new session configuration. To use a
+  session configuration in a session, users must have at least Execute(Invoke)
+  permission for the configuration.
+* **AccessMode**: Enables and disables the session configuration and determines
+  whether it can be used for remote or local sessions on the computer. The
+  default value is "Remote". { Local | *Remote* | Disabled }
+
+### Read-Only Properties from Get-TargetResource
+
+*None.*
+
+#### Examples
+
+* [Register a new session configuration endpoint with optional access mode](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewConfig.ps1)
+* [Register a new session configuration endpoint with default values](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewWithDefaultsConfig.ps1)
+* [Register a new session configuration endpoint with custom values](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewCustomConfig.ps1)
+* [Removes an existing session configuration endpoint](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_RemoveConfig.ps1)
 
 ### xMsiPackage
 
@@ -380,10 +415,9 @@ None
 
 #### Examples
 
-* [Install the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromFile.ps1)
-* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UninstallPackageFromFile.ps1)
-* [Install the MSI file with the given ID at the given HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromHttp.ps1)
-* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UnstallPackageFromHttps.ps1)
+* [Install the MSI file with the given ID at the given file path or HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_InstallPackageConfig.ps1)
+* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_UninstallPackageFromFileConfig.ps1)
+* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_UninstallPackageFromHttpsConfig.ps1)
 
 ### xFileUpload
 
@@ -590,7 +624,8 @@ This resource works on Nano Server.
 
 #### Examples
 
-* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
+* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeature_EnableConfig.ps1)
+* [Disables the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeature_DisableConfig.ps1)
 
 ### xWindowsOptionalFeatureSet
 
@@ -620,8 +655,8 @@ None
 
 #### Examples
 
-* [Enable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeatureSet_Enable.ps1)
-* [Disable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeatureSet_Disable.ps1)
+* [Enable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeatureSet_EnableConfig.ps1)
+* [Disable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeatureSet_DisableConfig.ps1)
 
 ### xWindowsPackageCab
 Provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
@@ -644,7 +679,7 @@ None
 
 #### Examples
 
-* [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsPackageCab.ps1)
+* [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsPackageCab_InstallPackageConfig.ps1)
 
 ## Functions
 
@@ -691,12 +726,33 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Sample_xService_DeleteService.ps1 → xService_RemoveServiceConfig.ps1
   * Sample_xServiceSet_StartServices.ps1 → xServiceSet_StartServicesConfig.ps1
   * Sample_xServiceSet_BuiltInAccount → xServiceSet_EnsureBuiltInAccountConfig.ps1
-* New examples:
+  * Sample_xWindowsPackageCab → xWindowsPackageCab_InstallPackageConfig
+  * Sample_xWindowsOptionalFeature.ps1 → xWindowsOptionalFeature_EnableConfig.ps1
+  * Sample_xWindowsOptionalFeatureSet_Enable.ps1 → xWindowsOptionalFeatureSet_EnableConfig.ps1
+  * Sample_xWindowsOptionalFeatureSet_Disable.ps1 → xWindowsOptionalFeatureSet_DisableConfig.ps1
+  * Sample_xRemoteFileUsingProxy.ps1 → xRemoteFile_DownloadFileUsingProxy.ps1
+  * Sample_xRemoteFile.ps1 → xRemoteFile_DownloadFileConfig.ps1
+  * Sample_xProcessSet_Start.ps1 → xProcessSet_StartProcessConfig.ps1
+  * Sample_xProcessSet_Stop.ps1 → xProcessSet_StopProcessConfig.ps1
+  * Sample_xMsiPackage_UninstallPackageFromHttps.ps1 → xMsiPackage_UninstallPackageFromHttpsConfig.ps1
+  * Sample_xMsiPackage_UninstallPackageFromFile.ps1 → xMsiPackage_UninstallPackageFromFileConfig.ps1
+  * Sample_xMsiPackage_InstallPackageFromFile → xMsiPackage_InstallPackageConfig.ps1
+* New examples
   * xUser_RemoveUserConfig.ps1
   * xWindowsFeature_AddFeatureUsingCredentialConfig.ps1
   * xWindowsFeature_AddFeatureWithLogPathConfig.ps1
   * xWindowsFeature_RemoveFeatureConfig.ps1
   * xService_ChangeServiceStateConfig.ps1
+  * xWindowsOptionalFeature_DisableConfig.ps1
+  * xPSEndpoint_NewConfig.ps1
+  * xPSEndpoint_NewWithDefaultsConfig.ps1
+  * xPSEndpoint_RemoveConfig.ps1
+  * xPSEndpoint_NewCustomConfig.ps1
+* Removed examples
+  * Sample_xPSSessionConfiguration.ps1 - This file was split up in several examples,
+    those starting with 'xPSEndpoint*'.
+  * Sample_xMsiPackage_InstallPackageFromHttp - This was added to the example
+    xMsiPackage_InstallPackageConfig.ps1 so the example sows either URI scheme.
 
 ### 8.3.0.0
 

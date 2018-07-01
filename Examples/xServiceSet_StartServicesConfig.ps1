@@ -34,7 +34,6 @@
         Windows Firewall services are running.
 
     .EXAMPLE
-        xServiceSet_StartServicesConfig -Name @('Dhcp', 'MpsSvc')
         Start-AzureRmAutomationDscCompilationJob -ResourceGroupName '<resource-group>' -AutomationAccountName '<automation-account>' -ConfigurationName 'xServiceSet_StartServicesConfig' -Parameters @{ Name = @('Dhcp', 'MpsSvc') }
 
         Compiles a configuration in Azure Automation that ensures that the
@@ -56,7 +55,7 @@ Configuration xServiceSet_StartServicesConfig
 
     Node localhost
     {
-        xServiceSet ServiceSet1
+        xServiceSet 'StartServices'
         {
             Name   = $Name
             Ensure = 'Present'

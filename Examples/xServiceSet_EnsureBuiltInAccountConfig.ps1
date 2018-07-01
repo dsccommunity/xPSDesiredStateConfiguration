@@ -40,7 +40,7 @@ Configuration xServiceSet_EnsureBuiltInAccountConfig
 
     Node localhost
     {
-        xServiceSet ServiceSet1
+        xServiceSet 'EnsureBuiltInAccount'
         {
             Name           = @('SstpSvc', 'Dhcp')
             Ensure         = 'Present'
