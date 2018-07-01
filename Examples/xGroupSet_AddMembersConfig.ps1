@@ -30,7 +30,7 @@
     .PARAMETER Name
         The name of one or more groups to add members to.
 
-    .PARAMETER Members
+    .PARAMETER MembersToInclude
         One or more usernames of the users that should be added as members of the
         group.
 
@@ -77,7 +77,7 @@ Configuration xGroupSet_AddMembersConfig
         {
             GroupName = $Name
             Ensure    = 'Present'
-            MembersToInclude   = $Members
+            MembersToInclude   = $MembersToInclude
         }
     }
 }
