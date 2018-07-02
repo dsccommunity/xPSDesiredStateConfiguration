@@ -69,7 +69,7 @@ Configuration xPackage_InstallMsiUsingProductIdConfig
         {
             Ensure    = "Present"
             Name      = $PackageName
-            Path      = $SourcePath
+            Path      = $Path
             ProductId = $ProductId
         }
     }
