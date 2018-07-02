@@ -90,12 +90,12 @@ None
 
 #### Examples
 
-* [Expand an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveNoValidation.ps1)
-* [Expand an archive under a credential without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveNoValidationCredential.ps1)
-* [Expand an archive with default file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveDefaultValidationAndForce.ps1)
-* [Expand an archive with SHA-256 file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveChecksumAndForce.ps1)
-* [Remove an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_RemoveArchiveNoValidation.ps1)
-* [Remove an archive with SHA-256 file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_RemoveArchiveChecksum.ps1)
+* [Expand an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveNoValidationConfig.ps1)
+* [Expand an archive under a credential without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveNoValidationCredentialConfig.ps1)
+* [Expand an archive with default file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveDefaultValidationAndForceConfig.ps1)
+* [Expand an archive with SHA-256 file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveChecksumAndForceConfig.ps1)
+* [Remove an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_RemoveArchiveNoValidationConfig.ps1)
+* [Remove an archive with SHA-256 file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_RemoveArchiveChecksumConfig.ps1)
 
 ### xDscWebService
 
@@ -340,6 +340,11 @@ None
 * **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
 * **RunAsCredential**: Credential used to install the package on the local system.
+* **CreateCheckRegValue**: If a registry value should be created.
+* **InstalledCheckRegHive**: The hive in which to create the registry key. Defaults to 'LocalMachine'. { LocalMachine | CurrentUser }
+* **InstalledCheckRegKey**: That path in the registry where the value should be created.
+* **InstalledCheckRegValueName**: The name of the registry value to create.
+* **InstalledCheckRegValueData**: The data that should be set to the registry value.
 
 ### Read-Only Properties from Get-TargetResource
 
@@ -349,6 +354,13 @@ None
 * **Size**: Size of the installation.
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
+
+#### Examples
+
+* [Install an .exe using credentials](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallExeUsingCredentialsConfig.ps1)
+* [Install an .exe using credentials and using custom registry data to discover the package](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallExeUsingCredentialsAndRegistryConfig.ps1)
+* [Simple installer for an msi package that matches via the Name](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallMsiConfig.ps1)
+* [Simple installer for an msi package and matches based on the product id](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallMsiUsingProductIdConfig.ps1)
 
 ### xPSEndpoint (xPSSessionConfiguration)
 
@@ -426,6 +438,10 @@ None
 * **Credential**: PSCredential for the user with access to DestinationPath.
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
 
+#### Examples
+
+* [Upload file or folder to a SMB share](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xFileUpload_UploadToSMBShareConfig.ps1)
+
 ### xEnvironment
 
 Provides a mechanism to configure and manage environment variables for a machine or process.
@@ -448,10 +464,12 @@ None
 
 #### Examples
 
-* [Create a non-path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreateNonPathVariable.ps1)
-* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreatePathVariable.ps1)
-* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_Remove.ps1)
+* [Create a regular (non-path) environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_CreateNonPathVariableConfig.ps1)
+* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_AddMultiplePathsConfig.ps1)
+* [Remove paths from a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_RemoveMultiplePathsConfig.ps1)
+* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_RemoveVariableConfig.ps1)
 
+xEnvironment_AddMultiplePaths
 ### xScript
 
 Provides a mechanism to run PowerShell script blocks on a target node.
@@ -740,6 +758,21 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Sample_xGroup_SetMembers.ps1 → xGroup_SetMembersConfig.ps1
   * Sample_xGroup_RemoveMembers.ps1 → xGroup_RemoveMembersConfig.ps1
   * Sample_xGroupSet_AddMembers.ps1 → xGroupSet_AddMembersConfig.ps1
+  * Sample_xFileUpload.ps1 → xFileUpload_UploadToSMBShareConfig.ps1
+  * Sample_xEnvironment_CreateMultiplePathVariables.ps1 → xEnvironment_AddMultiplePathsConfig.ps1
+  * Sample_xEnvironment_RemovePathVariables.ps1 → xEnvironment_RemoveMultiplePathsConfig.ps1
+  * Sample_xEnvironment_CreateNonPathVariable.ps1 → xEnvironment_CreateNonPathVariableConfig.ps1
+  * Sample_xEnvironment_Remove.ps1 → xEnvironment_RemoveVariableConfig.ps1
+  * Sample_xArchive_ExpandArchiveChecksumAndForce.ps1 → xArchive_ExpandArchiveChecksumAndForceConfig.ps1
+  * Sample_xArchive_ExpandArchiveDefaultValidationAndForce.ps1 → xArchive_ExpandArchiveDefaultValidationAndForceConfig.ps1
+  * Sample_xArchive_ExpandArchiveNoValidation.ps1 → xArchive_ExpandArchiveNoValidationConfig.ps1
+  * Sample_xArchive_ExpandArchiveNoValidationCredential.ps1 → xArchive_ExpandArchiveNoValidationCredentialConfig.ps1
+  * Sample_xArchive_RemoveArchiveChecksum.ps1 → xArchive_RemoveArchiveChecksumConfig.ps1
+  * Sample_xArchive_RemoveArchiveNoValidation.ps1 → xArchive_RemoveArchiveNoValidationConfig.ps1
+  * Sample_InstallExeCreds_xPackage.ps1 → xPackage_InstallExeUsingCredentialsConfig.ps1
+  * Sample_InstallExeCredsRegistry_xPackage.ps1 → xPackage_InstallExeUsingCredentialsAndRegistryConfig.ps1
+  * Sample_InstallMSI_xPackage.ps1 → xPackage_InstallMsiConfig.ps1
+  * Sample_InstallMSIProductId_xPackage.ps1 → xPackage_InstallMsiUsingProductIdConfig.ps1
 * New examples
   * xUser_RemoveUserConfig.ps1
   * xWindowsFeature_AddFeatureUsingCredentialConfig.ps1
@@ -756,6 +789,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     those starting with 'xPSEndpoint*'.
   * Sample_xMsiPackage_InstallPackageFromHttp - This was added to the example
     xMsiPackage_InstallPackageConfig.ps1 so the example sows either URI scheme.
+  * Sample_xEnvironment_CreatePathVariable.ps1 - Same as the new example
+    xEnvironment_AddMultiplePaths.ps1
 
 ### 8.3.0.0
 
