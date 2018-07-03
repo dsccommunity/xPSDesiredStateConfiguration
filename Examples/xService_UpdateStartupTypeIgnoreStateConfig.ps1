@@ -1,4 +1,3 @@
-
 <#PSScriptInfo
 .VERSION 1.0.0
 .GUID 5a442bad-d301-463e-9510-79193ff1bf88
@@ -19,9 +18,13 @@
 #Requires -module @{ModuleName = 'xPSDesiredStateConfiguration';ModuleVersion = '8.2.0.0'}
 
 <#
+    .SYNOPSIS
+        Configuration that updates startup type to manual for the service Print
+        Spooler, ignoring it's current state (e.g. running, stopped, etc).
+
     .DESCRIPTION
-        Updates startup type to manual for the service Print Spooler, ignoring
-        it's current state (e.g. running, stopped, etc).
+        Configuration that updates startup type to manual for the service Print
+        Spooler, ignoring it's current state (e.g. running, stopped, etc).
 
     .NOTES
         If the service with the name spooler does not exist, this configuration would throw an
@@ -31,6 +34,13 @@
         with the name spooler to Manual and ignores the state that the service is currently in.
         If State is not specified, the configuration will ensure that the state of the service is
         Running by default.
+
+    .EXAMPLE
+        xService_UpdateStartupTypeIgnoreStateConfig
+
+        Compiles a configuration that make sure the service Print Spooler
+        has the startup type set to 'Manual' regardless of the current state
+        of the service (e.g. running, stopped, etc).
 #>
 Configuration xService_UpdateStartupTypeIgnoreStateConfig
 {

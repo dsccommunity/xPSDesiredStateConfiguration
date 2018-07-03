@@ -1,4 +1,3 @@
-
 <#PSScriptInfo
 .VERSION 1.0.0
 .GUID f9306ebe-8af5-4dee-baf3-f3fac17891db
@@ -20,30 +19,37 @@
 
 <#
     .SYNOPSIS
-        Creates a file at the given file path with the specified content through
-        the xScript resource.
+        Configuration that make sure the file exist at the given file path with
+        the specified content.
 
     .DESCRIPTION
-        Creates a file at the given file path with the specified content through
-        the xScript resource.
+        Configuration that creates a file at the given file path with the
+        specified content, using the xScript resource.
+        If the content of the file is changed, the configuration will update
+        the file content to match the content in the configuration.
 
     .PARAMETER FilePath
-        The path at which to create the file. Defaults to $env:TEMP.
+        The path at which to create the file.
 
     .PARAMETER FileContent
-        The content to set for the new file.
-        Defaults to 'Just some sample text to write to the file'.
+        The content to set in the file.
+
+    .EXAMPLE
+        xScript_WatchFileContentConfig -FilePath 'C:\test.txt' -FileContent 'Just some sample text to write to the file'
+
+        Compiles a configuration that make sure the is a file 'C:\test.txt' with
+        the content 'Just some sample text to write to the file'.
 #>
 Configuration xScript_WatchFileContentConfig {
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, HelpMessage='The path at which to create the file.')]
         [ValidateNotNullOrEmpty()]
         [String]
         $FilePath,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, HelpMessage='The content to set in the file.')]
         [ValidateNotNullOrEmpty()]
         [String]
         $FileContent
