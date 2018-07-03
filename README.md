@@ -272,6 +272,7 @@ None
 
 * [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_CreateService.ps1)
 * [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_DeleteService.ps1)
+* [Update startup type for a service, and ignoring the current state](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_UpdateStartupTypeIgnoreStateConfig.ps1)
 
 ### xServiceSet
 Provides a mechanism to configure and manage multiple xService resources with common settings but different names.
@@ -438,7 +439,7 @@ None
 
 #### Examples
 
-* [Create a file with content through xScript](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xScript.ps1)
+* [Create a file with content through xScript](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xScript_WatchFileContentConfig.ps1)
 
 ### xRegistry
 
@@ -661,6 +662,12 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     against the style guideline.
   * Update all examples for them to be able pass the common test validation.
 * xEnvironment path documentation update demonstrating usage with multiple values  ([issue #415](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/415). [Alex Kokkinos (@alexkokkinos)](https://github.com/alexkokkinos)
+* Changes to xWindowsProcess
+  * Increased the wait time in the integration tests since the tests
+    still failed randomly ([issue #420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
+* Renamed and updated examples to be able to publish them to PowerShell Gallery.
+  * Sample\_xScript.ps1 → xScript\_WatchFileContentConfig.ps1
+  * Sample\_xService\_UpdateStartupTypeIgnoreState.ps1 → xService\_UpdateStartupTypeIgnoreStateConfig.ps1
 
 ### 8.3.0.0
 
