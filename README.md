@@ -320,7 +320,7 @@ None
 #### Examples
 
 * [Download a file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileConfig.ps1)
-* [Download a file using proxy](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileUsingProxy.ps1)
+* [Download a file using proxy](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileUsingProxyConfig.ps1)
 
 ### xPackage
 
@@ -733,7 +733,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Sample\_xWindowsProcess\_StopUnderUser.ps1 → xWindowsProcess\_StopProcessUnderUserConfig.ps1
   * Sample\_xUser\_CreateUser.ps1.ps1 → xUser\_CreateUserConfig.ps1
   * Sample\_xUser\_Generic.ps1.ps1 → xUser\_CreateUserDetailedConfig.ps1
-  * Sample\_xWindowsFeature.ps1 → xWindowsFeature\_AddFeature.ps1
+  * Sample\_xWindowsFeature.ps1 → xWindowsFeature\_AddFeatureConfig.ps1
   * Sample\_xWindowsFeatureSet\_Install.ps1 → xWindowsFeatureSet\_AddFeaturesConfig.ps1
   * Sample\_xWindowsFeatureSet\_Uninstall.ps1 → xWindowsFeatureSet\_RemoveFeaturesConfig.ps1
   * Sample\_xRegistryResource\_AddKey.ps1 → xRegistryResource\_AddKeyConfig.ps1
@@ -748,7 +748,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Sample\_xWindowsOptionalFeature.ps1 → xWindowsOptionalFeature\_EnableConfig.ps1
   * Sample\_xWindowsOptionalFeatureSet\_Enable.ps1 → xWindowsOptionalFeatureSet\_EnableConfig.ps1
   * Sample\_xWindowsOptionalFeatureSet\_Disable.ps1 → xWindowsOptionalFeatureSet\_DisableConfig.ps1
-  * Sample\_xRemoteFileUsingProxy.ps1 → xRemoteFile\_DownloadFileUsingProxy.ps1
+  * Sample\_xRemoteFileUsingProxy.ps1 → xRemoteFile\_DownloadFileUsingProxyConfig.ps1
   * Sample\_xRemoteFile.ps1 → xRemoteFile\_DownloadFileConfig.ps1
   * Sample\_xProcessSet\_Start.ps1 → xProcessSet\_StartProcessConfig.ps1
   * Sample\_xProcessSet\_Stop.ps1 → xProcessSet\_StopProcessConfig.ps1

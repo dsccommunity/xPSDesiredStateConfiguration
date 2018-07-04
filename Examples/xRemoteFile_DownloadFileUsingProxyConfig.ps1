@@ -47,7 +47,7 @@
         'http://10.20.30.1').
 
     .EXAMPLE
-        xRemoteFile_DownloadFileUsingProxy -DestinationPath "$env:SystemDrive\fileName.jpg" -Uri 'http://www.contoso.com/image.jpg' -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Headers @{'Accept-Language' = 'en-US'} -Proxy 'http://10.22.93.1'
+        xRemoteFile_DownloadFileUsingProxyConfig -DestinationPath "$env:SystemDrive\fileName.jpg" -Uri 'http://www.contoso.com/image.jpg' -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Headers @{'Accept-Language' = 'en-US'} -Proxy 'http://10.22.93.1'
 
         Compiles a configuration that downloads the file 'http://www.contoso.com/image.jpg',
         using proxy 'http://10.22.93.1', to the local file "$env:SystemDrive\fileName.jpg".
@@ -62,7 +62,7 @@
             }
             Proxy = 'http://10.22.93.1'
         }
-        Start-AzureRmAutomationDscCompilationJob -ResourceGroupName '<resource-group>' -AutomationAccountName '<automation-account>' -ConfigurationName 'xRemoteFile_DownloadFileUsingProxy' -Parameters $configurationParameters
+        Start-AzureRmAutomationDscCompilationJob -ResourceGroupName '<resource-group>' -AutomationAccountName '<automation-account>' -ConfigurationName 'xRemoteFile_DownloadFileUsingProxyConfig' -Parameters $configurationParameters
 
         Compiles a configuration in Azure Automation that downloads the file
         'http://www.contoso.com/image.jpg', using proxy 'http://10.22.93.1', to
@@ -70,7 +70,7 @@
 
         Replace the <resource-group> and <automation-account> with correct values.
 #>
-configuration xRemoteFile_DownloadFileUsingProxy
+configuration xRemoteFile_DownloadFileUsingProxyConfig
 {
     param
     (
