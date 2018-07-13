@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.0.1
 .GUID b89e163c-48d0-4038-aecd-8c759cfee61e
 .AUTHOR Microsoft Corporation
 .COMPANYNAME Microsoft Corporation
@@ -8,7 +8,7 @@
 .LICENSEURI https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/LICENSE
 .PROJECTURI https://github.com/PowerShell/xPSDesiredStateConfiguration
 .ICONURI
-.EXTERNALMODULEDEPENDENCIES xPSDesiredStateConfiguration
+.EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
 .EXTERNALSCRIPTDEPENDENCIES
 .RELEASENOTES First version.
