@@ -64,54 +64,54 @@ PrivateData = @{
   * Increased the wait time in the integration tests since the tests
     still failed randomly ([issue 420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
 * Renamed and updated examples to be able to publish them to PowerShell Gallery.
-  * Sample\_xScript.ps1 → xScript\_WatchFileContentConfig.ps1
-  * Sample\_xService\_UpdateStartupTypeIgnoreState.ps1 → xService\_UpdateStartupTypeIgnoreStateConfig.ps1
-  * Sample\_xWindowsProcess\_Start.ps1 → xWindowsProcess\_StartProcessConfig.ps1
-  * Sample\_xWindowsProcess\_StartUnderUser.ps1 → xWindowsProcess\_StartProcessUnderUserConfig.ps1
-  * Sample\_xWindowsProcess\_Stop.ps1 → xWindowsProcess\_StopProcessConfig.ps1
-  * Sample\_xWindowsProcess\_StopUnderUser.ps1 → xWindowsProcess\_StopProcessUnderUserConfig.ps1
-  * Sample\_xUser\_CreateUser.ps1.ps1 → xUser\_CreateUserConfig.ps1
-  * Sample\_xUser\_Generic.ps1.ps1 → xUser\_CreateUserDetailedConfig.ps1
-  * Sample\_xWindowsFeature.ps1 → xWindowsFeature\_AddFeatureConfig.ps1
-  * Sample\_xWindowsFeatureSet\_Install.ps1 → xWindowsFeatureSet\_AddFeaturesConfig.ps1
-  * Sample\_xWindowsFeatureSet\_Uninstall.ps1 → xWindowsFeatureSet\_RemoveFeaturesConfig.ps1
-  * Sample\_xRegistryResource\_AddKey.ps1 → xRegistryResource\_AddKeyConfig.ps1
-  * Sample\_xRegistryResource\_RemoveKey.ps1 → xRegistryResource\_RemoveKeyConfig.ps1
-  * Sample\_xRegistryResource\_AddOrModifyValue.ps1 → xRegistryResource\_AddOrModifyValueConfig.ps1
-  * Sample\_xRegistryResource\_RemoveValue.ps1 → xRegistryResource\_RemoveValueConfig.ps1
-  * Sample\_xService\_CreateService.ps1 → xService\_CreateServiceConfig.ps1
-  * Sample\_xService\_DeleteService.ps1 → xService\_RemoveServiceConfig.ps1
-  * Sample\_xServiceSet\_StartServices.ps1 → xServiceSet\_StartServicesConfig.ps1
-  * Sample\_xServiceSet\_BuiltInAccount → xServiceSet\_EnsureBuiltInAccountConfig.ps1
-  * Sample\_xWindowsPackageCab → xWindowsPackageCab\_InstallPackageConfig
-  * Sample\_xWindowsOptionalFeature.ps1 → xWindowsOptionalFeature\_EnableConfig.ps1
-  * Sample\_xWindowsOptionalFeatureSet\_Enable.ps1 → xWindowsOptionalFeatureSet\_EnableConfig.ps1
-  * Sample\_xWindowsOptionalFeatureSet\_Disable.ps1 → xWindowsOptionalFeatureSet\_DisableConfig.ps1
-  * Sample\_xRemoteFileUsingProxy.ps1 → xRemoteFile\_DownloadFileUsingProxyConfig.ps1
-  * Sample\_xRemoteFile.ps1 → xRemoteFile\_DownloadFileConfig.ps1
-  * Sample\_xProcessSet\_Start.ps1 → xProcessSet\_StartProcessConfig.ps1
-  * Sample\_xProcessSet\_Stop.ps1 → xProcessSet\_StopProcessConfig.ps1
-  * Sample\_xMsiPackage\_UninstallPackageFromHttps.ps1 → xMsiPackage\_UninstallPackageFromHttpsConfig.ps1
-  * Sample\_xMsiPackage\_UninstallPackageFromFile.ps1 → xMsiPackage\_UninstallPackageFromFileConfig.ps1
-  * Sample\_xMsiPackage\_InstallPackageFromFile → xMsiPackage\_InstallPackageConfig.ps1
-  * Sample\_xGroup\_SetMembers.ps1 → xGroup\_SetMembersConfig.ps1
-  * Sample\_xGroup\_RemoveMembers.ps1 → xGroup\_RemoveMembersConfig.ps1
-  * Sample\_xGroupSet\_AddMembers.ps1 → xGroupSet\_AddMembersConfig.ps1
-  * Sample\_xFileUpload.ps1 → xFileUpload\_UploadToSMBShareConfig.ps1
-  * Sample\_xEnvironment\_CreateMultiplePathVariables.ps1 → xEnvironment\_AddMultiplePathsConfig.ps1
-  * Sample\_xEnvironment\_RemovePathVariables.ps1 → xEnvironment\_RemoveMultiplePathsConfig.ps1
-  * Sample\_xEnvironment\_CreateNonPathVariable.ps1 → xEnvironment\_CreateNonPathVariableConfig.ps1
-  * Sample\_xEnvironment\_Remove.ps1 → xEnvironment\_RemoveVariableConfig.ps1
-  * Sample\_xArchive\_ExpandArchiveChecksumAndForce.ps1 → xArchive\_ExpandArchiveChecksumAndForceConfig.ps1
-  * Sample\_xArchive\_ExpandArchiveDefaultValidationAndForce.ps1 → xArchive\_ExpandArchiveDefaultValidationAndForceConfig.ps1
-  * Sample\_xArchive\_ExpandArchiveNoValidation.ps1 → xArchive\_ExpandArchiveNoValidationConfig.ps1
-  * Sample\_xArchive\_ExpandArchiveNoValidationCredential.ps1 → xArchive\_ExpandArchiveNoValidationCredentialConfig.ps1
-  * Sample\_xArchive\_RemoveArchiveChecksum.ps1 → xArchive\_RemoveArchiveChecksumConfig.ps1
-  * Sample\_xArchive\_RemoveArchiveNoValidation.ps1 → xArchive\_RemoveArchiveNoValidationConfig.ps1
-  * Sample\_InstallExeCreds\_xPackage.ps1 → xPackage\_InstallExeUsingCredentialsConfig.ps1
-  * Sample\_InstallExeCredsRegistry\_xPackage.ps1 → xPackage\_InstallExeUsingCredentialsAndRegistryConfig.ps1
-  * Sample\_InstallMSI\_xPackage.ps1 → xPackage\_InstallMsiConfig.ps1
-  * Sample\_InstallMSIProductId\_xPackage.ps1 → xPackage\_InstallMsiUsingProductIdConfig.ps1
+  * Sample\_xScript.ps1 to xScript\_WatchFileContentConfig.ps1
+  * Sample\_xService\_UpdateStartupTypeIgnoreState.ps1 to xService\_UpdateStartupTypeIgnoreStateConfig.ps1
+  * Sample\_xWindowsProcess\_Start.ps1 to xWindowsProcess\_StartProcessConfig.ps1
+  * Sample\_xWindowsProcess\_StartUnderUser.ps1 to xWindowsProcess\_StartProcessUnderUserConfig.ps1
+  * Sample\_xWindowsProcess\_Stop.ps1 to xWindowsProcess\_StopProcessConfig.ps1
+  * Sample\_xWindowsProcess\_StopUnderUser.ps1 to xWindowsProcess\_StopProcessUnderUserConfig.ps1
+  * Sample\_xUser\_CreateUser.ps1.ps1 to xUser\_CreateUserConfig.ps1
+  * Sample\_xUser\_Generic.ps1.ps1 to xUser\_CreateUserDetailedConfig.ps1
+  * Sample\_xWindowsFeature.ps1 to xWindowsFeature\_AddFeatureConfig.ps1
+  * Sample\_xWindowsFeatureSet\_Install.ps1 to xWindowsFeatureSet\_AddFeaturesConfig.ps1
+  * Sample\_xWindowsFeatureSet\_Uninstall.ps1 to xWindowsFeatureSet\_RemoveFeaturesConfig.ps1
+  * Sample\_xRegistryResource\_AddKey.ps1 to xRegistryResource\_AddKeyConfig.ps1
+  * Sample\_xRegistryResource\_RemoveKey.ps1 to xRegistryResource\_RemoveKeyConfig.ps1
+  * Sample\_xRegistryResource\_AddOrModifyValue.ps1 to xRegistryResource\_AddOrModifyValueConfig.ps1
+  * Sample\_xRegistryResource\_RemoveValue.ps1 to xRegistryResource\_RemoveValueConfig.ps1
+  * Sample\_xService\_CreateService.ps1 to xService\_CreateServiceConfig.ps1
+  * Sample\_xService\_DeleteService.ps1 to xService\_RemoveServiceConfig.ps1
+  * Sample\_xServiceSet\_StartServices.ps1 to xServiceSet\_StartServicesConfig.ps1
+  * Sample\_xServiceSet\_BuiltInAccount to xServiceSet\_EnsureBuiltInAccountConfig.ps1
+  * Sample\_xWindowsPackageCab to xWindowsPackageCab\_InstallPackageConfig
+  * Sample\_xWindowsOptionalFeature.ps1 to xWindowsOptionalFeature\_EnableConfig.ps1
+  * Sample\_xWindowsOptionalFeatureSet\_Enable.ps1 to xWindowsOptionalFeatureSet\_EnableConfig.ps1
+  * Sample\_xWindowsOptionalFeatureSet\_Disable.ps1 to xWindowsOptionalFeatureSet\_DisableConfig.ps1
+  * Sample\_xRemoteFileUsingProxy.ps1 to xRemoteFile\_DownloadFileUsingProxyConfig.ps1
+  * Sample\_xRemoteFile.ps1 to xRemoteFile\_DownloadFileConfig.ps1
+  * Sample\_xProcessSet\_Start.ps1 to xProcessSet\_StartProcessConfig.ps1
+  * Sample\_xProcessSet\_Stop.ps1 to xProcessSet\_StopProcessConfig.ps1
+  * Sample\_xMsiPackage\_UninstallPackageFromHttps.ps1 to xMsiPackage\_UninstallPackageFromHttpsConfig.ps1
+  * Sample\_xMsiPackage\_UninstallPackageFromFile.ps1 to xMsiPackage\_UninstallPackageFromFileConfig.ps1
+  * Sample\_xMsiPackage\_InstallPackageFromFile to xMsiPackage\_InstallPackageConfig.ps1
+  * Sample\_xGroup\_SetMembers.ps1 to xGroup\_SetMembersConfig.ps1
+  * Sample\_xGroup\_RemoveMembers.ps1 to xGroup\_RemoveMembersConfig.ps1
+  * Sample\_xGroupSet\_AddMembers.ps1 to xGroupSet\_AddMembersConfig.ps1
+  * Sample\_xFileUpload.ps1 to xFileUpload\_UploadToSMBShareConfig.ps1
+  * Sample\_xEnvironment\_CreateMultiplePathVariables.ps1 to xEnvironment\_AddMultiplePathsConfig.ps1
+  * Sample\_xEnvironment\_RemovePathVariables.ps1 to xEnvironment\_RemoveMultiplePathsConfig.ps1
+  * Sample\_xEnvironment\_CreateNonPathVariable.ps1 to xEnvironment\_CreateNonPathVariableConfig.ps1
+  * Sample\_xEnvironment\_Remove.ps1 to xEnvironment\_RemoveVariableConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveChecksumAndForce.ps1 to xArchive\_ExpandArchiveChecksumAndForceConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveDefaultValidationAndForce.ps1 to xArchive\_ExpandArchiveDefaultValidationAndForceConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveNoValidation.ps1 to xArchive\_ExpandArchiveNoValidationConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveNoValidationCredential.ps1 to xArchive\_ExpandArchiveNoValidationCredentialConfig.ps1
+  * Sample\_xArchive\_RemoveArchiveChecksum.ps1 to xArchive\_RemoveArchiveChecksumConfig.ps1
+  * Sample\_xArchive\_RemoveArchiveNoValidation.ps1 to xArchive\_RemoveArchiveNoValidationConfig.ps1
+  * Sample\_InstallExeCreds\_xPackage.ps1 to xPackage\_InstallExeUsingCredentialsConfig.ps1
+  * Sample\_InstallExeCredsRegistry\_xPackage.ps1 to xPackage\_InstallExeUsingCredentialsAndRegistryConfig.ps1
+  * Sample\_InstallMSI\_xPackage.ps1 to xPackage\_InstallMsiConfig.ps1
+  * Sample\_InstallMSIProductId\_xPackage.ps1 to xPackage\_InstallMsiUsingProductIdConfig.ps1
 * New examples
   * xUser\_RemoveUserConfig.ps1
   * xWindowsFeature\_AddFeatureUsingCredentialConfig.ps1
@@ -137,23 +137,3 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
