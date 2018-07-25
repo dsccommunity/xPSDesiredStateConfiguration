@@ -713,6 +713,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+### 8.4.0.0
+
 * Changes to xPSDesiredStateConfiguration
   * Opt-in for the common tests validate module files and script files.
   * All files change to encoding UTF-8 (without byte order mark).
