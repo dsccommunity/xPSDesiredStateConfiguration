@@ -1,4 +1,4 @@
-﻿# Localized MSFT_xScriptResource.strings.psd1
+# Localized MSFT_xScriptResource.strings.psd1
 
 ConvertFrom-StringData @'
     GetTargetResourceStartVerboseMessage = Begin executing get script.

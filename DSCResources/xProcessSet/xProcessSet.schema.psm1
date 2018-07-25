@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 # Import ResourceSetHelper for New-ResourceSetConfigurationScriptBlock
@@ -78,7 +78,7 @@ Configuration xProcessSet
         [String]
         $WorkingDirectory
     )
-    
+
     $newResourceSetConfigurationParams = @{
         ResourceName = 'xWindowsProcess'
         ModuleName = 'xPSDesiredStateConfiguration'
@@ -88,7 +88,7 @@ Configuration xProcessSet
 
     # Arguments is a key parameter in xWindowsProcess resource. Adding it as a common parameter with an empty value string
     $newResourceSetConfigurationParams['Parameters']['Arguments'] = ''
-    
+
     $configurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
     # This script block must be run directly in this configuration in order to resolve variables

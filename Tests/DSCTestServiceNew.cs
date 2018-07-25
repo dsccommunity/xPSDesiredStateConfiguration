@@ -1,4 +1,4 @@
-﻿namespace TestServiceNamespace
+namespace TestServiceNamespace
 {
     using System;
     using System.ComponentModel;

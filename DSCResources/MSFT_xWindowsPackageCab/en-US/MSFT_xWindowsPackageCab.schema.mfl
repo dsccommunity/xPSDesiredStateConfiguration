@@ -1,4 +1,4 @@
-﻿[Description("This resource is used to install or uninstall a package from a windows cabinet (cab) file.") : Amended,AMENDMENT, LOCALE("MS_409")] 
+[Description("This resource is used to install or uninstall a package from a windows cabinet (cab) file.") : Amended,AMENDMENT, LOCALE("MS_409")]
 class MSFT_xWindowsPackageCab : OMI_BaseResource
 {
     [Key, Description("The name of the package to install or uninstall.") : Amended] String Name;

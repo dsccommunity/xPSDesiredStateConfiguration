@@ -1,4 +1,4 @@
-﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
 $errorActionPreference = 'Stop'
@@ -8,7 +8,11 @@ $script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
 $script:moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
 $script:dscResourcesFolderFilePath = Join-Path -Path $script:moduleRootFilePath -ChildPath 'DscResources'
 $script:resourceSetHelperFilePath = Join-Path -Path $script:dscResourcesFolderFilePath -ChildPath "ResourceSetHelper.psm1"
-Import-Module -Name $script:resourceSetHelperFilePath
+
+# Make sure that any lingering copies of the module that is tested are removed.
+Get-Module -Name 'ResourceSetHelper' -All | Remove-Module -Force -ErrorAction SilentlyContinue
+# Import the module that is being tested.
+Import-Module -Name $script:resourceSetHelperFilePath -Force
 
 InModuleScope 'ResourceSetHelper' {
     Describe 'ResourceSetHelper\New-ResourceSetCommonParameterString' {
@@ -17,7 +21,7 @@ InModuleScope 'ResourceSetHelper' {
                 Name = 'Name'
                 CommonStringParameter1 = 'CommonParameter1'
             }
-        
+
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
@@ -27,12 +31,12 @@ InModuleScope 'ResourceSetHelper' {
         It 'Should return string containing one variable reference for one credential common parameter' {
             $testUserName = 'testUserName'
             $secureTestPassword = ConvertTo-SecureString -String 'testPassword' -AsPlainText -Force
-            
+
             $parameters = @{
                 Name = 'Name'
                 CommonCredentialParameter1 = New-Object -TypeName 'PSCredential' -ArgumentList @( $testUsername, $secureTestPassword )
             }
-        
+
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
@@ -100,7 +104,7 @@ InModuleScope 'ResourceSetHelper' {
                 CommonParameter2 = 'CommonParameterValue2'
             }
         }
-        
+
         $newResourceSetConfigurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
         It 'Should return a ScriptBlock' {
