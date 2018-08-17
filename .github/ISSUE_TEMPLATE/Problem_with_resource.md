@@ -30,11 +30,26 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
 # insert configuration here
 ```
 
-#### Version of the operating system and PowerShell the target node is running
+#### The operating system the target node is running
+<!-
+    Please provide as much as possible about the target node, for example
+    edition, version, build and language.
+    On OS with WMF 5.1 the following command can help get this information.
+
+    Get-ComputerInfo -Property @(
+        'OsName',
+        'OsOperatingSystemSKU',
+        'OSArchitecture',
+        'WindowsVersion',
+        'WindowsBuildLabEx',
+        'OsLanguage',
+        'OsMuiLanguages')
+-->
+
+#### Version and build of PowerShell the target node is running
 <!--
     To help with this information, please run this command:
-    Get-CimInstance -ClassName 'Win32_OperatingSystem' |
-        fl Caption,OSArchitecture,Version,MUILanguages,{$PSVersionTable.PSVersion}
+    $PSVersionTable
 -->
 
 #### Version of the DSC module that was used ('dev' if using current dev branch)
