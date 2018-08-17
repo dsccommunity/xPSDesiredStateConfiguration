@@ -14,7 +14,7 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
     Write N/A under any headers that do not apply to your issue, or if the
     information is not available.
 
-    NOTE! Any sensitive information should be obfuscated.
+    NOTE! Sensitive information should be obfuscated.
 
     PLEASE KEEP THE HEADERS.
 
@@ -22,6 +22,8 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
     but please keep the headers.
 -->
 #### Details of the scenario you tried and the problem that is occurring
+
+#### Verbose logs showing the problem
 
 #### Suggested solution to the issue
 
@@ -31,7 +33,7 @@ about: If you have a problem, bug, or enhancement with a resource in this resour
 ```
 
 #### The operating system the target node is running
-<!-
+<!--
     Please provide as much as possible about the target node, for example
     edition, version, build and language.
     On OS with WMF 5.1 the following command can help get this information.
