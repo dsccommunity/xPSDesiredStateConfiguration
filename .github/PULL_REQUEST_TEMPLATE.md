@@ -21,15 +21,15 @@
     If this PR does not fix an open issue, replace this comment block with None.
     If this PR resolves one or more open issues, replace this comment block with
     a list the issues using a GitHub closing keyword, e.g.:
-    Fixes #123
-    Fixes #124
+    - Fixes #123
+    - Fixes #124
 -->
 
 #### Task list
 <!--
     To aid community reviewers in reviewing and merging your PR, please take
     the time to run through the below checklist and make sure your PR has
-    everything updated as needed.
+    everything updated as required.
 
     Change to [x] for each task in the task list that applies to your PR.
     For those task that don't apply to you PR, leave those as is.
