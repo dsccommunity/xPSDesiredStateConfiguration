@@ -714,6 +714,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* Changes to xService
+  * Added support for Group Managed Service Accounts
+
 ### 8.4.0.0
 
 * Changes to xPSDesiredStateConfiguration

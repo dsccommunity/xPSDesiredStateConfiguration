@@ -118,10 +118,16 @@ function Get-TargetResource
     .PARAMETER BuiltInAccount
         The built-in account the service should start under.
 
-        Cannot be specified at the same time as Credential.
+        Cannot be specified at the same time as Credential or GroupManagedServiceAccount.
 
         The user account specified by this property must have access to the service executable path
         defined by Path in order to start the service.
+
+    .PARAMETER GroupManagedServiceAccount
+        The Group Managed Service Account the service should start under. The GMSA
+        must be provided in DOMAIN\gMSA$ format or UPN format gMSA$@domain.fqdn.
+
+        Cannot be specified at the same time as BuilInAccount or Credential.
 
     .PARAMETER DesktopInteract
         Indicates whether or not the service should be able to communicate with a window on the
@@ -352,9 +358,15 @@ function Set-TargetResource
         The startup type the service should have.
 
     .PARAMETER BuiltInAccount
-        The account the service should be starting under.
+        The built-in account the service should start under.
 
-        Cannot be specified at the same time as Credential.
+        Cannot be specified at the same time as Credential or GroupManagedServiceAccount.
+
+    .PARAMETER GroupManagedServiceAccount
+        The Group Managed Service Account the service should start under. The GMSA
+        must be provided in DOMAIN\gMSA$ format or UPN format gMSA$@domain.fqdn.
+
+        Cannot be specified at the same time as BuilInAccount or Credential.
 
     .PARAMETER DesktopInteract
         Indicates whether or not the service should be able to communicate with a window on the
