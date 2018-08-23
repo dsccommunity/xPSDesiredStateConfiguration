@@ -6,7 +6,7 @@
 ConvertFrom-StringData @'
     ServiceExists = Service {0} exists.
     ServiceDoesNotExist = Service {0} does not exist.
-    BuiltInAccountAndCredentialSpecified = BuiltInAccount, Credential and GroupManagedServiceAccount are mutually exclusive. Please specify only one of these parameters for service {0}.
+    CredentialParametersAreMutallyExclusive = BuiltInAccount, Credential and GroupManagedServiceAccount are mutually exclusive. Please specify only one of these parameters for service {0}.
     ServiceAlreadyAbsent = Service {0} is already absent. No change required.
     ServiceDoesNotExistPathMissingError = The service '{0}' does not exist, but Path was not specified. Please specify the path to the executable the service should run to create a new service.
     CreatingService = Creating new service {0}...

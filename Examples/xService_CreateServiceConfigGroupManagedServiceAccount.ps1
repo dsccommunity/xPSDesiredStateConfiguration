@@ -1,6 +1,6 @@
 <#PSScriptInfo
-.VERSION 1.0.1
-.GUID 22b2e2d1-76cd-4f4c-b952-ec3b574b9751
+.VERSION 1.0.0
+.GUID 9c377df3-c4d5-4cbd-b631-78e320bdcdd9
 .AUTHOR Microsoft Corporation
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT
@@ -38,7 +38,7 @@
     .EXAMPLE
         $gmsaSplat = @{
             Path                        = 'C:\FilePath\MyServiceExecutable.exe'
-            Name                        ='Service1'
+            Name                        = 'Service1'
             GroupManagedServiceAccount  = 'DOMAIN\gMSA$'
         }
 

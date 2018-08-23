@@ -245,12 +245,11 @@ function Set-TargetResource
 
     if (($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('Credential')) -or
         ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('GroupManagedServiceAccount')) -or
-        ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential')) -or
-        ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential'))
+        ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential'))
     )
     {
-        $errorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $Name
-        New-InvalidArgumentException -ArgumentName 'BuiltInAccount & Credential' -Message $errorMessage
+        $errorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $Name
+        New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
     }
 
     $service = Get-Service -Name $Name -ErrorAction 'SilentlyContinue'
@@ -469,12 +468,11 @@ function Test-TargetResource
 
     if (($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('Credential')) -or
         ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('GroupManagedServiceAccount')) -or
-        ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential')) -or
-        ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential'))
+        ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential'))
     )
     {
-        $errorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $Name
-        New-InvalidArgumentException -ArgumentName 'BuiltInAccount & Credential' -Message $errorMessage
+        $errorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $Name
+        New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
     }
 
     $serviceResource = Get-TargetResource -Name $Name
@@ -1510,12 +1508,17 @@ function Set-ServiceStartupType
     .PARAMETER BuiltInAccount
         The built-in account the service should start under.
 
-        Cannot be specified at the same time as Credential.
+        Cannot be specified at the same time as Credential or GroupManagedServiceAccount.
+
+    .PARAMETER GroupManagedServiceAccount
+        The Group Managed Service Account that is used to run the service.
+
+        Cannot be specified at the same time as BuiltInAccount or Credential.
 
     .PARAMETER Credential
         The credential of the user account the service should start under.
 
-        Cannot be specified at the same time as BuiltInAccount.
+        Cannot be specified at the same time as BuiltInAccount or GroupManagedServiceAccount.
         The user specified by this credential will automatically be granted the Log on as a Service
         right.
 
