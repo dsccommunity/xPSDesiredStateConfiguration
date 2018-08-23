@@ -377,7 +377,7 @@ try
                 }
 
                 It 'Should throw an error for BuiltInAccount and Credential conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $setTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
                     { Set-TargetResource @setTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
 
@@ -388,7 +388,7 @@ try
                 }
 
                 It 'Should throw an error for BuiltInAccount and GroupManagedServiceAccount conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $setTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
                     { Set-TargetResource @setTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
 
@@ -399,7 +399,7 @@ try
                 }
 
                 It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $setTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
                     { Set-TargetResource @setTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
             }
@@ -503,7 +503,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Running, and all parameters except Credential & GroupManagedServiceAccount specified' {
+            Context 'Service does not exist, Ensure set to Present, State set to Running, and all parameters except Credential and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -554,7 +554,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount & GroupManagedServiceAccount specified' {
+            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -605,7 +605,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount & Credential specified' {
+            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and Credential specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -1014,7 +1014,7 @@ try
                 }
 
                 It 'Should throw an error for BuiltInAccount and Credential conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $testTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
                     { Test-TargetResource @testTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
 
@@ -1025,7 +1025,7 @@ try
                 }
 
                 It 'Should throw an error for BuiltInAccount and GroupManagedServiceAccount conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $testTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
                     { Test-TargetResource @testTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
 
@@ -1036,7 +1036,7 @@ try
                 }
 
                 It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $testTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
                     { Test-TargetResource @testTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
             }
