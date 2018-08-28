@@ -24,6 +24,14 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xServiceResource'
         This may be different from the service's display name.
         To retrieve a list of all services with their names and current states, use the Get-Service
         cmdlet.
+
+    .NOTES
+        BuiltInAccount, Credential and GroupManagedServiceAccount parameters output the user used
+        to run the service to the BuiltinAccount property, Evaluating if the account is a gMSA would
+        mean doing a call to active directory to verify, as the property returned by the ciminstance
+        is just a string. In a production scenario that would mean that every xService test will check
+        with AD every 15 minutes if the account is a gMSA. That's not desireable, so we output Credential
+        and GroupManagedServiceAccount without evaluating what kind of user is supplied.
 #>
 function Get-TargetResource
 {
