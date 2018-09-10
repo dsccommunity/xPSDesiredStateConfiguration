@@ -22,7 +22,7 @@ try
 
     InModuleScope 'MSFT_xServiceResource' {
         $script:testServiceName = 'DscTestService'
-        
+
         $script:testUsername1 = 'TestUser1'
         $script:testUsername2 = 'TestUser2'
 
@@ -31,6 +31,9 @@ try
 
         $script:testCredential1 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList ($script:testUsername1, $secureTestPassword)
         $script:testCredential2 = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList ($script:testUsername2, $secureTestPassword)
+
+        $script:gMSAUser1 = 'DOMAIN\gMSA1$'
+        $script:gMSAUser2 = 'DOMAIN\gMSA2$'
 
         Describe 'xService\Get-TargetResource' {
             Mock -CommandName 'Get-Service' -MockWith { }
@@ -99,7 +102,7 @@ try
                 }
 
                 $convertToStartupTypeStringResult = 'TestStartupTypeString'
-                
+
                 Mock -CommandName 'Get-Service' -MockWith { return $testService }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
@@ -188,7 +191,7 @@ try
                 }
 
                 $convertToStartupTypeStringResult = 'TestStartupTypeString'
-                
+
                 Mock -CommandName 'Get-Service' -MockWith { return $testService }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
@@ -284,7 +287,7 @@ try
                 }
 
                 $convertToStartupTypeStringResult = 'TestStartupTypeString'
-                
+
                 Mock -CommandName 'Get-Service' -MockWith { return $testService }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
@@ -366,7 +369,7 @@ try
             Mock -CommandName 'Start-ServiceWithTimeout' -MockWith { }
             Mock -CommandName 'Stop-ServiceWithTimeout' -MockWith { }
 
-            Context 'Both BuiltInAccount and Credential specified' {
+            Context 'Both BuiltInAccount, Credential or GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     BuiltInAccount = 'LocalSystem'
@@ -374,7 +377,29 @@ try
                 }
 
                 It 'Should throw an error for BuiltInAccount and Credential conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $setTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
+                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $expectedErrorMessage
+                }
+
+                $setTargetResourceParameters = @{
+                    Name = $script:testServiceName
+                    BuiltInAccount = 'LocalSystem'
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                }
+
+                It 'Should throw an error for BuiltInAccount and GroupManagedServiceAccount conflict' {
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
+                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $expectedErrorMessage
+                }
+
+                $setTargetResourceParameters = @{
+                    Name = $script:testServiceName
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                    Credential = $script:testCredential1
+                }
+
+                It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
                     { Set-TargetResource @setTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
             }
@@ -478,7 +503,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Running, and all parameters except Credential specified' {
+            Context 'Service does not exist, Ensure set to Present, State set to Running, and all parameters except Credential and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -529,7 +554,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount specified' {
+            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -569,6 +594,57 @@ try
 
                 It 'Should change all service properties except BuiltInAccount' {
                     Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Credential -DifferenceObject $Credential) -and $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and $DisplayName -eq $setTargetResourceParameters.DisplayName -and $Description -eq $setTargetResourceParameters.Description -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies) } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to start the service' {
+                    Assert-MockCalled -CommandName 'Start-ServiceWithTimeout' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should stop the service' {
+                    Assert-MockCalled -CommandName 'Stop-ServiceWithTimeout' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                }
+            }
+
+            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and Credential specified' {
+                $setTargetResourceParameters = @{
+                    Name = $script:testServiceName
+                    Ensure = 'Present'
+                    Path = 'FakePath'
+                    StartupType = 'Disabled'
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                    DesktopInteract = $true
+                    State = 'Stopped'
+                    DisplayName = 'TestDisplayName'
+                    Description = 'Test device description'
+                    Dependencies = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+                }
+
+                It 'Should not throw' {
+                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                }
+
+                It 'Should check for a startup type and state conflict' {
+                    Assert-MockCalled -CommandName 'Assert-NoStartupTypeStateConflict' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $State -eq $setTargetResourceParameters.State } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should retrieve the service' {
+                    Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should create the service' {
+                    Assert-MockCalled -CommandName 'New-Service' -ParameterFilter { $Name -eq $setTargetResourceParameters.Name -and $BinaryPathName -eq $setTargetResourceParameters.Path } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the service' {
+                    Assert-MockCalled -CommandName 'Remove-ServiceWithTimeout' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to change the service path' {
+                    Assert-MockCalled -CommandName 'Set-ServicePath' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should set the service to start with the GroupManagedServiceAccount' {
+                    Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $GroupManagedServiceAccount -eq $setTargetResourceParameters.GroupManagedServiceAccount } -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to start the service' {
@@ -677,7 +753,7 @@ try
                 It 'Should start the service' {
                     Assert-MockCalled -CommandName 'Start-ServiceWithTimeout' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name } -Times 1 -Scope 'Context'
                 }
- 
+
                 It 'Should not attempt to stop or restart the service' {
                     Assert-MockCalled -CommandName 'Stop-ServiceWithTimeout' -Times 0 -Scope 'Context'
                 }
@@ -727,7 +803,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, State set to Stopped, and all parameters except Credential specified' {
+            Context 'Service exists, Ensure set to Present, State set to Stopped, and all parameters except Credential and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -778,7 +854,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, State set to Ignore, and all parameters except Path and BuiltInAccount specified' {
+            Context 'Service exists, Ensure set to Present, State set to Ignore, and all parameters except Path, BuiltInAccount and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -873,7 +949,7 @@ try
             }
 
             Mock -CommandName 'Set-ServicePath' -MockWith { return $false }
-            
+
             Context 'Service exists, Ensure set to Present, and matching Path to service path specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
@@ -930,7 +1006,7 @@ try
             Mock -CommandName 'Test-PathsMatch' -MockWith { return $true }
             Mock -CommandName 'ConvertTo-StartName' -MockWith { return $Username }
 
-            Context 'Both BuiltInAccount and Credential specified' {
+            Context 'Both BuiltInAccount, Credential or GroupManagedServiceAccount specified' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     BuiltInAccount = 'LocalSystem'
@@ -938,7 +1014,29 @@ try
                 }
 
                 It 'Should throw an error for BuiltInAccount and Credential conflict' {
-                    $expectedErrorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $testTargetResourceParameters.Name
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
+                    { Test-TargetResource @testTargetResourceParameters } | Should Throw $expectedErrorMessage
+                }
+
+                $testTargetResourceParameters = @{
+                    Name = $script:testServiceName
+                    BuiltInAccount = 'LocalSystem'
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                }
+
+                It 'Should throw an error for BuiltInAccount and GroupManagedServiceAccount conflict' {
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
+                    { Test-TargetResource @testTargetResourceParameters } | Should Throw $expectedErrorMessage
+                }
+
+                $testTargetResourceParameters = @{
+                    Name = $script:testServiceName
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                    Credential = $script:testCredential1
+                }
+
+                It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
+                    $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
                     { Test-TargetResource @testTargetResourceParameters } | Should Throw $expectedErrorMessage
                 }
             }
@@ -948,7 +1046,7 @@ try
                     Name = $script:testServiceName
                     Ensure = 'Absent'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -979,7 +1077,7 @@ try
                     Name = $script:testServiceName
                     Ensure = 'Present'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1011,7 +1109,7 @@ try
                     Ensure = 'Present'
                     StartupType = 'Disabled'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1057,7 +1155,7 @@ try
                     Name = $script:testServiceName
                     Ensure = 'Absent'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1088,7 +1186,7 @@ try
                     Name = $script:testServiceName
                     Ensure = 'Present'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1114,9 +1212,9 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and all matching parameters specified except Credential' {
+            Context 'Service exists, Ensure set to Present, and all matching parameters specified except Credential and GroupManagedServiceAccount' {
                 $testTargetResourceParameters = $serviceResourceWithAllProperties
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1160,12 +1258,12 @@ try
                         Ensure = 'Present'
                         $mismatchingParameterName = $mismatchingParameters[$mismatchingParameterName]
                     }
-                
+
                     It 'Should not throw' {
                         { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                     }
 
-                    
+
 
                     if ($mismatchingParameterName -eq 'StartupType')
                     {
@@ -1204,7 +1302,7 @@ try
                     Ensure = 'Present'
                     State = 'Ignore'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1248,7 +1346,7 @@ try
                     Ensure = 'Present'
                     Credential = $script:testCredential1
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1280,7 +1378,7 @@ try
                     Ensure = 'Present'
                     Credential = $script:testCredential2
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1324,7 +1422,7 @@ try
                     {
                         $testTargetResourceParameters[$allowedEmptyPropertyName] = ''
                     }
-                
+
                     It 'Should not throw' {
                         { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                     }
@@ -1362,7 +1460,7 @@ try
             {
                 $serviceResourceWithNullProperties[$nullPropertyName] = $null
             }
-                
+
             Mock -CommandName 'Get-TargetResource' -MockWith { return $serviceResourceWithNullProperties }
 
             foreach ($nullPropertyName in $allowedEmptyPropertyNames)
@@ -1373,7 +1471,7 @@ try
                         Ensure = 'Present'
                         $nullPropertyName = 'Something'
                     }
-                
+
                     It 'Should not throw' {
                         { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                     }
@@ -1404,7 +1502,7 @@ try
                         Name = $serviceResourceWithNullProperties.Name
                         Ensure = 'Present'
                     }
-                
+
                     It 'Should not throw' {
                         { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                     }
@@ -1439,7 +1537,7 @@ try
                     Ensure = 'Present'
                     Path = 'Mismatching path'
                 }
-                
+
                 It 'Should not throw' {
                     { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
                 }
@@ -1462,6 +1560,66 @@ try
 
                 It 'Should return false' {
                     Test-TargetResource @testTargetResourceParameters | Should Be $false
+                }
+            }
+
+            $serviceResourceWithGroupManagedServiceAccount = @{
+                Name            = $script:testServiceName
+                Ensure          = 'Present'
+                State           = 'Running'
+                BuiltInAccount  = $script:gMSAUser1
+                DisplayName     = 'TestDisplayName'
+                Description     = 'Test service description'
+                Dependencies    = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+            }
+
+            Mock -CommandName 'Get-TargetResource' -MockWith { return $serviceResourceWithGroupManagedServiceAccount }
+
+            Context 'Service exists, Ensure set to Present, and mismatching GroupManagedServiceAccount specified' {
+                $testTargetResourceParameters = @{
+                    Name = $serviceResourceWithCustomBuiltInAccount.Name
+                    Ensure = 'Present'
+                    GroupManagedServiceAccount = $script:gMSAUser2
+                }
+
+                It 'Should not throw' {
+                    { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                }
+
+                It 'Should not check for a startup type and state conflict' {
+                    Assert-MockCalled -CommandName 'Assert-NoStartupTypeStateConflict' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should retrieve the service' {
+                    Assert-MockCalled -CommandName 'Get-TargetResource' -ParameterFilter { $Name -eq $testTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not test if the service path matches the specified path' {
+                    Assert-MockCalled -CommandName 'Test-PathsMatch' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should convert the credential username to a service start name' {
+                    Assert-MockCalled -CommandName 'ConvertTo-StartName' -ParameterFilter { $Username -eq $script:gMSAUser2 } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should return false' {
+                    Test-TargetResource @testTargetResourceParameters | Should Be $false
+                }
+            }
+
+            Context 'Service exists, Ensure set to Present, and matching GroupManagedServiceAccount specified' {
+                $testTargetResourceParameters = @{
+                    Name = $serviceResourceWithCustomBuiltInAccount.Name
+                    Ensure = 'Present'
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                }
+
+                It 'Should not throw' {
+                    { Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                }
+
+                It 'Should return true' {
+                    Test-TargetResource @testTargetResourceParameters | Should Be $true
                 }
             }
         }
@@ -1542,7 +1700,7 @@ try
                             It 'Should throw error for conflicting state and startup type' {
                                 $errorMessage = $script:localizedData.StartupTypeStateConflict -f $assertNoStartupTypeStateConflictParameters.ServiceName, $startupTypeValue, $stateValue
                                 { Assert-NoStartupTypeStateConflict @assertNoStartupTypeStateConflictParameters } | Should Throw $errorMessage
-                            }                    
+                            }
                         }
                         elseif ($stateValue -eq 'Stopped' -and $startupTypeValue -eq 'Automatic')
                         {
@@ -1695,7 +1853,7 @@ try
                         Set-ServicePath @setServicePathParameters | Should Be $true
                     }
                 }
-    
+
                 $invokeCimMethodFailResult = @{
                     ReturnValue = 1
                 }
@@ -1752,7 +1910,7 @@ try
                     }
 
                     It 'Should retrieve the service' {
-                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'                        
+                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not retrieve the service CIM instance' {
@@ -1775,7 +1933,7 @@ try
                     }
 
                     It 'Should retrieve the service' {
-                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'                        
+                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should retrieve the service CIM instance' {
@@ -1798,7 +1956,7 @@ try
                     }
 
                     It 'Should retrieve the service' {
-                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'                        
+                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should retrieve the service CIM instance' {
@@ -1827,7 +1985,7 @@ try
                     }
 
                     It 'Should retrieve the service' {
-                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'                        
+                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not retrieve the service CIM instance' {
@@ -1850,7 +2008,7 @@ try
                     }
 
                     It 'Should retrieve the service' {
-                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'                        
+                        Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $setServiceDependenciesParameters.ServiceName } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should retrieve the service CIM instance' {
@@ -1859,9 +2017,9 @@ try
 
                     It 'Should change the service' {
                         Assert-MockCalled -CommandName 'Invoke-CimMethod' -ParameterFilter { $InputObject -eq $testServiceCimInstance -and $MethodName -eq 'Change' -and $null -eq (Compare-Object -ReferenceObject $setServiceDependenciesParameters.Dependencies -DifferenceObject $Arguments.ServiceDependencies) } -Times 1 -Scope 'Context'
-                    }                    
+                    }
                 }
-    
+
                 $invokeCimMethodFailResult = @{
                     ReturnValue = 1
                 }
@@ -1894,7 +2052,7 @@ try
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'Grant-LogOnAsServiceRight' -MockWith { }
                 Mock -CommandName 'ConvertTo-StartName' -MockWith { return $Username }
-                
+
                 $invokeCimMethodSuccessResult = @{
                     ReturnValue = 0
                 }
@@ -2089,6 +2247,63 @@ try
 
                     It 'Should change service' {
                         Assert-MockCalled -CommandName 'Invoke-CimMethod' -ParameterFilter { $InputObject -eq $testServiceCimInstance -and $MethodName -eq 'Change' -and $Arguments.StartName -eq $setServiceAccountPropertyParameters.BuiltInAccount -and $Arguments.StartPassword -eq [String]::Empty } -Times 1 -Scope 'Context'
+                    }
+                }
+
+                $testServiceCimInstance = New-CimInstance -ClassName 'Win32_Service' -Property @{ StartName = $script:gMSAUser1; DesktopInteract = $true } -ClientOnly
+                Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
+
+                Context 'Matching GroupManagedServiceAccount specified' {
+                    $setServiceAccountPropertyParameters = @{
+                        ServiceName = $script:testServiceName
+                        GroupManagedServiceAccount = $script:gMSAUser1
+                    }
+
+                    It 'Should not throw' {
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should Not Throw
+                    }
+
+                    It 'Should retrieve service CIM instance' {
+                        Assert-MockCalled -CommandName 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $setServiceAccountPropertyParameters.ServiceName } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should convert the GroupManagedServiceAccount to a service start name' {
+                        Assert-MockCalled -CommandName 'ConvertTo-StartName' -ParameterFilter { $Username -eq $setServiceAccountPropertyParameters.GroupManagedServiceAccount } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to grant Log on As a Service right' {
+                        Assert-MockCalled -CommandName 'Grant-LogOnAsServiceRight' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to change service' {
+                        Assert-MockCalled -CommandName 'Invoke-CimMethod' -Times 0 -Scope 'Context'
+                    }
+                }
+
+                Context 'Mismatching GroupManagedServiceAccount specified and service change succeeds' {
+                    $setServiceAccountPropertyParameters = @{
+                        ServiceName = $script:testServiceName
+                        GroupManagedServiceAccount = $script:gMSAUser2
+                    }
+
+                    It 'Should not throw' {
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should Not Throw
+                    }
+
+                    It 'Should retrieve service CIM instance' {
+                        Assert-MockCalled -CommandName 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $setServiceAccountPropertyParameters.ServiceName } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should convert the GroupManagedServiceAccount to a service start name' {
+                        Assert-MockCalled -CommandName 'ConvertTo-StartName' -ParameterFilter { $Username -eq $setServiceAccountPropertyParameters.GroupManagedServiceAccount } -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should attempt to grant Log on As a Service right' {
+                        Assert-MockCalled -CommandName 'Grant-LogOnAsServiceRight' -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should change service' {
+                        Assert-MockCalled -CommandName 'Invoke-CimMethod' -ParameterFilter { $InputObject -eq $testServiceCimInstance -and $MethodName -eq 'Change' -and $Arguments.StartName -eq $setServiceAccountPropertyParameters.GroupManagedServiceAccount } -Times 1 -Scope 'Context'
                     }
                 }
 
@@ -2454,6 +2669,38 @@ try
                 }
             }
 
+            Context 'GroupManagedServiceAccount specified' {
+                $setServicePropertyParameters = @{
+                    ServiceName = $script:testServiceName
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                }
+
+                It 'Should not throw' {
+                    { Set-ServiceProperty @setServicePropertyParameters } | Should Not Throw
+                }
+
+                It 'Should retrieve service CIM instance' {
+                    Assert-MockCalled -CommandName 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $setServicePropertyParameters.ServiceName } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not set service description or display name' {
+                    Assert-MockCalled -CommandName 'Set-Service' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not set service dependencies' {
+                    Assert-MockCalled -CommandName 'Set-ServiceDependencies' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should set service account properties' {
+                    Assert-MockCalled -CommandName 'Set-ServiceAccountProperty' -ParameterFilter { $ServiceName -eq $setServicePropertyParameters.ServiceName -and $GroupManagedServiceAccount -eq $setServicePropertyParameters.GroupManagedServiceAccount } -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not set service startup type' {
+                    Assert-MockCalled -CommandName 'Set-ServiceStartupType' -Times 0 -Scope 'Context'
+                }
+            }
+
+
             Context 'DesktopInteract specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
@@ -2565,7 +2812,7 @@ try
             }
 
             $expectedTimeSpan = [TimeSpan]::FromMilliseconds($startServiceWithTimeoutParameters.StartupTimeout)
-                    
+
             It 'Should not throw' {
                 { Start-ServiceWithTimeout @startServiceWithTimeoutParameters } | Should Not Throw
             }
@@ -2589,7 +2836,7 @@ try
             }
 
             $expectedTimeSpan = [TimeSpan]::FromMilliseconds($stopServiceWithTimeoutParameters.TerminateTimeout)
-                    
+
             It 'Should not throw' {
                 { Stop-ServiceWithTimeout @stopServiceWithTimeoutParameters } | Should Not Throw
             }
