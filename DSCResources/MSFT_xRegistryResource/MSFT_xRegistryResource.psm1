@@ -302,7 +302,7 @@ function Set-TargetResource
                     if (-not [String]::IsNullOrEmpty($ValueName))
                     {
                         # If the user specified a registry key value with a name to remove, remove the registry key value with the specified name
-                        $null = Remove-ItemProperty -Path $Key -Name $ValueName -Force
+                        $null = Remove-RegistryKeyValue -RegistryKey $registryKey -RegistryKeyValueName $ValueName
                     }
                     else
                     {
@@ -329,7 +329,7 @@ function Set-TargetResource
                 {
                     # Remove the registry key
                     Write-Verbose -Message ($script:localizedData.RemovingRegistryKey -f $Key)
-                    $null = Remove-Item -Path $Key -Recurse -Force
+                    $null = Remove-RegistryKey -RegistryKey $registryKey
                 }
             }
         }
