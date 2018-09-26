@@ -145,6 +145,24 @@ try
                 $registryKeyExists | Should Be $false
             }
 
+            It 'Should remove a registry key (Common registry path)' {
+                $commonRegistryKeyPath = $script:registryKeyPath -replace 'HKLM:', 'HKEY_LOCAL_MACHINE'
+
+                # Create the test registry key
+                New-TestRegistryKey -KeyPath $script:registryKeyPath
+
+                # Verify that the registry key exists before removal
+                $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
+                $registryKeyExists | Should Be $true
+
+                # Now remove the TestKey
+                Set-TargetResource -Key $commonRegistryKeyPath -ValueName '' -Ensure 'Absent'
+
+                # Verify that the registry key has been removed
+                $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
+                $registryKeyExists | Should Be $false
+            }
+
             It 'Should remove a registry key tree' {
                 $registryKeyTreePath = Join-Path -Path (Join-Path -Path (Join-Path -Path $script:registryKeyPath -ChildPath 'A') -ChildPath 'B') -ChildPath 'C'
 
@@ -157,6 +175,25 @@ try
 
                 # Remove the test registry key tree
                 Set-TargetResource -Key $registryKeyTreePath -ValueName '' -Ensure 'Absent'
+
+                # Verify that the registry key tree has been removed
+                $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
+                $registryKeyExists | Should Be $false
+            }
+
+            It 'Should remove a registry key tree (Common registry path)' {
+                $registryKeyTreePath = Join-Path -Path (Join-Path -Path (Join-Path -Path $script:registryKeyPath -ChildPath 'A') -ChildPath 'B') -ChildPath 'C'
+                $commonRegistryKeyTreePath = $registryKeyTreePath -replace 'HKLM:', 'HKEY_LOCAL_MACHINE'
+
+                # Create the test registry key
+                New-TestRegistryKey -KeyPath $registryKeyTreePath
+
+                # Verify that the registry key tree exists before removal
+                $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
+                $registryKeyExists | Should Be $true
+
+                # Remove the test registry key tree
+                Set-TargetResource -Key $commonRegistryKeyTreePath -ValueName '' -Ensure 'Absent'
 
                 # Verify that the registry key tree has been removed
                 $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
