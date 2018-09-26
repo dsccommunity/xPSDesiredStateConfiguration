@@ -61,7 +61,7 @@ try
             # Remove the test registry key if it already exists
             if (Test-RegistryKeyExists -KeyPath $script:registryKeyPath)
             {
-                Remove-RegistryKey -KeyPath $script:registryKeyPath
+                Remove-TestRegistryKey -KeyPath $script:registryKeyPath
             }
         }
 
@@ -69,7 +69,7 @@ try
             # Remove the test registry key if it already exists
             if ((Test-RegistryKeyExists -KeyPath $script:registryKeyPath) -and -not $script:doNotDeleteRegistryKey)
             {
-                Remove-RegistryKey -KeyPath $script:registryKeyPath
+                Remove-TestRegistryKey -KeyPath $script:registryKeyPath
             }
         }
 
