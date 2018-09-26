@@ -1409,6 +1409,58 @@ function Test-RegistryKeyValuesMatch
 
 <#
     .SYNOPSIS
+        Removes the specified registry key and child subkeys recursively.
+
+    .PARAMETER RegistryKey
+        The registry key to remove.
+#>
+function Remove-RegistryKey
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryKey]
+        $RegistryKey
+    )
+
+    $parentKeyName = Split-Path -Path $RegistryKey.Name -Parent
+    $targetKeyName = Split-Path -Path $RegistryKey.Name -Leaf
+
+    $parentRegistryKey = Get-RegistryKey -RegistryKeyPath $parentKeyName -WriteAccessAllowed
+
+    $null = $parentRegistryKey.DeleteSubKeyTree($targetKeyName)
+}
+
+<#
+    .SYNOPSIS
+        Removes the specified value of the specified registry key.
+        This is a wrapper function for unit testing.
+
+    .PARAMETER RegistryKey
+        The registry key to remove the default value of.
+#>
+function Remove-RegistryKeyValue
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryKey]
+        $RegistryKey,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [AllowEmptyString()]
+        [String]
+        $RegistryKeyValueName
+    )
+
+    $null = $RegistryKey.DeleteValue($RegistryKeyValueName)
+}
+
+<#
+    .SYNOPSIS
         Removes the default value of the specified registry key.
         This is a wrapper function for unit testing.
         
