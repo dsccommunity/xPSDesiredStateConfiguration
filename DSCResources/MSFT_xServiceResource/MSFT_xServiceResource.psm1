@@ -57,7 +57,14 @@ function Get-TargetResource
 
         foreach ($serviceDependedOn in $service.ServicesDependedOn)
         {
-            $dependencies += $serviceDependedOn.Name.ToString()
+            if ($null -ne $serviceDependedOn -and $null -ne $serviceDependedOn.Name)
+            {
+                $dependencies += $serviceDependedOn.Name.ToString()
+            }
+            else
+            {
+                Write-Warning -Message "Service '$Name' has a corrupt dependency. For more information, inspect the registry value at HKLM:\SYSTEM\CurrentControlSet\Services\$Name\DependOnService."
+            }
         }
 
         $startupType = ConvertTo-StartupTypeString -StartMode $serviceCimInstance.StartMode

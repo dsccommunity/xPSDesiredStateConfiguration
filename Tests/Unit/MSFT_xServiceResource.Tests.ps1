@@ -36,6 +36,168 @@ try
         $script:gMSAUser2 = 'DOMAIN\gMSA2$'
 
         Describe 'xService\Get-TargetResource' {
+            <#
+                .SYNOPSIS
+                    Invokes Get-TargetResource, ensures that it does not throw an exception,
+                    and tests whether expected functions were called.
+
+                .PARAMETER GetTargetResourceParameters
+                    The parameters to pass to Get-TargetResource
+
+                .PARAMETER TestServiceCimInstance
+                    The TestServiceCimInstance object to use when checking whether
+                    ConvertTo-StartupTypeString was called.
+
+                .PARAMETER ExpectServiceCIMInstance
+                    Whether or not the function should expect Get-ServiceCimInstance
+                    to be called. Defaults to $true.
+            #>
+            function Test-GetTargetResourceDoesntThrow
+            {
+                [CmdletBinding()]
+                param
+                (
+                    [Parameter(Mandatory = $true)]
+                    [System.Collections.Hashtable]
+                    $GetTargetResourceParameters,
+
+                    [Parameter()]
+                    [System.Collections.Hashtable]
+                    $TestServiceCimInstance,
+
+                    [Parameter()]
+                    [System.Boolean]
+                    $ExpectServiceCIMInstance = $true
+                )
+
+                It 'Should not throw' {
+                    { $null = Get-TargetResource @GetTargetResourceParameters } | Should -Not -Throw
+                }
+
+                It 'Should retrieve service' {
+                    Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $GetTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                }
+
+                if ($ExpectServiceCIMInstance)
+                {
+                    $expectedTimes = 1
+                }
+                else
+                {
+                    $expectedTimes = 0
+                }
+
+                It 'Should retrieve the service CIM instance' {
+                    Assert-MockCalled 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $GetTargetResourceParameters.Name } -Times $expectedTimes -Scope 'Context'
+                }
+
+                It 'Should convert the service start mode to a startup type string' {
+                    Assert-MockCalled -CommandName 'ConvertTo-StartupTypeString' -ParameterFilter { $StartMode -eq $TestServiceCimInstance.StartMode } -Times $expectedTimes -Scope 'Context'
+                }
+            }
+
+            <#
+                .SYNOPSIS
+                    Invokes Get-TargetResource, and performs tests against the return variable.
+
+                .PARAMETER GetTargetResourceParameters
+                    The parameters to pass to Get-TargetResource
+
+                .PARAMETER ExpectedValues
+                    A hashtable containing values that are expected to be returned by
+                    Get-TargetResource.
+            #>
+            function Test-GetTargetResourceResult
+            {
+                [CmdletBinding()]
+                param
+                (
+                    [Parameter(Mandatory = $true)]
+                    [System.Collections.Hashtable]
+                    $GetTargetResourceParameters,
+
+                    [Parameter(Mandatory = $true)]
+                    [System.Collections.Hashtable]
+                    $ExpectedValues
+                )
+
+                $getTargetResourceResult = Get-TargetResource @GetTargetResourceParameters
+
+                It 'Should return a hashtable' {
+                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                }
+
+                if ($ExpectedValues.ContainsKey('Name'))
+                {
+                    It 'Should return the service name' {
+                        $getTargetResourceResult.Name | Should -Be $ExpectedValues.Name
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('Ensure'))
+                {
+                    It 'Should return the service Ensure state as Present' {
+                        $getTargetResourceResult.Ensure | Should -Be $ExpectedValues.Ensure
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('Path'))
+                {
+                    It 'Should return the service path' {
+                        $getTargetResourceResult.Path | Should -Be $ExpectedValues.Path
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('StartupType'))
+                {
+                    It 'Should return the service startup type' {
+                        $getTargetResourceResult.StartupType | Should -Be $ExpectedValues.StartupType
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('BuiltInAccount'))
+                {
+                    It 'Should return the service startup account name' {
+                        $getTargetResourceResult.BuiltInAccount | Should -Be $ExpectedValues.BuiltInAccount
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('State'))
+                {
+                    It 'Should return the service state' {
+                        $getTargetResourceResult.State | Should -Be $ExpectedValues.State
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('DisplayName'))
+                {
+                    It 'Should return the service display name' {
+                        $getTargetResourceResult.DisplayName | Should -Be $ExpectedValues.DisplayName
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('Description'))
+                {
+                    It 'Should return the service description as null' {
+                        $getTargetResourceResult.Description | Should -Be $ExpectedValues.Description
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('DesktopInteract'))
+                {
+                    It 'Should return the service desktop interation setting' {
+                        $getTargetResourceResult.DesktopInteract | Should -Be $ExpectedValues.DesktopInteract
+                    }
+                }
+
+                if ($ExpectedValues.ContainsKey('Dependencies'))
+                {
+                    It 'Should return the service dependencies' {
+                        $getTargetResourceResult.Dependencies | Should -Be $ExpectedValues.Dependencies
+                    }
+                }
+            }
+
             Mock -CommandName 'Get-Service' -MockWith { }
             Mock -CommandName 'Get-ServiceCimInstance' -MockWith { }
             Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { }
@@ -44,36 +206,17 @@ try
                 Name = 'TestServiceName'
             }
 
+            $convertToStartupTypeStringResult = 'TestStartupTypeString'
+
             Context 'Service does not exist' {
-                It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -ExpectServiceCIMInstance $false
+
+                $expectedValues = @{
+                    Name            = $getTargetResourceParameters.Name
+                    Ensure          = 'Absent'
                 }
 
-                It 'Should retrieve service' {
-                    Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
-                }
-
-                It 'Should not attempt to retrieve the service CIM instance' {
-                    Assert-MockCalled 'Get-ServiceCimInstance' -Times 0 -Scope 'Context'
-                }
-
-                It 'Should not attempt to convert the service start mode to a startup type string' {
-                    Assert-MockCalled -CommandName 'ConvertTo-StartupTypeString' -Times 0 -Scope 'Context'
-                }
-
-                $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-
-                It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
-                }
-
-                It 'Should return the service name' {
-                    $getTargetResourceResult.Name | Should Be $getTargetResourceParameters.Name
-                }
-
-                It 'Should return the service Ensure state as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
-                }
+                Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
             Context 'Service exists with all properties defined and custom startup account name' {
@@ -101,73 +244,26 @@ try
                     DesktopInteract = $true
                 }
 
-                $convertToStartupTypeStringResult = 'TestStartupTypeString'
-
                 Mock -CommandName 'Get-Service' -MockWith { return $testService }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
 
-                It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
+
+                $expectedValues = @{
+                    Name            = $getTargetResourceParameters.Name
+                    Ensure          = 'Present'
+                    Path            = $testServiceCimInstance.PathName
+                    StartupType     = $convertToStartupTypeStringResult
+                    BuiltInAccount  = $testServiceCimInstance.StartName
+                    State           = $testService.Status
+                    DisplayName     = $testService.DisplayName
+                    Description     = $testServiceCimInstance.Description
+                    DesktopInteract = $testServiceCimInstance.DesktopInteract
+                    Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
                 }
 
-                It 'Should retrieve service' {
-                    Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
-                }
-
-                It 'Should retrieve the service CIM instance' {
-                    Assert-MockCalled 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
-                }
-
-                It 'Should convert the service start mode to a startup type string' {
-                    Assert-MockCalled -CommandName 'ConvertTo-StartupTypeString' -ParameterFilter { $StartMode -eq $testServiceCimInstance.StartMode } -Times 1 -Scope 'Context'
-                }
-
-                $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-
-                It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
-                }
-
-                It 'Should return the service name' {
-                    $getTargetResourceResult.Name | Should Be $getTargetResourceParameters.Name
-                }
-
-                It 'Should return the service Ensure state as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
-                }
-
-                It 'Should return the service path' {
-                    $getTargetResourceResult.Path | Should Be $testServiceCimInstance.PathName
-                }
-
-                It 'Should return the service startup type' {
-                    $getTargetResourceResult.StartupType | Should Be $convertToStartupTypeStringResult
-                }
-
-                It 'Should return the service startup account name' {
-                    $getTargetResourceResult.BuiltInAccount | Should Be $testServiceCimInstance.StartName
-                }
-
-                It 'Should return the service state' {
-                    $getTargetResourceResult.State | Should Be $testService.Status
-                }
-
-                It 'Should return the service display name' {
-                    $getTargetResourceResult.DisplayName | Should Be $testService.DisplayName
-                }
-
-                It 'Should return the service description' {
-                    $getTargetResourceResult.Description | Should Be $testServiceCimInstance.Description
-                }
-
-                It 'Should return the service desktop interation setting' {
-                    $getTargetResourceResult.DesktopInteract | Should Be $testServiceCimInstance.DesktopInteract
-                }
-
-                It 'Should return the service dependencies' {
-                    $getTargetResourceResult.Dependencies | Should Be $testService.ServicesDependedOn.Name
-                }
+                Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
             Context 'Service exists with no dependencies and startup account name as NT Authority\LocalService' {
@@ -190,73 +286,26 @@ try
                     DesktopInteract = $false
                 }
 
-                $convertToStartupTypeStringResult = 'TestStartupTypeString'
-
                 Mock -CommandName 'Get-Service' -MockWith { return $testService }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
 
-                It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
+
+                $expectedValues = @{
+                    Name            = $getTargetResourceParameters.Name
+                    Ensure          = 'Present'
+                    Path            = $testServiceCimInstance.PathName
+                    StartupType     = $convertToStartupTypeStringResult
+                    BuiltInAccount  = $expectedBuiltInAccountValue
+                    State           = $testService.Status
+                    DisplayName     = $testService.DisplayName
+                    Description     = $testServiceCimInstance.Description
+                    DesktopInteract = $testServiceCimInstance.DesktopInteract
+                    Dependencies    = $null
                 }
 
-                It 'Should retrieve service' {
-                    Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
-                }
-
-                It 'Should retrieve the service CIM instance' {
-                    Assert-MockCalled 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
-                }
-
-                It 'Should convert the service start mode to a startup type string' {
-                    Assert-MockCalled -CommandName 'ConvertTo-StartupTypeString' -ParameterFilter { $StartMode -eq $testServiceCimInstance.StartMode } -Times 1 -Scope 'Context'
-                }
-
-                $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-
-                It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
-                }
-
-                It 'Should return the service name' {
-                    $getTargetResourceResult.Name | Should Be $getTargetResourceParameters.Name
-                }
-
-                It 'Should return the service Ensure state as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
-                }
-
-                It 'Should return the service path' {
-                    $getTargetResourceResult.Path | Should Be $testServiceCimInstance.PathName
-                }
-
-                It 'Should return the service startup type' {
-                    $getTargetResourceResult.StartupType | Should Be $convertToStartupTypeStringResult
-                }
-
-                It 'Should return the service startup account name' {
-                    $getTargetResourceResult.BuiltInAccount | Should Be $expectedBuiltInAccountValue
-                }
-
-                It 'Should return the service state' {
-                    $getTargetResourceResult.State | Should Be $testService.Status
-                }
-
-                It 'Should return the service display name' {
-                    $getTargetResourceResult.DisplayName | Should Be $testService.DisplayName
-                }
-
-                It 'Should return the service description' {
-                    $getTargetResourceResult.Description | Should Be $testServiceCimInstance.Description
-                }
-
-                It 'Should return the service desktop interation setting' {
-                    $getTargetResourceResult.DesktopInteract | Should Be $testServiceCimInstance.DesktopInteract
-                }
-
-                It 'Should return the service dependencies as null' {
-                    $getTargetResourceResult.Dependencies | Should Be $null
-                }
+                Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
             Context 'Service exists with no description or display name and startup account name as NT Authority\NetworkService' {
@@ -286,73 +335,117 @@ try
                     DesktopInteract = $false
                 }
 
-                $convertToStartupTypeStringResult = 'TestStartupTypeString'
-
                 Mock -CommandName 'Get-Service' -MockWith { return $testService }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
 
-                It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
+
+                $expectedValues = @{
+                    Name            = $getTargetResourceParameters.Name
+                    Ensure          = 'Present'
+                    Path            = $testServiceCimInstance.PathName
+                    StartupType     = $convertToStartupTypeStringResult
+                    BuiltInAccount  = $expectedBuiltInAccountValue
+                    State           = $testService.Status
+                    DisplayName     = $null
+                    Description     = $null
+                    DesktopInteract = $testServiceCimInstance.DesktopInteract
+                    Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
                 }
 
-                It 'Should retrieve service' {
-                    Assert-MockCalled -CommandName 'Get-Service' -ParameterFilter { $Name -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
+            }
+
+            Context 'Service exists with with stale or corrupt dependencies' {
+                <#
+                    Due to a failed install or uninstall, it's possible to get in a scenario where a service
+                    has a dependency configured in the registry (in the DependOnService REG_MULTI_SZ value), but
+                    where the specified service no longer exists. When this occurs, Get-Service will return a member with null
+                    properties within the ServicesDependedOn property for the missing service. Get-TargetResource should
+                    be able to handle this.
+
+                    Here's an example where XboxNetApiSvc has a dependency on BADSVC, which no longer exists as an actual service:
+
+                    PS D:\> (Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\XboxNetApiSvc' -Name 'DependOnService').DependOnService
+                    BFE
+                    mpssvc
+                    IKEEXT
+                    KeyIso
+                    BADSVC
+
+                    PS D:\> $s = Get-Service XboxNetApiSvc
+
+                    PS D:\> $s.ServicesDependedOn
+
+                    Status   Name               DisplayName
+                    ------   ----               -----------
+
+                    Running  KeyIso             CNG Key Isolation
+                    Running  IKEEXT             IKE and AuthIP IPsec Keying Modules
+                    Running  mpssvc             Windows Defender Firewall
+                    Running  BFE                Base Filtering Engine
+
+
+                    PS D:\> $s.ServicesDependedOn[0]
+
+                    Status   Name               DisplayName
+                    ------   ----               -----------
+
+
+                    PS D:\> $s.ServicesDependedOn[0].Name -eq $null
+                    True
+                #>
+
+                $testService = @{
+                    Name               = 'TestServiceName'
+                    DisplayName        = 'TestDisplayName'
+                    Status             = 'TestServiceStatus'
+                    StartType          = 'TestServiceStartType'
+                    ServicesDependedOn = @(
+                        @{
+                            Name = 'ServiceDependency1'
+                        },
+                        @{
+                            Name = $null
+                        }
+                    )
                 }
 
-                It 'Should retrieve the service CIM instance' {
-                    Assert-MockCalled 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $getTargetResourceParameters.Name } -Times 1 -Scope 'Context'
+                $testServiceCimInstance = @{
+                    Name            = $testService.Name
+                    PathName        = 'TestServicePath'
+                    Description     = 'Test service description'
+                    StartName       = 'LocalService'
+                    StartMode       = 'Auto'
+                    DesktopInteract = $false
                 }
 
-                It 'Should convert the service start mode to a startup type string' {
-                    Assert-MockCalled -CommandName 'ConvertTo-StartupTypeString' -ParameterFilter { $StartMode -eq $testServiceCimInstance.StartMode } -Times 1 -Scope 'Context'
+                Mock -CommandName 'Get-Service' -MockWith { return $testService }
+                Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
+                Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                Mock -CommandName 'Write-Warning'
+
+                Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
+
+                It 'Should warn that a service dependency is corrupt' {
+                    Assert-MockCalled -CommandName 'Write-Warning' -ParameterFilter { $Message -like "*has a corrupt dependency*" } -Times 1 -Scope 'Context'
                 }
 
-                $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-
-                It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                $expectedValues = @{
+                    Name            = $getTargetResourceParameters.Name
+                    Ensure          = 'Present'
+                    Path            = $testServiceCimInstance.PathName
+                    StartupType     = $convertToStartupTypeStringResult
+                    BuiltInAccount  = $testServiceCimInstance.StartName
+                    State           = $testService.Status
+                    DisplayName     = $testService.DisplayName
+                    Description     = $testServiceCimInstance.Description
+                    DesktopInteract = $testServiceCimInstance.DesktopInteract
+                    Dependencies    = [System.Object[]] ($testService.ServicesDependedOn | Where-Object -FilterScript {![String]::IsNullOrEmpty($_.Name)}).Name
                 }
 
-                It 'Should return the service name' {
-                    $getTargetResourceResult.Name | Should Be $getTargetResourceParameters.Name
-                }
-
-                It 'Should return the service Ensure state as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
-                }
-
-                It 'Should return the service path' {
-                    $getTargetResourceResult.Path | Should Be $testServiceCimInstance.PathName
-                }
-
-                It 'Should return the service startup type' {
-                    $getTargetResourceResult.StartupType | Should Be $convertToStartupTypeStringResult
-                }
-
-                It 'Should return the service startup account name' {
-                    $getTargetResourceResult.BuiltInAccount | Should Be $expectedBuiltInAccountValue
-                }
-
-                It 'Should return the service state' {
-                    $getTargetResourceResult.State | Should Be $testService.Status
-                }
-
-                It 'Should return the service display name as null' {
-                    $getTargetResourceResult.DisplayName | Should Be $null
-                }
-
-                It 'Should return the service description as null' {
-                    $getTargetResourceResult.Description | Should Be $null
-                }
-
-                It 'Should return the service desktop interation setting' {
-                    $getTargetResourceResult.DesktopInteract | Should Be $testServiceCimInstance.DesktopInteract
-                }
-
-                It 'Should return the service dependencies' {
-                    $getTargetResourceResult.Dependencies | Should Be $testService.ServicesDependedOn.Name
-                }
+                Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
         }
 
