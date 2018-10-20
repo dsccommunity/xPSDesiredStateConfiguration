@@ -719,6 +719,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 * Changes to xService
   * Added support for Group Managed Service Accounts
 
+* Changes to xWindowsOptionalFeature
+  * Suppressed useless verbose output. ([issue #453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453)
+
 ### 8.4.0.0
 
 * Changes to xPSDesiredStateConfiguration
