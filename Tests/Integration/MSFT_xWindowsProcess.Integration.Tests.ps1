@@ -20,7 +20,7 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
 
 try
 {
-    Describe 'xWindowsProcess Integration Tests without Credential' {
+    Describe 'xWindowsProcess Integration Tests without Credential' -Tag 'Disabled' {
         $testProcessPath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                      -ChildPath 'WindowsProcessTestProcess.exe'
 
@@ -292,7 +292,7 @@ try
         }
     }
 
-    Describe 'xWindowsProcess Integration Tests with Credential' {
+    Describe 'xWindowsProcess Integration Tests with Credential' -Tag 'Disabled' {
         $ConfigData = @{
             AllNodes = @(
                 @{

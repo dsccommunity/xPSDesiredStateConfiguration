@@ -34,7 +34,7 @@ test_script:
             -CodeCoverage `
             -CodeCovIo `
             -DisableConsistency `
-            -ExcludeTag @()
+            -ExcludeTag @('Disabled')
 
 after_test:
   - ps: |

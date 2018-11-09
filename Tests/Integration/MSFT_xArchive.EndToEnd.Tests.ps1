@@ -1,7 +1,7 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-Describe 'xArchive End to End Tests' {
+Describe 'xArchive End to End Tests' -Tag 'Disabled' {
     BeforeAll {
         # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
         $testsFolderFilePath = Split-Path $PSScriptRoot -Parent

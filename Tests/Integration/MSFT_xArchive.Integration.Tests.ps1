@@ -1,7 +1,7 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-Describe 'xArchive Integration Tests' {
+Describe 'xArchive Integration Tests' -Tag 'Disabled' {
     BeforeAll {
         # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
         $testsFolderFilePath = Split-Path $PSScriptRoot -Parent

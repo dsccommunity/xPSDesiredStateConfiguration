@@ -713,6 +713,11 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* Disable Integration Tests in MSFT_xArchive.EndToEnd.Tests.ps1,
+  MSFT_xArchive.Integration.Tests.ps1, and
+  MSFT_xWindowsProcess.Integration.Tests.ps1 until #457 and #458 can be
+  resolved.
+
 
 ### 8.5.0.0
 * Changes to xRegistry
