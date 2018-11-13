@@ -4,4 +4,6 @@ ConvertFrom-StringData -StringData @'
     ThrowUseSecurityBestPractice     = Error: Cannot use best practice security settings with unencrypted traffic. Please set UseSecurityBestPractices to $false or use a certificate to encrypt pull server traffic.
     FindCertificateBySubjectMultiple = More than one certificate found with subject containing {0} and using template "{1}".
     FindCertificateBySubjectNotFound = Certificate not found with subject containing {0} and using template "{1}".
+    IISInstallationPathNotFound      = IIS installation path not found
+    IISWebAdministrationAssemblyNotFound = IIS version of Microsoft.Web.Administration.dll not found
 '@
