@@ -713,6 +713,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* Changes to xDSCWebService
+  * Fixed an issue that made a redepolyment fail, because the deletion of the IIS Webapplication stops with an error. ([issue #460](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/460))
 
 ### 8.5.0.0
 * Changes to xRegistry
