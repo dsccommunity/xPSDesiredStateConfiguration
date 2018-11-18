@@ -713,6 +713,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* Changes to xDSCWebService
+  * Fixed an issue where a Pull Server cannot be deployed on a machine when IIS Express is installed aside a full blown IIS ([issue #191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191))
 
 ### 8.5.0.0
 * Changes to xRegistry
