@@ -713,6 +713,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* Changes to xDSCWebService
+  * Fixed an issue which prevented the removal of the IIS Application Pool created during deployment of an DSC Pull Server instance. ([issue #464](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/464))
 
 ### 8.5.0.0
 * Changes to xRegistry
