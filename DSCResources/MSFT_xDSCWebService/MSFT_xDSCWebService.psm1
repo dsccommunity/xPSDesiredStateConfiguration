@@ -975,6 +975,19 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
         $Authentication
     )
 
+    $webAdminSrvMgr = Get-IISServerManager
+    $appHostConfig = $webAdminSrvMgr.GetApplicationHostConfiguration()
+
+    $authenticationType = $Authentication + "Authentication"
+    $appHostConfigSection = $appHostConfig.GetSection("system.webServer/security/authentication/$authenticationType", $WebSite)
+    $appHostConfigSection.OverrideMode="Allow"
+    $webAdminSrvMgr.CommitChanges()
+}
+
+function Get-IISServerManager {
+    [CmdletBinding()]
+    param ()
+
     $iisInstallPath = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\INetStp" -Name InstallPath).InstallPath
     if (-not $iisInstallPath)
     {
@@ -986,14 +999,7 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
         throw ($LocalizedData.IISWebAdministrationAssemblyNotFound)
     }
     $assy = [System.Reflection.Assembly]::LoadFrom($assyPath)
-    $webAdminSrvMgr = [System.Activator]::CreateInstance($assy.FullName, "Microsoft.Web.Administration.ServerManager").Unwrap()
-
-    $appHostConfig = $webAdminSrvMgr.GetApplicationHostConfiguration()
-
-    $authenticationType = $Authentication + "Authentication"
-    $appHostConfigSection = $appHostConfig.GetSection("system.webServer/security/authentication/$authenticationType", $WebSite)
-    $appHostConfigSection.OverrideMode="Allow"
-    $webAdminSrvMgr.CommitChanges()
+    [System.Activator]::CreateInstance($assy.FullName, "Microsoft.Web.Administration.ServerManager").Unwrap()
 }
 
 function Find-CertificateThumbprintWithSubjectAndTemplateName
