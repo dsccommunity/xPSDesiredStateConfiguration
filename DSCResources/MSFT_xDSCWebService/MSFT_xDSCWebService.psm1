@@ -446,7 +446,7 @@ function Set-TargetResource
             Write-Verbose -Message "Enabling Pull Server to run in a 64 bit process"
         }
 
-        if (-not ((& $script:appCmd list config -section:system.webServer/globalModules) -match "IISSelfSignedCertModule"))
+        if (-not ((& $script:appCmd list config -section:system.webServer/globalModules) -match 'IISSelfSignedCertModule'))
         {
             $sourceFilePath = Join-Path -Path "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" -ChildPath $iisSelfSignedModuleAssemblyName
             $destinationFolderPath = "$env:windir\System32\inetsrv"
