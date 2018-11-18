@@ -1105,13 +1105,13 @@ try
             Add-Member -InputObject $webAdminSrvMgr -MemberType ScriptMethod -Name GetApplicationHostConfiguration -Value {$appHostConfig}
             Add-Member -InputObject $webAdminSrvMgr -MemberType ScriptMethod -Name CommitChanges -Value {}
 
-            Mock -CommandName Add-Type -Verifiable
-            Mock -CommandName New-Object -MockWith {$webAdminSrvMgr} -Verifiable
+            Mock -CommandName Get-IISServerManager -MockWith {$webAdminSrvMgr} -Verifiable
 
             Update-LocationTagInApplicationHostConfigForAuthentication -Website 'PesterSite' -Authentication 'Basic'
 
             It 'Should call expected mocks' {
                 Assert-VerifiableMock
+                Assert-MockCalled Get-IISServerManager -Exactly 1
             }
         }
         Describe -Name "$dscResourceName\Find-CertificateThumbprintWithSubjectAndTemplateName" -Fixture {
