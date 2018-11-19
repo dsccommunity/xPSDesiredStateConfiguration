@@ -987,6 +987,7 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
 function Get-IISServerManager
 {
     [CmdletBinding()]
+    [OutputType([System.Object])]
     param ()
 
     $iisInstallPath = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\INetStp' -Name InstallPath).InstallPath
