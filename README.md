@@ -713,7 +713,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
-- Corrected a resource name in the example xRemoteFile_DownloadFileConfig.ps1
+* Corrected a resource name in the example xRemoteFile_DownloadFileConfig.ps1
 
 ### 8.5.0.0
 * Changes to xRegistry
