@@ -984,7 +984,8 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
     $webAdminSrvMgr.CommitChanges()
 }
 
-function Get-IISServerManager {
+function Get-IISServerManager
+{
     [CmdletBinding()]
     param ()
 
@@ -993,13 +994,13 @@ function Get-IISServerManager {
     {
         throw ($LocalizedData.IISInstallationPathNotFound)
     }
-    $assyPath = Join-Path $iisInstallPath 'Microsoft.Web.Administration.dll' -Resolve -ErrorAction:SilentlyContinue
+    $assyPath = Join-Path -Path $iisInstallPath -ChildPath 'Microsoft.Web.Administration.dll' -Resolve -ErrorAction:SilentlyContinue
     if (-not $assyPath)
     {
         throw ($LocalizedData.IISWebAdministrationAssemblyNotFound)
     }
     $assy = [System.Reflection.Assembly]::LoadFrom($assyPath)
-    [System.Activator]::CreateInstance($assy.FullName, 'Microsoft.Web.Administration.ServerManager').Unwrap()
+    return [System.Activator]::CreateInstance($assy.FullName, 'Microsoft.Web.Administration.ServerManager').Unwrap()
 }
 
 function Find-CertificateThumbprintWithSubjectAndTemplateName
