@@ -725,6 +725,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     tests can run on machines with localized datetime formats that are not
     US.
   * Fix 'Get-ArchiveEntryLastWriteTime' to return `[datetime]` ([issue #471](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/471)).
+  * Improved verbose logging to make debugging path issues easier.
 * Added .gitattributes file and removed git configuration from AppVeyor
   to ensure CRLF settings are configured correctly for the repository.
 * Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that

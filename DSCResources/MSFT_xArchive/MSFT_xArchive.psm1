@@ -1349,12 +1349,14 @@ function Copy-ArchiveEntryToDestination
         $DestinationPath
     )
 
-    Write-Verbose -Message ($script:localizedData.CopyingArchiveEntryToDestination -f $DestinationPath)
-
     $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $ArchiveEntry
+
+    Write-Verbose -Message ($script:localizedData.CopyingArchiveEntryToDestination -f $archiveEntryFullName, $DestinationPath)
 
     if ($archiveEntryFullName.EndsWith('\'))
     {
+        Write-Verbose -Message ($script:localizedData.CreatingArchiveEntryDirectory -f $DestinationPath)
+
         $null = New-Item -Path $DestinationPath -ItemType 'Directory'
     }
     else
