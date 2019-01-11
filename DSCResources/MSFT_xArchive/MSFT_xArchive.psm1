@@ -934,21 +934,22 @@ function Test-FileHashMatchesArchiveEntryHash
 
 <#
     .SYNOPSIS
-        Retrieves the timestamp of the specified file for the specified checksum method.
+        Retrieves the timestamp of the specified file for the specified checksum method
+        and returns it as a checksum.
 
     .PARAMETER File
         The file to retrieve the timestamp of.
 
     .PARAMETER Checksum
-        The checksum method to retrieve the timestamp for.
+        The checksum method to retrieve the timestamp checksum for.
 
     .NOTES
-        The returned date is normalized to the General (G) date format.
-        https://technet.microsoft.com/en-us/library/ee692801.aspx
+        The returned string is file timestamp normalized to the format specified in
+        ConvertTo-CheckSumFromDateTime.
 #>
-function Get-TimestampForChecksum
+function Get-ChecksumFromFileTimestamp
 {
-    [OutputType([System.DateTime])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
@@ -959,22 +960,116 @@ function Get-TimestampForChecksum
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum
     )
 
-    $relevantTimestamp = $null
+    $timestamp = Get-TimestampForChecksum @PSBoundParameters
+
+    return ConvertTo-ChecksumFromDateTime -Date $timestamp
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the timestamp of the specified file for the specified checksum method.
+
+    .PARAMETER File
+        The file to retrieve the timestamp of.
+
+    .PARAMETER Checksum
+        The checksum method to retrieve the timestamp for.
+
+    .NOTES
+        The returned date is normalized to the format specified in
+        ConvertTo-CheckSumFromDateTime
+#>
+function Get-TimestampForChecksum
+{
+    [OutputType([System.Datetime])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.IO.FileInfo]
+        $File,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('CreatedDate', 'ModifiedDate')]
+        [System.String]
+        $Checksum
+    )
 
     if ($Checksum -ieq 'CreatedDate')
     {
-        $relevantTimestamp = Get-Date -Date $File.CreationTime.DateTime -Format 'G'
+        $relevantTimestamp = 'CreationTime'
     }
     elseif ($Checksum -ieq 'ModifiedDate')
     {
-        $relevantTimestamp = Get-Date -Date $File.LastWriteTime.DateTime -Format 'G'
+        $relevantTimestamp = 'LastWriteTime'
     }
 
-    return $relevantTimestamp
+    return Get-TimestampFromFile -File $File -Timestamp $relevantTimestamp
+}
+
+<#
+    .SYNOPSIS
+        Retrieves a timestamp of the specified file.
+
+    .PARAMETER File
+        The file to retrieve the timestamp from.
+
+    .PARAMETER Timestamp
+        The timestamp attribute to retrieve.
+#>
+function Get-TimestampFromFile
+{
+    [OutputType([System.Datetime])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.IO.FileInfo]
+        $File,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('CreationTime', 'LastWriteTime')]
+        [System.String]
+        $Timestamp
+    )
+
+    return $File.$Timestamp.DateTime
+}
+
+<#
+    .SYNOPSIS
+        Converts a datetime object into the format used for a
+        checksum.
+
+    .PARAMETER Date
+        The date to use to generate the checksum.
+
+    .NOTES
+        The returned date is normalized to the General (G) date format.
+        https://technet.microsoft.com/en-us/library/ee692801.aspx
+
+        Because the General (G) is localization specific a non-localization
+        specific format such as ISO9660 could be used in future.
+#>
+function ConvertTo-ChecksumFromDateTime
+{
+    [OutputType([System.String])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.DateTime]
+        $Date
+    )
+
+    return Get-Date -Date $Date -Format 'G'
 }
 
 <#
@@ -984,10 +1079,6 @@ function Get-TimestampForChecksum
 
     .PARAMETER ArchiveEntry
         The archive entry to retrieve the last write time of.
-
-    .NOTES
-        The returned date is normalized to the General (G) date format.
-        https://technet.microsoft.com/en-us/library/ee692801.aspx
 #>
 function Get-ArchiveEntryLastWriteTime
 {
@@ -1001,7 +1092,7 @@ function Get-ArchiveEntryLastWriteTime
         $ArchiveEntry
     )
 
-    return (Get-Date -Date $ArchiveEntry.LastWriteTime.DateTime -Format 'G')
+    return $ArchiveEntry.LastWriteTime.DateTime
 }
 
 <#
@@ -1064,11 +1155,12 @@ function Test-FileMatchesArchiveEntryByChecksum
     }
     else
     {
-        $fileTimestampForChecksum = Get-TimestampForChecksum -File $File -Checksum $Checksum
+        $fileTimestampForChecksum = Get-ChecksumFromFileTimestamp -File $File -Checksum $Checksum
 
         $archiveEntryLastWriteTime = Get-ArchiveEntryLastWriteTime -ArchiveEntry $ArchiveEntry
+        $archiveEntryLastWriteTimeChecksum = ConvertTo-CheckSumFromDateTime -Date $archiveEntryLastWriteTime
 
-        if ($fileTimestampForChecksum.Equals($archiveEntryLastWriteTime))
+        if ($fileTimestampForChecksum.Equals($archiveEntryLastWriteTimeChecksum))
         {
             Write-Verbose -Message ($script:localizedData.FileMatchesArchiveEntryByChecksum -f $File.FullName, $archiveEntryFullName, $Checksum)
 

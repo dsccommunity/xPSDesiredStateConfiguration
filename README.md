@@ -721,8 +721,10 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Update unit and integration tests to meet Pester 4.0.0 standards.
   * Wrapped all verbose message parameters with quotes to make identifying
     actual paths possible.
-  * Fix unit tests for 'Get-TimestampForChecksum' not working when run
-    on with non US date/time format.
+  * Refactored date/time checksum code to improve testability and ensure
+    tests can run on machines with localized datetime formats that are not
+    US.
+  * Fix 'Get-ArchiveEntryLastWriteTime' to return `[datetime]` ([issue #471](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/471)).
 * Added .gitattributes file and removed git configuration from AppVeyor
   to ensure CRLF settings are configured correctly for the repository.
 * Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that

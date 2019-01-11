@@ -2093,15 +2093,48 @@ Describe 'xArchive Unit Tests' {
             }
         }
 
-        Describe 'Get-TimestampForChecksum' {
-            # This is the actual file info of this file since we cannot set the properties of mock objects
+        Describe 'Get-ChecksumFromFileTimestamp' {
             $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
-            $testFileCreationTime = (Get-Date -Date $testFileInfo.CreationTime.DateTime -Format 'G')
-            $testFileLastWriteTime = (Get-Date -Date $testFileInfo.LastWriteTime.DateTime -Format 'G')
+            $testFileCreationTime = $testFileInfo.CreationTime.DateTime
+            $testFileLastWriteTime = $testFileInfo.LastWriteTime.DateTime
+            $testFileCreationTimeChecksum = (Get-Date -Date $testFileCreationTime -Format 'G')
+            $testFileLastWriteTimeChecksum = (Get-Date -Date $testFileLastWriteTime -Format 'G')
 
-            Mock -CommandName 'Get-Date' -MockWith { return $testFileCreationTime }
+            Context 'When checksum specified as CreatedDate' {
+                $getChecksumFromFileTimestampParameters = @{
+                    File = $testFileInfo
+                    Checksum = 'CreatedDate'
+                }
 
-            Context 'Checksum specified as CreatedDate' {
+                It 'Should not throw' {
+                    { $null = Get-ChecksumFromFileTimestamp @getChecksumFromFileTimestampParameters } | Should -Not -Throw
+                }
+
+                It 'Should return the creation time of the file as a Checksum' {
+                    Get-ChecksumFromFileTimestamp @getChecksumFromFileTimestampParameters | Should -Be $testFileCreationTimeChecksum
+                }
+            }
+
+            Context 'When checksum specified as ModifiedDate' {
+                $getChecksumFromFileTimestampParameters = @{
+                    File = $testFileInfo
+                    Checksum = 'ModifiedDate'
+                }
+
+                It 'Should not throw' {
+                    { $null = Get-ChecksumFromFileTimestamp @getChecksumFromFileTimestampParameters } | Should -Not -Throw
+                }
+
+                It 'Should return the last write time of the file' {
+                    Get-ChecksumFromFileTimestamp @getChecksumFromFileTimestampParameters | Should -Be $testFileLastWriteTimeChecksum
+                }
+            }
+        }
+
+        Describe 'Get-TimestampForChecksum' {
+            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
+
+            Context 'When checksum specified as CreatedDate' {
                 $getTimestampForChecksumParameters = @{
                     File = $testFileInfo
                     Checksum = 'CreatedDate'
@@ -2111,26 +2144,12 @@ Describe 'xArchive Unit Tests' {
                     { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should -Not -Throw
                 }
 
-                It 'Should normalize the date to the General (G) format' {
-                    $getDateParameterFilter = {
-                        $dateParameterString = (Get-Date -Date $Date -Format 'G')
-                        $dateParameterCorrect = $dateParameterString -eq $testFileCreationTime
-                        $formatParameterCorrect = $Format -eq 'G'
-
-                        return $dateParameterCorrect -and $formatParameterCorrect
-                    }
-
-                    Assert-MockCalled -CommandName 'Get-Date' -ParameterFilter $getDateParameterFilter -Exactly 1 -Scope 'Context'
-                }
-
-                It 'Should return the creation time of the file' {
-                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileCreationTime
+                It 'Should return the creation time of the file as a Checksum' {
+                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileInfo.CreationTime.DateTime
                 }
             }
 
-            Mock -CommandName 'Get-Date' -MockWith { return $testFileLastWriteTime }
-
-            Context 'Checksum specified as ModifiedDate' {
+            Context 'When checksum specified as ModifiedDate' {
                 $getTimestampForChecksumParameters = @{
                     File = $testFileInfo
                     Checksum = 'ModifiedDate'
@@ -2140,20 +2159,61 @@ Describe 'xArchive Unit Tests' {
                     { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should -Not -Throw
                 }
 
-                It 'Should normalize the date to the General (G) format' {
-                    $getDateParameterFilter = {
-                        $dateParameterString = (Get-Date -Date $Date -Format 'G')
-                        $dateParameterCorrect = $dateParameterString -eq $testFileLastWriteTime
-                        $formatParameterCorrect = $Format -eq 'G'
+                It 'Should return the last write time of the file' {
+                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileInfo.LastWriteTime.DateTime
+                }
+            }
+        }
 
-                        return $dateParameterCorrect -and $formatParameterCorrect
-                    }
+        Describe 'Get-TimestampFromFile' {
+            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
 
-                    Assert-MockCalled -CommandName 'Get-Date' -ParameterFilter $getDateParameterFilter -Exactly 1 -Scope 'Context'
+            Context 'When Timestamp specified as CreationTime' {
+                $getTimestampFromFileParameters = @{
+                    File = $testFileInfo
+                    Timestamp = 'CreationTime'
                 }
 
-                It 'Should return the last write time of the file' {
-                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileLastWriteTime
+                It 'Should not throw' {
+                    { $null = Get-TimestampFromFile @getTimestampFromFileParameters } | Should -Not -Throw
+                }
+
+                It 'Should return the creation time of the file as a Checksum' {
+                    Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.CreationTime.DateTime
+                }
+            }
+
+            Context 'When Timestamp specified as LastWriteTime' {
+                $getTimestampFromFileParameters = @{
+                    File = $testFileInfo
+                    Timestamp = 'LastWriteTime'
+                }
+
+                It 'Should not throw' {
+                    { $null = Get-TimestampFromFile @getTimestampFromFileParameters } | Should -Not -Throw
+                }
+
+                It 'Should return the creation time of the file as a Checksum' {
+                    Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.LastWriteTime.DateTime
+                }
+            }
+        }
+
+        Describe 'ConvertTo-CheckSumFromDateTime' {
+            $testDate = Get-Date
+            $testDateFromChecksum = (Get-Date -Date $testDate -Format 'G')
+
+            Context 'When called with a datetime object set to now' {
+                $convertToCheckSumFromDateTimeParameters = @{
+                    Date = $testDate
+                }
+
+                It 'Should not throw' {
+                    { $null = ConvertTo-CheckSumFromDateTime @convertToCheckSumFromDateTimeParameters } | Should -Not -Throw
+                }
+
+                It 'Should return the date normalized to a string using format of ''G''' {
+                    ConvertTo-CheckSumFromDateTime @convertToCheckSumFromDateTimeParameters | Should -Be $testDateFromChecksum
                 }
             }
         }

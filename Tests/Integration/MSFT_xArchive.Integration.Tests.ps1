@@ -31,7 +31,6 @@ Describe 'xArchive Integration Tests' {
                 File1 = 'Fake file contents'
             }
         }
-
         $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
 
         $destinationDirectoryName = 'ExpandBasicArchive'
@@ -417,6 +416,7 @@ Describe 'xArchive Integration Tests' {
 
             # This foreach loop with the Open-Archive call is needed to set the timestamps of the files at the destination correctly
             $destinationChildItems = Get-ChildItem -Path $destinationDirectoryPath -Recurse -File
+
             foreach ($destinationChildItem in $destinationChildItems)
             {
                 $correspondingZipItemPath = $destinationChildItem.FullName.Replace($destinationDirectoryPath + '\', '')
@@ -424,8 +424,10 @@ Describe 'xArchive Integration Tests' {
 
                 try
                 {
-                    $matchingArchiveEntry = $archive.Entries | Where-Object -FilterScript {$_.FullName -eq $correspondingZipItemPath }
-                    $archiveEntryLastWriteTime = Get-Date -Date $matchingArchiveEntry.LastWriteTime.DateTime -Format 'G'
+                    $matchingArchiveEntry = $archive.Entries | Where-Object -FilterScript {
+                        $_.FullName -eq $correspondingZipItemPath
+                    }
+                    $archiveEntryLastWriteTime = $matchingArchiveEntry.LastWriteTime.DateTime
                 }
                 finally
                 {
@@ -527,6 +529,7 @@ Describe 'xArchive Integration Tests' {
 
             # This foreach loop with the Open-Archive call is needed to set the timestamps of the files at the destination correctly
             $destinationChildItems = Get-ChildItem -Path $destinationDirectoryPath -Recurse -File
+
             foreach ($destinationChildItem in $destinationChildItems)
             {
                 $correspondingZipItemPath = $destinationChildItem.FullName.Replace($destinationDirectoryPath + '\', '')
@@ -534,8 +537,10 @@ Describe 'xArchive Integration Tests' {
 
                 try
                 {
-                    $matchingArchiveEntry = $archive.Entries | Where-Object -FilterScript {$_.FullName -eq $correspondingZipItemPath }
-                    $archiveEntryLastWriteTime = Get-Date -Date $matchingArchiveEntry.LastWriteTime.DateTime -Format 'G'
+                    $matchingArchiveEntry = $archive.Entries | Where-Object -FilterScript {
+                        $_.FullName -eq $correspondingZipItemPath
+                    }
+                    $archiveEntryLastWriteTime = $matchingArchiveEntry.LastWriteTime.DateTime
                 }
                 finally
                 {
@@ -605,6 +610,7 @@ Describe 'xArchive Integration Tests' {
 
             # This foreach loop with the Open-Archive call is needed to set the timestamps of the files at the destination correctly
             $destinationChildItems = Get-ChildItem -Path $destinationDirectoryPath -Recurse -File
+
             foreach ($destinationChildItem in $destinationChildItems)
             {
                 $correspondingZipItemPath = $destinationChildItem.FullName.Replace($destinationDirectoryPath + '\', '')
@@ -612,8 +618,10 @@ Describe 'xArchive Integration Tests' {
 
                 try
                 {
-                    $matchingArchiveEntry = $archive.Entries | Where-Object -FilterScript {$_.FullName -eq $correspondingZipItemPath }
-                    $archiveEntryLastWriteTime = Get-Date -Date $matchingArchiveEntry.LastWriteTime.DateTime -Format 'G'
+                    $matchingArchiveEntry = $archive.Entries | Where-Object -FilterScript {
+                        $_.FullName -eq $correspondingZipItemPath
+                    }
+                    $archiveEntryLastWriteTime = $matchingArchiveEntry.LastWriteTime.DateTime
                 }
                 finally
                 {
