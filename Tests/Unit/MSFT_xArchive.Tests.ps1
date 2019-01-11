@@ -126,7 +126,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to test if the specified archive exists at the specified destination' {
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove a mounted PSDrive' {
@@ -200,7 +200,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to test if the specified archive exists at the specified destination' {
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove a mounted PSDrive' {
@@ -281,7 +281,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove a mounted PSDrive' {
@@ -363,7 +363,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $checksumParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove a mounted PSDrive' {
@@ -444,7 +444,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove a mounted PSDrive' {
@@ -526,7 +526,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $checksumParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove a mounted PSDrive' {
@@ -613,7 +613,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Test-ArchiveExistsAtDestination' -ParameterFilter $testArchiveExistsAtDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should remove the mounted PSDrive' {
@@ -650,7 +650,7 @@ Describe 'xArchive Unit Tests' {
                 }
             }
         }
-            
+
         Describe 'Set-TargetResource' {
             $testPSDrive = @{
                 Root = 'Test PSDrive Name'
@@ -758,7 +758,7 @@ Describe 'xArchive Unit Tests' {
                         return $pathParameterCorrect -and $itemTypeParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'New-Item' -ParameterFilter $newItemParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -ParameterFilter $newItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should expand the archive to the specified destination' {
@@ -770,7 +770,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $forceParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -829,11 +829,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to expand the archive to the specified destination' {
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -901,7 +901,7 @@ Describe 'xArchive Unit Tests' {
                         return $pathParameterCorrect -and $itemTypeParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'New-Item' -ParameterFilter $newItemParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -ParameterFilter $newItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should expand the archive to the specified destination based on the specified Checksum method' {
@@ -914,7 +914,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $checksumParameterCorrect -and $forceParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -975,11 +975,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to expand the archive to the specified destination' {
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -1040,7 +1040,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should expand the archive to the specified destination' {
@@ -1052,7 +1052,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $forceParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -1111,11 +1111,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to expand the archive to the specified destination' {
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should remove the content of the opened archive from the directory at the specified destination' {
@@ -1183,7 +1183,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should expand the archive to the specified destination based on the specified Checksum method' {
@@ -1196,7 +1196,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $checksumParameterCorrect -and $forceParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -1257,11 +1257,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to expand the archive to the specified destination' {
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should remove the content of the opened archive from the directory at the specified destination' {
@@ -1335,7 +1335,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not attempt to create a new directory at the specified destination' {
-                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'New-Item' -Exactly 0 -Scope 'Context'
                 }
 
                 It 'Should expand the archive to the specified destination' {
@@ -1347,7 +1347,7 @@ Describe 'xArchive Unit Tests' {
                         return $archiveSourcePathParameterCorrect -and $destinationParameterCorrect -and $forceParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'  
+                    Assert-MockCalled -CommandName 'Expand-ArchiveToDestination' -ParameterFilter $expandArchiveToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the content of the opened archive from the directory at the specified destination' {
@@ -1565,7 +1565,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $mountPSDriveWithCredentialParameters.Path
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-Path' -ParameterFilter $testPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -1619,7 +1619,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $mountPSDriveWithCredentialParameters.Path
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-Path' -ParameterFilter $testPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -1663,7 +1663,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $mountPSDriveWithCredentialParameters.Path
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-Path' -ParameterFilter $testPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -1856,7 +1856,7 @@ Describe 'xArchive Unit Tests' {
             $convertToPowerShellHashAlgorithmNameParameters = @{
                 DscHashAlgorithmName = 'SHA-256'
             }
-            
+
             It 'Should not throw' {
                 { $null = ConvertTo-PowerShellHashAlgorithmName @convertToPowerShellHashAlgorithmNameParameters } | Should -Not -Throw
             }
@@ -1887,8 +1887,8 @@ Describe 'xArchive Unit Tests' {
                     FilePath = 'TestPath'
                     ArchiveEntry = $mockArchiveEntry
                     HashAlgorithmName = 'SHA-256'
-                } 
-                
+                }
+
                 It 'Should throw error for failure while opening archive entry' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
                     { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
@@ -1902,8 +1902,8 @@ Describe 'xArchive Unit Tests' {
                     FilePath = 'TestPath'
                     ArchiveEntry = $mockArchiveEntry
                     HashAlgorithmName = 'SHA-256'
-                } 
-                
+                }
+
                 It 'Should throw error for failure while opening a stream to the file' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
                     { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
@@ -1917,8 +1917,8 @@ Describe 'xArchive Unit Tests' {
                     FilePath = 'TestPath'
                     ArchiveEntry = $mockArchiveEntry
                     HashAlgorithmName = 'SHA-256'
-                } 
-                
+                }
+
                 It 'Should throw error for failure to retrieve the file hash or archive entry hash' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
                     { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
@@ -1937,8 +1937,8 @@ Describe 'xArchive Unit Tests' {
                     FilePath = 'TestPath'
                     ArchiveEntry = $mockArchiveEntry
                     HashAlgorithmName = 'SHA-256'
-                } 
-                
+                }
+
                 It 'Should not throw' {
                     { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Not -Throw
                 }
@@ -1963,7 +1963,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should open a stream to the specified file' {
                     $expectedArgumentList = @( $testFileHashMatchesArchiveEntryHashParameters.FilePath, [System.IO.FileMode]::Open )
-                    
+
                     $newObjectParameterFilter = {
                         $typeNameParameterCorrect = $TypeName -eq 'System.IO.FileStream'
                         $argumentListParameterCorrect = $null -eq (Compare-Object -ReferenceObject $expectedArgumentList -DifferenceObject $ArgumentList)
@@ -1974,7 +1974,7 @@ Describe 'xArchive Unit Tests' {
                     Assert-MockCalled -CommandName 'New-Object' -ParameterFilter $newObjectParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
-                
+
 
                 It 'Should retrieve the hashes of the specified file and the specified archive entry with the specified hash algorithm name' {
                     $getFileHashParameterFilter = {
@@ -2027,8 +2027,8 @@ Describe 'xArchive Unit Tests' {
                     FilePath = 'TestPath'
                     ArchiveEntry = $mockArchiveEntry
                     HashAlgorithmName = 'SHA-256'
-                } 
-                
+                }
+
                 It 'Should not throw' {
                     { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Not -Throw
                 }
@@ -2053,7 +2053,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should open a stream to the specified file' {
                     $expectedArgumentList = @( $testFileHashMatchesArchiveEntryHashParameters.FilePath, [System.IO.FileMode]::Open )
-                    
+
                     $newObjectParameterFilter = {
                         $typeNameParameterCorrect = $TypeName -eq 'System.IO.FileStream'
                         $argumentListParameterCorrect = $null -eq (Compare-Object -ReferenceObject $expectedArgumentList -DifferenceObject $ArgumentList)
@@ -2064,7 +2064,7 @@ Describe 'xArchive Unit Tests' {
                     Assert-MockCalled -CommandName 'New-Object' -ParameterFilter $newObjectParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
-                
+
 
                 It 'Should retrieve the hashes of the specified file and the specified archive entry with the specified hash algorithm name' {
                     $getFileHashParameterFilter = {
@@ -2113,7 +2113,8 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should normalize the date to the General (G) format' {
                     $getDateParameterFilter = {
-                        $dateParameterCorrect = $Date -eq $testFileCreationTime
+                        $dateParameterString = (Get-Date -Date $Date -Format 'G')
+                        $dateParameterCorrect = $dateParameterString -eq $testFileCreationTime
                         $formatParameterCorrect = $Format -eq 'G'
 
                         return $dateParameterCorrect -and $formatParameterCorrect
@@ -2141,7 +2142,8 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should normalize the date to the General (G) format' {
                     $getDateParameterFilter = {
-                        $dateParameterCorrect = $Date -eq $testFileLastWriteTime
+                        $dateParameterString = (Get-Date -Date $Date -Format 'G')
+                        $dateParameterCorrect = $dateParameterString -eq $testFileLastWriteTime
                         $formatParameterCorrect = $Format -eq 'G'
 
                         return $dateParameterCorrect -and $formatParameterCorrect
@@ -2414,7 +2416,7 @@ Describe 'xArchive Unit Tests' {
             $mockArchiveEntry = New-MockObject -Type 'System.IO.Compression.ZipArchiveEntry'
             $mockFile = New-MockObject -Type 'System.IO.FileInfo'
             $mockDirectory = New-MockObject -Type 'System.IO.DirectoryInfo'
-            
+
             Mock -CommandName 'Open-Archive' -MockWith { return $mockArchive }
             Mock -CommandName 'Get-ArchiveEntries' -MockWith { return @( $mockArchiveEntry ) }
             Mock -CommandName 'Get-ArchiveEntryFullName' -MockWith { return $testArchiveEntryFullNameWithBackslash }
@@ -2464,7 +2466,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -2541,7 +2543,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -2618,7 +2620,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -2700,7 +2702,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -2778,7 +2780,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -2855,7 +2857,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -2932,7 +2934,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3009,7 +3011,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3085,7 +3087,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3171,7 +3173,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $testArchiveExistsAtDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3304,7 +3306,7 @@ Describe 'xArchive Unit Tests' {
                 It 'Should not attempt to retrieve the last write time of the specified archive entry' {
                     Assert-MockCalled -CommandName 'Get-ArchiveEntryLastWriteTime' -Exactly 0 -Scope 'Context'
                 }
-                
+
                 It 'Should not attempt to set the last write time of the file at the specified destination' {
                     $setItemPropertyParameterFilter = {
                         $nameParameterIsLastWriteTime = $Name -eq 'LastWriteTime'
@@ -3440,7 +3442,7 @@ Describe 'xArchive Unit Tests' {
 
                     Assert-MockCalled -CommandName 'Get-ArchiveEntryLastWriteTime' -ParameterFilter $getArchiveEntryLastWriteTimeParameterFilter -Exactly 1 -Scope 'Context'
                 }
-                
+
                 It 'Should set the last write time of the file at the specified destination' {
                     $setItemPropertyParameterFilter = {
                         $nameParameterIsLastWriteTime = $Name -eq 'LastWriteTime'
@@ -3493,7 +3495,7 @@ Describe 'xArchive Unit Tests' {
             $mockArchiveEntry = New-MockObject -Type 'System.IO.Compression.ZipArchiveEntry'
             $mockFile = New-MockObject -Type 'System.IO.FileInfo'
             $mockDirectory = New-MockObject -Type 'System.IO.DirectoryInfo'
-            
+
             Mock -CommandName 'Open-Archive' -MockWith { return $mockArchive }
             Mock -CommandName 'Get-ArchiveEntries' -MockWith { return @( $mockArchiveEntry ) }
             Mock -CommandName 'Get-ArchiveEntryFullName' -MockWith { return $testArchiveEntryFullNameWithBackslash }
@@ -3548,7 +3550,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3580,10 +3582,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -3665,7 +3667,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3697,10 +3699,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -3713,7 +3715,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -3787,7 +3789,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3819,10 +3821,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -3835,7 +3837,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -3896,7 +3898,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -3995,7 +3997,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4038,7 +4040,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $pathParameterCorrect -and $itemTypeParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'New-Item' -ParameterFilter $newItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4046,10 +4048,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4118,7 +4120,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4162,10 +4164,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4247,7 +4249,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4279,10 +4281,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4295,7 +4297,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4369,7 +4371,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4401,10 +4403,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4417,7 +4419,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4478,7 +4480,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4588,7 +4590,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4620,10 +4622,10 @@ Describe 'xArchive Unit Tests' {
                     $copyArchiveEntryToDestinationParameterFilter = {
                         $archiveEntryParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mockArchiveEntry -DifferenceObject $ArchiveEntry)
                         $destinationPathParameterCorrect = $DestinationPath -eq $testItemPathAtDestination
-                        
+
                         return $archiveEntryParameterCorrect -and $destinationPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Copy-ArchiveEntryToDestination' -ParameterFilter $copyArchiveEntryToDestinationParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4635,7 +4637,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
                 }
 
@@ -4644,7 +4646,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4706,7 +4708,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $expandArchiveToDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -4746,7 +4748,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
                 }
 
@@ -4809,7 +4811,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Join-Path' -ParameterFilter $joinPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4866,7 +4868,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Join-Path' -ParameterFilter $joinPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4933,7 +4935,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Join-Path' -ParameterFilter $joinPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -4964,7 +4966,7 @@ Describe 'xArchive Unit Tests' {
                 }
             }
         }
-        
+
         Describe 'Remove-ArchiveFromDestination' {
             $testArchiveEntryFullNameWithBackslash = 'TestArchiveEntryFullName\'
             $testArchiveEntryFullNameNoBackslash = 'TestArchiveEntryFullName'
@@ -4975,7 +4977,7 @@ Describe 'xArchive Unit Tests' {
             $mockArchiveEntry = New-MockObject -Type 'System.IO.Compression.ZipArchiveEntry'
             $mockFile = New-MockObject -Type 'System.IO.FileInfo'
             $mockDirectory = New-MockObject -Type 'System.IO.DirectoryInfo'
-            
+
             Mock -CommandName 'Open-Archive' -MockWith { return $mockArchive }
             Mock -CommandName 'Get-ArchiveEntries' -MockWith { return @( $mockArchiveEntry ) }
             Mock -CommandName 'Get-ArchiveEntryFullName' -MockWith { return $testArchiveEntryFullNameWithBackslash }
@@ -5028,7 +5030,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5117,7 +5119,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5206,7 +5208,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5295,7 +5297,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5325,7 +5327,7 @@ Describe 'xArchive Unit Tests' {
                         $parentParameterCorrect = $Parent -eq $true
                         return $pathParameterCorrect -and $parentParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Split-Path' -ParameterFilter $splitPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -5401,7 +5403,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameWithBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5431,7 +5433,7 @@ Describe 'xArchive Unit Tests' {
                         $parentParameterCorrect = $Parent -eq $true
                         return $pathParameterCorrect -and $parentParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Split-Path' -ParameterFilter $splitPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -5504,7 +5506,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5593,7 +5595,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5682,7 +5684,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5771,7 +5773,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5796,7 +5798,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -5806,7 +5808,7 @@ Describe 'xArchive Unit Tests' {
                         $parentParameterCorrect = $Parent -eq $true
                         return $pathParameterCorrect -and $parentParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Split-Path' -ParameterFilter $splitPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -5876,7 +5878,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -5901,7 +5903,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -5911,7 +5913,7 @@ Describe 'xArchive Unit Tests' {
                         $parentParameterCorrect = $Parent -eq $true
                         return $pathParameterCorrect -and $parentParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Split-Path' -ParameterFilter $splitPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -5981,7 +5983,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -6005,7 +6007,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
                 }
 
@@ -6079,7 +6081,7 @@ Describe 'xArchive Unit Tests' {
                     $joinPathParameterFilter = {
                         $pathParameterCorrect = $Path -eq $removeArchiveFromDestinationParameters.Destination
                         $childPathParameterCorrect = $ChildPath -eq $testArchiveEntryFullNameNoBackslash
-                        
+
                         return $pathParameterCorrect -and $childPathParameterCorrect
                     }
 
@@ -6103,7 +6105,7 @@ Describe 'xArchive Unit Tests' {
 
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
                 }
 
@@ -6112,7 +6114,7 @@ Describe 'xArchive Unit Tests' {
                         $literalPathParameterCorrect = $LiteralPath -eq $testItemPathAtDestination
                         return $literalPathParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
@@ -6122,7 +6124,7 @@ Describe 'xArchive Unit Tests' {
                         $parentParameterCorrect = $Parent -eq $true
                         return $pathParameterCorrect -and $parentParameterCorrect
                     }
-                    
+
                     Assert-MockCalled -CommandName 'Split-Path' -ParameterFilter $splitPathParameterFilter -Exactly 1 -Scope 'Context'
                 }
 

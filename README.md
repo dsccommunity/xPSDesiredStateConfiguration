@@ -719,8 +719,14 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Update integration tests to meet Pester 4.0.0 standards.
   * Update end-to-end tests to meet Pester 4.0.0 standards.
   * Update unit and integration tests to meet Pester 4.0.0 standards.
+  * Wrapped all verbose message parameters with quotes to make identifying
+    actual paths possible.
+  * Fix unit tests for 'Get-TimestampForChecksum' not working when run
+    on with non US date/time format.
 * Added .gitattributes file and removed git configuration from AppVeyor
   to ensure CRLF settings are configured correctly for the repository.
+* Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that
+  custom syntax problems are highlighted in Visual Studio Code.
 
 ### 8.5.0.0
 

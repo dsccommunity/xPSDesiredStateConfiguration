@@ -46,7 +46,7 @@ if (-not (Test-IsNanoServer))
         Specifies whether or not to validate that a file at the destination with the same name as a
         file in the archive actually matches that corresponding file in the archive by the
         specified checksum method.
-        
+
         If a file does not match it will be considered not present.
 
         The default value is false.
@@ -106,7 +106,7 @@ function Get-TargetResource
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $Checksum, $Path, $Destination
-        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage 
+        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage
     }
 
     $archiveState = @{
@@ -178,7 +178,7 @@ function Get-TargetResource
     .SYNOPSIS
         Expands the archive (.zip) file at the specified path to the specified destination or
         removes the expanded archive (.zip) file at the specified path from the specified
-        destination. 
+        destination.
 
     .PARAMETER Path
         The path to the archive file that should be expanded to or removed from the specified
@@ -202,7 +202,7 @@ function Get-TargetResource
         Specifies whether or not to validate that a file at the destination with the same name as a
         file in the archive actually matches that corresponding file in the archive by the
         specified checksum method.
-        
+
         If the file does not match and Ensure is specified as Present and Force is not specified,
         the resource will throw an error that the file at the destination cannot be overwritten.
         If the file does not match and Ensure is specified as Present and Force is specified, the
@@ -285,7 +285,7 @@ function Set-TargetResource
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $Checksum, $Path, $Destination
-        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage 
+        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage
     }
 
     $psDrive = $null
@@ -301,7 +301,7 @@ function Set-TargetResource
         Assert-DestinationDoesNotExistAsFile -Destination $Destination
 
         Write-Verbose -Message ($script:localizedData.SettingArchiveState -f $Path, $Destination)
-        
+
         $expandArchiveToDestinationParameters = @{
             ArchiveSourcePath = $Path
             Destination = $Destination
@@ -384,7 +384,7 @@ function Set-TargetResource
         Specifies whether or not to validate that a file at the destination with the same name as a
         file in the archive actually matches that corresponding file in the archive by the
         specified checksum method.
-        
+
         If a file does not match it will be considered not present.
 
         The default value is false.
@@ -823,7 +823,7 @@ function Test-ChecksumIsSha
         [String]
         $Checksum
     )
-    
+
     return ($Checksum.Length -ge 'SHA'.Length) -and ($Checksum.Substring(0, 3) -ieq 'SHA')
 }
 
@@ -1404,7 +1404,7 @@ function Expand-ArchiveToDestination
                         $overwriteArchiveEntry = $false
                     }
                 }
-   
+
                 if ($overwriteArchiveEntry)
                 {
                     if ($Force)
@@ -1431,7 +1431,7 @@ function Expand-ArchiveToDestination
 <#
     .SYNOPSIS
         Removes the specified directory from the specified destination path.
-        
+
     .PARAMETER Directory
         The partial path under the destination path of the directory to remove.
 
@@ -1559,7 +1559,7 @@ function Remove-ArchiveFromDestination
                 elseif ((-not $archiveEntryIsDirectory) -and $itemAtDestinationIsFile)
                 {
                     $removeArchiveEntry = $true
-                        
+
                     if ($PSBoundParameters.ContainsKey('Checksum'))
                     {
                         $removeArchiveEntry = Test-FileMatchesArchiveEntryByChecksum -File $itemAtDestination -ArchiveEntry $archiveEntry -Checksum $Checksum
