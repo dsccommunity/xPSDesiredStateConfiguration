@@ -715,9 +715,12 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ### Unreleased
 
 * xArchive
-  * Fix integration tests ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444)).
+  * Fix end-to-end tests ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444)).
   * Update integration tests to meet Pester 4.0.0 standards.
+  * Update end-to-end tests to meet Pester 4.0.0 standards.
   * Update unit and integration tests to meet Pester 4.0.0 standards.
+* Added .gitattributes file and removed git configuration from AppVeyor
+  to ensure CRLF settings are configured correctly for the repository.
 
 ### 8.5.0.0
 
