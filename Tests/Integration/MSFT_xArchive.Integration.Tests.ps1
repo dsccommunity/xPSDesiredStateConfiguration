@@ -22,7 +22,7 @@ Describe 'xArchive Integration Tests' {
         Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
     }
 
-    Context 'Expand a basic archive' {
+    Context 'When expanding a basic archive' {
         $zipFileName = 'BasicArchive1'
         $subfolderName = 'Folder1'
 
@@ -66,7 +66,7 @@ Describe 'xArchive Integration Tests' {
         }
     }
 
-    Context 'Remove a basic archive' {
+    Context 'When removing a basic archive' {
         $zipFileName = 'BasicArchive2'
         $subfolderName = 'Folder1'
 
@@ -112,7 +112,7 @@ Describe 'xArchive Integration Tests' {
         }
     }
 
-    Context 'Expand an archive with nested directories' {
+    Context 'When expanding an archive with nested directories' {
         $zipFileName = 'NestedArchive1'
 
         $zipFileStructure = @{
@@ -182,7 +182,7 @@ Describe 'xArchive Integration Tests' {
         }
     }
 
-    Context 'Remove an archive with nested directories' {
+    Context 'When removing an archive with nested directories' {
         $zipFileName = 'NestedArchive2'
 
         $zipFileStructure = @{
@@ -254,7 +254,7 @@ Describe 'xArchive Integration Tests' {
         }
     }
 
-    Context 'Expand an archive when another archive with the same timestamp exists in the same folder' {
+    Context 'When expanding an archive when another archive with the same timestamp exists in the same folder' {
         $zipFileName1 = 'SameTimestamp1'
 
         $zipFileStructure1 = @{
@@ -327,7 +327,7 @@ Describe 'xArchive Integration Tests' {
         }
     }
 
-    Context 'Remove an archive with an extra file in a nested directory' {
+    Context 'When removing an archive with an extra file in a nested directory' {
         $zipFileName = 'NestedArchiveWithAdd'
 
         $zipFileStructure = @{
@@ -376,7 +376,7 @@ Describe 'xArchive Integration Tests' {
         It 'Set-TargetResource should not throw' {
             { Set-TargetResource -Ensure 'Absent' -Path $zipFilePath -Destination $destinationDirectoryPath } | Should -Not -Throw
         }
-        
+
         It 'File structure and contents of the destination should not match the file structure and contents of the archive after Set-TargetResource' {
             Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
@@ -393,9 +393,9 @@ Describe 'xArchive Integration Tests' {
             Test-Path -Path $newFilePath | Should -Be $true
         }
     }
-    
+
     $possibleChecksumValues = @( 'SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate' )
-    
+
     $zipFileName = 'ChecksumWithModifiedFile'
     $fileToEditName = 'File1'
     $fileNotToEditName = 'File2'
@@ -408,8 +408,8 @@ Describe 'xArchive Integration Tests' {
     $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
 
     foreach ($possibleChecksumValue in $possibleChecksumValues)
-    {        
-        Context "Expand an archive with an edited file, Validate and Force specified, and Checksum specified as $possibleChecksumValue" {
+    {
+        Context "When expanding an archive with an edited file, Validate and Force specified, and Checksum specified as $possibleChecksumValue" {
             $destinationDirectoryName = 'ExpandModifiedArchiveWithCheck'
             $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
 
@@ -519,7 +519,7 @@ Describe 'xArchive Integration Tests' {
             }
         }
 
-        Context "Expand an archive with an edited file, Validate specfied, Force not specified, and Checksum specified as $possibleChecksumValue" {
+        Context "When expanding an archive with an edited file, Validate specfied, Force not specified, and Checksum specified as $possibleChecksumValue" {
             $destinationDirectoryName = 'ExpandModifiedArchiveWithCheckFail'
             $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
 
@@ -597,7 +597,7 @@ Describe 'xArchive Integration Tests' {
             { Set-TargetResource -Ensure 'Present' -Path $zipFilePath -Destination $destinationDirectoryPath -Validate $true -Checksum $possibleChecksumValue } | Should -Throw
         }
 
-        Context "Remove an archive with an edited file, Validate specified, and Checksum specified as $possibleChecksumValue" {
+        Context "When removing an archive with an edited file, Validate specified, and Checksum specified as $possibleChecksumValue" {
             $destinationDirectoryName = 'RemoveModifiedArchiveWithCheck'
             $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
 
@@ -708,7 +708,7 @@ Describe 'xArchive Integration Tests' {
         }
     }
 
-    Context 'Archive name contains a bracket' {
+    Context 'When expanding an archive when the archive name contains a bracket' {
         $zipFileName = 'ReturnCorrectValue['
 
         $zipFileStructure = @{

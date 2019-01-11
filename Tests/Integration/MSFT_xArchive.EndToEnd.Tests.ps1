@@ -147,11 +147,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -230,11 +230,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -302,11 +302,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $true
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -362,7 +362,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Throw
         }
 
@@ -417,11 +417,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -476,11 +476,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $true
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -528,11 +528,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -617,11 +617,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -687,11 +687,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $true
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -728,11 +728,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $true
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -779,11 +779,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $true
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
@@ -834,11 +834,11 @@ Describe 'xArchive End to End Tests' {
             MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
         }
 
-        It 'Should compile and run configuration' {
+        It 'Should compile and apply the MOF without throwing an exception' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose -Verbose
             } | Should -Not -Throw
         }
 
