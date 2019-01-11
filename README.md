@@ -714,10 +714,15 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 ### Unreleased
 
+* xArchive
+  * Fix integration tests ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444)).
+  * Update integration tests to meet Pester 4.0.0 standards.
+  * Update unit and integration tests to meet Pester 4.0.0 standards.
+
 ### 8.5.0.0
+
 * Changes to xRegistry
   * Fixed an issue that fails to remove reg key when the `Key` is specified as common registry path. ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444))
-
 * Changes to xService
   * Added support for Group Managed Service Accounts
 

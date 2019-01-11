@@ -54,7 +54,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for Checksum specified while Validate is false' {
                     $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $getTargetResourceParameters.Checksum, $getTargetResourceParameters.Path, $getTargetResourceParameters.Destination
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Throw $errorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -65,7 +65,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid archive path' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Throw $testInvalidArchivePathErrorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $testInvalidArchivePathErrorMessage
                 }
             }
 
@@ -78,7 +78,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid destination' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Throw $testInvalidDestinationErrorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $testInvalidDestinationErrorMessage
                 }
             }
 
@@ -91,7 +91,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -136,23 +136,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
             }
 
@@ -165,7 +165,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -210,23 +210,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
             }
 
@@ -239,7 +239,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -291,23 +291,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
             }
 
@@ -320,7 +320,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -373,23 +373,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
             }
 
@@ -402,7 +402,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -454,23 +454,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
             }
 
@@ -483,7 +483,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -536,23 +536,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
             }
 
@@ -564,7 +564,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should mount a PSDrive' {
@@ -630,23 +630,23 @@ Describe 'xArchive Unit Tests' {
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a Hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return a Hashtable with 3 properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 3
+                    $getTargetResourceResult.Keys.Count | Should -Be 3
                 }
 
                 It 'Should return a Hashtable with the Path property as the specified path' {
-                    $getTargetResourceResult.Path | Should Be $getTargetResourceParameters.Path
+                    $getTargetResourceResult.Path | Should -Be $getTargetResourceParameters.Path
                 }
 
                 It 'Should return a Hashtable with the Destination property as the specified destination' {
-                    $getTargetResourceResult.Destination | Should Be $getTargetResourceParameters.Destination
+                    $getTargetResourceResult.Destination | Should -Be $getTargetResourceParameters.Destination
                 }
 
                 It 'Should return a Hashtable with the Ensure property as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
             }
         }
@@ -678,7 +678,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for Checksum specified while Validate is false' {
                     $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $setTargetResourceParameters.Checksum, $setTargetResourceParameters.Path, $setTargetResourceParameters.Destination
-                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $errorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -689,7 +689,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid archive path' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $testInvalidArchivePathErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $testInvalidArchivePathErrorMessage
                 }
             }
 
@@ -702,7 +702,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid destination' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $testInvalidDestinationErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $testInvalidDestinationErrorMessage
                 }
             }
 
@@ -716,7 +716,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -782,7 +782,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -794,7 +794,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -845,7 +845,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -859,7 +859,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -926,7 +926,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -940,7 +940,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -991,7 +991,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1005,7 +1005,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -1064,7 +1064,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1076,7 +1076,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -1134,7 +1134,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1148,7 +1148,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -1208,7 +1208,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1222,7 +1222,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should not attempt to mount a PSDrive' {
@@ -1281,7 +1281,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1293,7 +1293,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should mount a PSDrive' {
@@ -1366,7 +1366,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
         }
@@ -1382,7 +1382,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the state of the specified archive' {
@@ -1397,7 +1397,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-TargetResource @testTargetResourceParameters | Should Be $false
+                    Test-TargetResource @testTargetResourceParameters | Should -Be $false
                 }
             }
 
@@ -1409,7 +1409,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the state of the specified archive' {
@@ -1424,7 +1424,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-TargetResource @testTargetResourceParameters | Should Be $true
+                    Test-TargetResource @testTargetResourceParameters | Should -Be $true
                 }
             }
 
@@ -1438,7 +1438,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the state of the specified archive' {
@@ -1453,7 +1453,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-TargetResource @testTargetResourceParameters | Should Be $true
+                    Test-TargetResource @testTargetResourceParameters | Should -Be $true
                 }
             }
 
@@ -1465,7 +1465,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the state of the specified archive' {
@@ -1480,7 +1480,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-TargetResource @testTargetResourceParameters | Should Be $false
+                    Test-TargetResource @testTargetResourceParameters | Should -Be $false
                 }
             }
 
@@ -1494,7 +1494,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the state of the specified archive' {
@@ -1511,7 +1511,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-TargetResource @testTargetResourceParameters | Should Be $true
+                    Test-TargetResource @testTargetResourceParameters | Should -Be $true
                 }
             }
 
@@ -1524,7 +1524,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the state of the specified archive' {
@@ -1540,7 +1540,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-TargetResource @testTargetResourceParameters | Should Be $true
+                    Test-TargetResource @testTargetResourceParameters | Should -Be $true
                 }
             }
         }
@@ -1557,7 +1557,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should Not Throw
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Not -Throw
                 }
 
                 It 'Should test if the given path is already accessible' {
@@ -1580,7 +1580,7 @@ Describe 'xArchive Unit Tests' {
                 $mountPSDriveWithCredentialResult = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters
 
                 It 'Should return null' {
-                    $mountPSDriveWithCredentialResult | Should Be $null
+                    $mountPSDriveWithCredentialResult | Should -Be $null
                 }
             }
 
@@ -1595,7 +1595,7 @@ Describe 'xArchive Unit Tests' {
                 It 'Should throw an error for failed PSDrive creation' {
                     $expectedPath = $mountPSDriveWithCredentialParameters.Path.Substring(0, $mountPSDriveWithCredentialParameters.Path.IndexOf('\'))
                     $expectedErrorMessage = $script:localizedData.ErrorCreatingPSDrive -f $expectedPath, $mountPSDriveWithCredentialParameters.Credential.UserName
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should Throw $expectedErrorMessage
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Throw $expectedErrorMessage
                 }
             }
 
@@ -1611,7 +1611,7 @@ Describe 'xArchive Unit Tests' {
                 $expectedPSDrivePath = $mountPSDriveWithCredentialParameters.Path.Substring(0, $mountPSDriveWithCredentialParameters.Path.IndexOf('\'))
 
                 It 'Should not throw' {
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should Not Throw
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Not -Throw
                 }
 
                 It 'Should test if the given path is already accessible' {
@@ -1644,7 +1644,7 @@ Describe 'xArchive Unit Tests' {
                 $mountPSDriveWithCredentialResult = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters
 
                 It 'Should return the PSDrive outputted from New-PSDrive' {
-                    $mountPSDriveWithCredentialResult | Should Be $expectedPSDrive
+                    $mountPSDriveWithCredentialResult | Should -Be $expectedPSDrive
                 }
             }
 
@@ -1655,7 +1655,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should Not Throw
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Not -Throw
                 }
 
                 It 'Should test if the given path is already accessible' {
@@ -1688,7 +1688,7 @@ Describe 'xArchive Unit Tests' {
                 $mountPSDriveWithCredentialResult = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters
 
                 It 'Should return the PSDrive outputted from New-PSDrive' {
-                    $mountPSDriveWithCredentialResult | Should Be $expectedPSDrive
+                    $mountPSDriveWithCredentialResult | Should -Be $expectedPSDrive
                 }
             }
 
@@ -1700,7 +1700,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for an invalid path' {
                     $expectedErrorMessage = $script:localizedData.PathDoesNotContainValidPSDriveRoot -f $mountPSDriveWithCredentialParameters.Path
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should Throw $expectedErrorMessage
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Throw $expectedErrorMessage
                 }
             }
         }
@@ -1714,7 +1714,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Assert-PathExistsAsLeaf @assertPathExistsAsLeafParameters } | Should Not Throw
+                    { Assert-PathExistsAsLeaf @assertPathExistsAsLeafParameters } | Should -Not -Throw
                 }
 
                 It 'Should test if path exists as a leaf' {
@@ -1738,7 +1738,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for non-existent path' {
                     $expectedErrorMessage = $script:localizedData.PathDoesNotExistAsLeaf -f $assertPathExistsAsLeafParameters.Path
-                    { Assert-PathExistsAsLeaf @assertPathExistsAsLeafParameters } | Should Throw $expectedErrorMessage
+                    { Assert-PathExistsAsLeaf @assertPathExistsAsLeafParameters } | Should -Throw $expectedErrorMessage
                 }
             }
         }
@@ -1752,7 +1752,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should Not Throw
+                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve item at destination' {
@@ -1774,7 +1774,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should Not Throw
+                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve item at destination' {
@@ -1797,7 +1797,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw error for file at destination' {
                     $expectedErrorMessage = $script:localizedData.DestinationExistsAsFile -f $assertDestinationDoesNotExistAsFileParameters.Destination
-                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should Throw $expectedErrorMessage
+                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should -Throw $expectedErrorMessage
                 }
             }
         }
@@ -1809,13 +1809,13 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ChecksumIsSha @testChecksumIsShaParameters } | Should Not Throw
+                    { $null = Test-ChecksumIsSha @testChecksumIsShaParameters } | Should -Not -Throw
                 }
 
                 $testChecksumIsShaResult = Test-ChecksumIsSha @testChecksumIsShaParameters
 
                 It 'Should return true' {
-                    $testChecksumIsShaResult | Should Be $true
+                    $testChecksumIsShaResult | Should -Be $true
                 }
             }
 
@@ -1825,13 +1825,13 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ChecksumIsSha @testChecksumIsShaParameters } | Should Not Throw
+                    { $null = Test-ChecksumIsSha @testChecksumIsShaParameters } | Should -Not -Throw
                 }
 
                 $testChecksumIsShaResult = Test-ChecksumIsSha @testChecksumIsShaParameters
 
                 It 'Should return false' {
-                    $testChecksumIsShaResult | Should Be $false
+                    $testChecksumIsShaResult | Should -Be $false
                 }
             }
 
@@ -1841,13 +1841,13 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ChecksumIsSha @testChecksumIsShaParameters } | Should Not Throw
+                    { $null = Test-ChecksumIsSha @testChecksumIsShaParameters } | Should -Not -Throw
                 }
 
                 $testChecksumIsShaResult = Test-ChecksumIsSha @testChecksumIsShaParameters
 
                 It 'Should return false' {
-                    $testChecksumIsShaResult | Should Be $false
+                    $testChecksumIsShaResult | Should -Be $false
                 }
             }
         }
@@ -1858,13 +1858,13 @@ Describe 'xArchive Unit Tests' {
             }
             
             It 'Should not throw' {
-                { $null = ConvertTo-PowerShellHashAlgorithmName @convertToPowerShellHashAlgorithmNameParameters } | Should Not Throw
+                { $null = ConvertTo-PowerShellHashAlgorithmName @convertToPowerShellHashAlgorithmNameParameters } | Should -Not -Throw
             }
 
             $convertToPowerShellHashAlgorithmNameResult = ConvertTo-PowerShellHashAlgorithmName @convertToPowerShellHashAlgorithmNameParameters
 
             It 'Should return the specified algorithm name without the hyphen' {
-                $convertToPowerShellHashAlgorithmNameResult | Should Be 'SHA256'
+                $convertToPowerShellHashAlgorithmNameResult | Should -Be 'SHA256'
             }
         }
 
@@ -1891,7 +1891,7 @@ Describe 'xArchive Unit Tests' {
                 
                 It 'Should throw error for failure while opening archive entry' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should Throw $expectedErrorMessage
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
                 }
             }
 
@@ -1906,7 +1906,7 @@ Describe 'xArchive Unit Tests' {
                 
                 It 'Should throw error for failure while opening a stream to the file' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should Throw $expectedErrorMessage
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
                 }
             }
 
@@ -1921,7 +1921,7 @@ Describe 'xArchive Unit Tests' {
                 
                 It 'Should throw error for failure to retrieve the file hash or archive entry hash' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should Throw $expectedErrorMessage
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
                 }
             }
 
@@ -1940,7 +1940,7 @@ Describe 'xArchive Unit Tests' {
                 } 
                 
                 It 'Should not throw' {
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should Not Throw
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Not -Throw
                 }
 
                 It 'Should convert the specified DSC hash algorithm name to a PowerShell hash algorithm name' {
@@ -1997,7 +1997,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should Be $true
+                    Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should -Be $true
                 }
             }
 
@@ -2030,7 +2030,7 @@ Describe 'xArchive Unit Tests' {
                 } 
                 
                 It 'Should not throw' {
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should Not Throw
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Not -Throw
                 }
 
                 It 'Should convert the specified DSC hash algorithm name to a PowerShell hash algorithm name' {
@@ -2088,7 +2088,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should return false' {
                     $script:timesGetFileHashCalled = 0
-                    Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should Be $false
+                    Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should -Be $false
                 }
             }
         }
@@ -2108,7 +2108,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should Not Throw
+                    { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should -Not -Throw
                 }
 
                 It 'Should normalize the date to the General (G) format' {
@@ -2123,7 +2123,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return the creation time of the file' {
-                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should Be $testFileCreationTime
+                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileCreationTime
                 }
             }
 
@@ -2136,7 +2136,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should Not Throw
+                    { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should -Not -Throw
                 }
 
                 It 'Should normalize the date to the General (G) format' {
@@ -2151,7 +2151,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return the last write time of the file' {
-                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should Be $testFileLastWriteTime
+                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileLastWriteTime
                 }
             }
         }
@@ -2181,7 +2181,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should Not Throw
+                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the full name of the archive entry' {
@@ -2227,7 +2227,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should Be $false
+                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $false
                 }
             }
 
@@ -2241,7 +2241,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should Not Throw
+                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the full name of the archive entry' {
@@ -2287,7 +2287,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should Be $true
+                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $true
                 }
             }
 
@@ -2301,7 +2301,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should Not Throw
+                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the full name of the archive entry' {
@@ -2343,7 +2343,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should Be $false
+                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $false
                 }
             }
 
@@ -2357,7 +2357,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should Not Throw
+                    { $null = Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the full name of the archive entry' {
@@ -2399,7 +2399,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should Be $true
+                    Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $true
                 }
             }
         }
@@ -2430,7 +2430,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2494,7 +2494,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -2507,7 +2507,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2571,7 +2571,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -2584,7 +2584,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2648,7 +2648,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -2666,7 +2666,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2730,7 +2730,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $true
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $true
                 }
             }
 
@@ -2744,7 +2744,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2808,7 +2808,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -2821,7 +2821,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2885,7 +2885,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -2898,7 +2898,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -2962,7 +2962,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -2975,7 +2975,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3039,7 +3039,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $true
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $true
                 }
             }
 
@@ -3051,7 +3051,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3123,7 +3123,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $false
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
                 }
             }
 
@@ -3137,7 +3137,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should Not Throw
+                    { Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3209,7 +3209,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should Be $true
+                    Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $true
                 }
             }
         }
@@ -3248,7 +3248,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should Not Throw
+                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the full name of the specified archive entry' {
@@ -3333,7 +3333,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters | Should Be $null
+                    Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -3348,7 +3348,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for failed copy from the file stream to the archive entry stream' {
                     $expectedErrorMessage = $script:localizedData.ErrorCopyingFromArchiveToDestination -f $copyArchiveEntryToDestinationParameters.DestinationPath
-                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should Throw $expectedErrorMessage
+                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should -Throw $expectedErrorMessage
                 }
             }
 
@@ -3361,7 +3361,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should Not Throw
+                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the full name of the specified archive entry' {
@@ -3478,7 +3478,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return' {
-                    Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters | Should Be $null
+                    Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters | Should -Be $null
                 }
             }
         }
@@ -3514,7 +3514,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3605,7 +3605,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -3619,7 +3619,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullNameWithBackslash
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -3631,7 +3631,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3727,7 +3727,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -3741,7 +3741,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullNameWithBackslash
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -3753,7 +3753,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3849,7 +3849,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -3862,7 +3862,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -3946,7 +3946,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -3961,7 +3961,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4071,7 +4071,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -4084,7 +4084,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4187,7 +4187,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -4201,7 +4201,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullNameNoBackslash
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -4213,7 +4213,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4309,7 +4309,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -4323,7 +4323,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullNameNoBackslash
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -4335,7 +4335,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4431,7 +4431,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -4444,7 +4444,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4528,7 +4528,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -4541,7 +4541,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullNameNoBackslash
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -4554,7 +4554,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4658,7 +4658,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
 
@@ -4672,7 +4672,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should Not Throw
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -4764,7 +4764,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should Be $null
+                    Expand-ArchiveToDestination @expandArchiveToDestinationParameters | Should -Be $null
                 }
             }
         }
@@ -4787,7 +4787,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-DirectoryFromDestination @removeDirectoryFromDestination } | Should Not Throw
+                    { Remove-DirectoryFromDestination @removeDirectoryFromDestination } | Should -Not -Throw
                 }
 
                 It 'Should sort the specified list of directories' {
@@ -4831,7 +4831,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-DirectoryFromDestination @removeDirectoryFromDestination | Should Be $null
+                    Remove-DirectoryFromDestination @removeDirectoryFromDestination | Should -Be $null
                 }
             }
 
@@ -4844,7 +4844,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-DirectoryFromDestination @removeDirectoryFromDestination } | Should Not Throw
+                    { Remove-DirectoryFromDestination @removeDirectoryFromDestination } | Should -Not -Throw
                 }
 
                 It 'Should sort the specified list of directories' {
@@ -4898,7 +4898,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-DirectoryFromDestination @removeDirectoryFromDestination | Should Be $null
+                    Remove-DirectoryFromDestination @removeDirectoryFromDestination | Should -Be $null
                 }
             }
 
@@ -4911,7 +4911,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-DirectoryFromDestination @removeDirectoryFromDestination } | Should Not Throw
+                    { Remove-DirectoryFromDestination @removeDirectoryFromDestination } | Should -Not -Throw
                 }
 
                 It 'Should sort the specified list of directories' {
@@ -4960,7 +4960,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-DirectoryFromDestination @removeDirectoryFromDestination | Should Be $null
+                    Remove-DirectoryFromDestination @removeDirectoryFromDestination | Should -Be $null
                 }
             }
         }
@@ -4994,7 +4994,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5070,7 +5070,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5083,7 +5083,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5159,7 +5159,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5172,7 +5172,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5248,7 +5248,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5261,7 +5261,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5349,7 +5349,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5367,7 +5367,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5455,7 +5455,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5470,7 +5470,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5546,7 +5546,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5559,7 +5559,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5635,7 +5635,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5648,7 +5648,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5724,7 +5724,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5737,7 +5737,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5824,7 +5824,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5842,7 +5842,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -5935,7 +5935,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -5947,7 +5947,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -6031,7 +6031,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
 
@@ -6045,7 +6045,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should Not Throw
+                    { Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters } | Should -Not -Throw
                 }
 
                 It 'Should open the archive' {
@@ -6146,7 +6146,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not return anything' {
-                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should Be $null
+                    Remove-ArchiveFromDestination @removeArchiveFromDestinationParameters | Should -Be $null
                 }
             }
         }
