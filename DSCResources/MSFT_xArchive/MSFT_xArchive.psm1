@@ -282,6 +282,7 @@ function Set-TargetResource
         $Force = $false
     )
 
+    Write-Verbose -Message 'Executing Set-TargetResource' -Verbose
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $Checksum, $Path, $Destination
@@ -297,8 +298,11 @@ function Set-TargetResource
 
     try
     {
+        Write-Verbose -Message 'Executing Set-TargetResource - 1' -Verbose
         Assert-PathExistsAsLeaf -Path $Path
+        Write-Verbose -Message 'Executing Set-TargetResource - 2' -Verbose
         Assert-DestinationDoesNotExistAsFile -Destination $Destination
+        Write-Verbose -Message 'Executing Set-TargetResource - 3' -Verbose
 
         Write-Verbose -Message ($script:localizedData.SettingArchiveState -f $Path, $Destination)
 
@@ -346,6 +350,10 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message ($script:localizedData.ArchiveStateSet -f $Path, $Destination)
+    }
+    catch
+    {
+        Throw $_
     }
     finally
     {
