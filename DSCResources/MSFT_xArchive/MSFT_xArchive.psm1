@@ -978,10 +978,6 @@ function Get-ChecksumFromFileTimestamp
 
     .PARAMETER Checksum
         The checksum method to retrieve the timestamp for.
-
-    .NOTES
-        The returned date is normalized to the format specified in
-        ConvertTo-CheckSumFromDateTime
 #>
 function Get-TimestampForChecksum
 {
