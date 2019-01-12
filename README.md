@@ -728,7 +728,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Improved verbose logging to make debugging path issues easier.
   * Added handling for '/' as a path seperator by backporting code from
     PSDscResources - ([issue #469](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/469)).
-  * Copied unit tests from [PSDscResources](https://github.com/PowerShell/PSDscResources)
+  * Copied unit tests from [PSDscResources](https://github.com/PowerShell/PSDscResources).
 * Added .gitattributes file and removed git configuration from AppVeyor
   to ensure CRLF settings are configured correctly for the repository.
 * Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that
