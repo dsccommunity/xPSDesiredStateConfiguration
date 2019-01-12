@@ -1802,32 +1802,6 @@ Describe 'xArchive Unit Tests' {
             }
         }
 
-        Describe 'Test-PathEndsWithSeparator' {
-            Context 'When called with an empty path' {
-                It 'Should return false' {
-                    Test-PathEndsWithSeparator -Path '' | Should -Be $false
-                }
-            }
-
-            Context 'When called with a path that does not end with a separator' {
-                It 'Should return false' {
-                    Test-PathEndsWithSeparator -Path 'NotEndWithSeparator' | Should -Be $false
-                }
-            }
-
-            Context 'When called with a path that ends with a ''\''' {
-                It 'Should return true' {
-                    Test-PathEndsWithSeparator -Path 'EndsWithSeparator\' | Should -Be $true
-                }
-            }
-
-            Context 'When called with a path that ends with a ''/''' {
-                It 'Should return true' {
-                    Test-PathEndsWithSeparator -Path 'EndsWithSeparator/' | Should -Be $true
-                }
-            }
-        }
-
         Describe 'Test-ChecksumIsSha' {
             Context 'Specified checksum method name is a SHA method name' {
                 $testChecksumIsShaParameters = @{
@@ -2488,6 +2462,78 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should return true' {
                     Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $true
+                }
+            }
+        }
+
+        Describe 'Test-ArchiveEntryIsDirectory' {
+            Context 'Archive entry name does not contain a backslash or a foward slash' {
+                $testArchiveEntryNameIsDirectoryPathParameters = @{
+                    ArchiveEntryName = 'TestArchiveEntryName'
+                }
+
+                It 'Should not throw' {
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $false
+                }
+            }
+
+            Context 'Archive entry name contains a backslash but does not end with a backslash' {
+                $testArchiveEntryNameIsDirectoryPathParameters = @{
+                    ArchiveEntryName = 'TestArchive\EntryName'
+                }
+
+                It 'Should not throw' {
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $false
+                }
+            }
+
+            Context 'Archive entry name contains a foward slash but does not end with a foward slash' {
+                $testArchiveEntryNameIsDirectoryPathParameters = @{
+                    ArchiveEntryName = 'TestArchive/EntryName'
+                }
+
+                It 'Should not throw' {
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                }
+
+                It 'Should return false' {
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $false
+                }
+            }
+
+            Context 'Archive entry name ends with a backslash' {
+                $testArchiveEntryNameIsDirectoryPathParameters = @{
+                    ArchiveEntryName = 'TestArchiveEntryName\'
+                }
+
+                It 'Should not throw' {
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                }
+
+                It 'Should return true' {
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $true
+                }
+            }
+
+            Context 'Archive entry name ends with a forward slash' {
+                $testArchiveEntryNameIsDirectoryPathParameters = @{
+                    ArchiveEntryName = 'TestArchiveEntryName/'
+                }
+
+                It 'Should not throw' {
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                }
+
+                It 'Should return true' {
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $true
                 }
             }
         }

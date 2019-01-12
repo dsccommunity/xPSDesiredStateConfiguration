@@ -143,9 +143,9 @@ Describe 'xArchive End to End Tests' {
             Verbose = $true
         }
 
-#        It 'Should return false from Test-TargetResource with the same parameters before configuration' {
-#            MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
-#        }
+        It 'Should return false from Test-TargetResource with the same parameters before configuration' {
+            MSFT_xArchive\Test-TargetResource @archiveParameters | Should -Be $false
+        }
 
         It 'Should compile and apply the MOF without throwing an exception' {
             {

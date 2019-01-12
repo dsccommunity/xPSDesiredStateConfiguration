@@ -551,7 +551,7 @@ function Mount-PSDriveWithCredential
     }
     else
     {
-        $pathIsADirectory = Test-PathEndsWithSeparator -Path $Path
+        $pathIsADirectory = $Path.EndsWith('\')
 
         if ($pathIsADirectory)
         {
@@ -653,27 +653,6 @@ function Assert-DestinationDoesNotExistAsFile
         $errorMessage = $script:localizedData.DestinationExistsAsFile -f $Destination
         New-InvalidArgumentException -ArgumentName 'Destination' -Message $errorMessage
     }
-}
-
-<#
-    .SYNOPSIS
-        Returns true if the path ends with a path seperator '\' or '/'.
-
-    .PARAMETER Path
-        The path to check.
-#>
-function Test-PathEndsWithSeparator
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter()]
-        [System.String]
-        $Path
-    )
-
-    return ($Path.EndsWith('\') -or $Path.EndsWith('/'))
 }
 
 <#
@@ -1006,7 +985,7 @@ function Get-ChecksumFromFileTimestamp
 #>
 function Get-TimestampForChecksum
 {
-    [OutputType([System.Datetime])]
+    [OutputType([System.DateTime])]
     [CmdletBinding()]
     param
     (
@@ -1198,6 +1177,28 @@ function Test-FileMatchesArchiveEntryByChecksum
 
 <#
     .SYNOPSIS
+        Tests if the given archive entry name represents a directory.
+
+    .PARAMETER ArchiveEntryName
+        The archive entry name to test.
+#>
+function Test-ArchiveEntryIsDirectory
+{
+    [OutputType([Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $ArchiveEntryName
+    )
+
+    return $ArchiveEntryName.EndsWith('\') -or $ArchiveEntryName.EndsWith('/')
+}
+
+<#
+    .SYNOPSIS
         Tests if the specified archive exists in its expanded form at the destination.
 
     .PARAMETER Archive
@@ -1263,7 +1264,7 @@ function Test-ArchiveExistsAtDestination
             {
                 Write-Verbose -Message ($script:localizedData.ItemWithArchiveEntryNameExists -f $archiveEntryPathAtDestination)
 
-                if (Test-PathEndsWithSeparator -Path $archiveEntryFullName)
+                if (Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName)
                 {
                     if (-not ($archiveEntryItemAtDestination -is [System.IO.DirectoryInfo]))
                     {
@@ -1374,7 +1375,7 @@ function Copy-ArchiveEntryToDestination
 
     Write-Verbose -Message ($script:localizedData.CopyingArchiveEntryToDestination -f $archiveEntryFullName, $DestinationPath)
 
-    if (Test-PathEndsWithSeparator -Path $archiveEntryFullName)
+    if (Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName)
     {
         Write-Verbose -Message ($script:localizedData.CreatingArchiveEntryDirectory -f $DestinationPath)
 
@@ -1410,7 +1411,7 @@ function Copy-ArchiveEntryToDestination
             }
         }
 
-        $newArchiveFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $DestinationPath )
+        $null = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $DestinationPath )
 
         $updatedTimestamp = Get-ArchiveEntryLastWriteTime -ArchiveEntry $ArchiveEntry
 
@@ -1476,7 +1477,7 @@ function Expand-ArchiveToDestination
             $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $archiveEntry
             $archiveEntryPathAtDestination = Join-Path -Path $Destination -ChildPath $archiveEntryFullName
 
-            $archiveEntryIsDirectory = Test-PathEndsWithSeparator -Path $archiveEntryFullName
+            $archiveEntryIsDirectory = Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName
 
             $archiveEntryItemAtDestination = Get-Item -LiteralPath $archiveEntryPathAtDestination -ErrorAction 'SilentlyContinue'
 
@@ -1648,7 +1649,7 @@ function Remove-ArchiveFromDestination
             $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $archiveEntry
             $archiveEntryPathAtDestination = Join-Path -Path $Destination -ChildPath $archiveEntryFullName
 
-            $archiveEntryIsDirectory = Test-PathEndsWithSeparator -Path $archiveEntryFullName
+            $archiveEntryIsDirectory = Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName
 
             $itemAtDestination = Get-Item -LiteralPath $archiveEntryPathAtDestination -ErrorAction 'SilentlyContinue'
 

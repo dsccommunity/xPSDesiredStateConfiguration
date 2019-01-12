@@ -1,6 +1,12 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+if ($PSVersionTable.PSVersion -lt [Version] '5.1')
+{
+    Write-Warning -Message 'Cannot run PSDscResources integration tests on PowerShell versions lower than 5.1'
+    return
+}
+
 Describe 'xArchive Integration Tests' {
     BeforeAll {
         # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
@@ -31,13 +37,15 @@ Describe 'xArchive Integration Tests' {
                 File1 = 'Fake file contents'
             }
         }
+
         $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
+        $zipFileSourcePath = $zipFilePath.Replace('.zip', '')
 
         $destinationDirectoryName = 'ExpandBasicArchive'
         $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
 
         It 'File structure and contents of the destination should not match the file structure and contents of the archive before Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
 
         It 'Test-TargetResource with Ensure as Present should return false before Set-TargetResource' {
@@ -53,7 +61,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         It 'File structure and contents of the destination should match the file structure and contents of the archive after Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
         }
 
         It 'Test-TargetResource with Ensure as Present should return true after Set-TargetResource' {
@@ -76,6 +84,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
+        $zipFileSourcePath = $zipFilePath.Replace('.zip', '')
 
         $destinationDirectoryName = 'RemoveBasicArchive'
         $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
@@ -83,7 +92,7 @@ Describe 'xArchive Integration Tests' {
         $null = Expand-Archive -Path $zipFilePath -DestinationPath $destinationDirectoryPath -Force
 
         It 'File structure and contents of the destination should match the file structure and contents of the archive before Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
         }
 
         It 'Test-TargetResource with Ensure as Present should return true before Set-TargetResource' {
@@ -99,7 +108,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         It 'File structure and contents of the destination should not match the file structure and contents of the archive after Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
 
         It 'Test-TargetResource with Ensure as Present should return false after Set-TargetResource' {
@@ -148,12 +157,13 @@ Describe 'xArchive Integration Tests' {
         }
 
         $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
+        $zipFileSourcePath = $zipFilePath.Replace('.zip', '')
 
         $destinationDirectoryName = 'ExpandNestedArchive'
         $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
 
         It 'File structure and contents of the destination should not match the file structure and contents of the archive before Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
 
         It 'Test-TargetResource with Ensure as Present should return false before Set-TargetResource' {
@@ -169,7 +179,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         It 'File structure and contents of the destination should match the file structure and contents of the archive after Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
         }
 
         It 'Test-TargetResource with Ensure as Present should return true after Set-TargetResource' {
@@ -218,6 +228,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
+        $zipFileSourcePath = $zipFilePath.Replace('.zip', '')
 
         $destinationDirectoryName = 'RemoveNestedArchive'
         $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
@@ -225,7 +236,7 @@ Describe 'xArchive Integration Tests' {
         $null = Expand-Archive -Path $zipFilePath -DestinationPath $destinationDirectoryPath -Force
 
         It 'File structure and contents of the destination should match the file structure and contents of the archive before Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
         }
 
         It 'Test-TargetResource with Ensure as Present should return true before Set-TargetResource' {
@@ -241,7 +252,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         It 'File structure and contents of the destination should not match the file structure and contents of the archive after Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
 
         It 'Test-TargetResource with Ensure as Present should return false after Set-TargetResource' {
@@ -263,6 +274,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         $zipFilePath1 = New-ZipFileFromHashtable -Name $zipFileName1 -ParentPath $TestDrive -ZipFileStructure $zipFileStructure1
+        $zipFileSourcePath1 = $zipFilePath1.Replace('.zip', '')
 
         $zipFileName2 = 'SameTimestamp2'
 
@@ -282,7 +294,7 @@ Describe 'xArchive Integration Tests' {
         $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
 
         It 'File structure and contents of the destination should not match the file structure and contents of the archive before Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath1.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath1 -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
 
         It 'Test-TargetResource with Ensure as Present should return false for specified archive before Set-TargetResource' {
@@ -306,7 +318,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         It 'File structure and contents of the destination should match the file structure and contents of the archive after Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath1.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath1 -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
         }
 
         It 'Test-TargetResource with Ensure as Present should return true for specified archive after Set-TargetResource' {
@@ -346,6 +358,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
+        $zipFileSourcePath = $zipFilePath.Replace('.zip', '')
 
         $destinationDirectoryName = 'RemoveArchiveWithExtra'
         $destinationDirectoryPath = Join-Path -Path $TestDrive -ChildPath $destinationDirectoryName
@@ -357,7 +370,7 @@ Describe 'xArchive Integration Tests' {
         $null = Set-Content -Path $newFilePath -Value 'Fake text'
 
         It 'File structure and contents of the destination should match the file structure and contents of the archive before Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
         }
 
         It 'Test-TargetResource with Ensure as Present should return true before Set-TargetResource' {
@@ -377,7 +390,7 @@ Describe 'xArchive Integration Tests' {
         }
 
         It 'File structure and contents of the destination should not match the file structure and contents of the archive after Set-TargetResource' {
-            Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+            Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
         }
 
         It 'Test-TargetResource with Ensure as Present should return false after Set-TargetResource' {
@@ -405,6 +418,7 @@ Describe 'xArchive Integration Tests' {
     }
 
     $zipFilePath = New-ZipFileFromHashtable -Name $zipFileName -ParentPath $TestDrive -ZipFileStructure $zipFileStructure
+    $zipFileSourcePath = $zipFilePath.Replace('.zip', '')
 
     foreach ($possibleChecksumValue in $possibleChecksumValues)
     {
@@ -483,7 +497,7 @@ Describe 'xArchive Integration Tests' {
             }
 
             It 'File structure and contents of the destination should not match the file structure and contents of the archive before Set-TargetResource' {
-                Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+                Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
             }
 
             It 'Set-TargetResource should not throw' {
@@ -517,7 +531,7 @@ Describe 'xArchive Integration Tests' {
             }
 
             It 'File structure and contents of the destination should match the file structure and contents of the archive after Set-TargetResource' {
-                Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
+                Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $true
             }
         }
 
@@ -596,7 +610,7 @@ Describe 'xArchive Integration Tests' {
             }
 
             It 'File structure and contents of the destination should not match the file structure and contents of the archive before Set-TargetResource' {
-                Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+                Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
             }
 
             { Set-TargetResource -Ensure 'Present' -Path $zipFilePath -Destination $destinationDirectoryPath -Validate $true -Checksum $possibleChecksumValue } | Should -Throw
@@ -677,7 +691,7 @@ Describe 'xArchive Integration Tests' {
             }
 
             It 'File structure and contents of the destination should not match the file structure and contents of the archive before Set-TargetResource' {
-                Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+                Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
             }
 
             It 'Set-TargetResource should not throw' {
@@ -711,7 +725,7 @@ Describe 'xArchive Integration Tests' {
             }
 
             It 'File structure and contents of the destination should not match the file structure and contents of the archive after Set-TargetResource' {
-                Test-FileStructuresMatch -SourcePath $zipFilePath.Replace('.zip', '') -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
+                Test-FileStructuresMatch -SourcePath $zipFileSourcePath -DestinationPath $destinationDirectoryPath -CheckContents | Should -Be $false
             }
         }
     }
