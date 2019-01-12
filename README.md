@@ -726,10 +726,12 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     US.
   * Fix 'Get-ArchiveEntryLastWriteTime' to return `[datetime]` ([issue #471](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/471)).
   * Improved verbose logging to make debugging path issues easier.
+  * Added handling for '/' as a path seperator ([issue #469](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/469)).
 * Added .gitattributes file and removed git configuration from AppVeyor
   to ensure CRLF settings are configured correctly for the repository.
 * Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that
   custom syntax problems are highlighted in Visual Studio Code.
+* Fixed style guideline violations in `CommonResourceHelper.psm1`.
 
 ### 8.5.0.0
 

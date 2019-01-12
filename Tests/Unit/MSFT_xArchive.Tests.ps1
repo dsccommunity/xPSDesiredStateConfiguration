@@ -1802,6 +1802,32 @@ Describe 'xArchive Unit Tests' {
             }
         }
 
+        Describe 'Test-PathEndsWithSeparator' {
+            Context 'When called with an empty path' {
+                It 'Should return false' {
+                    Test-PathEndsWithSeparator -Path '' | Should -Be $false
+                }
+            }
+
+            Context 'When called with a path that does not end with a separator' {
+                It 'Should return false' {
+                    Test-PathEndsWithSeparator -Path 'NotEndWithSeparator' | Should -Be $false
+                }
+            }
+
+            Context 'When called with a path that ends with a ''\''' {
+                It 'Should return true' {
+                    Test-PathEndsWithSeparator -Path 'EndsWithSeparator\' | Should -Be $true
+                }
+            }
+
+            Context 'When called with a path that ends with a ''/''' {
+                It 'Should return true' {
+                    Test-PathEndsWithSeparator -Path 'EndsWithSeparator/' | Should -Be $true
+                }
+            }
+        }
+
         Describe 'Test-ChecksumIsSha' {
             Context 'Specified checksum method name is a SHA method name' {
                 $testChecksumIsShaParameters = @{

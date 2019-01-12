@@ -282,7 +282,6 @@ function Set-TargetResource
         $Force = $false
     )
 
-    Write-Verbose -Message 'Executing Set-TargetResource' -Verbose
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $Checksum, $Path, $Destination
@@ -298,11 +297,8 @@ function Set-TargetResource
 
     try
     {
-        Write-Verbose -Message 'Executing Set-TargetResource - 1' -Verbose
         Assert-PathExistsAsLeaf -Path $Path
-        Write-Verbose -Message 'Executing Set-TargetResource - 2' -Verbose
         Assert-DestinationDoesNotExistAsFile -Destination $Destination
-        Write-Verbose -Message 'Executing Set-TargetResource - 3' -Verbose
 
         Write-Verbose -Message ($script:localizedData.SettingArchiveState -f $Path, $Destination)
 
@@ -350,10 +346,6 @@ function Set-TargetResource
         }
 
         Write-Verbose -Message ($script:localizedData.ArchiveStateSet -f $Path, $Destination)
-    }
-    catch
-    {
-        Throw $_
     }
     finally
     {
@@ -559,7 +551,7 @@ function Mount-PSDriveWithCredential
     }
     else
     {
-        $pathIsADirectory = $Path.EndsWith('\')
+        $pathIsADirectory = Test-PathEndsWithSeparator -Path $Path
 
         if ($pathIsADirectory)
         {
@@ -661,6 +653,27 @@ function Assert-DestinationDoesNotExistAsFile
         $errorMessage = $script:localizedData.DestinationExistsAsFile -f $Destination
         New-InvalidArgumentException -ArgumentName 'Destination' -Message $errorMessage
     }
+}
+
+<#
+    .SYNOPSIS
+        Returns true if the path ends with a path seperator '\' or '/'.
+
+    .PARAMETER Path
+        The path to check.
+#>
+function Test-PathEndsWithSeparator
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter()]
+        [System.String]
+        $Path
+    )
+
+    return ($Path.EndsWith('\') -or $Path.EndsWith('/'))
 }
 
 <#
@@ -1250,7 +1263,7 @@ function Test-ArchiveExistsAtDestination
             {
                 Write-Verbose -Message ($script:localizedData.ItemWithArchiveEntryNameExists -f $archiveEntryPathAtDestination)
 
-                if ($archiveEntryFullName.EndsWith('\'))
+                if (Test-PathEndsWithSeparator -Path $archiveEntryFullName)
                 {
                     if (-not ($archiveEntryItemAtDestination -is [System.IO.DirectoryInfo]))
                     {
@@ -1361,7 +1374,7 @@ function Copy-ArchiveEntryToDestination
 
     Write-Verbose -Message ($script:localizedData.CopyingArchiveEntryToDestination -f $archiveEntryFullName, $DestinationPath)
 
-    if ($archiveEntryFullName.EndsWith('\'))
+    if (Test-PathEndsWithSeparator -Path $archiveEntryFullName)
     {
         Write-Verbose -Message ($script:localizedData.CreatingArchiveEntryDirectory -f $DestinationPath)
 
@@ -1463,7 +1476,7 @@ function Expand-ArchiveToDestination
             $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $archiveEntry
             $archiveEntryPathAtDestination = Join-Path -Path $Destination -ChildPath $archiveEntryFullName
 
-            $archiveEntryIsDirectory = $archiveEntryFullName.EndsWith('\')
+            $archiveEntryIsDirectory = Test-PathEndsWithSeparator -Path $archiveEntryFullName
 
             $archiveEntryItemAtDestination = Get-Item -LiteralPath $archiveEntryPathAtDestination -ErrorAction 'SilentlyContinue'
 
@@ -1635,7 +1648,7 @@ function Remove-ArchiveFromDestination
             $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $archiveEntry
             $archiveEntryPathAtDestination = Join-Path -Path $Destination -ChildPath $archiveEntryFullName
 
-            $archiveEntryIsDirectory = $archiveEntryFullName.EndsWith('\')
+            $archiveEntryIsDirectory = Test-PathEndsWithSeparator -Path $archiveEntryFullName
 
             $itemAtDestination = Get-Item -LiteralPath $archiveEntryPathAtDestination -ErrorAction 'SilentlyContinue'
 
