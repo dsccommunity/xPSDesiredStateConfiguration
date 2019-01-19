@@ -2189,7 +2189,7 @@ Describe 'xArchive Unit Tests' {
                     { $null = Get-TimestampFromFile @getTimestampFromFileParameters } | Should -Not -Throw
                 }
 
-                It 'Should return the creation time of the file as a Checksum' {
+                It 'Should return the last write time of the file as a Checksum' {
                     Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.LastWriteTime
                 }
             }
