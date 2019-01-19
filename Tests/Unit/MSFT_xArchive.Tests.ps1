@@ -2136,7 +2136,6 @@ Describe 'xArchive Unit Tests' {
                     File = $testFileInfo
                     Checksum = 'CreatedDate'
                 }
-
                 It 'Should not throw' {
                     { $null = Get-TimestampForChecksum @getTimestampForChecksumParameters } | Should -Not -Throw
                 }
