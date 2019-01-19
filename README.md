@@ -719,8 +719,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Update integration tests to meet Pester 4.0.0 standards.
   * Update end-to-end tests to meet Pester 4.0.0 standards.
   * Update unit and integration tests to meet Pester 4.0.0 standards.
-  * Wrapped all verbose message parameters with quotes to make identifying
-    actual paths possible.
+  * Wrapped all path and identifier strings in verbose messages with
+    quotes to make it easier to identify the limit of the string when
+    debugging.
   * Refactored date/time checksum code to improve testability and ensure
     tests can run on machines with localized datetime formats that are not
     US.
@@ -729,7 +730,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Added handling for '/' as a path seperator by backporting code from
     PSDscResources - ([issue #469](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/469)).
   * Copied unit tests from [PSDscResources](https://github.com/PowerShell/PSDscResources).
-* Added .gitattributes file and removed git configuration from AppVeyor
+    * Added .gitattributes file and removed git configuration from AppVeyor
   to ensure CRLF settings are configured correctly for the repository.
 * Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that
   custom syntax problems are highlighted in Visual Studio Code.

@@ -2094,10 +2094,8 @@ Describe 'xArchive Unit Tests' {
 
         Describe 'Get-ChecksumFromFileTimestamp' {
             $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
-            $testFileCreationTime = $testFileInfo.CreationTime.DateTime
-            $testFileLastWriteTime = $testFileInfo.LastWriteTime.DateTime
-            $testFileCreationTimeChecksum = (Get-Date -Date $testFileCreationTime -Format 'G')
-            $testFileLastWriteTimeChecksum = (Get-Date -Date $testFileLastWriteTime -Format 'G')
+            $testFileCreationTimeChecksum = (Get-Date -Date $testFileInfo.CreationTime -Format 'G')
+            $testFileLastWriteTimeChecksum = (Get-Date -Date $testFileInfo.LastWriteTime -Format 'G')
 
             Context 'When checksum specified as CreatedDate' {
                 $getChecksumFromFileTimestampParameters = @{
@@ -2144,7 +2142,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return the creation time of the file as a Checksum' {
-                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileInfo.CreationTime.DateTime
+                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileInfo.CreationTime
                 }
             }
 
@@ -2159,7 +2157,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return the last write time of the file' {
-                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileInfo.LastWriteTime.DateTime
+                    Get-TimestampForChecksum @getTimestampForChecksumParameters | Should -Be $testFileInfo.LastWriteTime
                 }
             }
         }
@@ -2178,7 +2176,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return the creation time of the file as a Checksum' {
-                    Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.CreationTime.DateTime
+                    Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.CreationTime
                 }
             }
 
@@ -2193,7 +2191,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should return the creation time of the file as a Checksum' {
-                    Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.LastWriteTime.DateTime
+                    Get-TimestampFromFile @getTimestampFromFileParameters | Should -Be $testFileInfo.LastWriteTime
                 }
             }
         }
