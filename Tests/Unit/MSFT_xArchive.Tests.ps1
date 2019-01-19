@@ -2093,7 +2093,7 @@ Describe 'xArchive Unit Tests' {
         }
 
         Describe 'Get-ChecksumFromFileTimestamp' {
-            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
+            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
             $testFileCreationTimeChecksum = (Get-Date -Date $testFileInfo.CreationTime -Format 'G')
             $testFileLastWriteTimeChecksum = (Get-Date -Date $testFileInfo.LastWriteTime -Format 'G')
 
@@ -2129,7 +2129,7 @@ Describe 'xArchive Unit Tests' {
         }
 
         Describe 'Get-TimestampForChecksum' {
-            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
+            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
 
             Context 'When checksum specified as CreatedDate' {
                 $getTimestampForChecksumParameters = @{
@@ -2163,7 +2163,7 @@ Describe 'xArchive Unit Tests' {
         }
 
         Describe 'Get-TimestampFromFile' {
-            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
+            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
 
             Context 'When Timestamp specified as CreationTime' {
                 $getTimestampFromFileParameters = @{
@@ -2223,7 +2223,7 @@ Describe 'xArchive Unit Tests' {
             $mockArchiveEntry = New-MockObject -Type 'System.IO.Compression.ZipArchiveEntry'
 
             # This is the actual file info of this file since we cannot set the properties of mock objects
-            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $PSScriptRoot )
+            $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
             $testFileFullName = $testFileInfo.FullName
 
             Mock -CommandName 'Get-ArchiveEntryFullName' -MockWith { return $testArchiveEntryFullName }
