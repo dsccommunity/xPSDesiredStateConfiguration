@@ -42,17 +42,17 @@ Describe "xDSCWebService" {
             {
                 WindowsFeature DSCServiceFeature
                 {
-                    Ensure = “Present”
-                    Name   = “DSC-Service”
+                    Ensure = ???Present???
+                    Name   = ???DSC-Service???
                 }
             }
 
             # execute the configuration into a temp location
             InstallingService -OutputPath $env:temp\$($tempName)_InstallingService
             # run the configuration, it should not throw any errors
-            Start-DscConfiguration -Path $env:temp\$($tempName)_InstallingService -Wait -Verbose -ErrorAction Stop -Force}  | should not throw
+            Start-DscConfiguration -Path $env:temp\$($tempName)_InstallingService -Wait -Verbose -ErrorAction Stop -Force}  | should -not -throw
 
-            (Get-WindowsFeature -name DSC-Service | Where Installed).count | should be 1
+            (Get-WindowsFeature -name DSC-Service | Where Installed).count | should -be 1
         }
 
         It 'Creating Sites' -test {
@@ -64,29 +64,29 @@ Describe "xDSCWebService" {
                 
                 xDscWebService PSDSCPullServer
                 {
-                    EndpointName            = “TestPSDSCPullServer”
+                    EndpointName            = ???TestPSDSCPullServer???
                     Port                    = 21001
-                    CertificateThumbPrint   = “AllowUnencryptedTraffic”
+                    CertificateThumbPrint   = ???AllowUnencryptedTraffic???
                 }
             }
 
             # execute the configuration into a temp location
             CreatingSites -OutputPath $env:temp\$($tempName)_CreatingSites
             # run the configuration, it should not throw any errors
-            Start-DscConfiguration -Path $env:temp\$($tempName)_CreatingSites -Wait -Verbose -ErrorAction Stop -Force}  | should not throw
+            Start-DscConfiguration -Path $env:temp\$($tempName)_CreatingSites -Wait -Verbose -ErrorAction Stop -Force}  | should -not -throw
 
             # we now expect two sites starting with our prefix
-            (Get-ChildItem iis:\sites | Where-Object Name -match "^TestPSDSC").count | should be 1
+            (Get-ChildItem iis:\sites | Where-Object Name -match "^TestPSDSC").count | should -be 1
 
             # we expect some files in the web root, using the defaults
-            (Test-Path "$env:SystemDrive\inetpub\TestPSDSCPullServer\web.config") | should be $true
+            (Test-Path "$env:SystemDrive\inetpub\TestPSDSCPullServer\web.config") | should -be $true
 
             $FireWallRuleDisplayName = "Desired State Configuration - Pull Server Port:{0}"
             $ruleName = ($($FireWallRuleDisplayName) -f "21001")
-            (Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Measure-Object).count | should be 1
+            (Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Measure-Object).count | should -be 1
 
             # we also expect an XML document with certain strings at a certain URI
-            (Verify-DSCPullServer "http" "localhost" "21001") | should match "Action|Module"
+            (Verify-DSCPullServer "http" "localhost" "21001") | should -match "Action|Module"
 
         }
 
@@ -100,25 +100,25 @@ Describe "xDSCWebService" {
 
                 xDscWebService PSDSCPullServer
                 {
-                    Ensure                  = “Absent”
-                    EndpointName            = “TestPSDSCPullServer”
-                    CertificateThumbPrint   = “NotUsed”
+                    Ensure                  = ???Absent???
+                    EndpointName            = ???TestPSDSCPullServer???
+                    CertificateThumbPrint   = ???NotUsed???
                 }
             }
 
             # execute the configuration into a temp location
             RemovingSites -OutputPath $env:temp\$($tempName)_RemovingSites
             # run the configuration, it should not throw any errors
-            Start-DscConfiguration -Path $env:temp\$($tempName)_RemovingSites -Wait -Verbose -ErrorAction Stop -Force}  | should not throw
+            Start-DscConfiguration -Path $env:temp\$($tempName)_RemovingSites -Wait -Verbose -ErrorAction Stop -Force}  | should -not -throw
 
             # we now expect two sites starting with our prefix
-            (Get-ChildItem iis:\sites | Where-Object Name -match "^TestPSDSC").count | should be 0
+            (Get-ChildItem iis:\sites | Where-Object Name -match "^TestPSDSC").count | should -be 0
 
-            (Test-Path "$env:SystemDrive\inetpub\TestPSDSCPullServer\web.config") | should be $false
+            (Test-Path "$env:SystemDrive\inetpub\TestPSDSCPullServer\web.config") | should -be $false
 
             $FireWallRuleDisplayName = "Desired State Configuration - Pull Server Port:{0}"
             $ruleName = ($($FireWallRuleDisplayName) -f "8081")
-            (Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Measure-Object).count | should be 0
+            (Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Measure-Object).count | should -be 0
 
         }
 
@@ -139,16 +139,16 @@ Describe "xDSCWebService" {
 
                 xDscWebService PSDSCPullServer2
                 {
-                    EndpointName            = “TestPSDSCPullServer2”
+                    EndpointName            = ???TestPSDSCPullServer2???
                     Port                    = 21003
-                    CertificateThumbPrint   = “AllowUnencryptedTraffic”
+                    CertificateThumbPrint   = ???AllowUnencryptedTraffic???
                 }
             }
 
             # execute the configuration into a temp location
             CreatingSitesWithFTP -OutputPath $env:temp\$($tempName)_CreatingSitesWithFTP
             # run the configuration, it should not throw any errors
-            Start-DscConfiguration -Path $env:temp\$($tempName)_CreatingSitesWithFTP -Wait -Verbose -ErrorAction Stop -Force}  | should not throw
+            Start-DscConfiguration -Path $env:temp\$($tempName)_CreatingSitesWithFTP -Wait -Verbose -ErrorAction Stop -Force}  | should -not -throw
 
         }
 
