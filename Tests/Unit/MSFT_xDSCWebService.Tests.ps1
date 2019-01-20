@@ -247,11 +247,11 @@ try
                 It 'Should return <Variable> set to <Data>' -TestCases $testData {
                     param
                     (
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [String]
                         $Variable,
 
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [PSObject]
                         $Data
                     )
@@ -296,11 +296,11 @@ try
                 It 'Should return <Variable> set to <Data>' -TestCases $testData {
                     param
                     (
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [String]
                         $Variable,
 
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [PSObject]
                         $Data
                     )
@@ -346,11 +346,11 @@ try
                 It 'Should return <Variable> set to <Data>' -TestCases $testData {
                     param
                     (
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [String]
                         $Variable,
 
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [PSObject]
                         $Data
                     )
@@ -400,11 +400,11 @@ try
                 It 'Should return <Variable> set to <Data>' -TestCases $testData {
                     param
                     (
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [String]
                         $Variable,
 
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [PSObject]
                         $Data
                     )
@@ -521,18 +521,18 @@ try
                 It 'Should create the <Name> directory' -TestCases $testCases {
                     param
                     (
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [String]
                         $Name,
 
-                        [Parameter(Mandatory)]
+                        [Parameter(Mandatory = $true)]
                         [String]
                         $Value
                     )
 
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
-                    Test-Path -Path $Value | Should -be $true
+                    Test-Path -Path $Value | Should -Be $true
                 }
             }
 
@@ -655,7 +655,7 @@ try
 
                 It 'Should throw an error because no certificate specified' {
                     $message = "Error: Cannot use best practice security settings with unencrypted traffic. Please set UseSecurityBestPractices to `$false or use a certificate to encrypt pull server traffic."
-                    {Set-TargetResource @altTestParameters -Ensure Present} | Should -throw $message
+                    {Set-TargetResource @altTestParameters -Ensure Present} | Should -Throw $message
                 }
             }
 
@@ -698,7 +698,7 @@ try
                 }
 
                 It 'Should not throw an error' {
-                    {Set-TargetResource @altTestParameters @setTargetPaths -Ensure Present} | Should -not -throw
+                    {Set-TargetResource @altTestParameters @setTargetPaths -Ensure Present} | Should -Not -throw
                 }
 
                 It 'Should call expected mocks' {
@@ -982,11 +982,11 @@ try
             It 'Should return $true when ExpectedAppSettingValue is <Value> for <Key>.' -TestCases $testCases {
                 param
                 (
-                    [Parameter(Mandatory)]
+                    [Parameter(Mandatory = $true)]
                     [String]
                     $Key,
 
-                    [Parameter(Mandatory)]
+                    [Parameter(Mandatory = $true)]
                     [String]
                     $Value
                 )
@@ -995,11 +995,11 @@ try
             It 'Should return $false when ExpectedAppSettingValue is not <Value> for <Key>.' -TestCases $testCases {
                 param
                 (
-                    [Parameter(Mandatory)]
+                    [Parameter(Mandatory = $true)]
                     [String]
                     $Key,
 
-                    [Parameter(Mandatory)]
+                    [Parameter(Mandatory = $true)]
                     [String]
                     $Value
                 )
@@ -1032,11 +1032,11 @@ try
             It 'Should return <Value> when Key is <Key>.' -TestCases $testCases {
                 param
                 (
-                    [Parameter(Mandatory)]
+                    [Parameter(Mandatory = $true)]
                     [String]
                     $Key,
 
-                    [Parameter(Mandatory)]
+                    [Parameter(Mandatory = $true)]
                     [String]
                     $Value
                 )
@@ -1128,14 +1128,14 @@ try
                 $templateName = 'Invalid Template Name'
 
                 $errorMessage = 'Certificate not found with subject containing {0} and using template "{1}".' -f $subject, $templateName
-                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -throw $errorMessage
+                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw $errorMessage
             }
             It 'Should throw an error when the more than one certificate is found' {
                 $subject      = $certificateData[1].Subject
                 $templateName = 'WebServer'
 
                 $errorMessage = 'More than one certificate found with subject containing {0} and using template "{1}".' -f $subject, $templateName
-                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -throw $errorMessage
+                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw $errorMessage
             }
         }
         Describe -Name "$dscResourceName\Get-OSVersion" -Fixture {
