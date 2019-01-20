@@ -722,6 +722,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
 * Update `MSFT_xDSCWebService` integration tests to meet Pester 4.0.0
   standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
+* Refactored `MSFT_xDSCWebService` integration tests to meet current
+  standards and to use Pester TestDrive.
 * xArchive
   * Fix end-to-end tests ([issue #457](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/457)).
   * Update integration tests to meet Pester 4.0.0 standards.
