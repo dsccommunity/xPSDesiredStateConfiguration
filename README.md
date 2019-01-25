@@ -746,6 +746,10 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 * Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that
   custom syntax problems are highlighted in Visual Studio Code.
 * Fixed style guideline violations in `CommonResourceHelper.psm1`.
+* Changes to xService
+  * Fixes issue where Get-TargetResource or Test-TargetResource will throw an
+    exception if the target service is configured with a non-existent dependency.
+  * Refactored Get-TargetResource Unit tests.
 
 ### 8.5.0.0
 
