@@ -4,7 +4,7 @@
 #>
 function Test-IsNanoServer
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param ()
 
@@ -34,13 +34,13 @@ function Test-IsNanoServer
 #>
 function Test-CommandExists
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -65,12 +65,12 @@ function New-InvalidArgumentException
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Message,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ArgumentName
     )
 
@@ -100,10 +100,12 @@ function New-InvalidOperationException
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Message,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.ErrorRecord]
         $ErrorRecord
