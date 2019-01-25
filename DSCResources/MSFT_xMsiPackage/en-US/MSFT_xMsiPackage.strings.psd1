@@ -1,4 +1,4 @@
-﻿# Localized resources for MSFT_xMsiPackage
+# Localized resources for MSFT_xMsiPackage
 
 ConvertFrom-StringData @'
     CheckingFileHash = Checking file '{0}' for expected {2} hash value of {1}
@@ -40,5 +40,5 @@ ConvertFrom-StringData @'
     ThePathExtensionWasPathExt = The path extension was {0}
     TheUriSchemeWasUriScheme = The uri scheme was {0}
     WrongSignerSubject = File '{0}' was not signed by expected signer subject '{1}'
-    WrongSignerThumbprint = File '{0}' was not signed by expected signer certificate thumbprint '{1}'  
+    WrongSignerThumbprint = File '{0}' was not signed by expected signer certificate thumbprint '{1}'
 '@

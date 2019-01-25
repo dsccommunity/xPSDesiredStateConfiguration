@@ -1,15 +1,15 @@
-﻿<#
+<#
     .SYNOPSIS
         Tests if the current machine is a Nano server.
 #>
 function Test-IsNanoServer
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param ()
 
     $isNanoServer = $false
-    
+
     if (Test-CommandExists -Name 'Get-ComputerInfo')
     {
         $computerInfo = Get-ComputerInfo
@@ -34,14 +34,14 @@ function Test-IsNanoServer
 #>
 function Test-CommandExists
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
-        $Name 
+        [System.String]
+        $Name
     )
 
     $command = Get-Command -Name $Name -ErrorAction 'SilentlyContinue'
@@ -65,12 +65,12 @@ function New-InvalidArgumentException
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Message,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ArgumentName
     )
 
@@ -100,10 +100,12 @@ function New-InvalidOperationException
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Message,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.ErrorRecord]
         $ErrorRecord

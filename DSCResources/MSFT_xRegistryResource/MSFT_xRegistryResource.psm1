@@ -302,7 +302,7 @@ function Set-TargetResource
                     if (-not [String]::IsNullOrEmpty($ValueName))
                     {
                         # If the user specified a registry key value with a name to remove, remove the registry key value with the specified name
-                        $null = Remove-ItemProperty -Path $Key -Name $ValueName -Force
+                        $null = Remove-RegistryKeyValue -RegistryKey $registryKey -RegistryKeyValueName $ValueName
                     }
                     else
                     {
@@ -329,7 +329,7 @@ function Set-TargetResource
                 {
                     # Remove the registry key
                     Write-Verbose -Message ($script:localizedData.RemovingRegistryKey -f $Key)
-                    $null = Remove-Item -Path $Key -Recurse -Force
+                    $null = Remove-RegistryKey -RegistryKey $registryKey
                 }
             }
         }
@@ -1405,6 +1405,58 @@ function Test-RegistryKeyValuesMatch
     }
 
     return $registryKeyValuesMatch
+}
+
+<#
+    .SYNOPSIS
+        Removes the specified registry key and child subkeys recursively.
+
+    .PARAMETER RegistryKey
+        The registry key to remove.
+#>
+function Remove-RegistryKey
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryKey]
+        $RegistryKey
+    )
+
+    $parentKeyName = Split-Path -Path $RegistryKey.Name -Parent
+    $targetKeyName = Split-Path -Path $RegistryKey.Name -Leaf
+
+    $parentRegistryKey = Get-RegistryKey -RegistryKeyPath $parentKeyName -WriteAccessAllowed
+
+    $null = $parentRegistryKey.DeleteSubKeyTree($targetKeyName)
+}
+
+<#
+    .SYNOPSIS
+        Removes the specified value of the specified registry key.
+        This is a wrapper function for unit testing.
+
+    .PARAMETER RegistryKey
+        The registry key to remove the default value of.
+#>
+function Remove-RegistryKeyValue
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [Microsoft.Win32.RegistryKey]
+        $RegistryKey,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNull()]
+        [AllowEmptyString()]
+        [String]
+        $RegistryKeyValueName
+    )
+
+    $null = $RegistryKey.DeleteValue($RegistryKeyValueName)
 }
 
 <#

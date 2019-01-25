@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
@@ -80,7 +80,7 @@ try {
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @windowsFeatureSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -111,7 +111,7 @@ try {
                     $windowsFeature.Installed | Should Be $true
                 }
             }
-                
+
             It 'Should have created the log file' {
                 Test-Path -Path $windowsFeatureSetParameters.LogPath | Should Be $true
             }
@@ -159,7 +159,7 @@ try {
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @windowsFeatureSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -190,7 +190,7 @@ try {
                     $windowsFeature.Installed | Should Be $false
                 }
             }
-                
+
             It 'Should have created the log file' {
                 Test-Path -Path $windowsFeatureSetParameters.LogPath | Should Be $true
             }

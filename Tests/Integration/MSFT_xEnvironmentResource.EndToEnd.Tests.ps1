@@ -1,4 +1,4 @@
-﻿<#
+<#
     Please note that some of these tests depend on each other.
     They must be run in the order given - if one test fails, subsequent tests may
     also fail.
@@ -76,7 +76,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -104,7 +104,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -132,7 +132,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -160,7 +160,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -200,7 +200,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -231,7 +231,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -262,7 +262,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -291,7 +291,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -320,7 +320,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -382,7 +382,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -411,7 +411,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -440,7 +440,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -469,7 +469,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -504,7 +504,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -536,7 +536,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -568,7 +568,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -598,7 +598,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -628,7 +628,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -693,7 +693,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -722,7 +722,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -751,7 +751,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -780,7 +780,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testEnvironmentVarName
@@ -818,7 +818,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -850,7 +850,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -882,7 +882,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -912,7 +912,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName
@@ -942,7 +942,7 @@ try
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-        
+
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                $currentConfig.Name | Should Be $testPathEnvironmentVarName

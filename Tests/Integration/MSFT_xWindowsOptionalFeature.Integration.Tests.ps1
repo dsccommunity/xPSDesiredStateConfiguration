@@ -1,4 +1,4 @@
-﻿Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -14,7 +14,7 @@ try
 
             $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsOptionalFeature.config.ps1'
         }
-    
+
         It 'Should enable a valid Windows optional feature' {
             $configurationName = 'EnableWindowsOptionalFeature'
 
@@ -34,7 +34,7 @@ try
                     Dism\Disable-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online -NoRestart
                 }
 
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -83,7 +83,7 @@ try
                     Dism\Enable-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online -NoRestart
                 }
 
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -126,7 +126,7 @@ try
 
             try
             {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force

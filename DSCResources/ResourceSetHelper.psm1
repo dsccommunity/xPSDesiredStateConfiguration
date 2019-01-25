@@ -1,4 +1,4 @@
-﻿# This module should not write any verbose or error messages unless a localization file for it is added
+# This module should not write any verbose or error messages unless a localization file for it is added
 
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
@@ -44,7 +44,7 @@ function New-ResourceSetCommonParameterString
 
     $stringBuilder = New-Object -TypeName 'System.Text.StringBuilder'
 
-    foreach ($parameterName in $Parameters.Keys) 
+    foreach ($parameterName in $Parameters.Keys)
     {
         # All composite resources have an extra parameter 'InstanceName'
         if ($parameterName -ine $KeyParameterName -and $parameterName -ine 'InstanceName')
@@ -106,7 +106,7 @@ function New-ResourceSetCommonParameterString
                 Name = "Telnet-Client"
                 Ensure = "Present"
                 IncludeAllSubFeature = $true
-            }  
+            }
 
             xWindowsFeature Resource1
             {
@@ -139,8 +139,8 @@ function New-ResourceSetConfigurationString
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String[]]
-        $KeyParameterValues, 
-    
+        $KeyParameterValues,
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [String]
@@ -162,7 +162,7 @@ function New-ResourceSetConfigurationString
         $null = $stringBuilder.AppendLine()
         $null = $stringBuilder.Append($CommonParameterString)
         $null = $stringBuilder.AppendLine('}')
-        
+
         $resourceCount++
     }
 
@@ -195,7 +195,7 @@ function New-ResourceSetConfigurationString
             CommonParameterNames = @( 'Ensure', 'MembersToInclude', 'MembersToExclude', 'Credential' )
             Parameters = $PSBoundParameters
         }
-    
+
         $configurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
     .NOTES
