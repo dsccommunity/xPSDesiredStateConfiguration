@@ -57,7 +57,14 @@ function Get-TargetResource
 
         foreach ($serviceDependedOn in $service.ServicesDependedOn)
         {
-            $dependencies += $serviceDependedOn.Name.ToString()
+            if ($null -ne $serviceDependedOn -and $null -ne $serviceDependedOn.Name)
+            {
+                $dependencies += $serviceDependedOn.Name.ToString()
+            }
+            else
+            {
+                Write-Warning -Message ($script:localizedData.CorruptDependency -f $Name)
+            }
         }
 
         $startupType = ConvertTo-StartupTypeString -StartMode $serviceCimInstance.StartMode
