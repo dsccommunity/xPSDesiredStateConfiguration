@@ -63,7 +63,7 @@ function Get-TargetResource
             }
             else
             {
-                Write-Warning -Message "Service '$Name' has a corrupt dependency. For more information, inspect the registry value at HKLM:\SYSTEM\CurrentControlSet\Services\$Name\DependOnService."
+                Write-Warning -Message ($script:localizedData.CorruptDependency -f $Name)
             }
         }
 

@@ -208,7 +208,7 @@ try
 
             $convertToStartupTypeStringResult = 'TestStartupTypeString'
 
-            Context 'Service does not exist' {
+            Context 'When a service does not exist' {
                 Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -ExpectServiceCIMInstance $false
 
                 $expectedValues = @{
@@ -219,7 +219,7 @@ try
                 Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
-            Context 'Service exists with all properties defined and custom startup account name' {
+            Context 'When a service exists with all properties defined and custom startup account name' {
                 $testService = @{
                     Name = 'TestServiceName'
                     DisplayName = 'TestDisplayName'
@@ -266,7 +266,7 @@ try
                 Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
-            Context 'Service exists with no dependencies and startup account name as NT Authority\LocalService' {
+            Context 'When a service exists with no dependencies and startup account name as NT Authority\LocalService' {
                 $testService = @{
                     Name = 'TestServiceName'
                     DisplayName = 'TestDisplayName'
@@ -308,7 +308,7 @@ try
                 Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
-            Context 'Service exists with no description or display name and startup account name as NT Authority\NetworkService' {
+            Context 'When a service exists with no description or display name and startup account name as NT Authority\NetworkService' {
                 $testService = @{
                     Name = 'TestServiceName'
                     DisplayName = $null
@@ -357,7 +357,7 @@ try
                 Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
             }
 
-            Context 'Service exists with with stale or corrupt dependencies' {
+            Context 'When a service exists with with stale or corrupt dependencies' {
                 <#
                     Due to a failed install or uninstall, it's possible to get in a scenario where a service
                     has a dependency configured in the registry (in the DependOnService REG_MULTI_SZ value), but
@@ -462,7 +462,7 @@ try
             Mock -CommandName 'Start-ServiceWithTimeout' -MockWith { }
             Mock -CommandName 'Stop-ServiceWithTimeout' -MockWith { }
 
-            Context 'Both BuiltInAccount, Credential or GroupManagedServiceAccount specified' {
+            Context 'When both BuiltInAccount, Credential or GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     BuiltInAccount = 'LocalSystem'
@@ -497,7 +497,7 @@ try
                 }
             }
 
-            Context 'Service does not exist and Ensure set to Absent' {
+            Context 'When a service does not exist and Ensure set to Absent' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Absent'
@@ -540,7 +540,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, and Path not specified' {
+            Context 'When a service does not exist, Ensure set to Present, and Path not specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -552,7 +552,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, and Path specified' {
+            Context 'When a service does not exist, Ensure set to Present, and Path specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -596,7 +596,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Running, and all parameters except Credential and GroupManagedServiceAccount specified' {
+            Context 'When a service does not exist, Ensure set to Present, State set to Running, and all parameters except Credential and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -647,7 +647,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and GroupManagedServiceAccount specified' {
+            Context 'When a service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -698,7 +698,7 @@ try
                 }
             }
 
-            Context 'Service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and Credential specified' {
+            Context 'When a service does not exist, Ensure set to Present, State set to Stopped, and all parameters except BuiltInAccount and Credential specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -766,7 +766,7 @@ try
 
             Mock -CommandName 'Get-Service' -MockWith { return $testService }
 
-            Context 'Service exists and Ensure set to Absent' {
+            Context 'When a service exists and Ensure set to Absent' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Absent'
@@ -809,7 +809,7 @@ try
                 }
             }
 
-            Context 'Service exists and Ensure set to Present' {
+            Context 'When a service exists and Ensure set to Present' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -852,7 +852,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and Path specified' {
+            Context 'When a service exists, Ensure set to Present, and Path specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -896,7 +896,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, State set to Stopped, and all parameters except Credential and GroupManagedServiceAccount specified' {
+            Context 'When a service exists, Ensure set to Present, State set to Stopped, and all parameters except Credential and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -947,7 +947,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, State set to Ignore, and all parameters except Path, BuiltInAccount and GroupManagedServiceAccount specified' {
+            Context 'When a service exists, Ensure set to Present, State set to Ignore, and all parameters except Path, BuiltInAccount and GroupManagedServiceAccount specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -997,7 +997,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and DesktopInteract specified' {
+            Context 'When a service exists, Ensure set to Present, and DesktopInteract specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -1043,7 +1043,7 @@ try
 
             Mock -CommandName 'Set-ServicePath' -MockWith { return $false }
 
-            Context 'Service exists, Ensure set to Present, and matching Path to service path specified' {
+            Context 'When a service exists, Ensure set to Present, and matching Path to service path specified' {
                 $setTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -1099,7 +1099,7 @@ try
             Mock -CommandName 'Test-PathsMatch' -MockWith { return $true }
             Mock -CommandName 'ConvertTo-StartName' -MockWith { return $Username }
 
-            Context 'Both BuiltInAccount, Credential or GroupManagedServiceAccount specified' {
+            Context 'When multiple of BuiltInAccount, Credential or GroupManagedServiceAccount are specified' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     BuiltInAccount = 'LocalSystem'
@@ -1134,7 +1134,7 @@ try
                 }
             }
 
-            Context 'Service does not exist and Ensure set to Absent' {
+            Context 'When a service does not exist and Ensure set to Absent' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Absent'
@@ -1165,7 +1165,7 @@ try
                 }
             }
 
-            Context 'Service does not exist and Ensure set to Present' {
+            Context 'When a service does not exist and Ensure set to Present' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -1196,7 +1196,7 @@ try
                 }
             }
 
-        Context 'Service does not exist, Ensure set to Present, and StartupType is set to Disabled' {
+        Context 'When a service does not exist, Ensure set to Present, and StartupType is set to Disabled' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -1243,7 +1243,7 @@ try
 
             Mock -CommandName 'Get-TargetResource' -MockWith { return $serviceResourceWithAllProperties }
 
-            Context 'Service exists and Ensure set to Absent' {
+            Context 'When a service exists and Ensure set to Absent' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Absent'
@@ -1274,7 +1274,7 @@ try
                 }
             }
 
-            Context 'Service exists and Ensure set to Present' {
+            Context 'When a service exists and Ensure set to Present' {
                 $testTargetResourceParameters = @{
                     Name = $script:testServiceName
                     Ensure = 'Present'
@@ -1305,7 +1305,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and all matching parameters specified except Credential and GroupManagedServiceAccount' {
+            Context 'When a service exists, Ensure set to Present, and all matching parameters specified except Credential and GroupManagedServiceAccount' {
                 $testTargetResourceParameters = $serviceResourceWithAllProperties
 
                 It 'Should not throw' {
@@ -1389,7 +1389,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and State is set to Ignore' {
+            Context 'When a service exists, Ensure set to Present, and State is set to Ignore' {
                 $testTargetResourceParameters = @{
                     Name = $serviceResourceWithAllProperties.Name
                     Ensure = 'Present'
@@ -1433,7 +1433,7 @@ try
 
             Mock -CommandName 'Get-TargetResource' -MockWith { return $serviceResourceWithCustomBuiltInAccount }
 
-            Context 'Service exists, Ensure set to Present, and matching Credential specified' {
+            Context 'When a service exists, Ensure set to Present, and matching Credential specified' {
                 $testTargetResourceParameters = @{
                     Name = $serviceResourceWithCustomBuiltInAccount.Name
                     Ensure = 'Present'
@@ -1465,7 +1465,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and mismatching Credential specified' {
+            Context 'When a service exists, Ensure set to Present, and mismatching Credential specified' {
                 $testTargetResourceParameters = @{
                     Name = $serviceResourceWithCustomBuiltInAccount.Name
                     Ensure = 'Present'
@@ -1624,7 +1624,7 @@ try
 
             Mock -CommandName 'Test-PathsMatch' -MockWith { return $false }
 
-            Context 'Service exists, Ensure set to Present, and mismatching Path specified' {
+            Context 'When a service exists, Ensure set to Present, and mismatching Path specified' {
                 $testTargetResourceParameters = @{
                     Name = $serviceResourceWithCustomBuiltInAccount.Name
                     Ensure = 'Present'
@@ -1668,7 +1668,7 @@ try
 
             Mock -CommandName 'Get-TargetResource' -MockWith { return $serviceResourceWithGroupManagedServiceAccount }
 
-            Context 'Service exists, Ensure set to Present, and mismatching GroupManagedServiceAccount specified' {
+            Context 'When a service exists, Ensure set to Present, and mismatching GroupManagedServiceAccount specified' {
                 $testTargetResourceParameters = @{
                     Name = $serviceResourceWithCustomBuiltInAccount.Name
                     Ensure = 'Present'
@@ -1700,7 +1700,7 @@ try
                 }
             }
 
-            Context 'Service exists, Ensure set to Present, and matching GroupManagedServiceAccount specified' {
+            Context 'When a service exists, Ensure set to Present, and matching GroupManagedServiceAccount specified' {
                 $testTargetResourceParameters = @{
                     Name = $serviceResourceWithCustomBuiltInAccount.Name
                     Ensure = 'Present'
@@ -1720,7 +1720,7 @@ try
         Describe 'xService\Get-ServiceCimInstance' {
             Mock -CommandName 'Get-CimInstance' -MockWith { }
 
-            Context 'Service does not exist' {
+            Context 'When a service does not exist' {
                 It 'Should not throw' {
                     { Get-ServiceCimInstance -ServiceName $script:testServiceName } | Should Not Throw
                 }
@@ -1738,7 +1738,7 @@ try
 
             Mock -CommandName 'Get-CimInstance' -MockWith { return $testCimInstance }
 
-            Context 'Service exists' {
+            Context 'When a service exists' {
                 It 'Should not throw' {
                     { Get-ServiceCimInstance -ServiceName $script:testServiceName } | Should Not Throw
                 }
@@ -1754,19 +1754,19 @@ try
         }
 
         Describe 'xService\ConvertTo-StartupTypeString' {
-            Context 'StartupType specifed as Auto' {
+            Context 'When StartupType is specifed as Auto' {
                 It 'Should return Automatic' {
                     ConvertTo-StartupTypeString -StartMode 'Auto' | Should Be 'Automatic'
                 }
             }
 
-            Context 'StartupType specifed as Manual' {
+            Context 'When StartupType is specifed as Manual' {
                 It 'Should return Manual' {
                     ConvertTo-StartupTypeString -StartMode 'Manual' | Should Be 'Manual'
                 }
             }
 
-            Context 'StartupType specifed as Disabled' {
+            Context 'When StartupType is specifed as Disabled' {
                 It 'Should return Disabled' {
                     ConvertTo-StartupTypeString -StartMode 'Disabled' | Should Be 'Disabled'
                 }
@@ -1814,14 +1814,14 @@ try
         }
 
         Describe 'xService\Test-PathsMatch' {
-            Context 'Specified paths match' {
+            Context 'When Specified paths match' {
                 It 'Should return true' {
                     $matchingPath = 'MatchingPath'
                     Test-PathsMatch -ExpectedPath $matchingPath -ActualPath $matchingPath | Should Be $true
                 }
             }
 
-            Context 'Specified paths do not match' {
+            Context 'When Specified paths do not match' {
                 It 'Should return false' {
                     Test-PathsMatch -ExpectedPath 'Path1' -ActualPath 'Path2' | Should Be $false
                 }
@@ -1829,32 +1829,32 @@ try
         }
 
         Describe 'xService\ConvertTo-StartName' {
-            Context 'Username specified as LocalSystem' {
+            Context 'When Username is specified as LocalSystem' {
                 It 'Should return .\LocalSystem' {
                     ConvertTo-StartName -Username 'LocalSystem' | Should Be '.\LocalSystem'
                 }
             }
 
-            Context 'Username specified as LocalService' {
+            Context 'When Username is specified as LocalService' {
                 It 'Should return NT Authority\LocalService' {
                     ConvertTo-StartName -Username 'LocalService' | Should Be 'NT Authority\LocalService'
                 }
             }
 
-            Context 'Username specified as NetworkService' {
+            Context 'When Username is specified as NetworkService' {
                 It 'Should return NT Authority\NetworkService' {
                     ConvertTo-StartName -Username 'NetworkService' | Should Be 'NT Authority\NetworkService'
                 }
             }
 
-            Context 'Custom username specified without any \ or @ characters' {
+            Context 'When custom username is specified without any \ or @ characters' {
                 It 'Should return custom username prefixed with .\' {
                     $customUsername = 'TestUsername'
                     ConvertTo-StartName -Username $customUsername | Should Be ".\$customUsername"
                 }
             }
 
-            Context 'Custom username specified that starts with the local computer name followed by a \ character' {
+            Context 'When custom username is specified that starts with the local computer name followed by a \ character' {
                 It 'Should return custom username prefixed with .\ instead of the local computer name' {
                     $customUsername = 'TestUsername'
                     $customUsernameWithComputerNamePrefix = "$env:computerName\$customUsername"
@@ -1862,14 +1862,14 @@ try
                 }
             }
 
-            Context 'Custom username specified with a \ character and a custom domain' {
+            Context 'When custom username is specified with a \ character and a custom domain' {
                 It 'Should return the custom username with no changes' {
                     $customUsername = 'TestDomain\TestUsername'
                     ConvertTo-StartName -Username $customUsername | Should Be $customUsername
                 }
             }
 
-            Context 'Custom username specified with an @ character' {
+            Context 'When custom username is specified with an @ character' {
                 It 'Should return the custom username with no changes' {
                     $customUsername = 'TestUsername@TestDomain'
                     ConvertTo-StartName -Username $customUsername | Should Be $customUsername
@@ -1891,7 +1891,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodSuccessResult }
 
-                Context 'Specified path matches the service path' {
+                Context 'When specified path matches the service path' {
                     $setServicePathParameters = @{
                         ServiceName = $script:testServiceName
                         Path = $testServiceCimInstance.PathName
@@ -1920,7 +1920,7 @@ try
 
                 Mock -CommandName 'Test-PathsMatch' -MockWith { return $false }
 
-                Context 'Specified path does not match the service path and the path change succeeds' {
+                Context 'When specified path does not match the service path and the path change succeeds' {
                     $setServicePathParameters = @{
                         ServiceName = $script:testServiceName
                         Path = 'NewTestPath'
@@ -1953,7 +1953,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodFailResult }
 
-                Context 'Specified path does not match the service path and the path change fails' {
+                Context 'When specified path does not match the service path and the path change fails' {
                     $setServicePathParameters = @{
                         ServiceName = $script:testServiceName
                         Path = 'NewTestPath'
@@ -1992,7 +1992,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodSuccessResult }
 
-                Context 'Specified dependencies match the service dependencies' {
+                Context 'When specified dependencies match the service dependencies' {
                     $setServiceDependenciesParameters = @{
                         ServiceName = $script:testServiceName
                         Dependencies = $testService.ServicesDependedOn.Name
@@ -2015,7 +2015,7 @@ try
                     }
                 }
 
-                Context 'Specified dependencies do not match the populated service dependencies and the dependency change succeeds' {
+                Context 'When specified dependencies do not match the populated service dependencies and the dependency change succeeds' {
                     $setServiceDependenciesParameters = @{
                         ServiceName = $script:testServiceName
                         Dependencies = @( 'TestDependency3', 'TestDependency4' )
@@ -2038,7 +2038,7 @@ try
                     }
                 }
 
-                Context 'Specified empty dependencies do not match the populated service dependencies and the dependency change succeeds' {
+                Context 'When specified empty dependencies do not match the populated service dependencies and the dependency change succeeds' {
                     $setServiceDependenciesParameters = @{
                         ServiceName = $script:testServiceName
                         Dependencies = @()
@@ -2067,7 +2067,7 @@ try
 
                 Mock -CommandName 'Get-Service' -MockWith { return $testServiceWithNoDependencies }
 
-                Context 'Specified empty dependencies match the null service dependencies' {
+                Context 'When specified empty dependencies match the null service dependencies' {
                     $setServiceDependenciesParameters = @{
                         ServiceName = $script:testServiceName
                         Dependencies = @()
@@ -2090,7 +2090,7 @@ try
                     }
                 }
 
-                Context 'Specified dependencies do not match the null service dependencies and the dependency change succeeds' {
+                Context 'When specified dependencies do not match the null service dependencies and the dependency change succeeds' {
                     $setServiceDependenciesParameters = @{
                         ServiceName = $script:testServiceName
                         Dependencies = @( 'TestDependency3', 'TestDependency4' )
@@ -2119,7 +2119,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodFailResult }
 
-                Context 'Specified dependencies do not match the service dependencies and the dependency change fails' {
+                Context 'When specified dependencies do not match the service dependencies and the dependency change fails' {
                     $setServiceDependenciesParameters = @{
                         ServiceName = $script:testServiceName
                         Dependencies = @( 'TestDependency3', 'TestDependency4' )
@@ -2152,7 +2152,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodSuccessResult }
 
-                Context 'No parameters specified' {
+                Context 'When no parameters are specified' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                     }
@@ -2178,7 +2178,7 @@ try
                     }
                 }
 
-                Context 'Matching DesktopInteract specified' {
+                Context 'When matching DesktopInteract specified' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         DesktopInteract = $testServiceCimInstance.DesktopInteract
@@ -2205,7 +2205,7 @@ try
                     }
                 }
 
-                Context 'Mismatching DesktopInteract specified and service change succeeds' {
+                Context 'When mismatching DesktopInteract specified and service change succeeds' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         DesktopInteract = -not $testServiceCimInstance.DesktopInteract
@@ -2232,7 +2232,7 @@ try
                     }
                 }
 
-                Context 'Credential with matching username specified' {
+                Context 'When credential with matching username specified' {
                     $secureTestPassword = ConvertTo-SecureString -String 'TestPassword' -AsPlainText -Force
                     $testCredentialWithMatchingUsername = New-Object -TypeName 'PSCredential' -ArgumentList @( $testServiceCimInstance.StartName, $secureTestPassword )
 
@@ -2262,7 +2262,7 @@ try
                     }
                 }
 
-                Context 'Credential with mismatching username specified and service change succeeds' {
+                Context 'When credential with mismatching username specified and service change succeeds' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         Credential = $script:testCredential1
@@ -2289,7 +2289,7 @@ try
                     }
                 }
 
-                Context 'Matching BuiltInAccount specified' {
+                Context 'When matching BuiltInAccount specified' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         BuiltInAccount = $testServiceCimInstance.StartName
@@ -2316,7 +2316,7 @@ try
                     }
                 }
 
-                Context 'Mismatching BuiltInAccount specified and service change succeeds' {
+                Context 'When mismatching BuiltInAccount specified and service change succeeds' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         BuiltInAccount = 'NetworkService'
@@ -2346,7 +2346,7 @@ try
                 $testServiceCimInstance = New-CimInstance -ClassName 'Win32_Service' -Property @{ StartName = $script:gMSAUser1; DesktopInteract = $true } -ClientOnly
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
 
-                Context 'Matching GroupManagedServiceAccount specified' {
+                Context 'When matching GroupManagedServiceAccount specified' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         GroupManagedServiceAccount = $script:gMSAUser1
@@ -2373,7 +2373,7 @@ try
                     }
                 }
 
-                Context 'Mismatching GroupManagedServiceAccount specified and service change succeeds' {
+                Context 'When mismatching GroupManagedServiceAccount specified and service change succeeds' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         GroupManagedServiceAccount = $script:gMSAUser2
@@ -2406,7 +2406,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodFailResult }
 
-                Context 'Mismatching DesktopInteract specified and service change fails' {
+                Context 'When mismatching DesktopInteract specified and service change fails' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         DesktopInteract = -not $testServiceCimInstance.DesktopInteract
@@ -2419,7 +2419,7 @@ try
                     }
                 }
 
-                Context 'Credential with mismatching username specified and service change fails' {
+                Context 'When Credential with mismatching username specified and service change fails' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         Credential = $script:testCredential1
@@ -2432,7 +2432,7 @@ try
                     }
                 }
 
-                Context 'Mismatching BuiltInAccount specified and service change fails' {
+                Context 'When mismatching BuiltInAccount specified and service change fails' {
                     $setServiceAccountPropertyParameters = @{
                         ServiceName = $script:testServiceName
                         BuiltInAccount = 'NetworkService'
@@ -2467,7 +2467,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodSuccessResult }
 
-                Context 'Specified startup type matches the service startup type' {
+                Context 'When specified startup type matches the service startup type' {
                     $setServiceStartupTypeParameters = @{
                         ServiceName = $script:testServiceName
                         StartupType = $testServiceCimInstance.StartMode
@@ -2486,7 +2486,7 @@ try
                     }
                 }
 
-                Context 'Specified startup type does not match the service startup type and service change succeeds' {
+                Context 'When specified startup type does not match the service startup type and service change succeeds' {
                     $setServiceStartupTypeParameters = @{
                         ServiceName = $script:testServiceName
                         StartupType = 'Automatic'
@@ -2511,7 +2511,7 @@ try
 
                 Mock -CommandName 'Invoke-CimMethod' -MockWith { return $invokeCimMethodFailResult }
 
-                Context 'Specified startup type does not match the service startup type and service change fails' {
+                Context 'When specified startup type does not match the service startup type and service change fails' {
                     $setServiceStartupTypeParameters = @{
                         ServiceName = $script:testServiceName
                         StartupType = 'Automatic'
@@ -2545,7 +2545,7 @@ try
             Mock -CommandName 'Set-ServiceAccountProperty' -MockWith { }
             Mock -CommandName 'Set-ServiceStartupType' -MockWith { }
 
-            Context 'No parameters specified' {
+            Context 'When no parameters are specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                 }
@@ -2575,7 +2575,7 @@ try
                 }
             }
 
-            Context 'Mismatching DisplayName specified' {
+            Context 'When mismatching DisplayName is specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     DisplayName = 'NewDisplayName'
@@ -2606,7 +2606,7 @@ try
                 }
             }
 
-            Context 'Mismatching Description specified' {
+            Context 'When mismatching Description is specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     Description = 'New service description'
@@ -2637,7 +2637,7 @@ try
                 }
             }
 
-            Context 'Matching Description and DisplayName specified' {
+            Context 'When matching Description and DisplayName specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     DisplayName = $testServiceCimInstance.DisplayName
@@ -2669,7 +2669,7 @@ try
                 }
             }
 
-            Context 'Dependencies specified' {
+            Context 'When Dependencies specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     Dependencies = @( 'TestDependency1' )
@@ -2700,7 +2700,7 @@ try
                 }
             }
 
-            Context 'Credential specified' {
+            Context 'When Credential specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     Credential = $script:testCredential1
@@ -2731,7 +2731,7 @@ try
                 }
             }
 
-            Context 'BuiltInAccount specified' {
+            Context 'When BuiltInAccount specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     BuiltInAccount = 'LocalService'
@@ -2762,7 +2762,7 @@ try
                 }
             }
 
-            Context 'GroupManagedServiceAccount specified' {
+            Context 'When GroupManagedServiceAccount specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     GroupManagedServiceAccount = $script:gMSAUser1
@@ -2794,7 +2794,7 @@ try
             }
 
 
-            Context 'DesktopInteract specified' {
+            Context 'When DesktopInteract specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     DesktopInteract = $true
@@ -2825,7 +2825,7 @@ try
                 }
             }
 
-            Context 'StartupType specified' {
+            Context 'When StartupType specified' {
                 $setServicePropertyParameters = @{
                     ServiceName = $script:testServiceName
                     StartupType = 'Manual'
@@ -2861,7 +2861,7 @@ try
             Mock -CommandName 'Remove-Service' -MockWith { }
             Mock -CommandName 'Get-Service' -MockWith { }
 
-            Context 'Service removal succeeds' {
+            Context 'When a service removal succeeds' {
                 $removeServiceWithTimeoutParameters = @{
                     Name = $script:testServiceName
                     TerminateTimeout = 500
@@ -2882,7 +2882,7 @@ try
 
             Mock -CommandName 'Get-Service' -MockWith { return 'Not null' }
 
-            Context 'Service removal fails' {
+            Context 'When a service removal fails' {
                 $removeServiceWithTimeoutParameters = @{
                     Name = $script:testServiceName
                     TerminateTimeout = 500
