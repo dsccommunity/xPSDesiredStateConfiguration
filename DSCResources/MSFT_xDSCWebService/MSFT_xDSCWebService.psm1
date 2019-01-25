@@ -31,20 +31,20 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [String]
         $EndpointName,
-            
-        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+
+        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateThumbPrint')]
         [ValidateNotNullOrEmpty()]
         [String]
         $CertificateThumbPrint,
 
-        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [String]
         $CertificateSubject,
 
-        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [String]
@@ -81,8 +81,8 @@ function Get-TargetResource
     {
             $Ensure = 'Present'
             $acceptSelfSignedCertificates = $false
-                
-            # Get Full Path for Web.config file    
+
+            # Get Full Path for Web.config file
             $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath "web.config"
 
             # Get module and configuration path
@@ -103,7 +103,7 @@ function Get-TargetResource
                     {
                         $databasePath = $Matches[0]
                     }
-                    else 
+                    else
                     {
                         $databasePath = $connectionString
                     }
@@ -119,14 +119,14 @@ function Get-TargetResource
             }
 
             $iisPort = $website.bindings.Collection[0].bindingInformation.Split(":")[1]
-                        
+
             $svcFileName = (Get-ChildItem -Path $website.physicalPath -Filter "*.svc").Name
 
             $serverUrl = $urlPrefix + $fqdn + ":" + $iisPort + "/" + $svcFileName
 
             $webBinding = Get-WebBinding -Name $EndpointName
 
-            $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"            
+            $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
             $certNativeModule = Get-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName $iisSelfSignedModuleName
             if($certNativeModule)
             {
@@ -162,7 +162,7 @@ function Get-TargetResource
     else
     {
         $certificate = ([Array](Get-ChildItem -Path 'Cert:\LocalMachine\My\')).Where{$_.Thumbprint -eq $webBinding.CertificateHash}
-        
+
         $output.Add('CertificateThumbPrint',   $webBinding.CertificateHash)
         $output.Add('CertificateSubject',      $certificate.Subject)
         $output.Add('CertificateTemplateName', $certificate.Extensions.Where{$_.Oid.FriendlyName -eq 'Certificate Template Name'}.Format($false))
@@ -188,23 +188,23 @@ function Set-TargetResource
         [Uint32]
         $Port = 8080,
 
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub)                            
+        # Physical path for the IIS Endpoint on the machine (usually under inetpub)
         [Parameter()]
         [String]
         $PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
 
-        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateThumbPrint')]
         [ValidateNotNullOrEmpty()]
         [String]$CertificateThumbPrint,
 
-        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [String]
         $CertificateSubject,
 
-        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [String]
@@ -226,17 +226,17 @@ function Set-TargetResource
         [String]
         $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
-        # Location on the disk where the Modules are stored            
+        # Location on the disk where the Modules are stored
         [Parameter()]
         [String]
         $ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
 
-        # Location on the disk where the Configuration is stored                    
+        # Location on the disk where the Configuration is stored
         [Parameter()]
         [String]
         $ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
-        # Location on the disk where the RegistrationKeys file is stored                    
+        # Location on the disk where the RegistrationKeys file is stored
         [Parameter()]
         [String]
         $RegistrationKeyPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
@@ -245,7 +245,7 @@ function Set-TargetResource
         [Parameter()]
         [Boolean]
         $AcceptSelfSignedCertificates = $true,
-        
+
         # Required Field when user want to enable DSC to use SQL server as backend DB
         [Parameter()]
         [Boolean]
@@ -299,18 +299,19 @@ function Set-TargetResource
     Push-Location -Path "$env:windir\system32\inetsrv"
     $script:appCmd = Get-Command -Name '.\appcmd.exe' -CommandType 'Application'
     Pop-Location
-   
+
     $pathPullServer = "$pshome\modules\PSDesiredStateConfiguration\PullServer"
     $jet4provider = "System.Data.OleDb"
     $jet4database = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
     $eseprovider = "ESENT"
     $esedatabase = "$DatabasePath\Devices.edb"
 
+    $languagePath = (Get-Culture).IetfLanguageTag
     $language = (Get-Culture).TwoLetterISOLanguageName
 
     # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
-    if (-not (Test-Path -Path $pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
-        $language = 'en'
+    if (-not (Test-Path -Path $pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
+        $languagePath = 'en'
     }
 
     $os = Get-OSVersion
@@ -345,11 +346,11 @@ function Set-TargetResource
          }
 
          # we are done here, all stuff below is for 'Present'
-         return 
+         return
     }
     # ===========================================================
-                
-    Write-Verbose -Message "Create the IIS endpoint"    
+
+    Write-Verbose -Message "Create the IIS endpoint"
     PSWSIISEndpoint\New-PSWSEndpoint -site $EndpointName `
                      -path $PhysicalPath `
                      -cfgfile $webConfigFileName `
@@ -362,7 +363,7 @@ function Set-TargetResource
                      -asax "$pathPullServer\Global.asax" `
                      -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
                      -language $language `
-                     -dependentMUIFiles  "$pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
+                     -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
                      -certificateThumbPrint $certificateThumbPrint `
                      -EnableFirewallException $true `
                      -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
@@ -371,14 +372,14 @@ function Set-TargetResource
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "windows"
-    
+
     if($SqlProvider)
     {
             Write-Verbose -Message "Set values into the web.config that define the SQL Connection "
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
             if ($isBlue)
-            {       
+            {
                 Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
             }
     }
@@ -387,7 +388,7 @@ function Set-TargetResource
         Write-Verbose -Message "Set values into the web.config that define the repository for BLUE OS"
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
-     
+
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
     else
@@ -409,7 +410,7 @@ function Set-TargetResource
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
         }
-        
+
     }
 
     Write-Verbose -Message "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
@@ -432,7 +433,7 @@ function Set-TargetResource
     $iisSelfSignedModuleAssemblyName = "IISSelfSignedCertModule.dll"
     $iisSelfSignedModuleName = "IISSelfSignedCertModule(32bit)"
     if($AcceptSelfSignedCertificates)
-    {        
+    {
         $preConditionBitnessArgumentFor32BitInstall=""
         if ($Enable32BitAppOnWin64 -eq $true)
         {
@@ -485,7 +486,7 @@ function Test-TargetResource
         [Uint32]
         $Port = 8080,
 
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub)                            
+        # Physical path for the IIS Endpoint on the machine (usually under inetpub)
         [Parameter()]
         [String]
         $PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
@@ -496,13 +497,13 @@ function Test-TargetResource
         [String]
         $CertificateThumbPrint,
 
-        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [String]
         $CertificateSubject,
 
-        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server   
+        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [String]
@@ -524,17 +525,17 @@ function Test-TargetResource
         [String]
         $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
-        # Location on the disk where the Modules are stored            
+        # Location on the disk where the Modules are stored
         [Parameter()]
         [String]
         $ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
 
-        # Location on the disk where the Configuration is stored                    
+        # Location on the disk where the Configuration is stored
         [Parameter()]
         [String]
         $ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
-        # Location on the disk where the RegistrationKeys file is stored                    
+        # Location on the disk where the RegistrationKeys file is stored
         [Parameter()]
         [String]
         $RegistrationKeyPath,
@@ -589,21 +590,21 @@ function Test-TargetResource
         Write-Verbose -Message "Check Ensure"
         if(($Ensure -eq "Present" -and $website -eq $null))
         {
-            $desiredConfigurationMatch = $false            
+            $desiredConfigurationMatch = $false
             Write-Verbose -Message "The Website $EndpointName is not present"
-            break       
+            break
         }
         if(($Ensure -eq "Absent" -and $website -ne $null))
         {
-            $desiredConfigurationMatch = $false            
+            $desiredConfigurationMatch = $false
             Write-Verbose -Message "The Website $EndpointName is present but should not be"
-            break       
+            break
         }
         if(($Ensure -eq "Absent" -and $website -eq $null))
         {
-            $desiredConfigurationMatch = $true            
+            $desiredConfigurationMatch = $true
             Write-Verbose -Message "The Website $EndpointName is not present as requested"
-            break       
+            break
         }
         # the other case is: Ensure and exist, we continue with more checks
 
@@ -613,7 +614,7 @@ function Test-TargetResource
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "Port for the Website $EndpointName does not match the desired state."
-            break       
+            break
         }
 
         Write-Verbose -Message 'Check Binding'
@@ -644,7 +645,7 @@ function Test-TargetResource
 #                {
 #                    $desiredConfigurationMatch = $false
 #                    Write-Verbose -Message "Certificate Hash for the Website $EndpointName does not match the desired state."
-#                    break       
+#                    break
 #                }
 
                 if ($CertificateThumbPrint -ne 'AllowUnencryptedTraffic' -and $websiteProtocol -ne 'https')
@@ -680,7 +681,7 @@ function Test-TargetResource
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "The state of Website $EndpointName does not match the desired state."
-            break      
+            break
         }
 
         Write-Verbose -Message "Get Full Path for Web.config file"
@@ -728,7 +729,7 @@ function Test-TargetResource
                     $desiredConfigurationMatch = $false
                     break
                 }
-            }    
+            }
 
             Write-Verbose -Message "Check ConfigurationPath"
             if ($ConfigurationPath)
@@ -773,7 +774,7 @@ function Test-TargetResource
         }
         $stop = $false
     }
-    While($stop)  
+    While($stop)
 
     $desiredConfigurationMatch
 }
@@ -819,20 +820,20 @@ function Test-WebConfigAppSetting
         [String]
         $ExpectedAppSettingValue
     )
-    
+
     $returnValue = $true
 
     if (Test-Path -Path $WebConfigFullPath)
     {
         $webConfigXml = [Xml](Get-Content -Path $WebConfigFullPath)
-        $root = $webConfigXml.get_DocumentElement() 
+        $root = $webConfigXml.get_DocumentElement()
 
-        foreach ($item in $root.appSettings.add) 
-        { 
-            if( $item.key -eq $AppSettingName ) 
-            {                 
+        foreach ($item in $root.appSettings.add)
+        {
+            if( $item.key -eq $AppSettingName )
+            {
                 break
-            } 
+            }
         }
 
         if($item.value -ne $ExpectedAppSettingValue)
@@ -853,28 +854,28 @@ function Get-WebConfigAppSetting
         [Parameter(Mandatory = $true)]
         [String]
         $WebConfigFullPath,
-        
+
         [Parameter(Mandatory = $true)]
         [String]
         $AppSettingName
     )
-    
+
     $appSettingValue = ""
     if (Test-Path -Path $WebConfigFullPath)
     {
         $webConfigXml = [Xml](Get-Content -Path $WebConfigFullPath)
-        $root = $webConfigXml.get_DocumentElement() 
+        $root = $webConfigXml.get_DocumentElement()
 
-        foreach ($item in $root.appSettings.add) 
-        { 
-            if( $item.key -eq $AppSettingName ) 
-            {     
-                $appSettingValue = $item.value          
+        foreach ($item in $root.appSettings.add)
+        {
+            if( $item.key -eq $AppSettingName )
+            {
+                $appSettingValue = $item.value
                 break
-            } 
-        }        
+            }
+        }
     }
-    
+
     $appSettingValue
 }
 
@@ -895,17 +896,17 @@ function Test-WebConfigModulesSetting
         [Boolean]
         $ExpectedInstallationStatus
     )
-    
+
     $returnValue = $false
 
     if (Test-Path -Path $WebConfigFullPath)
     {
         $webConfigXml = [Xml](Get-Content -Path $WebConfigFullPath)
-        $root = $webConfigXml.get_DocumentElement() 
+        $root = $webConfigXml.get_DocumentElement()
 
-        foreach ($item in $root."system.webServer".modules.add) 
-        { 
-            if( $item.name -eq $ModuleName ) 
+        foreach ($item in $root."system.webServer".modules.add)
+        {
+            if( $item.name -eq $ModuleName )
             {
                 return $ExpectedInstallationStatus -eq $true
             }
@@ -928,23 +929,23 @@ function Get-WebConfigModulesSetting
         [String]
         $ModuleName
     )
-    
+
     $moduleValue = ""
     if (Test-Path -Path $WebConfigFullPath)
     {
         $webConfigXml = [Xml](Get-Content -Path $WebConfigFullPath)
-        $root = $webConfigXml.get_DocumentElement() 
+        $root = $webConfigXml.get_DocumentElement()
 
-        foreach ($item in $root."system.webServer".modules.add) 
-        { 
-            if( $item.name -eq $ModuleName ) 
-            {     
-                $moduleValue = $item.name          
+        foreach ($item in $root."system.webServer".modules.add)
+        {
+            if( $item.name -eq $ModuleName )
+            {
+                $moduleValue = $item.name
                 break
-            } 
-        }        
+            }
+        }
     }
-    
+
     $moduleValue
 }
 
@@ -963,7 +964,7 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
 {
     param
     (
-        # Name of the WebSite        
+        # Name of the WebSite
         [Parameter(Mandatory = $true)]
         [String]
         $WebSite,
