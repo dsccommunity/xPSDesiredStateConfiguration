@@ -713,6 +713,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* xWindowsOptionalFeature
+  * Suppress useless verbose output from `Import-Module` cmdlet. ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453))
 * Changes to xDSCWebService
   * Fixed an issue which prevented the removal of the IIS Application Pool created during deployment of an DSC Pull Server instance. ([issue #464](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/464))
   * Fixed an issue where a Pull Server cannot be deployed on a machine when IIS Express is installed aside a full blown IIS ([issue #191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191))
