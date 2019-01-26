@@ -305,12 +305,14 @@ function Set-TargetResource
     $jet4database = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
     $eseprovider = "ESENT"
     $esedatabase = "$DatabasePath\Devices.edb"
-
-    $language = (Get-Culture).TwoLetterISOLanguageName
+    
+    $cultureInfo = Get-Culture
+    $languagePath = $cultureInfo.IetfLanguageTag
+    $language = $cultureInfo.TwoLetterISOLanguageName
 
     # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
-    if (-not (Test-Path -Path $pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
-        $language = 'en'
+    if (-not (Test-Path -Path $pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll)) {
+        $languagePath = 'en'
     }
 
     $os = Get-OSVersion
@@ -362,7 +364,7 @@ function Set-TargetResource
                      -asax "$pathPullServer\Global.asax" `
                      -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
                      -language $language `
-                     -dependentMUIFiles  "$pathPullServer\$language\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
+                     -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
                      -certificateThumbPrint $certificateThumbPrint `
                      -EnableFirewallException $true `
                      -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
