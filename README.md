@@ -759,20 +759,15 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Fixes issue where Get-TargetResource or Test-TargetResource will throw an
     exception if the target service is configured with a non-existent dependency.
   * Refactored Get-TargetResource Unit tests.
-* Fixes files which are getting triggered for re-encoding after recent pull
-  request (possibly #472).
 * Changes to xPackage
-  * Fixed an issue where an error occurs during error message output. ([issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
-
+  * Fixed an issue where incorrect verbose output was displayed if product found. ([issue #446](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/446))
+  
 ### 8.5.0.0
 
 * Changes to xRegistry
   * Fixed an issue that fails to remove reg key when the `Key` is specified as common registry path. ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444))
 * Changes to xService
   * Added support for Group Managed Service Accounts
-
-* Changes to xPackage
-  * Fixed an issue where incorrect verbose output was displayed if product found. ([issue #446](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/446))
 
 ### 8.4.0.0
 
