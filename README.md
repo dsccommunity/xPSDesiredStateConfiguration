@@ -715,7 +715,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ### Unreleased
 * Fix `MSFT_xDSCWebService` to find
  `Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll`
-  when server is configured with pt-BR Locales ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).
+  when server is configured with pt-BR Locales ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).  
+* Changes to xDSCWebService
+  * Fixed an issue where a Pull Server cannot be deployed on a machine when IIS Express is installed aside a full blown IIS ([issue #191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191))
 * Update `CommonResourceHelper` unit tests to meet Pester 4.0.0
   standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
 * Update `ResourceHelper` unit tests to meet Pester 4.0.0

@@ -977,18 +977,33 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
         $Authentication
     )
 
-    $gacAssemblyVersion = Get-GacAssemblyVersion -AssemblyName 'Microsoft.Web.Administration'
-
-    Add-Type -AssemblyName ($gacAssemblyVersion)
-
-    $webAdminSrvMgr = New-Object -TypeName Microsoft.Web.Administration.ServerManager
-
+    $webAdminSrvMgr = Get-IISServerManager
     $appHostConfig = $webAdminSrvMgr.GetApplicationHostConfiguration()
 
-    $authenticationType = $Authentication + "Authentication"
+    $authenticationType = $Authentication + 'Authentication'
     $appHostConfigSection = $appHostConfig.GetSection("system.webServer/security/authentication/$authenticationType", $WebSite)
-    $appHostConfigSection.OverrideMode="Allow"
+    $appHostConfigSection.OverrideMode = 'Allow'
     $webAdminSrvMgr.CommitChanges()
+}
+
+function Get-IISServerManager
+{
+    [CmdletBinding()]
+    [OutputType([System.Object])]
+    param ()
+
+    $iisInstallPath = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\INetStp' -Name InstallPath).InstallPath
+    if (-not $iisInstallPath)
+    {
+        throw ($LocalizedData.IISInstallationPathNotFound)
+    }
+    $assyPath = Join-Path -Path $iisInstallPath -ChildPath 'Microsoft.Web.Administration.dll' -Resolve -ErrorAction:SilentlyContinue
+    if (-not $assyPath)
+    {
+        throw ($LocalizedData.IISWebAdministrationAssemblyNotFound)
+    }
+    $assy = [System.Reflection.Assembly]::LoadFrom($assyPath)
+    return [System.Activator]::CreateInstance($assy.FullName, 'Microsoft.Web.Administration.ServerManager').Unwrap()
 }
 
 function Find-CertificateThumbprintWithSubjectAndTemplateName
@@ -1067,18 +1082,6 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
     }
 }
 
-function Get-GacAssemblyVersion
-{
-    [OutputType([String])]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [String]
-        $AssemblyName
-    )
-
-    return [String] [System.Reflection.Assembly]::LoadWithPartialName($AssemblyName)
-}
 function Get-OSVersion
 {
     [CmdletBinding()]
