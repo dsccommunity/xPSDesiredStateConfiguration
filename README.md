@@ -713,6 +713,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* Changes to xRemoteFile
+  * Corrected a resource name in the example xRemoteFile_DownloadFileConfig.ps1
 * Fix `MSFT_xDSCWebService` to find
  `Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll`
   when server is configured with pt-BR Locales ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).  
