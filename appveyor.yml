@@ -2,9 +2,15 @@
 #      environment configuration  #
 #---------------------------------#
 version: 6.0.{build}.0
+
 image:
 - Visual Studio 2015
 - Visual Studio 2017
+
+environment:
+  gallery_api:
+    secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
+
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
@@ -28,14 +34,19 @@ test_script:
             -Type 'Default' `
             -CodeCoverage `
             -CodeCovIo `
-            -DisableConsistency
+            -DisableConsistency `
+            -ExcludeTag @()
+
+after_test:
+  - ps: |
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Invoke-AppveyorAfterTestTask `
+            -ResourceModuleName $moduleName
 
 #---------------------------------#
 #      deployment configuration   #
 #---------------------------------#
 
-# scripts to run before deployment
 deploy_script:
   - ps: |
-        Invoke-AppveyorAfterTestTask `
-            -ResourceModuleName $moduleName
+        Invoke-AppVeyorDeployTask

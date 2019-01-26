@@ -1,4 +1,4 @@
-﻿param
+param
 (
     [Parameter(Mandatory = $true)]
     [String]
@@ -13,15 +13,15 @@ Configuration $ConfigurationName
         [ValidateNotNullOrEmpty()]
         [String]
         $Name,
-        
+
         [ValidateNotNull()]
         [String]
         $Value = [String]::Empty,
-        
+
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
-        
+
         [Boolean]
         $Path = $false,
 

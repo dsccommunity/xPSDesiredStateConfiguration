@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 Add-Type -AssemblyName 'System.IO.Compression.FileSystem'
@@ -66,7 +66,7 @@ function ConvertTo-FileStructure
     .SYNOPSIS
         Creates a new zip file with the specified name and file structure under the specified parent path.
         Returns the file path to the compressed zip file.
-    
+
     .PARAMETER ParentPath
         The path under which the new zip file should be created.
 
@@ -78,7 +78,7 @@ function ConvertTo-FileStructure
         Nested hashtable values denote directories with the key as the name of the directory and the
         hashtable value as the contents.
         String values denote files with the key as the name of the file and the value as the contents.
-    
+
     .EXAMPLE
         $zipFileStructure = @{
             DirectoryName = @{

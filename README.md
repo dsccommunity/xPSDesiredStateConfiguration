@@ -1,14 +1,31 @@
 # xPSDesiredStateConfiguration
 
-master: [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/master)
-dev : [![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xpsdesiredstateconfiguration/branch/dev)
-
 The **xPSDesiredStateConfiguration** module is a more recent, experimental version of the PSDesiredStateConfiguration module that ships in Windows as part of PowerShell 4.0.
 
 The high quality, supported version of this module is available as [PSDscResources](https://github.com/PowerShell/PSDscResources).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Branches
+
+### master
+
+[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xPSDesiredStateConfiguration/branch/master)
+[![codecov](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/master)
+
+This is the branch containing the latest release -
+no contributions should be made directly to this branch.
+
+### dev
+
+[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xPSDesiredStateConfiguration/branch/dev)
+[![codecov](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/dev)
+
+This is the development branch
+to which contributions should be proposed by contributors as pull requests.
+This development branch will periodically be merged to the master branch,
+and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 ## Contributing
 
@@ -73,12 +90,12 @@ None
 
 #### Examples
 
-* [Expand an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveNoValidation.ps1)
-* [Expand an archive under a credential without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveNoValidationCredential.ps1)
-* [Expand an archive with default file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveDefaultValidationAndForce.ps1)
-* [Expand an archive with SHA-256 file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_ExpandArchiveChecksumAndForce.ps1)
-* [Remove an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_RemoveArchiveNoValidation.ps1)
-* [Remove an archive with SHA-256 file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xArchive_RemoveArchiveChecksum.ps1)
+* [Expand an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveNoValidationConfig.ps1)
+* [Expand an archive under a credential without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveNoValidationCredentialConfig.ps1)
+* [Expand an archive with default file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveDefaultValidationAndForceConfig.ps1)
+* [Expand an archive with SHA-256 file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveChecksumAndForceConfig.ps1)
+* [Remove an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_RemoveArchiveNoValidationConfig.ps1)
+* [Remove an archive with SHA-256 file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_RemoveArchiveChecksumConfig.ps1)
 
 ### xDscWebService
 
@@ -122,8 +139,8 @@ None
 
 #### Examples
 
-* [Remove members from a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_RemoveMembers.ps1)
-* [Set the members of a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroup_SetMembers.ps1)
+* [Remove members from a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroup_RemoveMembersConfig.ps1)
+* [Set the members of a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroup_SetMembersConfig.ps1)
 
 ### xGroupSet
 
@@ -150,7 +167,7 @@ None
 
 #### Examples
 
-* [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xGroupSet_AddMembers.ps1)
+* [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroupSet_AddMembersConfig.ps1)
 
 ### xWindowsProcess
 
@@ -182,10 +199,10 @@ None
 
 #### Examples
 
-* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Start.ps1)
-* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_Stop.ps1)
-* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StartUnderUser.ps1)
-* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsProcess_StopUnderUser.ps1)
+* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StartProcessConfig.ps1)
+* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StopProcessConfig.ps1)
+* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StartProcessUnderUserConfig.ps1)
+* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StopProcessUnderUserConfig.ps1)
 
 ### xProcessSet
 
@@ -219,8 +236,8 @@ The following parameters will be the same for each process in the set:
 
 #### Examples
 
-* [Start multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Start.ps1)
-* [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xProcessSet_Stop.ps1)
+* [Start multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xProcessSet_StartProcessConfig.ps1)
+* [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xProcessSet_StopProcessConfig.ps1)
 
 ### xService
 
@@ -239,8 +256,9 @@ None
 * **[String] DisplayName** _(Write)_: The display name of the service.
 * **[String] Description** _(Write)_: The description of the service.
 * **[String[]] Dependencies** _(Write)_: The names of the dependencies of the service.
-* **[String] BuiltInAccount** _(Write)_: The built-in account the service should start under. Cannot be specified at the same time as Credential. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. { LocalService | LocalSystem | NetworkService }.
-* **[PSCredential] Credential** _(Write)_: The credential of the user account the service should start under. Cannot be specified at the same time as BuiltInAccount. The user specified by this credential will automatically be granted the Log on as a Service right. The user account specified by this property must have access to the service executable path defined by Path in order to start the service.
+* **[String] BuiltInAccount** _(Write)_: The built-in account the service should start under. Cannot be specified at the same time as Credential or GroupManagedServiceAccount. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. { LocalService | LocalSystem | NetworkService }.
+* **[String] GroupManagedServiceAccount** _(Write)_: The Group Managed Service Account the service should start under. Cannot be specified at the same time as Credential or BuiltinAccount. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. When specified in a DOMAIN\User$ form, remember to also input the trailing dollar sign. Get-TargetResource outputs the name of the user to the BuiltinAccount property.
+* **[PSCredential] Credential** _(Write)_: The credential of the user account the service should start under. Cannot be specified at the same time as BuiltInAccount or GroupManagedServiceAccount. The user specified by this credential will automatically be granted the Log on as a Service right. The user account specified by this property must have access to the service executable path defined by Path in order to start the service. Get-TargetResource outputs the name of the user to the BuiltinAccount property.
 * **[Boolean] DesktopInteract** _(Write)_: Indicates whether or not the service should be able to communicate with a window on the desktop. Must be false for services not running as LocalSystem. The default value is False.
 * **[String] StartupType** _(Write)_: The startup type of the service. { Automatic | Disabled | Manual }. If StartupType is "Disabled" and Service is not installed the resource will complete as being DSC compliant.
 * **[String] State** _(Write)_: The state of the service. { *Running* | Stopped | Ignore }.
@@ -253,8 +271,10 @@ None
 
 #### Examples
 
-* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_CreateService.ps1)
-* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xService_DeleteService.ps1)
+* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_CreateServiceConfig.ps1)
+* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_RemoveServiceConfig.ps1)
+* [Change the state of a service to started or stopped](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_ChangeServiceStateConfig.ps1.ps1)
+* [Update startup type for a service, and ignoring the current state](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_UpdateStartupTypeIgnoreStateConfig.ps1)
 
 ### xServiceSet
 Provides a mechanism to configure and manage multiple xService resources with common settings but different names.
@@ -282,8 +302,8 @@ None
 
 #### Examples
 
-* [Ensure that multiple services are running](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xServiceSet_StartServices.ps1)
-* [Set multiple services to run under the built-in account LocalService](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xServiceSet_BuiltInAccount.ps1)
+* [Ensure that multiple services are running](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xServiceSet_StartServicesConfig.ps1)
+* [Set multiple services to run under the built-in account LocalService](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xServiceSet_EnsureBuiltInAccountConfig.ps1)
 
 ### xRemoteFile
 
@@ -297,6 +317,11 @@ None
 * **Proxy**: Uses a proxy server for the request, rather than connecting directly to the Internet resource. Should be the URI of a network proxy server (e.g 'http://10.20.30.1'). Optional.
 * **ProxyCredential**: Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter. Optional.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read only property.
+
+#### Examples
+
+* [Download a file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileConfig.ps1)
+* [Download a file using proxy](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileUsingProxyConfig.ps1)
 
 ### xPackage
 
@@ -316,6 +341,11 @@ None
 * **SignerThumbprint**: The certificate thumbprint that should match that of the package file's signing certificate.
 * **ServerCertificateValidationCallback**: A callback function to validate the server certificate.
 * **RunAsCredential**: Credential used to install the package on the local system.
+* **CreateCheckRegValue**: If a registry value should be created.
+* **InstalledCheckRegHive**: The hive in which to create the registry key. Defaults to 'LocalMachine'. { LocalMachine | CurrentUser }
+* **InstalledCheckRegKey**: That path in the registry where the value should be created.
+* **InstalledCheckRegValueName**: The name of the registry value to create.
+* **InstalledCheckRegValueData**: The data that should be set to the registry value.
 
 ### Read-Only Properties from Get-TargetResource
 
@@ -325,6 +355,43 @@ None
 * **Size**: Size of the installation.
 * **Version**: Version of the package.
 * **Installed**: Is the package installed?
+
+#### Examples
+
+* [Install an .exe using credentials](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallExeUsingCredentialsConfig.ps1)
+* [Install an .exe using credentials and using custom registry data to discover the package](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallExeUsingCredentialsAndRegistryConfig.ps1)
+* [Simple installer for an msi package that matches via the Name](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallMsiConfig.ps1)
+* [Simple installer for an msi package and matches based on the product id](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallMsiUsingProductIdConfig.ps1)
+
+### xPSEndpoint (xPSSessionConfiguration)
+
+Creates and registers a new session configuration endpoint.
+
+* **Ensure**: Indicates if the session configuration is **Present** or **Absent**.
+* **Name**: Specifies the name of the session configuration.
+* **StartupScript**: Specifies the startup script for the configuration. Enter
+  the fully qualified path of a Windows PowerShell script.
+* **RunAsCredential**: Specifies the credential for commands of this session
+  configuration. By default, commands run with the permissions of the current user.
+* **SecurityDescriptorSDDL**: Specifies the Security Descriptor Definition
+  Language (SDDL) string for the configuration. This string determines the
+  permissions that are required to use the new session configuration. To use a
+  session configuration in a session, users must have at least Execute(Invoke)
+  permission for the configuration.
+* **AccessMode**: Enables and disables the session configuration and determines
+  whether it can be used for remote or local sessions on the computer. The
+  default value is "Remote". { Local | *Remote* | Disabled }
+
+### Read-Only Properties from Get-TargetResource
+
+*None.*
+
+#### Examples
+
+* [Register a new session configuration endpoint with optional access mode](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewConfig.ps1)
+* [Register a new session configuration endpoint with default values](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewWithDefaultsConfig.ps1)
+* [Register a new session configuration endpoint with custom values](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewCustomConfig.ps1)
+* [Removes an existing session configuration endpoint](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_RemoveConfig.ps1)
 
 ### xMsiPackage
 
@@ -361,10 +428,9 @@ None
 
 #### Examples
 
-* [Install the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromFile.ps1)
-* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UninstallPackageFromFile.ps1)
-* [Install the MSI file with the given ID at the given HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_InstallPackageFromHttp.ps1)
-* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xMsiPackage_UnstallPackageFromHttps.ps1)
+* [Install the MSI file with the given ID at the given file path or HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_InstallPackageConfig.ps1)
+* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_UninstallPackageFromFileConfig.ps1)
+* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_UninstallPackageFromHttpsConfig.ps1)
 
 ### xFileUpload
 
@@ -372,6 +438,10 @@ None
 * **SourcePath**: Path to the local file which should be uploaded.
 * **Credential**: PSCredential for the user with access to DestinationPath.
 * **CertificateThumbprint**: Thumbprint of the certificate which should be used for encryption/decryption.
+
+#### Examples
+
+* [Upload file or folder to a SMB share](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xFileUpload_UploadToSMBShareConfig.ps1)
 
 ### xEnvironment
 
@@ -384,9 +454,9 @@ None
 #### Parameters
 
 * **[String] Name** _(Key)_: The name of the environment variable to create, modify, or remove.
-* **[String] Value** _(Write)_: The desired value for the environment variable. The default value is an empty string which either indicates that the variable should be removed entirely or that the value does not matter when testing its existence.
+* **[String] Value** _(Write)_: The desired value for the environment variable. The default value is an empty string which either indicates that the variable should be removed entirely or that the value does not matter when testing its existence. Multiple entries can be entered and separated by semicolons (see [Examples](./Examples)).
 * **[String] Ensure** _(Write)_: Specifies if the environment varaible should exist. { *Present* | Absent }.
-* **[Boolean] Path** _(Write)_: Indicates whether or not the environment variable is a path variable. If the variable being configured is a path variable, the value provided will be appended to or removed from the existing value, otherwise the existing value will be replaced by the new value. The default value is False.
+* **[Boolean] Path** _(Write)_: Indicates whether or not the environment variable is a path variable. If the variable being configured is a path variable, the value provided will be appended to or removed from the existing value, otherwise the existing value will be replaced by the new value. When configured as a Path variable, multiple entries separated by semicolons are ensured to be either present or absent without affecting other Path entries (see [Examples](./Examples)). The default value is False.
 * **[String[]] Target** _(Write)_: Indicates the target where the environment variable should be set. { Process | Machine | *Process, Machine* }.
 
 #### Read-Only Properties from Get-TargetResource
@@ -395,10 +465,12 @@ None
 
 #### Examples
 
-* [Create a non-path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreateNonPathVariable.ps1)
-* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_CreatePathVariable.ps1)
-* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xEnvironment_Remove.ps1)
+* [Create a regular (non-path) environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_CreateNonPathVariableConfig.ps1)
+* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_AddMultiplePathsConfig.ps1)
+* [Remove paths from a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_RemoveMultiplePathsConfig.ps1)
+* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_RemoveVariableConfig.ps1)
 
+xEnvironment_AddMultiplePaths
 ### xScript
 
 Provides a mechanism to run PowerShell script blocks on a target node.
@@ -421,7 +493,7 @@ None
 
 #### Examples
 
-* [Create a file with content through xScript](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xScript.ps1)
+* [Create a file with content through xScript](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xScript_WatchFileContentConfig.ps1)
 
 ### xRegistry
 
@@ -447,10 +519,10 @@ None
 
 #### Examples
 
-* [Add a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_AddKey.ps1)
-* [Add or modify a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_AddOrModifyValue.ps1)
-* [Remove a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_RemoveValue.ps1)
-* [Remove a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xRegistryResource_RemoveKey.ps1)
+* [Add a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_AddKeyConfig.ps1)
+* [Add or modify a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_AddOrModifyValueConfig.ps1)
+* [Remove a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_RemoveValueConfig.ps1)
+* [Remove a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_RemoveKeyConfig.ps1)
 
 ### xUser
 
@@ -481,10 +553,12 @@ None
 * **[Boolean] PasswordNeverExpires** _(Write)_: Indicates if the password will expire. To ensure that the password for this account will never expire, set this property to $true, and set it to $false if the password will expire.
    - Suported values: $true, $false
    - Default value: $false
-   
+
 #### Examples
 
-* [Create a new User](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xUser_CreateUser.ps1)
+* [Create a new local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_CreateUserConfig.ps1)
+* [Remove a local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_RemoveUserConfig.ps1)
+* [Create a new detailed local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_CreateUserDetailedConfig.ps1)
 
 ### xWindowsFeature
 
@@ -510,7 +584,10 @@ Provides a mechanism to install or uninstall Windows roles or features on a targ
 
 #### Examples
 
-* [Install or uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeature.ps1)
+* [Install a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureConfig.ps1)
+* [Uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_RemoveFeatureConfig.ps1)
+* [Install a Windows feature using credentials](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureUsingCredentialConfig.ps1)
+* [Install a Windows feature, output the log to file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureWithLogPathConfig.ps1)
 
 ### xWindowsFeatureSet
 
@@ -536,8 +613,8 @@ Provides a mechanism to configure and manage multiple xWindowsFeature resources 
 
 #### Examples
 
-* [Install multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeatureSet_Install.ps1)
-* [Uninstall multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsFeatureSet_Uninstall.ps1)
+* [Install multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeatureSet_AddFeaturesConfig.ps1)
+* [Uninstall multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeatureSet_RemoveFeaturesConfig.ps1)
 
 ### xWindowsOptionalFeature
 
@@ -566,7 +643,8 @@ This resource works on Nano Server.
 
 #### Examples
 
-* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeature.ps1)
+* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeature_EnableConfig.ps1)
+* [Disables the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeature_DisableConfig.ps1)
 
 ### xWindowsOptionalFeatureSet
 
@@ -596,8 +674,8 @@ None
 
 #### Examples
 
-* [Enable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeatureSet_Enable.ps1)
-* [Disable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsOptionalFeatureSet_Disable.ps1)
+* [Enable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeatureSet_EnableConfig.ps1)
+* [Disable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeatureSet_DisableConfig.ps1)
 
 ### xWindowsPackageCab
 Provides a mechanism to install or uninstall a package from a windows cabinet (cab) file on a target node.
@@ -620,7 +698,7 @@ None
 
 #### Examples
 
-* [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/Sample_xWindowsPackageCab.ps1)
+* [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsPackageCab_InstallPackageConfig.ps1)
 
 ## Functions
 
@@ -635,6 +713,154 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+* Fix `MSFT_xDSCWebService` to find
+ `Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll`
+  when server is configured with pt-BR Locales ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).  
+* Changes to xDSCWebService
+  * Fixed an issue which prevented the removal of the IIS Application Pool created during deployment of an DSC Pull Server instance. ([issue #464](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/464))
+  * Fixed an issue where a Pull Server cannot be deployed on a machine when IIS Express is installed aside a full blown IIS ([issue #191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191))
+* Update `CommonResourceHelper` unit tests to meet Pester 4.0.0
+  standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
+* Update `ResourceHelper` unit tests to meet Pester 4.0.0
+  standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
+* Update `MSFT_xDSCWebService` unit tests to meet Pester 4.0.0
+  standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
+* Update `MSFT_xDSCWebService` integration tests to meet Pester 4.0.0
+  standards ([issue #473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
+* Refactored `MSFT_xDSCWebService` integration tests to meet current
+  standards and to use Pester TestDrive.
+* xArchive
+  * Fix end-to-end tests ([issue #457](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/457)).
+  * Update integration tests to meet Pester 4.0.0 standards.
+  * Update end-to-end tests to meet Pester 4.0.0 standards.
+  * Update unit and integration tests to meet Pester 4.0.0 standards.
+  * Wrapped all path and identifier strings in verbose messages with
+    quotes to make it easier to identify the limit of the string when
+    debugging.
+  * Refactored date/time checksum code to improve testability and ensure
+    tests can run on machines with localized datetime formats that are not
+    US.
+  * Fix 'Get-ArchiveEntryLastWriteTime' to return `[datetime]` ([issue #471](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/471)).
+  * Improved verbose logging to make debugging path issues easier.
+  * Added handling for '/' as a path seperator by backporting code from
+    PSDscResources - ([issue #469](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/469)).
+  * Copied unit tests from [PSDscResources](https://github.com/PowerShell/PSDscResources).
+    * Added .gitattributes file and removed git configuration from AppVeyor
+  to ensure CRLF settings are configured correctly for the repository.
+* Updated '.vscode\settings.json' to refer to AnalyzerSettings.psd1 so that
+  custom syntax problems are highlighted in Visual Studio Code.
+* Fixed style guideline violations in `CommonResourceHelper.psm1`.
+* Changes to xService
+  * Fixes issue where Get-TargetResource or Test-TargetResource will throw an
+    exception if the target service is configured with a non-existent dependency.
+  * Refactored Get-TargetResource Unit tests.
+
+### 8.5.0.0
+
+* Changes to xRegistry
+  * Fixed an issue that fails to remove reg key when the `Key` is specified as common registry path. ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444))
+* Changes to xService
+  * Added support for Group Managed Service Accounts
+
+### 8.4.0.0
+
+* Changes to xPSDesiredStateConfiguration
+  * Opt-in for the common tests validate module files and script files.
+  * All files change to encoding UTF-8 (without byte order mark).
+  * Opt-in for the common test for example validation.
+  * Added Visual Studio Code workspace settings that helps with formatting
+    against the style guideline.
+  * Update all examples for them to be able pass the common test validation.
+* xEnvironment path documentation update demonstrating usage with multiple values  ([issue #415](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/415). [Alex Kokkinos (@alexkokkinos)](https://github.com/alexkokkinos)
+* Changes to xWindowsProcess
+  * Increased the wait time in the integration tests since the tests
+    still failed randomly ([issue #420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
+* Renamed and updated examples to be able to publish them to PowerShell Gallery.
+  * Sample\_xScript.ps1 → xScript\_WatchFileContentConfig.ps1
+  * Sample\_xService\_UpdateStartupTypeIgnoreState.ps1 → xService\_UpdateStartupTypeIgnoreStateConfig.ps1
+  * Sample\_xWindowsProcess\_Start.ps1 → xWindowsProcess\_StartProcessConfig.ps1
+  * Sample\_xWindowsProcess\_StartUnderUser.ps1 → xWindowsProcess\_StartProcessUnderUserConfig.ps1
+  * Sample\_xWindowsProcess\_Stop.ps1 → xWindowsProcess\_StopProcessConfig.ps1
+  * Sample\_xWindowsProcess\_StopUnderUser.ps1 → xWindowsProcess\_StopProcessUnderUserConfig.ps1
+  * Sample\_xUser\_CreateUser.ps1.ps1 → xUser\_CreateUserConfig.ps1
+  * Sample\_xUser\_Generic.ps1.ps1 → xUser\_CreateUserDetailedConfig.ps1
+  * Sample\_xWindowsFeature.ps1 → xWindowsFeature\_AddFeatureConfig.ps1
+  * Sample\_xWindowsFeatureSet\_Install.ps1 → xWindowsFeatureSet\_AddFeaturesConfig.ps1
+  * Sample\_xWindowsFeatureSet\_Uninstall.ps1 → xWindowsFeatureSet\_RemoveFeaturesConfig.ps1
+  * Sample\_xRegistryResource\_AddKey.ps1 → xRegistryResource\_AddKeyConfig.ps1
+  * Sample\_xRegistryResource\_RemoveKey.ps1 → xRegistryResource\_RemoveKeyConfig.ps1
+  * Sample\_xRegistryResource\_AddOrModifyValue.ps1 → xRegistryResource\_AddOrModifyValueConfig.ps1
+  * Sample\_xRegistryResource\_RemoveValue.ps1 → xRegistryResource\_RemoveValueConfig.ps1
+  * Sample\_xService\_CreateService.ps1 → xService\_CreateServiceConfig.ps1
+  * Sample\_xService\_DeleteService.ps1 → xService\_RemoveServiceConfig.ps1
+  * Sample\_xServiceSet\_StartServices.ps1 → xServiceSet\_StartServicesConfig.ps1
+  * Sample\_xServiceSet\_BuiltInAccount → xServiceSet\_EnsureBuiltInAccountConfig.ps1
+  * Sample\_xWindowsPackageCab → xWindowsPackageCab\_InstallPackageConfig
+  * Sample\_xWindowsOptionalFeature.ps1 → xWindowsOptionalFeature\_EnableConfig.ps1
+  * Sample\_xWindowsOptionalFeatureSet\_Enable.ps1 → xWindowsOptionalFeatureSet\_EnableConfig.ps1
+  * Sample\_xWindowsOptionalFeatureSet\_Disable.ps1 → xWindowsOptionalFeatureSet\_DisableConfig.ps1
+  * Sample\_xRemoteFileUsingProxy.ps1 → xRemoteFile\_DownloadFileUsingProxyConfig.ps1
+  * Sample\_xRemoteFile.ps1 → xRemoteFile\_DownloadFileConfig.ps1
+  * Sample\_xProcessSet\_Start.ps1 → xProcessSet\_StartProcessConfig.ps1
+  * Sample\_xProcessSet\_Stop.ps1 → xProcessSet\_StopProcessConfig.ps1
+  * Sample\_xMsiPackage\_UninstallPackageFromHttps.ps1 → xMsiPackage\_UninstallPackageFromHttpsConfig.ps1
+  * Sample\_xMsiPackage\_UninstallPackageFromFile.ps1 → xMsiPackage\_UninstallPackageFromFileConfig.ps1
+  * Sample\_xMsiPackage\_InstallPackageFromFile → xMsiPackage\_InstallPackageConfig.ps1
+  * Sample\_xGroup\_SetMembers.ps1 → xGroup\_SetMembersConfig.ps1
+  * Sample\_xGroup\_RemoveMembers.ps1 → xGroup\_RemoveMembersConfig.ps1
+  * Sample\_xGroupSet\_AddMembers.ps1 → xGroupSet\_AddMembersConfig.ps1
+  * Sample\_xFileUpload.ps1 → xFileUpload\_UploadToSMBShareConfig.ps1
+  * Sample\_xEnvironment\_CreateMultiplePathVariables.ps1 → xEnvironment\_AddMultiplePathsConfig.ps1
+  * Sample\_xEnvironment\_RemovePathVariables.ps1 → xEnvironment\_RemoveMultiplePathsConfig.ps1
+  * Sample\_xEnvironment\_CreateNonPathVariable.ps1 → xEnvironment\_CreateNonPathVariableConfig.ps1
+  * Sample\_xEnvironment\_Remove.ps1 → xEnvironment\_RemoveVariableConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveChecksumAndForce.ps1 → xArchive\_ExpandArchiveChecksumAndForceConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveDefaultValidationAndForce.ps1 → xArchive\_ExpandArchiveDefaultValidationAndForceConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveNoValidation.ps1 → xArchive\_ExpandArchiveNoValidationConfig.ps1
+  * Sample\_xArchive\_ExpandArchiveNoValidationCredential.ps1 → xArchive\_ExpandArchiveNoValidationCredentialConfig.ps1
+  * Sample\_xArchive\_RemoveArchiveChecksum.ps1 → xArchive\_RemoveArchiveChecksumConfig.ps1
+  * Sample\_xArchive\_RemoveArchiveNoValidation.ps1 → xArchive\_RemoveArchiveNoValidationConfig.ps1
+  * Sample\_InstallExeCreds\_xPackage.ps1 → xPackage\_InstallExeUsingCredentialsConfig.ps1
+  * Sample\_InstallExeCredsRegistry\_xPackage.ps1 → xPackage\_InstallExeUsingCredentialsAndRegistryConfig.ps1
+  * Sample\_InstallMSI\_xPackage.ps1 → xPackage\_InstallMsiConfig.ps1
+  * Sample\_InstallMSIProductId\_xPackage.ps1 → xPackage\_InstallMsiUsingProductIdConfig.ps1
+* New examples
+  * xUser\_RemoveUserConfig.ps1
+  * xWindowsFeature\_AddFeatureUsingCredentialConfig.ps1
+  * xWindowsFeature\_AddFeatureWithLogPathConfig.ps1
+  * xWindowsFeature\_RemoveFeatureConfig.ps1
+  * xService\_ChangeServiceStateConfig.ps1
+  * xWindowsOptionalFeature\_DisableConfig.ps1
+  * xPSEndpoint\_NewConfig.ps1
+  * xPSEndpoint\_NewWithDefaultsConfig.ps1
+  * xPSEndpoint\_RemoveConfig.ps1
+  * xPSEndpoint\_NewCustomConfig.ps1
+* Removed examples
+  * Sample\_xPSSessionConfiguration.ps1 - This file was split up in several examples,
+    those starting with 'xPSEndpoint*'.
+  * Sample\_xMsiPackage\_InstallPackageFromHttp - This was added to the example
+    xMsiPackage\_InstallPackageConfig.ps1 so the example sows either URI scheme.
+  * Sample\_xEnvironment\_CreatePathVariable.ps1 - Same as the new example
+    xEnvironment\_AddMultiplePaths.ps1
+
+### 8.3.0.0
+
+* Changes to xPSDesiredStateConfiguration
+  * README.md: Fixed typo. [Steve Banik (@stevebanik-ndsc)](https://github.com/stevebanik-ndsc)
+  * Adding a Branches section to the README.md with Codecov badges for both
+    master and dev branch ([issue #416](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/416)).
+* Changes to xWindowsProcess
+  * Integration tests for this resource should no longer fail randomly. A timing
+    issue made the tests fail in certain scenarios ([issue #420](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/420)).
+* Changes to xDSCWebService
+    * Added the option to use a certificate based on it's subject and template name instead of it's thumbprint. Resolves [issue #205](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/205).
+    * xDSCWebService: Fixed an issue where Test-WebConfigModulesSetting would return $true when web.config contains a module and the desired state was for it to be absent. Resolves [issue #418](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/418).
+* Updated the main DSCPullServerSetup readme to read easier, then updates the PowerShell comment based help for each function to follow normal help standards. [James Pogran (@jpogran)](https://github.com/jpogran)
+* xRemoteFile: Remove progress bar for file download. This resolves issues [#165](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/165) and [#383](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/383) [Claudio Spizzi (@claudiospizzi)](https://github.com/claudiospizzi)
+
+### 8.2.0.0
+
+* xDSCWebService: Disable installing Microsoft.Powershell.Desiredstateconfiguration.Service.Resources.dll as a temporary workaround since the binary is missing on the latest Windows builds
 
 ### 8.1.0.0
 
@@ -665,7 +891,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ### 6.2.0.0
 
 * xMsiPackage:
-    * Created high quality MSI package manager resource 
+    * Created high quality MSI package manager resource
 * xArchive:
     * Fixed a minor bug in the unit tests where sometimes the incorrect DateTime format was used.
 * xWindowsFeatureSet:
@@ -693,7 +919,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Added unit and end-to-end tests.
     * Significantly cleaned the resource.
     * Minor Breaking Change where the resource will now throw an error if no value is provided, Ensure is set to present, and the variable does not exist, whereas before it would create an empty registry key on the machine in this case (if this is the desired outcome then use the Registry resource).
-    * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).  
+    * Added a new Write property 'Target', which specifies whether the user wants to set the machine variable, the process variable, or both (previously it was setting both in most cases).
 * xGroup:
     * Group members in the "NT Authority", "BuiltIn" and "NT Service" scopes should now be resolved without an error. If you were seeing the errors "Exception calling ".ctor" with "4" argument(s): "Server names cannot contain a space character."" or "Exception calling ".ctor" with "2" argument(s): "Server names cannot contain a space character."", this fix should resolve those errors. If you are still seeing one of the errors, there is probably another local scope we need to add. Please let us know.
     * The resource will no longer attempt to resolve group members if Members, MembersToInclude, and MembersToExclude are not specified.
@@ -738,7 +964,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Added integration tests for BuiltInAccount and Credential.
 * xServiceSet:
     * Updated resource to use new ResouceSetHelper functions and added integration tests.
-    * Updated documentation and example 
+    * Updated documentation and example
 * xWindowsProcess
     * Cleaned resource as per high quality guidelines.
     * Added unit tests.
@@ -763,7 +989,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     * Fixed bug in which the user could not set a Binary registry value to 0
     * Added unit and integration tests
     * Added examples and updated documentation
-    
+
 ### 5.0.0.0
 
 * xWindowsFeature:
@@ -1067,7 +1293,7 @@ This configuration will install a .msi package and verify the package using the 
 
 This configuration will install a .exe package and verify the package using the product ID and package name and requires credentials to read the share and install the package. It also uses custom registry values to check for the package presence.
 
-### Validate pullserver deployement
+### Validate pullserver deployment
 
 If Sample_xDscWebService.ps1 is used to setup a DSC pull and reporting endpoint, the service endpoint can be validated by performing Invoke-WebRequest -URI http://localhost:8080/PSDSCPullServer.svc/$metadata in PowerShell or http://localhost:8080/PSDSCPullServer.svc/ when using InternetExplorer.
 

@@ -1,4 +1,4 @@
-﻿<#
+<#
     These tests should only be run in AppVeyor since they currently require the AppVeyor
     administrator account credential to run.
 
@@ -138,7 +138,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:confgurationFilePathAllExceptBuiltInAccount -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive -ConfigurationData $configData @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -180,7 +180,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:confgurationFilePathBuiltInAccountOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -225,7 +225,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:confgurationFilePathBuiltInAccountOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force

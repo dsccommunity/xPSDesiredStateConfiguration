@@ -215,7 +215,7 @@ function New-RegistryValue
         The path to the registry key to remove 
         Must include the registry hive.
 #>
-function Remove-RegistryKey
+function Remove-TestRegistryKey
 {
     [CmdletBinding()]
     param 
@@ -240,7 +240,7 @@ function Remove-RegistryKey
     .PARAMETER ValueName
         The name of the value to remove.
 #>
-function Remove-RegistryValue
+function Remove-TestRegistryValue
 {
     [CmdletBinding()]
     param 
@@ -396,7 +396,7 @@ Export-ModuleMember -Function `
     'Test-RegistryValueExists', `
     'New-TestRegistryKey', `
     'New-RegistryValue', `
-    'Remove-RegistryKey', `
-    'Remove-RegistryValue', `
+    'Remove-TestRegistryKey', `
+    'Remove-TestRegistryValue', `
     'Dismount-RegistryDrive', `
     'Test-RegistryDriveMounted'

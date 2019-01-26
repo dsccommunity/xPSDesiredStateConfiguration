@@ -1,9 +1,9 @@
-﻿<#
+<#
     Integration tests for Installing/uninstalling a Windows Feature. Currently Telnet-Client is
     set as the feature to test since it's fairly small and doesn't require a restart.
     RSAT-File-Services is set as the feature to test installing/uninstalling a feature with
     subfeatures.
-#> 
+#>
 
 # Suppressing this rule since we need to create a plaintext password to test this resource
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
@@ -94,7 +94,7 @@ try {
                 It 'Should be able to call Get-DscConfiguration without throwing' {
                     { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
                 }
-                
+
                 It 'Should return the correct configuration' {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                    $currentConfig.Name | Should Be $script:testFeatureName
@@ -143,7 +143,7 @@ try {
                 It 'Should be able to call Get-DscConfiguration without throwing' {
                     { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
                 }
-                
+
                 It 'Should return the correct configuration' {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                    $currentConfig.Name | Should Be $script:testFeatureName
@@ -196,7 +196,7 @@ try {
             It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-                
+
             It 'Should return the correct configuration' -Skip:$script:skipLongTests {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                 $currentConfig.Name | Should Be $script:testFeatureWithSubFeaturesName
@@ -237,7 +237,7 @@ try {
             It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
             }
-                
+
             It 'Should return the correct configuration' -Skip:$script:skipLongTests  {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                 $currentConfig.Name | Should Be $script:testFeatureWithSubFeaturesName

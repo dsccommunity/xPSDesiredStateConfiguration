@@ -1,6 +1,6 @@
 @{
 # Version number of this module.
-moduleVersion = '8.1.0.0'
+moduleVersion = '8.5.0.0'
 
 # ID used to uniquely identify this module
 GUID = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,7 +52,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-        ReleaseNotes = '* xDSCWebService: Enable SQL provider configuration
+        ReleaseNotes = '* Changes to xRegistry
+  * Fixed an issue that fails to remove reg key when the `Key` is specified as common registry path. ([issue 444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444))
+
+* Changes to xService
+  * Added support for Group Managed Service Accounts
 
 '
 
@@ -60,20 +64,4 @@ PrivateData = @{
 
 } # End of PrivateData hashtable
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

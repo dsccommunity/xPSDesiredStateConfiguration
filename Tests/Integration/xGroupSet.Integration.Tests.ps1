@@ -1,4 +1,4 @@
-﻿[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param ()
 
 $errorActionPreference = 'Stop'
@@ -64,7 +64,7 @@ try
 
             try
             {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -103,7 +103,7 @@ try
 
             try
             {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -139,7 +139,7 @@ try
 
             try
             {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -159,7 +159,7 @@ try
 
         It 'Should remove two members from a set of three groups' {
             $configurationName = 'RemoveTwoMembersFromThreeGroups'
-            
+
             $testGroupNames = @('TestGroupWithMembersToExclude1', 'TestGroupWithMembersToExclude2', 'TestGroupWithMembersToExclude3')
 
             $groupMembersToExclude = @( $testUsername2, $testUsername3 )
@@ -181,7 +181,7 @@ try
 
             try
             {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -206,7 +206,7 @@ try
 
         It 'Should remove a set of groups' {
                 $configurationName = 'RemoveThreeGroups'
-            
+
             $testGroupNames = @('TestGroupRemove1', 'TestGroupRemove2', 'TestGroupRemove3')
 
             $groupSetParameters = @{
@@ -226,7 +226,7 @@ try
 
             try
             {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
