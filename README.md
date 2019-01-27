@@ -756,6 +756,8 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Fixes issue where Get-TargetResource or Test-TargetResource will throw an
     exception if the target service is configured with a non-existent dependency.
   * Refactored Get-TargetResource Unit tests.
+* Fixes files which are getting triggered for re-encoding after recent pull
+  request (possibly #472).
 
 ### 8.5.0.0
 
