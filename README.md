@@ -713,6 +713,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+
 * xWindowsOptionalFeature
   * Suppress useless verbose output from `Import-Module` cmdlet. ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453))
 * Fix `MSFT_xDSCWebService` to find
@@ -763,8 +764,6 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
   * Fixed an issue that fails to remove reg key when the `Key` is specified as common registry path. ([issue #444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444))
 * Changes to xService
   * Added support for Group Managed Service Accounts
-
-
 
 ### 8.4.0.0
 
