@@ -760,7 +760,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
     exception if the target service is configured with a non-existent dependency.
   * Refactored Get-TargetResource Unit tests.
 * Changes to xPackage
-  * Fixed an issue where incorrect verbose output was displayed if product found. ([issue #446](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/446))
+  * Fixes an issue where incorrect verbose output was displayed if product found. ([issue #446](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/446))
 * Fixes files which are getting triggered for re-encoding after recent pull
   request (possibly #472).
 
