@@ -84,6 +84,8 @@
   - Corrected style guideline violations. ([issue #485](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/485))
 - xWindowsProcess
   - Corrected style guideline violations. ([issue #496](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/496))
+- Changes to PSWSIISEndpoint.psm1
+  - Fixes most PSScriptAnalyzer issues.
 - Changes to xRegistry
   - Fixed an issue that fails to remove reg key when the `Key` is specified as
     common registry path.
