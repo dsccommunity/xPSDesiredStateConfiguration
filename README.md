@@ -713,6 +713,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
+
+* xWindowsOptionalFeature
+  * Suppress useless verbose output from `Import-Module` cmdlet. ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453))
 * Changes to xRemoteFile
   * Corrected a resource name in the example xRemoteFile_DownloadFileConfig.ps1
 * Fix `MSFT_xDSCWebService` to find

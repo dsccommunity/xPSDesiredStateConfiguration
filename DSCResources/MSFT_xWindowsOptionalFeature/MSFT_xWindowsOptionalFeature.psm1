@@ -374,7 +374,7 @@ function Assert-ResourcePrerequisitesValid
     }
 
     # Check that Dism PowerShell module is available
-    Import-Module -Name 'Dism' -ErrorVariable 'errorsFromDismImport' -ErrorAction 'SilentlyContinue' -Force
+    Import-Module -Name 'Dism' -ErrorVariable 'errorsFromDismImport' -ErrorAction 'SilentlyContinue' -Force -Verbose:$false
 
     if ($errorsFromDismImport.Count -gt 0)
     {
