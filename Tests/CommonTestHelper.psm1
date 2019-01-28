@@ -789,6 +789,40 @@ function Exit-DscResourceTestEnvironment
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
+<#
+    .SYNOPSIS
+        Exits the specified DSC Resource test environment.
+
+    .PARAMETER TestEnvironment
+        The test environment to exit.
+#>
+function Test-SkipCi
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Name,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Unit', 'Integration')]
+        [System.String]
+        $Type
+    )
+
+    $result = $false
+
+    if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne $Type)
+    {
+        Write-Verbose -Message ('Tests for {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
+        $result = $true
+    }
+
+    return $result
+}
+
 Export-ModuleMember -Function @(
     'Test-GetTargetResourceResult', `
     'Wait-ScriptBlockReturnTrue', `
@@ -801,5 +835,6 @@ Export-ModuleMember -Function @(
     'Invoke-SetTargetResourceUnitTest', `
     'Invoke-TestTargetResourceUnitTest', `
     'Invoke-ExpectedMocksAreCalledTest', `
-    'Invoke-GenericUnitTest'
+    'Invoke-GenericUnitTest',
+    'Test-SkipCi'
 )

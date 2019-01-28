@@ -1,9 +1,11 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1')
+
+if ((Test-SkipCi -Name 'MSFT_xArchive' -Type 'Integration'))
 {
-    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
     return
 }
 
@@ -15,11 +17,6 @@ if ($PSVersionTable.PSVersion -lt [Version] '5.1')
 
 Describe 'xArchive Integration Tests' {
     BeforeAll {
-        # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-        $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-        Import-Module -Name $commonTestHelperFilePath
-
         $script:testEnvironment = Enter-DscResourceTestEnvironment `
             -DscResourceModuleName 'xPSDesiredStateConfiguration' `
             -DscResourceName 'MSFT_xArchive' `

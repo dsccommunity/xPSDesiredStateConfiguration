@@ -1,15 +1,14 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
-{
-    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
-    return
-}
-
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $script:commonTestHelperFilePath
+
+if ((Test-SkipCi -Name 'MSFT_xMsiPackage' -Type 'Integration'))
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `

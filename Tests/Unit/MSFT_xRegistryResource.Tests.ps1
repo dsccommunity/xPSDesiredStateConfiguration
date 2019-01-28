@@ -1,16 +1,15 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
-{
-    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
-    return
-}
-
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
+
+if ((Test-SkipCi -Name 'MSFT_xRegistryResource' -Type 'Unit'))
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `

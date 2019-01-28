@@ -4,22 +4,21 @@
     also fail.
 #>
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
-{
-    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
-    return
-}
-
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+# Import CommonTestHelper
+$testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
+if ((Test-SkipCi -Name 'MSFT_xMsiPackage.EndToEnd' -Type 'Integration'))
+{
+    return
+}
+
 Describe 'xMsiPackage End to End Tests' {
     BeforeAll {
-        # Import CommonTestHelper
-        $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-        Import-Module -Name $commonTestHelperFilePath
-
         $script:testEnvironment = Enter-DscResourceTestEnvironment `
             -DscResourceModuleName 'xPSDesiredStateConfiguration' `
             -DscResourceName 'MSFT_xMsiPackage' `

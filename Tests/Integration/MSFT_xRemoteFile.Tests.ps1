@@ -1,10 +1,11 @@
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1')
 
 $Global:DSCModuleName      = 'xPSDesiredStateConfiguration' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xRemoteFile' # Example MSFT_xFirewall
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+if ((Test-SkipCi -Name 'MSFT_xRemoteFile' -Type 'Integration'))
 {
-    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
     return
 }
 

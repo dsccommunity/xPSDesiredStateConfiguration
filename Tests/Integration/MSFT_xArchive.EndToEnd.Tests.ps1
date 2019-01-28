@@ -1,19 +1,18 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
+$testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
+if ((Test-SkipCi -Name 'MSFT_xArchive.EndToEnd' -Type 'Integration'))
 {
-    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
     return
 }
 
 Describe 'xArchive End to End Tests' {
     BeforeAll {
-        # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-        $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-        Import-Module -Name $commonTestHelperFilePath
-
         $script:testEnvironment = Enter-DscResourceTestEnvironment `
             -DscResourceModuleName 'xPSDesiredStateConfiguration' `
             -DscResourceName 'MSFT_xArchive' `
