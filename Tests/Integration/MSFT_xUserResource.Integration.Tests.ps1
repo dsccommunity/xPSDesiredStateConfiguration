@@ -1,12 +1,17 @@
 <#
     To run these tests, the currently logged on user must have rights to create a user.
-    These integration tests cover creating a brand new user, updating values 
+    These integration tests cover creating a brand new user, updating values
     of a user that already exists, and deleting a user that exists.
-#> 
-
+#>
 # Suppressing this rule since we need to create a plaintext password to test this resource
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
+
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+{
+    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
+    return
+}
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
@@ -34,13 +39,13 @@ try {
                 }
             )
         }
-    
+
         Context 'Should create a new user' {
             $configurationName = 'MSFT_xUser_NewUser'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'NewUser.log'
-            
+
             $testUserName = 'TestUserName12345'
             $testUserPassword = 'StrongOne7.'
             $testDescription = 'Test Description'
@@ -65,7 +70,7 @@ try {
                 It 'Should be able to call Get-DscConfiguration without throwing' {
                     { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not Throw
                 }
-                
+
                 It 'Should return the correct configuration' {
                     $currentConfig = Get-DscConfiguration -Verbose -ErrorAction Stop
                     $currentConfig.UserName | Should Be $testUserName
@@ -87,13 +92,13 @@ try {
                 }
             }
         }
-        
+
         Context 'Should update an existing user' {
             $configurationName = 'MSFT_xUser_UpdateUser'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'UpdateUser.log'
-            
+
             $testUserName = 'TestUserName12345'
             $testUserPassword = 'StrongOne7.'
             $testDescription = 'New Test Description'
@@ -118,7 +123,7 @@ try {
                 It 'Should be able to call Get-DscConfiguration without throwing' {
                     { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not Throw
                 }
-                
+
                 It 'Should return the correct configuration' {
                     $currentConfig = Get-DscConfiguration -Verbose -ErrorAction Stop
                     $currentConfig.UserName | Should Be $testUserName
@@ -140,13 +145,13 @@ try {
                 }
             }
         }
-        
+
         Context 'Should delete an existing user' {
             $configurationName = 'MSFT_xUser_DeleteUser'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'DeleteUser.log'
-            
+
             $testUserName = 'TestUserName12345'
             $testUserPassword = 'StrongOne7.'
             $secureTestPassword = ConvertTo-SecureString $testUserPassword -AsPlainText -Force
@@ -170,7 +175,7 @@ try {
                 It 'Should be able to call Get-DscConfiguration without throwing' {
                     { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not Throw
                 }
-                
+
                 It 'Should return the correct configuration' {
                     $currentConfig = Get-DscConfiguration -Verbose -ErrorAction Stop
                     $currentConfig.UserName | Should Be $testUserName
@@ -189,7 +194,7 @@ try {
                 }
             }
         }
-        
+
     }
 }
 finally

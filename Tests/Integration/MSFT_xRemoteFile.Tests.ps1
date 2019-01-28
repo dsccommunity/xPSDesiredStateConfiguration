@@ -2,6 +2,12 @@
 $Global:DSCModuleName      = 'xPSDesiredStateConfiguration' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xRemoteFile' # Example MSFT_xFirewall
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+{
+    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
+    return
+}
+
 #region HEADER
 # Integration Test Template Version: 1.1.0
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
@@ -15,7 +21,7 @@ Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHel
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $Global:DSCModuleName `
     -DSCResourceName $Global:DSCResourceName `
-    -TestType Integration 
+    -TestType Integration
 #endregion
 
 # Using try/finally to always cleanup even if something awful happens.

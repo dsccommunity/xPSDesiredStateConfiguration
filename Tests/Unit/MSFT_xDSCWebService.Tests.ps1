@@ -1,6 +1,12 @@
 $script:dscModuleName   = 'xPSDesiredStateConfiguration'
 $script:dscResourceName = 'MSFT_xDSCWebService'
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
+{
+    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
+    return
+}
+
 #region HEADER
 # Integration Test Template Version: 1.1.0
 [String] $script:moduleRoot = Split-Path -Parent -Path (Split-Path -Parent -Path $PSScriptRoot)

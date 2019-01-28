@@ -7,6 +7,12 @@
     also fail.
 #>
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+{
+    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
+    return
+}
+
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
@@ -116,7 +122,7 @@ try
             $resourceParameters = $script:existingServiceProperties
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationAllExceptCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -179,7 +185,7 @@ try
             $resourceParameters = $script:newServiceProperties
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationAllExceptCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -247,7 +253,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationAllExceptCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -297,7 +303,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationCredentialOnlyFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive -ConfigurationData $configData @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -342,7 +348,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationAllExceptCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -380,7 +386,7 @@ try
             }
 
             It 'Should compile and apply the MOF without throwing' {
-                { 
+                {
                     . $script:configurationAllExceptCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force

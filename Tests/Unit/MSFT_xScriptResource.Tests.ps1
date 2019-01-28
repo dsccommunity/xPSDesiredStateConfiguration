@@ -1,6 +1,12 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
+{
+    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
+    return
+}
+
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
@@ -77,7 +83,7 @@ try {
                     TestScript = 'NotUsed'
                     SetScript = 'NotUsed'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -94,7 +100,7 @@ try {
 
                     Assert-MockCalled -CommandName 'Invoke-Script' -ParameterFilter $invokeScriptParameterFilter -Times 1 -Scope 'It'
                 }
-                
+
                 It 'Should return a hashtable' {
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                     $getTargetResourceResult -is [Hashtable] | Should Be $true
@@ -113,7 +119,7 @@ try {
                     SetScript = 'NotUsed'
                     Credential = $script:testCredenital
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -126,13 +132,13 @@ try {
                     $invokeScriptParameterFilter = {
                         $scriptBlockParameterCorrect = $null -eq (Compare-Object -ReferenceObject $expectedScriptBlock.Ast -DifferenceObject $ScriptBlock.Ast)
                         $credentialParameterCorrect = $null -eq (Compare-Object -ReferenceObject $getTargetResourceParameters.Credential -DifferenceObject $Credential)
-                        
-                        return $scriptBlockParameterCorrect -and $credentialParameterCorrect 
+
+                        return $scriptBlockParameterCorrect -and $credentialParameterCorrect
                     }
 
                     Assert-MockCalled -CommandName 'Invoke-Script' -ParameterFilter $invokeScriptParameterFilter -Times 1 -Scope 'It'
                 }
-                
+
                 It 'Should return a hashtable' {
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
                     $getTargetResourceResult -is [Hashtable] | Should Be $true
@@ -193,8 +199,8 @@ try {
                     $invokeScriptParameterFilter = {
                         $scriptBlockParameterCorrect = $null -eq (Compare-Object -ReferenceObject $expectedScriptBlock.Ast -DifferenceObject $ScriptBlock.Ast)
                         $credentialParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Credential -DifferenceObject $Credential)
-                        
-                        return $scriptBlockParameterCorrect -and $credentialParameterCorrect 
+
+                        return $scriptBlockParameterCorrect -and $credentialParameterCorrect
                     }
 
                     Assert-MockCalled -CommandName 'Invoke-Script' -ParameterFilter $invokeScriptParameterFilter -Times 1 -Scope 'It'
@@ -280,7 +286,7 @@ try {
 
                     Assert-MockCalled -CommandName 'Invoke-Script' -ParameterFilter $invokeScriptParameterFilter -Times 1 -Scope 'It'
                 }
-                
+
                 It 'Should return the expected boolean' {
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
                     $testTargetResourceResult | Should Be $expectedBoolean
@@ -307,13 +313,13 @@ try {
                     $invokeScriptParameterFilter = {
                         $scriptBlockParameterCorrect = $null -eq (Compare-Object -ReferenceObject $expectedScriptBlock.Ast -DifferenceObject $ScriptBlock.Ast)
                         $credentialParameterCorrect = $null -eq (Compare-Object -ReferenceObject $testTargetResourceParameters.Credential -DifferenceObject $Credential)
-                        
-                        return $scriptBlockParameterCorrect -and $credentialParameterCorrect 
+
+                        return $scriptBlockParameterCorrect -and $credentialParameterCorrect
                     }
 
                     Assert-MockCalled -CommandName 'Invoke-Script' -ParameterFilter $invokeScriptParameterFilter -Times 1 -Scope 'It'
                 }
-                
+
                 It 'Should return the expected boolean' {
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
                     $testTargetResourceResult | Should Be $expectedBoolean
@@ -346,7 +352,7 @@ try {
 
                     Assert-MockCalled -CommandName 'Invoke-Script' -ParameterFilter $invokeScriptParameterFilter -Times 1 -Scope 'It'
                 }
-                
+
                 It 'Should return the expected boolean' {
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
                     $testTargetResourceResult | Should Be $expectedBoolean
@@ -443,7 +449,7 @@ try {
                 It 'Should return result of script' {
                     $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
                     $scriptExecutionHelperResult | Should Be $testScriptResult
-                } 
+                }
             }
         }
     }
