@@ -6,6 +6,12 @@
 # Run as an elevated administrator
 ######################################################################################
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+{
+    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
+    return
+}
+
 # Create a unique name that we use for our temp files and folders
 [System.String] $tempFolderName = 'xDSCWebServiceTests_' + (Get-Date).ToString("yyyyMMdd_HHmmss")
 

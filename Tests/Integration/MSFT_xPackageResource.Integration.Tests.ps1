@@ -1,3 +1,9 @@
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+{
+    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
+    return
+}
+
 Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `

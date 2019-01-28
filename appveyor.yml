@@ -6,6 +6,20 @@ environment:
   gallery_api:
     secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
 
+image:
+- Visual Studio 2015
+- Visual Studio 2017
+
+configuration:
+- Meta
+- Unit
+- Integration
+
+matrix:
+  exclude:
+    - configuration: Meta
+      image: Visual Studio 2017
+
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
     - ps: |
@@ -23,20 +37,52 @@ build: false
 #      test configuration         #
 #---------------------------------#
 
-test_script:
+for:
+-
+  matrix:
+    only:
+      - configuration: Meta
+
+  test_script:
+    - ps: |
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Default' `
+            -ExcludeTag @()
+
+-
+  matrix:
+    only:
+      - configuration: Integration
+  environment:
+    SkipAllCommonTests: True
+
+  test_script:
+    - ps: |
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Default' `
+            -DisableConsistency `
+            -ExcludeTag @()
+
+-
+  matrix:
+    only:
+      - configuration: Unit
+  environment:
+    SkipAllCommonTests: True
+
+  test_script:
     - ps: |
         Invoke-AppveyorTestScriptTask `
             -Type 'Default' `
             -CodeCoverage `
             -CodeCovIo `
-            -DisableConsistency `
             -ExcludeTag @()
 
 after_test:
-  - ps: |
-        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-        Invoke-AppveyorAfterTestTask `
-            -ResourceModuleName $moduleName
+- ps: |
+    Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+    Invoke-AppveyorAfterTestTask `
+        -ResourceModuleName $moduleName
 
 #---------------------------------#
 #      deployment configuration   #

@@ -1,6 +1,12 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
+{
+    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
+    return
+}
+
 if ($PSVersionTable.PSVersion -lt [Version] '5.1')
 {
     Write-Warning -Message 'Cannot run PSDscResources integration tests on PowerShell versions lower than 5.1'

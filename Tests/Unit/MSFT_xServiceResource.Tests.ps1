@@ -2,6 +2,12 @@
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
+{
+    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
+    return
+}
+
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 

@@ -1,6 +1,12 @@
 $Global:DSCModuleName      = 'xPSDesiredStateConfiguration'
 $Global:DSCResourceName    = 'MSFT_xRemoteFile'
 
+if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
+{
+    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
+    return
+}
+
 #region HEADER
 # Unit Test Template Version: 1.1.0
 [String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
@@ -14,7 +20,7 @@ Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHel
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $Global:DSCModuleName `
     -DSCResourceName $Global:DSCResourceName `
-    -TestType Unit 
+    -TestType Unit
 #endregion HEADER
 
 # Create a working folder that all files will be created in
@@ -39,11 +45,11 @@ try
                 [System.String]
                 $errorMessage
             )
-            
+
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
             $exception = New-Object `
                 -TypeName System.InvalidOperationException `
-                -ArgumentList $errorMessage 
+                -ArgumentList $errorMessage
             $errorRecord = New-Object `
                 -TypeName System.Management.Automation.ErrorRecord `
                 -ArgumentList $exception, $errorId, $errorCategory, $null
