@@ -1,8 +1,7 @@
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
+if ((Test-SkipCi -Name 'MSFT_xWindowsOptionalFeature' -Type 'Unit'))
 {
-    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
     return
 }
 

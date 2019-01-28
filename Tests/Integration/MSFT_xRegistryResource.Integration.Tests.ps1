@@ -5,12 +5,6 @@
     If this happens to you, it is fixable, but the fix is difficult and time-consuming.
 #>
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
-{
-    Write-Verbose -Message 'Integration test for will be skipped unless $env:CONFIGURATION is set to ''Integration''.' -Verbose
-    return
-}
-
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
@@ -18,6 +12,11 @@ Set-StrictMode -Version 'Latest'
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
+
+if ((Test-SkipCi -Name 'MSFT_xRegistryResource' -Type 'Integration'))
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `

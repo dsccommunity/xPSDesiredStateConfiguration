@@ -1,9 +1,12 @@
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
 $script:dscModuleName   = 'xPSDesiredStateConfiguration'
 $script:dscResourceName = 'MSFT_xDSCWebService'
 
-if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Unit')
+if ((Test-SkipCi -Name $script:dscResourceName -Type 'Unit'))
 {
-    Write-Verbose -Message 'Unit test for will be skipped unless $env:CONFIGURATION is set to ''Unit''.' -Verbose
     return
 }
 

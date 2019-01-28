@@ -7,6 +7,11 @@ if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
+if ((Test-SkipCi -Name 'MSFT_xWindowsOptionalFeature' -Type 'Integration'))
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xWindowsOptionalFeature' `
