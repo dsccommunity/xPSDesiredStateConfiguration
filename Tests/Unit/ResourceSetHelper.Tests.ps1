@@ -7,7 +7,7 @@ Set-StrictMode -Version 'Latest'
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1')
 
-if ((Test-SkipCi -Name 'MSFT_xWindowsProcess' -Type 'Unit'))
+if ((Test-SkipCi -Type 'Unit'))
 {
     return
 }

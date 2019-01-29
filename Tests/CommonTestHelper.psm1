@@ -791,20 +791,27 @@ function Exit-DscResourceTestEnvironment
 
 <#
     .SYNOPSIS
-        Exits the specified DSC Resource test environment.
+        Returns $true if the the environment variable APPVEYOR is set to $true,
+        and the environment variable CONFIGURATION is set to the value passed
+        in the parameter Type.
 
-    .PARAMETER TestEnvironment
-        The test environment to exit.
+    .PARAMETER Name
+        Name of the test script that is called. Defaults to the name of the
+        calling script.
+
+    .PARAMETER Type
+        Type of tests in the test file. Can be set to Unit or Integration.
 #>
 function Test-SkipCi
 {
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Name,
+        $Name = $MyInvocation.PSCommandPath.Split('\')[-1],
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Unit', 'Integration')]
@@ -816,7 +823,7 @@ function Test-SkipCi
 
     if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne $Type)
     {
-        Write-Verbose -Message ('Tests for {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
+        Write-Verbose -Message ('{1} tests for {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
         $result = $true
     }
 

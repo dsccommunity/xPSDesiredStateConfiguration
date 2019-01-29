@@ -5,7 +5,7 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $script:commonTestHelperFilePath
 
-if ((Test-SkipCi -Name 'MSFT_xMsiPackage' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }

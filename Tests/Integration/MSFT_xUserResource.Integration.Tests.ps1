@@ -11,7 +11,7 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
 
-if ((Test-SkipCi -Name 'MSFT_xUserResource' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }

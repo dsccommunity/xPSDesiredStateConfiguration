@@ -1,6 +1,6 @@
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
-if ((Test-SkipCi -Name 'MSFT_xWindowsPackageCab' -Type 'Unit'))
+if ((Test-SkipCi -Type 'Unit'))
 {
     return
 }
