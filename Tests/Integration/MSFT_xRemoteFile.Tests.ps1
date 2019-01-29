@@ -4,7 +4,7 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
 $Global:DSCModuleName      = 'xPSDesiredStateConfiguration' # Example xNetworking
 $Global:DSCResourceName    = 'MSFT_xRemoteFile' # Example MSFT_xFirewall
 
-if ((Test-SkipCi -Name 'MSFT_xRemoteFile' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }

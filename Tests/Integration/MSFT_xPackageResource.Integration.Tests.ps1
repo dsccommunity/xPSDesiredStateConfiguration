@@ -1,6 +1,6 @@
 Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 
-if ((Test-SkipCi -Name 'MSFT_xPackageResource' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }

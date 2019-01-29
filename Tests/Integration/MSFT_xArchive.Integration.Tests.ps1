@@ -4,7 +4,7 @@ Set-StrictMode -Version 'Latest'
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1')
 
-if ((Test-SkipCi -Name 'MSFT_xArchive' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }

@@ -6,7 +6,7 @@ if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne 'Integration')
 
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
-if ((Test-SkipCi -Name 'MSFT_xWindowsPackageCab' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }

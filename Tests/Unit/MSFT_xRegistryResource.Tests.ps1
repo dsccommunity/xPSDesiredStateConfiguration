@@ -6,7 +6,7 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
-if ((Test-SkipCi -Name 'MSFT_xRegistryResource' -Type 'Unit'))
+if ((Test-SkipCi -Type 'Unit'))
 {
     return
 }

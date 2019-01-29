@@ -15,7 +15,7 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
-if ((Test-SkipCi -Name 'xServiceSet' -Type 'Integration'))
+if ((Test-SkipCi -Type 'Integration'))
 {
     return
 }
