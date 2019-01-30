@@ -823,7 +823,7 @@ function Test-SkipCi
 
     if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne $Type)
     {
-        Write-Verbose -Message ('{1} tests for {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
+        Write-Verbose -Message ('{1} tests in {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
         $result = $true
     }
 
