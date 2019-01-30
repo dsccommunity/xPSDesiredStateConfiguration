@@ -6,15 +6,24 @@ environment:
   gallery_api:
     secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
 
+# The images that will be used when building the job matrix.
 image:
 - Visual Studio 2015
 - Visual Studio 2017
 
+# The configuration that will be used when building the job matrix.
+# Meta = Test Framework Common Test
+# Unit = Module Unit Tests.
+# Integration = Module Integration Tests.
 configuration:
 - Meta
 - Unit
 - Integration
 
+# The jobs that will excluded based on the combination of configuration name
+# and image name.
+# This will make sure the meta tests (common tests) are only run on one of the
+# images.
 matrix:
   exclude:
     - configuration: Meta
@@ -37,8 +46,19 @@ build: false
 #      test configuration         #
 #---------------------------------#
 
+# This will build the job matrix (exception is what is excluded from the matrix
+# above). The jobs will be order by the order of key 'configuration:' and then
+# by the key 'images:'.
+#
+# Job 1: Run meta test (common tests) on image Visual Studio 2015.
+# Job 2: Run unit tests on image Visual Studio 2015, including Codecov report.
+# Job 3: Run integration tests on image Visual Studio 2015.
+# Job 4: Run unit tests on image Visual Studio 2017, without Codecov report.
+# Job 5: Run integration tests on image Visual Studio 2017.
+
 for:
 -
+  # Job 1.
   matrix:
     only:
       - configuration: Meta
@@ -50,6 +70,7 @@ for:
             -ExcludeTag @()
 
 -
+  # Job 3 and job 4.
   matrix:
     only:
       - configuration: Integration
@@ -64,9 +85,11 @@ for:
             -ExcludeTag @()
 
 -
+  # Job 2.
   matrix:
     only:
       - configuration: Unit
+        image: Visual Studio 2015
   environment:
     SkipAllCommonTests: True
 
@@ -78,6 +101,23 @@ for:
             -CodeCovIo `
             -ExcludeTag @()
 
+-
+  # Job 5.
+  matrix:
+    only:
+      - configuration: Unit
+        image: Visual Studio 2017
+  environment:
+    SkipAllCommonTests: True
+
+  test_script:
+    - ps: |
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Default' `
+            -CodeCoverage `
+            -ExcludeTag @()
+
+# Runs for all jobs.
 after_test:
 - ps: |
     Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
@@ -88,6 +128,7 @@ after_test:
 #      deployment configuration   #
 #---------------------------------#
 
+# Runs for all jobs, but only when test step is successful.
 deploy_script:
   - ps: |
         Invoke-AppVeyorDeployTask
