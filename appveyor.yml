@@ -8,8 +8,8 @@ environment:
 
 # The images that will be used when building the job matrix.
 image:
-- Visual Studio 2015
 - Visual Studio 2017
+- Visual Studio 2015
 
 # The configuration that will be used when building the job matrix.
 # Meta = Test Framework Common Test
@@ -27,7 +27,7 @@ configuration:
 matrix:
   exclude:
     - configuration: Meta
-      image: Visual Studio 2017
+      image: Visual Studio 2015
 
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
