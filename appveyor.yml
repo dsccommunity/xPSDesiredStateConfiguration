@@ -123,9 +123,9 @@ for:
 # Runs for all jobs.
 after_test:
   - ps: |
-      Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-      Invoke-AppveyorAfterTestTask `
-          -ResourceModuleName $moduleName
+        Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+        Invoke-AppveyorAfterTestTask `
+            -ResourceModuleName $moduleName
 
 #---------------------------------#
 #      deployment configuration   #
