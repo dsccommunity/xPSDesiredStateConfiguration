@@ -1,5 +1,10 @@
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xWindowsPackageCab' `

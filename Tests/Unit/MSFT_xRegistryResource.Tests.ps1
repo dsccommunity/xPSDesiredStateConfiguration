@@ -6,6 +6,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xRegistryResource' `
@@ -18,7 +23,7 @@ try
 
         $script:validRegistryDriveRoots = @( 'HKEY_CLASSES_ROOT', 'HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE', 'HKEY_USERS', 'HKEY_CURRENT_CONFIG' )
         $script:validRegistryDriveNames = @( 'HKCR', 'HKCU', 'HKLM', 'HKUS', 'HKCC' )
-        
+
         # This registry key is used ONLY for its type (Microsoft.Win32.RegistryKey). It is not actually accessed in any way during these tests.
         $script:testRegistryKey = [Microsoft.Win32.Registry]::CurrentConfig
 
@@ -37,7 +42,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -97,7 +102,7 @@ try
                     $getTargetResourceResult.ValueData | Should Be $null
                 }
             }
-            
+
             Mock -CommandName 'Get-RegistryKey' -MockWith { return $script:testRegistryKey }
 
             Context 'Specified registry key exists, registry key value name specified as an empty string, and registry key value data and type not specified' {
@@ -105,7 +110,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -171,7 +176,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = 'TestValueName'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -254,7 +259,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = 'TestValueName'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -347,7 +352,7 @@ try
                     ValueType = 'String'
                     ValueData = 'TestValueData'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -1016,7 +1021,7 @@ try
                     Set-TargetResource @setTargetResourceParameters | Should Be $null
                 }
             }
-            
+
             Context 'Registry key exists, Ensure specified as Present, specified registry value does not exist, and registry value type and data not specified' {
                 $setTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
@@ -1061,7 +1066,7 @@ try
 
                 It 'Should convert the specified registry key value to a string' {
                     $convertToStringParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:defaultValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:defaultValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1181,7 +1186,7 @@ try
 
                 It 'Should convert the specified registry key value to binary data' {
                     $convertToBinaryParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1311,7 +1316,7 @@ try
 
                 It 'Should convert the specified registry key value to a multi-string' {
                     $convertToMultiStringParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1438,9 +1443,9 @@ try
 
                 It 'Should convert the specified registry key value to a dword' {
                     $convertToDwordParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         $hexParameterCorrect = $Hex -eq $setTargetResourceParameters.Hex
-                        
+
                         return $registryKeyValueParameterCorrect -and $hexParameterCorrect
                     }
 
@@ -1570,9 +1575,9 @@ try
 
                 It 'Should convert the specified registry key value to a qword' {
                     $convertToQwordParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         $hexParameterCorrect = $Hex -eq $setTargetResourceParameters.Hex
-                        
+
                         return $registryKeyValueParameterCorrect -and $hexParameterCorrect
                     }
 
@@ -1846,7 +1851,7 @@ try
                 }
             }
         }
-        
+
         Describe 'xRegistry\Test-TargetResource' {
             Mock -CommandName 'Get-RegistryKeyValueDisplayName' -MockWith { return $RegistryKeyValueName }
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
@@ -2783,7 +2788,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2797,7 +2802,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2811,7 +2816,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2825,7 +2830,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'HKCR'
                 }
-                
+
                 $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
 
                 It 'Should not throw' {
@@ -2847,7 +2852,7 @@ try
                         $rootParameterCorrect = $Root -eq $expectedRegistryDriveRoot
                         $psProviderParameterCorrect = $PSProvider -eq 'Registry'
                         $scopeParameterCorrect = $Scope -eq 'Script'
-                        
+
                         return $nameParameterCorrect -and $rootParameterCorrect -and $psProviderParameterCorrect -and $scopeParameterCorrect
                     }
 
@@ -2865,7 +2870,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2879,7 +2884,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2893,7 +2898,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'HKCR'
                 }
-                
+
                 $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
 
                 It 'Should not throw' {
@@ -3223,7 +3228,7 @@ try
                         $convertToReadableStringResult | Should Be ([String]::Empty)
                     }
                 }
-            
+
                 Context "Registry key value specified as an empty array and registry key type specified as $registryKeyValueType" {
                     $convertToReadableStringParameters = @{
                         RegistryKeyValue = @()

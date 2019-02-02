@@ -789,6 +789,47 @@ function Exit-DscResourceTestEnvironment
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
 }
 
+<#
+    .SYNOPSIS
+        Returns $true if the the environment variable APPVEYOR is set to $true,
+        and the environment variable CONFIGURATION is set to the value passed
+        in the parameter Type.
+
+    .PARAMETER Name
+        Name of the test script that is called. Defaults to the name of the
+        calling script.
+
+    .PARAMETER Type
+        Type of tests in the test file. Can be set to Unit or Integration.
+#>
+function Test-SkipContinuousIntegrationTask
+{
+    [OutputType([System.Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Name = $MyInvocation.PSCommandPath.Split('\')[-1],
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Unit', 'Integration')]
+        [System.String]
+        $Type
+    )
+
+    $result = $false
+
+    if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne $Type)
+    {
+        Write-Verbose -Message ('{1} tests in {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
+        $result = $true
+    }
+
+    return $result
+}
+
 Export-ModuleMember -Function @(
     'Test-GetTargetResourceResult', `
     'Wait-ScriptBlockReturnTrue', `
@@ -801,5 +842,6 @@ Export-ModuleMember -Function @(
     'Invoke-SetTargetResourceUnitTest', `
     'Invoke-TestTargetResourceUnitTest', `
     'Invoke-ExpectedMocksAreCalledTest', `
-    'Invoke-GenericUnitTest'
+    'Invoke-GenericUnitTest',
+    'Test-SkipContinuousIntegrationTask'
 )
