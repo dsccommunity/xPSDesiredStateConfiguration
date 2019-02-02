@@ -1,13 +1,18 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
+$testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 Describe 'xArchive End to End Tests' {
     BeforeAll {
-        # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-        $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-        Import-Module -Name $commonTestHelperFilePath
-
         $script:testEnvironment = Enter-DscResourceTestEnvironment `
             -DscResourceModuleName 'xPSDesiredStateConfiguration' `
             -DscResourceName 'MSFT_xArchive' `

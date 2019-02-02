@@ -1,5 +1,14 @@
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
 $Global:DSCModuleName      = 'xPSDesiredStateConfiguration'
 $Global:DSCResourceName    = 'MSFT_xRemoteFile'
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
 
 #region HEADER
 # Unit Test Template Version: 1.1.0
@@ -14,7 +23,7 @@ Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHel
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $Global:DSCModuleName `
     -DSCResourceName $Global:DSCResourceName `
-    -TestType Unit 
+    -TestType Unit
 #endregion HEADER
 
 # Create a working folder that all files will be created in
@@ -39,11 +48,11 @@ try
                 [System.String]
                 $errorMessage
             )
-            
+
             $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
             $exception = New-Object `
                 -TypeName System.InvalidOperationException `
-                -ArgumentList $errorMessage 
+                -ArgumentList $errorMessage
             $errorRecord = New-Object `
                 -TypeName System.Management.Automation.ErrorRecord `
                 -ArgumentList $exception, $errorId, $errorCategory, $null

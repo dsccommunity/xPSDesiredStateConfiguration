@@ -15,6 +15,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'xServiceSet' `

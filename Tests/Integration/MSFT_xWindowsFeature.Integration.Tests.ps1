@@ -4,7 +4,6 @@
     RSAT-File-Services is set as the feature to test installing/uninstalling a feature with
     subfeatures.
 #>
-
 # Suppressing this rule since we need to create a plaintext password to test this resource
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
@@ -12,6 +11,11 @@ param ()
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `

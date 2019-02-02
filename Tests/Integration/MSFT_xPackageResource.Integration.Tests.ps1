@@ -1,5 +1,10 @@
 Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xPackageResource' `

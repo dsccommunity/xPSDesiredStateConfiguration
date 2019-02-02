@@ -1,5 +1,10 @@
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xWindowsOptionalFeature' `
@@ -14,7 +19,7 @@ try
 
                 $script:testFeatureName = 'TestFeature'
 
-                $script:fakeEnabledFeature = [PSCustomObject] @{ 
+                $script:fakeEnabledFeature = [PSCustomObject] @{
                     Name = $testFeatureName
                     State = 'Enabled'
                 }
@@ -27,7 +32,7 @@ try
 
             <#
                 This context block needs to stay at the top because of a bug in Pester on Nano server.
-                
+
                 Assert-ResourcePrerequisitesValid is mocked in most of the other contexts blocks.
                 This causes errors to throw from the script blocks in this context since this function does
                 not take any parameters, but Pester tries to pipe something into it.
@@ -57,7 +62,7 @@ try
                         BuildNumber = 9600
                     }
                 }
-                
+
                 It 'Should throw when the DISM module is not available' {
                     Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { Write-Error 'Cannot find module' }
                     { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.DismNotAvailable
@@ -111,7 +116,7 @@ try
                 }
             }
 
-            
+
             Context 'Get-TargetResource - Feature Disabled' {
                 Mock Assert-ResourcePrerequisitesValid -MockWith { }
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { return $script:fakeDisabledFeature }
@@ -167,9 +172,9 @@ try
 
                 It 'Should call Enable-WindowsOptionalFeature with NoRestart set to true by default when Ensure set to Present' {
                     Mock Dism\Enable-WindowsOptionalFeature -ParameterFilter { $NoRestart -eq $true } -MockWith { }
-                    
+
                     Set-TargetResource -Name $script:testFeatureName
-                    
+
                     Assert-MockCalled Dism\Enable-WindowsOptionalFeature -ParameterFilter { $NoRestart -eq $true } -Scope It
                 }
 
@@ -306,7 +311,7 @@ try
 
                 It 'Should return the correct string for each object' {
                     $propertiesAsStrings = Convert-CustomPropertyArrayToStringArray -CustomProperties $psCustomObjects
-                    
+
                     foreach ($objectNumber in @(1, 2, 3))
                     {
                         $propertiesAsStrings.Contains("Name = Object $objectNumber, Value = Value $objectNumber, Path = Path $objectNumber") | Should Be $true

@@ -1,5 +1,14 @@
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
 $script:dscModuleName   = 'xPSDesiredStateConfiguration'
 $script:dscResourceName = 'MSFT_xDSCWebService'
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
 
 #region HEADER
 # Integration Test Template Version: 1.1.0

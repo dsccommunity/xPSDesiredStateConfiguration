@@ -4,6 +4,14 @@ param ()
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1')
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
 $script:moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
 $script:dscResourcesFolderFilePath = Join-Path -Path $script:moduleRootFilePath -ChildPath 'DscResources'
