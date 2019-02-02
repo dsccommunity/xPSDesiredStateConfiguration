@@ -713,7 +713,7 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
-* Pull server modulel publishing
+* Pull server module publishing
   * Removed forced verbose logging from CreateZipFromSource, Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the console
 * xWindowsOptionalFeature
   * Suppress useless verbose output from `Import-Module` cmdlet. ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453))
