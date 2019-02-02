@@ -127,18 +127,18 @@ after_test:
     Invoke-AppveyorAfterTestTask `
         -ResourceModuleName $moduleName
 
-  #---------------------------------#
-  #      deployment configuration   #
-  #---------------------------------#
+#---------------------------------#
+#      deployment configuration   #
+#---------------------------------#
 
-  deploy_script:
-    - ps: |
-          # Runs only in job 5 (last job).
-          if ($env:APPVEYOR_JOB_NUMBER -eq $env:DeployInJobNumber)
-          {
-              Invoke-AppVeyorDeployTask
-          }
-          else
-          {
-              Write-Verbose -Message ('Skipping deploy step. Deploy step was requested to run in job number {0}. Current job number is {1}.' -f $env:DeployInJobNumber, $env:APPVEYOR_JOB_NUMBER) -Verbose
-          }
+# Runs only in a branch (not in PR).
+deploy_script:
+  - ps: |
+        if ($env:APPVEYOR_JOB_NUMBER -eq $env:DeployInJobNumber)
+        {
+            Invoke-AppVeyorDeployTask
+        }
+        else
+        {
+            Write-Verbose -Message ('Skipping deploy step. Deploy step was requested to run in job number {0}. Current job number is {1}.' -f $env:DeployInJobNumber, $env:APPVEYOR_JOB_NUMBER) -Verbose
+        }
