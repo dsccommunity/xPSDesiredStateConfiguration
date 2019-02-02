@@ -713,14 +713,15 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 ## Versions
 
 ### Unreleased
-
+* Pull server modulel publishing
+  * Removed forced verbose logging from CreateZipFromSource, Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the console
 * xWindowsOptionalFeature
   * Suppress useless verbose output from `Import-Module` cmdlet. ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453))
 * Changes to xRemoteFile
   * Corrected a resource name in the example xRemoteFile_DownloadFileConfig.ps1
 * Fix `MSFT_xDSCWebService` to find
  `Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll`
-  when server is configured with pt-BR Locales ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).  
+  when server is configured with pt-BR Locales ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).
 * Changes to xDSCWebService
   * Fixed an issue which prevented the removal of the IIS Application Pool created during deployment of an DSC Pull Server instance. ([issue #464](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/464))
   * Fixed an issue where a Pull Server cannot be deployed on a machine when IIS Express is installed aside a full blown IIS ([issue #191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191))
