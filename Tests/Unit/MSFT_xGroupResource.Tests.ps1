@@ -929,11 +929,7 @@ try
                         return $memberPrincipals
                     }
 
-<<<<<<< HEAD
-                    Mock -CommandName 'Clear-GroupMembers' -MockWith { }
-=======
                     Mock -CommandName 'Clear-GroupMember' -MockWith { }
->>>>>>> Renamed Clear-GroupMembers helper function to Clear-GroupMember to remove violation of PowerShell best practice.
                     Mock -CommandName 'Add-GroupMember' -MockWith { }
                     Mock -CommandName 'Remove-GroupMember' -MockWith { }
                     Mock -CommandName 'Remove-Group' -MockWith { }
