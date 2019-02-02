@@ -22,10 +22,10 @@ configuration:
 - Unit
 - Integration
 
-# The jobs that will excluded based on the combination of configuration name
-# and image name.
-# This will make sure the meta tests (common tests) are only run on one of the
-# images.
+# - If one job in the matrix fails, the build will stop (fast_finish).
+# - The jobs that will excluded based on the combination of configuration name
+#   and image name. This will make sure the meta tests (common tests) are only
+#   run on one of the images.
 matrix:
   fast_finish: true
   exclude:
@@ -122,10 +122,10 @@ for:
 
 # Runs for all jobs.
 after_test:
-- ps: |
-    Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
-    Invoke-AppveyorAfterTestTask `
-        -ResourceModuleName $moduleName
+  - ps: |
+      Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
+      Invoke-AppveyorAfterTestTask `
+          -ResourceModuleName $moduleName
 
 #---------------------------------#
 #      deployment configuration   #
