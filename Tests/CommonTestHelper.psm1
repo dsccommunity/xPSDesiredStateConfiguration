@@ -802,7 +802,7 @@ function Exit-DscResourceTestEnvironment
     .PARAMETER Type
         Type of tests in the test file. Can be set to Unit or Integration.
 #>
-function Test-SkipCi
+function Test-SkipContinuousIntegrationTask
 {
     [OutputType([System.Boolean])]
     [CmdletBinding()]
@@ -843,5 +843,5 @@ Export-ModuleMember -Function @(
     'Invoke-TestTargetResourceUnitTest', `
     'Invoke-ExpectedMocksAreCalledTest', `
     'Invoke-GenericUnitTest',
-    'Test-SkipCi'
+    'Test-SkipContinuousIntegrationTask'
 )

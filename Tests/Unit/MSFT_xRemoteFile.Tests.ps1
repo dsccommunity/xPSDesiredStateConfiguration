@@ -5,7 +5,7 @@ Import-Module -Name $commonTestHelperFilePath
 $Global:DSCModuleName      = 'xPSDesiredStateConfiguration'
 $Global:DSCResourceName    = 'MSFT_xRemoteFile'
 
-if ((Test-SkipCi -Name $Global:DSCResourceName -Type 'Unit'))
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
 {
     return
 }

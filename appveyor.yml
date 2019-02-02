@@ -25,6 +25,7 @@ configuration:
 # This will make sure the meta tests (common tests) are only run on one of the
 # images.
 matrix:
+  fast_finish: true
   exclude:
     - configuration: Meta
       image: Visual Studio 2015
@@ -117,18 +118,18 @@ for:
             -CodeCoverage `
             -ExcludeTag @()
 
+  #---------------------------------#
+  #      deployment configuration   #
+  #---------------------------------#
+
+  # Runs only in job 5, and only when all are successful.
+  deploy_script:
+    - ps: |
+          Invoke-AppVeyorDeployTask
+
 # Runs for all jobs.
 after_test:
 - ps: |
     Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
     Invoke-AppveyorAfterTestTask `
         -ResourceModuleName $moduleName
-
-#---------------------------------#
-#      deployment configuration   #
-#---------------------------------#
-
-# Runs for all jobs, but only when test step is successful.
-deploy_script:
-  - ps: |
-        Invoke-AppVeyorDeployTask

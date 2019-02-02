@@ -6,7 +6,7 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
 
-if ((Test-SkipCi -Type 'Unit'))
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
 {
     return
 }

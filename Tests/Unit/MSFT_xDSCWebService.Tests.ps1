@@ -5,7 +5,7 @@ Import-Module -Name $commonTestHelperFilePath
 $script:dscModuleName   = 'xPSDesiredStateConfiguration'
 $script:dscResourceName = 'MSFT_xDSCWebService'
 
-if ((Test-SkipCi -Name $script:dscResourceName -Type 'Unit'))
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
 {
     return
 }
