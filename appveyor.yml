@@ -5,6 +5,8 @@ version: 6.0.{build}.0
 environment:
   gallery_api:
     secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
+  # The job where deploy step should run (normally the last job)
+  DeployInJobNumber: 5
 
 # The images that will be used when building the job matrix.
 image:
@@ -51,11 +53,11 @@ build: false
 # above). The jobs will be order by the order of key 'configuration:' and then
 # by the key 'images:'.
 #
-# Job 1: Run meta test (common tests) on image Visual Studio 2015.
-# Job 2: Run unit tests on image Visual Studio 2015, including Codecov report.
-# Job 3: Run integration tests on image Visual Studio 2015.
-# Job 4: Run unit tests on image Visual Studio 2017, without Codecov report.
-# Job 5: Run integration tests on image Visual Studio 2017.
+# Job 1: Run meta test (common tests) on image Visual Studio 2017.
+# Job 2: Run unit tests on image Visual Studio 2017, including Codecov report.
+# Job 3: Run integration tests on image Visual Studio 2017.
+# Job 4: Run unit tests on image Visual Studio 2015, without Codecov report.
+# Job 5: Run integration tests on image Visual Studio 2015.
 
 for:
 -
@@ -71,7 +73,7 @@ for:
             -ExcludeTag @()
 
 -
-  # Job 3 and job 4.
+  # Job 3 and job 5.
   matrix:
     only:
       - configuration: Integration
@@ -86,7 +88,7 @@ for:
             -ExcludeTag @()
 
 -
-  # Job 2.
+  # Job 4.
   matrix:
     only:
       - configuration: Unit
@@ -99,11 +101,10 @@ for:
         Invoke-AppveyorTestScriptTask `
             -Type 'Default' `
             -CodeCoverage `
-            -CodeCovIo `
             -ExcludeTag @()
 
 -
-  # Job 5.
+  # Job 2.
   matrix:
     only:
       - configuration: Unit
@@ -116,16 +117,8 @@ for:
         Invoke-AppveyorTestScriptTask `
             -Type 'Default' `
             -CodeCoverage `
+            -CodeCovIo `
             -ExcludeTag @()
-
-  #---------------------------------#
-  #      deployment configuration   #
-  #---------------------------------#
-
-  # Runs only in job 5, and only when all are successful.
-  deploy_script:
-    - ps: |
-          Invoke-AppVeyorDeployTask
 
 # Runs for all jobs.
 after_test:
@@ -133,3 +126,19 @@ after_test:
     Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
     Invoke-AppveyorAfterTestTask `
         -ResourceModuleName $moduleName
+
+  #---------------------------------#
+  #      deployment configuration   #
+  #---------------------------------#
+
+  deploy_script:
+    - ps: |
+          # Runs only in job 5 (last job).
+          if ($env:APPVEYOR_JOB_NUMBER -eq $env:DeployInJobNumber)
+          {
+              Invoke-AppVeyorDeployTask
+          }
+          else
+          {
+              Write-Verbose -Message ('Skipping deploy step. Deploy step was requested to run in job number {0}. Current job number is {1}.' -f $env:DeployInJobNumber, $env:APPVEYOR_JOB_NUMBER) -Verbose
+          }
