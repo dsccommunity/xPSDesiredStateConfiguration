@@ -6,7 +6,7 @@ $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
-if ((Test-SkipCi -Type 'Integration'))
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 {
     return
 }

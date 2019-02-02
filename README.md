@@ -716,9 +716,9 @@ Publishes a 'FileInfo' object(s) to the pullserver configuration repository. It 
 
 * Changes to xPSDesiredStateConfiguration
   * In AppVeyor CI the tests are split into three separate jobs, and also
-    running tests on two different build worker images (Windows Server
-    2012R2 and Windows Server 2016). The common tests are run on only
-    one of the build worker images (Windows Server 2012R2). Helps with
+    run tests on two different build worker images (Windows Server 2012R2
+    and Windows Server 2016). The common tests are only run on the
+    Windows Server 2016 build worker image. Helps with
     [issue #477](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/477).
 * xWindowsOptionalFeature
   * Suppress useless verbose output from `Import-Module` cmdlet. ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453))

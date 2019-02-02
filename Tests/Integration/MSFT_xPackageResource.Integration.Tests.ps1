@@ -1,6 +1,6 @@
 Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 
-if ((Test-SkipCi -Type 'Integration'))
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 {
     return
 }

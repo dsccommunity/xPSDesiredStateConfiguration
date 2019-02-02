@@ -1,10 +1,10 @@
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1')
 
-$Global:DSCModuleName      = 'xPSDesiredStateConfiguration' # Example xNetworking
-$Global:DSCResourceName    = 'MSFT_xRemoteFile' # Example MSFT_xFirewall
+$script:DSCModuleName      = 'xPSDesiredStateConfiguration' # Example xNetworking
+$script:DSCResourceName    = 'MSFT_xRemoteFile' # Example MSFT_xFirewall
 
-if ((Test-SkipCi -Type 'Integration'))
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 {
     return
 }
@@ -20,8 +20,8 @@ if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource
 
 Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:DSCModuleName `
+    -DSCResourceName $script:DSCResourceName `
     -TestType Integration
 #endregion
 
@@ -29,17 +29,17 @@ $TestEnvironment = Initialize-TestEnvironment `
 try
 {
     #region Integration Tests
-    $ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath "$($Global:DSCResourceName).config.ps1"
+    $ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:DSCResourceName).config.ps1"
     . $ConfigFile
 
     # Make sure the file to download doesn't exist
     Remove-Item -Path $TestDestinationPath -Force -ErrorAction SilentlyContinue
 
-    Describe "$($Global:DSCResourceName)_Integration" {
+    Describe "$($script:DSCResourceName)_Integration" {
         #region DEFAULT TESTS
         It 'Should compile without throwing' {
             {
-                Invoke-Expression -Command "$($Global:DSCResourceName)_Config -OutputPath `$TestDrive"
+                Invoke-Expression -Command "$($script:DSCResourceName)_Config -OutputPath `$TestDrive"
                 Start-DscConfiguration -Path $TestDrive `
                     -ComputerName localhost -Wait -Verbose -Force
             } | Should not throw
