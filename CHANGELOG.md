@@ -79,6 +79,8 @@
     [issue #477](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/477).
 - xGroup
   - Corrected style guideline violations. ([issue #485](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/485))
+- xWindowsProcess
+  - Corrected style guideline violations. ([issue #496](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/496))
 
 ## 8.5.0.0
 
