@@ -10,7 +10,7 @@
 - Fix `MSFT_xDSCWebService` to find
  `Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll`
   when server is configured with pt-BR Locales
-  ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).  
+  ([issue #284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).
 - Changes to xDSCWebService
   - Fixed an issue which prevented the removal of the IIS Application Pool
     created during deployment of an DSC Pull Server instance.
@@ -77,6 +77,8 @@
     and Windows Server 2016). The common tests are only run on the
     Windows Server 2016 build worker image. Helps with
     [issue #477](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/477).
+- xGroup
+  - Corrected style guideline violations. ([issue #485](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/485))
 
 ## 8.5.0.0
 
