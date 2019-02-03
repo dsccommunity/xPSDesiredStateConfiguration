@@ -602,7 +602,6 @@ function Get-ProcessCimInstance
 
     if ($getProcessResult.Count -ge $UseGetCimInstanceThreshold)
     {
-
         $escapedPathForWqlFilter = ConvertTo-EscapedStringForWqlFilter -FilterString $Path
         $wqlFilter = "ExecutablePath = '$escapedPathForWqlFilter'"
 
