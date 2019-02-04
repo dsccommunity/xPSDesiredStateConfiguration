@@ -1,4 +1,4 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 # Import ResourceSetHelper for New-ResourceSetConfigurationScriptBlock
@@ -15,7 +15,7 @@ Import-Module -Name $script:resourceSetHelperFilePath
 
     .PARAMETER Ensure
         Specifies whether or not the set of services should exist.
-        
+
         Set this property to Present to modify a set of services.
         Set this property to Absent to remove a set of services.
 
@@ -81,7 +81,7 @@ Configuration xServiceSet
         KeyParameterName = 'Name'
         Parameters = $PSBoundParameters
     }
-    
+
     $configurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
     # This script block must be run directly in this configuration in order to resolve variables

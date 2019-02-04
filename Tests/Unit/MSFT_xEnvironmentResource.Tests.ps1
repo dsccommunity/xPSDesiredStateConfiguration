@@ -1,5 +1,14 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
+
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
 
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
@@ -87,7 +96,7 @@ try
                 It 'Should return the environment variable Ensure state as Absent' {
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                 }
-                
+
                 It 'Should return Value as null' {
                     $getTargetResourceResult.Value | Should Be $null
                 }
@@ -135,7 +144,7 @@ try
                 It 'Should return the environment variable Ensure state as Absent' {
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                 }
-                
+
                 It 'Should return Value as null' {
                     $getTargetResourceResult.Value | Should Be $null
                 }
@@ -183,7 +192,7 @@ try
                 It 'Should return the environment variable Ensure state as Absent' {
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
                 }
-                
+
                 It 'Should return Value as null' {
                     $getTargetResourceResult.Value | Should Be $null
                 }
@@ -205,7 +214,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should Not Throw
                 }
-                
+
                 It 'Should have set the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -219,11 +228,11 @@ try
 
             Context 'Add new environment variable with Path and item properties present' {
                 $newPathValue = 'new path value2'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
                 }
-                
+
                 It 'Should have set the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -268,7 +277,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -286,7 +295,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should Not Throw
                 }
-                
+
                 It 'Should have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -300,11 +309,11 @@ try
 
             Context 'Update environment variable with Path and invalid Value (;) passed in' {
                 $newPathValue = ';'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
                 }
@@ -320,11 +329,11 @@ try
 
             Context 'Update environment variable with Path and invalid Value ( ) passed in' {
                 $newPathValue = '    '
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
                 }
@@ -346,7 +355,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
                 }
-                
+
                 It 'Should have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newFullPathValue
                 }
@@ -366,11 +375,11 @@ try
                 $oldPathValue = $script:mockEnvironmentVar.PATH
                 $newPathValue = 'new path value 5'
                 $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $oldPathValue
                 }
@@ -422,7 +431,7 @@ try
                     { Set-TargetResource -Name $script:mockEnvironmentVarName `
                                          -Value 'mockNewValue' `
                                          -Ensure 'Absent' `
-                                         -Path $false 
+                                         -Path $false
                     } | Should Not Throw
                 }
 
@@ -473,7 +482,7 @@ try
 
             Context 'Remove environment variable with Value set to full path value that the environment var is already set to' {
                 $pathToRemove = $script:mockEnvironmentVar.PATH
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName `
                                          -Value $pathToRemove `
@@ -496,7 +505,7 @@ try
             Context 'Remove environment variable with Value set to a path value that the environment variable contains' {
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $pathToRemove = 'path3'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName `
                                          -Value $pathToRemove `
@@ -529,7 +538,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should have set the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -543,11 +552,11 @@ try
 
             Context 'Add new environment variable with Path and item properties present' {
                 $newPathValue = 'new path value2'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should have set the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -585,11 +594,11 @@ try
             Context 'Update environment variable without Path and Value given is the value already set' {
                 $newPathValue = 'new path value2'
                 $script:mockEnvironmentVar.PATH = $newPathValue
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -603,11 +612,11 @@ try
 
             Context 'Update environment variable without Path and new Value passed in' {
                 $newPathValue = 'new path value3'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -621,11 +630,11 @@ try
 
             Context 'Update environment variable with Path and invalid Value (;) passed in' {
                 $newPathValue = ';'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
                 }
@@ -640,11 +649,11 @@ try
 
             Context 'Update environment variable with Path and invalid Value ( ) passed in' {
                 $newPathValue = '    '
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
                 }
@@ -665,7 +674,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newFullPathValue
                 }
@@ -684,11 +693,11 @@ try
                 $oldPathValue = $script:mockEnvironmentVar.PATH
                 $newPathValue = 'new path value 5'
                 $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Process') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $oldPathValue
                 }
@@ -736,7 +745,7 @@ try
                                          -Value 'mockNewValue' `
                                          -Ensure 'Absent' `
                                          -Path $false `
-                                         -Target @('Process') 
+                                         -Target @('Process')
                     } | Should Not Throw
                 }
 
@@ -787,7 +796,7 @@ try
 
             Context 'Remove environment variable with Value set to full path value that the environment var is already set to' {
                 $pathToRemove = $script:mockEnvironmentVar.PATH
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName `
                                          -Value $pathToRemove `
@@ -810,7 +819,7 @@ try
             Context 'Remove environment variable with Value set to a path value that the environment variable contains' {
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $pathToRemove = 'path3'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName `
                                          -Value $pathToRemove `
@@ -845,7 +854,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should have set the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -859,11 +868,11 @@ try
 
             Context 'Add new environment variable with Path and item properties present' {
                 $newPathValue = 'new path value2'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should have set the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -906,11 +915,11 @@ try
             Context 'Update environment variable without Path and Value given is the value already set' {
                 $newPathValue = 'new path value2'
                 $script:mockEnvironmentVar.PATH = $newPathValue
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -924,11 +933,11 @@ try
 
             Context 'Update environment variable without Path and new Value passed in' {
                 $newPathValue = 'new path value3'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newPathValue
                 }
@@ -942,11 +951,11 @@ try
 
             Context 'Update environment variable with Path and invalid Value (;) passed in' {
                 $newPathValue = ';'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
                 }
@@ -962,11 +971,11 @@ try
 
             Context 'Update environment variable with Path and invalid Value ( ) passed in' {
                 $newPathValue = '    '
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
                 }
@@ -988,7 +997,7 @@ try
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $newFullPathValue
                 }
@@ -1008,11 +1017,11 @@ try
                 $oldPathValue = $script:mockEnvironmentVar.PATH
                 $newPathValue = 'new path value 5'
                 $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Machine') } | Should Not Throw
                 }
-                
+
                 It 'Should not have updated the mock variable value' {
                     $script:mockEnvironmentVar.PATH | Should Be $oldPathValue
                 }
@@ -1046,7 +1055,7 @@ try
                 Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $script:mockEnvironmentVar }
                 Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar.PATH }
                 Mock -CommandName Remove-EnvironmentVariable -MockWith {}
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true -Target @('Machine') } | Should Not Throw
                 }
@@ -1145,7 +1154,7 @@ try
             Context 'Remove environment variable with Value set to a path value that the environment variable contains' {
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
                 $pathToRemove = 'path3'
-                
+
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName `
                                          -Value $pathToRemove `
@@ -1307,7 +1316,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context
                 }
             }
-            
+
             $expectedProperties = @{ PATH = $expectedValue }
             Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $expectedProperties }
             Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar.PATH }
@@ -1347,7 +1356,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 0 -Scope Context
                 }
             }
-            
+
             Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $script:mockEnvironmentVar }
             Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar.PATH }
 
@@ -1365,7 +1374,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 0 -Scope Context
                 }
             }
-            
+
             Context 'Ensure set to Absent and Path set to false with non-existent value' {
                 $expectedValue = 'nonExistentExpectedValue'
 
@@ -1619,7 +1628,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context
                 }
             }
-            
+
             Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar.PATH }
 
             Context 'Ensure set to Present, Path set to true, and not all paths in Value are set in process' {
@@ -1654,7 +1663,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 0 -Scope Context
                 }
             }
-            
+
             Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar.PATH }
 
             Context 'Ensure set to Absent and value not specified' {
@@ -1671,7 +1680,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 0 -Scope Context
                 }
             }
-            
+
             Context 'Ensure set to Absent and Path set to false with non-existent value' {
                 $expectedValue = 'nonExistentExpectedValue'
 
@@ -1724,7 +1733,7 @@ try
 
             Context 'Ensure set to Absent, Path set to true, and Value is set in machine environment variable' {
                 $script:mockEnvironmentVar.PATH = 'path1;path2;path3;path4'
-                
+
                 It 'Should return true' {
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName `
                                                                     -Value $expectedValue `
@@ -1736,7 +1745,7 @@ try
 
                 It 'Should have called the correct mocks' {
                     Assert-MockCalled Get-EnvironmentVariable -Exactly 1 -Scope Context
-                    Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context                   
+                    Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context
                 }
             }
 
@@ -1933,7 +1942,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context
                 }
             }
-            
+
             $expectedProperties = @{ PATH = $expectedValue }
             Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $expectedProperties }
             Mock -CommandName Get-EnvironmentVariable -MockWith { return $script:mockEnvironmentVar.PATH }
@@ -1974,7 +1983,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 0 -Scope Context
                 }
             }
-            
+
             Mock -CommandName Get-EnvironmentVariableWithoutExpanding -MockWith { return $script:mockEnvironmentVar }
 
             Context 'Ensure set to Absent and value not specified' {
@@ -1992,7 +2001,7 @@ try
                     Assert-MockCalled Test-PathsInValue -Exactly 0 -Scope Context
                 }
             }
-            
+
             Context 'Ensure set to Absent and Path set to false with non-existent value' {
                 $expectedValue = 'nonExistentExpectedValue'
 
@@ -2060,7 +2069,7 @@ try
                 It 'Should have called the correct mocks' {
                     Assert-MockCalled Get-EnvironmentVariableWithoutExpanding -Exactly 1 -Scope Context
                     Assert-MockCalled Get-EnvironmentVariable -Exactly 0 -Scope Context
-                    Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context                   
+                    Assert-MockCalled Test-PathsInValue -Exactly 1 -Scope Context
                 }
             }
 
@@ -2175,7 +2184,7 @@ try
                 }
             }
         }
-        
+
         Describe 'xEnvironmentResource\Remove-PathsFromValue' {
             Context 'Path is updated' {
                 It 'Should return the updated path value with the specified path removed' {
@@ -2210,17 +2219,17 @@ try
             Mock -CommandName Set-ProcessEnvironmentVariable -MockWith {}
             Mock -CommandName Set-ItemProperty -MockWith {}
             Mock -CommandName Remove-ItemProperty -MockWith {}
-            Mock -CommandName Get-ItemProperty -MockWith { 
+            Mock -CommandName Get-ItemProperty -MockWith {
                 if ($Name -eq $script:mockEnvironmentVarName)
                 {
                     return $script:mockEnvironmentVar.$script:mockEnvironmentVarName
-                } 
+                }
                 else
                 {
                     return $null
                 }
             }
-            
+
             Context 'Set Process variable' {
                 It 'Should call the correct mocks' {
                     Set-EnvironmentVariable -Name $script:mockEnvironmentVarName -Target @('Process')
@@ -2260,19 +2269,19 @@ try
                     } | Should Throw $script:localizedData.ArgumentTooLong
                 }
 
-                
+
 
                 It 'Should throw exception when environment variable cannot be found to remove' {
                     $invalidName = 'invalidName'
                     {
-                        Set-EnvironmentVariable -Name $invalidName -Target @('Machine') 
+                        Set-EnvironmentVariable -Name $invalidName -Target @('Machine')
                     } | Should Throw ($script:localizedData.RemoveNonExistentVarError -f $invalidName)
                 }
 
                 It 'Should throw exception when environment variable cannot be found to set' {
                     $invalidName = 'invalidName'
                     {
-                        Set-EnvironmentVariable -Name $invalidName -Value 'testValue' -Target @('Machine') 
+                        Set-EnvironmentVariable -Name $invalidName -Value 'testValue' -Target @('Machine')
                     } | Should Throw ($script:localizedData.GetItemPropertyFailure -f $invalidName, $script:envVarRegPathMachine)
                 }
 
@@ -2298,13 +2307,13 @@ try
                 It 'Should throw exception' {
                     $name = 'mockVariableName'
                     $value = 'mockValue'
-                    { 
+                    {
                         Set-EnvironmentVariable -Name $name -Value $value -Target @('Process')
                     } | Should Throw $errorRecord
                 }
             }
         }
-        
+
         Describe 'xEnvironmentResource\Test-PathsInValue' {
             $existingPaths = 'path1;path2;path3;path5;path6'
 

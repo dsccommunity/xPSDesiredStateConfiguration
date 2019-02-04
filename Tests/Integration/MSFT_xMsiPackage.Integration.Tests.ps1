@@ -1,9 +1,14 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $script:commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -28,7 +33,7 @@ try
 
                 <#
                     This log file is used to log messages from the mock server which is important for debugging since
-                    most of the work of the mock server is done within a separate process. 
+                    most of the work of the mock server is done within a separate process.
                 #>
                 $script:logFile = Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'
 
@@ -211,7 +216,7 @@ try
 
                         $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true
                         $fileServerStarted = $serverResult.FileServerStarted
-                        $job = $serverResult.Job             
+                        $job = $serverResult.Job
 
                         # Wait for the file server to be ready to receive requests
                         $fileServerStarted.WaitOne(30000)

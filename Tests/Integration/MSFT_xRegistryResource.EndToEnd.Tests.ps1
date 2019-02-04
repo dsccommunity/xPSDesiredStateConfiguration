@@ -1,4 +1,4 @@
-﻿<#
+<#
     WARNING: DO NOT RUN THESE TESTS ON A VALUABLE MACHINE!
     Running on a disposable VM or AppVeyor is strongly recommended.
     If these tests go awry, your machine's registry could be corrupted which will brick your machine!
@@ -12,6 +12,11 @@ Set-StrictMode -Version 'Latest'
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -47,7 +52,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -79,7 +84,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -117,7 +122,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -177,7 +182,7 @@ try
                 }
 
                 It 'Should compile and run configuration' {
-                    { 
+                    {
                         . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -218,7 +223,7 @@ try
             $expectedRegistryKeyValue = [Byte[]]@(0)
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -254,7 +259,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -288,7 +293,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -320,7 +325,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -347,4 +352,4 @@ finally
 {
     Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
 }
-        
+

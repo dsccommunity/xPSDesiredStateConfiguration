@@ -1,4 +1,9 @@
-﻿Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -10,11 +15,11 @@ try
     Describe 'xWindowsPackageCab Integration Tests' {
         BeforeAll {
             Import-Module -Name 'Dism'
-            
+
             $script:installedStates = @( 'Installed', 'InstallPending' )
             $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsPackageCab.config.ps1'
 
-            $script:testPackageName = '' 
+            $script:testPackageName = ''
             $script:testSourcePath = Join-Path -Path $PSScriptRoot -ChildPath ''
 
             $script:cabPackageNotProvided = $script:testPackageName -eq [String]::Empty
@@ -47,7 +52,7 @@ try
             {
                 try
                 {
-                    $windowsPackage = Dism\Get-WindowsPackage -PackageName $script:testPackageName -Online 
+                    $windowsPackage = Dism\Get-WindowsPackage -PackageName $script:testPackageName -Online
                     if ($null -ne $windowsPackage -and $windowsPackage.PackageState -in $script:installedStates)
                     {
                         Dism\Remove-WindowsPackage -PackageName $script:testPackageName.Name -Online -NoRestart
@@ -59,7 +64,7 @@ try
                 }
             }
         }
-    
+
         It 'Should install a Windows package through a cab file' -Skip:$script:cabPackageNotProvided {
             $configurationName = 'InstallWindowsPackageCab'
 
@@ -69,7 +74,7 @@ try
                 Ensure = 'Present'
             }
 
-            { 
+            {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -95,7 +100,7 @@ try
 
             { $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should Not Throw
 
-            { 
+            {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -116,7 +121,7 @@ try
 
             { Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should Throw
 
-            { 
+            {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force

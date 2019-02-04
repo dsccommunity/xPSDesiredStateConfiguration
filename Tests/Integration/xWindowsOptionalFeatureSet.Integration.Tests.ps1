@@ -1,10 +1,15 @@
-﻿$errorActionPreference = 'Stop'
+$errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -87,7 +92,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @wofSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -115,7 +120,7 @@ try
                     $windowsOptionalFeature.State -in $script:enabledStates | Should Be $true
                 }
             }
-                
+
             It 'Should have created the log file' {
                 Test-Path -Path $wofSetParameters.LogPath | Should Be $true
             }
@@ -163,7 +168,7 @@ try
             }
 
             It 'Should compile and run configuration' {
-                { 
+                {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @wofSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
@@ -191,7 +196,7 @@ try
                     $windowsOptionalFeature.State -in $script:disabledStates | Should Be $true
                 }
             }
-                
+
             It 'Should have created the log file' {
                 Test-Path -Path $wofSetParameters.LogPath | Should Be $true
             }

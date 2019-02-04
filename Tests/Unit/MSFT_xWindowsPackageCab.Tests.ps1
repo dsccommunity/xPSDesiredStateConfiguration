@@ -1,4 +1,9 @@
-﻿Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -30,7 +35,7 @@ try
                 It 'Should return Ensure as Absent when package is not installed' {
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
-                    
+
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
 
@@ -39,16 +44,16 @@ try
 
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
                     $getTargetResourceResult.Ensure | Should Be 'Absent'
-                    
+
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
-        
+
                 It 'Should return Ensure as Present when package is installed' {
                     Mock -CommandName 'Dism\Get-WindowsPackage' -MockWith { return @{ PackageState = 'Installed' } }
 
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
                     $getTargetResourceResult.Ensure | Should Be 'Present'
-                    
+
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
 
@@ -57,7 +62,7 @@ try
 
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
                     $getTargetResourceResult.Ensure | Should Be 'Present'
-                    
+
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
 
@@ -116,10 +121,10 @@ try
                 It 'Should return true when Get-TargetResource returns Ensure Present and Ensure is set to Present' {
                     Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Present' | Should Be $true
                     Assert-MockCalled -CommandName 'Get-TargetResource'
-                } 
+                }
 
                 It 'Should return false when Get-TargetResource returns Ensure Present and Ensure is set to Absent' {
-                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Absent' | Should Be $false 
+                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Absent' | Should Be $false
                     Assert-MockCalled -CommandName 'Get-TargetResource'
                 }
 

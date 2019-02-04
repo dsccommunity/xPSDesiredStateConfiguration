@@ -213,6 +213,9 @@ function Set-TargetResource
 	$responseHeaders = $null
     try
     {
+        $currentProgressPreference = $ProgressPreference
+        $ProgressPreference = 'SilentlyContinue'
+
         Write-Verbose -Message $($LocalizedData.DownloadingURI `
             -f ${DestinationPath},${URI})
         $responseHeaders = (Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -outFile $DestinationPath -PassThru).Headers
@@ -232,6 +235,10 @@ function Set-TargetResource
         New-InvalidDataException `
             -errorId "SystemException" `
             -errorMessage $errorMessage
+    }
+    finally
+    {
+        $ProgressPreference = $currentProgressPreference
     }
 
     # Update cache

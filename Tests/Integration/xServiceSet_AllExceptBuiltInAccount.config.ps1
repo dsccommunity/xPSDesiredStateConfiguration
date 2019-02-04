@@ -1,4 +1,4 @@
-﻿param
+param
 (
     [Parameter(Mandatory = $true)]
     [String]
@@ -44,7 +44,7 @@ Configuration $ConfigurationName
             Ensure      = $Ensure
             Credential  = $Credential
             State       = $State
-            StartupType = $StartupType     
+            StartupType = $StartupType
         }
     }
 }

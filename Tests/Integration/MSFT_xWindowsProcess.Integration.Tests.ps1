@@ -1,4 +1,4 @@
-﻿<#
+<#
     These tests should only be run in AppVeyor since the second half of the tests require
     the AppVeyor administrator account credential to run.
 
@@ -12,6 +12,11 @@ Set-StrictMode -Version 'Latest'
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -52,7 +57,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -93,7 +98,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -139,7 +144,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -181,7 +186,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -222,7 +227,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should start another process running' {
                 Start-Process -FilePath $testProcessPath -ArgumentList @($logFilePath)
@@ -272,7 +277,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -339,7 +344,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -382,7 +387,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -430,7 +435,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -474,7 +479,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
@@ -517,7 +522,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should start another process running' {
                 Start-Process -FilePath $testProcessPath -ArgumentList @($logFilePath)
@@ -574,7 +579,7 @@ try
             }
 
             # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 1
+            $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw

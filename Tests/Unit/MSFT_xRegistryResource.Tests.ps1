@@ -6,6 +6,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xRegistryResource' `
@@ -18,7 +23,7 @@ try
 
         $script:validRegistryDriveRoots = @( 'HKEY_CLASSES_ROOT', 'HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE', 'HKEY_USERS', 'HKEY_CURRENT_CONFIG' )
         $script:validRegistryDriveNames = @( 'HKCR', 'HKCU', 'HKLM', 'HKUS', 'HKCC' )
-        
+
         # This registry key is used ONLY for its type (Microsoft.Win32.RegistryKey). It is not actually accessed in any way during these tests.
         $script:testRegistryKey = [Microsoft.Win32.Registry]::CurrentConfig
 
@@ -37,7 +42,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -97,7 +102,7 @@ try
                     $getTargetResourceResult.ValueData | Should Be $null
                 }
             }
-            
+
             Mock -CommandName 'Get-RegistryKey' -MockWith { return $script:testRegistryKey }
 
             Context 'Specified registry key exists, registry key value name specified as an empty string, and registry key value data and type not specified' {
@@ -105,7 +110,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -171,7 +176,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = 'TestValueName'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -254,7 +259,7 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = 'TestValueName'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -347,7 +352,7 @@ try
                     ValueType = 'String'
                     ValueData = 'TestValueData'
                 }
-                
+
                 It 'Should not throw' {
                     { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
                 }
@@ -447,11 +452,11 @@ try
             Mock -CommandName 'Get-RegistryKeyName' -MockWith { return $setTargetResourceParameters.Key }
             Mock -CommandName 'Set-RegistryKeyValue' -MockWith { }
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
-            Mock -CommandName 'Remove-ItemProperty' -MockWith { }
+            Mock -CommandName 'Remove-RegistryKey' -MockWith { }
+            Mock -CommandName 'Remove-RegistryKeyValue' -MockWith { }
             Mock -CommandName 'Remove-DefaultRegistryKeyValue' -MockWith { }
             Mock -CommandName 'Get-RegistryKeySubKeyCount' -MockWith { return 0 }
-            Mock -CommandName 'Remove-Item' -MockWith { }
-            
+
 
             Context 'Registry key does not exist and Ensure specified as Absent' {
                 $setTargetResourceParameters = @{
@@ -518,7 +523,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -530,7 +535,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -608,7 +613,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -620,7 +625,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -695,7 +700,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -712,15 +717,12 @@ try
                 }
 
                 It 'Should remove the registry key' {
-                    $removeItemParameterFilter = {
-                        $pathParameterCorrect = $Path -eq $setTargetResourceParameters.Key
-                        $recurseParameterCorrect = $Recurse -eq $true
-                        $forceParameterCorrect = $Force -eq $true
-
-                        return $pathParameterCorrect -and $recurseParameterCorrect -and $forceParameterCorrect
+                    $removeRegistryKeyParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        return $registryKeyParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -ParameterFilter $removeRegistryKeyParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -810,7 +812,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -827,15 +829,12 @@ try
                 }
 
                 It 'Should remove the registry key' {
-                    $removeItemParameterFilter = {
-                        $pathParameterCorrect = $Path -eq $setTargetResourceParameters.Key
-                        $recurseParameterCorrect = $Recurse -eq $true
-                        $forceParameterCorrect = $Force -eq $true
-
-                        return $pathParameterCorrect -and $recurseParameterCorrect -and $forceParameterCorrect
+                    $removeRegistryKeyParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        return $registryKeyParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -ParameterFilter $removeRegistryKeyParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -918,7 +917,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -930,7 +929,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1003,7 +1002,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1015,14 +1014,14 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
                     Set-TargetResource @setTargetResourceParameters | Should Be $null
                 }
             }
-            
+
             Context 'Registry key exists, Ensure specified as Present, specified registry value does not exist, and registry value type and data not specified' {
                 $setTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
@@ -1067,7 +1066,7 @@ try
 
                 It 'Should convert the specified registry key value to a string' {
                     $convertToStringParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:defaultValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:defaultValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1117,7 +1116,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1129,7 +1128,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1187,7 +1186,7 @@ try
 
                 It 'Should convert the specified registry key value to binary data' {
                     $convertToBinaryParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1233,7 +1232,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1245,7 +1244,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1317,7 +1316,7 @@ try
 
                 It 'Should convert the specified registry key value to a multi-string' {
                     $convertToMultiStringParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1350,7 +1349,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1362,7 +1361,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1444,9 +1443,9 @@ try
 
                 It 'Should convert the specified registry key value to a dword' {
                     $convertToDwordParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         $hexParameterCorrect = $Hex -eq $setTargetResourceParameters.Hex
-                        
+
                         return $registryKeyValueParameterCorrect -and $hexParameterCorrect
                     }
 
@@ -1496,7 +1495,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1508,7 +1507,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1576,9 +1575,9 @@ try
 
                 It 'Should convert the specified registry key value to a qword' {
                     $convertToQwordParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         $hexParameterCorrect = $Hex -eq $setTargetResourceParameters.Hex
-                        
+
                         return $registryKeyValueParameterCorrect -and $hexParameterCorrect
                     }
 
@@ -1624,7 +1623,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1636,7 +1635,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1722,15 +1721,14 @@ try
                 }
 
                 It 'Should remove the registry key value' {
-                    $removeItemPropertyParameterFilter = {
-                        $pathParameterCorrect = $Path -eq $setTargetResourceParameters.Key
-                        $nameParameterCorrect = $Name -eq $setTargetResourceParameters.ValueName
-                        $forceParameterCorrect = $Force -eq $true
+                    $removeRegistryKeyValueParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
 
-                        return $pathParameterCorrect -and $nameParameterCorrect -and $forceParameterCorrect
+                        return $registryKeyParameterCorrect -and $registryKeyValueNameParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -ParameterFilter $removeItemPropertyParameterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -ParameterFilter $removeRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1742,7 +1740,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1828,7 +1826,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should remove the default registry key value' {
@@ -1845,7 +1843,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
@@ -1853,7 +1851,7 @@ try
                 }
             }
         }
-        
+
         Describe 'xRegistry\Test-TargetResource' {
             Mock -CommandName 'Get-RegistryKeyValueDisplayName' -MockWith { return $RegistryKeyValueName }
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
@@ -2790,7 +2788,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2804,7 +2802,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2818,7 +2816,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2832,7 +2830,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'HKCR'
                 }
-                
+
                 $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
 
                 It 'Should not throw' {
@@ -2854,7 +2852,7 @@ try
                         $rootParameterCorrect = $Root -eq $expectedRegistryDriveRoot
                         $psProviderParameterCorrect = $PSProvider -eq 'Registry'
                         $scopeParameterCorrect = $Scope -eq 'Script'
-                        
+
                         return $nameParameterCorrect -and $rootParameterCorrect -and $psProviderParameterCorrect -and $scopeParameterCorrect
                     }
 
@@ -2872,7 +2870,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2886,7 +2884,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
@@ -2900,7 +2898,7 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'HKCR'
                 }
-                
+
                 $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
 
                 It 'Should not throw' {
@@ -3230,7 +3228,7 @@ try
                         $convertToReadableStringResult | Should Be ([String]::Empty)
                     }
                 }
-            
+
                 Context "Registry key value specified as an empty array and registry key type specified as $registryKeyValueType" {
                     $convertToReadableStringParameters = @{
                         RegistryKeyValue = @()
