@@ -18,7 +18,7 @@ function Test-UseSecurityBestPractice
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String[]]
         $DisableSecurityBestPractices
     )
@@ -37,7 +37,7 @@ function Set-UseSecurityBestPractice
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
         [System.String[]]
         $DisableSecurityBestPractices
     )
