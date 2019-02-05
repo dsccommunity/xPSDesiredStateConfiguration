@@ -48,4 +48,4 @@ function Set-UseSecurityBestPractice
     }
 }
 
-Export-ModuleMember -function *-UseSecurityBestPractices
+Export-ModuleMember -Function *-UseSecurityBestPractice
