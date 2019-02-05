@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Pull server module publishing
+  - Removed forced verbose logging from CreateZipFromSource, Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the console
 - Corrected GitHub Pull Request template to remove referral to
   `BestPractices.MD` which has been combined into `StyleGuidelines.md`
   ([issue #520](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/520)).
