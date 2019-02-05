@@ -342,6 +342,10 @@ try
                         Variable = 'CertificateSubject'
                         Data     = $certificateData[0].Subject
                     }
+                    @{
+                        Variable = 'CertificateTemplateName'
+                        Data     = $certificateData[0].Extensions.Where{$_.Oid.FriendlyName -eq 'Certificate Template Name'}.Format($false)
+                    }
                )
 
                 It 'Should not throw' {
@@ -391,6 +395,10 @@ try
                      @{
                         Variable = 'CertificateSubject'
                         Data     = $certificateData[0].Subject
+                    }
+                    @{
+                        Variable = 'CertificateTemplateName'
+                        Data     = $certificateData[0].Extensions.Where{$_.Oid.FriendlyName -eq 'Certificate Template Name'}.Format($false)
                     }
                )
 
