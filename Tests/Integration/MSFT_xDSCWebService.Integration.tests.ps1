@@ -93,7 +93,9 @@ function Test-DSCPullServerIsPresent
     }
 
     It 'Should create a firewall rule for the chosen port' {
-        (Get-NetFirewallRule | Where-Object -FilterScript {$_.DisplayName -eq 'DSCPullServer_IIS_Port'} | Measure-Object).Count | Should -Be 1
+        (Get-NetFirewallRule | Where-Object -FilterScript {
+            $_.DisplayName -eq 'DSCPullServer_IIS_Port'
+        } | Measure-Object).Count | Should -Be 1
     }
 }
 #endregion
@@ -105,15 +107,12 @@ try
     if (!(Install-WindowsFeatureAndVerify -Name 'DSC-Service') -or
         !(Install-WindowsFeatureAndVerify -Name 'Web-Server'))
     {
-        Write-Verbose -Message 'Skipping xDSCWebService Integration tests.' -Verbose
+        Write-Verbose -Message 'Skipping xDSCWebService Integration tests due to missing Windows Features.' -Verbose
         return
     }
 
     # Make sure the w3svc is running before proceeding with tests
-    if ((Get-Service -Name w3svc).Status -ne 'Running')
-    {
-        Start-Service -Name w3svc -ErrorAction Stop
-    }
+    Start-Service -Name w3svc -ErrorAction Stop
 
     #region Integration Tests
     $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dcsResourceName).config.ps1"
