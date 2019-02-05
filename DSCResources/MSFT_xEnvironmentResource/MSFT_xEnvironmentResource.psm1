@@ -197,7 +197,6 @@ function Set-TargetResource
 
         if ($createMachineVariable -and $createProcessVariable)
         {
-
             if (-not $valueSpecified)
             {
                 <#
