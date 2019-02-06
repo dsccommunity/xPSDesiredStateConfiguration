@@ -161,11 +161,24 @@ function Get-TargetResource
     }
     else
     {
-        $certificate = ([Array](Get-ChildItem -Path 'Cert:\LocalMachine\My\')).Where{$_.Thumbprint -eq $webBinding.CertificateHash}
+        $certificate = ([Array] (Get-ChildItem -Path 'Cert:\LocalMachine\My\')) | Where-Object -FilterScript {
+            $_.Thumbprint -eq $webBinding.CertificateHash
+        }
+
+        # Try to parse the Certificate Template Name. The property is not available on all Certificates.
+        $actualCertificateTemplateName = ''
+        $certificateTemplateProperty = $certificate.Extensions | Where-Object -FilterScript {
+            $_.Oid.FriendlyName -eq 'Certificate Template Name'
+        }
+
+        if ($null -ne $certificateTemplateProperty)
+        {
+            $actualCertificateTemplateName = $certificateTemplateProperty.Format($false)
+        }
 
         $output.Add('CertificateThumbPrint',   $webBinding.CertificateHash)
         $output.Add('CertificateSubject',      $certificate.Subject)
-        $output.Add('CertificateTemplateName', $certificate.Extensions.Where{$_.Oid.FriendlyName -eq 'Certificate Template Name'}.Format($false))
+        $output.Add('CertificateTemplateName', $actualCertificateTemplateName)
     }
 
     return $output
