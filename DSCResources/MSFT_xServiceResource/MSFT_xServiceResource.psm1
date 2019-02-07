@@ -969,7 +969,7 @@ function Grant-LogOnAsServiceRight
                 private const int UNLEN = 256;
                 private const int DNLEN = 15;
 
-                // Extra characteres for "\", "@" etc.
+                // Extra characteres for '\', '@' etc.
                 private const int EXTRA_LENGTH = 3;
                 #endregion constants
 
