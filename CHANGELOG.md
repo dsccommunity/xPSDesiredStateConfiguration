@@ -100,6 +100,10 @@
   - Corrected style guideline violations. ([issue #489](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/489))
 - Fixes script analyzer issues in xEnvironmentResource.
   [issue #484](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/484)
+- Fixes script analyzer issues in MSFT_xMsiPackage.psm1.
+  [issue #486](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/486)
+- Fixes script analyzer issues in MSFT_xPackageResource.psm1.
+  [issue #487](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/487).
 
 ## 8.4.0.0
 
