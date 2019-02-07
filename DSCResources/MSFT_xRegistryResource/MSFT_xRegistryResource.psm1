@@ -53,9 +53,11 @@ function Get-TargetResource
         [AllowEmptyString()]
         $ValueName,
 
+        [Parameter()]
         [String[]]
         $ValueData,
 
+        [Parameter()]
         [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [String]
         $ValueType
@@ -142,10 +144,10 @@ function Get-TargetResource
 
     .PARAMETER Ensure
         Specifies whether or not the registry key with the given path and the registry key value with the given name should exist.
-        
+
         To ensure that the registry key and value exists, set this property to Present.
         To ensure that the registry key and value do not exist, set this property to Absent.
-        
+
         The default value is Present.
 
     .PARAMETER ValueData
@@ -153,7 +155,7 @@ function Get-TargetResource
 
     .PARAMETER ValueType
         The type of the value to set.
-        
+
         The supported types are:
             String (REG_SZ)
             Binary (REG-BINARY)
@@ -167,12 +169,12 @@ function Get-TargetResource
 
         If specified, DWORD/QWORD value data is presented in hexadecimal format.
         Not valid for other value types.
-        
+
         The default value is $false.
 
     .PARAMETER Force
         Specifies whether or not to overwrite the registry key with the given path with the new
-        value if it is already present. 
+        value if it is already present.
 #>
 function Set-TargetResource
 {
@@ -190,21 +192,26 @@ function Set-TargetResource
         [AllowEmptyString()]
         $ValueName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [ValidateNotNull()]
         [String[]]
         $ValueData = @(),
 
+        [Parameter()]
         [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [String]
         $ValueType = 'String',
 
+        [Parameter()]
         [Boolean]
         $Hex = $false,
 
+        [Parameter()]
         [Boolean]
         $Force = $false
     )
@@ -288,7 +295,7 @@ function Set-TargetResource
                             Write-Verbose -Message ($script:localizedData.OverwritingRegistryKeyValue -f $valueDisplayName, $Key)
                             $null = Set-RegistryKeyValue -RegistryKeyName $registryKeyName -RegistryKeyValueName $ValueName -RegistryKeyValue $expectedRegistryKeyValue -ValueType $ValueType
                         }
-                    }   
+                    }
                 }
             }
             else
@@ -297,7 +304,7 @@ function Set-TargetResource
                 if ($null -ne $actualRegistryKeyValue)
                 {
                     Write-Verbose -Message ($script:localizedData.RemovingRegistryKeyValue -f $valueDisplayName, $Key)
-                        
+
                     # If the specified registry key value exists, check if the user specified a registry key value with a name to remove
                     if (-not [String]::IsNullOrEmpty($ValueName))
                     {
@@ -352,7 +359,7 @@ function Set-TargetResource
 
     .PARAMETER Ensure
         Specifies whether or not the registry key and value should exist.
-        
+
         To test that they exist, set this property to "Present".
         To test that they do not exist, set the property to "Absent".
         The default value is "Present".
@@ -362,7 +369,7 @@ function Set-TargetResource
 
     .PARAMETER ValueType
         The type of the value.
-        
+
         The supported types are:
             String (REG_SZ)
             Binary (REG-BINARY)
@@ -394,21 +401,26 @@ function Test-TargetResource
         [String]
         $ValueName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [ValidateNotNull()]
         [String[]]
         $ValueData = @(),
 
+        [Parameter()]
         [ValidateSet('String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString')]
         [String]
         $ValueType = 'String',
 
+        [Parameter()]
         [Boolean]
         $Hex = $false,
 
+        [Parameter()]
         [Boolean]
         $Force = $false
     )
@@ -732,6 +744,7 @@ function Get-RegistryKey
         [String]
         $RegistryKeyPath,
 
+        [Parameter()]
         [Switch]
         $WriteAccessAllowed
     )
@@ -777,9 +790,9 @@ function Get-RegistryKeyValueDisplayName
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
         [AllowNull()]
         [AllowEmptyString()]
+        [String]
         $RegistryKeyValueName
     )
 
@@ -816,8 +829,8 @@ function Get-RegistryKeyValue
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
         [AllowEmptyString()]
+        [String]
         $RegistryKeyValueName
     )
 
@@ -850,8 +863,8 @@ function Get-RegistryKeyValueType
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
         [AllowEmptyString()]
+        [String]
         $RegistryKeyValueName
     )
 
@@ -873,8 +886,8 @@ function Convert-ByteArrayToHexString
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Object[]]
         [AllowEmptyCollection()]
+        [Object[]]
         $ByteArray
     )
 
@@ -905,9 +918,9 @@ function ConvertTo-ReadableString
     param
     (
         [Parameter(Mandatory = $true)]
-        [Object[]]
         [AllowNull()]
         [AllowEmptyCollection()]
+        [Object[]]
         $RegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
@@ -925,7 +938,7 @@ function ConvertTo-ReadableString
         {
             $RegistryKeyValue = Convert-ByteArrayToHexString -ByteArray $RegistryKeyValue
         }
-        
+
         if ($RegistryKeyValueType -ne 'MultiString')
         {
             $RegistryKeyValue = [String[]]@() + $RegistryKeyValue
@@ -1049,8 +1062,8 @@ function ConvertTo-Binary
     (
         [Parameter()]
         [AllowNull()]
-        [String[]]
         [AllowEmptyCollection()]
+        [String[]]
         $RegistryKeyValue
     )
 
@@ -1106,8 +1119,8 @@ function ConvertTo-DWord
     (
         [Parameter()]
         [AllowNull()]
-        [String[]]
         [AllowEmptyCollection()]
+        [String[]]
         $RegistryKeyValue,
 
         [Parameter()]
@@ -1169,8 +1182,8 @@ function ConvertTo-MultiString
     (
         [Parameter()]
         [AllowNull()]
-        [String[]]
         [AllowEmptyCollection()]
+        [String[]]
         $RegistryKeyValue
     )
 
@@ -1199,8 +1212,8 @@ function ConvertTo-QWord
     (
         [Parameter()]
         [AllowNull()]
-        [String[]]
         [AllowEmptyCollection()]
+        [String[]]
         $RegistryKeyValue,
 
         [Parameter()]
@@ -1262,8 +1275,8 @@ function ConvertTo-String
     (
         [Parameter()]
         [AllowNull()]
-        [String[]]
         [AllowEmptyCollection()]
+        [String[]]
         $RegistryKeyValue
     )
 
@@ -1311,13 +1324,13 @@ function Set-RegistryKeyValue
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
         [AllowEmptyString()]
+        [String]
         $RegistryKeyValueName,
 
         [Parameter(Mandatory = $true)]
-        [Object]
         [AllowNull()]
+        [Object]
         $RegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
@@ -1358,13 +1371,13 @@ function Test-RegistryKeyValuesMatch
     param
     (
         [Parameter(Mandatory = $true)]
-        [Object]
         [AllowNull()]
+        [Object]
         $ExpectedRegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
-        [Object]
         [AllowNull()]
+        [Object]
         $ActualRegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
@@ -1463,9 +1476,9 @@ function Remove-RegistryKeyValue
     .SYNOPSIS
         Removes the default value of the specified registry key.
         This is a wrapper function for unit testing.
-        
+
     .PARAMETER RegistryKey
-        The registry key to remove the default value of. 
+        The registry key to remove the default value of.
 #>
 function Remove-DefaultRegistryKeyValue
 {

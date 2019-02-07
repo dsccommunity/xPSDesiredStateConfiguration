@@ -96,6 +96,8 @@
   - Added support for Group Managed Service Accounts
 - Adds new Integration tests for MSFT_xDSCWebService and removes old
   Integration test file, MSFT_xDSCWebService.xxx.ps1.
+- xRegistry
+  - Corrected style guideline violations. ([issue #489](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/489))
 
 ## 8.4.0.0
 
