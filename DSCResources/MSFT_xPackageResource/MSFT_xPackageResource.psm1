@@ -43,7 +43,7 @@ function Get-TargetResource
         $CreateCheckRegValue = $false,
 
         [Parameter()]
-        [ValidateSet('LocalMachine','CurrentUser')]
+        [ValidateSet('LocalMachine', 'CurrentUser')]
         [System.String]
         $InstalledCheckRegHive = 'LocalMachine',
 
@@ -245,7 +245,7 @@ function Set-TargetResource
         $CreateCheckRegValue = $false,
 
         [Parameter()]
-        [ValidateSet('LocalMachine','CurrentUser')]
+        [ValidateSet('LocalMachine', 'CurrentUser')]
         [System.String]
         $InstalledCheckRegHive = 'LocalMachine',
 
@@ -776,7 +776,7 @@ function Test-TargetResource
         $CreateCheckRegValue = $false,
 
         [Parameter()]
-        [ValidateSet('LocalMachine','CurrentUser')]
+        [ValidateSet('LocalMachine', 'CurrentUser')]
         [System.String]
         $InstalledCheckRegHive = 'LocalMachine',
 
