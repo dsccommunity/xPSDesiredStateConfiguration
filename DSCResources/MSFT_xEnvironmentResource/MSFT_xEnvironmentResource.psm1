@@ -30,18 +30,18 @@ $script:maxUserEnvVariableLength = 255
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter()]
         [ValidateSet('Process', 'Machine')]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Target = ('Process', 'Machine')
     )
 
@@ -120,31 +120,31 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter()]
         [ValidateNotNull()]
-        [String]
-        $Value = [String]::Empty,
+        [System.String]
+        $Value = [System.String]::Empty,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Path = $false,
 
         [Parameter()]
         [ValidateSet('Process', 'Machine')]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Target = ('Process', 'Machine')
     )
 
-    $valueSpecified = ($Value -ne [String]::Empty)
+    $valueSpecified = ($Value -ne [System.String]::Empty)
     $currentValueFromMachine = $null
     $currentValueFromProcess = $null
     $currentPropertiesFromMachine = $null
@@ -192,8 +192,8 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $createMachineVariable = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
-        $createProcessVariable = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
+        $createMachineVariable = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [System.String]::Empty))
+        $createProcessVariable = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [System.String]::Empty))
 
         if ($createMachineVariable -and $createProcessVariable)
         {
@@ -234,7 +234,7 @@ function Set-TargetResource
         # Check if an empty, whitespace or semi-colon only string has been specified. If yes, return unchanged.
         $trimmedValue = $Value.Trim(';').Trim()
 
-        if ([String]::IsNullOrEmpty($trimmedValue))
+        if ([System.String]::IsNullOrEmpty($trimmedValue))
         {
             Write-Verbose -Message ($script:localizedData.EnvVarPathUnchanged -f $Name, $currentValueToDisplay)
             return
@@ -323,7 +323,7 @@ function Set-TargetResource
         # Check if an empty string or semi-colon only string has been specified as $Value. If yes, return unchanged as we don't need to remove anything.
         $trimmedValue = $Value.Trim(';').Trim()
 
-        if ([String]::IsNullOrEmpty($trimmedValue))
+        if ([System.String]::IsNullOrEmpty($trimmedValue))
         {
             Write-Verbose -Message ($script:localizedData.EnvVarPathUnchanged -f $Name, $currentValueToDisplay)
             return
@@ -346,7 +346,7 @@ function Set-TargetResource
                 $finalPath = Remove-PathsFromValue -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
             }
 
-            if ([String]::IsNullOrEmpty($finalPath))
+            if ([System.String]::IsNullOrEmpty($finalPath))
             {
                 Remove-EnvironmentVariable -Name $Name -Target @('Machine')
                 Write-Verbose -Message ($script:localizedData.EnvVarRemoved -f $Name)
@@ -377,7 +377,7 @@ function Set-TargetResource
                 $finalPath = Remove-PathsFromValue -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
             }
 
-            if ([String]::IsNullOrEmpty($finalPath))
+            if ([System.String]::IsNullOrEmpty($finalPath))
             {
                 Remove-EnvironmentVariable -Name $Name -Target @('Process')
                 Write-Verbose -Message ($script:localizedData.EnvVarRemoved -f $Name)
@@ -426,36 +426,36 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter()]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $Value,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Path = $false,
 
         [Parameter()]
         [ValidateSet('Process', 'Machine')]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Target = ('Process', 'Machine')
     )
 
-    $valueSpecified = $PSBoundParameters.ContainsKey('Value') -and ($Value -ne [String]::Empty)
+    $valueSpecified = $PSBoundParameters.ContainsKey('Value') -and ($Value -ne [System.String]::Empty)
     $currentValueFromMachine = $null
     $currentValueFromProcess = $null
     $currentPropertiesFromMachine = $null
@@ -602,17 +602,17 @@ function Test-TargetResource
 function Get-EnvironmentVariable
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
-        [String]
+        [System.String]
         $Target
     )
 
@@ -654,12 +654,12 @@ function Get-EnvironmentVariable
 function Get-ProcessEnvironmentVariable
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -682,17 +682,17 @@ function Get-ProcessEnvironmentVariable
 function Add-PathsToValue
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $CurrentValue,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $NewValue
     )
 
@@ -734,18 +734,18 @@ function Add-PathsToValue
 #>
 function Remove-PathsFromValue
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $CurrentValue,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $PathsToRemove
     )
 
@@ -807,16 +807,16 @@ function Set-EnvironmentVariable
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter()]
-        [String]
+        [System.String]
         $Value,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
-        [String[]]
+        [System.String[]]
         $Target
     )
 
@@ -824,8 +824,8 @@ function Set-EnvironmentVariable
 
     try
     {
-        # If the Value is set to [String]::Empty then nothing should be updated for the process
-        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [String]::Empty)))
+        # If the Value is set to [System.String]::Empty then nothing should be updated for the process
+        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [System.String]::Empty)))
         {
             if (-not $valueSpecified)
             {
@@ -935,12 +935,12 @@ function Set-ProcessEnvironmentVariable
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter()]
-        [String]
-        $Value = [String]::Empty
+        [System.String]
+        $Value = [System.String]::Empty
     )
 
     [System.Environment]::SetEnvironmentVariable($Name, $Value)
@@ -964,12 +964,12 @@ function Remove-EnvironmentVariable
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
-        [String[]]
+        [System.String[]]
         $Target
     )
 
@@ -1005,21 +1005,21 @@ function Remove-EnvironmentVariable
 #>
 function Test-PathsInValue
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $ExistingPaths,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $QueryPaths,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Any', 'All')]
-        [String]
+        [System.String]
         $FindCriteria
     )
 
@@ -1082,7 +1082,7 @@ function Get-EnvironmentVariableWithoutExpanding
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -1105,7 +1105,7 @@ function Get-EnvironmentVariableWithoutExpanding
             return $null
         }
 
-        [String] $value = Get-KeyValue -Name $Name -Key $key
+        [System.String] $value = Get-KeyValue -Name $Name -Key $key
         $noteProperties.Add($Name, $value)
     }
     finally
@@ -1134,13 +1134,13 @@ function Get-EnvironmentVariableWithoutExpanding
 #>
 function Get-KeyValue
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
