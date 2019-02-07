@@ -30,18 +30,18 @@ $script:msiTools = $null
 #>
 function Get-TargetResource
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ProductId,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
@@ -122,44 +122,54 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ProductId,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Arguments,
 
-        [PSCredential]
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $FileHash,
 
+        [Parameter()]
         [ValidateSet('SHA1', 'SHA256', 'SHA384', 'SHA512', 'MD5', 'RIPEMD160')]
-        [String]
+        [System.String]
         $HashAlgorithm = 'SHA256',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $SignerSubject,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $SignerThumbprint,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $ServerCertificateValidationCallback,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $RunAsCredential
@@ -213,7 +223,7 @@ function Set-TargetResource
             if ($uri.IsUnc)
             {
                 $psDriveArgs = @{
-                    Name = [Guid]::NewGuid()
+                    Name = [System.Guid]::NewGuid()
                     PSProvider = 'FileSystem'
                     Root = Split-Path -Path $localPath
                 }
@@ -289,7 +299,7 @@ function Set-TargetResource
             # Check if the MSI package specifies the ProductCode, and if so make sure they match
             $productCode = Get-MsiProductCode -Path $Path
 
-            if ((-not [String]::IsNullOrEmpty($identifyingNumber)) -and ($identifyingNumber -ne $productCode))
+            if ((-not [System.String]::IsNullOrEmpty($identifyingNumber)) -and ($identifyingNumber -ne $productCode))
             {
                 New-InvalidArgumentException -ArgumentName 'ProductId' -Message ($script:localizedData.InvalidId -f $identifyingNumber, $productCode)
             }
@@ -397,50 +407,60 @@ function Set-TargetResource
 #>
 function Test-TargetResource
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ProductId,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Arguments,
 
-        [PSCredential]
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $FileHash,
 
+        [Parameter()]
         [ValidateSet('SHA1', 'SHA256', 'SHA384', 'SHA512', 'MD5', 'RIPEMD160')]
-        [String]
+        [System.String]
         $HashAlgorithm = 'SHA256',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $SignerSubject,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $SignerThumbprint,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $ServerCertificateValidationCallback,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $RunAsCredential
@@ -477,7 +497,7 @@ function Assert-PathExtensionValid
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
@@ -500,19 +520,19 @@ function Assert-PathExtensionValid
 #>
 function Convert-PathToUri
 {
-    [OutputType([Uri])]
+    [OutputType([System.Uri])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
     try
     {
-        $uri = [Uri]$Path
+        $uri = [System.Uri] $Path
     }
     catch
     {
@@ -539,20 +559,20 @@ function Convert-PathToUri
 #>
 function Convert-ProductIdToIdentifyingNumber
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ProductId
     )
 
     try
     {
         Write-Verbose -Message ($script:localizedData.ParsingProductIdAsAnIdentifyingNumber -f $ProductId)
-        $identifyingNumber = '{{{0}}}' -f [Guid]::Parse($ProductId).ToString().ToUpper()
+        $identifyingNumber = '{{{0}}}' -f [System.Guid]::Parse($ProductId).ToString().ToUpper()
 
         Write-Verbose -Message ($script:localizedData.ParsedProductIdAsIdentifyingNumber -f $ProductId, $identifyingNumber)
         return $identifyingNumber
@@ -578,7 +598,7 @@ function Get-ProductEntry
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $IdentifyingNumber
     )
 
@@ -587,7 +607,7 @@ function Get-ProductEntry
 
     $productEntry = $null
 
-    if (-not [String]::IsNullOrEmpty($IdentifyingNumber))
+    if (-not [System.String]::IsNullOrEmpty($IdentifyingNumber))
     {
         $productEntryKeyLocation = Join-Path -Path $uninstallRegistryKey -ChildPath $IdentifyingNumber
         $productEntry = Get-Item -Path $productEntryKeyLocation -ErrorAction 'SilentlyContinue'
@@ -611,7 +631,7 @@ function Get-ProductEntry
 #>
 function Get-ProductEntryInfo
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
@@ -626,7 +646,7 @@ function Get-ProductEntryInfo
     {
         try
         {
-            $installDate = '{0:d}' -f [DateTime]::ParseExact($installDate, 'yyyyMMdd',[System.Globalization.CultureInfo]::CurrentCulture).Date
+            $installDate = '{0:d}' -f [System.DateTime]::ParseExact($installDate, 'yyyyMMdd',[System.Globalization.CultureInfo]::CurrentCulture).Date
         }
         catch
         {
@@ -675,7 +695,7 @@ function Get-ProductEntryInfo
 #>
 function Get-ProductEntryValue
 {
-    [OutputType([Object])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     param
     (
@@ -684,7 +704,7 @@ function Get-ProductEntryValue
         $ProductEntry,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Property
     )
 
@@ -705,7 +725,7 @@ function New-LogFile
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $LogPath
     )
 
@@ -745,10 +765,11 @@ function Get-WebRequestResponse
     param
     (
         [Parameter(Mandatory = $true)]
-        [Uri]
+        [System.Uri]
         $Uri,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $ServerCertificateValidationCallback
     )
 
@@ -769,7 +790,7 @@ function Get-WebRequestResponse
             Write-Verbose -Message ($script:localizedData.SettingAuthenticationLevel)
             $webRequest.AuthenticationLevel = [System.Net.Security.AuthenticationLevel]::None
         }
-        elseif ($uriScheme -eq 'https' -and -not [String]::IsNullOrEmpty($ServerCertificateValidationCallback))
+        elseif ($uriScheme -eq 'https' -and -not [System.String]::IsNullOrEmpty($ServerCertificateValidationCallback))
         {
             Write-Verbose -Message $script:localizedData.SettingCertificateValidationCallback
             $webRequest.ServerCertificateValidationCallBack = (Get-ScriptBlock -FunctionName $ServerCertificateValidationCallback)
@@ -801,7 +822,7 @@ function Get-WebRequest
     param
     (
         [Parameter(Mandatory = $true)]
-        [Uri]
+        [System.Uri]
         $Uri
     )
 
@@ -840,16 +861,16 @@ function Get-WebRequestResponseStream
 #>
 function Get-ScriptBlock
 {
-    [OutputType([ScriptBlock])]
+    [OutputType([System.Management.Automation.ScriptBlock])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $FunctionName
     )
 
-    return [ScriptBlock]::Create($FunctionName)
+    return [System.Management.Automation.ScriptBlock]::Create($FunctionName)
 }
 
 <#
@@ -938,28 +959,32 @@ function Assert-FileValid
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $FileHash,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $HashAlgorithm = 'SHA256',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $SignerThumbprint,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $SignerSubject
     )
 
-    if (-not [String]::IsNullOrEmpty($FileHash))
+    if (-not [System.String]::IsNullOrEmpty($FileHash))
     {
         Assert-FileHashValid -Path $Path -Hash $FileHash -Algorithm $HashAlgorithm
     }
 
-    if (-not [String]::IsNullOrEmpty($SignerThumbprint) -or -not [String]::IsNullOrEmpty($SignerSubject))
+    if (-not [System.String]::IsNullOrEmpty($SignerThumbprint) -or -not [System.String]::IsNullOrEmpty($SignerSubject))
     {
         Assert-FileSignatureValid -Path $Path -Thumbprint $SignerThumbprint -Subject $SignerSubject
     }
@@ -985,14 +1010,15 @@ function Assert-FileHashValid
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Hash,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Algorithm = 'SHA256'
     )
 
@@ -1025,13 +1051,15 @@ function Assert-FileSignatureValid
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Thumbprint,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Subject
     )
 
@@ -1048,12 +1076,12 @@ function Assert-FileSignatureValid
         Write-Verbose -Message ($script:localizedData.FileHasValidSignature -f $Path, $signature.SignerCertificate.Thumbprint, $signature.SignerCertificate.Subject)
     }
 
-    if (-not [String]::IsNullOrEmpty($Subject) -and ($signature.SignerCertificate.Subject -notlike $Subject))
+    if (-not [System.String]::IsNullOrEmpty($Subject) -and ($signature.SignerCertificate.Subject -notlike $Subject))
     {
         New-InvalidArgumentException -ArgumentName 'SignerSubject' -Message ($script:localizedData.WrongSignerSubject -f $Path, $Subject)
     }
 
-    if (-not [String]::IsNullOrEmpty($Thumbprint) -and ($signature.SignerCertificate.Thumbprint -ne $Thumbprint))
+    if (-not [System.String]::IsNullOrEmpty($Thumbprint) -and ($signature.SignerCertificate.Thumbprint -ne $Thumbprint))
     {
         New-InvalidArgumentException -ArgumentName 'SignerThumbprint' -Message ($script:localizedData.WrongSignerThumbprint -f $Path, $Thumbprint)
     }
@@ -1090,24 +1118,28 @@ function Start-MsiProcess
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $IdentifyingNumber,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Arguments,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $RunAsCredential
@@ -1133,14 +1165,14 @@ function Start-MsiProcess
         $startInfo.Arguments = ('/x{0}' -f $id)
     }
 
-    if (-not [String]::IsNullOrEmpty($LogPath))
+    if (-not [System.String]::IsNullOrEmpty($LogPath))
     {
         $startInfo.Arguments += (' /log "{0}"' -f $LogPath)
     }
 
     $startInfo.Arguments += ' /quiet /norestart'
 
-    if (-not [String]::IsNullOrEmpty($Arguments))
+    if (-not [System.String]::IsNullOrEmpty($Arguments))
     {
         # Append any specified arguments with a space
         $startInfo.Arguments += (' {0}' -f $Arguments)
@@ -1152,7 +1184,7 @@ function Start-MsiProcess
 
     try
     {
-        if (-not [String]::IsNullOrEmpty($RunAsCredential))
+        if (-not [System.String]::IsNullOrEmpty($RunAsCredential))
         {
             $commandLine = ('"{0}" {1}' -f $startInfo.FileName, $startInfo.Arguments)
             $exitCode = Invoke-PInvoke -CommandLine $commandLine -RunAsCredential $RunAsCredential
@@ -1190,7 +1222,7 @@ function Invoke-PInvoke
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $CommandLine,
 
         [Parameter(Mandatory = $true)]
@@ -1245,13 +1277,13 @@ function Invoke-Process
 #>
 function Get-MsiProductCode
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
