@@ -163,7 +163,7 @@ function Set-TargetResource
     }
 
     # Validate DestinationPath does not contain invalid characters
-    @('*','?','"','<','>','|') | % { 
+    @('*', '?', '"', '<', '>', '|') | % { 
         if ($DestinationPath.Contains($_) ){
             $errorMessage = $($LocalizedData.DestinationPathHasInvalidCharactersError `
                 -f ${DestinationPath})
