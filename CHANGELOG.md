@@ -102,7 +102,8 @@
   [issue #486](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/486)
 - Fixes script analyzer issues in MSFT_xPackageResource.psm1.
   [issue #487](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/487).
-- Add spaces between variable types and variables.
+- Adds spaces between variable types and variables, and changes Type
+  Accelerators to Fully Qualified Type Names on affected code.
 
 ## 8.4.0.0
 
