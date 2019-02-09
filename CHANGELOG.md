@@ -104,6 +104,9 @@
   [issue #487](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/487).
 - Adds spaces between variable types and variables, and changes Type
   Accelerators to Fully Qualified Type Names on affected code.
+- Fixes script analyzer issues in MSFT_xPSSessionConfiguration.psm1
+  and convert Type Accelrators to Fully Qualified Type Names
+  [issue #488](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/488).
 
 ## 8.4.0.0
 
