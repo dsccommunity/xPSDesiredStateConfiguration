@@ -771,7 +771,7 @@ function Set-AppSettingsInWebconfig
 
     if (Test-Path -Path $webconfig)
     {
-        $xml = [xml] (get-content $webconfig)
+        $xml = [System.Xml.XmlDocument] (Get-Content -Path $webconfig)
         $root = $xml.get_DocumentElement()
 
         foreach( $item in $root.appSettings.add)
@@ -843,7 +843,7 @@ function Set-BindingRedirectSettingInWebConfig
 
     if (Test-Path -Path $webconfig)
     {
-        $xml = [xml](get-content $webconfig)
+        $xml = [System.Xml.XmlDocument] (Get-Content -Path $webconfig)
 
         if(-not($xml.get_DocumentElement().runtime))
         {
