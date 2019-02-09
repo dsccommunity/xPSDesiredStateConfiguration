@@ -835,4 +835,4 @@ function Invoke-ThrowErrorHelper
     throw $errorRecord
 }
 
-Export-ModuleMember -Function Get-TargetResource, Set-TargetResource, Get-TargetResource
+Export-ModuleMember -Function Get-TargetResource, Set-TargetResource, Test-TargetResource
