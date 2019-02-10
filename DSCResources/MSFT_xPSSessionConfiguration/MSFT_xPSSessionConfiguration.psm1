@@ -81,7 +81,7 @@ function Get-TargetResource
 
     @{
         Name                   = $Name
-        RunAsCredential        = [CimInstance]$convertToCimCredential
+        RunAsCredential        = [CimInstance] $convertToCimCredential
         SecurityDescriptorSDDL = $endpoint.Permission
         StartupScript          = $endpoint.StartupScript
         AccessMode             = $accessMode
@@ -226,7 +226,7 @@ function Set-TargetResource
                     $null = $PSBoundParameters.Remove('Ensure')
                 }
 
-                [Hashtable]$validatedProperties = (
+                [Hashtable] $validatedProperties = (
                     Get-ValidatedResourcePropertyTable -Endpoint $endpoint @PSBoundParameters -Apply)
                 $null = $validatedProperties.Add('Name',$Name)
 
@@ -378,20 +378,31 @@ function Test-TargetResource
     (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [String]$Name,
+        [String]
+        $Name,
 
+        [Parameter()]
         [AllowEmptyString()]
-        [String]$StartupScript,
+        [String]
+        $StartupScript,
 
-        [PSCredential]$RunAsCredential,
+        [Parameter()]
+        [PSCredential]
+        $RunAsCredential,
 
-        [String]$SecurityDescriptorSDDL,
+        [Parameter()]
+        [String]
+        $SecurityDescriptorSDDL,
 
+        [Parameter()]
         [ValidateSet('Local','Remote', 'Disabled')]
-        [String]$AccessMode = 'Remote',
+        [String]
+        $AccessMode = 'Remote',
 
+        [Parameter()]
         [ValidateSet('Present','Absent')]
-        [String]$Ensure = 'Present'
+        [String]
+        $Ensure = 'Present'
     )
 
     Write-Verbose ($LocalizedData.TestTargetResourceStartMessage -f $Name)

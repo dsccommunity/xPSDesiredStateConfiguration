@@ -388,7 +388,7 @@ function Start-Server
                 Write-Log -LogFile $LogPath -Message 'Starting request listener'
 
                 $asyncState = $Result.AsyncState
-                [System.Net.HttpListener]$listener = $asyncState.Listener
+                [System.Net.HttpListener] $listener = $asyncState.Listener
                 $filepath = $asyncState.FilePath
 
                 Write-Log -LogFile $LogPath -Message (ConvertTo-Json $asyncState)
@@ -1263,7 +1263,8 @@ function New-TestExecutable
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]$DestinationPath
+        [String]
+        $DestinationPath
     )
 
     if (Test-Path -Path $DestinationPath)
