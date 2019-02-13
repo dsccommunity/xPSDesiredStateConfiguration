@@ -44,7 +44,7 @@ try {
                 DependsOn                 = @()
                 Parent                    = ''
                 ServerComponentDescriptor = 'ServerComponent_Test_Cert_Authority'
-                Subfeatures               = @('SubTest1','SubTest2','SubTest3')
+                Subfeatures               = @('SubTest1', 'SubTest2', 'SubTest3')
                 SystemService             = @()
                 Notification              = @()
                 BestPracticesModelId      = $null

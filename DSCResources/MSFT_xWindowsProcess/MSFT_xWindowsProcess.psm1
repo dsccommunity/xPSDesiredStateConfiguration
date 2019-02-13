@@ -335,7 +335,7 @@ function Set-TargetResource
                 if (($PSBoundParameters.ContainsKey('Credential')) -and (Test-IsRunFromLocalSystemUser))
                 {
                     # Throw an exception if any of the below parameters are included with Credential passed
-                    foreach ($key in @('StandardOutputPath','StandardInputPath','WorkingDirectory'))
+                    foreach ($key in @('StandardOutputPath', 'StandardInputPath', 'WorkingDirectory'))
                     {
                         if ($PSBoundParameters.Keys -contains $key)
                         {
@@ -679,7 +679,7 @@ function ConvertTo-EscapedStringForWqlFilter
         $FilterString
     )
 
-    return $FilterString.Replace("\","\\").Replace('"','\"').Replace("'","\'")
+    return $FilterString.Replace("\", "\\").Replace('"', '\"').Replace("'", "\'")
 }
 
 <#

@@ -10,9 +10,9 @@ $resProperties = @{
     StartupScript = New-xDscResourceProperty -Description 'Path for the startup script. Empty string clears the value'`
                                              -Name StartupScriptPath -Type String -Attribute Write
     Ensure        = New-xDscResourceProperty -Description 'Whether to create the endpoint or delete it' `
-                                             -Name Ensure -Type String -Attribute Write -ValidateSet 'Present','Absent'
+                                             -Name Ensure -Type String -Attribute Write -ValidateSet @('Present', 'Absent')
     AccessMode    = New-xDscResourceProperty -Description 'Whether the endpoint is remotely accessible or has local access only or no access' `
-                                             -Name AccessMode -Type String -Attribute Write -ValidateSet 'Local','Remote', 'Disabled'
+                                             -Name AccessMode -Type String -Attribute Write -ValidateSet @('Local', 'Remote', 'Disabled')
 }
 
 New-xDscResource -Name MSFT_xPSSessionConfiguration -Property $resProperties.Values -Path $home\desktop -ModuleName xPSDesiredStateConfiguration -FriendlyName xPSEndpoint -Force

@@ -30,7 +30,7 @@
         '{DEADBEEF-80C6-41E6-A1B9-8BDB8A05027F}'.
 
     .PARAMETER Path
-        The URI path. Should start with an URI scheme, e.g. 'file://','http://',
+        The URI path. Should start with an URI scheme, e.g. 'file://', 'http://',
         'https://'.
 
     .NOTES
