@@ -540,7 +540,7 @@ function Test-TargetResource
 <#
     .SYNOPSIS
         Helper function to translate the endpoint's accessmode
-        to the "Disabled","Local","Remote" values
+        to the 'Disabled', 'Local', 'Remote' values
 
     .PARAMETER Endpoint
         Specifies a valid session configuration endpoint object
