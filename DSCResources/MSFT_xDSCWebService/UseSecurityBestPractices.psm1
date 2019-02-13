@@ -6,15 +6,22 @@
 Import-Module $PSScriptRoot\SecureTLSProtocols.psm1 -Verbose:$false
 
 # This list corresponds to the ValueMap definition of DisableSecurityBestPractices parameter defined in MSFT_xDSCWebService.Schema.mof
-$SecureTLSProtocols = "SecureTLSProtocols";
+$SecureTLSProtocols = 'SecureTLSProtocols'
 
 <#
     .SYNOPSIS
         This function tests whether the node uses security best practices for non-disabled items
 #>
-function Test-UseSecurityBestPractices
+function Test-UseSecurityBestPractice
 {
-    param([string[]] $DisableSecurityBestPractices)
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param
+    (
+        [Parameter()]
+        [System.String[]]
+        $DisableSecurityBestPractices
+    )
 
     $usedProtocolsBestPractices = ($DisableSecurityBestPractices -icontains $SecureTLSProtocols) -or (Test-SChannelProtocol)
 
@@ -25,9 +32,15 @@ function Test-UseSecurityBestPractices
     .SYNOPSIS
         This function sets the node to use security best practices for non-disabled items
 #>
-function Set-UseSecurityBestPractices
+function Set-UseSecurityBestPractice
 {
-    param([string[]] $DisableSecurityBestPractices)
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.String[]]
+        $DisableSecurityBestPractices
+    )
 
     if (-not ($DisableSecurityBestPractices -icontains $SecureTLSProtocols))
     {
@@ -35,4 +48,4 @@ function Set-UseSecurityBestPractices
     }
 }
 
-Export-ModuleMember -function *-UseSecurityBestPractices
+Export-ModuleMember -Function *-UseSecurityBestPractice

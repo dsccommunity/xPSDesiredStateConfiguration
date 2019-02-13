@@ -479,7 +479,7 @@ function Set-TargetResource
 
     if($UseSecurityBestPractices)
     {
-        UseSecurityBestPractices\Set-UseSecurityBestPractices -DisableSecurityBestPractices $DisableSecurityBestPractices
+        UseSecurityBestPractices\Set-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices
     }
 }
 
@@ -780,7 +780,7 @@ function Test-TargetResource
         Write-Verbose -Message "Check UseSecurityBestPractices"
         if ($UseSecurityBestPractices)
         {
-            if (-not (UseSecurityBestPractices\Test-UseSecurityBestPractices -DisableSecurityBestPractices $DisableSecurityBestPractices))
+            if (-not (UseSecurityBestPractices\Test-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices))
             {
                 $desiredConfigurationMatch = $false
                 Write-Verbose -Message "The state of security settings does not match the desired state."

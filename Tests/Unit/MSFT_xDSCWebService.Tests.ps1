@@ -692,7 +692,7 @@ try
 
             Context -Name 'Ensure is Present - CertificateThumbprint and UseSecurityBestPractices is $true' -Fixture {
                 #region Mocks
-                Mock -CommandName Set-UseSecurityBestPractices
+                Mock -CommandName Set-UseSecurityBestPractice
                 #endregion
 
                 $altTestParameters = $testParameters.Clone()
@@ -712,7 +712,7 @@ try
 
                 It 'Should call expected mocks' {
                     Assert-MockCalled -Exactly -Times 0 -CommandName Find-CertificateThumbprintWithSubjectAndTemplateName
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Set-UseSecurityBestPractices
+                    Assert-MockCalled -Exactly -Times 1 -CommandName Set-UseSecurityBestPractice
                 }
             }
 
@@ -928,7 +928,7 @@ try
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
                     Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
-                    Mock -CommandName Test-UseSecurityBestPractices -MockWith {$false} -Verifiable
+                    Mock -CommandName Test-UseSecurityBestPractice -MockWith {$false} -Verifiable
 
                     Test-TargetResource @altTestParameters -Ensure Present | Should -Be $false
 
