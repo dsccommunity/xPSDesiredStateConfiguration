@@ -130,8 +130,8 @@ function Set-TargetResource
     {
         $errorMessage = $script:localizedData.InvalidWebUriError -f $Uri
         New-InvalidDataException `
-            -errorId 'UriValidationFailure' `
-            -errorMessage $errorMessage
+            -ErrorId 'UriValidationFailure' `
+            -ErrorMessage $errorMessage
     }
 
     # Validate DestinationPath scheme
@@ -139,34 +139,27 @@ function Set-TargetResource
     {
         $errorMessage = $script:localizedData.InvalidDestinationPathSchemeError -f $DestinationPath
         New-InvalidDataException `
-            -errorId 'DestinationPathSchemeValidationFailure' `
-            -errorMessage $errorMessage
+            -ErrorId 'DestinationPathSchemeValidationFailure' `
+            -ErrorMessage $errorMessage
     }
 
     # Validate DestinationPath is not UNC path
-    if ($DestinationPath.StartsWith("\\"))
+    if ($DestinationPath.StartsWith('\\'))
     {
         $errorMessage = $script:localizedData.DestinationPathIsUncError -f $DestinationPath
         New-InvalidDataException `
-            -errorId 'DestinationPathIsUncFailure' `
-            -errorMessage $errorMessage
+            -ErrorId 'DestinationPathIsUncFailure' `
+            -ErrorMessage $errorMessage
     }
 
     # Validate DestinationPath does not contain invalid characters
-<<<<<<< HEAD
-    @('*', '?', '"', '<', '>', '|') | % { 
-        if ($DestinationPath.Contains($_) ){
-            $errorMessage = $($LocalizedData.DestinationPathHasInvalidCharactersError `
-                -f ${DestinationPath})
-=======
     @('*', '?', '"', '<', '>', '|') | Foreach-Object -Process {
         if ($DestinationPath.Contains($_))
         {
             $errorMessage = $script:localizedData.DestinationPathHasInvalidCharactersError -f $DestinationPath
->>>>>>> Fix PSSA violations in xRemoteFile
             New-InvalidDataException `
-                -errorId 'DestinationPathHasInvalidCharactersError' `
-                -errorMessage $errorMessage
+                -ErrorId 'DestinationPathHasInvalidCharactersError' `
+                -ErrorMessage $errorMessage
         }
     }
 
@@ -175,8 +168,8 @@ function Set-TargetResource
     {
         $errorMessage = $script:localizedData.DestinationPathEndsWithInvalidCharacterError -f $DestinationPath
         New-InvalidDataException `
-            -errorId 'DestinationPathEndsWithInvalidCharacterError' `
-            -errorMessage $errorMessage
+            -ErrorId 'DestinationPathEndsWithInvalidCharacterError' `
+            -ErrorMessage $errorMessage
     }
 
     # Check whether DestinationPath's parent directory exists. Create if it doesn't.
@@ -222,15 +215,15 @@ function Set-TargetResource
     {
         $errorMessage = $script:localizedData.DownloadOutOfMemoryException -f $_
         New-InvalidDataException `
-            -errorId 'SystemOutOfMemoryException' `
-            -errorMessage $errorMessage
+            -ErrorId 'SystemOutOfMemoryException' `
+            -ErrorMessage $errorMessage
     }
     catch [System.Exception]
     {
         $errorMessage = $script:localizedData.DownloadException -f $_
         New-InvalidDataException `
-            -errorId 'SystemException' `
-            -errorMessage $errorMessage
+            -ErrorId 'SystemException' `
+            -ErrorMessage $errorMessage
     }
     finally
     {
@@ -436,7 +429,7 @@ function Test-UriScheme
 
     $newUri = $Uri -as [System.URI]
 
-    return ($newUri.AbsoluteURI -ne $null -and $newUri.Scheme -match $Scheme)
+    return ($null -ne $newUri.AbsoluteURI -and $newUri.Scheme -match $Scheme)
 }
 
 <#
