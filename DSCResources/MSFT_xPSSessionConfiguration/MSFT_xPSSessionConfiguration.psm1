@@ -133,7 +133,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -343,7 +342,7 @@ function Set-TargetResource
         #>
         if ($restartNeeded)
         {
-            $global:DscMachineStatus = 1
+            Set-DSCMachineStatus -NewDSCMachineStatus 1
         }
     }
 
