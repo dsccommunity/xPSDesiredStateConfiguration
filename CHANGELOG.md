@@ -115,6 +115,7 @@
 - Fixes script analyzer issues in MSFT_xRemoteFile.psm1 and
   correct general style violations.
   ([issue #490](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/490))
+- Remove unnecessary whitespace from line endings.
 
 ## 8.4.0.0
 
