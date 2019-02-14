@@ -112,6 +112,9 @@
   correct general style violations.
   ([issue #490](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/490))
 - Remove unnecessary whitespace from line endings.
+- Add statement to README.md regarding the lack of testing of this module with
+  PowerShell 4
+  [issue #522](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/522).
 
 ## 8.4.0.0
 
