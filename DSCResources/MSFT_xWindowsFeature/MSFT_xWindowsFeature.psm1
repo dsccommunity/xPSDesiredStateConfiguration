@@ -1,7 +1,3 @@
-# Global needed to indicate if a restart is required
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
-param ()
-
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonResourceHelper.psm1')
 
@@ -236,7 +232,7 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-                $global:DSCMachineStatus = 1
+                Set-DSCMachineStatus -NewDSCMachineStatus 1
             }
         }
         else
@@ -287,7 +283,7 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-                $global:DSCMachineStatus = 1
+                Set-DSCMachineStatus -NewDSCMachineStatus 1
             }
         }
         else
