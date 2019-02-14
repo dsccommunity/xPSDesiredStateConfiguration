@@ -7,6 +7,13 @@ of PowerShell 4.0.
 The high quality, supported version of this module is available as
 [PSDscResources](https://github.com/PowerShell/PSDscResources).
 
+This module is automatically tested using PowerShell 5.1 on servers running
+Windows 2012 R2 and Windows 2016, and is expected to work on other operating
+systems running PowerShell 5.1. While this module may work with PowerShell
+versions going back to PowerShell 4, there is no automatic testing performed
+for these versions, and thus no guarantee that the module will work as
+expected.
+
 This project has adopted the
 [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the
