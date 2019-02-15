@@ -197,5 +197,11 @@ function Set-DSCMachineRebootRequired
     $global:DSCMachineStatus = 1
 }
 
-Export-ModuleMember -Function @( 'Test-IsNanoServer', 'New-InvalidArgumentException',
-    'New-InvalidOperationException', 'Get-LocalizedData' )
+Export-ModuleMember `
+    -Function @(
+        'Test-IsNanoServer',
+        'New-InvalidArgumentException',
+        'New-InvalidOperationException',
+        'Get-LocalizedData',
+        'Set-DSCMachineRebootRequired'
+    )
