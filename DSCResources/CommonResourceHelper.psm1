@@ -176,5 +176,32 @@ function Get-LocalizedData
     return $localizedData
 }
 
-Export-ModuleMember -Function @( 'Test-IsNanoServer', 'New-InvalidArgumentException',
-    'New-InvalidOperationException', 'Get-LocalizedData' )
+<#
+    .SYNOPSIS
+        Sets the Global DSCMachineStatus variable to a value of 1.
+#>
+function Set-DSCMachineRebootRequired
+{
+    # Suppressing this rule because $global:DSCMachineStatus is used to trigger a reboot.
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
+    <#
+        Suppressing this rule because $global:DSCMachineStatus is only set,
+        never used (by design of Desired State Configuration).
+    #>
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+    [CmdletBinding()]
+    param
+    (
+    )
+
+    $global:DSCMachineStatus = 1
+}
+
+Export-ModuleMember `
+    -Function @(
+        'Test-IsNanoServer',
+        'New-InvalidArgumentException',
+        'New-InvalidOperationException',
+        'Get-LocalizedData',
+        'Set-DSCMachineRebootRequired'
+    )
