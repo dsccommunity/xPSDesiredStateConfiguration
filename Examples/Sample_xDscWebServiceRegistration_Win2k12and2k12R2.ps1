@@ -27,7 +27,7 @@
         The example creates a new GUID for the registration key.
 
     .EXAMPLE
-        $thumbprint = (New-SelfSignedCertificate -DnsName $env:COMPUTERNAME -CertStoreLocation cert:\LocalMachine\My ).Thumbprint
+        $thumbprint = (New-SelfSignedCertificate -Subject $env:COMPUTERNAME).Thumbprint
         $registrationKey = [System.Guid]::NewGuid()
 
         Sample_xDscWebServiceRegistration_Win2k12and2k12R2 -RegistrationKey $registrationKey -certificateThumbPrint $thumbprint -Verbose
