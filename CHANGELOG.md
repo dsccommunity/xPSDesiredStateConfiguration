@@ -120,8 +120,8 @@
   [issue #494](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/494))
 - Fixes script analyzer issues in MSFT_xRemoteFile.psm1 missed from
   [issue #490](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/490).
-- Fix script analyzer issues in MSFT_xUserResource.psm1.
-  [issue #492](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/492)
+- Fix script analyzer issues in MSFT_xWindowsFeature.psm1.
+  [issue #494](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/494)
 
 ## 8.4.0.0
 
