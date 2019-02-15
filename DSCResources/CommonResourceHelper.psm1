@@ -178,10 +178,7 @@ function Get-LocalizedData
 
 <#
     .SYNOPSIS
-        Sets the Global DSCMachineStatus variable to the desired value.
-
-    .PARAMETER NewDSCMachineStatus
-        The value to set $global:DSCMachineStatus to.
+        Sets the Global DSCMachineStatus variable to a value of 1.
 #>
 function Set-DSCMachineRebootRequired
 {
@@ -195,12 +192,9 @@ function Set-DSCMachineRebootRequired
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory=$true)]
-        [System.Int32]
-        $NewDSCMachineStatus
     )
 
-    $global:DSCMachineStatus = $NewDSCMachineStatus
+    $global:DSCMachineStatus = 1
 }
 
 Export-ModuleMember -Function @( 'Test-IsNanoServer', 'New-InvalidArgumentException',
