@@ -36,6 +36,7 @@ function Get-TargetResource
        [String]
        $Name,
 
+       [Parameter()]
        [ValidateNotNullOrEmpty()]
        [System.Management.Automation.PSCredential]
        [System.Management.Automation.Credential()]
@@ -60,7 +61,7 @@ function Get-TargetResource
         $feature = Get-WindowsFeature @PSBoundParameters
     }
 
-    Assert-SingleFeatureExists -Feature $feature -Name $Name
+    Assert-SingleInstanceOfFeature -Feature $feature -Name $Name
 
     $includeAllSubFeature = $true
 
@@ -72,7 +73,6 @@ function Get-TargetResource
     {
         foreach ($currentSubFeatureName in $feature.SubFeatures)
         {
-
             $getWindowsFeatureParameters = @{
                 Name = $currentSubFeatureName
             }
@@ -98,7 +98,7 @@ function Get-TargetResource
                 $subFeature = Get-WindowsFeature @getWindowsFeatureParameters
             }
 
-            Assert-SingleFeatureExists -Feature $subFeature -Name $currentSubFeatureName
+            Assert-SingleInstanceOfFeature -Feature $subFeature -Name $currentSubFeatureName
 
             if (-not $subFeature.Installed)
             {
@@ -166,18 +166,22 @@ function Set-TargetResource
        [String]
        $Name,
 
+       [Parameter()]
        [ValidateSet('Present', 'Absent')]
        [String]
        $Ensure = 'Present',
 
+       [Parameter()]
        [Boolean]
        $IncludeAllSubFeature = $false,
 
+       [Parameter()]
        [ValidateNotNullOrEmpty()]
        [System.Management.Automation.PSCredential]
        [System.Management.Automation.Credential()]
        $Credential,
 
+       [Parameter()]
        [ValidateNotNullOrEmpty()]
        [String]
        $LogPath
@@ -336,18 +340,22 @@ function Test-TargetResource
         [String]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [Boolean]
         $IncludeAllSubFeature = $false,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $LogPath
@@ -388,7 +396,7 @@ function Test-TargetResource
         $feature = Get-WindowsFeature @getWindowsFeatureParameters
     }
 
-    Assert-SingleFeatureExists -Feature $feature -Name $Name
+    Assert-SingleInstanceOfFeature -Feature $feature -Name $Name
 
     # Check if the feature is in the requested Ensure state.
     if (($Ensure -eq 'Present' -and $feature.Installed -eq $true) -or `
@@ -419,7 +427,7 @@ function Test-TargetResource
                     $subFeature = Get-WindowsFeature @getWindowsFeatureParameters
                 }
 
-                Assert-SingleFeatureExists -Feature $subFeature -Name $currentSubFeatureName
+                Assert-SingleInstanceOfFeature -Feature $subFeature -Name $currentSubFeatureName
 
                 if (-not $subFeature.Installed -and $Ensure -eq 'Present')
                 {
@@ -458,14 +466,16 @@ function Test-TargetResource
         The name of the role or feature to include in any error messages that are thrown.
         (Not used to assert validity of the feature).
 #>
-function Assert-SingleFeatureExists
+function Assert-SingleInstanceOfFeature
 {
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [PSObject]
         $Feature,
 
+        [Parameter()]
         [String]
         $Name
     )
@@ -517,7 +527,8 @@ function Import-ServerManager
     {
         Import-Module -Name 'ServerManager' -ErrorAction Stop
     }
-    catch [System.Management.Automation.RuntimeException] {
+    catch [System.Management.Automation.RuntimeException]
+    {
         if ($_.Exception.Message -like "*Some or all identity references could not be translated*")
         {
             Write-Verbose $_.Exception.Message
