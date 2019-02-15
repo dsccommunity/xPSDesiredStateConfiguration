@@ -15,11 +15,11 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsOptionalFe
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -51,8 +51,8 @@ function Get-TargetResource
     $windowsOptionalFeatureResource = @{
         LogPath = $windowsOptionalFeatureProperties.LogPath
         Ensure = Convert-FeatureStateToEnsure -State $windowsOptionalFeatureProperties.State
-        CustomProperties =
-            Convert-CustomPropertyArrayToStringArray -CustomProperties $windowsOptionalFeatureProperties.CustomProperties
+        CustomProperties = Convert-CustomPropertyArrayToStringArray `
+            -CustomProperties $windowsOptionalFeatureProperties.CustomProperties
         Name = $windowsOptionalFeatureProperties.FeatureName
         LogLevel = $windowsOptionalFeatureProperties.LogLevel
         Description = $windowsOptionalFeatureProperties.Description
@@ -102,24 +102,29 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $RemoveFilesOnDisable,
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $NoWindowsUpdateCheck,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
+        [Parameter()]
         [ValidateSet('ErrorsOnly', 'ErrorsAndWarning', 'ErrorsAndWarningAndInformation')]
-        [String]
+        [System.String]
         $LogLevel = 'ErrorsAndWarningAndInformation'
     )
 
@@ -129,9 +134,23 @@ function Set-TargetResource
 
     $dismLogLevel = switch ($LogLevel)
     {
-        'ErrorsOnly' {  'Errors'; break }
-        'ErrorsAndWarning' { 'Warnings'; break }
-        'ErrorsAndWarningAndInformation' { 'WarningsInfo'; break }
+        'ErrorsOnly'
+        {
+            'Errors'
+            break
+        }
+
+        'ErrorsAndWarning'
+        {
+            'Warnings'
+            break
+        }
+
+        'ErrorsAndWarningAndInformation'
+        {
+            'WarningsInfo'
+            break
+        }
     }
 
     # Construct splatting hashtable for DISM cmdlets
@@ -226,28 +245,33 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $RemoveFilesOnDisable,
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $NoWindowsUpdateCheck,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
+        [Parameter()]
         [ValidateSet('ErrorsOnly', 'ErrorsAndWarning', 'ErrorsAndWarningAndInformation')]
-        [String]
+        [System.String]
         $LogLevel = 'ErrorsAndWarningAndInformation'
     )
 
@@ -284,14 +308,15 @@ function Test-TargetResource
 function Convert-CustomPropertyArrayToStringArray
 {
     [CmdletBinding()]
-    [OutputType([String[]])]
+    [OutputType([System.String[]])]
     param
     (
+        [Parameter()]
         [PSCustomObject[]]
         $CustomProperties
     )
 
-    $propertiesAsStrings = [String[]] @()
+    $propertiesAsStrings = [System.String[]] @()
 
     foreach ($customProperty in $CustomProperties)
     {
@@ -315,11 +340,11 @@ function Convert-CustomPropertyArrayToStringArray
 function Convert-FeatureStateToEnsure
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $State
     )
 
@@ -368,6 +393,7 @@ function Assert-ResourcePrerequisitesValid
     $windowsPrincipal = New-Object -TypeName 'System.Security.Principal.WindowsPrincipal' -ArgumentList @( $windowsIdentity )
 
     $adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
+
     if (-not $windowsPrincipal.IsInRole($adminRole))
     {
         New-InvalidOperationException -Message $script:localizedData.ElevationRequired
