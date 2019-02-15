@@ -2685,7 +2685,13 @@ try
                 }
 
                 It 'Should retrieve service CIM instance' {
-                    Assert-MockCalled -CommandName 'Get-ServiceCimInstance' -ParameterFilter { $ServiceName -eq $setServicePropertyParameters.ServiceName } -Times 1 -Scope 'Context'
+                    Assert-MockCalled `
+                        -CommandName 'Get-ServiceCimInstance' `
+                        -ParameterFilter {
+                            $ServiceName -eq $setServicePropertyParameters.ServiceName
+                        } `
+                        -Times 1 `
+                        -Scope 'Context'
                 }
 
                 It 'Should not set service description or display name' {
@@ -2693,7 +2699,14 @@ try
                 }
 
                 It 'Should set service dependencies' {
-                    Assert-MockCalled -CommandName 'Set-ServiceDependency' -ParameterFilter { $ServiceName -eq $setServicePropertyParameters.ServiceName -and $null -eq (Compare-Object -ReferenceObject $setServicePropertyParameters.Dependencies -DifferenceObject $Dependencies) } -Times 1 -Scope 'Context'
+                    Assert-MockCalled `
+                        -CommandName 'Set-ServiceDependency' `
+                        -ParameterFilter {
+                            $ServiceName -eq $setServicePropertyParameters.ServiceName -and `
+                            $null -eq (Compare-Object -ReferenceObject $setServicePropertyParameters.Dependencies -DifferenceObject $Dependencies)
+                        } `
+                        -Times 1 `
+                        -Scope 'Context'
                 }
 
                 It 'Should not set service account properties' {
