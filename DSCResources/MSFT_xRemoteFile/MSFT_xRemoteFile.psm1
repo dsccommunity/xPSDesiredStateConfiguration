@@ -196,7 +196,7 @@ function Set-TargetResource
     $null = $PSBoundParameters.Remove('Headers')
     $headersHashtable = $null
 
-    if ($Headers -ne $null)
+    if ($null -ne $Headers)
     {
         $headersHashtable = Convert-KeyValuePairArrayToHashtable -Array $Headers
     }
@@ -310,7 +310,7 @@ function Test-TargetResource
                 # Getting cache. It's cleared every time user runs Start-DscConfiguration
                 $cache = Get-Cache -DestinationPath $DestinationPath -Uri $Uri
 
-                if ($cache -ne $null `
+                if ($null -ne $cache `
                         -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc) `
                         -and ($cache.FileSize -eq $file.Length))
                 {
@@ -342,7 +342,7 @@ function Test-TargetResource
                     $file = Get-Item -Path $expectedDestinationPath
                     $cache = Get-Cache -DestinationPath $expectedDestinationPath -Uri $Uri
 
-                    if ($cache -ne $null -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
+                    if ($null -ne $cache -and ($cache.LastWriteTime -eq $file.LastWriteTimeUtc))
                     {
                         Write-Verbose -Message $script:localizedData.CacheReflectsCurrentState
                         $fileExists = $true
@@ -442,6 +442,7 @@ function Test-UriScheme
 function Get-PathItemType
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -486,6 +487,7 @@ function Get-PathItemType
 function Convert-KeyValuePairArrayToHashtable
 {
     [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory = $true)]
