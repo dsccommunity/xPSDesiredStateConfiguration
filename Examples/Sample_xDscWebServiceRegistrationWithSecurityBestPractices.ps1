@@ -29,24 +29,7 @@
         The example creates a new GUID for the registration key.
 
     .EXAMPLE
-        Check if OS major version is higher or equal to 10.
-
-        Note: This check is to pass example validation CI tests,
-              it has not been tested to run on Windows Server 2012 R2,
-              please see the following example for a Windows Server 2012 R2 version
-              of this example;
-              https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1.
-
-        if ([Environment]::OSVersion.Version.Major -ge '10')
-        {
-            $thumbprint = (New-SelfSignedCertificate -Subject $env:COMPUTERNAME).Thumbprint
-        }
-        else
-        {
-            Write-Warning -Message 'Running on operating system older than major version 10, this configuration is not meant to run on OS with a major version older than version 10. Generating certificate using New-SelfSignedCertificate with an alternate method.'
-            $thumbprint = (New-SelfSignedCertificate -DnsName $env:COMPUTERNAME -CertStoreLocation cert:\LocalMachine\My ).Thumbprint
-        }
-
+        $thumbprint = (New-SelfSignedCertificate -Subject $env:COMPUTERNAME).Thumbprint
         $registrationKey = [System.Guid]::NewGuid()
 
         Sample_xDscWebServiceRegistrationWithSecurityBestPractices -RegistrationKey $registrationKey -certificateThumbPrint $thumbprint
