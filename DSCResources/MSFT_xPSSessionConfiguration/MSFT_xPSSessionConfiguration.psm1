@@ -342,7 +342,7 @@ function Set-TargetResource
         #>
         if ($restartNeeded)
         {
-            Set-DSCMachineStatus -NewDSCMachineStatus 1
+            Set-DSCMachineRebootRequired
         }
     }
 

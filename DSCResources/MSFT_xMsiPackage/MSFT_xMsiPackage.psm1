@@ -339,7 +339,7 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $rebootRequired)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
-        Set-DSCMachineStatus -NewDSCMachineStatus 1
+        Set-DSCMachineRebootRequired
     }
     elseif ($Ensure -eq 'Present')
     {
