@@ -311,6 +311,7 @@ function Convert-CustomPropertyArrayToStringArray
     [OutputType([System.String[]])]
     param
     (
+        [Parameter()]
         [PSCustomObject[]]
         $CustomProperties
     )
