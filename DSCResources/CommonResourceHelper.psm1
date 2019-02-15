@@ -183,7 +183,7 @@ function Get-LocalizedData
     .PARAMETER NewDSCMachineStatus
         The value to set $global:DSCMachineStatus to.
 #>
-function Set-DSCMachineStatus
+function Set-DSCMachineRebootRequired
 {
     # Suppressing this rule because $global:DSCMachineStatus is used to trigger a reboot.
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]

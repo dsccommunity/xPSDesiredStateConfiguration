@@ -228,7 +228,7 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-                Set-DSCMachineStatus -NewDSCMachineStatus 1
+                Set-DSCMachineRebootRequired
             }
         }
         else
@@ -279,7 +279,7 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-                Set-DSCMachineStatus -NewDSCMachineStatus 1
+                Set-DSCMachineRebootRequired
             }
         }
         else

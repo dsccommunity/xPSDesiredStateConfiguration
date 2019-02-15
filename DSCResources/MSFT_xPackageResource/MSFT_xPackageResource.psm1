@@ -669,7 +669,7 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $registryData -or $exitcode -eq 3010 -or $exitcode -eq 1641)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
-        Set-DSCMachineStatus -NewDSCMachineStatus 1
+        Set-DSCMachineRebootRequired
     }
     elseif ($Ensure -eq 'Present')
     {

@@ -210,7 +210,7 @@ function Set-TargetResource
     if ($restartNeeded)
     {
         Write-Verbose -Message $script:localizedData.RestartNeeded
-        Set-DSCMachineStatus -NewDSCMachineStatus 1
+        Set-DSCMachineRebootRequired
     }
 
     Write-Verbose -Message ($script:localizedData.SetTargetResourceEndMessage -f $Name)

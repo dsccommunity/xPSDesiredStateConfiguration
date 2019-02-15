@@ -17,7 +17,7 @@ try
     InModuleScope 'MSFT_xPackageResource' {
         Describe 'MSFT_xPackageResource Unit Tests' {
             # Override helper functions from CommonResourceHelper.psm1
-            function Set-DSCMachineStatus {}
+            function Set-DSCMachineRebootRequired {}
 
             BeforeAll {
                 $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
@@ -503,7 +503,7 @@ try
                     Mock Invoke-Process { return [PSCustomObject] @{ ExitCode = 3010 } }
                     Mock Test-TargetResource { return $false }
                     Mock Get-ProductEntry { return $null }
-                    Mock -CommandName Set-DSCMachineStatus
+                    Mock -CommandName Set-DSCMachineRebootRequired
 
                     $packageParameters = @{
                         Path = $script:msiLocation
@@ -513,7 +513,7 @@ try
 
                     { Set-TargetResource -Ensure 'Present' @packageParameters } | Should Not Throw
 
-                    Assert-MockCalled -CommandName Set-DSCMachineStatus -Times 1
+                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 1
                 }
 
                 It 'Should install package using user credentials when specified' {

@@ -187,7 +187,7 @@ Describe 'CommonResourceHelper Unit Tests' {
             }
         }
 
-        Describe 'Set-DSCMachineStatus' {
+        Describe 'Set-DSCMachineRebootRequired' {
             Context 'When called' {
                 It 'Should set the desired DSCMachineStatus value' {
                     # A new value we'll attempt to set to $global:DSCMachineStatus
@@ -200,7 +200,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                     $global:DSCMachineStatus = 99
 
                     # Set and test for the new value
-                    Set-DSCMachineStatus -NewDSCMachineStatus $newValue
+                    Set-DSCMachineRebootRequired -NewDSCMachineStatus $newValue
                     $global:DSCMachineStatus | Should -Be $newValue
 
                     # Revert to previous $global:DSCMachineStatus value
