@@ -1,5 +1,3 @@
-# PSSA global rule suppression is allowed here because $global:DSCMachineStatus must be set
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonResourceHelper.psm1')
@@ -212,7 +210,7 @@ function Set-TargetResource
     if ($restartNeeded)
     {
         Write-Verbose -Message $script:localizedData.RestartNeeded
-        $global:DSCMachineStatus = 1
+        Set-DSCMachineRebootRequired
     }
 
     Write-Verbose -Message ($script:localizedData.SetTargetResourceEndMessage -f $Name)

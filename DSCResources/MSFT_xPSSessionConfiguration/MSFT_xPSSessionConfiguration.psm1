@@ -133,7 +133,6 @@ function Get-TargetResource
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -168,7 +167,7 @@ function Set-TargetResource
 
     Write-Verbose -Message ($LocalizedData.SetTargetResourceStartMessage -f $Name)
 
-    #Check if the session configuration exists
+    # Check if the session configuration exists
     Write-Verbose -Message ($LocalizedData.CheckEndpointMessage -f $Name)
 
     # Try to get a named session configuration
@@ -343,7 +342,7 @@ function Set-TargetResource
         #>
         if ($restartNeeded)
         {
-            $global:DscMachineStatus = 1
+            Set-DSCMachineRebootRequired
         }
     }
 
@@ -495,7 +494,7 @@ function Test-TargetResource
     }
     #endregion
 
-    #Check if the session configuration exists
+    # Check if the session configuration exists
     Write-Verbose -Message ($LocalizedData.CheckEndpointMessage -f $Name)
 
     try
