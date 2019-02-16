@@ -1,5 +1,3 @@
-# Suppress Global Vars PSSA Error because $global:DSCMachineStatus must be allowed
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 param()
 
@@ -585,10 +583,12 @@ function Set-TargetResource
 
             if ($logStream)
             {
-                #We have to re-mux these since they appear to us as different streams
-                #The underlying Win32 APIs prevent this problem, as would constructing a script
-                #on the fly and executing it, but the former is highly problematic from PowerShell
-                #and the latter doesn't let us get the return code for UI-based EXEs
+                <#
+                    We have to re-mux these since they appear to us as different streams
+                    the underlying Win32 APIs prevent this problem, as would constructing a script
+                    on the fly and executing it, but the former is highly problematic from PowerShell
+                    and the latter doesn't let us get the return code for UI-based EXEs
+                #>
                 $outputEvents = Get-Event -SourceIdentifier $LogPath
                 $errorEvents = Get-Event -SourceIdentifier $errorLogPath
                 $masterEvents = @() + $outputEvents + $errorEvents
@@ -671,7 +671,7 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $registryData -or $exitcode -eq 3010 -or $exitcode -eq 1641)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
-        $global:DSCMachineStatus = 1
+        Set-DSCMachineRebootRequired
     }
     elseif ($Ensure -eq 'Present')
     {

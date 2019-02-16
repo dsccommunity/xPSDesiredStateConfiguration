@@ -1,5 +1,3 @@
-# Suppress Global Vars PSSA Error because $global:DSCMachineStatus must be allowed
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
 param()
 
@@ -341,7 +339,7 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $rebootRequired)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
-        $global:DSCMachineStatus = 1
+        Set-DSCMachineRebootRequired
     }
     elseif ($Ensure -eq 'Present')
     {

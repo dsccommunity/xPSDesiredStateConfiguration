@@ -13,7 +13,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xMsiPackage' `
-    -TestType 'Unit'
+    -TestType 'Integration'
 
 try
 {

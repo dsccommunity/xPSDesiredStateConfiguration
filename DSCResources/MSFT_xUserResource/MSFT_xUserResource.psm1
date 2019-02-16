@@ -95,30 +95,38 @@ function Set-TargetResource
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [System.String]
         $FullName,
 
+        [Parameter()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Password,
 
+        [Parameter()]
         [System.Boolean]
         $Disabled,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordNeverExpires,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeRequired,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeNotAllowed
     )
@@ -178,30 +186,38 @@ function Test-TargetResource
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [System.String]
         $FullName,
 
+        [Parameter()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Password,
 
+        [Parameter()]
         [System.Boolean]
         $Disabled,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordNeverExpires,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeRequired,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeNotAllowed
     )
@@ -337,30 +353,38 @@ function Set-TargetResourceOnFullSKU
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [System.String]
         $FullName,
 
+        [Parameter()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Password,
 
+        [Parameter()]
         [System.Boolean]
         $Disabled,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordNeverExpires,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeRequired,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeNotAllowed
     )
@@ -500,7 +524,7 @@ function Set-TargetResourceOnFullSKU
         else
         {
             # Ensure is set to 'Absent'
-            if ($user -ne $null)
+            if ($null -ne $user)
             {
                 # The user exists
                 if ($pscmdlet.ShouldProcess($script:localizedData.UserWithName -f $UserName, $script:localizedData.RemoveOperation))
@@ -579,30 +603,38 @@ function Test-TargetResourceOnFullSKU
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [System.String]
         $FullName,
 
+        [Parameter()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Password,
 
+        [Parameter()]
         [System.Boolean]
         $Disabled,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordNeverExpires,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeRequired,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeNotAllowed
     )
@@ -725,7 +757,7 @@ function Get-TargetResourceOnNanoServer
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $UserName
@@ -826,30 +858,38 @@ function Set-TargetResourceOnNanoServer
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [System.String]
         $FullName,
 
+        [Parameter()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Password,
 
+        [Parameter()]
         [System.Boolean]
         $Disabled,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordNeverExpires,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeRequired,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeNotAllowed
     )
@@ -897,7 +937,7 @@ function Set-TargetResourceOnNanoServer
         {
             if (-not $userExists -or $FullName -ne $user.FullName)
             {
-                if ($FullName -eq $null)
+                if ($null -eq $FullName)
                 {
                     Set-LocalUser -Name $UserName -FullName ([String]::Empty)
                 }
@@ -1035,30 +1075,38 @@ function Test-TargetResourceOnNanoServer
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [System.String]
         $FullName,
 
+        [Parameter()]
         [System.String]
         $Description,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Password,
 
+        [Parameter()]
         [System.Boolean]
         $Disabled,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordNeverExpires,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeRequired,
 
+        [Parameter()]
         [System.Boolean]
         $PasswordChangeNotAllowed
     )
@@ -1255,6 +1303,7 @@ function Test-CredentialsValidOnNanoServer
         [System.String]
         $UserName,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [SecureString]
         $Password
