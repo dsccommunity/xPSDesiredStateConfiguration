@@ -122,6 +122,16 @@
   [issue #490](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/490).
 - Fix script analyzer issues in MSFT_xWindowsFeature.psm1.
   [issue #493](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/493)
+- Fix script analyzer issues in MSFT_xUserResource.psm1.
+  [issue #492](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/492)
+- Moves calls to set $global:DSCMachineStatus = 1 into a helper function to
+  reduce the number of locations where we need to suppress PSScriptAnalyzer
+  rules PSAvoidGlobalVars and PSUseDeclaredVarsMoreThanAssignments.
+- Adds spaces between comment hashtags and comments.
+- Fixes script analyzer issues in MSFT_xServiceResource.psm1.
+  [issue #491](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/491)
+- Fixes script analyzer issues in MSFT_xWindowsPackageCab.psm1.
+  [issue #495](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/495)
 
 ## 8.4.0.0
 
