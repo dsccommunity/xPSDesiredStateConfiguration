@@ -40,30 +40,30 @@ Configuration xWindowsOptionalFeatureSet
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Name,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $RemoveFilesOnDisable,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $NoWindowsUpdateCheck,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $LogPath,
 
         [Parameter()]
         [ValidateSet('ErrorsOnly', 'ErrorsAndWarning', 'ErrorsAndWarningAndInformation')]
-        [String]
+        [System.String]
         $LogLevel
     )
 

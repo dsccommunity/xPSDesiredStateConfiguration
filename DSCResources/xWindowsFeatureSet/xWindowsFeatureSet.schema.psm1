@@ -40,21 +40,21 @@ Configuration xWindowsFeatureSet
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Name,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Source,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $IncludeAllSubFeature,
 
         [Parameter()]
@@ -65,7 +65,7 @@ Configuration xWindowsFeatureSet
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $LogPath
     )
 
