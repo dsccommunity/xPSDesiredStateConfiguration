@@ -1,8 +1,13 @@
 <#
     .SYNOPSIS
-        Configuration uploads file or folder to an SMB share.
+        DSC Composite Resource uploads file or folder to an SMB share.
 
     .DESCRIPTION
+        This is a DSC Composite resource that can be used to upload
+        a file or folder into an SMB file share. The SMB file share
+        does not have to be currently mounted. It will be mounted
+        during the upload process using the optional Credential
+        and then dismounted after completion of the upload.
 
     .PARAMETER DestinationPath
         The destination SMB share path to upload the file or folder to.

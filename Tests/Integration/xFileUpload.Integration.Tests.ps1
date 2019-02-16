@@ -20,8 +20,11 @@ try
 {
     Describe 'xFileUpload Integration Tests' {
         BeforeAll {
-            $script:configurationName = 'xFileUpload_Integration_Test'
-            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xFileUpload.config.ps1'
+            $script:configurationName = 'xFileUpload_Config'
+            $script:configurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xFileUpload.config.ps1'
+
+            # File content to use for testing
+            $script:testFileContent = 'Test Content'
 
             # Create a folder to be used as the destination SMB Share
             $script:smbShareName = 'xFileUploadSMBShare'
@@ -33,14 +36,14 @@ try
             # Create a file to be used as the source
             $script:sourceFileName = 'testfile.txt'
             $script:sourcePathFile = Join-Path -Path $TestDrive -ChildPath $script:sourceFileName
-            $null = Set-Content -Path $script:sourcePathFile -Value 'TestContent' -Force
+            $null = Set-Content -Path $script:sourcePathFile -Value $script:testFileContent -Force
 
             # Create a folder and file to be used as the source
             $script:sourceFolderName = 'testfolder'
             $script:sourcePathFolder = Join-Path -Path $TestDrive -ChildPath $script:sourceFolderName
             $null = New-Item -Path $script:sourcePathFolder -ItemType Directory -ErrorAction SilentlyContinue
             $script:sourcePathFolderFile = Join-Path -Path $script:sourcePathFolder -ChildPath $script:sourceFileName
-            $null = Set-Content -Path $script:sourcePathFolderFile -Value 'TestContent' -Force
+            $null = Set-Content -Path $script:sourcePathFolderFile -Value $script:testFileContent -Force
         }
 
         AfterAll {
@@ -50,11 +53,21 @@ try
         Context 'When uploading a single file to an SMB file share' {
             It 'Should compile and run configuration' {
                 {
-                    . $script:confgurationFilePath -ConfigurationName $script:configurationName
+                    $ConfigurationData = @{
+                        AllNodes = @(
+                            @{
+                                NodeName        = 'localhost'
+                                CertificateFile = $env:DscPublicCertificatePath
+                                DestinationPath = $script:destinationPath
+                                SourcePath      = $script:sourcePathFile
+                            }
+                        )
+                    }
+
+                    . $script:configurationFilePath -ConfigurationName $script:configurationName
                     & $script:configurationName `
                         -OutputPath $TestDrive `
-                        -DestinationPath $script:destinationPath `
-                        -SourcePath $script:sourcePathFile
+                        -ConfigurationData $ConfigurationData
 
                     Start-DscConfiguration `
                         -Path $TestDrive `
@@ -68,18 +81,28 @@ try
             It 'Should have copied the file to the destination' {
                 $uploadedFilePath = Join-Path -Path $script:smbSharePath -ChildPath $script:sourceFileName
                 Test-Path -Path $uploadedFilePath | Should -Be $true
-                Get-Content -Path $uploadedFilePath | Should -Be 'TestContent'
+                Get-Content -Path $uploadedFilePath | Should -Be $script:testFileContent
             }
         }
 
         Context 'When uploading a folder to an SMB file share' {
             It 'Should compile and run configuration' {
                 {
-                    . $script:confgurationFilePath -ConfigurationName $script:configurationName
+                    $ConfigurationData = @{
+                        AllNodes = @(
+                            @{
+                                NodeName        = 'localhost'
+                                CertificateFile = $env:DscPublicCertificatePath
+                                DestinationPath = $script:destinationPath
+                                SourcePath      = $script:sourcePathFolder
+                            }
+                        )
+                    }
+
+                    . $script:configurationFilePath -ConfigurationName $script:configurationName
                     & $script:configurationName `
                         -OutputPath $TestDrive `
-                        -DestinationPath $script:destinationPath `
-                        -SourcePath $script:sourcePathFolder
+                        -ConfigurationData $ConfigurationData
 
                     Start-DscConfiguration `
                         -Path $TestDrive `
@@ -95,7 +118,7 @@ try
                 $uploadedFilePath = Join-Path -Path $uploadedFolderPath -ChildPath $script:sourceFileName
                 Test-Path -Path $uploadedFolderPath | Should -Be $true
                 Test-Path -Path $uploadedFilePath | Should -Be $true
-                Get-Content -Path $uploadedFilePath | Should -Be 'TestContent'
+                Get-Content -Path $uploadedFilePath | Should -Be $script:testFileContent
             }
         }
     }

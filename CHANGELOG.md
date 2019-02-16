@@ -137,6 +137,11 @@
     [issue #497](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/497)
   - Update to meet style guidelines.
   - Added Integration tests.
+  - Updated manifest Author, Company and Copyright to match
+    standards.
+- Updated module manifest Copyright to match standards and remove
+  year.
+- Auto-formatted the module manifest to improve layout.
 
 ## 8.4.0.0
 
