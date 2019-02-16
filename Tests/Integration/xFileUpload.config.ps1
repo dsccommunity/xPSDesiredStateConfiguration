@@ -1,30 +1,22 @@
-param
-(
-    [Parameter(Mandatory = $true)]
-    [String]
-    $ConfigurationName
-)
+#region HEADER
+# Integration Test Config Template Version: 1.2.0
+#endregion
 
-Configuration $ConfigurationName
+<#
+    .SYNOPSIS
+        Integration test configuration that uploads a file or folder
+        containined in the SourcePath into the SMB Share in the DestinationPath.
+#>
+Configuration xFileUpload_Config
 {
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DestinationPath,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $SourcePath
-    )
-
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
-    xFileUpload UploadFileOrFolder
+    node $AllNodes.NodeName
     {
-        DestinationPath = $DestinationPath
-        SourcePath = $SourcePath
+        xFileUpload Integration_Test
+        {
+            DestinationPath = $Node.DestinationPath
+            SourcePath      = $Node.SourcePath
+        }
     }
 }
