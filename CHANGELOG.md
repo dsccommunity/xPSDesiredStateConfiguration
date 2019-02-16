@@ -136,6 +136,11 @@
   [issue #491](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/491)
 - Fixes script analyzer issues in MSFT_xWindowsPackageCab.psm1.
   [issue #495](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/495)
+- xFileUpload:
+  - Fixes script analyzer issues in xFileUpload.schema.psm1.
+    [issue #497](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/497)
+  - Update to meet style guidelines.
+  - Added Integration tests.
 
 ## 8.4.0.0
 
@@ -407,7 +412,7 @@
 - xDSCWebService
   - Fixed issue where resource would fail to read redirection.config file.
     This resolves issue
-    [#191] (https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
+    [#191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191)
 - xArchive
   - Fixed issue where resource would throw exception when file name contains
     brackets. This resolves issue
