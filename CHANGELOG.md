@@ -147,8 +147,8 @@
   year.
 - Auto-formatted the module manifest to improve layout.
 - Changes to xPackage
-- Fix an misnamed variable that causes an error during error message output.
-  [issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
+  - Fix an misnamed variable that causes an error during error message output.
+    [issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
 - Fixes script analyzer issues in MSFT_xPSSessionConfiguration.psm1.
   [issue #566](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/566)
 - Fixes script analyzer issues in xGroupSet.schema.psm1.
