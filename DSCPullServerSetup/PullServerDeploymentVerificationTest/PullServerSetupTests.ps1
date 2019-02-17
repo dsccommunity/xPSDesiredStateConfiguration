@@ -122,7 +122,7 @@ Describe PullServerInstallationTests {
         }
         It 'Updates DscConfiguration Successfully' {
             Update-DscConfiguration -Wait -Verbose:$VerbosePreference
-            (Get-DscConfiguration).ConfigurationName | Should -Be "NoOpConfig"
+            (Get-DscConfiguration).ConfigurationName | Should -Be 'NoOpConfig'
         }
     }
 }
