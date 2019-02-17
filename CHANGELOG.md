@@ -146,6 +146,9 @@
 - Updated module manifest Copyright to match standards and remove
   year.
 - Auto-formatted the module manifest to improve layout.
+- Changes to xPackage
+  - Fix an misnamed variable that causes an error during error message output.
+    [issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
 
 ## 8.4.0.0
 
