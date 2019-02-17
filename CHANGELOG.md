@@ -146,6 +146,7 @@
 - Updated module manifest Copyright to match standards and remove
   year.
 - Auto-formatted the module manifest to improve layout.
+- Fix Run-On Words in README.md.
 
 ## 8.4.0.0
 
