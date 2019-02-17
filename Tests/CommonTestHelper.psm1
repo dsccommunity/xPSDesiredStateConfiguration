@@ -199,7 +199,7 @@ function Invoke-GenericUnitTest {
     if ($ShouldThrow)
     {
         It "Should throw an error for $ErrorTestName" {
-            { $null = $($Function.Invoke($FunctionParameters)) } | Should -Throw $ErrorMessage
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should -Throw -ExpectedMessage $ErrorMessage
         }
     }
     else
@@ -326,7 +326,7 @@ function Invoke-SetTargetResourceUnitTest {
     if ($ShouldThrow)
     {
         It "Should throw an error for $ErrorTestName" {
-            { $null = Set-TargetResource @SetTargetResourceParameters } | Should -Throw $ErrorMessage
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should -Throw -ExpectedMessage $ErrorMessage
         }
     }
     else

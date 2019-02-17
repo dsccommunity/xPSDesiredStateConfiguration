@@ -133,7 +133,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "UriValidationFailure" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Context 'DestinationPath is "bad://.."' {
@@ -145,7 +145,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DestinationPathSchemeValidationFailure" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Context 'DestinationPath starts with "\\"' {
@@ -157,7 +157,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DestinationPathIsUncFailure" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Context 'DestinationPath contains invalid characters "*"' {
@@ -169,7 +169,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DestinationPathHasInvalidCharactersError" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Mock Update-Cache
@@ -182,7 +182,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DownloadException" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Update-Cache -Exactly 0

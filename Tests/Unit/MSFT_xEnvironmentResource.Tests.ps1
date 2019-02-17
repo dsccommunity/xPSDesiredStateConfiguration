@@ -2266,7 +2266,7 @@ try
                             really really really long name that will not be accepted by the machine. `
                             really really really long name that will not be accepted by the machine.' `
                             -Target @('Machine')
-                    } | Should -Throw $script:localizedData.ArgumentTooLong
+                    } | Should -Throw -ExpectedMessage $script:localizedData.ArgumentTooLong
                 }
 
 
@@ -2309,7 +2309,7 @@ try
                     $value = 'mockValue'
                     {
                         Set-EnvironmentVariable -Name $name -Value $value -Target @('Process')
-                    } | Should -Throw $errorRecord
+                    } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }

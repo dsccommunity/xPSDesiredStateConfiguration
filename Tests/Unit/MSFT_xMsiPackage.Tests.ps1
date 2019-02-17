@@ -481,14 +481,14 @@ Describe 'xMsiPackage Unit Tests' {
                     $invalidPath = 'testMsiFile.exe'
                     $expectedErrorMessage = ($script:localizedData.InvalidBinaryType -f $invalidPath)
 
-                    { Assert-PathExtensionValid -Path $invalidPath } | Should -Throw $expectedErrorMessage
+                    { Assert-PathExtensionValid -Path $invalidPath } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
 
                 It 'Should throw an invalid argument exception when an invalid file type is passed in' {
                     $invalidPath = 'testMsiFilemsi'
                     $expectedErrorMessage = ($script:localizedData.InvalidBinaryType -f $invalidPath)
 
-                    { Assert-PathExtensionValid -Path $invalidPath } | Should -Throw $expectedErrorMessage
+                    { Assert-PathExtensionValid -Path $invalidPath } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -522,14 +522,14 @@ Describe 'xMsiPackage Unit Tests' {
                     $filePath = 'ht://localhost:1243/testMsi.msi'
                     $expectedErrorMessage = ($script:localizedData.InvalidPath -f $filePath)
 
-                    { Convert-PathToUri -Path $filePath } | Should -Throw $expectedErrorMessage
+                    { Convert-PathToUri -Path $filePath } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
 
                 It 'Should throw an error when path is not in valid format' {
                     $filePath = 'mri'
                     $expectedErrorMessage = ($script:localizedData.InvalidPath -f $filePath)
 
-                    { Convert-PathToUri -Path $filePath } | Should -Throw $expectedErrorMessage
+                    { Convert-PathToUri -Path $filePath } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -548,7 +548,7 @@ Describe 'xMsiPackage Unit Tests' {
             Context 'Invalid Product ID is passed in' {
                 It 'Should throw an exception when an invalid product ID is passed in' {
                     $expectedErrorMessage = ($script:localizedData.InvalidIdentifyingNumber -f $script:testWrongProductId)
-                    { Convert-ProductIdToIdentifyingNumber -ProductId $script:testWrongProductId } | Should -Throw $expectedErrorMessage
+                    { Convert-ProductIdToIdentifyingNumber -ProductId $script:testWrongProductId } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -749,7 +749,7 @@ Describe 'xMsiPackage Unit Tests' {
             Context 'Error occurred during while retrieving the response' {
                 It 'Should throw the expected exception' {
                     $expectedErrorMessage = ($script:localizedData.CouldNotGetResponseFromWebRequest -f $script:testUriHttp.Scheme, $script:testUriHttp.OriginalString)
-                    { Get-WebRequestResponse -Uri $script:testUriHttp } | Should -Throw $expectedErrorMessage
+                    { Get-WebRequestResponse -Uri $script:testUriHttp } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -861,7 +861,7 @@ Describe 'xMsiPackage Unit Tests' {
                 $expectedErrorMessage = ($script:localizedData.InvalidFileHash -f $script:testPath, $badHash, 'SHA256')
 
                 It 'Should throw when hashes do not match' {
-                    { Assert-FileHashValid -Path $script:testPath -Hash $badHash -Algorithm 'SHA256' } | Should -Throw $expectedErrorMessage
+                    { Assert-FileHashValid -Path $script:testPath -Hash $badHash -Algorithm 'SHA256' } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -905,7 +905,7 @@ Describe 'xMsiPackage Unit Tests' {
                 $expectedErrorMessage = ($script:localizedData.WrongSignerSubject -f $script:testPath, $badSubject)
 
                 It 'Should throw expected error message' {
-                    { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $mockThumbprint -Subject $badSubject } | Should -Throw $expectedErrorMessage
+                    { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $mockThumbprint -Subject $badSubject } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -914,7 +914,7 @@ Describe 'xMsiPackage Unit Tests' {
                 $expectedErrorMessage = ($script:localizedData.WrongSignerThumbprint -f $script:testPath, $badThumbprint)
 
                 It 'Should throw expected error message' {
-                    { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $badThumbprint -Subject $mockSubject } | Should -Throw $expectedErrorMessage
+                    { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $badThumbprint -Subject $mockSubject } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -923,7 +923,7 @@ Describe 'xMsiPackage Unit Tests' {
                 $expectedErrorMessage = ($script:localizedData.InvalidFileSignature -f $script:testPath, $mockSignature.Status)
 
                 It 'Should throw expected error message' {
-                    { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $mockThumbprint -Subject $mockSubject } | Should -Throw $expectedErrorMessage
+                    { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $mockThumbprint -Subject $mockSubject } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }

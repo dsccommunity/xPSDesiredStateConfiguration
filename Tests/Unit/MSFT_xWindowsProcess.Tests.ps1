@@ -247,7 +247,7 @@ try
                 { Set-TargetResource -Path $script:errorProcess.Path `
                                      -Arguments '' `
                                      -Ensure 'Absent'
-                } | Should -Throw $script:exceptionMessage
+                } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName Expand-Path -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-ProcessCimInstance -Exactly 1 -Scope It
@@ -262,7 +262,7 @@ try
                 { Set-TargetResource -Path $script:validPath1 `
                                      -Arguments $script:mockProcess1.Arguments `
                                      -Ensure 'Absent'
-                } | Should -Throw $script:exceptionMessage
+                } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName Expand-Path -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-ProcessCimInstance -Exactly 1 -Scope It
@@ -298,7 +298,7 @@ try
                                      -Credential $script:testCredential `
                                      -WorkingDirectory 'test working directory' `
                                      -Ensure 'Present'
-                } | Should -Throw $script:exceptionMessage
+                } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName Expand-Path -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-ProcessCimInstance -Exactly 1 -Scope It
@@ -318,7 +318,7 @@ try
                                      -Arguments $script:mockProcess1.Arguments `
                                      -Credential $script:testCredential `
                                      -Ensure 'Present'
-                } | Should -Throw $testErrorRecord
+                } | Should -Throw -ExpectedMessage $testErrorRecord
 
                 Assert-MockCalled -CommandName Expand-Path -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-ProcessCimInstance -Exactly 1 -Scope It
@@ -349,7 +349,7 @@ try
                 { Set-TargetResource -Path $script:invalidPath `
                                      -Arguments $script:mockProcess1.Arguments `
                                      -Ensure 'Present'
-                } | Should -Throw $script:exceptionMessage
+                } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName Expand-Path -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-ProcessCimInstance -Exactly 1 -Scope It
@@ -365,7 +365,7 @@ try
                 { Set-TargetResource -Path $script:invalidPath `
                                      -Arguments $script:mockProcess1.Arguments `
                                      -Ensure 'Present'
-                } | Should -Throw $script:exceptionMessage
+                } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName Expand-Path -Exactly 1 -Scope It
                 Assert-MockCalled -CommandName Get-ProcessCimInstance -Exactly 1 -Scope It
@@ -456,7 +456,7 @@ try
             It 'Should throw an invalid argument exception when Path is rooted and does not exist' {
                 $rootedPath = 'C:\invalidProcess.exe'
 
-                { Expand-Path -Path $rootedPath} | Should -Throw $script:exceptionMessage
+                { Expand-Path -Path $rootedPath} | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -464,7 +464,7 @@ try
             It 'Should throw an invalid argument exception when Path is unrooted and does not exist' {
                  $unrootedPath = 'invalidfile.txt'
 
-                 { Expand-Path -Path $unrootedPath} | Should -Throw $script:exceptionMessage
+                 { Expand-Path -Path $unrootedPath} | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                  Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -656,7 +656,7 @@ try
 
             It 'Should throw an exception if the hashtable contains a key' {
                 $mockKey = @('k1', 'k2', 'Key3', 'k4', 'k5')
-                { Assert-HashTableDoesNotContainKey -Hashtable $mockHashtable -Key $mockKey } | Should -Throw $script:exceptionMessage
+                { Assert-HashTableDoesNotContainKey -Hashtable $mockHashtable -Key $mockKey } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -697,7 +697,7 @@ try
 
 
                  { Assert-PathArgumentRooted -PathArgumentName 'mock test name' `
-                                             -PathArgument $unrootedPath } | Should -Throw $script:exceptionMessage
+                                             -PathArgument $unrootedPath } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                  Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -717,7 +717,7 @@ try
                 Mock -CommandName Test-Path -MockWith { return $false }
 
                 { Assert-PathArgumentValid -PathArgumentName 'test name' `
-                                           -PathArgument 'invalidPath' } | Should -Throw $script:exceptionMessage
+                                           -PathArgument 'invalidPath' } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -764,7 +764,7 @@ try
                 $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
                 $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
 
-                { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should -Throw $script:exceptionMessage
+                { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -774,7 +774,7 @@ try
                 $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
                 $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
 
-                { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should -Throw $script:exceptionMessage
+                { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }

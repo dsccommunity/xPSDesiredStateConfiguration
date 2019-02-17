@@ -65,19 +65,19 @@ try
 
                 It 'Should throw when the DISM module is not available' {
                     Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { Write-Error 'Cannot find module' }
-                    { Assert-ResourcePrerequisitesValid } | Should -Throw $script:localizedData.DismNotAvailable
+                    { Assert-ResourcePrerequisitesValid } | Should -Throw -ExpectedMessage $script:localizedData.DismNotAvailable
                 }
 
                 Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { }
 
                 It 'Should throw when operating system is Server 2008 R2' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2008R2'] }
-                    { Assert-ResourcePrerequisitesValid } | Should -Throw $script:localizedData.NotSupportedSku
+                    { Assert-ResourcePrerequisitesValid } | Should -Throw -ExpectedMessage $script:localizedData.NotSupportedSku
                 }
 
                 It 'Should throw when operating system is Server 2012' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012'] }
-                    { Assert-ResourcePrerequisitesValid } | Should -Throw $script:localizedData.NotSupportedSku
+                    { Assert-ResourcePrerequisitesValid } | Should -Throw -ExpectedMessage $script:localizedData.NotSupportedSku
                 }
 
                 It 'Should not throw when operating system is Windows 7' {

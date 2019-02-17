@@ -63,7 +63,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for Checksum specified while Validate is false' {
                     $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $getTargetResourceParameters.Checksum, $getTargetResourceParameters.Path, $getTargetResourceParameters.Destination
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -74,7 +74,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid archive path' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $testInvalidArchivePathErrorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw -ExpectedMessage $testInvalidArchivePathErrorMessage
                 }
             }
 
@@ -87,7 +87,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid destination' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $testInvalidDestinationErrorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw -ExpectedMessage $testInvalidDestinationErrorMessage
                 }
             }
 
@@ -687,7 +687,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for Checksum specified while Validate is false' {
                     $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $setTargetResourceParameters.Checksum, $setTargetResourceParameters.Path, $setTargetResourceParameters.Destination
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $errorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -698,7 +698,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid archive path' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $testInvalidArchivePathErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $testInvalidArchivePathErrorMessage
                 }
             }
 
@@ -711,7 +711,7 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should throw an error for invalid destination' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $testInvalidDestinationErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $testInvalidDestinationErrorMessage
                 }
             }
 
@@ -1604,7 +1604,7 @@ Describe 'xArchive Unit Tests' {
                 It 'Should throw an error for failed PSDrive creation' {
                     $expectedPath = $mountPSDriveWithCredentialParameters.Path.Substring(0, $mountPSDriveWithCredentialParameters.Path.IndexOf('\'))
                     $expectedErrorMessage = $script:localizedData.ErrorCreatingPSDrive -f $expectedPath, $mountPSDriveWithCredentialParameters.Credential.UserName
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Throw $expectedErrorMessage
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -1709,7 +1709,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for an invalid path' {
                     $expectedErrorMessage = $script:localizedData.PathDoesNotContainValidPSDriveRoot -f $mountPSDriveWithCredentialParameters.Path
-                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Throw $expectedErrorMessage
+                    { $null = Mount-PSDriveWithCredential @mountPSDriveWithCredentialParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -1747,7 +1747,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for non-existent path' {
                     $expectedErrorMessage = $script:localizedData.PathDoesNotExistAsLeaf -f $assertPathExistsAsLeafParameters.Path
-                    { Assert-PathExistsAsLeaf @assertPathExistsAsLeafParameters } | Should -Throw $expectedErrorMessage
+                    { Assert-PathExistsAsLeaf @assertPathExistsAsLeafParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -1807,7 +1807,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw error for file at destination' {
                     $expectedErrorMessage = $script:localizedData.DestinationExistsAsFile -f $assertDestinationDoesNotExistAsFileParameters.Destination
-                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should -Throw $expectedErrorMessage
+                    { Assert-DestinationDoesNotExistAsFile @assertDestinationDoesNotExistAsFileParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
         }
@@ -1901,7 +1901,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw error for failure while opening archive entry' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -1916,7 +1916,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw error for failure while opening a stream to the file' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -1931,7 +1931,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw error for failure to retrieve the file hash or archive entry hash' {
                     $expectedErrorMessage = $script:localizedData.ErrorComparingHashes -f $testFileHashMatchesArchiveEntryHashParameters.FilePath, $testArchiveEntryFullName, $testFileHashMatchesArchiveEntryHashParameters.HashAlgorithmName
-                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw $expectedErrorMessage
+                    { $null = Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -3575,7 +3575,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for failed copy from the file stream to the archive entry stream' {
                     $expectedErrorMessage = $script:localizedData.ErrorCopyingFromArchiveToDestination -f $copyArchiveEntryToDestinationParameters.DestinationPath
-                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should -Throw $expectedErrorMessage
+                    { Copy-ArchiveEntryToDestination @copyArchiveEntryToDestinationParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -3864,7 +3864,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullName
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3995,7 +3995,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullName
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -4490,7 +4490,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullName
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -4621,7 +4621,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullName
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -4857,7 +4857,7 @@ Describe 'xArchive Unit Tests' {
 
                 It 'Should throw an error for attempting to overwrite an existing item without specifying the Force parameter' {
                     $errorMessage = $script:localizedData.ForceNotSpecifiedToOverwriteItem -f $testItemPathAtDestination, $testArchiveEntryFullName
-                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw $errorMessage
+                    { Expand-ArchiveToDestination @expandArchiveToDestinationParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 

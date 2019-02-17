@@ -428,7 +428,7 @@ try {
                     $errorMessage = "The name $invalidName cannot be used."
                     $exception = New-Object System.ArgumentException $errorMessage;
                     $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-                    { Assert-UserNameValid -UserName $invalidName } | Should -Throw $errorRecord
+                    { Assert-UserNameValid -UserName $invalidName } | Should -Throw -ExpectedMessage $errorRecord
                 }
 
                 It 'Should throw InvalidArgumentError when username contains an invalid char' {
@@ -438,7 +438,7 @@ try {
                     $errorMessage = "The name $invalidName cannot be used."
                     $exception = New-Object System.ArgumentException $errorMessage;
                     $errorRecord = New-Object System.Management.Automation.ErrorRecord $exception, $errorId, $errorCategory, $null
-                    { Assert-UserNameValid -UserName $invalidName } | Should -Throw $errorRecord
+                    { Assert-UserNameValid -UserName $invalidName } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }

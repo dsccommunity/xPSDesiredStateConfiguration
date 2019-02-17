@@ -36,7 +36,7 @@ try {
 
                 It 'Should throw an error for malformed get script' {
                     $errorMessage = $script:localizedData.GetScriptDidNotReturnHashtable
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -51,7 +51,7 @@ try {
 
                 It 'Should throw an error for malformed get script' {
                     $errorMessage = $script:localizedData.GetScriptDidNotReturnHashtable
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -69,7 +69,7 @@ try {
                 }
 
                 It 'Should throw error from get script' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $testErrorRecord
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw -ExpectedMessage $testErrorRecord
                 }
             }
 
@@ -220,7 +220,7 @@ try {
                 }
 
                 It 'Should throw error from set script' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $testErrorRecord
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $testErrorRecord
                 }
             }
         }
@@ -237,7 +237,7 @@ try {
 
                 It 'Should throw an error for malformed test script' {
                     $errorMessage = $script:localizedData.TestScriptDidNotReturnBoolean
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw $errorMessage
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -255,7 +255,7 @@ try {
                 }
 
                 It 'Should throw error from test script' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw $testErrorRecord
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $testErrorRecord
                 }
             }
 
@@ -369,7 +369,7 @@ try {
 
                 It 'Should throw an error for malformed test script' {
                     $errorMessage = $script:localizedData.TestScriptDidNotReturnBoolean
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw $errorMessage
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }

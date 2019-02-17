@@ -476,7 +476,7 @@ try
 
                 It 'Should throw an error for BuiltInAccount and Credential conflict' {
                     $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
 
                 $setTargetResourceParameters = @{
@@ -487,7 +487,7 @@ try
 
                 It 'Should throw an error for BuiltInAccount and GroupManagedServiceAccount conflict' {
                     $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
 
                 $setTargetResourceParameters = @{
@@ -498,7 +498,7 @@ try
 
                 It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
                     $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $setTargetResourceParameters.Name
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -553,7 +553,7 @@ try
 
                 It 'Should throw an error for the missing path' {
                     $expectedErrorMessage = $script:localizedData.ServiceDoesNotExistPathMissingError -f $script:testServiceName
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -1113,7 +1113,7 @@ try
 
                 It 'Should throw an error for BuiltInAccount and Credential conflict' {
                     $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
-                    { Test-TargetResource @testTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
 
                 $testTargetResourceParameters = @{
@@ -1124,7 +1124,7 @@ try
 
                 It 'Should throw an error for BuiltInAccount and GroupManagedServiceAccount conflict' {
                     $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
-                    { Test-TargetResource @testTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
 
                 $testTargetResourceParameters = @{
@@ -1135,7 +1135,7 @@ try
 
                 It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
                     $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
-                    { Test-TargetResource @testTargetResourceParameters } | Should -Throw $expectedErrorMessage
+                    { Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                 }
             }
 
@@ -1797,14 +1797,14 @@ try
                         {
                             It 'Should throw error for conflicting state and startup type' {
                                 $errorMessage = $script:localizedData.StartupTypeStateConflict -f $assertNoStartupTypeStateConflictParameters.ServiceName, $startupTypeValue, $stateValue
-                                { Assert-NoStartupTypeStateConflict @assertNoStartupTypeStateConflictParameters } | Should -Throw $errorMessage
+                                { Assert-NoStartupTypeStateConflict @assertNoStartupTypeStateConflictParameters } | Should -Throw -ExpectedMessage $errorMessage
                             }
                         }
                         elseif ($stateValue -eq 'Stopped' -and $startupTypeValue -eq 'Automatic')
                         {
                             It 'Should throw error for conflicting state and startup type' {
                                 $errorMessage = $script:localizedData.StartupTypeStateConflict -f $assertNoStartupTypeStateConflictParameters.ServiceName, $startupTypeValue, $stateValue
-                                { Assert-NoStartupTypeStateConflict @assertNoStartupTypeStateConflictParameters } | Should -Throw $errorMessage
+                                { Assert-NoStartupTypeStateConflict @assertNoStartupTypeStateConflictParameters } | Should -Throw -ExpectedMessage $errorMessage
                             }
                         }
                         else
@@ -1967,7 +1967,7 @@ try
                     It 'Should throw error for failed service path change' {
                         $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServicePathParameters.ServiceName, 'PathName', $invokeCimMethodFailResult.ReturnValue
 
-                        { Set-ServicePath @setServicePathParameters } | Should -Throw $errorMessage
+                        { Set-ServicePath @setServicePathParameters } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
             }
@@ -2133,7 +2133,7 @@ try
                     It 'Should throw error for failed service path change' {
                         $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServiceDependenciesParameters.ServiceName, 'ServiceDependencies', $invokeCimMethodFailResult.ReturnValue
 
-                        { Set-ServiceDependency @setServiceDependenciesParameters } | Should -Throw $errorMessage
+                        { Set-ServiceDependency @setServiceDependenciesParameters } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
             }
@@ -2420,7 +2420,7 @@ try
                     It 'Should throw an error for service change failure' {
                         $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServiceAccountPropertyParameters.ServiceName, 'DesktopInteract', $invokeCimMethodFailResult.ReturnValue
 
-                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should -Throw $errorMessage
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 
@@ -2433,7 +2433,7 @@ try
                     It 'Should throw an error for service change failure' {
                         $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServiceAccountPropertyParameters.ServiceName, 'StartName, StartPassword', $invokeCimMethodFailResult.ReturnValue
 
-                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should -Throw $errorMessage
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 
@@ -2446,7 +2446,7 @@ try
                     It 'Should throw an error for service change failure' {
                         $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServiceAccountPropertyParameters.ServiceName, 'StartName, StartPassword', $invokeCimMethodFailResult.ReturnValue
 
-                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should -Throw $errorMessage
+                        { Set-ServiceAccountProperty @setServiceAccountPropertyParameters } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
             }
@@ -2525,7 +2525,7 @@ try
                     It 'Should throw error for failed service change' {
                         $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $setServiceStartupTypeParameters.ServiceName, 'StartMode', $invokeCimMethodFailResult.ReturnValue
 
-                        { Set-ServiceStartupType @setServiceStartupTypeParameters } | Should -Throw $errorMessage
+                        { Set-ServiceStartupType @setServiceStartupTypeParameters } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
             }
@@ -2908,7 +2908,7 @@ try
 
                 It 'Should throw error for service removal timeout' {
                     $errorMessage = $script:localizedData.ServiceDeletionFailed -f $removeServiceWithTimeoutParameters.Name
-                    { Remove-ServiceWithTimeout @removeServiceWithTimeoutParameters } | Should -Throw $errorMessage
+                    { Remove-ServiceWithTimeout @removeServiceWithTimeoutParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }

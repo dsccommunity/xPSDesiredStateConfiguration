@@ -330,7 +330,7 @@ try
                     It 'Should throw an error when Get-LocalGroup throws an exception other than GroupNotFound' {
                         Mock -CommandName 'Get-LocalGroup' -MockWith { Write-Error -Message $script:testErrorMessage -CategoryReason 'OtherException' }
 
-                        { $getTargetResourceResult = Get-TargetResourceOnNanoServer -GroupName $script:testGroupName } | Should -Throw $script:testErrorMessage
+                        { $getTargetResourceResult = Get-TargetResourceOnNanoServer -GroupName $script:testGroupName } | Should -Throw -ExpectedMessage $script:testErrorMessage
 
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                     }
@@ -453,7 +453,7 @@ try
                     Mock -CommandName 'Get-LocalGroup' -MockWith { Write-Error -Message $script:testErrorMessage -CategoryReason 'OtherException' }
 
                     It 'Should throw from group retrieval if exception is not a GroupNotFoundException' {
-                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -Ensure 'Present' } | Should -Throw $script:testErrorMessage
+                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -Ensure 'Present' } | Should -Throw -ExpectedMessage $script:testErrorMessage
                     }
 
                     Mock -CommandName 'Get-LocalGroup' -MockWith { return $script:testLocalGroup }
@@ -571,7 +571,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude'
 
-                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if Members and MembersToExclude are both specified' {
@@ -580,7 +580,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude'
 
-                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if MembersToInclude and MembersToExclude contain the same member' {
@@ -589,7 +589,7 @@ try
 
                         $errorMessage = $script:localizedData.IncludeAndExcludeConflict -f $script:testMemberName1, 'MembersToInclude', 'MembersToExclude'
 
-                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Set-TargetResourceOnNanoServer -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should not modify group if member specified by MembersToInclude is already in group' {
@@ -681,7 +681,7 @@ try
                     Mock -CommandName 'Get-LocalGroup' -MockWith { Write-Error -Message $script:testErrorMessage -CategoryReason 'OtherException' }
 
                     It 'Should throw from group retrieval if exception is not a GroupNotFoundException' {
-                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -Ensure 'Present' } | Should -Throw $script:testErrorMessage
+                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -Ensure 'Present' } | Should -Throw -ExpectedMessage $script:testErrorMessage
                     }
 
                     Mock -CommandName 'Get-LocalGroup' -MockWith { return $script:testLocalGroup }
@@ -794,7 +794,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude'
 
-                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if Members and MembersToExclude are both specified' {
@@ -803,7 +803,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude'
 
-                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if MembersToInclude and MembersToExclude contain the same member' {
@@ -812,7 +812,7 @@ try
 
                         $errorMessage = $script:localizedData.IncludeAndExcludeConflict -f $script:testMemberName1, 'MembersToInclude', 'MembersToExclude'
 
-                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Test-TargetResourceOnNanoServer -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 
@@ -1188,7 +1188,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude'
 
-                        { Set-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Set-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if Members and MembersToExclude are both specified' {
@@ -1197,7 +1197,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude'
 
-                        { Set-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Set-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if MembersToInclude and MembersToExclude contain the same member' {
@@ -1206,7 +1206,7 @@ try
 
                         $errorMessage = $script:localizedData.IncludeAndExcludeConflict -f $script:testUserPrincipal1.Name, 'MembersToInclude', 'MembersToExclude'
 
-                        { Set-TargetResourceOnFullSKU -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Set-TargetResourceOnFullSKU -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should not modify group if member specified by MembersToInclude is already in group' {
@@ -1545,7 +1545,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToInclude'
 
-                        { Test-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Test-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToInclude $testMembersToInclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if Members and MembersToExclude are both specified' {
@@ -1554,7 +1554,7 @@ try
 
                         $errorMessage = $script:localizedData.MembersAndIncludeExcludeConflict -f 'Members', 'MembersToExclude'
 
-                        { Test-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Test-TargetResourceOnFullSKU -GroupName $script:testGroupName -Members $testMembers -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
 
                     It 'Should throw if MembersToInclude and MembersToExclude contain the same member' {
@@ -1563,7 +1563,7 @@ try
 
                         $errorMessage = $script:localizedData.IncludeAndExcludeConflict -f $script:testUserPrincipal1.Name, 'MembersToInclude', 'MembersToExclude'
 
-                        { Test-TargetResourceOnFullSKU -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw $errorMessage
+                        { Test-TargetResourceOnFullSKU -GroupName $script:testGroupName -MembersToInclude $testMembersToInclude -MembersToExclude $testMembersToExclude -Ensure 'Present' } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 
@@ -1729,7 +1729,7 @@ try
                     It 'Should throw when prinicpal context for custom domain cannot be found' {
                         $errorMessage = ($script:localizedData.DomainCredentialsRequired -f 'accountname')
 
-                        { Get-MembersAsPrincipalsList -Group $script:testGroup -PrincipalContextCache $principalContextCache -Disposables $disposables } | Should -Throw $errorMessage
+                        { Get-MembersAsPrincipalsList -Group $script:testGroup -PrincipalContextCache $principalContextCache -Disposables $disposables } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 
@@ -1849,7 +1849,7 @@ try
                         { $convertToPrincipalResult = ConvertTo-Principal `
                             -MemberName $script:testUserPrincipal1.Name `
                             -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables } | Should -Throw $errorMessage
+                            -Disposables $disposables } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 

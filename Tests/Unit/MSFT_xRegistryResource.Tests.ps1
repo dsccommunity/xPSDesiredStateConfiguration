@@ -742,7 +742,7 @@ try
                 It 'Should throw error for removal of registry key with subkeys without specifying Force as True' {
                     $errorMessage = $script:localizedData.CannotRemoveExistingRegistryKeyWithSubKeysWithoutForce -f $setTargetResourceParameters.Key
 
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $errorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -1383,7 +1383,7 @@ try
                 It 'Should throw error for trying to overwrite existing registry key value without specifying Force as True' {
                     $errorMessage = $script:localizedData.CannotOverwriteExistingRegistryKeyValueWithoutForce -f $setTargetResourceParameters.Key, $setTargetResourceParameters.ValueName
 
-                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $errorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2689,7 +2689,7 @@ try
                 It 'Should throw an error for invalid registry drive' {
                     $errorMessage = $script:localizedData.InvalidRegistryDrive -f $invalidRegistryDriveRoot
 
-                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Throw $errorMessage
+                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2742,7 +2742,7 @@ try
                 It 'Should throw an error for invalid registry drive' {
                     $errorMessage = $script:localizedData.InvalidRegistryDrive -f $invalidRegistryDriveName
 
-                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Throw $errorMessage
+                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2792,7 +2792,7 @@ try
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2806,7 +2806,7 @@ try
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2820,7 +2820,7 @@ try
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2874,7 +2874,7 @@ try
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2888,7 +2888,7 @@ try
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3650,7 +3650,7 @@ try
                 It 'Should not throw' {
                     $errorMessage = $script:localizedData.BinaryDataNotInHexFormat -f $invalidBinaryString
 
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3662,7 +3662,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'Binary'
 
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
@@ -3744,7 +3744,7 @@ try
                 It 'Should throw an error for the invalid dword string' {
                     $errorMessage = $script:localizedData.DWordDataNotInHexFormat -f $invalidHexDWord
 
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3798,7 +3798,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'Dword'
 
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
@@ -3962,7 +3962,7 @@ try
                 It 'Should throw an error for the invalid qword string' {
                     $errorMessage = $script:localizedData.QWordDataNotInHexFormat -f $invalidHexDWord
 
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -4016,7 +4016,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'Qword'
 
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
@@ -4094,7 +4094,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'String or ExpandString'
 
-                    { $null = ConvertTo-String @convertToStringParameters } | Should -Throw $errorMessage
+                    { $null = ConvertTo-String @convertToStringParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
