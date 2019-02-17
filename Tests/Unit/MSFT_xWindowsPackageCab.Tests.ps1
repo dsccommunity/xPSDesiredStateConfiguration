@@ -34,7 +34,7 @@ try
 
                 It 'Should return Ensure as Absent when package is not installed' {
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
 
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
@@ -43,7 +43,7 @@ try
                     Mock -CommandName 'Dism\Get-WindowsPackage' -MockWith { return @{ PackageState = 'NotPresent' } }
 
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
 
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
@@ -52,7 +52,7 @@ try
                     Mock -CommandName 'Dism\Get-WindowsPackage' -MockWith { return @{ PackageState = 'Installed' } }
 
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
 
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
@@ -61,7 +61,7 @@ try
                     Mock -CommandName 'Dism\Get-WindowsPackage' -MockWith { return @{ PackageState = 'InstallPending' } }
 
                     $getTargetResourceResult = Get-TargetResource -Name $script:testPackageName @getTargetResourceCommonParams
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
 
                     Assert-MockCalled -CommandName 'Dism\Get-WindowsPackage'
                 }
@@ -107,24 +107,24 @@ try
                 Mock -CommandName 'Get-TargetResource' -MockWith { return @{ Ensure = 'Absent' } }
 
                 It 'Should return true when Get-TargetResource returns Ensure Absent and Ensure is set to Absent' {
-                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Absent' | Should Be $true
+                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Absent' | Should -Be $true
                     Assert-MockCalled -CommandName 'Get-TargetResource'
                 }
 
                 It 'Should return false when Get-TargetResource returns Ensure Absent and Ensure is set to Present' {
-                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Present' | Should Be $false
+                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Present' | Should -Be $false
                     Assert-MockCalled -CommandName 'Get-TargetResource'
                 }
 
                 Mock -CommandName 'Get-TargetResource' -MockWith { return @{ Ensure = 'Present' } }
 
                 It 'Should return true when Get-TargetResource returns Ensure Present and Ensure is set to Present' {
-                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Present' | Should Be $true
+                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Present' | Should -Be $true
                     Assert-MockCalled -CommandName 'Get-TargetResource'
                 }
 
                 It 'Should return false when Get-TargetResource returns Ensure Present and Ensure is set to Absent' {
-                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Absent' | Should Be $false
+                    Test-TargetResource -Name $script:testPackageName -SourcePath $script:testSourcePath -Ensure 'Absent' | Should -Be $false
                     Assert-MockCalled -CommandName 'Get-TargetResource'
                 }
 

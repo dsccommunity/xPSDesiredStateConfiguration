@@ -68,7 +68,7 @@ try
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
 
                 It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature | Should Not Be $null
+                    $windowsOptionalFeature | Should -Not -Be $null
                 }
 
                 if ($windowsOptionalFeature.State -in $script:enabledStates)
@@ -87,7 +87,7 @@ try
                 }
 
                 It "Should have disabled Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature.State -in $script:disabledStates | Should Be $true
+                    $windowsOptionalFeature.State -in $script:disabledStates | Should -Be $true
                 }
             }
 
@@ -96,7 +96,7 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @wofSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
@@ -104,7 +104,7 @@ try
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
 
                 It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the configuration" {
-                    $windowsOptionalFeature | Should Not Be $null
+                    $windowsOptionalFeature | Should -Not -Be $null
                 }
 
                 # May need to wait a moment for the correct state to populate
@@ -117,16 +117,16 @@ try
                 }
 
                 It "Should have enabled Windows optional feature $windowsOptionalFeatureName after the configuration" {
-                    $windowsOptionalFeature.State -in $script:enabledStates | Should Be $true
+                    $windowsOptionalFeature.State -in $script:enabledStates | Should -Be $true
                 }
             }
 
             It 'Should have created the log file' {
-                Test-Path -Path $wofSetParameters.LogPath | Should Be $true
+                Test-Path -Path $wofSetParameters.LogPath | Should -Be $true
             }
 
             It 'Should have created content in the log file' {
-                Get-Content -Path $wofSetParameters.LogPath -Raw | Should Not Be $null
+                Get-Content -Path $wofSetParameters.LogPath -Raw | Should -Not -Be $null
             }
         }
 
@@ -144,7 +144,7 @@ try
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
 
                 It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature | Should Not Be $null
+                    $windowsOptionalFeature | Should -Not -Be $null
                 }
 
                 if ($windowsOptionalFeature.State -in $script:disabledStates)
@@ -163,7 +163,7 @@ try
                 }
 
                 It "Should have enabled Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature.State -in $script:enabledStates | Should Be $true
+                    $windowsOptionalFeature.State -in $script:enabledStates | Should -Be $true
                 }
             }
 
@@ -172,7 +172,7 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @wofSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
@@ -180,7 +180,7 @@ try
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
 
                 It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the confguration" {
-                    $windowsOptionalFeature | Should Not Be $null
+                    $windowsOptionalFeature | Should -Not -Be $null
                 }
 
                 # May need to wait a moment for the correct state to populate
@@ -193,16 +193,16 @@ try
                 }
 
                 It "Should have disabled Windows optional feature $windowsOptionalFeatureName after the confguration" {
-                    $windowsOptionalFeature.State -in $script:disabledStates | Should Be $true
+                    $windowsOptionalFeature.State -in $script:disabledStates | Should -Be $true
                 }
             }
 
             It 'Should have created the log file' {
-                Test-Path -Path $wofSetParameters.LogPath | Should Be $true
+                Test-Path -Path $wofSetParameters.LogPath | Should -Be $true
             }
 
             It 'Should have created content in the log file' {
-                Get-Content -Path $wofSetParameters.LogPath -Raw | Should Not Be $null
+                Get-Content -Path $wofSetParameters.LogPath -Raw | Should -Not -Be $null
             }
         }
     }

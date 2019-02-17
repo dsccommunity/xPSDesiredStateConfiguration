@@ -199,13 +199,13 @@ function Invoke-GenericUnitTest {
     if ($ShouldThrow)
     {
         It "Should throw an error for $ErrorTestName" {
-            { $null = $($Function.Invoke($FunctionParameters)) } | Should Throw $ErrorMessage
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should -Throw $ErrorMessage
         }
     }
     else
     {
         It 'Should not throw' {
-            { $null = $($Function.Invoke($FunctionParameters)) } | Should Not Throw
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should -Not -Throw
         }
     }
 
@@ -251,7 +251,7 @@ function Invoke-GetTargetResourceUnitTest
     )
 
     It 'Should not throw' {
-        { $null = Get-TargetResource @GetTargetResourceParameters } | Should Not Throw
+        { $null = Get-TargetResource @GetTargetResourceParameters } | Should -Not -Throw
     }
 
     Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
@@ -259,17 +259,17 @@ function Invoke-GetTargetResourceUnitTest
     $getTargetResourceResult = Get-TargetResource @GetTargetResourceParameters
 
     It 'Should return a Hashtable' {
-        $getTargetResourceResult -is [Hashtable] | Should Be $true
+        $getTargetResourceResult -is [Hashtable] | Should -Be $true
     }
 
     It "Should return a Hashtable with $($ExpectedReturnValue.Keys.Count) properties" {
-        $getTargetResourceResult.Keys.Count | Should Be $ExpectedReturnValue.Keys.Count
+        $getTargetResourceResult.Keys.Count | Should -Be $ExpectedReturnValue.Keys.Count
     }
 
     foreach ($key in $ExpectedReturnValue.Keys)
     {
         It "Should return a Hashtable with the $key property as $($ExpectedReturnValue.$key)" {
-           $getTargetResourceResult.$key | Should Be $ExpectedReturnValue.$key
+           $getTargetResourceResult.$key | Should -Be $ExpectedReturnValue.$key
         }
     }
 }
@@ -326,13 +326,13 @@ function Invoke-SetTargetResourceUnitTest {
     if ($ShouldThrow)
     {
         It "Should throw an error for $ErrorTestName" {
-            { $null = Set-TargetResource @SetTargetResourceParameters } | Should Throw $ErrorMessage
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should -Throw $ErrorMessage
         }
     }
     else
     {
         It 'Should not throw' {
-            { $null = Set-TargetResource @SetTargetResourceParameters } | Should Not Throw
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should -Not -Throw
         }
     }
 
@@ -378,7 +378,7 @@ function Invoke-TestTargetResourceUnitTest
     )
 
     It 'Should not throw' {
-        { $null = Test-TargetResource @TestTargetResourceParameters } | Should Not Throw
+        { $null = Test-TargetResource @TestTargetResourceParameters } | Should -Not -Throw
     }
 
     Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
@@ -386,7 +386,7 @@ function Invoke-TestTargetResourceUnitTest
     $testTargetResourceResult = Test-TargetResource @TestTargetResourceParameters
 
     It "Should return $ExpectedReturnValue" {
-        $testTargetResourceResult | Should Be $ExpectedReturnValue
+        $testTargetResourceResult | Should -Be $ExpectedReturnValue
     }
 }
 
@@ -419,7 +419,7 @@ function Test-GetTargetResourceResult
 
     foreach ($property in $GetTargetResourceResultProperties)
     {
-        $GetTargetResourceResult[$property] | Should Not Be $null
+        $GetTargetResourceResult[$property] | Should -Not -Be $null
     }
 }
 
@@ -610,7 +610,7 @@ function Test-SetTargetResourceWithWhatIf
         Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
 
         $transcriptContent = Get-Content -Path $transcriptPath -Raw
-        $transcriptContent | Should Not Be $null
+        $transcriptContent | Should -Not -Be $null
 
         $regexString = '\*+[^\*]*\*+'
 
@@ -628,13 +628,13 @@ function Test-SetTargetResourceWithWhatIf
 
         if ($null -eq $ExpectedOutput -or $ExpectedOutput.Count -eq 0)
         {
-            [String]::IsNullOrEmpty($transcriptContent) | Should Be $true
+            [String]::IsNullOrEmpty($transcriptContent) | Should -Be $true
         }
         else
         {
             foreach ($expectedOutputPiece in $ExpectedOutput)
             {
-                $transcriptContent.Contains($expectedOutputPiece) | Should Be $true
+                $transcriptContent.Contains($expectedOutputPiece) | Should -Be $true
             }
         }
     }

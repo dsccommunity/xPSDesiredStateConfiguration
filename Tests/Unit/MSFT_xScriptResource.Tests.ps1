@@ -36,7 +36,7 @@ try {
 
                 It 'Should throw an error for malformed get script' {
                     $errorMessage = $script:localizedData.GetScriptDidNotReturnHashtable
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Throw $errorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -51,7 +51,7 @@ try {
 
                 It 'Should throw an error for malformed get script' {
                     $errorMessage = $script:localizedData.GetScriptDidNotReturnHashtable
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Throw $errorMessage
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -69,7 +69,7 @@ try {
                 }
 
                 It 'Should throw error from get script' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Throw $testErrorRecord
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Throw $testErrorRecord
                 }
             }
 
@@ -84,7 +84,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script' {
@@ -102,12 +102,12 @@ try {
 
                 It 'Should return a hashtable' {
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the output from the specified get script' {
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                    Compare-Object -ReferenceObject $testScriptResult -DifferenceObject $getTargetResourceResult | Should Be $null
+                    Compare-Object -ReferenceObject $testScriptResult -DifferenceObject $getTargetResourceResult | Should -Be $null
                 }
             }
 
@@ -120,7 +120,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script with the specified Credential' {
@@ -140,12 +140,12 @@ try {
 
                 It 'Should return a hashtable' {
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the output from the specified get script' {
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                    Compare-Object -ReferenceObject $testScriptResult -DifferenceObject $getTargetResourceResult | Should Be $null
+                    Compare-Object -ReferenceObject $testScriptResult -DifferenceObject $getTargetResourceResult | Should -Be $null
                 }
             }
         }
@@ -161,7 +161,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script' {
@@ -187,7 +187,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script with specified Credential' {
@@ -220,7 +220,7 @@ try {
                 }
 
                 It 'Should throw error from set script' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $testErrorRecord
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw $testErrorRecord
                 }
             }
         }
@@ -237,7 +237,7 @@ try {
 
                 It 'Should throw an error for malformed test script' {
                     $errorMessage = $script:localizedData.TestScriptDidNotReturnBoolean
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Throw $errorMessage
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw $errorMessage
                 }
             }
 
@@ -255,7 +255,7 @@ try {
                 }
 
                 It 'Should throw error from test script' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Throw $testErrorRecord
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw $testErrorRecord
                 }
             }
 
@@ -270,7 +270,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script' {
@@ -288,7 +288,7 @@ try {
 
                 It 'Should return the expected boolean' {
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                    $testTargetResourceResult | Should Be $expectedBoolean
+                    $testTargetResourceResult | Should -Be $expectedBoolean
                 }
             }
 
@@ -301,7 +301,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script with specified Credential' {
@@ -321,7 +321,7 @@ try {
 
                 It 'Should return the expected boolean' {
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                    $testTargetResourceResult | Should Be $expectedBoolean
+                    $testTargetResourceResult | Should -Be $expectedBoolean
                 }
             }
 
@@ -336,7 +336,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should use script execution helper to run script' {
@@ -354,7 +354,7 @@ try {
 
                 It 'Should return the expected boolean' {
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
-                    $testTargetResourceResult | Should Be $expectedBoolean
+                    $testTargetResourceResult | Should -Be $expectedBoolean
                 }
             }
 
@@ -369,7 +369,7 @@ try {
 
                 It 'Should throw an error for malformed test script' {
                     $errorMessage = $script:localizedData.TestScriptDidNotReturnBoolean
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Throw $errorMessage
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Throw $errorMessage
                 }
             }
         }
@@ -385,22 +385,22 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Invoke-Script @scriptExecutionHelperParameters } | Should Not Throw
+                    { $null = Invoke-Script @scriptExecutionHelperParameters } | Should -Not -Throw
                 }
 
                 It 'Should return an error record' {
                     $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                    $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should Be $true
+                    $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should -Be $true
                 }
 
                 It 'Should return an error record' {
                     $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                    $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should Be $true
+                    $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should -Be $true
                 }
 
                 It 'Should return error with expected message from script' {
                     $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                    $scriptExecutionHelperResult.Exception.Message | Should Be $testErrorMessage
+                    $scriptExecutionHelperResult.Exception.Message | Should -Be $testErrorMessage
                 }
             }
 
@@ -411,7 +411,7 @@ try {
                 }
 
                 It 'Should not throw' {
-                    { $null = Invoke-Script @scriptExecutionHelperParameters } | Should Not Throw
+                    { $null = Invoke-Script @scriptExecutionHelperParameters } | Should -Not -Throw
                 }
 
                 It 'Should run script through Invoke-Command using the specified Credential' {
@@ -429,7 +429,7 @@ try {
 
                 It 'Should return nothing' {
                     $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                    $scriptExecutionHelperResult | Should Be $null
+                    $scriptExecutionHelperResult | Should -Be $null
                 }
             }
 
@@ -447,7 +447,7 @@ try {
 
                 It 'Should return result of script' {
                     $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                    $scriptExecutionHelperResult | Should Be $testScriptResult
+                    $scriptExecutionHelperResult | Should -Be $testScriptResult
                 }
             }
         }

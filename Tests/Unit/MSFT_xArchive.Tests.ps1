@@ -2478,11 +2478,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should -Not -Throw
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $false
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $false
                 }
             }
 
@@ -2492,11 +2492,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should -Not -Throw
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $false
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $false
                 }
             }
 
@@ -2506,11 +2506,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should -Not -Throw
                 }
 
                 It 'Should return false' {
-                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $false
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $false
                 }
             }
 
@@ -2520,11 +2520,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should -Not -Throw
                 }
 
                 It 'Should return true' {
-                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $true
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $true
                 }
             }
 
@@ -2534,11 +2534,11 @@ Describe 'xArchive Unit Tests' {
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should Not Throw
+                    { $null = Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters } | Should -Not -Throw
                 }
 
                 It 'Should return true' {
-                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should Be $true
+                    Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $true
                 }
             }
         }

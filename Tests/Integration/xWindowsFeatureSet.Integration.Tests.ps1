@@ -61,7 +61,7 @@ try {
                 $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
 
                 It "Should be able to retrieve Windows feature $windowsFeatureName before the configuration" {
-                    $windowsFeature | Should Not Be $null
+                    $windowsFeature | Should -Not -Be $null
                 }
 
                 if ($windowsFeature.Installed)
@@ -80,7 +80,7 @@ try {
                 }
 
                 It "Should have uninstalled Windows feature $windowsFeatureName before the configuration" {
-                    $windowsFeature.Installed | Should Be $false
+                    $windowsFeature.Installed | Should -Be $false
                 }
             }
 
@@ -89,7 +89,7 @@ try {
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @windowsFeatureSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             foreach ($windowsFeatureName in $windowsFeatureSetParameters.WindowsFeatureNames)
@@ -97,7 +97,7 @@ try {
                 $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
 
                 It "Should be able to retrieve Windows feature $windowsFeatureName after the configuration" {
-                    $windowsFeature | Should Not Be $null
+                    $windowsFeature | Should -Not -Be $null
                 }
 
                 if (-not $windowsFeature.Installed)
@@ -113,16 +113,16 @@ try {
                 }
 
                 It "Should have installed Windows feature $windowsFeatureName after the configuration" {
-                    $windowsFeature.Installed | Should Be $true
+                    $windowsFeature.Installed | Should -Be $true
                 }
             }
 
             It 'Should have created the log file' {
-                Test-Path -Path $windowsFeatureSetParameters.LogPath | Should Be $true
+                Test-Path -Path $windowsFeatureSetParameters.LogPath | Should -Be $true
             }
 
             It 'Should have created content in the log file' {
-                Get-Content -Path $windowsFeatureSetParameters.LogPath -Raw | Should Not Be $null
+                Get-Content -Path $windowsFeatureSetParameters.LogPath -Raw | Should -Not -Be $null
             }
         }
 
@@ -140,7 +140,7 @@ try {
                 $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
 
                 It "Should be able to retrieve Windows feature $windowsFeatureName before the configuration" {
-                    $windowsFeature | Should Not Be $null
+                    $windowsFeature | Should -Not -Be $null
                 }
 
                 if (-not $windowsFeature.Installed)
@@ -159,7 +159,7 @@ try {
                 }
 
                 It "Should have installed Windows feature $windowsFeatureName before the configuration" {
-                    $windowsFeature.Installed | Should Be $true
+                    $windowsFeature.Installed | Should -Be $true
                 }
             }
 
@@ -168,7 +168,7 @@ try {
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @windowsFeatureSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             foreach ($windowsFeatureName in $windowsFeatureSetParameters.WindowsFeatureNames)
@@ -176,7 +176,7 @@ try {
                 $windowsFeature = Get-WindowsFeature -Name $windowsFeatureName
 
                 It "Should be able to retrieve Windows feature $windowsFeatureName after the configuration" {
-                    $windowsFeature | Should Not Be $null
+                    $windowsFeature | Should -Not -Be $null
                 }
 
                 if ($windowsFeature.Installed)
@@ -192,16 +192,16 @@ try {
                 }
 
                 It "Should have uninstalled Windows feature $windowsFeatureName after the configuration" {
-                    $windowsFeature.Installed | Should Be $false
+                    $windowsFeature.Installed | Should -Be $false
                 }
             }
 
             It 'Should have created the log file' {
-                Test-Path -Path $windowsFeatureSetParameters.LogPath | Should Be $true
+                Test-Path -Path $windowsFeatureSetParameters.LogPath | Should -Be $true
             }
 
             It 'Should have created content in the log file' {
-                Get-Content -Path $windowsFeatureSetParameters.LogPath -Raw | Should Not Be $null
+                Get-Content -Path $windowsFeatureSetParameters.LogPath -Raw | Should -Not -Be $null
             }
         }
     }
