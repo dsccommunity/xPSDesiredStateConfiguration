@@ -147,8 +147,20 @@
   year.
 - Auto-formatted the module manifest to improve layout.
 - Changes to xPackage
-  - Fix an misnamed variable that causes an error during error message output.
-    [issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
+- Fix an misnamed variable that causes an error during error message output.
+  [issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
+- Fixes script analyzer issues in MSFT_xPSSessionConfiguration.psm1.
+  [issue #566](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/566)
+- Fixes script analyzer issues in xGroupSet.schema.psm1.
+  [issue #498](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/498)
+- Fixes script analyzer issues in xProcessSet.schema.psm1.
+  [issue #499](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/499)
+- Fixes script analyzer issues in xServiceSet.schema.psm1.
+  [issue #500](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/500)
+- Fixes script analyzer issues in xWindowsFeatureSet.schema.psm1.
+  [issue #501](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/501)
+- Fixes script analyzer issues in xWindowsOptionalFeatureSet.schema.psm1.
+  [issue #502](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/502)
 
 ## 8.4.0.0
 

@@ -53,22 +53,27 @@ Configuration xServiceSet
         [String[]]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure,
 
+        [Parameter()]
         [ValidateSet('Automatic', 'Manual', 'Disabled')]
         [String]
         $StartupType,
 
+        [Parameter()]
         [ValidateSet('LocalSystem', 'LocalService', 'NetworkService')]
         [String]
         $BuiltInAccount,
 
+        [Parameter()]
         [ValidateSet('Running', 'Stopped', 'Ignore')]
         [String]
         $State,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]

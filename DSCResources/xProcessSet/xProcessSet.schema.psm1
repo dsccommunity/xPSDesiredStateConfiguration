@@ -53,27 +53,33 @@ Configuration xProcessSet
         [String[]]
         $Path,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $StandardOutputPath,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $StandardErrorPath,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $StandardInputPath,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $WorkingDirectory

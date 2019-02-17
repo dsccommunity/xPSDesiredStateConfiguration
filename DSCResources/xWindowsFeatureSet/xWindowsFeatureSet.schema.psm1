@@ -43,22 +43,27 @@ Configuration xWindowsFeatureSet
         [String[]]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $Source,
 
+        [Parameter()]
         [Boolean]
         $IncludeAllSubFeature,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $LogPath
