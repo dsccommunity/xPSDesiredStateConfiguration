@@ -71,7 +71,7 @@ try
                 }
 
                 It "Should not have started process $processName before configuration" {
-                    $process | Should Be $null
+                    $process | Should -Be $null
                 }
             }
 
@@ -80,7 +80,7 @@ try
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @processSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             foreach ($processPath in $processSetParameters.ProcessPaths)
@@ -89,7 +89,7 @@ try
                 $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
 
                 It "Should have started process $processName after configuration" {
-                    $process | Should Not Be $null
+                    $process | Should -Not -Be $null
                 }
             }
         }
@@ -122,7 +122,7 @@ try
                 }
 
                 It "Should have started process $processName before configuration" {
-                    $process | Should Not Be $null
+                    $process | Should -Not -Be $null
                 }
             }
 
@@ -131,7 +131,7 @@ try
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @processSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             foreach ($processPath in $processSetParameters.ProcessPaths)
@@ -140,7 +140,7 @@ try
                 $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
 
                 It "Should have stopped process $processName after configuration" {
-                    $process | Should Be $null
+                    $process | Should -Be $null
                 }
             }
         }

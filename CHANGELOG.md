@@ -162,6 +162,7 @@
   [issue #501](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/501)
 - Fixes script analyzer issues in xWindowsOptionalFeatureSet.schema.psm1.
   [issue #502](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/502)
+- Updates Should statements in Pester tests to use dashes before parameters.
 
 ## 8.4.0.0
 

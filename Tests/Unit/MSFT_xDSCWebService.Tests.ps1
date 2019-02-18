@@ -664,7 +664,7 @@ try
 
                 It 'Should throw an error because no certificate specified' {
                     $message = "Error: Cannot use best practice security settings with unencrypted traffic. Please set UseSecurityBestPractices to `$false or use a certificate to encrypt pull server traffic."
-                    {Set-TargetResource @altTestParameters -Ensure Present} | Should -Throw $message
+                    {Set-TargetResource @altTestParameters -Ensure Present} | Should -Throw -ExpectedMessage $message
                 }
             }
 
@@ -1137,14 +1137,14 @@ try
                 $templateName = 'Invalid Template Name'
 
                 $errorMessage = 'Certificate not found with subject containing {0} and using template "{1}".' -f $subject, $templateName
-                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw $errorMessage
+                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw -ExpectedMessage $errorMessage
             }
             It 'Should throw an error when the more than one certificate is found' {
                 $subject      = $certificateData[1].Subject
                 $templateName = 'WebServer'
 
                 $errorMessage = 'More than one certificate found with subject containing {0} and using template "{1}".' -f $subject, $templateName
-                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw $errorMessage
+                {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw -ExpectedMessage $errorMessage
             }
         }
         Describe -Name "$dscResourceName\Get-OSVersion" -Fixture {

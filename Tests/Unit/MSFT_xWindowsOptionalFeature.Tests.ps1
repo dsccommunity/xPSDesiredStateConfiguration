@@ -65,34 +65,34 @@ try
 
                 It 'Should throw when the DISM module is not available' {
                     Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { Write-Error 'Cannot find module' }
-                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.DismNotAvailable
+                    { Assert-ResourcePrerequisitesValid } | Should -Throw -ExpectedMessage $script:localizedData.DismNotAvailable
                 }
 
                 Mock Import-Module -ParameterFilter { $Name -eq 'Dism' } -MockWith { }
 
                 It 'Should throw when operating system is Server 2008 R2' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2008R2'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.NotSupportedSku
+                    { Assert-ResourcePrerequisitesValid } | Should -Throw -ExpectedMessage $script:localizedData.NotSupportedSku
                 }
 
                 It 'Should throw when operating system is Server 2012' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Throw $script:localizedData.NotSupportedSku
+                    { Assert-ResourcePrerequisitesValid } | Should -Throw -ExpectedMessage $script:localizedData.NotSupportedSku
                 }
 
                 It 'Should not throw when operating system is Windows 7' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['7'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
+                    { Assert-ResourcePrerequisitesValid } | Should -Not -Throw
                 }
 
                 It 'Should not throw when operating system is Windows 8.1' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['8.1'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
+                    { Assert-ResourcePrerequisitesValid } | Should -Not -Throw
                 }
 
                 It 'Should not throw when operating system is Server 2012 R2' {
                     Mock Get-CimInstance -ParameterFilter { $ClassName -eq 'Win32_OperatingSystem' } -MockWith { return $fakeWin32OSObjects['Server2012R2'] }
-                    { Assert-ResourcePrerequisitesValid } | Should Not Throw
+                    { Assert-ResourcePrerequisitesValid } | Should -Not -Throw
                 }
             }
 
@@ -102,7 +102,7 @@ try
 
                 It 'Should return a Hashtable' {
                     $getTargetResourceResult = Get-TargetResource -Name $script:testFeatureName
-                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should call Assert-ResourcePrerequisitesValid with the feature name' {
@@ -112,7 +112,7 @@ try
 
                 It 'Should return Ensure as Present' {
                     $getTargetResourceResult = Get-TargetResource -Name $script:testFeatureName
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
             }
 
@@ -123,7 +123,7 @@ try
 
                 It 'Should return Ensure as Absent' {
                     $getTargetResourceResult = Get-TargetResource -Name $script:testFeatureName
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
             }
 
@@ -132,11 +132,11 @@ try
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { return $script:fakeEnabledFeature }
 
                 It 'Should return true when Ensure set to Present' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should Be $true
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -Be $true
                 }
 
                 It 'Should return false when Ensure set to Absent' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should Be $false
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -Be $false
                 }
 
             }
@@ -146,11 +146,11 @@ try
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { return $script:fakeDisabledFeature }
 
                 It 'Should return false when Ensure set to Present' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should Be $false
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -Be $false
                 }
 
                 It 'Should return true when Ensure set to Absent' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should Be $true
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -Be $true
                 }
             }
 
@@ -159,11 +159,11 @@ try
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { }
 
                 It 'Should return false when Ensure set to Present' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should Be $false
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -Be $false
                 }
 
                 It 'Should return true when Ensure set to Absent' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should Be $true
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -Be $true
                 }
             }
 
@@ -262,11 +262,11 @@ try
 
             Context 'Convert-FeatureStateToEnsure' {
                 It 'Should return Present when state is Enabled' {
-                    Convert-FeatureStateToEnsure -State 'Enabled' | Should Be 'Present'
+                    Convert-FeatureStateToEnsure -State 'Enabled' | Should -Be 'Present'
                 }
 
                 It 'Should return Absent when state is Disabled' {
-                    Convert-FeatureStateToEnsure -State 'Disabled' | Should Be 'Absent'
+                    Convert-FeatureStateToEnsure -State 'Disabled' | Should -Be 'Absent'
                 }
 
                 It 'Should return the same state when state is not Enabled or Disabled' {
@@ -275,7 +275,7 @@ try
 
                     try
                     {
-                        Convert-FeatureStateToEnsure -State 'UnknownState' | Should Be 'UnknownState'
+                        Convert-FeatureStateToEnsure -State 'UnknownState' | Should -Be 'UnknownState'
                     }
                     finally
                     {
@@ -306,7 +306,7 @@ try
 
                 It 'Should return 3 strings from 3 PSCustomObjects and a null object' {
                     $propertiesAsStrings = Convert-CustomPropertyArrayToStringArray -CustomProperties $psCustomObjects
-                    $propertiesAsStrings.Length | Should Be 3
+                    $propertiesAsStrings.Length | Should -Be 3
                 }
 
                 It 'Should return the correct string for each object' {
@@ -314,7 +314,7 @@ try
 
                     foreach ($objectNumber in @(1, 2, 3))
                     {
-                        $propertiesAsStrings.Contains("Name = Object $objectNumber, Value = Value $objectNumber, Path = Path $objectNumber") | Should Be $true
+                        $propertiesAsStrings.Contains("Name = Object $objectNumber, Value = Value $objectNumber, Path = Path $objectNumber") | Should -Be $true
                     }
                 }
             }

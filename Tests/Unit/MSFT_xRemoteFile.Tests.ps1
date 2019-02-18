@@ -103,23 +103,23 @@ try
         Describe "$($Global:DSCResourceName)\Get-TargetResource" {
             $result = Get-TargetResource @testSplatFile
             It 'Returns "Present" when DestinationPath is a File and exists' {
-                $Result.Ensure | Should Be 'Present'
+                $Result.Ensure | Should -Be 'Present'
             }
 
             $result = Get-TargetResource @testSplatFolderFileExists
             It 'Returns "Present" when DestinationPath is a Directory and exists and URI file exists' {
-                $Result.Ensure | Should Be 'Present'
+                $Result.Ensure | Should -Be 'Present'
             }
 
             $result = Get-TargetResource @testSplatFolderFileNotExist
             It 'Returns "Absent" when DestinationPath is a Directory and exists but URI file does not' {
-                $Result.Ensure | Should Be 'Absent'
+                $Result.Ensure | Should -Be 'Absent'
             }
 
             Mock Get-PathItemType -MockWith { return 'Other' }
             $result = Get-TargetResource @testSplatFile
             It 'Returns "Absent" when DestinationPath is Other' {
-                $Result.Ensure | Should Be 'Absent'
+                $Result.Ensure | Should -Be 'Absent'
             }
         } #end Describe "$($Global:DSCResourceName)\Get-TargetResource"
 
@@ -133,7 +133,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "UriValidationFailure" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Context 'DestinationPath is "bad://.."' {
@@ -145,7 +145,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DestinationPathSchemeValidationFailure" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Context 'DestinationPath starts with "\\"' {
@@ -157,7 +157,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DestinationPathIsUncFailure" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Context 'DestinationPath contains invalid characters "*"' {
@@ -169,7 +169,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DestinationPathHasInvalidCharactersError" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
             Mock Update-Cache
@@ -182,7 +182,7 @@ try
                     $errorRecord = Get-InvalidDataException `
                         -errorId "DownloadException" `
                         -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should Throw $errorRecord
+                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Update-Cache -Exactly 0
@@ -191,7 +191,7 @@ try
             Mock Invoke-WebRequest
             Context 'URI is valid, DestinationPath is a file, download successful' {
                 It 'Does not throw' {
-                    { Set-TargetResource @testSplatFile } | Should Not Throw
+                    { Set-TargetResource @testSplatFile } | Should -Not -Throw
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Invoke-WebRequest -Exactly 1
@@ -204,7 +204,7 @@ try
             Mock Get-Cache
             Context 'URI is valid, DestinationPath is a File, file exists' {
                 It 'Returns "False"' {
-                    Test-TargetResource @testSplatFile | Should Be $False
+                    Test-TargetResource @testSplatFile | Should -Be $False
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Get-Cache -Exactly 1
@@ -214,7 +214,7 @@ try
                 It 'Returns "True"' {
                     $splat = $testSplatFile.Clone()
                     $splat.MatchSource = $False
-                    Test-TargetResource @splat | Should Be $True
+                    Test-TargetResource @splat | Should -Be $True
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Get-Cache -Exactly 0
@@ -222,7 +222,7 @@ try
             }
             Context 'URI is valid, DestinationPath is a Folder, file exists' {
                 It 'Returns "False"' {
-                    Test-TargetResource @testSplatFolderFileExists | Should Be $False
+                    Test-TargetResource @testSplatFolderFileExists | Should -Be $False
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Get-Cache -Exactly 1
@@ -232,7 +232,7 @@ try
                 It 'Returns "True"' {
                     $splat = $testSplatFolderFileExists.Clone()
                     $splat.MatchSource = $False
-                    Test-TargetResource @splat | Should Be $True
+                    Test-TargetResource @splat | Should -Be $True
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Get-Cache -Exactly 0
@@ -240,7 +240,7 @@ try
             }
             Context 'URI is valid, DestinationPath is a Folder, file does not exist' {
                 It 'Returns "False"' {
-                    Test-TargetResource @testSplatFolderFileNotExist | Should Be $False
+                    Test-TargetResource @testSplatFolderFileNotExist | Should -Be $False
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Get-Cache -Exactly 0
@@ -250,7 +250,7 @@ try
                 It 'Returns "False"' {
                     $splat = $testSplatFolderFileNotExist.Clone()
                     $splat.MatchSource = $False
-                    Test-TargetResource @splat | Should Be $False
+                    Test-TargetResource @splat | Should -Be $False
                 }
                 It 'Calls expected mocks' {
                     Assert-MockCalled Get-Cache -Exactly 0
@@ -261,31 +261,31 @@ try
 
         Describe "$($Global:DSCResourceName)\Test-UriScheme" {
             It 'Returns "True" when URI is "http://.." and scheme is "http|https|file"' {
-                Test-UriScheme -Uri $testURI -Scheme 'http|https|file' | Should Be $true
+                Test-UriScheme -Uri $testURI -Scheme 'http|https|file' | Should -Be $true
             }
             It 'Returns "True" when URI is "http://.." and scheme is "http"' {
-                Test-UriScheme -Uri $testURI -Scheme 'http' | Should Be $true
+                Test-UriScheme -Uri $testURI -Scheme 'http' | Should -Be $true
             }
             It 'Returns "False" when URI is "http://.." and scheme is "https"' {
-                Test-UriScheme -Uri $testURI -Scheme 'https' | Should Be $false
+                Test-UriScheme -Uri $testURI -Scheme 'https' | Should -Be $false
             }
             It 'Returns "False" when URI is "bad://.." and scheme is "http|https|file"' {
-                Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should Be $false
+                Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should -Be $false
             }
         } #end Describe "$($Global:DSCResourceName)\Test-UriScheme"
 
         Describe "$($Global:DSCResourceName)\Get-PathItemType" {
             It 'Returns "Directory" when Path is a Directory' {
-                Get-PathItemType -Path $testDestinationFolder | Should Be 'Directory'
+                Get-PathItemType -Path $testDestinationFolder | Should -Be 'Directory'
             }
             It 'Returns "File" when Path is a File' {
-                Get-PathItemType -Path $testDestinationFile | Should Be 'File'
+                Get-PathItemType -Path $testDestinationFile | Should -Be 'File'
             }
             It 'Returns "NotExists" when Path does not exist' {
-                Get-PathItemType -Path $testDestinationNotExist | Should Be 'NotExists'
+                Get-PathItemType -Path $testDestinationNotExist | Should -Be 'NotExists'
             }
             It 'Returns "Other" when Path is not in File System' {
-                Get-PathItemType -Path HKLM:\Software | Should Be 'Other'
+                Get-PathItemType -Path HKLM:\Software | Should -Be 'Other'
             }
         } #end Describe "$($Global:DSCResourceName)\Get-PathItemType"
 
@@ -295,7 +295,7 @@ try
             Context "DestinationPath 'c:\' and Uri $testURI and Cached Content exists" {
                 $Result = Get-Cache -DestinationPath 'c:\' -Uri $testURI
                 It "Returns Expected Content" {
-                    $Result | Should Be 'Expected Content'
+                    $Result | Should -Be 'Expected Content'
                 }
                 It "Calls expected mocks" {
                     Assert-MockCalled Import-CliXml -Exactly 1
@@ -306,7 +306,7 @@ try
             Context "DestinationPath 'c:\' and Uri $testURI and Cached Content does not exist" {
                 $Result = Get-Cache -DestinationPath 'c:\' -Uri $testURI
                 It "Returns Null" {
-                    $Result | Should BeNullOrEmpty
+                    $Result | Should -BeNullOrEmpty
                 }
                 It "Calls expected mocks" {
                     Assert-MockCalled Import-CliXml -Exactly 0
@@ -321,7 +321,7 @@ try
             Mock New-Item
             Context "DestinationPath 'c:\' and Uri $testURI and CacheLocation Exists" {
                 It "Does Not Throw" {
-                    { Update-Cache -DestinationPath 'c:\' -Uri $testURI -InputObject @{} } | Should Not Throw
+                    { Update-Cache -DestinationPath 'c:\' -Uri $testURI -InputObject @{} } | Should -Not -Throw
                 }
                 It "Calls expected mocks" {
                     Assert-MockCalled Export-CliXml -Exactly 1
@@ -332,7 +332,7 @@ try
             Mock Test-Path -MockWith { $False }
             Context "DestinationPath 'c:\' and Uri $testURI and CacheLocation does not exist" {
                 It "Does Not Throw" {
-                    { Update-Cache -DestinationPath 'c:\' -Uri $testURI -InputObject @{} } | Should Not Throw
+                    { Update-Cache -DestinationPath 'c:\' -Uri $testURI -InputObject @{} } | Should -Not -Throw
                 }
                 It "Calls expected mocks" {
                     Assert-MockCalled Export-CliXml -Exactly 1
@@ -344,10 +344,10 @@ try
 
         Describe "$($Global:DSCResourceName)\Get-CacheKey" {
             It "Returns -799765921 as Cache Key for DestinationPath 'c:\' and Uri $testURI" {
-                Get-CacheKey -DestinationPath 'c:\' -Uri $testURI | Should Be -799765921
+                Get-CacheKey -DestinationPath 'c:\' -Uri $testURI | Should -Be -799765921
             }
             It "Returns 1266535016 as Cache Key for DestinationPath 'c:\Windows\System32' and Uri $testURINotExist" {
-                Get-CacheKey -DestinationPath 'c:\Windows\System32' -Uri $testURINotExist | Should Be 1266535016
+                Get-CacheKey -DestinationPath 'c:\Windows\System32' -Uri $testURINotExist | Should -Be 1266535016
             }
         } #end Describe "$($Global:DSCResourceName)\Get-CacheKey"
     }

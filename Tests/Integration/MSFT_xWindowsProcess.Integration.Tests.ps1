@@ -53,26 +53,26 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
 
@@ -82,7 +82,7 @@ try
 
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
 
             It 'Should compile without throwing' {
@@ -94,27 +94,27 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Present'
-                $currentConfig.ProcessCount | Should Be 1
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Present'
+                $currentConfig.ProcessCount | Should -Be 1
             }
 
             It 'Should create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
         }
 
@@ -124,11 +124,11 @@ try
 
             It 'Should have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
 
             It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should not Throw
+                { Remove-Item -Path $logFilePath } | Should -Not -Throw
             }
 
             It 'Should compile without throwing' {
@@ -140,27 +140,27 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Present'
-                $currentConfig.ProcessCount | Should Be 1
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Present'
+                $currentConfig.ProcessCount | Should -Be 1
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
 
@@ -170,7 +170,7 @@ try
 
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
 
             It 'Should compile without throwing' {
@@ -182,26 +182,26 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
 
@@ -211,7 +211,7 @@ try
 
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
 
             It 'Should compile without throwing' {
@@ -223,7 +223,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
@@ -234,20 +234,20 @@ try
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Present'
-                $currentConfig.ProcessCount | Should Be 2
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Present'
+                $currentConfig.ProcessCount | Should -Be 2
             }
 
             It 'Should create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
         }
 
@@ -257,11 +257,11 @@ try
 
             It 'Should have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
 
             It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should not Throw
+                { Remove-Item -Path $logFilePath } | Should -Not -Throw
             }
 
             It 'Should compile without throwing' {
@@ -273,26 +273,26 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
     }
@@ -340,26 +340,26 @@ try
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
 
@@ -369,7 +369,7 @@ try
 
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
 
             It 'Should compile without throwing' {
@@ -383,27 +383,27 @@ try
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Present'
-                $currentConfig.ProcessCount | Should Be 1
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Present'
+                $currentConfig.ProcessCount | Should -Be 1
             }
 
             It 'Should create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
         }
 
@@ -413,11 +413,11 @@ try
 
             It 'Should have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
 
             It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should not Throw
+                { Remove-Item -Path $logFilePath } | Should -Not -Throw
             }
 
             It 'Should compile without throwing' {
@@ -431,27 +431,27 @@ try
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Present'
-                $currentConfig.ProcessCount | Should Be 1
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Present'
+                $currentConfig.ProcessCount | Should -Be 1
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
 
@@ -461,7 +461,7 @@ try
 
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
 
             It 'Should compile without throwing' {
@@ -475,26 +475,26 @@ try
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
 
             It 'Should not create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
         }
 
@@ -504,7 +504,7 @@ try
 
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $false
+                $pathResult | Should -Be $false
             }
 
             It 'Should compile without throwing' {
@@ -518,7 +518,7 @@ try
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
@@ -529,20 +529,20 @@ try
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Present'
-                $currentConfig.ProcessCount | Should Be 2
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Present'
+                $currentConfig.ProcessCount | Should -Be 2
             }
 
             It 'Should create a logfile' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
         }
 
@@ -552,11 +552,11 @@ try
 
             It 'Should have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
-                $pathResult | Should Be $true
+                $pathResult | Should -Be $true
             }
 
             It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should not Throw
+                { Remove-Item -Path $logFilePath } | Should -Not -Throw
             }
 
             It 'Should compile without throwing' {
@@ -575,21 +575,21 @@ try
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should Be $testProcessPath
-                $currentConfig.Arguments | Should Be $logFilePath
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Path | Should -Be $testProcessPath
+                $currentConfig.Arguments | Should -Be $logFilePath
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
         }
     }
