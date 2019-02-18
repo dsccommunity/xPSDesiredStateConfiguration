@@ -38,16 +38,20 @@ Configuration xGroupSet
         [String[]]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
         [String]
         $Ensure,
 
+        [Parameter()]
         [String[]]
         $MembersToInclude,
 
+        [Parameter()]
         [String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]

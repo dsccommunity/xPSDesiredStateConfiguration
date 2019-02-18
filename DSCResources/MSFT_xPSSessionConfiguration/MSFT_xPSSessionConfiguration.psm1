@@ -547,6 +547,7 @@ function Test-TargetResource
 function Get-EndpointAccessMode
 {
     [CmdletBinding()]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -634,6 +635,7 @@ function Write-EndpointMessage
 function Get-ValidatedResourcePropertyTable
 {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]

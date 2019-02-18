@@ -48,16 +48,20 @@ Configuration xWindowsOptionalFeatureSet
         [String]
         $Ensure,
 
+        [Parameter()]
         [Boolean]
         $RemoveFilesOnDisable,
 
+        [Parameter()]
         [Boolean]
         $NoWindowsUpdateCheck,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [String]
         $LogPath,
 
+        [Parameter()]
         [ValidateSet('ErrorsOnly', 'ErrorsAndWarning', 'ErrorsAndWarningAndInformation')]
         [String]
         $LogLevel
