@@ -151,6 +151,8 @@
   - Fix an misnamed variable that causes an error during error message output.
     [issue #449](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/449))
 - Updates Should statements in Pester tests to use dashes before parameters.
+- Added a CODE\_OF\_CONDUCT.md with the same content as in the README.md
+  [issue #562](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/562)
 
 ## 8.4.0.0
 
