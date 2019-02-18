@@ -59,17 +59,17 @@ Describe PullServerInstallationTests {
     }
     Context "Verify general pull server functionality" {
         It "$DscRegKeyPath exists" {
-            $DscRegKeyPath | Should Exist
+            $DscRegKeyPath | Should -Exist
         }
         It "Module repository $DscModulePath exists" {
-            $DscModulePath | Should Exist
+            $DscModulePath | Should -Exist
         }
         It "Configuration repository $DscConfigPath exists" {
-            $DscConfigPath | Should Exist
+            $DscConfigPath | Should -Exist
         }
         It "Verify server $DscPullServerURL is up and running" {
             $DscPullServerResponse = Invoke-WebRequest -Uri $DscPullServerURL -UseBasicParsing
-            $DscPullServerResponse.StatusCode | Should Be 200
+            $DscPullServerResponse.StatusCode | Should -Be 200
         }
     }
     Context "Verify pull end to end works" {
@@ -93,7 +93,7 @@ Describe PullServerInstallationTests {
             Set-DscLocalConfigurationManager -Path $DscTestMetaConfigPath -Verbose:$VerbosePreference -Force
 
             $DscLocalConfigNames = (Get-DscLocalConfigurationManager).ConfigurationDownloadManagers.ConfigurationNames
-            $DscLocalConfigNames -contains $DscTestConfigName | Should Be True
+            $DscLocalConfigNames -contains $DscTestConfigName | Should -Be $true
         }
         It "Creates mof and checksum files in $DscConfigPath" {
             # Sample test configuration
@@ -114,15 +114,15 @@ Describe PullServerInstallationTests {
 
             # Create a mof file copy it to
             NoOpConfig -OutputPath $DscConfigPath -Verbose:$VerbosePreference
-            $DscTestMofPath | Should Exist
+            $DscTestMofPath | Should -Exist
 
             # Create checksum
             New-DscChecksum $DscConfigPath -Verbose:$VerbosePreference -Force
-            "$DscTestMofPath.checksum" | Should Exist
+            "$DscTestMofPath.checksum" | Should -Exist
         }
         It 'Updates DscConfiguration Successfully' {
             Update-DscConfiguration -Wait -Verbose:$VerbosePreference
-            (Get-DscConfiguration).ConfigurationName | Should Be "NoOpConfig"
+            (Get-DscConfiguration).ConfigurationName | Should -Be 'NoOpConfig'
         }
     }
 }

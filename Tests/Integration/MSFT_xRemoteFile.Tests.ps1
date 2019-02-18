@@ -42,24 +42,24 @@ try
                 Invoke-Expression -Command "$($script:DSCResourceName)_Config -OutputPath `$TestDrive"
                 Start-DscConfiguration -Path $TestDrive `
                     -ComputerName localhost -Wait -Verbose -Force
-            } | Should not throw
+            } | Should -Not -Throw
         }
 
         It 'should be able to call Get-DscConfiguration without throwing' {
-            { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should Not throw
+            { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should -Not -Throw
         }
         #endregion
 
         It 'Should have set the resource and all the parameters should match' {
             $Result = Get-DscConfiguration
-            $Result.Ensure          | Should Be 'Present'
-            $Result.Uri             | Should Be $TestURI
-            $Result.DestinationPath | Should Be $TestDestinationPath
+            $Result.Ensure          | Should -Be 'Present'
+            $Result.Uri             | Should -Be $TestURI
+            $Result.DestinationPath | Should -Be $TestDestinationPath
         }
         It 'The Downloaded content should match the source content' {
             $DownloadedContent = Get-Content -Path $TestDestinationPath -Raw
             $ExistingContent = Get-Content -Path $TestConfigPath -Raw
-            $DownloadedContent | Should Be $ExistingContent
+            $DownloadedContent | Should -Be $ExistingContent
         }
     }
     #endregion

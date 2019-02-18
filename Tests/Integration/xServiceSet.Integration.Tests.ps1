@@ -147,30 +147,30 @@ try
                     . $script:confgurationFilePathAllExceptBuiltInAccount -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive -ConfigurationData $configData @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             $service = Get-Service -Name $resourceParameters.Name[0] -ErrorAction 'SilentlyContinue'
             $serviceCimInstance = Get-CimInstance -ClassName 'Win32_Service' -Filter "Name='$($resourceParameters.Name[0])'" -ErrorAction 'SilentlyContinue'
 
             It 'Should not have removed service with the specified name' {
-                 $service | Should Not Be $null
-                 $serviceCimInstance | Should Not Be $null
+                 $service | Should -Not -Be $null
+                 $serviceCimInstance | Should -Not -Be $null
 
-                 $service.Name | Should Be $resourceParameters.Name[0]
-                 $serviceCimInstance.Name | Should Be $resourceParameters.Name[0]
+                 $service.Name | Should -Be $resourceParameters.Name[0]
+                 $serviceCimInstance.Name | Should -Be $resourceParameters.Name[0]
             }
 
             It 'Should have set the service state to the specified state' {
-                $service.Status | Should Be $resourceParameters.State
+                $service.Status | Should -Be $resourceParameters.State
             }
 
             It 'Should have set the service startup type to the specified startup type' {
-                $serviceCimInstance.StartMode | Should Be $resourceParameters.StartupType
+                $serviceCimInstance.StartMode | Should -Be $resourceParameters.StartupType
             }
 
             It 'Should have set the service start name to the appveyor account name' {
-                $serviceCimInstance.StartName | Should Be '.\appveyor'
+                $serviceCimInstance.StartName | Should -Be '.\appveyor'
             }
         }
 
@@ -189,7 +189,7 @@ try
                     . $script:confgurationFilePathBuiltInAccountOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             $serviceCount = 1
@@ -200,19 +200,19 @@ try
                 $serviceCimInstance = Get-CimInstance -ClassName 'Win32_Service' -Filter "Name='$serviceName'" -ErrorAction 'SilentlyContinue'
 
                 It "Should not have removed service $serviceCount" {
-                     $service | Should Not Be $null
-                     $serviceCimInstance | Should Not Be $null
+                     $service | Should -Not -Be $null
+                     $serviceCimInstance | Should -Not -Be $null
 
-                     $service.Name | Should Be $serviceName
-                     $serviceCimInstance.Name | Should Be $serviceName
+                     $service.Name | Should -Be $serviceName
+                     $serviceCimInstance.Name | Should -Be $serviceName
                 }
 
                 It "Should have set the state  of service $serviceCount to Running (default action of xService)" {
-                    $service.Status | Should Be 'Running'
+                    $service.Status | Should -Be 'Running'
                 }
 
                 It "Should have set the start name of service $serviceCount to the specified built-in account name" {
-                    $serviceCimInstance.StartName | Should Be $resourceParameters.BuiltInAccount
+                    $serviceCimInstance.StartName | Should -Be $resourceParameters.BuiltInAccount
                 }
 
                 $serviceCount += 1
@@ -234,7 +234,7 @@ try
                     . $script:confgurationFilePathBuiltInAccountOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             $serviceCount = 1
@@ -245,8 +245,8 @@ try
                 $serviceCimInstance = Get-CimInstance -ClassName 'Win32_Service' -Filter "Name='$serviceName'" -ErrorAction 'SilentlyContinue'
 
                 It "Should have removed service $serviceCount" {
-                     $service | Should Be $null
-                     $serviceCimInstance | Should Be $null
+                     $service | Should -Be $null
+                     $serviceCimInstance | Should -Be $null
                 }
 
                 $serviceCount += 1

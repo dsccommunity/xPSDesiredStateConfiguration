@@ -56,21 +56,21 @@ try
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKey = Get-Item -Path $registryParameters.Key -ErrorAction 'SilentlyContinue'
 
             It 'Should have created the registry key' {
-                $registryKey | Should Not Be $null
+                $registryKey | Should -Not -Be $null
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -88,25 +88,25 @@ try
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKeyValue = Get-ItemProperty -Path $registryParameters.Key -Name $registryParameters.ValueName -ErrorAction 'SilentlyContinue'
 
             It 'Should have created the registry key value' {
-                $registryKeyValue | Should Not Be $null
+                $registryKeyValue | Should -Not -Be $null
             }
 
             It 'Should not have set the registry key value' {
-                $registryKeyValue.($registryParameters.ValueName) | Should Be ''
+                $registryKeyValue.($registryParameters.ValueName) | Should -Be ''
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -126,25 +126,25 @@ try
                     . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKeyValue = Get-ItemProperty -Path $registryParameters.Key -Name $registryParameters.ValueName -ErrorAction 'SilentlyContinue'
 
             It 'Should have created the registry key value' {
-                $registryKeyValue | Should Not Be $null
+                $registryKeyValue | Should -Not -Be $null
             }
 
             It 'Should have set the registry key value to the specified String value' {
-                $registryKeyValue.($registryParameters.ValueName) | Should Be $registryParameters.ValueData
+                $registryKeyValue.($registryParameters.ValueName) | Should -Be $registryParameters.ValueData
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -186,25 +186,25 @@ try
                         . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
                 }
 
                 $registryKeyValue = Get-ItemProperty -Path $registryParameters.Key -Name $registryParameters.ValueName -ErrorAction 'SilentlyContinue'
 
                 It 'Should be able to retrieve the registry key value' {
-                    $registryKeyValue | Should Not Be $null
+                    $registryKeyValue | Should -Not -Be $null
                 }
 
                 It 'Should have set the registry key value to the specified value' {
-                    Compare-Object -ReferenceObject $expectedRegistryKeyValue -DifferenceObject $registryKeyValue.($registryParameters.ValueName) | Should Be $null
+                    Compare-Object -ReferenceObject $expectedRegistryKeyValue -DifferenceObject $registryKeyValue.($registryParameters.ValueName) | Should -Be $null
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                    MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
                 }
             }
         }
@@ -227,25 +227,25 @@ try
                     . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKeyValue = Get-ItemProperty -Path $registryParameters.Key -Name $registryParameters.ValueName -ErrorAction 'SilentlyContinue'
 
             It 'Should be able to retrieve the registry key value' {
-                $registryKeyValue | Should Not Be $null
+                $registryKeyValue | Should -Not -Be $null
             }
 
             It 'Should have set the registry key value to the specified Binary value' {
-                Compare-Object -ReferenceObject $expectedRegistryKeyValue -DifferenceObject $registryKeyValue.'(default)' | Should Be $null
+                Compare-Object -ReferenceObject $expectedRegistryKeyValue -DifferenceObject $registryKeyValue.'(default)' | Should -Be $null
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -263,21 +263,21 @@ try
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKeyValue = Get-ItemProperty -Path $registryParameters.Key -Name $registryParameters.ValueName -ErrorAction 'SilentlyContinue'
 
             It 'Should have removed the registry key value' {
-                $registryKeyValue | Should Be $null
+                $registryKeyValue | Should -Be $null
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -297,21 +297,21 @@ try
                     . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKeyValue = Get-ItemProperty -Path $registryParameters.Key -Name $registryParameters.ValueName -ErrorAction 'SilentlyContinue'
 
             It 'Should have removed the registry key value' {
-                $registryKeyValue | Should Be $null
+                $registryKeyValue | Should -Be $null
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -329,21 +329,21 @@ try
                     . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @registryParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             $registryKey = Get-Item -Path $registryParameters.Key -ErrorAction 'SilentlyContinue'
 
             It 'Should have removed the registry key value' {
-                $registryKey | Should Be $null
+                $registryKey | Should -Be $null
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should Be $true
+                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
     }
