@@ -819,7 +819,7 @@ function Get-RegistryKeyValueDisplayName
 #>
 function Get-RegistryKeyValue
 {
-    [OutputType([Object[]])]
+    [OutputType([System.Object[]])]
     [CmdletBinding()]
     param
     (
@@ -887,7 +887,7 @@ function Convert-ByteArrayToHexString
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         [AllowEmptyCollection()]
-        [Object[]]
+        [System.Object[]]
         $ByteArray
     )
 
@@ -920,7 +920,7 @@ function ConvertTo-ReadableString
         [Parameter(Mandatory = $true)]
         [AllowNull()]
         [AllowEmptyCollection()]
-        [Object[]]
+        [System.Object[]]
         $RegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
@@ -1330,7 +1330,7 @@ function Set-RegistryKeyValue
 
         [Parameter(Mandatory = $true)]
         [AllowNull()]
-        [Object]
+        [System.Object]
         $RegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
@@ -1372,12 +1372,12 @@ function Test-RegistryKeyValuesMatch
     (
         [Parameter(Mandatory = $true)]
         [AllowNull()]
-        [Object]
+        [System.Object]
         $ExpectedRegistryKeyValue,
 
         [Parameter(Mandatory = $true)]
         [AllowNull()]
-        [Object]
+        [System.Object]
         $ActualRegistryKeyValue,
 
         [Parameter(Mandatory = $true)]

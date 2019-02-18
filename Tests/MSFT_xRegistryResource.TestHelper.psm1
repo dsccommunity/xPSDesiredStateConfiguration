@@ -172,7 +172,7 @@ function New-RegistryValue
         [System.String]
         $ValueName,
 
-        [Object]
+        [System.Object]
         $ValueData,
 
         [ValidateNotNullOrEmpty()]

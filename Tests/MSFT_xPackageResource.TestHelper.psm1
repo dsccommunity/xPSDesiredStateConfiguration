@@ -1121,7 +1121,7 @@ function Get-LocalizedRegistryKeyValue
     [CmdletBinding()]
     param
     (
-        [Object]
+        [System.Object]
         $RegistryKey,
 
         [Parameter(Mandatory = $true)]

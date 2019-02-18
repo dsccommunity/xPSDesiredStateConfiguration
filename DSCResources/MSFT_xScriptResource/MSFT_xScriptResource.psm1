@@ -208,7 +208,7 @@ function Test-TargetResource
     $invokeScriptResult = Invoke-Script @invokeScriptParameters
 
     # If the script is returing multiple objects, then we consider the last object to be the result of the script execution.
-    if ($invokeScriptResult -is [Object[]] -and $invokeScriptResult.Count -gt 0)
+    if ($invokeScriptResult -is [System.Object[]] -and $invokeScriptResult.Count -gt 0)
     {
         $invokeScriptResult = $invokeScriptResult[$invokeScriptResult.Count - 1]
     }
@@ -243,7 +243,7 @@ function Test-TargetResource
 #>
 function Invoke-Script
 {
-    [OutputType([Object])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
     param
     (
