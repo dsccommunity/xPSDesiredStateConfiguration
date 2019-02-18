@@ -134,8 +134,8 @@
 - Adds spaces between comment hashtags and comments.
 - Fixes script analyzer issues in MSFT_xServiceResource.psm1.
   [issue #491](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/491)
-- Fixes script analyzer issues in MSFT_xWindowsPackageCab.psm1
-  [issue #495](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/495).
+- Fixes script analyzer issues in MSFT_xWindowsPackageCab.psm1.
+  [issue #495](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/495)
 - xFileUpload:
   - Fixes script analyzer issues in xFileUpload.schema.psm1.
     [issue #497](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/497)
@@ -160,7 +160,7 @@
   [issue #500](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/500)
 - Fixes script analyzer issues in xWindowsFeatureSet.schema.psm1.
   [issue #501](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/501)
-- Fixes script analyzer issues in xWindowsOptionalFeatureSet.schema.psm1.
+- Fixes script analyzer issues in xWindowsOptionalFeatureSet.schema.psm1
   [issue #502](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/502)
 - Updates Should statements in Pester tests to use dashes before parameters.
 - Added a CODE\_OF\_CONDUCT.md with the same content as in the README.md
