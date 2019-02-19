@@ -134,7 +134,7 @@ function Get-TargetResource
     {
         try
         {
-            $installDate = '{0:d}' -f [DateTime]::ParseExact($installDate, 'yyyyMMdd',[System.Globalization.CultureInfo]::CurrentCulture).Date
+            $installDate = '{0:d}' -f [System.DateTime]::ParseExact($installDate, 'yyyyMMdd',[System.Globalization.CultureInfo]::CurrentCulture).Date
         }
         catch
         {
@@ -564,7 +564,7 @@ function Set-TargetResource
         {
             try
             {
-                [int] $exitCode = 0
+                [System.Int32] $exitCode = 0
                 if($PSBoundParameters.ContainsKey('RunAsCredential'))
                 {
                     $commandLine = '"{0}" {1}' -f $startInfo.FileName, $startInfo.Arguments

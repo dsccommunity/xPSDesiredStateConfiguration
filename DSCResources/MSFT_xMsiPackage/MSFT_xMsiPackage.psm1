@@ -1110,7 +1110,7 @@ function Assert-FileSignatureValid
 #>
 function Start-MsiProcess
 {
-    [OutputType([Int32])]
+    [OutputType([System.Int32])]
     [CmdletBinding()]
     param
     (
