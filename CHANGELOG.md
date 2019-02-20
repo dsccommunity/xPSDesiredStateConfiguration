@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 8.5.0.0
+
 - Pull server module publishing
   - Removed forced verbose logging from CreateZipFromSource, Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the console
 - Corrected GitHub Pull Request template to remove referral to
