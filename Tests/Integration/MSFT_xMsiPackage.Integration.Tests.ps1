@@ -5,10 +5,15 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $script:commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xMsiPackage' `
-    -TestType 'Unit'
+    -TestType 'Integration'
 
 try
 {
@@ -105,34 +110,34 @@ try
                         -Path $script:msiLocation `
                         -ProductId $script:packageId
 
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
 
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Absent' `
                         -Path $script:msiLocation `
                         -ProductId $script:packageId
 
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should return correct value when package is present' {
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId
 
-                    Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
 
                     $testTargetResourceResult = Test-TargetResource `
                             -Ensure 'Present' `
                             -Path $script:msiLocation `
                             -ProductId $script:packageId `
 
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
 
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Absent' `
                         -Path $script:msiLocation `
                         -ProductId $script:packageId `
 
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -140,25 +145,25 @@ try
                 It 'Should correctly install and remove a .msi package' {
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId
 
-                    Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
 
                     $getTargetResourceResult = Get-TargetResource -Path $script:msiLocation -ProductId $script:packageId
 
-                    $getTargetResourceResult.Version | Should Be '1.2.3.4'
-                    $getTargetResourceResult.InstalledOn | Should Be ('{0:d}' -f [DateTime]::Now.Date)
-                    $getTargetResourceResult.ProductId | Should Be $script:packageId
+                    $getTargetResourceResult.Version | Should -Be '1.2.3.4'
+                    $getTargetResourceResult.InstalledOn | Should -Be ('{0:d}' -f [System.DateTime]::Now.Date)
+                    $getTargetResourceResult.ProductId | Should -Be $script:packageId
 
-                    [Math]::Round($getTargetResourceResult.Size, 2) | Should Be 0.03
+                    [Math]::Round($getTargetResourceResult.Size, 2) | Should -Be 0.03
 
                     Set-TargetResource -Ensure 'Absent' -Path $script:msiLocation -ProductId $script:packageId
 
-                    Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
                 }
 
                 It 'Should throw with incorrect product id' {
                     $wrongPackageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a050272}'
 
-                    { Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $wrongPackageId } | Should Throw
+                    { Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $wrongPackageId } | Should -Throw
                 }
 
                 It 'Should correctly install and remove a package from a HTTP URL' {
@@ -179,13 +184,13 @@ try
                         # Wait for the file server to be ready to receive requests
                         $fileServerStarted.WaitOne(30000)
 
-                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should Throw
+                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should -Throw
 
                         Set-TargetResource -Ensure 'Present' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
 
                         Set-TargetResource -Ensure 'Absent' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
+                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
                     }
                     finally
                     {
@@ -216,13 +221,13 @@ try
                         # Wait for the file server to be ready to receive requests
                         $fileServerStarted.WaitOne(30000)
 
-                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should Throw
+                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should -Throw
 
                         Set-TargetResource -Ensure 'Present' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should Be $true
+                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
 
                         Set-TargetResource -Ensure 'Absent' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should Be $false
+                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
                     }
                     finally
                     {
@@ -244,8 +249,8 @@ try
 
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -LogPath $logPath -ProductId $script:packageId
 
-                    Test-Path -Path $logPath | Should Be $true
-                    Get-Content -Path $logPath | Should Not Be $null
+                    Test-Path -Path $logPath | Should -Be $true
+                    Get-Content -Path $logPath | Should -Not -Be $null
                 }
 
                 It 'Should add space after .MSI installation arguments' {
@@ -272,7 +277,7 @@ try
                         ProductId = $script:packageId
                     }
 
-                    { Set-TargetResource -Ensure 'Present' @packageParameters } | Should Not Throw
+                    { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
                 }
 
                 It 'Should install package using user credentials when specified' {

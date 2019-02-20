@@ -5,10 +5,32 @@ version: 6.0.{build}.0
 environment:
   gallery_api:
     secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
+  # The job where deploy step should run (normally the last job)
+  DeployInJobNumber: 5
 
-init:
-  # Needed for publishing of examples, build worker defaults to core.autocrlf=input.
-  - git config --global core.autocrlf true
+# The images that will be used when building the job matrix.
+image:
+- Visual Studio 2017
+- Visual Studio 2015
+
+# The configuration that will be used when building the job matrix.
+# Meta = Test Framework Common Test
+# Unit = Module Unit Tests.
+# Integration = Module Integration Tests.
+configuration:
+- Meta
+- Unit
+- Integration
+
+# - If one job in the matrix fails, the build will stop (fast_finish).
+# - The jobs that will excluded based on the combination of configuration name
+#   and image name. This will make sure the meta tests (common tests) are only
+#   run on one of the images.
+matrix:
+  fast_finish: true
+  exclude:
+    - configuration: Meta
+      image: Visual Studio 2015
 
 install:
     - git clone https://github.com/PowerShell/DscResource.Tests
@@ -27,15 +49,78 @@ build: false
 #      test configuration         #
 #---------------------------------#
 
-test_script:
+# This will build the job matrix (exception is what is excluded from the matrix
+# above). The jobs will be order by the order of key 'configuration:' and then
+# by the key 'images:'.
+#
+# Job 1: Run meta test (common tests) on image Visual Studio 2017.
+# Job 2: Run unit tests on image Visual Studio 2017, including Codecov report.
+# Job 3: Run integration tests on image Visual Studio 2017.
+# Job 4: Run unit tests on image Visual Studio 2015, without Codecov report.
+# Job 5: Run integration tests on image Visual Studio 2015.
+
+for:
+-
+  # Job 1.
+  matrix:
+    only:
+      - configuration: Meta
+
+  test_script:
+    - ps: |
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Default' `
+            -ExcludeTag @()
+
+-
+  # Job 3 and job 5.
+  matrix:
+    only:
+      - configuration: Integration
+  environment:
+    SkipAllCommonTests: True
+
+  test_script:
+    - ps: |
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Default' `
+            -DisableConsistency `
+            -ExcludeTag @()
+
+-
+  # Job 4.
+  matrix:
+    only:
+      - configuration: Unit
+        image: Visual Studio 2015
+  environment:
+    SkipAllCommonTests: True
+
+  test_script:
+    - ps: |
+        Invoke-AppveyorTestScriptTask `
+            -Type 'Default' `
+            -CodeCoverage `
+            -ExcludeTag @()
+
+-
+  # Job 2.
+  matrix:
+    only:
+      - configuration: Unit
+        image: Visual Studio 2017
+  environment:
+    SkipAllCommonTests: True
+
+  test_script:
     - ps: |
         Invoke-AppveyorTestScriptTask `
             -Type 'Default' `
             -CodeCoverage `
             -CodeCovIo `
-            -DisableConsistency `
             -ExcludeTag @()
 
+# Runs for all jobs.
 after_test:
   - ps: |
         Import-Module -Name "$env:APPVEYOR_BUILD_FOLDER\DscResource.Tests\AppVeyor.psm1"
@@ -46,6 +131,14 @@ after_test:
 #      deployment configuration   #
 #---------------------------------#
 
+# Runs only in a branch (not in PR).
 deploy_script:
   - ps: |
-        Invoke-AppVeyorDeployTask
+        if ($env:APPVEYOR_JOB_NUMBER -eq $env:DeployInJobNumber)
+        {
+            Invoke-AppVeyorDeployTask
+        }
+        else
+        {
+            Write-Verbose -Message ('Skipping deploy step. Deploy step was requested to run in job number {0}. Current job number is {1}.' -f $env:DeployInJobNumber, $env:APPVEYOR_JOB_NUMBER) -Verbose
+        }

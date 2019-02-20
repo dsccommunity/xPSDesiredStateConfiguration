@@ -9,6 +9,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'xGroupSet' `
@@ -59,8 +64,8 @@ try
                 Ensure = 'Present'
             }
 
-            Test-GroupExists -GroupName $testGroupName1 | Should Be $false
-            Test-GroupExists -GroupName $testGroupName2 | Should Be $false
+            Test-GroupExists -GroupName $testGroupName1 | Should -Be $false
+            Test-GroupExists -GroupName $testGroupName2 | Should -Be $false
 
             try
             {
@@ -68,10 +73,10 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName1 -Members @() | Should Be $true
-                Test-GroupExists -GroupName $testGroupName2 -Members @() | Should Be $true
+                Test-GroupExists -GroupName $testGroupName1 -Members @() | Should -Be $true
+                Test-GroupExists -GroupName $testGroupName2 -Members @() | Should -Be $true
             }
             finally
             {
@@ -99,7 +104,7 @@ try
                 MembersToInclude = $groupMembers
             }
 
-            Test-GroupExists -GroupName $testGroupName1 | Should Be $false
+            Test-GroupExists -GroupName $testGroupName1 | Should -Be $false
 
             try
             {
@@ -107,9 +112,9 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName1 -MembersToInclude $groupMembers | Should Be $true
+                Test-GroupExists -GroupName $testGroupName1 -MembersToInclude $groupMembers | Should -Be $true
             }
             finally
             {
@@ -134,8 +139,8 @@ try
                 MembersToInclude = $groupMembers
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $false
-            Test-GroupExists -GroupName $administratorsGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $false
+            Test-GroupExists -GroupName $administratorsGroupName | Should -Be $true
 
             try
             {
@@ -143,10 +148,10 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should Be $true
-                Test-GroupExists -GroupName $administratorsGroupName -MembersToInclude $groupMembers | Should Be $true
+                Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should -Be $true
+                Test-GroupExists -GroupName $administratorsGroupName -MembersToInclude $groupMembers | Should -Be $true
             }
             finally
             {
@@ -172,11 +177,11 @@ try
 
             foreach ($testGroupName in $testGroupNames)
             {
-                Test-GroupExists -GroupName $testGroupName | Should Be $false
+                Test-GroupExists -GroupName $testGroupName | Should -Be $false
 
                 New-Group -GroupName $testGroupName -Members $testUsernames
 
-                Test-GroupExists -GroupName $testGroupName | Should Be $true
+                Test-GroupExists -GroupName $testGroupName | Should -Be $true
             }
 
             try
@@ -185,11 +190,11 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
                 foreach ($testGroupName in $testGroupNames)
                 {
-                    Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should Be $true
+                    Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should -Be $true
                 }
             }
             finally
@@ -217,11 +222,11 @@ try
 
             foreach ($testGroupName in $testGroupNames)
             {
-                Test-GroupExists -GroupName $testGroupName | Should Be $false
+                Test-GroupExists -GroupName $testGroupName | Should -Be $false
 
                 New-Group -GroupName $testGroupName
 
-                Test-GroupExists -GroupName $testGroupName | Should Be $true
+                Test-GroupExists -GroupName $testGroupName | Should -Be $true
             }
 
             try
@@ -230,11 +235,11 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @groupSetParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
                 foreach ($testGroupName in $testGroupNames)
                 {
-                    Test-GroupExists -GroupName $testGroupName | Should Be $false
+                    Test-GroupExists -GroupName $testGroupName | Should -Be $false
                 }
             }
             finally

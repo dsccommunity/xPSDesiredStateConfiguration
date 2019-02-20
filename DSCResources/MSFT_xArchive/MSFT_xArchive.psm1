@@ -46,7 +46,7 @@ if (-not (Test-IsNanoServer))
         Specifies whether or not to validate that a file at the destination with the same name as a
         file in the archive actually matches that corresponding file in the archive by the
         specified checksum method.
-        
+
         If a file does not match it will be considered not present.
 
         The default value is false.
@@ -74,27 +74,27 @@ if (-not (Test-IsNanoServer))
 #>
 function Get-TargetResource
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Validate = $false,
 
         [Parameter()]
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum = 'ModifiedDate',
 
         [Parameter()]
@@ -106,7 +106,7 @@ function Get-TargetResource
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $Checksum, $Path, $Destination
-        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage 
+        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage
     }
 
     $archiveState = @{
@@ -178,7 +178,7 @@ function Get-TargetResource
     .SYNOPSIS
         Expands the archive (.zip) file at the specified path to the specified destination or
         removes the expanded archive (.zip) file at the specified path from the specified
-        destination. 
+        destination.
 
     .PARAMETER Path
         The path to the archive file that should be expanded to or removed from the specified
@@ -202,7 +202,7 @@ function Get-TargetResource
         Specifies whether or not to validate that a file at the destination with the same name as a
         file in the archive actually matches that corresponding file in the archive by the
         specified checksum method.
-        
+
         If the file does not match and Ensure is specified as Present and Force is not specified,
         the resource will throw an error that the file at the destination cannot be overwritten.
         If the file does not match and Ensure is specified as Present and Force is specified, the
@@ -250,26 +250,26 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Validate = $false,
 
         [Parameter()]
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum = 'ModifiedDate',
 
         [Parameter()]
@@ -278,14 +278,14 @@ function Set-TargetResource
         $Credential,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Force = $false
     )
 
     if ($PSBoundParameters.ContainsKey('Checksum') -and -not $Validate)
     {
         $errorMessage = $script:localizedData.ChecksumSpecifiedAndValidateFalse -f $Checksum, $Path, $Destination
-        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage 
+        New-InvalidArgumentException -ArgumentName 'Checksum or Validate' -Message $errorMessage
     }
 
     $psDrive = $null
@@ -301,7 +301,7 @@ function Set-TargetResource
         Assert-DestinationDoesNotExistAsFile -Destination $Destination
 
         Write-Verbose -Message ($script:localizedData.SettingArchiveState -f $Path, $Destination)
-        
+
         $expandArchiveToDestinationParameters = @{
             ArchiveSourcePath = $Path
             Destination = $Destination
@@ -384,7 +384,7 @@ function Set-TargetResource
         Specifies whether or not to validate that a file at the destination with the same name as a
         file in the archive actually matches that corresponding file in the archive by the
         specified checksum method.
-        
+
         If a file does not match it will be considered not present.
 
         The default value is false.
@@ -415,32 +415,32 @@ function Set-TargetResource
 #>
 function Test-TargetResource
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Validate = $false,
 
         [Parameter()]
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum = 'ModifiedDate',
 
         [Parameter()]
@@ -449,7 +449,7 @@ function Test-TargetResource
         $Credential,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Force = $false
     )
 
@@ -484,11 +484,11 @@ function Test-TargetResource
 #>
 function New-Guid
 {
-    [OutputType([Guid])]
+    [OutputType([System.Guid])]
     [CmdletBinding()]
     param ()
 
-    return [Guid]::NewGuid()
+    return [System.Guid]::NewGuid()
 }
 
 <#
@@ -508,7 +508,7 @@ function Invoke-NewPSDrive
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $Parameters
     )
 
@@ -534,7 +534,7 @@ function Mount-PSDriveWithCredential
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter(Mandatory = $true)]
@@ -611,7 +611,7 @@ function Assert-PathExistsAsLeaf
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
@@ -639,7 +639,7 @@ function Assert-DestinationDoesNotExistAsFile
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination
     )
 
@@ -671,7 +671,7 @@ function Open-Archive
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
@@ -746,7 +746,7 @@ function Get-ArchiveEntries
 #>
 function Get-ArchiveEntryFullName
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
@@ -814,16 +814,16 @@ function Close-Stream
 #>
 function Test-ChecksumIsSha
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Checksum
     )
-    
+
     return ($Checksum.Length -ge 'SHA'.Length) -and ($Checksum.Substring(0, 3) -ieq 'SHA')
 }
 
@@ -838,13 +838,13 @@ function Test-ChecksumIsSha
 #>
 function ConvertTo-PowerShellHashAlgorithmName
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $DscHashAlgorithmName
     )
 
@@ -867,13 +867,13 @@ function ConvertTo-PowerShellHashAlgorithmName
 #>
 function Test-FileHashMatchesArchiveEntryHash
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $FilePath,
 
         [Parameter(Mandatory = $true)]
@@ -883,7 +883,7 @@ function Test-FileHashMatchesArchiveEntryHash
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $HashAlgorithmName
     )
 
@@ -934,6 +934,43 @@ function Test-FileHashMatchesArchiveEntryHash
 
 <#
     .SYNOPSIS
+        Retrieves the timestamp of the specified file for the specified checksum method
+        and returns it as a checksum.
+
+    .PARAMETER File
+        The file to retrieve the timestamp of.
+
+    .PARAMETER Checksum
+        The checksum method to retrieve the timestamp checksum for.
+
+    .NOTES
+        The returned string is file timestamp normalized to the format specified in
+        ConvertTo-CheckSumFromDateTime.
+#>
+function Get-ChecksumFromFileTimestamp
+{
+    [OutputType([System.String])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.IO.FileInfo]
+        $File,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('CreatedDate', 'ModifiedDate')]
+        [System.String]
+        $Checksum
+    )
+
+    $timestamp = Get-TimestampForChecksum @PSBoundParameters
+
+    return ConvertTo-ChecksumFromDateTime -Date $timestamp
+}
+
+<#
+    .SYNOPSIS
         Retrieves the timestamp of the specified file for the specified checksum method.
 
     .PARAMETER File
@@ -941,10 +978,6 @@ function Test-FileHashMatchesArchiveEntryHash
 
     .PARAMETER Checksum
         The checksum method to retrieve the timestamp for.
-
-    .NOTES
-        The returned date is normalized to the General (G) date format.
-        https://technet.microsoft.com/en-us/library/ee692801.aspx
 #>
 function Get-TimestampForChecksum
 {
@@ -959,22 +992,80 @@ function Get-TimestampForChecksum
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum
     )
 
-    $relevantTimestamp = $null
-
     if ($Checksum -ieq 'CreatedDate')
     {
-        $relevantTimestamp = Get-Date -Date $File.CreationTime.DateTime -Format 'G'
+        $relevantTimestamp = 'CreationTime'
     }
     elseif ($Checksum -ieq 'ModifiedDate')
     {
-        $relevantTimestamp = Get-Date -Date $File.LastWriteTime.DateTime -Format 'G'
+        $relevantTimestamp = 'LastWriteTime'
     }
 
-    return $relevantTimestamp
+    return Get-TimestampFromFile -File $File -Timestamp $relevantTimestamp
+}
+
+<#
+    .SYNOPSIS
+        Retrieves a timestamp of the specified file.
+
+    .PARAMETER File
+        The file to retrieve the timestamp from.
+
+    .PARAMETER Timestamp
+        The timestamp attribute to retrieve.
+#>
+function Get-TimestampFromFile
+{
+    [OutputType([System.Datetime])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.IO.FileInfo]
+        $File,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('CreationTime', 'LastWriteTime')]
+        [System.String]
+        $Timestamp
+    )
+
+    return $File.$Timestamp
+}
+
+<#
+    .SYNOPSIS
+        Converts a datetime object into the format used for a
+        checksum.
+
+    .PARAMETER Date
+        The date to use to generate the checksum.
+
+    .NOTES
+        The returned date is normalized to the General (G) date format.
+        https://technet.microsoft.com/en-us/library/ee692801.aspx
+
+        Because the General (G) is localization specific a non-localization
+        specific format such as ISO9660 could be used in future.
+#>
+function ConvertTo-ChecksumFromDateTime
+{
+    [OutputType([System.String])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.DateTime]
+        $Date
+    )
+
+    return Get-Date -Date $Date -Format 'G'
 }
 
 <#
@@ -984,10 +1075,6 @@ function Get-TimestampForChecksum
 
     .PARAMETER ArchiveEntry
         The archive entry to retrieve the last write time of.
-
-    .NOTES
-        The returned date is normalized to the General (G) date format.
-        https://technet.microsoft.com/en-us/library/ee692801.aspx
 #>
 function Get-ArchiveEntryLastWriteTime
 {
@@ -1001,7 +1088,7 @@ function Get-ArchiveEntryLastWriteTime
         $ArchiveEntry
     )
 
-    return (Get-Date -Date $ArchiveEntry.LastWriteTime.DateTime -Format 'G')
+    return $ArchiveEntry.LastWriteTime.DateTime
 }
 
 <#
@@ -1021,7 +1108,7 @@ function Get-ArchiveEntryLastWriteTime
 #>
 function Test-FileMatchesArchiveEntryByChecksum
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
@@ -1037,7 +1124,7 @@ function Test-FileMatchesArchiveEntryByChecksum
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Checksum
     )
 
@@ -1064,11 +1151,12 @@ function Test-FileMatchesArchiveEntryByChecksum
     }
     else
     {
-        $fileTimestampForChecksum = Get-TimestampForChecksum -File $File -Checksum $Checksum
+        $fileTimestampForChecksum = Get-ChecksumFromFileTimestamp -File $File -Checksum $Checksum
 
         $archiveEntryLastWriteTime = Get-ArchiveEntryLastWriteTime -ArchiveEntry $ArchiveEntry
+        $archiveEntryLastWriteTimeChecksum = ConvertTo-CheckSumFromDateTime -Date $archiveEntryLastWriteTime
 
-        if ($fileTimestampForChecksum.Equals($archiveEntryLastWriteTime))
+        if ($fileTimestampForChecksum.Equals($archiveEntryLastWriteTimeChecksum))
         {
             Write-Verbose -Message ($script:localizedData.FileMatchesArchiveEntryByChecksum -f $File.FullName, $archiveEntryFullName, $Checksum)
 
@@ -1081,6 +1169,28 @@ function Test-FileMatchesArchiveEntryByChecksum
     }
 
     return $fileMatchesArchiveEntry
+}
+
+<#
+    .SYNOPSIS
+        Tests if the given archive entry name represents a directory.
+
+    .PARAMETER ArchiveEntryName
+        The archive entry name to test.
+#>
+function Test-ArchiveEntryIsDirectory
+{
+    [OutputType([System.Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ArchiveEntryName
+    )
+
+    return $ArchiveEntryName.EndsWith('\') -or $ArchiveEntryName.EndsWith('/')
 }
 
 <#
@@ -1102,23 +1212,23 @@ function Test-FileMatchesArchiveEntryByChecksum
 #>
 function Test-ArchiveExistsAtDestination
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ArchiveSourcePath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination,
 
         [Parameter()]
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum
     )
 
@@ -1150,7 +1260,7 @@ function Test-ArchiveExistsAtDestination
             {
                 Write-Verbose -Message ($script:localizedData.ItemWithArchiveEntryNameExists -f $archiveEntryPathAtDestination)
 
-                if ($archiveEntryFullName.EndsWith('\'))
+                if (Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName)
                 {
                     if (-not ($archiveEntryItemAtDestination -is [System.IO.DirectoryInfo]))
                     {
@@ -1253,16 +1363,18 @@ function Copy-ArchiveEntryToDestination
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $DestinationPath
     )
 
-    Write-Verbose -Message ($script:localizedData.CopyingArchiveEntryToDestination -f $DestinationPath)
-
     $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $ArchiveEntry
 
-    if ($archiveEntryFullName.EndsWith('\'))
+    Write-Verbose -Message ($script:localizedData.CopyingArchiveEntryToDestination -f $archiveEntryFullName, $DestinationPath)
+
+    if (Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName)
     {
+        Write-Verbose -Message ($script:localizedData.CreatingArchiveEntryDirectory -f $DestinationPath)
+
         $null = New-Item -Path $DestinationPath -ItemType 'Directory'
     }
     else
@@ -1295,7 +1407,7 @@ function Copy-ArchiveEntryToDestination
             }
         }
 
-        $newArchiveFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $DestinationPath )
+        $null = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $DestinationPath )
 
         $updatedTimestamp = Get-ArchiveEntryLastWriteTime -ArchiveEntry $ArchiveEntry
 
@@ -1330,21 +1442,21 @@ function Expand-ArchiveToDestination
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ArchiveSourcePath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination,
 
         [Parameter()]
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $Force = $false
     )
 
@@ -1361,7 +1473,7 @@ function Expand-ArchiveToDestination
             $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $archiveEntry
             $archiveEntryPathAtDestination = Join-Path -Path $Destination -ChildPath $archiveEntryFullName
 
-            $archiveEntryIsDirectory = $archiveEntryFullName.EndsWith('\')
+            $archiveEntryIsDirectory = Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName
 
             $archiveEntryItemAtDestination = Get-Item -LiteralPath $archiveEntryPathAtDestination -ErrorAction 'SilentlyContinue'
 
@@ -1404,7 +1516,7 @@ function Expand-ArchiveToDestination
                         $overwriteArchiveEntry = $false
                     }
                 }
-   
+
                 if ($overwriteArchiveEntry)
                 {
                     if ($Force)
@@ -1431,7 +1543,7 @@ function Expand-ArchiveToDestination
 <#
     .SYNOPSIS
         Removes the specified directory from the specified destination path.
-        
+
     .PARAMETER Directory
         The partial path under the destination path of the directory to remove.
 
@@ -1445,12 +1557,12 @@ function Remove-DirectoryFromDestination
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Directory,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination
     )
 
@@ -1504,17 +1616,17 @@ function Remove-ArchiveFromDestination
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ArchiveSourcePath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Destination,
 
         [Parameter()]
         [ValidateSet('SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate')]
-        [String]
+        [System.String]
         $Checksum
     )
 
@@ -1533,7 +1645,7 @@ function Remove-ArchiveFromDestination
             $archiveEntryFullName = Get-ArchiveEntryFullName -ArchiveEntry $archiveEntry
             $archiveEntryPathAtDestination = Join-Path -Path $Destination -ChildPath $archiveEntryFullName
 
-            $archiveEntryIsDirectory = $archiveEntryFullName.EndsWith('\')
+            $archiveEntryIsDirectory = Test-ArchiveEntryIsDirectory -ArchiveEntryName $archiveEntryFullName
 
             $itemAtDestination = Get-Item -LiteralPath $archiveEntryPathAtDestination -ErrorAction 'SilentlyContinue'
 
@@ -1559,7 +1671,7 @@ function Remove-ArchiveFromDestination
                 elseif ((-not $archiveEntryIsDirectory) -and $itemAtDestinationIsFile)
                 {
                     $removeArchiveEntry = $true
-                        
+
                     if ($PSBoundParameters.ContainsKey('Checksum'))
                     {
                         $removeArchiveEntry = Test-FileMatchesArchiveEntryByChecksum -File $itemAtDestination -ArchiveEntry $archiveEntry -Checksum $Checksum
@@ -1580,7 +1692,7 @@ function Remove-ArchiveFromDestination
                 {
                     $parentDirectory = Split-Path -Path $archiveEntryFullName -Parent
 
-                    while (-not [String]::IsNullOrEmpty($parentDirectory))
+                    while (-not [System.String]::IsNullOrEmpty($parentDirectory))
                     {
                         $directoriesToRemove += $parentDirectory
                         $parentDirectory = Split-Path -Path $parentDirectory -Parent

@@ -29,25 +29,26 @@ $script:maxUserEnvVariableLength = 255
 #>
 function Get-TargetResource
 {
-    [CmdletBinding()]    
-    [OutputType([Hashtable])]
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
-        
+
+        [Parameter()]
         [ValidateSet('Process', 'Machine')]
         [ValidateNotNullOrEmpty()]
-        [String[]]
-        $Target = ('Process', 'Machine')      
+        [System.String[]]
+        $Target = ('Process', 'Machine')
     )
-    
+
     $valueToReturn = $null
 
     if ($Target -contains 'Machine')
-    {   
+    {
         $environmentVaraible = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
 
         if ($null -ne $environmentVaraible)
@@ -59,17 +60,17 @@ function Get-TargetResource
     {
         $valueToReturn = Get-ProcessEnvironmentVariable -Name $Name
     }
-    
+
     $environmentResource = @{
         Name = $Name
         Value = $null
         Ensure = 'Absent'
     }
-    
+
     if ($null -eq $valueToReturn)
-    {        
+    {
         Write-Verbose -Message ($script:localizedData.EnvVarNotFound -f $Name)
-    }    
+    }
     else
     {
         Write-Verbose -Message ($script:localizedData.EnvVarFound -f $Name, $valueToReturn)
@@ -83,7 +84,7 @@ function Get-TargetResource
 <#
     .SYNOPSIS
         Creates, modifies, or removes an environment variable.
-        
+
     .PARAMETER Name
         The name of the environment variable to create, modify, or remove.
 
@@ -116,30 +117,34 @@ function Set-TargetResource
 {
     [CmdletBinding()]
     param
-    (       
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
-        
+
+        [Parameter()]
         [ValidateNotNull()]
-        [String]
-        $Value = [String]::Empty,
-        
+        [System.String]
+        $Value = [System.String]::Empty,
+
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
-        
-        [Boolean]
+
+        [Parameter()]
+        [System.Boolean]
         $Path = $false,
 
+        [Parameter()]
         [ValidateSet('Process', 'Machine')]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Target = ('Process', 'Machine')
     )
-    
-    $valueSpecified = ($Value -ne [String]::Empty)
+
+    $valueSpecified = ($Value -ne [System.String]::Empty)
     $currentValueFromMachine = $null
     $currentValueFromProcess = $null
     $currentPropertiesFromMachine = $null
@@ -157,7 +162,7 @@ function Set-TargetResource
             {
                 $currentValueFromMachine = $currentPropertiesFromMachine.$Name
             }
-        } 
+        }
         else
         {
             $currentPropertiesFromMachine = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
@@ -187,12 +192,11 @@ function Set-TargetResource
 
     if ($Ensure -eq 'Present')
     {
-        $createMachineVariable = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [String]::Empty))
-        $createProcessVariable = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [String]::Empty))
+        $createMachineVariable = ((-not $setMachineVariable) -or ($null -eq $currentPropertiesFromMachine) -or ($currentValueFromMachine -eq [System.String]::Empty))
+        $createProcessVariable = ((-not $setProcessVariable) -or ($null -eq $currentValueFromProcess) -or ($currentValueFromProcess -eq [System.String]::Empty))
 
         if ($createMachineVariable -and $createProcessVariable)
         {
-
             if (-not $valueSpecified)
             {
                 <#
@@ -210,7 +214,7 @@ function Set-TargetResource
             #>
 
             Set-EnvironmentVariable -Name $Name -Value $Value -Target $Target
-            
+
             Write-Verbose -Message ($script:localizedData.EnvVarCreated -f $Name, $Value)
             return
         }
@@ -230,15 +234,15 @@ function Set-TargetResource
         # Check if an empty, whitespace or semi-colon only string has been specified. If yes, return unchanged.
         $trimmedValue = $Value.Trim(';').Trim()
 
-        if ([String]::IsNullOrEmpty($trimmedValue))
+        if ([System.String]::IsNullOrEmpty($trimmedValue))
         {
             Write-Verbose -Message ($script:localizedData.EnvVarPathUnchanged -f $Name, $currentValueToDisplay)
-            return        
+            return
         }
 
         if (-not $Path)
         {
-            # For non-path variables, simply set the specified $Value as the new value of the specified 
+            # For non-path variables, simply set the specified $Value as the new value of the specified
             # variable $Name for the given $Target
 
             if (($setMachineVariable -and ($Value -cne $currentValueFromMachine)) -or `
@@ -276,7 +280,7 @@ function Set-TargetResource
         if ($setProcessVariable)
         {
             $valueUnchanged = Test-PathsInValue -ExistingPaths $currentValueFromProcess -QueryPaths $trimmedValue -FindCriteria 'All'
-            
+
             if ($currentValueFromProcess -and -not $valueUnchanged)
             {
                 $updatedValue = Add-PathsToValue -CurrentValue $currentValueFromProcess -NewValue $trimmedValue
@@ -299,10 +303,10 @@ function Set-TargetResource
         if ($machineVariableRemoved -and $processVariableRemoved)
         {
             # Variable not found, condition is satisfied and there is nothing to set/remove, return
-            Write-Verbose -Message ($script:localizedData.EnvVarNotFound -f $Name)        
+            Write-Verbose -Message ($script:localizedData.EnvVarNotFound -f $Name)
             return
         }
-        
+
         if ((-not $ValueSpecified) -or (-not $Path))
         {
             <#
@@ -319,7 +323,7 @@ function Set-TargetResource
         # Check if an empty string or semi-colon only string has been specified as $Value. If yes, return unchanged as we don't need to remove anything.
         $trimmedValue = $Value.Trim(';').Trim()
 
-        if ([String]::IsNullOrEmpty($trimmedValue))
+        if ([System.String]::IsNullOrEmpty($trimmedValue))
         {
             Write-Verbose -Message ($script:localizedData.EnvVarPathUnchanged -f $Name, $currentValueToDisplay)
             return
@@ -330,7 +334,7 @@ function Set-TargetResource
         if ($setMachineVariable)
         {
             $finalPath = $null
-            
+
             if ($currentValueFromMachine)
             {
                 <#
@@ -342,7 +346,7 @@ function Set-TargetResource
                 $finalPath = Remove-PathsFromValue -CurrentValue $currentValueFromMachine -PathsToRemove $trimmedValue
             }
 
-            if ([String]::IsNullOrEmpty($finalPath))
+            if ([System.String]::IsNullOrEmpty($finalPath))
             {
                 Remove-EnvironmentVariable -Name $Name -Target @('Machine')
                 Write-Verbose -Message ($script:localizedData.EnvVarRemoved -f $Name)
@@ -355,13 +359,13 @@ function Set-TargetResource
             {
                 Set-EnvironmentVariable -Name $Name -Value $finalPath -Target @('Machine')
                 Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromMachine, $finalPath)
-            }       
+            }
         }
 
         if ($setProcessVariable)
         {
             $finalPath = $null
-            
+
             if ($currentValueFromProcess)
             {
                 <#
@@ -373,7 +377,7 @@ function Set-TargetResource
                 $finalPath = Remove-PathsFromValue -CurrentValue $currentValueFromProcess -PathsToRemove $trimmedValue
             }
 
-            if ([String]::IsNullOrEmpty($finalPath))
+            if ([System.String]::IsNullOrEmpty($finalPath))
             {
                 Remove-EnvironmentVariable -Name $Name -Target @('Process')
                 Write-Verbose -Message ($script:localizedData.EnvVarRemoved -f $Name)
@@ -386,7 +390,7 @@ function Set-TargetResource
             {
                 Set-EnvironmentVariable -Name $Name -Value $finalPath -Target @('Process')
                 Write-Verbose -Message ($script:localizedData.EnvVarPathUpdated -f $Name, $currentValueFromProcess, $finalPath)
-            }       
+            }
         }
     }
 }
@@ -394,7 +398,7 @@ function Set-TargetResource
 <#
     .SYNOPSIS
         Tests if the environment variable is in the desired state.
-        
+
     .PARAMETER Name
         The name of the environment variable to test.
 
@@ -422,32 +426,36 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
-    (       
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
-        
+
+        [Parameter()]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $Value,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
-        
-        [Boolean]
+
+        [Parameter()]
+        [System.Boolean]
         $Path = $false,
 
+        [Parameter()]
         [ValidateSet('Process', 'Machine')]
         [ValidateNotNullOrEmpty()]
-        [String[]]
+        [System.String[]]
         $Target = ('Process', 'Machine')
     )
-    
-    $valueSpecified = $PSBoundParameters.ContainsKey('Value') -and ($Value -ne [String]::Empty)
+
+    $valueSpecified = $PSBoundParameters.ContainsKey('Value') -and ($Value -ne [System.String]::Empty)
     $currentValueFromMachine = $null
     $currentValueFromProcess = $null
     $currentPropertiesFromMachine = $null
@@ -465,7 +473,7 @@ function Test-TargetResource
             {
                 $currentValueFromMachine = $currentPropertiesFromMachine.$Name
             }
-        } 
+        }
         else
         {
             $currentPropertiesFromMachine = Get-ItemProperty -Path $script:envVarRegPathMachine -Name $Name -ErrorAction 'SilentlyContinue'
@@ -492,7 +500,7 @@ function Test-TargetResource
     {
         $currentValueToDisplay = $currentValueFromProcess
     }
-   
+
     if (($checkMachineTarget -and ($null -eq $currentPropertiesFromMachine)) -or ($checkProcessTarget -and ($null -eq $currentValueFromProcess)))
     {
         # Variable not found
@@ -505,7 +513,7 @@ function Test-TargetResource
         Write-Verbose ($script:localizedData.EnvVarFound -f $Name, $currentValueToDisplay)
         return ($Ensure -eq 'Present')
     }
-    
+
     if (-not $Path)
     {
         # For this non-path variable, make sure that the specified $Value matches the current value.
@@ -525,12 +533,12 @@ function Test-TargetResource
 
     # If the control reaches here, the expected environment variable exists, it is a path variable and a $Value is specified to test against
     if ($Ensure -eq 'Present')
-    {                   
+    {
         if ($checkMachineTarget)
-        {        
+        {
             if (-not (Test-PathsInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'All'))
             {
-                # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure       
+                # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
                 return $false
             }
@@ -540,7 +548,7 @@ function Test-TargetResource
         {
             if (-not (Test-PathsInValue -ExistingPaths $currentValueFromProcess -QueryPaths $Value -FindCriteria 'All'))
             {
-                # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure       
+                # If the control reached here some part of the specified path ($Value) was not found in the existing variable, return failure
                 Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
                 return $false
             }
@@ -552,7 +560,7 @@ function Test-TargetResource
     }
     # Ensure = 'Absent'
     else
-    {                             
+    {
         if ($checkMachineTarget)
         {
             if (Test-PathsInValue -ExistingPaths $currentValueFromMachine -QueryPaths $Value -FindCriteria 'Any')
@@ -572,7 +580,7 @@ function Test-TargetResource
                 return $false
             }
         }
-                    
+
         # If the control reached here, none of the specified paths were found in the existing path-variable, return success
         Write-Verbose ($script:localizedData.EnvVarFoundWithMisMatchingValue -f $Name, $currentValueToDisplay, $Value)
         return $true
@@ -582,7 +590,7 @@ function Test-TargetResource
 <#
     .SYNOPSIS
         Retrieves the value of the environment variable from the given Target.
-        
+
     .PARAMETER Name
         The name of the environment variable to retrieve the value from.
 
@@ -594,23 +602,23 @@ function Test-TargetResource
 function Get-EnvironmentVariable
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
-        [String]
+        [System.String]
         $Target
     )
 
     $valueToReturn = $null
 
-    if ($Target -eq 'Process') 
+    if ($Target -eq 'Process')
     {
         $valueToReturn = Get-ProcessEnvironmentVariable -Name $Name
     }
@@ -632,27 +640,26 @@ function Get-EnvironmentVariable
             $valueToReturn = $retrievedProperty.$Name
         }
     }
- 
+
     return $valueToReturn
 }
 
 <#
     .SYNOPSIS
         Wrapper function to retrieve an environment variable from the current process.
-        
+
     .PARAMETER Name
         The name of the variable to retrieve
-      
 #>
 function Get-ProcessEnvironmentVariable
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -664,28 +671,28 @@ function Get-ProcessEnvironmentVariable
         If there are any paths in NewPaths that aren't in CurrentValue they will be added
         to the current paths value and a String will be returned containing all old paths
         and new paths. Otherwise the original value will be returned unchanged.
-        
+
     .PARAMETER CurrentValue
         A semicolon-separated String containing the current path values.
 
     .PARAMETER NewPaths
         A semicolon-separated String containing any paths that should be added to
-        the current value. If CurrentValue already contains a path, it will not be added.   
+        the current value. If CurrentValue already contains a path, it will not be added.
 #>
 function Add-PathsToValue
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
-    (       
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $CurrentValue,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $NewValue
     )
 
@@ -693,8 +700,8 @@ function Add-PathsToValue
     $currentPaths = $CurrentValue -split ';'
     $newPaths = $NewValue -split ';'
 
-    foreach ($path in $newPaths)            
-    {            
+    foreach ($path in $newPaths)
+    {
         if ($currentPaths -notcontains $path)
         {
             <#
@@ -703,8 +710,8 @@ function Add-PathsToValue
             #>
 
             $finalValue += ($path + ';')
-        }                            
-    }  
+        }
+    }
 
     # Remove any extraneous ';' at the end (and potentially start - as a side-effect) of the value to be set
     return $finalValue.Trim(';')
@@ -717,7 +724,7 @@ function Add-PathsToValue
         paths that remain, or an empty string will be returned if all paths were removed.
         If none of the paths in PathsToRemove are in CurrentValue then this function will
         return CurrentValue since nothing needs to be changed.
-        
+
     .PARAMETER CurrentValue
         A semicolon-separated String containing the current path values.
 
@@ -727,18 +734,18 @@ function Add-PathsToValue
 #>
 function Remove-PathsFromValue
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
-    (       
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $CurrentValue,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $PathsToRemove
     )
 
@@ -761,12 +768,12 @@ function Remove-PathsFromValue
         {
             # the current $subpath was not part of the $specifiedPaths (to be removed) so keep this $subpath in the finalPath
             $finalPath += $subpath + ';'
-        }                            
-    }                          
-    
-    # Remove any extraneous ';' at the end (and potentially start - as a side-effect) of the $finalPath        
-    $finalPath = $finalPath.Trim(';')                
-        
+        }
+    }
+
+    # Remove any extraneous ';' at the end (and potentially start - as a side-effect) of the $finalPath
+    $finalPath = $finalPath.Trim(';')
+
     if ($varAltered)
     {
         return $finalPath
@@ -781,14 +788,14 @@ function Remove-PathsFromValue
     .SYNOPSIS
         Sets the value of the environment variable with the given name if a value is specified.
         If no value is specified, then the environment variable will be removed.
-        
+
     .PARAMETER Name
         The name of the environment variable to set or remove.
 
     .PARAMETER Value
         The value to set the environment variable to. If not provided, then the variable will
         be removed.
-    
+
     .PARAMETER Target
         Indicates where to set or remove the environment variable: The machine, the process, or both.
         The logic for User is also included here for future expansion of this resource.
@@ -797,18 +804,19 @@ function Set-EnvironmentVariable
 {
     [CmdletBinding()]
     param
-    (       
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Value,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
-        [String[]]
+        [System.String[]]
         $Target
     )
 
@@ -816,8 +824,8 @@ function Set-EnvironmentVariable
 
     try
     {
-        # If the Value is set to [String]::Empty then nothing should be updated for the process
-        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [String]::Empty)))
+        # If the Value is set to [System.String]::Empty then nothing should be updated for the process
+        if (($Target -contains 'Process') -and (-not $valueSpecified -or ($Value -ne [System.String]::Empty)))
         {
             if (-not $valueSpecified)
             {
@@ -838,7 +846,7 @@ function Set-EnvironmentVariable
 
             $path = $script:envVarRegPathMachine
 
-            if (-not $valueSpecified) 
+            if (-not $valueSpecified)
             {
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -857,7 +865,7 @@ function Set-EnvironmentVariable
                 Set-ItemProperty -Path $path -Name $Name -Value $Value
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
-                if ($null -eq $environmentKey) 
+                if ($null -eq $environmentKey)
                 {
                     $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
                     New-InvalidArgumentException -Message $message -ArgumentName $Name
@@ -875,7 +883,7 @@ function Set-EnvironmentVariable
 
             $path = $script:envVarRegPathUser
 
-            if (-not $valueSpecified) 
+            if (-not $valueSpecified)
             {
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -894,7 +902,7 @@ function Set-EnvironmentVariable
                 Set-ItemProperty -Path $path -Name $Name -Value $Value
                 $environmentKey = Get-ItemProperty -Path $path -Name $Name -ErrorAction 'SilentlyContinue'
 
-                if ($null -eq $environmentKey) 
+                if ($null -eq $environmentKey)
                 {
                     $message = ($script:localizedData.GetItemPropertyFailure -f $Name, $path)
                     New-InvalidArgumentException -Message $message -ArgumentName $Name
@@ -902,7 +910,7 @@ function Set-EnvironmentVariable
             }
         }
     }
-    catch 
+    catch
     {
         New-InvalidOperationException -Message ($script:localizedData.EnvVarSetError -f $Name, $Value) `
                                       -ErrorRecord $_
@@ -913,13 +921,12 @@ function Set-EnvironmentVariable
 <#
     .SYNOPSIS
         Wrapper function to set an environment variable for the current process.
-        
+
     .PARAMETER Name
         The name of the environment variable to set.
 
     .PARAMETER Value
         The value to set the environment variable to.
-         
 #>
 function Set-ProcessEnvironmentVariable
 {
@@ -928,11 +935,12 @@ function Set-ProcessEnvironmentVariable
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
-        [String]
-        $Value = [String]::Empty
+        [Parameter()]
+        [System.String]
+        $Value = [System.String]::Empty
     )
 
     [System.Environment]::SetEnvironmentVariable($Name, $Value)
@@ -942,7 +950,7 @@ function Set-ProcessEnvironmentVariable
     .SYNOPSIS
         Removes an environment variable from the given target(s) by calling Set-EnvironmentVariable
         with no Value specified.
-        
+
     .PARAMETER Name
         The name of the environment variable to remove.
 
@@ -953,23 +961,23 @@ function Remove-EnvironmentVariable
 {
     [CmdletBinding()]
     param
-    (       
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Process', 'Machine')]
-        [String[]]
+        [System.String[]]
         $Target
     )
-        
+
     try
     {
         Set-EnvironmentVariable -Name $Name -Target $Target
     }
-    catch 
+    catch
     {
         New-InvalidOperationException -Message ($script:localizedData.EnvVarRemoveError -f $Name) `
                                       -ErrorRecord $_
@@ -983,7 +991,7 @@ function Remove-EnvironmentVariable
         paths in QueryPaths are in ExistingPaths, otherwise it will return False.
         If FindCriteria is set to 'Any' then it will return True if any of the paths
         in QueryPaths are in ExistingPaths, otherwise it will return False.
-          
+
     .PARAMETER ExistingPaths
         A semicolon-separated String containing the path values to test against.
 
@@ -997,21 +1005,21 @@ function Remove-EnvironmentVariable
 #>
 function Test-PathsInValue
 {
-    [OutputType([Boolean])]  
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]               
-        [String]
-        $ExistingPaths,
-        
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
+        $ExistingPaths,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $QueryPaths,
 
-        [Parameter(Mandatory = $true)]      
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Any', 'All')]
-        [String]
+        [System.String]
         $FindCriteria
     )
 
@@ -1023,35 +1031,35 @@ function Test-PathsInValue
         'Any'
         {
             foreach ($queryPath in $queryPathList)
-            {            
+            {
                 if ($existingPathList -contains $queryPath)
                 {
                     # Found this $queryPath in the existing paths, return $true
                     return $true
-                }                             
+                }
             }
 
             # If the control reached here, none of the QueryPaths were found in ExistingPaths
-            return $false   
+            return $false
         }
 
         'All'
         {
             foreach ($queryPath in $queryPathList)
             {
-                if ($queryPath) 
+                if ($queryPath)
                 {
                     if ($existingPathList -notcontains $queryPath)
                     {
-                        # The current $queryPath wasn't found in any of the $existingPathList, return false                    
+                        # The current $queryPath wasn't found in any of the $existingPathList, return false
                         return $false
                     }
-                }                
+                }
             }
 
             # If the control reached here, all of the QueryPaths were found in ExistingPaths
             return $true
-        }    
+        }
     }
 }
 
@@ -1062,7 +1070,7 @@ function Test-PathsInValue
         name and its current value on the machine. This is to most closely represent what the
         actual API call returns. If an environment variable with the given name is not found, then
         $null will be returned.
-          
+
     .PARAMETER Name
         The name of the environment variable to retrieve the value of.
 #>
@@ -1074,14 +1082,14 @@ function Get-EnvironmentVariableWithoutExpanding
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $Name
     )
 
     $path = $script:envVarRegPathMachine
     $pathTokens = $path.Split('\',[System.StringSplitOptions]::RemoveEmptyEntries)
     $entry = $pathTokens[1..($pathTokens.Count - 1)] -join '\'
-    
+
     # Since the target registry path coming to this function is hardcoded for local machine
     $hive = [Microsoft.Win32.Registry]::LocalMachine
 
@@ -1090,14 +1098,14 @@ function Get-EnvironmentVariableWithoutExpanding
     try
     {
         $key = $hive.OpenSubKey($entry)
-        
+
         $valueNames = $key.GetValueNames()
         if ($valueNames -inotcontains $Name)
         {
             return $null
         }
-        
-        [String] $value = Get-KeyValue -Name $Name -Key $key
+
+        [System.String] $value = Get-KeyValue -Name $Name -Key $key
         $noteProperties.Add($Name, $value)
     }
     finally
@@ -1117,7 +1125,7 @@ function Get-EnvironmentVariableWithoutExpanding
     .SYNOPSIS
         Wrapper function to get the value of the environment variable with the given name
         from the specified registry key.
-          
+
     .PARAMETER Name
         The name of the environment variable to retrieve the value of.
 
@@ -1126,13 +1134,13 @@ function Get-EnvironmentVariableWithoutExpanding
 #>
 function Get-KeyValue
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]

@@ -6,7 +6,7 @@
 ConvertFrom-StringData @'
     ServiceExists = Service {0} exists.
     ServiceDoesNotExist = Service {0} does not exist.
-    BuiltInAccountAndCredentialSpecified = Both BuiltInAccount and Credential cannot be specified. Please remove one for service {0}.
+    CredentialParametersAreMutallyExclusive = BuiltInAccount, Credential and GroupManagedServiceAccount are mutually exclusive. Please specify only one of these parameters for service {0}.
     ServiceAlreadyAbsent = Service {0} is already absent. No change required.
     ServiceDoesNotExistPathMissingError = The service '{0}' does not exist, but Path was not specified. Please specify the path to the executable the service should run to create a new service.
     CreatingService = Creating new service {0}...
@@ -21,6 +21,7 @@ ConvertFrom-StringData @'
     ServiceStartupTypeDoesNotMatch = The start mode of service {0} does not match the expected start mode.
     ServicePropertyDoesNotMatch = The service property {0} of service {1} does not match the expected value. The expected value is {2}. The actual value is {3}.
     ServiceCredentialDoesNotMatch = The start name of service {0} does not match the expected username from the given credential. The expected value is {1}. The actual value is {2}.
+    GroupManagedServiceCredentialDoesNotMatch = The start name of service {0} does not match the expected username from the given Group Managed Service Account. The expected value is {1}. The actual value is {2}.
     ServiceDeletionSucceeded = The service {0} has been successfully deleted.
     ServiceDeletionFailed = Failed to delete service {0}.
     WaitingForServiceDeletion = Waiting for service {0} to be deleted.
@@ -35,4 +36,5 @@ ConvertFrom-StringData @'
     CannotCreateAccountAccessErrorMessage = Failed to create policy for user.
     CannotGetAccountAccessErrorMessage = Failed to get user policy rights.
     CannotSetAccountAccessErrorMessage = Failed to set user policy rights.
+    CorruptDependency = Service '{0}' has a corrupt dependency. For more information, inspect the registry value at HKLM:\\SYSTEM\\CurrentControlSet\\Services\\{0}\\DependOnService.
 '@

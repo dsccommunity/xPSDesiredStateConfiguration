@@ -65,24 +65,24 @@ Test-Path = test that the path {0} exists
 #>
 function Get-TestName
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Command,
 
-        [Boolean]
+        [System.Boolean]
         $IsCalled = $true,
 
-        [String]
+        [System.String]
         $Custom = ''
     )
 
     $testName = ''
 
-    if (-not [String]::IsNullOrEmpty($Custom))
+    if (-not [System.String]::IsNullOrEmpty($Custom))
     {
         $testName = ($testStrings.$Command -f $Custom)
     }
@@ -115,7 +115,7 @@ function Invoke-ExpectedMocksAreCalledTest
     [CmdletBinding()]
     param
     (
-        [Hashtable[]]
+        [System.Collections.Hashtable[]]
         $MocksCalled
     )
 
@@ -176,36 +176,36 @@ function Invoke-GenericUnitTest {
     param
     (
         [Parameter(Mandatory = $true)]
-        [ScriptBlock]
+        [System.Management.Automation.ScriptBlock]
         $Function,
 
         [Parameter(Mandatory = $true)]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $FunctionParameters,
 
-        [Hashtable[]]
+        [System.Collections.Hashtable[]]
         $MocksCalled,
 
-        [Boolean]
+        [System.Boolean]
         $ShouldThrow = $false,
 
-        [String]
+        [System.String]
         $ErrorMessage = '',
 
-        [String]
+        [System.String]
         $ErrorTestName = ''
     )
 
     if ($ShouldThrow)
     {
         It "Should throw an error for $ErrorTestName" {
-            { $null = $($Function.Invoke($FunctionParameters)) } | Should Throw $ErrorMessage
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should -Throw -ExpectedMessage $ErrorMessage
         }
     }
     else
     {
         It 'Should not throw' {
-            { $null = $($Function.Invoke($FunctionParameters)) } | Should Not Throw
+            { $null = $($Function.Invoke($FunctionParameters)) } | Should -Not -Throw
         }
     }
 
@@ -239,19 +239,19 @@ function Invoke-GetTargetResourceUnitTest
     param
     (
         [Parameter(Mandatory = $true)]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $GetTargetResourceParameters,
 
-        [Hashtable[]]
+        [System.Collections.Hashtable[]]
         $MocksCalled,
 
         [Parameter(Mandatory = $true)]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $ExpectedReturnValue
     )
 
     It 'Should not throw' {
-        { $null = Get-TargetResource @GetTargetResourceParameters } | Should Not Throw
+        { $null = Get-TargetResource @GetTargetResourceParameters } | Should -Not -Throw
     }
 
     Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
@@ -259,17 +259,17 @@ function Invoke-GetTargetResourceUnitTest
     $getTargetResourceResult = Get-TargetResource @GetTargetResourceParameters
 
     It 'Should return a Hashtable' {
-        $getTargetResourceResult -is [Hashtable] | Should Be $true
+        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
     }
 
     It "Should return a Hashtable with $($ExpectedReturnValue.Keys.Count) properties" {
-        $getTargetResourceResult.Keys.Count | Should Be $ExpectedReturnValue.Keys.Count
+        $getTargetResourceResult.Keys.Count | Should -Be $ExpectedReturnValue.Keys.Count
     }
 
     foreach ($key in $ExpectedReturnValue.Keys)
     {
         It "Should return a Hashtable with the $key property as $($ExpectedReturnValue.$key)" {
-           $getTargetResourceResult.$key | Should Be $ExpectedReturnValue.$key
+           $getTargetResourceResult.$key | Should -Be $ExpectedReturnValue.$key
         }
     }
 }
@@ -307,32 +307,32 @@ function Invoke-SetTargetResourceUnitTest {
     param
     (
         [Parameter(Mandatory = $true)]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $SetTargetResourceParameters,
 
-        [Hashtable[]]
+        [System.Collections.Hashtable[]]
         $MocksCalled,
 
-        [Boolean]
+        [System.Boolean]
         $ShouldThrow = $false,
 
-        [String]
+        [System.String]
         $ErrorMessage = '',
 
-        [String]
+        [System.String]
         $ErrorTestName = ''
     )
 
     if ($ShouldThrow)
     {
         It "Should throw an error for $ErrorTestName" {
-            { $null = Set-TargetResource @SetTargetResourceParameters } | Should Throw $ErrorMessage
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should -Throw -ExpectedMessage $ErrorMessage
         }
     }
     else
     {
         It 'Should not throw' {
-            { $null = Set-TargetResource @SetTargetResourceParameters } | Should Not Throw
+            { $null = Set-TargetResource @SetTargetResourceParameters } | Should -Not -Throw
         }
     }
 
@@ -366,19 +366,19 @@ function Invoke-TestTargetResourceUnitTest
     param
     (
         [Parameter(Mandatory = $true)]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $TestTargetResourceParameters,
 
-        [Hashtable[]]
+        [System.Collections.Hashtable[]]
         $MocksCalled,
 
         [Parameter(Mandatory = $true)]
-        [Boolean]
+        [System.Boolean]
         $ExpectedReturnValue
     )
 
     It 'Should not throw' {
-        { $null = Test-TargetResource @TestTargetResourceParameters } | Should Not Throw
+        { $null = Test-TargetResource @TestTargetResourceParameters } | Should -Not -Throw
     }
 
     Invoke-ExpectedMocksAreCalledTest -MocksCalled $MocksCalled
@@ -386,7 +386,7 @@ function Invoke-TestTargetResourceUnitTest
     $testTargetResourceResult = Test-TargetResource @TestTargetResourceParameters
 
     It "Should return $ExpectedReturnValue" {
-        $testTargetResourceResult | Should Be $ExpectedReturnValue
+        $testTargetResourceResult | Should -Be $ExpectedReturnValue
     }
 }
 
@@ -410,16 +410,16 @@ function Test-GetTargetResourceResult
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $GetTargetResourceResult,
 
-        [String[]]
+        [System.String[]]
         $GetTargetResourceResultProperties
     )
 
     foreach ($property in $GetTargetResourceResultProperties)
     {
-        $GetTargetResourceResult[$property] | Should Not Be $null
+        $GetTargetResourceResult[$property] | Should -Not -Be $null
     }
 }
 
@@ -432,13 +432,13 @@ function Test-GetTargetResourceResult
 #>
 function Test-IsLocalMachine
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Scope
     )
 
@@ -501,23 +501,23 @@ function Test-IsLocalMachine
 #>
 function Wait-ScriptBlockReturnTrue
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [ScriptBlock]
+        [System.Management.Automation.ScriptBlock]
         $ScriptBlock,
 
-        [Int]
+        [System.Int32]
         $TimeoutSeconds = 5
     )
 
-    $startTime = [DateTime]::Now
+    $startTime = [System.DateTime]::Now
 
     $invokeScriptBlockResult = $false
-    while (-not $invokeScriptBlockResult -and (([DateTime]::Now - $startTime).TotalSeconds -lt $TimeoutSeconds))
+    while (-not $invokeScriptBlockResult -and (([System.DateTime]::Now - $startTime).TotalSeconds -lt $TimeoutSeconds))
     {
         $invokeScriptBlockResult = $ScriptBlock.Invoke()
         Start-Sleep -Seconds 1
@@ -535,12 +535,12 @@ function Wait-ScriptBlockReturnTrue
 #>
 function Test-IsFileLocked
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Path
     )
 
@@ -551,7 +551,7 @@ function Test-IsFileLocked
 
     try
     {
-        $content = Get-Content -Path $Path
+        Get-Content -Path $Path | Out-Null
         return $false
     }
     catch
@@ -578,15 +578,15 @@ function Test-IsFileLocked
 #>
 function Test-SetTargetResourceWithWhatIf
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $Parameters,
 
-        [String[]]
+        [System.String[]]
         $ExpectedOutput
     )
 
@@ -610,7 +610,7 @@ function Test-SetTargetResourceWithWhatIf
         Wait-ScriptBlockReturnTrue -ScriptBlock {-not (Test-IsFileLocked -Path $transcriptPath)}
 
         $transcriptContent = Get-Content -Path $transcriptPath -Raw
-        $transcriptContent | Should Not Be $null
+        $transcriptContent | Should -Not -Be $null
 
         $regexString = '\*+[^\*]*\*+'
 
@@ -628,13 +628,13 @@ function Test-SetTargetResourceWithWhatIf
 
         if ($null -eq $ExpectedOutput -or $ExpectedOutput.Count -eq 0)
         {
-            [String]::IsNullOrEmpty($transcriptContent) | Should Be $true
+            [System.String]::IsNullOrEmpty($transcriptContent) | Should -Be $true
         }
         else
         {
             foreach ($expectedOutputPiece in $ExpectedOutput)
             {
-                $transcriptContent.Contains($expectedOutputPiece) | Should Be $true
+                $transcriptContent.Contains($expectedOutputPiece) | Should -Be $true
             }
         }
     }
@@ -674,13 +674,13 @@ function Get-AppVeyorAdministratorCredential
 
         while ($password.Length -lt $passwordLength)
         {
-            $password = $password + [Char]$randomGenerator.Next(45, 126)
+            $password = $password + [System.Char] $randomGenerator.Next(45, 126)
         }
 
         # Change password
         $appVeyorAdministratorUsername = 'appveyor'
 
-        $appVeyorAdministratorUser = [ADSI]("WinNT://$($env:computerName)/$appVeyorAdministratorUsername")
+        $appVeyorAdministratorUser = [System.DirectoryServices.DirectoryEntry] ("WinNT://$($env:computerName)/$appVeyorAdministratorUsername")
 
         $null = $appVeyorAdministratorUser.SetPassword($password)
         [Microsoft.Win32.Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon', 'DefaultPassword', $password)
@@ -708,23 +708,23 @@ function Get-AppVeyorAdministratorCredential
 #>
 function Enter-DscResourceTestEnvironment
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $DscResourceModuleName,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $DscResourceName,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Unit', 'Integration')]
-        [String]
+        [System.String]
         $TestType
     )
 
@@ -776,7 +776,7 @@ function Exit-DscResourceTestEnvironment
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $TestEnvironment
     )
 
@@ -787,6 +787,90 @@ function Exit-DscResourceTestEnvironment
     Import-Module -Name $testHelperFilePath
 
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
+}
+
+<#
+    .SYNOPSIS
+        Returns $true if the the environment variable APPVEYOR is set to $true,
+        and the environment variable CONFIGURATION is set to the value passed
+        in the parameter Type.
+
+    .PARAMETER Name
+        Name of the test script that is called. Defaults to the name of the
+        calling script.
+
+    .PARAMETER Type
+        Type of tests in the test file. Can be set to Unit or Integration.
+#>
+function Test-SkipContinuousIntegrationTask
+{
+    [OutputType([System.Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Name = $MyInvocation.PSCommandPath.Split('\')[-1],
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Unit', 'Integration')]
+        [System.String]
+        $Type
+    )
+
+    $result = $false
+
+    if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne $Type)
+    {
+        Write-Verbose -Message ('{1} tests in {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
+        $result = $true
+    }
+
+    return $result
+}
+
+<#
+    .SYNOPSIS
+        Verifies that the specified Windows Feature exists and is installed
+        on the local machine.
+
+    .PARAMETER Name
+        The name of the Windows Feature to verify installation of.
+#>
+function Install-WindowsFeatureAndVerify
+{
+    [OutputType([System.Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Name
+    )
+
+    $featureInstalled = $true
+
+    $targetFeature = Get-WindowsFeature -Name $Name -ErrorAction SilentlyContinue
+
+    if ($null -eq $targetFeature)
+    {
+        Write-Warning -Message "Unable to find Windows Feature '$Name'."
+        $featureInstalled = $false
+    }
+    elseif (!$targetFeature.Installed)
+    {
+        $installResult = Install-WindowsFeature -Name $Name
+
+        if (!$installResult.Success)
+        {
+            Write-Error -Message "Failed to install Windows Feature '$Name'."
+            $featureInstalled = $false
+        }
+    }
+
+    return $featureInstalled
 }
 
 Export-ModuleMember -Function @(
@@ -801,5 +885,7 @@ Export-ModuleMember -Function @(
     'Invoke-SetTargetResourceUnitTest', `
     'Invoke-TestTargetResourceUnitTest', `
     'Invoke-ExpectedMocksAreCalledTest', `
-    'Invoke-GenericUnitTest'
+    'Invoke-GenericUnitTest',
+    'Test-SkipContinuousIntegrationTask',
+    'Install-WindowsFeatureAndVerify'
 )

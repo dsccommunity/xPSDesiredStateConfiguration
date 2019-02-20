@@ -6,6 +6,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xRegistryResource' `
@@ -18,7 +23,7 @@ try
 
         $script:validRegistryDriveRoots = @( 'HKEY_CLASSES_ROOT', 'HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE', 'HKEY_USERS', 'HKEY_CURRENT_CONFIG' )
         $script:validRegistryDriveNames = @( 'HKCR', 'HKCU', 'HKLM', 'HKUS', 'HKCC' )
-        
+
         # This registry key is used ONLY for its type (Microsoft.Win32.RegistryKey). It is not actually accessed in any way during these tests.
         $script:testRegistryKey = [Microsoft.Win32.Registry]::CurrentConfig
 
@@ -37,9 +42,9 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                 }
-                
+
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -70,34 +75,34 @@ try
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return 5 hashtable properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 5
+                    $getTargetResourceResult.Keys.Count | Should -Be 5
                 }
 
                 It 'Should return the Key property as the given registry key path' {
-                    $getTargetResourceResult.Key | Should Be $getTargetResourceParameters.Key
+                    $getTargetResourceResult.Key | Should -Be $getTargetResourceParameters.Key
                 }
 
                 It 'Should return the Ensure property as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should return the ValueName property as null' {
-                    $getTargetResourceResult.ValueName | Should Be $null
+                    $getTargetResourceResult.ValueName | Should -Be $null
                 }
 
                 It 'Should return the ValueType property as null' {
-                    $getTargetResourceResult.ValueType | Should Be $null
+                    $getTargetResourceResult.ValueType | Should -Be $null
                 }
 
                 It 'Should return the ValueData property as null' {
-                    $getTargetResourceResult.ValueData | Should Be $null
+                    $getTargetResourceResult.ValueData | Should -Be $null
                 }
             }
-            
+
             Mock -CommandName 'Get-RegistryKey' -MockWith { return $script:testRegistryKey }
 
             Context 'Specified registry key exists, registry key value name specified as an empty string, and registry key value data and type not specified' {
@@ -105,9 +110,9 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                 }
-                
+
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -138,31 +143,31 @@ try
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return 5 hashtable properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 5
+                    $getTargetResourceResult.Keys.Count | Should -Be 5
                 }
 
                 It 'Should return the Key property as the given registry key path' {
-                    $getTargetResourceResult.Key | Should Be $getTargetResourceParameters.Key
+                    $getTargetResourceResult.Key | Should -Be $getTargetResourceParameters.Key
                 }
 
                 It 'Should return the Ensure property as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the ValueName property as null' {
-                    $getTargetResourceResult.ValueName | Should Be $null
+                    $getTargetResourceResult.ValueName | Should -Be $null
                 }
 
                 It 'Should return the ValueType property as null' {
-                    $getTargetResourceResult.ValueType | Should Be $null
+                    $getTargetResourceResult.ValueType | Should -Be $null
                 }
 
                 It 'Should return the ValueData property as null' {
-                    $getTargetResourceResult.ValueData | Should Be $null
+                    $getTargetResourceResult.ValueData | Should -Be $null
                 }
             }
 
@@ -171,9 +176,9 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = 'TestValueName'
                 }
-                
+
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -216,31 +221,31 @@ try
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return 5 hashtable properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 5
+                    $getTargetResourceResult.Keys.Count | Should -Be 5
                 }
 
                 It 'Should return the Key property as the given registry key path' {
-                    $getTargetResourceResult.Key | Should Be $getTargetResourceParameters.Key
+                    $getTargetResourceResult.Key | Should -Be $getTargetResourceParameters.Key
                 }
 
                 It 'Should return the Ensure property as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should return the ValueName property as the specified value name' {
-                    $getTargetResourceResult.ValueName | Should Be $getTargetResourceParameters.ValueName
+                    $getTargetResourceResult.ValueName | Should -Be $getTargetResourceParameters.ValueName
                 }
 
                 It 'Should return the ValueType property as null' {
-                    $getTargetResourceResult.ValueType | Should Be $null
+                    $getTargetResourceResult.ValueType | Should -Be $null
                 }
 
                 It 'Should return the ValueData property as null' {
-                    $getTargetResourceResult.ValueData | Should Be $null
+                    $getTargetResourceResult.ValueData | Should -Be $null
                 }
             }
 
@@ -254,9 +259,9 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = 'TestValueName'
                 }
-                
+
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -312,31 +317,31 @@ try
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return 5 hashtable properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 5
+                    $getTargetResourceResult.Keys.Count | Should -Be 5
                 }
 
                 It 'Should return the Key property as the given registry key path' {
-                    $getTargetResourceResult.Key | Should Be $getTargetResourceParameters.Key
+                    $getTargetResourceResult.Key | Should -Be $getTargetResourceParameters.Key
                 }
 
                 It 'Should return the Ensure property as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the ValueName property as specified value display name' {
-                    $getTargetResourceResult.ValueName | Should Be $getTargetResourceParameters.ValueName
+                    $getTargetResourceResult.ValueName | Should -Be $getTargetResourceParameters.ValueName
                 }
 
                 It 'Should return the ValueType property as the retrieved value type' {
-                    $getTargetResourceResult.ValueType | Should Be $testRegistryValueType
+                    $getTargetResourceResult.ValueType | Should -Be $testRegistryValueType
                 }
 
                 It 'Should return the ValueData property as the retrieved value' {
-                    $getTargetResourceResult.ValueData | Should Be $testRegistryKeyValue
+                    $getTargetResourceResult.ValueData | Should -Be $testRegistryKeyValue
                 }
             }
 
@@ -347,9 +352,9 @@ try
                     ValueType = 'String'
                     ValueData = 'TestValueData'
                 }
-                
+
                 It 'Should not throw' {
-                    { $null = Get-TargetResource @getTargetResourceParameters } | Should Not Throw
+                    { $null = Get-TargetResource @getTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -405,31 +410,31 @@ try
                 $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return 5 hashtable properties' {
-                    $getTargetResourceResult.Keys.Count | Should Be 5
+                    $getTargetResourceResult.Keys.Count | Should -Be 5
                 }
 
                 It 'Should return the Key property as the given registry key path' {
-                    $getTargetResourceResult.Key | Should Be $getTargetResourceParameters.Key
+                    $getTargetResourceResult.Key | Should -Be $getTargetResourceParameters.Key
                 }
 
                 It 'Should return the Ensure property as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the ValueName property as specified value display name' {
-                    $getTargetResourceResult.ValueName | Should Be $getTargetResourceParameters.ValueName
+                    $getTargetResourceResult.ValueName | Should -Be $getTargetResourceParameters.ValueName
                 }
 
                 It 'Should return the ValueType property as the retrieved value type' {
-                    $getTargetResourceResult.ValueType | Should Be $testRegistryValueType
+                    $getTargetResourceResult.ValueType | Should -Be $testRegistryValueType
                 }
 
                 It 'Should return the ValueData property as the retrieved value' {
-                    $getTargetResourceResult.ValueData | Should Be $testRegistryKeyValue
+                    $getTargetResourceResult.ValueData | Should -Be $testRegistryKeyValue
                 }
             }
         }
@@ -447,11 +452,11 @@ try
             Mock -CommandName 'Get-RegistryKeyName' -MockWith { return $setTargetResourceParameters.Key }
             Mock -CommandName 'Set-RegistryKeyValue' -MockWith { }
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
-            Mock -CommandName 'Remove-ItemProperty' -MockWith { }
+            Mock -CommandName 'Remove-RegistryKey' -MockWith { }
+            Mock -CommandName 'Remove-RegistryKeyValue' -MockWith { }
             Mock -CommandName 'Remove-DefaultRegistryKeyValue' -MockWith { }
             Mock -CommandName 'Get-RegistryKeySubKeyCount' -MockWith { return 0 }
-            Mock -CommandName 'Remove-Item' -MockWith { }
-            
+
 
             Context 'Registry key does not exist and Ensure specified as Absent' {
                 $setTargetResourceParameters = @{
@@ -461,7 +466,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -518,7 +523,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -530,11 +535,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -546,7 +551,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -608,7 +613,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -620,11 +625,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -638,7 +643,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -695,7 +700,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -712,19 +717,16 @@ try
                 }
 
                 It 'Should remove the registry key' {
-                    $removeItemParameterFilter = {
-                        $pathParameterCorrect = $Path -eq $setTargetResourceParameters.Key
-                        $recurseParameterCorrect = $Recurse -eq $true
-                        $forceParameterCorrect = $Force -eq $true
-
-                        return $pathParameterCorrect -and $recurseParameterCorrect -and $forceParameterCorrect
+                    $removeRegistryKeyParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        return $registryKeyParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -ParameterFilter $removeRegistryKeyParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -740,7 +742,7 @@ try
                 It 'Should throw error for removal of registry key with subkeys without specifying Force as True' {
                     $errorMessage = $script:localizedData.CannotRemoveExistingRegistryKeyWithSubKeysWithoutForce -f $setTargetResourceParameters.Key
 
-                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $errorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -753,7 +755,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -810,7 +812,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -827,19 +829,16 @@ try
                 }
 
                 It 'Should remove the registry key' {
-                    $removeItemParameterFilter = {
-                        $pathParameterCorrect = $Path -eq $setTargetResourceParameters.Key
-                        $recurseParameterCorrect = $Recurse -eq $true
-                        $forceParameterCorrect = $Force -eq $true
-
-                        return $pathParameterCorrect -and $recurseParameterCorrect -and $forceParameterCorrect
+                    $removeRegistryKeyParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        return $registryKeyParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Remove-Item' -ParameterFilter $removeItemParameterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -ParameterFilter $removeRegistryKeyParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -851,7 +850,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -918,7 +917,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -930,11 +929,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -946,7 +945,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1003,7 +1002,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1015,14 +1014,14 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
-            
+
             Context 'Registry key exists, Ensure specified as Present, specified registry value does not exist, and registry value type and data not specified' {
                 $setTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
@@ -1031,7 +1030,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1067,7 +1066,7 @@ try
 
                 It 'Should convert the specified registry key value to a string' {
                     $convertToStringParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:defaultValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:defaultValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1117,7 +1116,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1129,11 +1128,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1142,12 +1141,12 @@ try
                     Key = 'TestRegistryKey'
                     ValueName = ''
                     ValueType = 'Binary'
-                    ValueData = @( [Byte]::MinValue.ToString(), [Byte]::MaxValue.ToString() )
+                    ValueData = @( [System.Byte]::MinValue.ToString(), [System.Byte]::MaxValue.ToString() )
                     Ensure = 'Present'
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1187,7 +1186,7 @@ try
 
                 It 'Should convert the specified registry key value to binary data' {
                     $convertToBinaryParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1233,7 +1232,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1245,11 +1244,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1265,7 +1264,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1317,7 +1316,7 @@ try
 
                 It 'Should convert the specified registry key value to a multi-string' {
                     $convertToMultiStringParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         return $registryKeyValueParameterCorrect
                     }
 
@@ -1350,7 +1349,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1362,11 +1361,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1384,7 +1383,7 @@ try
                 It 'Should throw error for trying to overwrite existing registry key value without specifying Force as True' {
                     $errorMessage = $script:localizedData.CannotOverwriteExistingRegistryKeyValueWithoutForce -f $setTargetResourceParameters.Key, $setTargetResourceParameters.ValueName
 
-                    { Set-TargetResource @setTargetResourceParameters } | Should Throw $errorMessage
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -1400,7 +1399,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1444,9 +1443,9 @@ try
 
                 It 'Should convert the specified registry key value to a dword' {
                     $convertToDwordParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         $hexParameterCorrect = $Hex -eq $setTargetResourceParameters.Hex
-                        
+
                         return $registryKeyValueParameterCorrect -and $hexParameterCorrect
                     }
 
@@ -1496,7 +1495,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1508,11 +1507,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1528,7 +1527,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1576,9 +1575,9 @@ try
 
                 It 'Should convert the specified registry key value to a qword' {
                     $convertToQwordParameterFilter = {
-                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue) 
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
                         $hexParameterCorrect = $Hex -eq $setTargetResourceParameters.Hex
-                        
+
                         return $registryKeyValueParameterCorrect -and $hexParameterCorrect
                     }
 
@@ -1624,7 +1623,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1636,11 +1635,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1655,7 +1654,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1722,15 +1721,14 @@ try
                 }
 
                 It 'Should remove the registry key value' {
-                    $removeItemPropertyParameterFilter = {
-                        $pathParameterCorrect = $Path -eq $setTargetResourceParameters.Key
-                        $nameParameterCorrect = $Name -eq $setTargetResourceParameters.ValueName
-                        $forceParameterCorrect = $Force -eq $true
+                    $removeRegistryKeyValueParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
 
-                        return $pathParameterCorrect -and $nameParameterCorrect -and $forceParameterCorrect
+                        return $registryKeyParameterCorrect -and $registryKeyValueNameParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -ParameterFilter $removeItemPropertyParameterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -ParameterFilter $removeRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the default registry key value' {
@@ -1742,11 +1740,11 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
 
@@ -1761,7 +1759,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { Set-TargetResource @setTargetResourceParameters } | Should Not Throw
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key' {
@@ -1828,7 +1826,7 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key value' {
-                    Assert-MockCalled -CommandName 'Remove-ItemProperty' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should remove the default registry key value' {
@@ -1845,15 +1843,15 @@ try
                 }
 
                 It 'Should not attempt to remove the registry key' {
-                    Assert-MockCalled -CommandName 'Remove-Item' -Times 0 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not return' {
-                    Set-TargetResource @setTargetResourceParameters | Should Be $null
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
                 }
             }
         }
-        
+
         Describe 'xRegistry\Test-TargetResource' {
             Mock -CommandName 'Get-RegistryKeyValueDisplayName' -MockWith { return $RegistryKeyValueName }
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
@@ -1877,7 +1875,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -1902,11 +1900,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return True' {
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
             }
 
@@ -1918,7 +1916,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -1943,16 +1941,16 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
             Mock -CommandName 'Get-TargetResource' -MockWith {
-                if ([String]::IsNullOrEmpty($ValueName))
+                if ([System.String]::IsNullOrEmpty($ValueName))
                 {
                     return @{
                         Ensure = 'Present'
@@ -1974,7 +1972,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry key value display name' {
@@ -2004,11 +2002,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return True' {
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
             }
 
@@ -2020,7 +2018,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2050,11 +2048,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -2072,7 +2070,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2097,11 +2095,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -2113,7 +2111,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2138,11 +2136,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return True' {
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
             }
 
@@ -2154,7 +2152,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2184,11 +2182,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -2201,7 +2199,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2231,11 +2229,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -2248,7 +2246,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2278,11 +2276,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -2294,7 +2292,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key and value name' {
@@ -2324,11 +2322,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return True' {
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
             }
 
@@ -2348,7 +2346,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key, value name, and value type' {
@@ -2379,11 +2377,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return True' {
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
             }
 
@@ -2404,7 +2402,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key, value name, and value data' {
@@ -2443,11 +2441,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return True' {
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
             }
 
@@ -2467,7 +2465,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key, value name, and value type' {
@@ -2498,11 +2496,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
 
@@ -2527,7 +2525,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Test-TargetResource @testTargetResourceParameters } | Should Not Throw
+                    { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry resource with the specified reigstry key, value name, and value data' {
@@ -2566,11 +2564,11 @@ try
                 $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                 It 'Should return a boolean' {
-                    $testTargetResourceResult -is [Boolean] | Should Be $true
+                    $testTargetResourceResult -is [System.Boolean] | Should -Be $true
                 }
 
                 It 'Should return False' {
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
         }
@@ -2582,13 +2580,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-PathRoot @getPathRootParameters } | Should Not Throw
+                    { $null = Get-PathRoot @getPathRootParameters } | Should -Not -Throw
                 }
 
                 $getPathRootResult = Get-PathRoot @getPathRootParameters
 
                 It 'Should return given path' {
-                    $getPathRootResult | Should Be $getPathRootParameters.Path
+                    $getPathRootResult | Should -Be $getPathRootParameters.Path
                 }
             }
 
@@ -2600,13 +2598,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-PathRoot @getPathRootParameters } | Should Not Throw
+                    { $null = Get-PathRoot @getPathRootParameters } | Should -Not -Throw
                 }
 
                 $getPathRootResult = Get-PathRoot @getPathRootParameters
 
                 It 'Should return the root of the given path' {
-                    $getPathRootResult | Should Be $pathRoot
+                    $getPathRootResult | Should -Be $pathRoot
                 }
             }
 
@@ -2620,13 +2618,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-PathRoot @getPathRootParameters } | Should Not Throw
+                    { $null = Get-PathRoot @getPathRootParameters } | Should -Not -Throw
                 }
 
                 $getPathRootResult = Get-PathRoot @getPathRootParameters
 
                 It 'Should return the root of the given path' {
-                    $getPathRootResult | Should Be $pathRoot
+                    $getPathRootResult | Should -Be $pathRoot
                 }
             }
         }
@@ -2640,7 +2638,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters } | Should Not Throw
+                        { $null = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters } | Should -Not -Throw
                     }
 
                     $expcetedRegistryDriveName = switch ($validRegistryDriveRoot)
@@ -2655,7 +2653,7 @@ try
                     $convertToRegistryDriveNameResult = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters
 
                     It "Should return correct registry drive name $expcetedRegistryDriveName" {
-                        $convertToRegistryDriveNameResult | Should Be $expcetedRegistryDriveName
+                        $convertToRegistryDriveNameResult | Should -Be $expcetedRegistryDriveName
                     }
                 }
             }
@@ -2666,13 +2664,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters } | Should Not Throw
+                    { $null = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters } | Should -Not -Throw
                 }
 
                 $convertToRegistryDriveNameResult = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters
 
                 It 'Should return null' {
-                    $convertToRegistryDriveNameResult | Should Be $null
+                    $convertToRegistryDriveNameResult | Should -Be $null
                 }
             }
         }
@@ -2691,7 +2689,7 @@ try
                 It 'Should throw an error for invalid registry drive' {
                     $errorMessage = $script:localizedData.InvalidRegistryDrive -f $invalidRegistryDriveRoot
 
-                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should Throw $errorMessage
+                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2705,7 +2703,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should Not Throw
+                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the path root' {
@@ -2729,7 +2727,7 @@ try
                 $getDriveNameResult = Get-RegistryDriveName @getRegistryDriveNameParameters
 
                 It 'Should return the retrieved registry drive name' {
-                    $getDriveNameResult | Should Be $script:validRegistryDriveNames[0]
+                    $getDriveNameResult | Should -Be $script:validRegistryDriveNames[0]
                 }
             }
 
@@ -2744,7 +2742,7 @@ try
                 It 'Should throw an error for invalid registry drive' {
                     $errorMessage = $script:localizedData.InvalidRegistryDrive -f $invalidRegistryDriveName
 
-                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should Throw $errorMessage
+                    { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2757,7 +2755,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should Not Throw
+                        { $null = Get-RegistryDriveName @getRegistryDriveNameParameters } | Should -Not -Throw
                     }
 
                     It 'Should retrieve the path root' {
@@ -2776,7 +2774,7 @@ try
                     $getDriveNameResult = Get-RegistryDriveName @getRegistryDriveNameParameters
 
                     It 'Should return the retrieved registry drive name' {
-                        $getDriveNameResult | Should Be $validRegistryDriveName
+                        $getDriveNameResult | Should -Be $validRegistryDriveName
                     }
                 }
             }
@@ -2790,11 +2788,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2804,11 +2802,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2818,11 +2816,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2832,11 +2830,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'HKCR'
                 }
-                
+
                 $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
 
                 It 'Should not throw' {
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Not Throw
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry drive with specified name' {
@@ -2854,7 +2852,7 @@ try
                         $rootParameterCorrect = $Root -eq $expectedRegistryDriveRoot
                         $psProviderParameterCorrect = $PSProvider -eq 'Registry'
                         $scopeParameterCorrect = $Scope -eq 'Script'
-                        
+
                         return $nameParameterCorrect -and $rootParameterCorrect -and $psProviderParameterCorrect -and $scopeParameterCorrect
                     }
 
@@ -2862,7 +2860,7 @@ try
                 }
 
                 It 'Should not return anything' {
-                    Mount-RegistryDrive @mountRegistryDriveParameters | Should Be $null
+                    Mount-RegistryDrive @mountRegistryDriveParameters | Should -Be $null
                 }
             }
 
@@ -2872,11 +2870,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2886,11 +2884,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'TestRegistryDriveName'
                 }
-                
+
                 It 'Should throw error for unmountable registry drive' {
                     $errorMessage = $script:localizedData.RegistryDriveCouldNotBeMounted -f $mountRegistryDriveParameters.RegistryDriveName
 
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Throw $errorMessage
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -2900,11 +2898,11 @@ try
                 $mountRegistryDriveParameters = @{
                     RegistryDriveName = 'HKCR'
                 }
-                
+
                 $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
 
                 It 'Should not throw' {
-                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should Not Throw
+                    { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry drive with specified name' {
@@ -2921,7 +2919,7 @@ try
                 }
 
                 It 'Should not return anything' {
-                    Mount-RegistryDrive @mountRegistryDriveParameters | Should Be $null
+                    Mount-RegistryDrive @mountRegistryDriveParameters | Should -Be $null
                 }
             }
         }
@@ -2942,7 +2940,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryKey @getRegistryKeyParameters } | Should Not Throw
+                    { $null = Get-RegistryKey @getRegistryKeyParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry drive name of the specified registry key path' {
@@ -2987,7 +2985,7 @@ try
                 $getRegistryKeyResult = Get-RegistryKey @getRegistryKeyParameters
 
                 It 'Should return the retrieved registry key' {
-                    $getRegistryKeyResult | Should Be $expectedGetRegistryKeyResult
+                    $getRegistryKeyResult | Should -Be $expectedGetRegistryKeyResult
                 }
             }
 
@@ -2999,7 +2997,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryKey @getRegistryKeyParameters } | Should Not Throw
+                    { $null = Get-RegistryKey @getRegistryKeyParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry drive name of the specified registry key path' {
@@ -3044,7 +3042,7 @@ try
                 $getRegistryKeyResult = Get-RegistryKey @getRegistryKeyParameters
 
                 It 'Should return the retrieved registry key' {
-                    $getRegistryKeyResult | Should Be $expectedGetRegistryKeyResult
+                    $getRegistryKeyResult | Should -Be $expectedGetRegistryKeyResult
                 }
             }
 
@@ -3055,7 +3053,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryKey @getRegistryKeyParameters } | Should Not Throw
+                    { $null = Get-RegistryKey @getRegistryKeyParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the registry drive name of the specified registry key path' {
@@ -3100,7 +3098,7 @@ try
                 $getRegistryKeyResult = Get-RegistryKey @getRegistryKeyParameters
 
                 It 'Should return the retrieved registry key' {
-                    $getRegistryKeyResult | Should Be $expectedGetRegistryKeyResult
+                    $getRegistryKeyResult | Should -Be $expectedGetRegistryKeyResult
                 }
             }
         }
@@ -3112,29 +3110,29 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters } | Should Not Throw
+                    { $null = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters } | Should -Not -Throw
                 }
 
                 $getRegistryKeyValueDisplayNameResult = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters
 
                 It 'Should return default registry key value name' {
-                    $getRegistryKeyValueDisplayNameResult | Should Be $localizedData.DefaultValueDisplayName
+                    $getRegistryKeyValueDisplayNameResult | Should -Be $localizedData.DefaultValueDisplayName
                 }
             }
 
             Context 'Specified registry key value name is an empty string' {
                 $getRegistryKeyValueDisplayNameParameters = @{
-                    RegistryKeyValue = [String]::Empty
+                    RegistryKeyValue = [System.String]::Empty
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters } | Should Not Throw
+                    { $null = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters } | Should -Not -Throw
                 }
 
                 $getRegistryKeyValueDisplayNameResult = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters
 
                 It 'Should return default registry key value name' {
-                    $getRegistryKeyValueDisplayNameResult | Should Be $localizedData.DefaultValueDisplayName
+                    $getRegistryKeyValueDisplayNameResult | Should -Be $localizedData.DefaultValueDisplayName
                 }
             }
 
@@ -3144,13 +3142,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters } | Should Not Throw
+                    { $null = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters } | Should -Not -Throw
                 }
 
                 $getRegistryKeyValueDisplayNameResult = Get-RegistryKeyValueDisplayName @getRegistryKeyValueDisplayNameParameters
 
                 It 'Should return given registry key value name' {
-                    $getRegistryKeyValueDisplayNameResult | Should Be $getRegistryKeyValueDisplayNameParameters.RegistryKeyValue
+                    $getRegistryKeyValueDisplayNameResult | Should -Be $getRegistryKeyValueDisplayNameParameters.RegistryKeyValue
                 }
             }
         }
@@ -3162,45 +3160,45 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters } | Should Not Throw
+                    { $null = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters } | Should -Not -Throw
                 }
 
                 $convertByteArrayToHexStringResult = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters
 
                 It 'Should return an empty string' {
-                    $convertByteArrayToHexStringResult | Should Be ([String]::Empty)
+                    $convertByteArrayToHexStringResult | Should -Be ([System.String]::Empty)
                 }
             }
 
             Context 'Specified byte array has one element' {
                 $convertByteArrayToHexStringParameters = @{
-                    ByteArray = @( [Byte]'1' )
+                    ByteArray = @( [System.Byte] '1' )
                 }
 
                 It 'Should not throw' {
-                    { $null = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters } | Should Not Throw
+                    { $null = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters } | Should -Not -Throw
                 }
 
                 $convertByteArrayToHexStringResult = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters
 
                 It 'Should return the byte array as a single hex string' {
-                    $convertByteArrayToHexStringResult | Should Be '01'
+                    $convertByteArrayToHexStringResult | Should -Be '01'
                 }
             }
 
             Context 'Specified byte array has multiple elements' {
                 $convertByteArrayToHexStringParameters = @{
-                    ByteArray = @( 0, [Byte]::MaxValue )
+                    ByteArray = @( 0, [System.Byte]::MaxValue )
                 }
 
                 It 'Should not throw' {
-                    { $null = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters } | Should Not Throw
+                    { $null = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters } | Should -Not -Throw
                 }
 
                 $convertByteArrayToHexStringResult = Convert-ByteArrayToHexString @convertByteArrayToHexStringParameters
 
                 It 'Should return the byte array as a single hex string' {
-                    $convertByteArrayToHexStringResult | Should Be '00ff'
+                    $convertByteArrayToHexStringResult | Should -Be '00ff'
                 }
             }
         }
@@ -3217,7 +3215,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should Not Throw
+                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should -Not -Throw
                     }
 
                     It 'Should not attempt to convert registry key value to a hex string' {
@@ -3227,10 +3225,10 @@ try
                     $convertToReadableStringResult = ConvertTo-ReadableString @convertToReadableStringParameters
 
                     It 'Should return an empty string' {
-                        $convertToReadableStringResult | Should Be ([String]::Empty)
+                        $convertToReadableStringResult | Should -Be ([System.String]::Empty)
                     }
                 }
-            
+
                 Context "Registry key value specified as an empty array and registry key type specified as $registryKeyValueType" {
                     $convertToReadableStringParameters = @{
                         RegistryKeyValue = @()
@@ -3238,7 +3236,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should Not Throw
+                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should -Not -Throw
                     }
 
                     if ($registryKeyValueType -eq 'Binary')
@@ -3262,7 +3260,7 @@ try
                     $convertToReadableStringResult = ConvertTo-ReadableString @convertToReadableStringParameters
 
                     It 'Should return an empty string' {
-                        $convertToReadableStringResult | Should Be ([String]::Empty)
+                        $convertToReadableStringResult | Should -Be ([System.String]::Empty)
                     }
                 }
 
@@ -3273,7 +3271,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should Not Throw
+                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should -Not -Throw
                     }
 
                     if ($registryKeyValueType -eq 'Binary')
@@ -3297,7 +3295,7 @@ try
                     $convertToReadableStringResult = ConvertTo-ReadableString @convertToReadableStringParameters
 
                     It 'Should return the specified string' {
-                        $convertToReadableStringResult | Should Be $convertToReadableStringParameters.RegistryKeyValue[0]
+                        $convertToReadableStringResult | Should -Be $convertToReadableStringParameters.RegistryKeyValue[0]
                     }
                 }
 
@@ -3308,7 +3306,7 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should Not Throw
+                        { $null = ConvertTo-ReadableString @convertToReadableStringParameters } | Should -Not -Throw
                     }
 
                     if ($registryKeyValueType -eq 'Binary')
@@ -3333,7 +3331,7 @@ try
                     $convertToReadableStringResult = ConvertTo-ReadableString @convertToReadableStringParameters
 
                     It 'Should return the specified strings inside one string' {
-                        $convertToReadableStringResult | Should Be $expectedReadProperty
+                        $convertToReadableStringResult | Should -Be $expectedReadProperty
                     }
                 }
             }
@@ -3352,7 +3350,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = New-RegistryKey @newRegistryKeyParameters } | Should Not Throw
+                    { $null = New-RegistryKey @newRegistryKeyParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the parent registry key' {
@@ -3382,7 +3380,7 @@ try
                 $newRegistryKeyResult = New-RegistryKey @newRegistryKeyParameters
 
                 It 'Should return the created subkey' {
-                    $newRegistryKeyResult | Should Be $script:testRegistryKey
+                    $newRegistryKeyResult | Should -Be $script:testRegistryKey
                 }
             }
 
@@ -3406,7 +3404,7 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = New-RegistryKey @newRegistryKeyParameters } | Should Not Throw
+                    { $null = New-RegistryKey @newRegistryKeyParameters } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the parent registry key' {
@@ -3451,7 +3449,7 @@ try
                 $newRegistryKeyResult = New-RegistryKey @newRegistryKeyParameters
 
                 It 'Should return the created subkey' {
-                    $newRegistryKeyResult | Should Be $script:testRegistryKey
+                    $newRegistryKeyResult | Should -Be $script:testRegistryKey
                 }
             }
         }
@@ -3462,7 +3460,7 @@ try
                 $expectedRegistryKeyValue = switch ($registryKeyValueType)
                 {
                     'String' { 'String1' }
-                    'Binary' { [Byte[]]@( 12, 172, 17, 17 ) }
+                    'Binary' { [System.Byte[]] @( 12, 172, 17, 17 ) }
                     'DWord' { 169 }
                     'QWord' { 92 }
                     'MultiString' { @( 'String1', 'String2' ) }
@@ -3472,7 +3470,7 @@ try
                 $mismatchingActualRegistryKeyValue = switch ($registryKeyValueType)
                 {
                     'String' { 'String2' }
-                    'Binary' { [Byte[]]@( 11, 172, 17, 1 ) }
+                    'Binary' { [System.Byte[]] @( 11, 172, 17, 1 ) }
                     'DWord' { 12 }
                     'QWord' { 64 }
                     'MultiString' { @( 'String3', 'String2' ) }
@@ -3487,13 +3485,13 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters } | Should Not Throw
+                        { $null = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters } | Should -Not -Throw
                     }
 
                     $testRegistryKeyValuesMatchResult = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters
 
                     It 'Should return true' {
-                        $testRegistryKeyValuesMatchResult | Should Be $true
+                        $testRegistryKeyValuesMatchResult | Should -Be $true
                     }
                 }
 
@@ -3505,13 +3503,13 @@ try
                     }
 
                     It 'Should not throw' {
-                        { $null = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters } | Should Not Throw
+                        { $null = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters } | Should -Not -Throw
                     }
 
                     $testRegistryKeyValuesMatchResult = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters
 
                     It 'Should return false' {
-                        $testRegistryKeyValuesMatchResult | Should Be $false
+                        $testRegistryKeyValuesMatchResult | Should -Be $false
                     }
                 }
             }
@@ -3524,13 +3522,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return null' {
-                    $convertToBinaryResult | Should Be $null
+                    $convertToBinaryResult | Should -Be $null
                 }
             }
 
@@ -3540,13 +3538,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return null' {
-                    $convertToBinaryResult | Should Be $null
+                    $convertToBinaryResult | Should -Be $null
                 }
             }
 
@@ -3556,89 +3554,89 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return null' {
-                    $convertToBinaryResult | Should Be $null
+                    $convertToBinaryResult | Should -Be $null
                 }
             }
 
             Context 'Specified registry key value is an array containing a valid single string of an odd length' {
                 $validBinaryString = '0xCAC1111'
-                $expectedByteArray = [Byte[]]@( 12, 172, 17, 17 )
+                $expectedByteArray = [System.Byte[]] @( 12, 172, 17, 17 )
 
                 $convertToBinaryParameters = @{
                     RegistryKeyValue = @( $validBinaryString )
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return the specified single string' {
-                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should Be $null
+                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should -Be $null
                 }
             }
 
             Context 'Specified registry key value is an array containing a valid single string of an even length' {
                 $validBinaryString = '0x0CAC1111'
-                $expectedByteArray = [Byte[]]@( 12, 172, 17, 17 )
+                $expectedByteArray = [System.Byte[]] @( 12, 172, 17, 17 )
 
                 $convertToBinaryParameters = @{
                     RegistryKeyValue = @( $validBinaryString )
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return the specified single string' {
-                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should Be $null
+                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should -Be $null
                 }
             }
 
             Context 'Specified registry key value is an array containing a valid single string of an even length not starting with 0x' {
                 $validBinaryString = '0CAC1111'
-                $expectedByteArray = [Byte[]]@( 12, 172, 17, 17 )
+                $expectedByteArray = [System.Byte[]] @( 12, 172, 17, 17 )
 
                 $convertToBinaryParameters = @{
                     RegistryKeyValue = @( $validBinaryString )
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return the specified single string' {
-                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should Be $null
+                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should -Be $null
                 }
             }
 
             Context 'Specified registry key value is an array containing a valid single string of 0x00' {
                 $validBinaryString = '0x00'
-                $expectedByteArray = [Byte[]]@( 0 )
+                $expectedByteArray = [System.Byte[]] @( 0 )
 
                 $convertToBinaryParameters = @{
                     RegistryKeyValue = @( $validBinaryString )
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Not Throw
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Not -Throw
                 }
 
                 $convertToBinaryResult = ConvertTo-Binary @convertToBinaryParameters
 
                 It 'Should return the specified single string' {
-                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should Be $null
+                    Compare-Object -ReferenceObject $expectedByteArray -DifferenceObject $convertToBinaryResult | Should -Be $null
                 }
             }
 
@@ -3652,7 +3650,7 @@ try
                 It 'Should not throw' {
                     $errorMessage = $script:localizedData.BinaryDataNotInHexFormat -f $invalidBinaryString
 
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3664,7 +3662,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'Binary'
 
-                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-Binary @convertToBinaryParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
@@ -3676,13 +3674,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Not Throw
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                 }
 
                 $convertToDWordResult =  ConvertTo-DWord @convertToDWordParameters
 
                 It 'Should return 0 as an Int32' {
-                    $convertToDWordResult | Should Be ([System.Int32] 0)
+                    $convertToDWordResult | Should -Be ([System.Int32] 0)
                 }
             }
 
@@ -3692,13 +3690,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Not Throw
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                 }
 
                 $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                 It 'Should return 0 as an Int32' {
-                    $convertToDWordResult | Should Be ([System.Int32] 0)
+                    $convertToDWordResult | Should -Be ([System.Int32] 0)
                 }
             }
 
@@ -3708,13 +3706,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Not Throw
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                 }
 
                 $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                 It 'Should return 0 as an Int32' {
-                    $convertToDWordResult | Should Be ([System.Int32] 0)
+                    $convertToDWordResult | Should -Be ([System.Int32] 0)
                 }
             }
 
@@ -3726,13 +3724,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Not Throw
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                 }
 
                 $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                 It 'Should return the specified double word' {
-                    $convertToDWordResult | Should Be $testDWord1
+                    $convertToDWordResult | Should -Be $testDWord1
                 }
             }
 
@@ -3746,7 +3744,7 @@ try
                 It 'Should throw an error for the invalid dword string' {
                     $errorMessage = $script:localizedData.DWordDataNotInHexFormat -f $invalidHexDWord
 
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3760,13 +3758,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Not Throw
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                 }
 
                 $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                 It 'Should return the specified double word converted from a Hex value' {
-                    $convertToDWordResult | Should Be $expectedInt32Value
+                    $convertToDWordResult | Should -Be $expectedInt32Value
                 }
             }
 
@@ -3780,13 +3778,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Not Throw
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                 }
 
                 $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                 It 'Should return the specified double word converted from a Hex value' {
-                    $convertToDWordResult | Should Be $expectedInt32Value
+                    $convertToDWordResult | Should -Be $expectedInt32Value
                 }
             }
 
@@ -3800,7 +3798,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'Dword'
 
-                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
@@ -3812,13 +3810,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should Not Throw
+                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                 }
 
                 $convertToMultiStringResult = ConvertTo-MultiString @convertToMultiStringParameters
 
                 It 'Should return null' {
-                    $convertToMultiStringResult | Should Be $null
+                    $convertToMultiStringResult | Should -Be $null
                 }
             }
 
@@ -3828,13 +3826,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should Not Throw
+                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                 }
 
                 $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
 
                 It 'Should return null' {
-                    $convertToMultiStringResult | Should Be $null
+                    $convertToMultiStringResult | Should -Be $null
                 }
             }
 
@@ -3844,13 +3842,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should Not Throw
+                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                 }
 
                 $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
 
                 It 'Should return an array containing null' {
-                    Compare-Object -ReferenceObject ([String[]]@($null)) -DifferenceObject $convertToMultiStringResult | Should Be $null
+                    Compare-Object -ReferenceObject ([System.String[]] @($null)) -DifferenceObject $convertToMultiStringResult | Should -Be $null
                 }
             }
 
@@ -3860,13 +3858,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should Not Throw
+                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                 }
 
                 $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
 
                 It 'Should return an array containing the specified single string' {
-                    Compare-Object -ReferenceObject $convertToMultiStringParameters.RegistryKeyValue -DifferenceObject $convertToMultiStringResult | Should Be $null
+                    Compare-Object -ReferenceObject $convertToMultiStringParameters.RegistryKeyValue -DifferenceObject $convertToMultiStringResult | Should -Be $null
                 }
             }
 
@@ -3876,13 +3874,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should Not Throw
+                    { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                 }
 
                 $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
 
                 It 'Should return an array containing the specified single string' {
-                    Compare-Object -ReferenceObject $convertToMultiStringParameters.RegistryKeyValue -DifferenceObject $convertToMultiStringResult | Should Be $null
+                    Compare-Object -ReferenceObject $convertToMultiStringParameters.RegistryKeyValue -DifferenceObject $convertToMultiStringResult | Should -Be $null
                 }
             }
         }
@@ -3894,13 +3892,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Not Throw
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Not -Throw
                 }
 
                 $convertToQWordResult = ConvertTo-QWord @convertToQWordParameters
 
                 It 'Should return 0 as an Int64' {
-                    $convertToQWordResult | Should Be ([System.Int64] 0)
+                    $convertToQWordResult | Should -Be ([System.Int64] 0)
                 }
             }
 
@@ -3910,13 +3908,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Not Throw
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Not -Throw
                 }
 
                 $convertToQWordResult = ConvertTo-QWord @convertToQWordParameters
 
                 It 'Should return 0 as an Int64' {
-                    $convertToQWordResult | Should Be ([System.Int64] 0)
+                    $convertToQWordResult | Should -Be ([System.Int64] 0)
                 }
             }
 
@@ -3926,13 +3924,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Not Throw
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Not -Throw
                 }
 
                 $convertToQWordResult = ConvertTo-QWord @convertToQWordParameters
 
                 It 'Should return 0 as an Int64' {
-                    $convertToQWordResult | Should Be ([System.Int64] 0)
+                    $convertToQWordResult | Should -Be ([System.Int64] 0)
                 }
             }
 
@@ -3944,13 +3942,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Not Throw
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Not -Throw
                 }
 
                 $convertToQWordResult = ConvertTo-QWord @convertToQWordParameters
 
                 It 'Should return the specified quad word' {
-                    $convertToQWordResult | Should Be $testDWord1
+                    $convertToQWordResult | Should -Be $testDWord1
                 }
             }
 
@@ -3964,7 +3962,7 @@ try
                 It 'Should throw an error for the invalid qword string' {
                     $errorMessage = $script:localizedData.QWordDataNotInHexFormat -f $invalidHexDWord
 
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
 
@@ -3978,13 +3976,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Not Throw
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Not -Throw
                 }
 
                 $convertToQWordResult = ConvertTo-QWord @convertToQWordParameters
 
                 It 'Should return the specified quad word converted from a Hex value' {
-                    $convertToQWordResult | Should Be $expectedInt64Value
+                    $convertToQWordResult | Should -Be $expectedInt64Value
                 }
             }
 
@@ -3998,13 +3996,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Not Throw
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Not -Throw
                 }
 
                 $convertToQWordResult = ConvertTo-QWord @convertToQWordParameters
 
                 It 'Should return the specified quad word converted from a Hex value' {
-                    $convertToQWordResult | Should Be $expectedInt64Value
+                    $convertToQWordResult | Should -Be $expectedInt64Value
                 }
             }
 
@@ -4018,7 +4016,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'Qword'
 
-                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-QWord @convertToQWordParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }
@@ -4030,13 +4028,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-String @convertToStringParameters } | Should Not Throw
+                    { $null = ConvertTo-String @convertToStringParameters } | Should -Not -Throw
                 }
 
                 $convertToStringResult = ConvertTo-String @convertToStringParameters
 
                 It 'Should return an empty string' {
-                    $convertToStringResult | Should Be ([String]::Empty)
+                    $convertToStringResult | Should -Be ([System.String]::Empty)
                 }
             }
 
@@ -4046,13 +4044,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-String @convertToStringParameters } | Should Not Throw
+                    { $null = ConvertTo-String @convertToStringParameters } | Should -Not -Throw
                 }
 
                 $convertToStringResult = ConvertTo-String @convertToStringParameters
 
                 It 'Should return an empty string' {
-                    $convertToStringResult | Should Be ([String]::Empty)
+                    $convertToStringResult | Should -Be ([System.String]::Empty)
                 }
             }
 
@@ -4062,13 +4060,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-String @convertToStringParameters } | Should Not Throw
+                    { $null = ConvertTo-String @convertToStringParameters } | Should -Not -Throw
                 }
 
                 $convertToStringResult = ConvertTo-String @convertToStringParameters
 
                 It 'Should return an empty string' {
-                    $convertToStringResult | Should Be ([String]::Empty)
+                    $convertToStringResult | Should -Be ([System.String]::Empty)
                 }
             }
 
@@ -4078,13 +4076,13 @@ try
                 }
 
                 It 'Should not throw' {
-                    { $null = ConvertTo-String @convertToStringParameters } | Should Not Throw
+                    { $null = ConvertTo-String @convertToStringParameters } | Should -Not -Throw
                 }
 
                 $convertToStringResult = ConvertTo-String @convertToStringParameters
 
                 It 'Should return the specified single string' {
-                    $convertToStringResult | Should Be $convertToStringParameters.RegistryKeyValue[0]
+                    $convertToStringResult | Should -Be $convertToStringParameters.RegistryKeyValue[0]
                 }
             }
 
@@ -4096,7 +4094,7 @@ try
                 It 'Should throw an error for unexpected array' {
                     $errorMessage = $script:localizedData.ArrayNotAllowedForExpectedType -f 'String or ExpandString'
 
-                    { $null = ConvertTo-String @convertToStringParameters } | Should Throw $errorMessage
+                    { $null = ConvertTo-String @convertToStringParameters } | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
         }

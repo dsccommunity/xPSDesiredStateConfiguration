@@ -2,13 +2,13 @@
 .SYNOPSIS
    Package DSC modules and mof configuration document and publish them on an enterprise DSC pull server in the required format.
 .DESCRIPTION
-   Uses Publish-DSCModulesAndMof function to package DSC modules into zip files with the version info. 
+   Uses Publish-DSCModulesAndMof function to package DSC modules into zip files with the version info.
    Publishes the zip modules on "$env:ProgramFiles\WindowsPowerShell\DscService\Modules".
    Publishes all mof configuration documents that are present in the $Source folder on "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"-
    Use $Force to overwrite the version of the module that exists in the PowerShell module path with the version from the $source folder.
    Use $ModuleNameList to specify the names of the modules to be published if the modules do not exist in $Source folder.
 .PARAMETER Source
-    The folder that contains the configuration mof documents and modules to be published on Pull server. 
+    The folder that contains the configuration mof documents and modules to be published on Pull server.
     Everything in this folder will be packaged and published.
 .PARAMETER Force
     Switch to overwrite the module in PSModulePath with the version provided in $Sources.
@@ -24,10 +24,17 @@ function Publish-DSCModuleAndMof
 {
     [CmdletBinding()]
     param(
-    [Parameter(Mandatory=$True)]
-    [string]$Source = $pwd,
-    [switch]$Force,
-    [string[]]$ModuleNameList
+        [Parameter(Mandatory = $True)]
+        [System.String]
+        $Source = $pwd,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $Force,
+
+        [Parameter()]
+        [System.String[]]
+        $ModuleNameList
     )
 
     # Create working directory
@@ -35,7 +42,7 @@ function Publish-DSCModuleAndMof
     New-Item -Path $tempFolder -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     # Copy the mof documents from the $Source to working dir
-    Copy-Item -Path "$Source\*.mof" -Destination $tempFolder -Force -Verbose
+    Copy-Item -Path "$Source\*.mof" -Destination $tempFolder -Force
 
     # Start Deployment!
     Log -Scope $MyInvocation -Message 'Start Deployment'
@@ -66,32 +73,32 @@ function CreateZipFromPSModulePath
     param($ListModuleNames, $Destination)
 
     # Move all required  modules from powershell module path to a temp folder and package them
-    if ([string]::IsNullOrEmpty($ListModuleNames))
+    if ([System.String]::IsNullOrEmpty($ListModuleNames))
     {
-        Log -Scope $MyInvocation -Message "No additional modules are specified to be packaged." 
+        Log -Scope $MyInvocation -Message "No additional modules are specified to be packaged."
     }
-    
+
     foreach ($module in $ListModuleNames)
     {
-        $allVersions = Get-Module -Name $module -ListAvailable -Verbose        
+        $allVersions = Get-Module -Name $module -ListAvailable
         # Package all versions of the module
         foreach ($moduleVersion in $allVersions)
         {
-            $name   = $moduleVersion.Name
+            $name = $moduleVersion.Name
             $source = "$Destination\$name"
             # Create package zip
-            $path    = $moduleVersion.ModuleBase
+            $path = $moduleVersion.ModuleBase
             $version = $moduleVersion.Version.ToString()
             Log -Scope $MyInvocation -Message "Zipping $name ($version)"
-            Compress-Archive -Path "$path\*" -DestinationPath "$source.zip" -Verbose -Force 
+            Compress-Archive -Path "$path\*" -DestinationPath "$source.zip" -Force
             $newName = "$Destination\$name" + "_" + "$version" + ".zip"
             # Rename the module folder to contain the version info.
             if (Test-Path $newName)
             {
-                Remove-Item $newName -Recurse -Force 
+                Remove-Item $newName -Recurse -Force
             }
-            Rename-Item -Path "$source.zip" -NewName $newName -Force    
-        } 
+            Rename-Item -Path "$source.zip" -NewName $newName -Force
+        }
     }
 }
 
@@ -109,19 +116,19 @@ function CreateZipFromPSModulePath
 function CreateZipFromSource
 {
     param($Source, $Destination)
-    # for each module under $Source folder create a zip package that has the same name as the folder. 
+    # for each module under $Source folder create a zip package that has the same name as the folder.
     $allModulesInSource = Get-ChildItem -Path $Source -Directory
     $modules = @()
-   
+
     foreach ($item in $allModulesInSource)
     {
         $name = $Item.Name
-        $alreadyExists = Get-Module -Name $name -ListAvailable -Verbose
+        $alreadyExists = Get-Module -Name $name -ListAvailable
         if (($alreadyExists -eq $null) -or ($Force))
         {
-            # Install the modules into PowerShell module path and overwrite the content 
-            Copy-Item -Path $item.FullName -Recurse -Force -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Verbose            
-        }              
+            # Install the modules into PowerShell module path and overwrite the content
+            Copy-Item -Path $item.FullName -Recurse -Force -Destination "$env:ProgramFiles\WindowsPowerShell\Modules"
+        }
         else
         {
             Write-Warning "Skipping module overwrite. Module with the name $name already exists."
@@ -148,12 +155,12 @@ function PublishModulesAndChecksum
     if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $moduleRepository))
     {
         Log -Scope $MyInvocation -Message "Copying modules and checksums to [$moduleRepository]."
-        Copy-Item -Path "$Source\*.zip*" -Destination $moduleRepository -Force -Verbose
+        Copy-Item -Path "$Source\*.zip*" -Destination $moduleRepository -Force
     }
     else
     {
         Write-Warning "Copying modules to Pull server module repository skipped because the machine is not a server sku or Pull server endpoint is not deployed."
-    }   
+    }
 }
 
 
@@ -165,13 +172,13 @@ function PublishModulesAndChecksum
 #>
 function PublishMofDocuments
 {
-   param($Source)
+    param($Source)
     # Check if the current machine is a server sku.
     $mofRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
-    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $mofRepository))    
+    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $mofRepository))
     {
         Log -Scope $MyInvocation -Message "Copying mofs and checksums to [$mofRepository]."
-        Copy-Item -Path "$Source\*.mof*" -Destination $mofRepository -Force -Verbose
+        Copy-Item -Path "$Source\*.mof*" -Destination $mofRepository -Force
     }
     else
     {
@@ -183,7 +190,7 @@ Function Log
 {
     Param(
         $Date = $(Get-Date),
-        $Scope, 
+        $Scope,
         $Message
     )
 
@@ -195,7 +202,7 @@ Function Log
 .SYNOPSIS
    Deploy DSC modules to the pullserver.
 .DESCRIPTION
-   Publish DSC module using Module Info object as an input. 
+   Publish DSC module using Module Info object as an input.
    The cmdlet will figure out the location of the module repository using web.config of the pullserver.
 .PARAMETER Name
     Name of the module.
@@ -214,22 +221,22 @@ function Publish-ModuleToPullServer
 {
     [CmdletBinding()]
     [Alias("pmp")]
-    [OutputType([void])]
+    [OutputType([System.Void])]
     Param
     (
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0)]
         $Name,
-          
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=1)]
+
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 1)]
         $ModuleBase,
-        
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=2)]
+
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 2)]
         $Version,
 
         $PullServerWebConfig = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config",
@@ -248,33 +255,33 @@ function Publish-ModuleToPullServer
             else
             {
                 # Pull Server exist figure out the module path of the pullserver and use this value as output folder path.
-                $webConfigXml = [xml](cat $PullServerWebConfig)
+                $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
                 $moduleXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ModulePath']")
-                $OutputFolderPath =  $moduleXElement.Value
+                $OutputFolderPath = $moduleXElement.Value
             }
         }
     }
     Process
     {
-       Write-Verbose "Name: $Name , ModuleBase : $ModuleBase ,Version: $Version"
-       $targetPath = Join-Path $OutputFolderPath "$($Name)_$($Version).zip"
+        Write-Verbose "Name: $Name , ModuleBase : $ModuleBase ,Version: $Version"
+        $targetPath = Join-Path $OutputFolderPath "$($Name)_$($Version).zip"
 
-      if (Test-Path $targetPath)
-      {
-            Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*" -Update -Verbose
-      }
-      else
-      {
-            Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*" -Verbose
-      }
+        if (Test-Path $targetPath)
+        {
+            Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*" -Update
+        }
+        else
+        {
+            Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*"
+        }
     }
     End
     {
-       # Now that all the modules are published generate thier checksum.
-       New-DscChecksum -Path $OutputFolderPath
-      
+        # Now that all the modules are published generate thier checksum.
+        New-DscChecksum -Path $OutputFolderPath
+
     }
-} 
+}
 
 
 <#
@@ -291,41 +298,41 @@ function Publish-MOFToPullServer
 {
     [CmdletBinding()]
     [Alias("pcp")]
-    [OutputType([void])]
+    [OutputType([System.Void])]
     Param
     (
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
+        [Parameter(Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0)]
         $FullName,
-       
+
         $PullServerWebConfig = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
     )
 
     Begin
     {
-       $webConfigXml = [xml](cat $PullServerWebConfig)
-       $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
-       $OutputFolderPath =  $configXElement.Value
+        $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
+        $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
+        $OutputFolderPath = $configXElement.Value
     }
     Process
     {
-        $fileInfo = [System.IO.FileInfo]::new($FullName)
+        $fileInfo = New-Item -Path $FullName -ItemType File
         if ($fileInfo.Extension -eq '.mof')
         {
-            if (Test-Path $FullName)
+            if (Test-Path -Path $FullName)
             {
-                copy $FullName $OutputFolderPath -Verbose -Force
+                Copy-Item -Path $FullName -Destination $OutputFolderPath -Force
             }
-            else 
+            else
             {
-                Throw "File not found at $FullName"
-            } 
+                throw "File not found at $FullName"
+            }
         }
         else
         {
             throw "Invalid file $FullName. Only mof files can be copied to the pullserver configuration repository"
-        }       
+        }
     }
     End
     {

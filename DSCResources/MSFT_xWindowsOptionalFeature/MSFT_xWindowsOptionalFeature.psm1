@@ -1,5 +1,3 @@
-# PSSA global rule suppression is allowed here because $global:DSCMachineStatus must be set
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
 param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonResourceHelper.psm1')
@@ -15,11 +13,11 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xWindowsOptionalFe
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -28,11 +26,11 @@ function Get-TargetResource
     Assert-ResourcePrerequisitesValid
 
     $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -FeatureName $Name -Online
-    
+
     <#
         $windowsOptionalFeatureProperties and this section of code are needed because an error will be thrown if a property
         is not found in WMF 4 instead of returning null.
-    #> 
+    #>
     $windowsOptionalFeatureProperties = @{}
     $propertiesNeeded = @( 'LogPath', 'State', 'CustomProperties', 'FeatureName', 'LogLevel', 'Description', 'DisplayName' )
 
@@ -51,8 +49,8 @@ function Get-TargetResource
     $windowsOptionalFeatureResource = @{
         LogPath = $windowsOptionalFeatureProperties.LogPath
         Ensure = Convert-FeatureStateToEnsure -State $windowsOptionalFeatureProperties.State
-        CustomProperties =
-            Convert-CustomPropertyArrayToStringArray -CustomProperties $windowsOptionalFeatureProperties.CustomProperties
+        CustomProperties = Convert-CustomPropertyArrayToStringArray `
+            -CustomProperties $windowsOptionalFeatureProperties.CustomProperties
         Name = $windowsOptionalFeatureProperties.FeatureName
         LogLevel = $windowsOptionalFeatureProperties.LogLevel
         Description = $windowsOptionalFeatureProperties.Description
@@ -81,7 +79,7 @@ function Get-TargetResource
         being disabled.
 
     .PARAMETER NoWindowsUpdateCheck
-        Specifies whether or not DISM contacts Windows Update (WU) when searching for the source 
+        Specifies whether or not DISM contacts Windows Update (WU) when searching for the source
         files to enable the feature.
         If $true, DISM will not contact WU.
 
@@ -102,24 +100,29 @@ function Set-TargetResource
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $RemoveFilesOnDisable,
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $NoWindowsUpdateCheck,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
+        [Parameter()]
         [ValidateSet('ErrorsOnly', 'ErrorsAndWarning', 'ErrorsAndWarningAndInformation')]
-        [String]
+        [System.String]
         $LogLevel = 'ErrorsAndWarningAndInformation'
     )
 
@@ -129,9 +132,23 @@ function Set-TargetResource
 
     $dismLogLevel = switch ($LogLevel)
     {
-        'ErrorsOnly' {  'Errors'; break }
-        'ErrorsAndWarning' { 'Warnings'; break }
-        'ErrorsAndWarningAndInformation' { 'WarningsInfo'; break }
+        'ErrorsOnly'
+        {
+            'Errors'
+            break
+        }
+
+        'ErrorsAndWarning'
+        {
+            'Warnings'
+            break
+        }
+
+        'ErrorsAndWarningAndInformation'
+        {
+            'WarningsInfo'
+            break
+        }
     }
 
     # Construct splatting hashtable for DISM cmdlets
@@ -179,7 +196,7 @@ function Set-TargetResource
     <#
         $restartNeeded and this section of code are needed because an error will be thrown if the
         RestartNeeded property is not found in WMF 4.
-    #> 
+    #>
     try
     {
         $restartNeeded = $windowsOptionalFeature.RestartNeeded
@@ -193,7 +210,7 @@ function Set-TargetResource
     if ($restartNeeded)
     {
         Write-Verbose -Message $script:localizedData.RestartNeeded
-        $global:DSCMachineStatus = 1
+        Set-DSCMachineRebootRequired
     }
 
     Write-Verbose -Message ($script:localizedData.SetTargetResourceEndMessage -f $Name)
@@ -226,28 +243,33 @@ function Set-TargetResource
 function Test-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $RemoveFilesOnDisable,
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $NoWindowsUpdateCheck,
 
-        [String]
+        [Parameter()]
+        [System.String]
         $LogPath,
 
+        [Parameter()]
         [ValidateSet('ErrorsOnly', 'ErrorsAndWarning', 'ErrorsAndWarningAndInformation')]
-        [String]
+        [System.String]
         $LogLevel = 'ErrorsAndWarningAndInformation'
     )
 
@@ -256,7 +278,7 @@ function Test-TargetResource
     Assert-ResourcePrerequisitesValid
 
     $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -FeatureName $Name -Online
-    
+
     $featureIsInDesiredState = $false
 
     if ($null -eq $windowsOptionalFeature -or $windowsOptionalFeature.State -eq 'Disabled')
@@ -267,9 +289,9 @@ function Test-TargetResource
     {
         $featureIsInDesiredState = $Ensure -eq 'Present'
     }
-    
+
     Write-Verbose -Message ($script:localizedData.TestTargetResourceEndMessage -f $Name)
-    
+
     return $featureIsInDesiredState
 }
 
@@ -284,14 +306,15 @@ function Test-TargetResource
 function Convert-CustomPropertyArrayToStringArray
 {
     [CmdletBinding()]
-    [OutputType([String[]])]
+    [OutputType([System.String[]])]
     param
     (
-        [PSCustomObject[]]
+        [Parameter()]
+        [System.Management.Automation.PSObject[]]
         $CustomProperties
     )
 
-    $propertiesAsStrings = [String[]] @()
+    $propertiesAsStrings = [System.String[]] @()
 
     foreach ($customProperty in $CustomProperties)
     {
@@ -315,11 +338,11 @@ function Convert-CustomPropertyArrayToStringArray
 function Convert-FeatureStateToEnsure
 {
     [CmdletBinding()]
-    [OutputType([String])]
+    [OutputType([System.String])]
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $State
     )
 
@@ -366,15 +389,16 @@ function Assert-ResourcePrerequisitesValid
     # Check that we are running as an administrator
     $windowsIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $windowsPrincipal = New-Object -TypeName 'System.Security.Principal.WindowsPrincipal' -ArgumentList @( $windowsIdentity )
-    
+
     $adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
+
     if (-not $windowsPrincipal.IsInRole($adminRole))
     {
         New-InvalidOperationException -Message $script:localizedData.ElevationRequired
     }
 
     # Check that Dism PowerShell module is available
-    Import-Module -Name 'Dism' -ErrorVariable 'errorsFromDismImport' -ErrorAction 'SilentlyContinue' -Force
+    Import-Module -Name 'Dism' -ErrorVariable 'errorsFromDismImport' -ErrorAction 'SilentlyContinue' -Force -Verbose:$false
 
     if ($errorsFromDismImport.Count -gt 0)
     {

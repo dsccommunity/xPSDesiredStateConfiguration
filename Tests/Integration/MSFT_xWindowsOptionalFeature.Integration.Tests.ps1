@@ -1,5 +1,10 @@
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xWindowsOptionalFeature' `
@@ -38,12 +43,12 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online
 
-                $windowsOptionalFeature | Should Not Be $null
-                $windowsOptionalFeature.State -in $script:enabledStates | Should Be $true
+                $windowsOptionalFeature | Should -Not -Be $null
+                $windowsOptionalFeature.State -in $script:enabledStates | Should -Be $true
             }
             finally
             {
@@ -87,12 +92,12 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
                 $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online
 
-                $windowsOptionalFeature | Should Not Be $null
-                $windowsOptionalFeature.State -in $script:disabledStates | Should Be $true
+                $windowsOptionalFeature | Should -Not -Be $null
+                $windowsOptionalFeature.State -in $script:disabledStates | Should -Be $true
             }
             finally
             {
@@ -122,7 +127,7 @@ try
                 NoWindowsUpdateCheck = $true
             }
 
-            Dism\Get-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online | Should Be $null
+            Dism\Get-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online | Should -Be $null
 
             try
             {
@@ -130,11 +135,11 @@ try
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Throw "Feature name $($resourceParameters.Name) is unknown."
+                } | Should -Throw "Feature name $($resourceParameters.Name) is unknown."
 
-                Test-Path -Path $resourceParameters.LogPath | Should Be $true
+                Test-Path -Path $resourceParameters.LogPath | Should -Be $true
 
-                Dism\Get-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online | Should Be $null
+                Dism\Get-WindowsOptionalFeature -FeatureName $resourceParameters.Name -Online | Should -Be $null
             }
             finally
             {

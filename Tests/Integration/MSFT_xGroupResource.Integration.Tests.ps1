@@ -9,6 +9,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xGroupResource' `
@@ -56,7 +61,7 @@ try
                 GroupName = $testGroupName
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $false
+            Test-GroupExists -GroupName $testGroupName | Should -Be $false
 
             try
             {
@@ -64,9 +69,9 @@ try
                     . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -Members @() | Should Be $true
+                Test-GroupExists -GroupName $testGroupName -Members @() | Should -Be $true
             }
             finally
             {
@@ -86,15 +91,15 @@ try
                 GroupName = $testGroupName
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $true
 
             {
                 . $script:confgurationNoMembersFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should Not Throw
+            } | Should -Not -Throw
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $true
         }
 
         It 'Should add a member to the built-in Users group with MembersToInclude' {
@@ -107,15 +112,15 @@ try
                 MembersToInclude = $testUsername1
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $true
 
             {
                 . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should Not Throw
+            } | Should -Not -Throw
 
-            Test-GroupExists -GroupName $testGroupName -MembersToInclude $testUsername1 | Should Be $true
+            Test-GroupExists -GroupName $testGroupName -MembersToInclude $testUsername1 | Should -Be $true
         }
 
         It 'Should create a group with two test users using Members' {
@@ -130,7 +135,7 @@ try
                 Members = $groupMembers
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $false
+            Test-GroupExists -GroupName $testGroupName | Should -Be $false
 
             try
             {
@@ -138,9 +143,9 @@ try
                     . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -Members $groupMembers | Should Be $true
+                Test-GroupExists -GroupName $testGroupName -Members $groupMembers | Should -Be $true
             }
             finally
             {
@@ -172,7 +177,7 @@ try
                 Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $true
 
             try
             {
@@ -180,9 +185,9 @@ try
                     . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should Be $true
+                Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should -Be $true
             }
             finally
             {
@@ -214,7 +219,7 @@ try
                 Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $true
 
             try
             {
@@ -222,9 +227,9 @@ try
                     . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should Be $true
+                Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should -Be $true
             }
             finally
             {
@@ -244,11 +249,11 @@ try
                 GroupName = $testGroupName
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $false
+            Test-GroupExists -GroupName $testGroupName | Should -Be $false
 
             New-Group -GroupName $testGroupName
 
-            Test-GroupExists -GroupName $testGroupName | Should Be $true
+            Test-GroupExists -GroupName $testGroupName | Should -Be $true
 
             try
             {
@@ -256,9 +261,9 @@ try
                     . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName | Should Be $false
+                Test-GroupExists -GroupName $testGroupName | Should -Be $false
             }
             finally
             {

@@ -87,15 +87,16 @@ if (-not (Test-IsNanoServer))
 #>
 function Get-TargetResource
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -127,7 +128,7 @@ function Get-TargetResource
 
         To ensure that the group does exist, set this property to present.
         To ensure that the group does not exist, set this property to Absent.
-        
+
         The default value is Present.
 
     .PARAMETER Description
@@ -138,10 +139,10 @@ function Get-TargetResource
 
         This property will replace all the current group members with the specified members.
 
-        Members should be specified as strings in the format of their domain qualified name 
+        Members should be specified as strings in the format of their domain qualified name
         (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...),
-        or their username (for local machine accounts).  
-        
+        or their username (for local machine accounts).
+
         Using either the MembersToExclude or MembersToInclude properties in the same configuration
         as this property will generate an error.
 
@@ -150,7 +151,7 @@ function Get-TargetResource
 
         This property will only add members to a group.
 
-        Members should be specified as strings in the format of their domain qualified name 
+        Members should be specified as strings in the format of their domain qualified name
         (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...),
         or their username (for local machine accounts).
 
@@ -161,7 +162,7 @@ function Get-TargetResource
 
         This property will only remove members from a group.
 
-        Members should be specified as strings in the format of their domain qualified name 
+        Members should be specified as strings in the format of their domain qualified name
         (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...),
         or their username (for local machine accounts).
 
@@ -185,25 +186,31 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $Members,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToInclude,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -244,10 +251,10 @@ function Set-TargetResource
 
     .PARAMETER Members
         The list of members the group should have.
-        
-        The value of this property is an array of strings of the formats domain qualified name 
+
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts.  
+        a unqualified (username) for local machine accounts.
 
         If you set this property in a configuration, do not use either the MembersToExclude or
         MembersToInclude property. Doing so will generate an error.
@@ -255,9 +262,9 @@ function Set-TargetResource
     .PARAMETER MembersToInclude
         A list of members that should be in the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts.  
+        a unqualified (username) for local machine accounts.
 
         If you set this property in a configuration, do not use the Members property.
         Doing so will generate an error.
@@ -265,7 +272,7 @@ function Set-TargetResource
     .PARAMETER MembersToExclude
         A list of members that should not be in the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -277,31 +284,37 @@ function Set-TargetResource
 #>
 function Test-TargetResource
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $Members,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToInclude,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -334,15 +347,16 @@ function Test-TargetResource
 #>
 function Get-TargetResourceOnFullSKU
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -402,15 +416,16 @@ function Get-TargetResourceOnFullSKU
 #>
 function Get-TargetResourceOnNanoServer
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -454,10 +469,10 @@ function Get-TargetResourceOnNanoServer
 
     .PARAMETER Ensure
         Indicates if the group should exist or not.
-        
+
         Set this property to Present to ensure that the group exists.
         Set this property to Absent to ensure that the group does not exist.
-        
+
         The default value is Present.
 
     .PARAMETER Description
@@ -465,31 +480,31 @@ function Get-TargetResourceOnNanoServer
 
     .PARAMETER Members
         Use this property to replace the current group membership with the specified members.
-        
-        The value of this property is an array of strings of the formats domain qualified name 
+
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         an unqualified (username) for local machine accounts.
-        
-        If you set this property in a configuration, do not use either the MembersToExclude or 
+
+        If you set this property in a configuration, do not use either the MembersToExclude or
         MembersToInclude property. Doing so will generate an error.
 
     .PARAMETER MembersToInclude
         Use this property to add members to the existing membership of the group.
-        
-        The value of this property is an array of strings of the formats domain qualified name 
+
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts. 
-        
+        a unqualified (username) for local machine accounts.
+
         If you set this property in a configuration, do not use the Members property.
         Doing so will generate an error.
 
     .PARAMETER MembersToExclude
         Use this property to remove members from the existing membership of the group.
-        
-        The value of this property is an array of strings of the formats domain qualified name 
+
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts. 
-        
+        a unqualified (username) for local machine accounts.
+
         If you set this property in a configuration, do not use the Members property.
         Doing so will generate an error.
 
@@ -505,25 +520,31 @@ function Set-TargetResourceOnFullSKU
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $Members,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToInclude,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -621,7 +642,7 @@ function Set-TargetResourceOnFullSKU
 
                     if ($Members.Count -eq 0 -and $null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -ne 0)
                     {
-                        Clear-GroupMembers -Group $group
+                        Clear-GroupMember -Group $group
                         $saveChanges = $true
                     }
                     elseif ($Members.Count -ne 0)
@@ -806,10 +827,10 @@ function Set-TargetResourceOnFullSKU
 
     .PARAMETER Ensure
         Indicates if the group should exist or not.
-        
+
         Set this property to Present to ensure that the group exists.
         Set this property to Absent to ensure that the group does not exist.
-        
+
         The default value is Present.
 
     .PARAMETER Description
@@ -817,31 +838,31 @@ function Set-TargetResourceOnFullSKU
 
     .PARAMETER Members
         Use this property to replace the current group membership with the specified members.
-        
-        The value of this property is an array of strings of the formats domain qualified name 
+
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
-        
-        If you set this property in a configuration, do not use either the MembersToExclude or 
+
+        If you set this property in a configuration, do not use either the MembersToExclude or
         MembersToInclude property. Doing so will generate an error.
 
     .PARAMETER MembersToInclude
         Use this property to add members to the existing membership of the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
-        
+
         If you set this property in a configuration, do not use the Members property.
         Doing so will generate an error.
 
     .PARAMETER MembersToExclude
         Use this property to remove members from the existing membership of the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
-        
+
         If you set this property in a configuration, do not use the Members property.
         Doing so will generate an error.
 
@@ -856,25 +877,31 @@ function Set-TargetResourceOnNanoServer
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $Members,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToInclude,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -923,7 +950,7 @@ function Set-TargetResourceOnNanoServer
             }
 
             # Set the group properties.
-            if ($PSBoundParameters.ContainsKey('Description') -and 
+            if ($PSBoundParameters.ContainsKey('Description') -and
                 ((-not $groupOriginallyExists) -or ($Description -ne $group.Description)))
             {
                 Set-LocalGroup -Name $GroupName -Description $Description
@@ -965,7 +992,7 @@ function Set-TargetResourceOnNanoServer
             }
             elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
             {
-                [array]$groupMembers = Get-MembersOnNanoServer -Group $group
+                [System.Array] $groupMembers = Get-MembersOnNanoServer -Group $group
 
                 $uniqueMembersToInclude = $MembersToInclude | Select-Object -Unique
                 $uniqueMembersToExclude = $MembersToExclude | Select-Object -Unique
@@ -1036,10 +1063,10 @@ function Set-TargetResourceOnNanoServer
 
     .PARAMETER Ensure
         Indicates if the group should exist or not.
-        
+
         Set this property to Present to ensure that the group exists.
         Set this property to Absent to ensure that the group does not exist.
-        
+
         The default value is Present.
 
     .PARAMETER Description
@@ -1048,8 +1075,8 @@ function Set-TargetResourceOnNanoServer
     .PARAMETER Members
         Use this property to test if the existing membership of the group matches
         the list provided.
-        
-        The value of this property is an array of strings of the formats domain qualified name 
+
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -1058,9 +1085,9 @@ function Set-TargetResourceOnNanoServer
 
     .PARAMETER MembersToInclude
         Use this property to test if members need to be added to the existing membership
-        of the group. 
+        of the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -1071,7 +1098,7 @@ function Set-TargetResourceOnNanoServer
         Use this property to test if members need to removed from the existing membership
         of the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -1083,31 +1110,37 @@ function Set-TargetResourceOnNanoServer
 #>
 function Test-TargetResourceOnFullSKU
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $Members,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToInclude,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -1297,10 +1330,10 @@ function Test-TargetResourceOnFullSKU
 
     .PARAMETER Ensure
         Indicates if the group should exist or not.
-        
+
         Set this property to Present to ensure that the group exists.
         Set this property to Absent to ensure that the group does not exist.
-        
+
         The default value is Present.
 
     .PARAMETER Description
@@ -1310,7 +1343,7 @@ function Test-TargetResourceOnFullSKU
         Use this property to test if the existing membership of the group matches
         the list provided.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -1321,7 +1354,7 @@ function Test-TargetResourceOnFullSKU
         Use this property to test if members need to be added to the existing membership
         of the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -1332,7 +1365,7 @@ function Test-TargetResourceOnFullSKU
         Use this property to test if members need to removed from the existing membership
         of the group.
 
-        The value of this property is an array of strings of the formats domain qualified name 
+        The value of this property is an array of strings of the formats domain qualified name
         (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
         a unqualified (username) for local machine accounts.
 
@@ -1344,31 +1377,37 @@ function Test-TargetResourceOnFullSKU
 #>
 function Test-TargetResourceOnNanoServer
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
-        [String]
+        [Parameter()]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $Members,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToInclude,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         $MembersToExclude,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -1419,7 +1458,7 @@ function Test-TargetResourceOnNanoServer
             }
         }
 
-        [array]$groupMembers = Get-MembersOnNanoServer -Group $group
+        [System.Array] $groupMembers = Get-MembersOnNanoServer -Group $group
 
         # Remove duplicate names as strings.
         $uniqueMembers = $Members | Select-Object -Unique
@@ -1561,7 +1600,7 @@ function Get-MembersOnFullSKU
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         [AllowEmptyCollection()]
         $PrincipalContextCache,
 
@@ -1571,6 +1610,7 @@ function Get-MembersOnFullSKU
         [AllowEmptyCollection()]
         $Disposables,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -1646,7 +1686,7 @@ function Get-MembersAsPrincipalsList
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         [AllowEmptyCollection()]
         $PrincipalContextCache,
 
@@ -1656,6 +1696,7 @@ function Get-MembersAsPrincipalsList
         [AllowEmptyCollection()]
         $Disposables,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -1763,7 +1804,7 @@ function Assert-GroupNameValid
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName
     )
 
@@ -1772,7 +1813,7 @@ function Assert-GroupNameValid
     if ($GroupName.IndexOfAny($invalidCharacters) -ne -1)
     {
         New-InvalidArgumentException -ArgumentName 'GroupName' `
-            -Message ($script:localizedData.InvalidGroupName -f $GroupName, [String]::Join(' ', $invalidCharacters))
+            -Message ($script:localizedData.InvalidGroupName -f $GroupName, [System.String]::Join(' ', $invalidCharacters))
     }
 
     $nameContainsOnlyWhitspaceOrDots = $true
@@ -1780,7 +1821,7 @@ function Assert-GroupNameValid
     # Check if the name consists of only periods and/or white spaces.
     for ($groupNameIndex = 0; $groupNameIndex -lt $GroupName.Length; $groupNameIndex++)
     {
-        if (-not [Char]::IsWhiteSpace($GroupName, $groupNameIndex) -and $GroupName[$groupNameIndex] -ne '.')
+        if (-not [System.Char]::IsWhiteSpace($GroupName, $groupNameIndex) -and $GroupName[$groupNameIndex] -ne '.')
         {
             $nameContainsOnlyWhitspaceOrDots = $false
             break
@@ -1790,7 +1831,7 @@ function Assert-GroupNameValid
     if ($nameContainsOnlyWhitspaceOrDots)
     {
         New-InvalidArgumentException -ArgumentName 'GroupName' `
-            -Message ($script:localizedData.InvalidGroupName -f $GroupName, [String]::Join(' ', $invalidCharacters))
+            -Message ($script:localizedData.InvalidGroupName -f $GroupName, [System.String]::Join(' ', $invalidCharacters))
     }
 }
 
@@ -1818,12 +1859,12 @@ function ConvertTo-UniquePrincipalsList
     param
     (
         [Parameter(Mandatory = $true)]
-        [String[]]
+        [System.String[]]
         $MemberNames,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         [AllowEmptyCollection()]
         $PrincipalContextCache,
 
@@ -1833,6 +1874,7 @@ function ConvertTo-UniquePrincipalsList
         [AllowEmptyCollection()]
         $Disposables,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -1907,12 +1949,12 @@ function ConvertTo-Principal
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $MemberName,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         [AllowEmptyCollection()]
         $PrincipalContextCache,
 
@@ -1922,6 +1964,7 @@ function ConvertTo-Principal
         [AllowEmptyCollection()]
         $Disposables,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -2008,7 +2051,7 @@ function Resolve-SidToPrincipal
         $PrincipalContext,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $Scope
     )
 
@@ -2058,16 +2101,17 @@ function Get-PrincipalContext
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Scope,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         [AllowEmptyCollection()]
         $PrincipalContextCache,
 
@@ -2107,7 +2151,7 @@ function Get-PrincipalContext
         # Create a PrincipalContext targeting $Scope using the network credentials that were passed in.
         $credentialDomain = $Credential.GetNetworkCredential().Domain
         $credentialUserName = $Credential.GetNetworkCredential().UserName
-        if ($credentialDomain -ne [String]::Empty)
+        if ($credentialDomain -ne [System.String]::Empty)
         {
             $principalContextName = "$credentialDomain\$credentialUserName"
         }
@@ -2117,7 +2161,7 @@ function Get-PrincipalContext
         }
 
         $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
-            -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope, 
+            -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope,
                 $principalContextName, $Credential.GetNetworkCredential().Password )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
@@ -2147,13 +2191,13 @@ function Get-PrincipalContext
 #>
 function Test-IsLocalMachine
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Scope
     )
 
@@ -2240,7 +2284,7 @@ function Split-MemberName
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $MemberName
     )
 
@@ -2326,9 +2370,10 @@ function Find-Principal
         $PrincipalContext,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $IdentityValue,
 
+        [Parameter()]
         [System.DirectoryServices.AccountManagement.IdentityType]
         $IdentityType
     )
@@ -2341,7 +2386,7 @@ function Find-Principal
     {
         return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, $IdentityValue)
     }
-    
+
 }
 
 <#
@@ -2370,7 +2415,7 @@ function Get-Group
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GroupName,
 
         [Parameter(Mandatory = $true)]
@@ -2425,7 +2470,7 @@ function Get-GroupMembersFromDirectoryEntry
     .PARAMETER Group
         The group to clear the members of.
 #>
-function Clear-GroupMembers
+function Clear-GroupMember
 {
     [CmdletBinding()]
     param
@@ -2435,7 +2480,7 @@ function Clear-GroupMembers
         [System.DirectoryServices.AccountManagement.GroupPrincipal]
         $Group
     )
-    
+
     $Group.Members.Clear()
 }
 
@@ -2517,7 +2562,7 @@ function Remove-Group
         [System.DirectoryServices.AccountManagement.GroupPrincipal]
         $Group
     )
-    
+
     $Group.Delete()
 }
 

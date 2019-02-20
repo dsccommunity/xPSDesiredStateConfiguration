@@ -95,7 +95,7 @@ configuration xRemoteFile_DownloadFileConfig
 
     Node $nodeName
     {
-        xRemoteFile 'DownloadFileUsingProxy'
+        xRemoteFile 'DownloadFile'
         {
             DestinationPath = $DestinationPath
             Uri             = $Uri

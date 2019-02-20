@@ -8,6 +8,11 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xEnvironmentResource' `
@@ -30,14 +35,14 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable $envVar is successfully retrieved
-            $retrievedVar.Ensure | Should Be 'Present'
+            $retrievedVar.Ensure | Should -Be 'Present'
 
             $regItem = Get-Item -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Session Manager\\Environment'
             $matchVar = $regItem.GetValue($envVar)
             $retrievedVarValue = $retrievedVar.Value
 
             # Verify the $retrievedVar environmnet variable value matches the value retrieved using [Environment] API
-            $retrievedVarValue | Should Be $matchVar
+            $retrievedVarValue | Should -Be $matchVar
         }
 
         It 'Should return Absent for an environment variable that does not exists' {
@@ -48,7 +53,7 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable $envVar is not found
-            $retrievedVar.Ensure | Should Be 'Absent'
+            $retrievedVar.Ensure | Should -Be 'Absent'
         }
 
         It 'Should throw an error when creating a new environment variable with no Value specified' {
@@ -56,16 +61,16 @@ try
             $envVar = 'TestEnvVar'
             Set-TargetResource -Name $envVar -Ensure Absent
 
-            { Set-TargetResource -Name $envVar } | Should Throw
+            { Set-TargetResource -Name $envVar } | Should -Throw
 
             # Now retrieve the created variable
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable $envVar is successfully created
-            $retrievedVar.Ensure | Should Be 'Absent'
+            $retrievedVar.Ensure | Should -Be 'Absent'
 
-            # Verify the create environmnet variable's value is set to default value [String]::Empty
-            $retrievedVar.Value | Should Be $null
+            # Verify the create environmnet variable's value is set to default value [System.String]::Empty
+            $retrievedVar.Value | Should -Be $null
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -84,10 +89,10 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable $envVar is successfully created
-            $retrievedVar.Ensure | Should Be 'Present'
+            $retrievedVar.Ensure | Should -Be 'Present'
 
             # Verify the create environmnet variable's value is set
-            $retrievedVar.Value | Should Be $val
+            $retrievedVar.Value | Should -Be $val
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -108,7 +113,7 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable $envVar is successfully updated
-            $retrievedVar.Value | Should Be $newVal
+            $retrievedVar.Value | Should -Be $newVal
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -127,7 +132,7 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable no more exists
-            $retrievedVar.Ensure | Should Be 'Absent'
+            $retrievedVar.Ensure | Should -Be 'Absent'
         }
 
         It 'Should update a path environment variable' {
@@ -143,7 +148,7 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable no more exists
-            $retrievedVar.Value | Should Be $expectedFinalVal
+            $retrievedVar.Value | Should -Be $expectedFinalVal
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -162,7 +167,7 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable no more exists
-            $retrievedVar.Value | Should Be $expectedFinalVal
+            $retrievedVar.Value | Should -Be $expectedFinalVal
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -180,7 +185,7 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable no more exists
-            $retrievedVar.Ensure | Should Be 'Absent'
+            $retrievedVar.Ensure | Should -Be 'Absent'
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -193,7 +198,7 @@ try
             Set-TargetResource -Name $envVar -Value $val
 
             # Test the created environmnet variable
-            Test-TargetResource -Name $envVar | Should Be $true
+            Test-TargetResource -Name $envVar | Should -Be $true
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -205,7 +210,7 @@ try
             Set-TargetResource -Name $envVar -Value $val
 
             # Verify the environmnet variable exists
-            Test-TargetResource -Name $envVar -Value $val | Should Be $true
+            Test-TargetResource -Name $envVar -Value $val | Should -Be $true
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -216,7 +221,7 @@ try
             Set-TargetResource -Name $envVar -Ensure Absent
 
             # Verify the environmnet variable exists
-            Test-TargetResource -Name $envVar -Ensure Absent | Should Be $true
+            Test-TargetResource -Name $envVar -Ensure Absent | Should -Be $true
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -230,7 +235,7 @@ try
             $subpath = 'B'
 
             # Test a sub-path exists in environment variable
-            Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should Be $true
+            Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should -Be $true
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -243,7 +248,7 @@ try
 
             $subpath = 'B;a;c'
 
-            Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should Be $true
+            Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should -Be $true
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -256,7 +261,7 @@ try
 
             $subpath = 'D;E'
 
-            Test-TargetResource -Name $envVar -Value $subpath -Path $true -Ensure Absent | Should Be $true
+            Test-TargetResource -Name $envVar -Value $subpath -Path $true -Ensure Absent | Should -Be $true
 
             # Remove the created test variable
             Set-TargetResource -Name $envVar -Ensure Absent
@@ -268,13 +273,13 @@ try
             $retrievedVar = Get-TargetResource -Name $envVar
 
             # Verify the environmnet variable $envVar is successfully retrieved
-            $retrievedVar.Ensure | Should Be 'Present'
+            $retrievedVar.Ensure | Should -Be 'Present'
 
             $matchVar = '%SystemRoot%'
             $retrievedVarValue = $retrievedVar.Value
 
             # Verify the $retrievedVar environmnet variable value matches the value retrieved using [Environment] API
-            $retrievedVarValue | Should Be $matchVar
+            $retrievedVarValue | Should -Be $matchVar
         }
     }
 }

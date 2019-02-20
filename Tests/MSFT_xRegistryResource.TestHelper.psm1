@@ -3,18 +3,18 @@
         Tests if a registry key exists.
 
     .PARAMETER KeyPath
-        The path to the registry key to test for existence. 
+        The path to the registry key to test for existence.
         Must include the registry hive.
 #>
 function Test-RegistryKeyExists
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
-    param 
+    [OutputType([System.Boolean])]
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath
     )
 
@@ -26,7 +26,7 @@ function Test-RegistryKeyExists
         Tests if a registry key value exists.
 
     .PARAMETER KeyPath
-        The path to the registry key that should contain the value to test for existence. 
+        The path to the registry key that should contain the value to test for existence.
         Must include the registry hive.
 
     .PARAMETER ValueName
@@ -41,28 +41,28 @@ function Test-RegistryKeyExists
 function Test-RegistryValueExists
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         [AllowEmptyString()]
-        [String]
+        [System.String]
         $ValueName,
 
-        [String]
+        [System.String]
         $ValueData,
 
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ValueType
     )
 
-    try 
+    try
     {
         $registryValue = Get-ItemProperty -Path $KeyPath -Name $ValueName -ErrorAction 'SilentlyContinue'
         Write-Verbose -Message "Test-RegistryValueExists - Registry key value: $registryKeyValue"
@@ -87,7 +87,7 @@ function Test-RegistryValueExists
                 $registryValueExists = $registryValueExists -and ($registryValue.GetType().Name -eq 'Byte[]')
                 $registryValue = Convert-ByteArrayToHexString -Data $registryValue
             }
-            else 
+            else
             {
                 $registryValueExists = $registryValueExists -and ($registryValue.GetType().Name -eq $ValueType)
             }
@@ -113,7 +113,7 @@ function Test-RegistryValueExists
         Creates a registry key.
 
     .PARAMETER KeyPath
-        The path to the registry key to be created. 
+        The path to the registry key to be created.
         Must include the registry hive.
 #>
 function New-TestRegistryKey
@@ -123,17 +123,17 @@ function New-TestRegistryKey
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath
     )
 
     $parentPath = Split-Path -Path $KeyPath -Parent
-    
+
     if (-not (Test-RegistryKeyExists -KeyPath $parentPath))
     {
         New-TestRegistryKey -KeyPath $parentPath
     }
-    
+
     Write-Verbose -Message "New-TestRegistryKey - Creating new registry key at: $KeyPath"
 
     $null = New-Item -Path $KeyPath
@@ -144,7 +144,7 @@ function New-TestRegistryKey
         Creates a registry key.
 
     .PARAMETER KeyPath
-        The path to the registry key to be created. 
+        The path to the registry key to be created.
         Must include the registry hive.
 
     .PARAMETER ValueName
@@ -163,20 +163,20 @@ function New-RegistryValue
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         [AllowEmptyString()]
-        [String]
+        [System.String]
         $ValueName,
 
-        [Object]
+        [System.Object]
         $ValueData,
 
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ValueType
     )
 
@@ -199,11 +199,11 @@ function New-RegistryValue
             $convertedValueData += [Convert]::ToInt32($ValueData.Substring($index, 2), 16)
         }
 
-        $ValueData = [Byte[]] $convertedValueData
+        $ValueData = [System.Byte[]] $convertedValueData
 
         Write-Verbose -Message "New-RegistryValue - Binary data: $ValueData"
     }
-    
+
     $null = New-ItemProperty -Path $KeyPath -Name $ValueName -Value $ValueData -PropertyType $ValueType
 }
 
@@ -212,17 +212,17 @@ function New-RegistryValue
         Removes a registry key.
 
     .PARAMETER KeyPath
-        The path to the registry key to remove 
+        The path to the registry key to remove
         Must include the registry hive.
 #>
-function Remove-RegistryKey
+function Remove-TestRegistryKey
 {
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath
     )
 
@@ -234,26 +234,26 @@ function Remove-RegistryKey
         Removes a registry value.
 
     .PARAMETER KeyPath
-        The path to the registry key that contains the value to remove. 
+        The path to the registry key that contains the value to remove.
         Must include the registry hive.
 
     .PARAMETER ValueName
         The name of the value to remove.
 #>
-function Remove-RegistryValue
+function Remove-TestRegistryValue
 {
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNull()]
         [AllowEmptyString()]
-        [String]
+        [System.String]
         $ValueName
     )
 
@@ -270,11 +270,11 @@ function Remove-RegistryValue
 function Mount-RegistryDrive
 {
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath
     )
 
@@ -327,11 +327,11 @@ function Mount-RegistryDrive
 function Dismount-RegistryDrive
 {
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath
     )
 
@@ -351,12 +351,12 @@ function Dismount-RegistryDrive
 function Test-RegistryDriveMounted
 {
     [CmdletBinding()]
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $KeyPath
     )
 
@@ -396,7 +396,7 @@ Export-ModuleMember -Function `
     'Test-RegistryValueExists', `
     'New-TestRegistryKey', `
     'New-RegistryValue', `
-    'Remove-RegistryKey', `
-    'Remove-RegistryValue', `
+    'Remove-TestRegistryKey', `
+    'Remove-TestRegistryValue', `
     'Dismount-RegistryDrive', `
     'Test-RegistryDriveMounted'

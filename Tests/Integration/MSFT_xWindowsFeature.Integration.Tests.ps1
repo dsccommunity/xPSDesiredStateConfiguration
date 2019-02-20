@@ -4,7 +4,6 @@
     RSAT-File-Services is set as the feature to test installing/uninstalling a feature with
     subfeatures.
 #>
-
 # Suppressing this rule since we need to create a plaintext password to test this resource
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
@@ -12,6 +11,11 @@ param ()
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1') `
                                -Force
+
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
@@ -30,7 +34,7 @@ try {
             $script:testFeatureName = 'Telnet-Client'
             $script:testFeatureWithSubFeaturesName = 'RSAT-File-Services'
 
-            #Saving the state so we can clean up afterwards
+            # Saving the state so we can clean up afterwards
             $testFeature = Get-WindowsFeature -Name $script:testFeatureName
             $script:installStateOfTestFeature = $testFeature.Installed
 
@@ -88,23 +92,23 @@ try {
                                              -OutputPath $configurationPath `
                                              -ErrorAction 'Stop'
                         Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
                 }
 
                 It 'Should return the correct configuration' {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                   $currentConfig.Name | Should Be $script:testFeatureName
-                   $currentConfig.IncludeAllSubFeature | Should Be $false
-                   $currentConfig.Ensure | Should Be 'Present'
+                   $currentConfig.Name | Should -Be $script:testFeatureName
+                   $currentConfig.IncludeAllSubFeature | Should -Be $false
+                   $currentConfig.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should be Installed' {
                     $feature = Get-WindowsFeature -Name $script:testFeatureName
-                    $feature.Installed | Should Be $true
+                    $feature.Installed | Should -Be $true
                 }
             }
             finally
@@ -137,23 +141,23 @@ try {
                                              -OutputPath $configurationPath `
                                              -ErrorAction 'Stop'
                         Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                    { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
                 }
 
                 It 'Should return the correct configuration' {
                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                   $currentConfig.Name | Should Be $script:testFeatureName
-                   $currentConfig.IncludeAllSubFeature | Should Be $false
-                   $currentConfig.Ensure | Should Be 'Absent'
+                   $currentConfig.Name | Should -Be $script:testFeatureName
+                   $currentConfig.IncludeAllSubFeature | Should -Be $false
+                   $currentConfig.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should not be installed' {
                     $feature = Get-WindowsFeature -Name $script:testFeatureName
-                    $feature.Installed | Should Be $false
+                    $feature.Installed | Should -Be $false
                 }
             }
             finally
@@ -190,28 +194,28 @@ try {
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' -Skip:$script:skipLongTests {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Name | Should Be $script:testFeatureWithSubFeaturesName
-                $currentConfig.IncludeAllSubFeature | Should Be $true
-                $currentConfig.Ensure | Should Be 'Present'
+                $currentConfig.Name | Should -Be $script:testFeatureWithSubFeaturesName
+                $currentConfig.IncludeAllSubFeature | Should -Be $true
+                $currentConfig.Ensure | Should -Be 'Present'
             }
 
             It 'Should be Installed (includes check for subFeatures)' -Skip:$script:skipLongTests {
                 $feature = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
-                $feature.Installed | Should Be $true
+                $feature.Installed | Should -Be $true
 
                 foreach ($subFeatureName in $feature.SubFeatures)
                 {
                     $subFeature = Get-WindowsFeature -Name $subFeatureName
-                    $subFeature.Installed | Should Be $true
+                    $subFeature.Installed | Should -Be $true
                 }
             }
         }
@@ -231,28 +235,28 @@ try {
                                             -OutputPath $configurationPath `
                                             -ErrorAction 'Stop'
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should Not Throw
+                } | Should -Not -Throw
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' -Skip:$script:skipLongTests {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should Not Throw
+                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
             It 'Should return the correct configuration' -Skip:$script:skipLongTests  {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Name | Should Be $script:testFeatureWithSubFeaturesName
-                $currentConfig.IncludeAllSubFeature | Should Be $false
-                $currentConfig.Ensure | Should Be 'Absent'
+                $currentConfig.Name | Should -Be $script:testFeatureWithSubFeaturesName
+                $currentConfig.IncludeAllSubFeature | Should -Be $false
+                $currentConfig.Ensure | Should -Be 'Absent'
             }
 
             It 'Should not be installed (includes check for subFeatures)' -Skip:$script:skipLongTests {
                 $feature = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
-                $feature.Installed | Should Be $false
+                $feature.Installed | Should -Be $false
 
                 foreach ($subFeatureName in $feature.SubFeatures)
                 {
                     $subFeature = Get-WindowsFeature -Name $subFeatureName
-                    $subFeature.Installed | Should Be $false
+                    $subFeature.Installed | Should -Be $false
                 }
             }
         }

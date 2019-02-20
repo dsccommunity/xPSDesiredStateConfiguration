@@ -1,5 +1,10 @@
 Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
 
+if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+{
+    return
+}
+
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
     -DscResourceName 'MSFT_xPackageResource' `
@@ -87,13 +92,13 @@ try
                     }
                 }
 "@
-                .([scriptblock]::Create($configurationScriptText))
+                .([System.Management.Automation.ScriptBlock]::Create($configurationScriptText))
 
                 & $configurationName -OutputPath $configurationPath
 
                 Start-DscConfiguration -Path $configurationPath -Wait -Force -Verbose
 
-                Test-PackageInstalledByName -Name $script:packageName | Should Be $true
+                Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
             }
             finally
             {

@@ -4,6 +4,14 @@ param ()
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
+                               -ChildPath 'CommonTestHelper.psm1')
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 $script:testsFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
 $script:moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
 $script:dscResourcesFolderFilePath = Join-Path -Path $script:moduleRootFilePath -ChildPath 'DscResources'
@@ -25,7 +33,7 @@ InModuleScope 'ResourceSetHelper' {
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
-            $commonParameterString | Should Be "CommonStringParameter1 = `"CommonParameter1`"`r`n"
+            $commonParameterString | Should -Be "CommonStringParameter1 = `"CommonParameter1`"`r`n"
         }
 
         It 'Should return string containing one variable reference for one credential common parameter' {
@@ -40,7 +48,7 @@ InModuleScope 'ResourceSetHelper' {
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
-            $commonParameterString | Should Be "CommonCredentialParameter1 = `$CommonCredentialParameter1`r`n"
+            $commonParameterString | Should -Be "CommonCredentialParameter1 = `$CommonCredentialParameter1`r`n"
         }
 
         It 'Should return string containing all parameters for two string common parameters and two int common parameters' {
@@ -55,10 +63,10 @@ InModuleScope 'ResourceSetHelper' {
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
-            $commonParameterString.Contains("CommonStringParameter1 = `"CommonParameter1`"`r`n") | Should Be $true
-            $commonParameterString.Contains("CommonStringParameter2 = `"CommonParameter2`"`r`n") | Should Be $true
-            $commonParameterString.Contains("CommonIntParameter1 = `$CommonIntParameter1`r`n") | Should Be $true
-            $commonParameterString.Contains("CommonIntParameter2 = `$CommonIntParameter2`r`n") | Should Be $true
+            $commonParameterString.Contains("CommonStringParameter1 = `"CommonParameter1`"`r`n") | Should -Be $true
+            $commonParameterString.Contains("CommonStringParameter2 = `"CommonParameter2`"`r`n") | Should -Be $true
+            $commonParameterString.Contains("CommonIntParameter1 = `$CommonIntParameter1`r`n") | Should -Be $true
+            $commonParameterString.Contains("CommonIntParameter2 = `$CommonIntParameter2`r`n") | Should -Be $true
         }
     }
 
@@ -73,7 +81,7 @@ InModuleScope 'ResourceSetHelper' {
 
         It 'Should return string with module import and one resource for one key value' {
             $resourceString = New-ResourceSetConfigurationString @newResourceSetConfigurationStringParams
-            $resourceString | Should Be ("Import-DscResource -Name ResourceName -ModuleName ModuleName`r`n" + `
+            $resourceString | Should -Be ("Import-DscResource -Name ResourceName -ModuleName ModuleName`r`n" + `
                 "ResourceName Resource0`r`n{`r`nName = `"KeyValue1`"`r`n$($newResourceSetConfigurationStringParams['CommonParameterString'])}`r`n")
         }
 
@@ -81,7 +89,7 @@ InModuleScope 'ResourceSetHelper' {
 
         It 'Should return string with module import and two resources for two key values' {
             $resourceString = New-ResourceSetConfigurationString @newResourceSetConfigurationStringParams
-            $resourceString | Should Be ("Import-DscResource -Name ResourceName -ModuleName ModuleName`r`n" + `
+            $resourceString | Should -Be ("Import-DscResource -Name ResourceName -ModuleName ModuleName`r`n" + `
                 "ResourceName Resource0`r`n{`r`nName = `"KeyValue1`"`r`n$($newResourceSetConfigurationStringParams['CommonParameterString'])}`r`n" + `
                 "ResourceName Resource1`r`n{`r`nName = `"KeyValue2`"`r`n$($newResourceSetConfigurationStringParams['CommonParameterString'])}`r`n")
         }
@@ -108,11 +116,11 @@ InModuleScope 'ResourceSetHelper' {
         $newResourceSetConfigurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
         It 'Should return a ScriptBlock' {
-            $newResourceSetConfigurationScriptBlock -is [ScriptBlock] | Should Be $true
+            $newResourceSetConfigurationScriptBlock -is [System.Management.Automation.ScriptBlock] | Should -Be $true
         }
 
         It 'Should return ScriptBlock of string returned from New-ResourceSetConfigurationString' {
-            $newResourceSetConfigurationScriptBlock | Should Match ([ScriptBlock]::Create($configurationString))
+            $newResourceSetConfigurationScriptBlock | Should -Match ([System.Management.Automation.ScriptBlock]::Create($configurationString))
         }
 
         It 'Should call New-ResourceSetConfigurationString with the correct ModuleName' {

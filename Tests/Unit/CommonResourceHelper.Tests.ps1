@@ -1,6 +1,15 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 Describe 'CommonResourceHelper Unit Tests' {
     BeforeAll {
         # Import the CommonResourceHelper module to test
@@ -40,7 +49,7 @@ Describe 'CommonResourceHelper Unit Tests' {
             Context 'Get-ComputerInfo command exists' {
                 Context 'Computer OS type is Server and OS server level is NanoServer' {
                     It 'Should not throw' {
-                        { $null = Test-IsNanoServer } | Should Not Throw
+                        { $null = Test-IsNanoServer } | Should -Not -Throw
                     }
 
                     It 'Should test if the Get-ComputerInfo command exists' {
@@ -56,7 +65,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                     }
 
                     It 'Should return true' {
-                        Test-IsNanoServer | Should Be $true
+                        Test-IsNanoServer | Should -Be $true
                     }
                 }
 
@@ -64,7 +73,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                     Mock -CommandName 'Get-ComputerInfo' -MockWith { return $testComputerInfoServerNotNano }
 
                     It 'Should not throw' {
-                        { $null = Test-IsNanoServer } | Should Not Throw
+                        { $null = Test-IsNanoServer } | Should -Not -Throw
                     }
 
                     It 'Should test if the Get-ComputerInfo command exists' {
@@ -80,7 +89,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                     }
 
                     It 'Should return false' {
-                        Test-IsNanoServer | Should Be $false
+                        Test-IsNanoServer | Should -Be $false
                     }
                 }
 
@@ -88,7 +97,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                     Mock -CommandName 'Get-ComputerInfo' -MockWith { return $testComputerInfoNotServer }
 
                     It 'Should not throw' {
-                        { $null = Test-IsNanoServer } | Should Not Throw
+                        { $null = Test-IsNanoServer } | Should -Not -Throw
                     }
 
                     It 'Should test if the Get-ComputerInfo command exists' {
@@ -104,7 +113,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                     }
 
                     It 'Should return false' {
-                        Test-IsNanoServer | Should Be $false
+                        Test-IsNanoServer | Should -Be $false
                     }
                 }
             }
@@ -113,7 +122,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                 Mock -CommandName 'Test-CommandExists' -MockWith { return $false }
 
                 It 'Should not throw' {
-                    { $null = Test-IsNanoServer } | Should Not Throw
+                    { $null = Test-IsNanoServer } | Should -Not -Throw
                 }
 
                 It 'Should test if the Get-ComputerInfo command exists' {
@@ -129,7 +138,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-IsNanoServer | Should Be $false
+                    Test-IsNanoServer | Should -Be $false
                 }
             }
         }
@@ -141,7 +150,7 @@ Describe 'CommonResourceHelper Unit Tests' {
 
             Context 'Get-Command returns the command' {
                 It 'Should not throw' {
-                    { $null = Test-CommandExists -Name $testCommandName } | Should Not Throw
+                    { $null = Test-CommandExists -Name $testCommandName } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the command with the specified name' {
@@ -153,7 +162,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                 }
 
                 It 'Should return true' {
-                    Test-CommandExists -Name $testCommandName | Should Be $true
+                    Test-CommandExists -Name $testCommandName | Should -Be $true
                 }
             }
 
@@ -161,7 +170,7 @@ Describe 'CommonResourceHelper Unit Tests' {
                 Mock -CommandName 'Get-Command' -MockWith { return $null }
 
                 It 'Should not throw' {
-                    { $null = Test-CommandExists -Name $testCommandName } | Should Not Throw
+                    { $null = Test-CommandExists -Name $testCommandName } | Should -Not -Throw
                 }
 
                 It 'Should retrieve the command with the specified name' {
@@ -173,7 +182,26 @@ Describe 'CommonResourceHelper Unit Tests' {
                 }
 
                 It 'Should return false' {
-                    Test-CommandExists -Name $testCommandName | Should Be $false
+                    Test-CommandExists -Name $testCommandName | Should -Be $false
+                }
+            }
+        }
+
+        Describe 'Set-DSCMachineRebootRequired' {
+            Context 'When called' {
+                It 'Should set the desired DSCMachineStatus value' {
+                    # Store the previous $global:DSCMachineStatus value
+                    $prevDSCMachineStatus = $global:DSCMachineStatus
+
+                    # Make sure DSCMachineStatus is set to a value that will have to be updated
+                    $global:DSCMachineStatus = 0
+
+                    # Set and test for the new value
+                    Set-DSCMachineRebootRequired
+                    $global:DSCMachineStatus | Should -Be 1
+
+                    # Revert to previous $global:DSCMachineStatus value
+                    $global:DSCMachineStatus = $prevDSCMachineStatus
                 }
             }
         }

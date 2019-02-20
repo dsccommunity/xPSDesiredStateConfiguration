@@ -1,6 +1,15 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+Import-Module -Name $commonTestHelperFilePath
+
+if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+{
+    return
+}
+
 # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
 $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
@@ -53,19 +62,19 @@ try
                 }
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the environment variable name' {
-                    $getTargetResourceResult.Name | Should Be $script:mockEnvironmentVarName
+                    $getTargetResourceResult.Name | Should -Be $script:mockEnvironmentVarName
                 }
 
                 It 'Should return the environment variable Ensure state as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the value of the environment variable' {
-                    $getTargetResourceResult.Value | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
+                    $getTargetResourceResult.Value | Should -Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
                 }
             }
 
@@ -77,19 +86,19 @@ try
                 }
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the environment variable name' {
-                    $getTargetResourceResult.Name | Should Be $script:mockEnvironmentVarInvalidName
+                    $getTargetResourceResult.Name | Should -Be $script:mockEnvironmentVarInvalidName
                 }
 
                 It 'Should return the environment variable Ensure state as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should return Value as null' {
-                    $getTargetResourceResult.Value | Should Be $null
+                    $getTargetResourceResult.Value | Should -Be $null
                 }
             }
 
@@ -101,19 +110,19 @@ try
                 }
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the environment variable name' {
-                    $getTargetResourceResult.Name | Should Be $script:mockEnvironmentVarName
+                    $getTargetResourceResult.Name | Should -Be $script:mockEnvironmentVarName
                 }
 
                 It 'Should return the environment variable Ensure state as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the value of the environment variable' {
-                    $getTargetResourceResult.Value | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
+                    $getTargetResourceResult.Value | Should -Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
                 }
             }
 
@@ -125,19 +134,19 @@ try
                 }
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the environment variable name' {
-                    $getTargetResourceResult.Name | Should Be $script:mockEnvironmentVarInvalidName
+                    $getTargetResourceResult.Name | Should -Be $script:mockEnvironmentVarInvalidName
                 }
 
                 It 'Should return the environment variable Ensure state as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should return Value as null' {
-                    $getTargetResourceResult.Value | Should Be $null
+                    $getTargetResourceResult.Value | Should -Be $null
                 }
             }
 
@@ -149,19 +158,19 @@ try
                 }
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the environment variable name' {
-                    $getTargetResourceResult.Name | Should Be $script:mockEnvironmentVarName
+                    $getTargetResourceResult.Name | Should -Be $script:mockEnvironmentVarName
                 }
 
                 It 'Should return the environment variable Ensure state as Present' {
-                    $getTargetResourceResult.Ensure | Should Be 'Present'
+                    $getTargetResourceResult.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should return the value of the environment variable' {
-                    $getTargetResourceResult.Value | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
+                    $getTargetResourceResult.Value | Should -Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
                 }
             }
 
@@ -173,19 +182,19 @@ try
                 }
 
                 It 'Should return a hashtable' {
-                    $getTargetResourceResult -is [Hashtable] | Should Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
                 }
 
                 It 'Should return the environment variable name' {
-                    $getTargetResourceResult.Name | Should Be $script:mockEnvironmentVarInvalidName
+                    $getTargetResourceResult.Name | Should -Be $script:mockEnvironmentVarInvalidName
                 }
 
                 It 'Should return the environment variable Ensure state as Absent' {
-                    $getTargetResourceResult.Ensure | Should Be 'Absent'
+                    $getTargetResourceResult.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should return Value as null' {
-                    $getTargetResourceResult.Value | Should Be $null
+                    $getTargetResourceResult.Value | Should -Be $null
                 }
             }
         }
@@ -203,11 +212,11 @@ try
 
             Context 'Add new environment variable without Path and item properties not present' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should -Not -Throw
                 }
 
                 It 'Should have set the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -221,11 +230,11 @@ try
                 $newPathValue = 'new path value2'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should -Not -Throw
                 }
 
                 It 'Should have set the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -241,7 +250,7 @@ try
                 It 'Should throw an exception' {
                     {
                         Set-TargetResource -Name $script:mockEnvironmentVarName -Path $true -Ensure 'Present'
-                    } | Should Throw ($script:localizedData.CannotSetValueToEmpty -f $script:mockEnvironmentVarName)
+                    } | Should -Throw ($script:localizedData.CannotSetValueToEmpty -f $script:mockEnvironmentVarName)
                 }
             }
 
@@ -251,7 +260,7 @@ try
 
             Context 'Update environment variable but no Value specified' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -266,11 +275,11 @@ try
                 $script:mockEnvironmentVar.PATH = $newPathValue
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -284,11 +293,11 @@ try
                 $newPathValue = 'new path value3'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue } | Should -Not -Throw
                 }
 
                 It 'Should have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -302,11 +311,11 @@ try
                 $newPathValue = ';'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Not -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -322,11 +331,11 @@ try
                 $newPathValue = '    '
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Not -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -344,11 +353,11 @@ try
 
             Context 'Update environment variable with new Path and valid Value passed in' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true } | Should -Not -Throw
                 }
 
                 It 'Should have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newFullPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newFullPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -368,11 +377,11 @@ try
                 $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $oldPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $oldPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -390,7 +399,7 @@ try
 
             Context 'Remove environment variable that is already removed' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -406,7 +415,7 @@ try
 
             Context 'Remove environment variable with no Value specified' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -423,7 +432,7 @@ try
                                          -Value 'mockNewValue' `
                                          -Ensure 'Absent' `
                                          -Path $false
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -440,7 +449,7 @@ try
                                          -Value ';' `
                                          -Ensure 'Absent' `
                                          -Path $true
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -457,7 +466,7 @@ try
                                          -Value 'nonExistentPath' `
                                          -Ensure 'Absent' `
                                          -Path $true
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -479,7 +488,7 @@ try
                                          -Value $pathToRemove `
                                          -Ensure 'Absent' `
                                          -Path $true
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -502,7 +511,7 @@ try
                                          -Value $pathToRemove `
                                          -Ensure 'Absent' `
                                          -Path $true
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -527,11 +536,11 @@ try
 
             Context 'Add new environment variable without Path and item properties not present' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have set the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -545,11 +554,11 @@ try
                 $newPathValue = 'new path value2'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have set the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -564,7 +573,7 @@ try
                 It 'Should throw an exception' {
                     {
                         Set-TargetResource -Name $script:mockEnvironmentVarName -Path $true -Ensure 'Present' -Target @('Process')
-                    } | Should Throw ($script:localizedData.CannotSetValueToEmpty -f $script:mockEnvironmentVarName)
+                    } | Should -Throw ($script:localizedData.CannotSetValueToEmpty -f $script:mockEnvironmentVarName)
                 }
             }
 
@@ -572,7 +581,7 @@ try
 
             Context 'Update environment variable but no Value specified' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -587,11 +596,11 @@ try
                 $script:mockEnvironmentVar.PATH = $newPathValue
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -605,11 +614,11 @@ try
                 $newPathValue = 'new path value3'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -623,11 +632,11 @@ try
                 $newPathValue = ';'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Not -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -642,11 +651,11 @@ try
                 $newPathValue = '    '
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Not -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -663,11 +672,11 @@ try
 
             Context 'Update environment variable with new Path and valid Value passed in' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newFullPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newFullPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -686,11 +695,11 @@ try
                 $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $oldPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $oldPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -705,7 +714,7 @@ try
 
             Context 'Remove environment variable that is already removed' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -720,7 +729,7 @@ try
 
             Context 'Remove environment variable with no Value specified' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true -Target @('Process') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true -Target @('Process') } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -737,7 +746,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $false `
                                          -Target @('Process')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -755,7 +764,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Process')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -772,7 +781,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Process')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -794,7 +803,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Process')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -817,7 +826,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Process')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -843,11 +852,11 @@ try
             Context 'Add new environment variable without Path and item properties not present' {
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have set the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -861,11 +870,11 @@ try
                 $newPathValue = 'new path value2'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have set the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -881,7 +890,7 @@ try
                 It 'Should throw an exception' {
                     {
                         Set-TargetResource -Name $script:mockEnvironmentVarName -Path $true -Ensure 'Present' -Target @('Machine')
-                    } | Should Throw ($script:localizedData.CannotSetValueToEmpty -f $script:mockEnvironmentVarName)
+                    } | Should -Throw ($script:localizedData.CannotSetValueToEmpty -f $script:mockEnvironmentVarName)
                 }
             }
 
@@ -891,7 +900,7 @@ try
 
             Context 'Update environment variable but no Value specified' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -908,11 +917,11 @@ try
                 $script:mockEnvironmentVar.PATH = $newPathValue
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -926,11 +935,11 @@ try
                 $newPathValue = 'new path value3'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -944,11 +953,11 @@ try
                 $newPathValue = ';'
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Not -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -964,11 +973,11 @@ try
                 $newPathValue = '    '
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Not Be $newPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Not -Be $newPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -986,11 +995,11 @@ try
 
             Context 'Update environment variable with new Path and valid Value passed in' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $newPathValue -Path $true -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $newFullPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $newFullPathValue
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -1010,11 +1019,11 @@ try
                 $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should not have updated the mock variable value' {
-                    $script:mockEnvironmentVar.PATH | Should Be $oldPathValue
+                    $script:mockEnvironmentVar.PATH | Should -Be $oldPathValue
                 }
 
                 It 'Should have called the correct mocks to not set the environment variable' {
@@ -1031,7 +1040,7 @@ try
 
             Context 'Remove environment variable that is already removed' {
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -1048,7 +1057,7 @@ try
                 Mock -CommandName Remove-EnvironmentVariable -MockWith {}
 
                 It 'Should not throw an exception' {
-                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true -Target @('Machine') } | Should Not Throw
+                    { Set-TargetResource -Name $script:mockEnvironmentVarName -Ensure 'Absent' -Path $true -Target @('Machine') } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -1069,7 +1078,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $false `
                                          -Target @('Machine')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -1087,7 +1096,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Machine')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -1105,7 +1114,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Machine')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to not remove the environment variable' {
@@ -1128,7 +1137,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Machine')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to remove the environment variable' {
@@ -1152,7 +1161,7 @@ try
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Machine')
-                    } | Should Not Throw
+                    } | Should -Not -Throw
                 }
 
                 It 'Should have called the correct mocks to set the environment variable' {
@@ -1176,7 +1185,7 @@ try
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName `
                                                                     -Ensure 'Present' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1194,7 +1203,7 @@ try
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName `
                                                                     -Ensure 'Present' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1212,7 +1221,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Present' `
                                                                     -Path $false
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1230,7 +1239,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Present' `
                                                                     -Path $false
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1248,7 +1257,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Present' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1267,7 +1276,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Present' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1298,7 +1307,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Present' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1320,7 +1329,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Present' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1338,7 +1347,7 @@ try
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1356,7 +1365,7 @@ try
                     $testTargetResourceResult = Test-TargetResource -Name $script:mockEnvironmentVarName `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1374,7 +1383,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Absent' `
                                                                     -Path $false
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1392,7 +1401,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Absent' `
                                                                     -Path $false
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1424,7 +1433,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1446,7 +1455,7 @@ try
                                                                     -Value $expectedValue `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1464,7 +1473,7 @@ try
                                                                     -Value 'nonExistentValue' `
                                                                     -Ensure 'Absent' `
                                                                     -Path $true
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1486,7 +1495,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1503,7 +1512,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1523,7 +1532,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $false `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1542,7 +1551,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $false `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1561,7 +1570,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1580,7 +1589,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1611,7 +1620,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1629,7 +1638,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1646,7 +1655,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1663,7 +1672,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1681,7 +1690,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $false `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1700,7 +1709,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $false `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1731,7 +1740,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1752,7 +1761,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1772,7 +1781,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Process')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1794,7 +1803,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1813,7 +1822,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1832,7 +1841,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $false `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1851,7 +1860,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $false `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1870,7 +1879,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1892,7 +1901,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1924,7 +1933,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1947,7 +1956,7 @@ try
                                                                     -Ensure 'Present' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1965,7 +1974,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -1983,7 +1992,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -2002,7 +2011,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $false `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -2021,7 +2030,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $false `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -2054,7 +2063,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $false
+                    $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should have called the correct mocks' {
@@ -2077,7 +2086,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -2096,7 +2105,7 @@ try
                                                                     -Ensure 'Absent' `
                                                                     -Path $true `
                                                                     -Target @('Machine')
-                    $testTargetResourceResult | Should Be $true
+                    $testTargetResourceResult | Should -Be $true
                 }
 
                 It 'Should have called the correct mocks' {
@@ -2125,7 +2134,7 @@ try
                 It 'Should return the correct value' {
                     $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'VariableName' `
                                                             -Target 'Process'
-                    $getEnvironmentVariableResult | Should Be $desiredValue
+                    $getEnvironmentVariableResult | Should -Be $desiredValue
                 }
             }
 
@@ -2133,13 +2142,13 @@ try
                 It 'Should return the correct value' {
                     $getEnvironmentVariableResult = Get-EnvironmentVariable -Name $script:mockEnvironmentVarName `
                                                             -Target 'Machine'
-                    $getEnvironmentVariableResult | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
+                    $getEnvironmentVariableResult | Should -Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
                 }
 
                 It 'Should return the null when Name does not exist' {
                     $getEnvironmentVariableResult = Get-EnvironmentVariable -Name 'nonExistentName' `
                                                             -Target 'Machine'
-                    $getEnvironmentVariableResult | Should Be $null
+                    $getEnvironmentVariableResult | Should -Be $null
                 }
             }
         }
@@ -2149,13 +2158,13 @@ try
                 It 'Should return the updated path value with the new path' {
                     $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue 'path1;path2;path4' `
                                                                                     -NewValue 'path3'
-                    $getPathValueWithAddedPathsResult | Should Be 'path1;path2;path4;path3'
+                    $getPathValueWithAddedPathsResult | Should -Be 'path1;path2;path4;path3'
                 }
 
                 It 'Should return the updated path value with all of the new paths' {
                     $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue 'path1;path2;path4' `
                                                                                     -NewValue 'path3;path4;path5;path6;path1'
-                    $getPathValueWithAddedPathsResult | Should Be 'path1;path2;path4;path3;path5;path6'
+                    $getPathValueWithAddedPathsResult | Should -Be 'path1;path2;path4;path3;path5;path6'
                 }
             }
 
@@ -2165,13 +2174,13 @@ try
                 It 'Should return the original value if one path is passed in and it is already in the current value' {
                     $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue $currentValue `
                                                                          -NewValue 'path3'
-                    $getPathValueWithAddedPathsResult | Should Be $currentValue
+                    $getPathValueWithAddedPathsResult | Should -Be $currentValue
                 }
 
                 It 'Should return $currentValue if multiple paths are passed in that are already contained in current value' {
                     $getPathValueWithAddedPathsResult = Add-PathsToValue -CurrentValue $currentValue `
                                                                          -NewValue 'path3;path4;path2'
-                    $getPathValueWithAddedPathsResult | Should Be $currentValue
+                    $getPathValueWithAddedPathsResult | Should -Be $currentValue
                 }
             }
         }
@@ -2181,19 +2190,19 @@ try
                 It 'Should return the updated path value with the specified path removed' {
                     $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path4' `
                                                                                     -PathsToRemove 'path2'
-                    $getPathValueWithRemovedPathsResult | Should Be 'path1;path4'
+                    $getPathValueWithRemovedPathsResult | Should -Be 'path1;path4'
                 }
 
                 It 'Should return the updated path value with all of the specified paths removed if they were present' {
                     $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path4' `
                                                                                     -PathsToRemove 'path3;path4;path5;path6;path1'
-                    $getPathValueWithRemovedPathsResult | Should Be 'path2'
+                    $getPathValueWithRemovedPathsResult | Should -Be 'path2'
                 }
 
                 It 'Should return an empty string if all paths are removed' {
                     $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path4' `
                                                                                     -PathsToRemove 'path2;path1;path4'
-                    $getPathValueWithRemovedPathsResult | Should Be ''
+                    $getPathValueWithRemovedPathsResult | Should -Be ''
                 }
             }
 
@@ -2201,7 +2210,7 @@ try
                 It 'Should return the original path if no paths were removed' {
                     $getPathValueWithRemovedPathsResult = Remove-PathsFromValue -CurrentValue 'path1;path2;path3;path4' `
                                                                                     -PathsToRemove 'path5;path6;path0'
-                    $getPathValueWithRemovedPathsResult | Should Be 'path1;path2;path3;path4'
+                    $getPathValueWithRemovedPathsResult | Should -Be 'path1;path2;path3;path4'
                 }
             }
         }
@@ -2257,7 +2266,7 @@ try
                             really really really long name that will not be accepted by the machine. `
                             really really really long name that will not be accepted by the machine.' `
                             -Target @('Machine')
-                    } | Should Throw $script:localizedData.ArgumentTooLong
+                    } | Should -Throw -ExpectedMessage $script:localizedData.ArgumentTooLong
                 }
 
 
@@ -2266,14 +2275,14 @@ try
                     $invalidName = 'invalidName'
                     {
                         Set-EnvironmentVariable -Name $invalidName -Target @('Machine')
-                    } | Should Throw ($script:localizedData.RemoveNonExistentVarError -f $invalidName)
+                    } | Should -Throw ($script:localizedData.RemoveNonExistentVarError -f $invalidName)
                 }
 
                 It 'Should throw exception when environment variable cannot be found to set' {
                     $invalidName = 'invalidName'
                     {
                         Set-EnvironmentVariable -Name $invalidName -Value 'testValue' -Target @('Machine')
-                    } | Should Throw ($script:localizedData.GetItemPropertyFailure -f $invalidName, $script:envVarRegPathMachine)
+                    } | Should -Throw ($script:localizedData.GetItemPropertyFailure -f $invalidName, $script:envVarRegPathMachine)
                 }
 
                 It 'Should set the environment variable if a value is passed in' {
@@ -2300,7 +2309,7 @@ try
                     $value = 'mockValue'
                     {
                         Set-EnvironmentVariable -Name $name -Value $value -Target @('Process')
-                    } | Should Throw $errorRecord
+                    } | Should -Throw -ExpectedMessage $errorRecord
                 }
             }
         }
@@ -2313,21 +2322,21 @@ try
                     $testPathInPathListWithCriteriaResult = Test-PathsInValue -ExistingPaths $existingPaths `
                                                                                             -QueryPaths 'path3' `
                                                                                             -FindCriteria 'Any'
-                    $testPathInPathListWithCriteriaResult | Should Be $true
+                    $testPathInPathListWithCriteriaResult | Should -Be $true
                 }
 
                 It 'Should return true when one of many paths is contained in path list' {
                     $testPathInPathListWithCriteriaResult = Test-PathsInValue -ExistingPaths $existingPaths `
                                                                                             -QueryPaths 'path0;path7;path3;path8'`
                                                                                             -FindCriteria 'Any'
-                    $testPathInPathListWithCriteriaResult | Should Be $true
+                    $testPathInPathListWithCriteriaResult | Should -Be $true
                 }
 
                 It 'Should return false when no path is contained in path list' {
                     $testPathInPathListWithCriteriaResult = Test-PathsInValue -ExistingPaths $existingPaths `
                                                                                             -QueryPaths 'path0;path7;path8;path9' `
                                                                                             -FindCriteria 'Any'
-                    $testPathInPathListWithCriteriaResult | Should Be $false
+                    $testPathInPathListWithCriteriaResult | Should -Be $false
                 }
             }
 
@@ -2336,21 +2345,21 @@ try
                     $testPathInPathListWithCriteriaResult = Test-PathsInValue -ExistingPaths $existingPaths `
                                                                                             -QueryPaths 'path3' `
                                                                                             -FindCriteria 'All'
-                    $testPathInPathListWithCriteriaResult | Should Be $true
+                    $testPathInPathListWithCriteriaResult | Should -Be $true
                 }
 
                 It 'Should return false when path is not contained in path list' {
                     $testPathInPathListWithCriteriaResult = Test-PathsInValue -ExistingPaths $existingPaths `
                                                                                             -QueryPaths 'path4' `
                                                                                             -FindCriteria 'All'
-                    $testPathInPathListWithCriteriaResult | Should Be $false
+                    $testPathInPathListWithCriteriaResult | Should -Be $false
                 }
 
                 It 'Should return false when one of many paths is not contained in path list' {
                     $testPathInPathListWithCriteriaResult = Test-PathsInValue -ExistingPaths $existingPaths `
                                                                                             -QueryPaths 'path1;path2;path3;path4' `
                                                                                             -FindCriteria 'All'
-                    $testPathInPathListWithCriteriaResult | Should Be $false
+                    $testPathInPathListWithCriteriaResult | Should -Be $false
                 }
             }
         }
@@ -2360,13 +2369,13 @@ try
 
             It 'Should return the correct value when the environment variable exists' {
                 $getItemPropertyExpandedResult = Get-EnvironmentVariableWithoutExpanding -Name $script:mockEnvironmentVarName
-                $getItemPropertyExpandedResult.$script:mockEnvironmentVarName | Should Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
+                $getItemPropertyExpandedResult.$script:mockEnvironmentVarName | Should -Be $script:mockEnvironmentVar.$script:mockEnvironmentVarName
                 Assert-MockCalled -CommandName Get-KeyValue -Exactly 1 -Scope It
             }
 
             It 'Should return $null when the environment variable does not exist' {
                 $getItemPropertyExpandedResult = Get-EnvironmentVariableWithoutExpanding -Name 'non-existentEnvironmentVariableName'
-                $getItemPropertyExpandedResult | Should Be $null
+                $getItemPropertyExpandedResult | Should -Be $null
                 Assert-MockCalled -CommandName Get-KeyValue -Exactly 0 -Scope It
             }
         }

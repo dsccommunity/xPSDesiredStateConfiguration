@@ -24,16 +24,24 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xServiceResource'
         This may be different from the service's display name.
         To retrieve a list of all services with their names and current states, use the Get-Service
         cmdlet.
+
+    .NOTES
+        BuiltInAccount, Credential and GroupManagedServiceAccount parameters output the user used
+        to run the service to the BuiltinAccount property, Evaluating if the account is a gMSA would
+        mean doing a call to active directory to verify, as the property returned by the ciminstance
+        is just a string. In a production scenario that would mean that every xService test will check
+        with AD every 15 minutes if the account is a gMSA. That's not desireable, so we output Credential
+        and GroupManagedServiceAccount without evaluating what kind of user is supplied.
 #>
 function Get-TargetResource
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -49,7 +57,14 @@ function Get-TargetResource
 
         foreach ($serviceDependedOn in $service.ServicesDependedOn)
         {
-            $dependencies += $serviceDependedOn.Name.ToString()
+            if ($null -ne $serviceDependedOn -and $null -ne $serviceDependedOn.Name)
+            {
+                $dependencies += $serviceDependedOn.Name.ToString()
+            }
+            else
+            {
+                Write-Warning -Message ($script:localizedData.CorruptDependency -f $Name)
+            }
         }
 
         $startupType = ConvertTo-StartupTypeString -StartMode $serviceCimInstance.StartMode
@@ -60,7 +75,7 @@ function Get-TargetResource
             'NT Authority\LocalService' { 'LocalService'; break }
             default { $serviceCimInstance.StartName }
         }
-        
+
         $serviceResource = @{
             Name            = $Name
             Ensure          = 'Present'
@@ -71,7 +86,7 @@ function Get-TargetResource
             DisplayName     = $service.DisplayName
             Description     = $serviceCimInstance.Description
             DesktopInteract = $serviceCimInstance.DesktopInteract
-            Dependencies    = $dependencies 
+            Dependencies    = $dependencies
         }
     }
     else
@@ -99,7 +114,7 @@ function Get-TargetResource
 
     .PARAMETER Ensure
         Specifies whether the service should exist or not.
-        
+
         Set this property to Present to create or modify a service.
         Set this property to Absent to delete a service.
 
@@ -118,10 +133,16 @@ function Get-TargetResource
     .PARAMETER BuiltInAccount
         The built-in account the service should start under.
 
-        Cannot be specified at the same time as Credential.
+        Cannot be specified at the same time as Credential or GroupManagedServiceAccount.
 
         The user account specified by this property must have access to the service executable path
         defined by Path in order to start the service.
+
+    .PARAMETER GroupManagedServiceAccount
+        The Group Managed Service Account the service should start under. The GMSA
+        must be provided in DOMAIN\gMSA$ format or UPN format gMSA$@domain.fqdn.
+
+        Cannot be specified at the same time as BuilInAccount or Credential.
 
     .PARAMETER DesktopInteract
         Indicates whether or not the service should be able to communicate with a window on the
@@ -168,7 +189,7 @@ function Get-TargetResource
         Here are the paths through which Set-TargetResource calls Invoke-CimMethod:
 
         Set-TargetResource --> Set-ServicePath --> Invoke-CimMethod
-                           --> Set-ServiceProperty --> Set-ServiceDependencies --> Invoke-CimMethod
+                           --> Set-ServiceProperty --> Set-ServiceDependency --> Invoke-CimMethod
                                                    --> Set-ServiceAccountProperty --> Invoke-CimMethod
                                                    --> Set-ServiceStartupType --> Invoke-CimMethod
 #>
@@ -179,50 +200,66 @@ function Set-TargetResource
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet('Automatic', 'Manual', 'Disabled')]
-        [String]
+        [System.String]
         $StartupType,
 
+        [Parameter()]
         [ValidateSet('LocalSystem', 'LocalService', 'NetworkService')]
-        [String]
+        [System.String]
         $BuiltInAccount,
 
+        [Parameter()]
+        [System.String]
+        $GroupManagedServiceAccount,
+
+        [Parameter()]
         [ValidateSet('Running', 'Stopped', 'Ignore')]
-        [String]
+        [System.String]
         $State = 'Running',
 
-        [Boolean]
+        [Parameter()]
+        [System.Boolean]
         $DesktopInteract = $false,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $DisplayName,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         [AllowEmptyCollection()]
         $Dependencies,
 
-        [UInt32]
+        [Parameter()]
+        [System.UInt32]
         $StartupTimeout = 30000,
 
-        [UInt32]
+        [Parameter()]
+        [System.UInt32]
         $TerminateTimeout = 30000,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -234,10 +271,13 @@ function Set-TargetResource
         Assert-NoStartupTypeStateConflict -ServiceName $Name -StartupType $StartupType -State $State
     }
 
-    if ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('Credential'))
+    if (($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('Credential')) -or
+        ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('GroupManagedServiceAccount')) -or
+        ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential'))
+    )
     {
-        $errorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $Name
-        New-InvalidArgumentException -ArgumentName 'BuiltInAccount & Credential' -Message $errorMessage
+        $errorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $Name
+        New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
     }
 
     $service = Get-Service -Name $Name -ErrorAction 'SilentlyContinue'
@@ -285,7 +325,7 @@ function Set-TargetResource
         # Update the properties of the service if needed
         $setServicePropertyParameters = @{}
 
-        $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'DesktopInteract', 'DisplayName', 'Description', 'Dependencies' )
+        $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount', 'DesktopInteract', 'DisplayName', 'Description', 'Dependencies' )
 
         foreach ($servicePropertyParameterName in $servicePropertyParameterNames)
         {
@@ -294,7 +334,7 @@ function Set-TargetResource
                 $setServicePropertyParameters[$servicePropertyParameterName] = $PSBoundParameters[$servicePropertyParameterName]
             }
         }
-        
+
         if ($setServicePropertyParameters.Count -gt 0)
         {
             Write-Verbose -Message ($script:localizedData.EditingServiceProperties -f $Name)
@@ -325,14 +365,14 @@ function Set-TargetResource
 
     .PARAMETER Name
         The name of the service to test.
-        
+
         This may be different from the service's display name.
         To retrieve a list of all services with their names and current states, use the Get-Service
         cmdlet.
 
     .PARAMETER Ensure
         Specifies whether the service should exist or not.
-        
+
         Set this property to Present to test if a service exists.
         Set this property to Absent to test if a service does not exist.
 
@@ -345,9 +385,15 @@ function Set-TargetResource
         The startup type the service should have.
 
     .PARAMETER BuiltInAccount
-        The account the service should be starting under.
+        The built-in account the service should start under.
 
-        Cannot be specified at the same time as Credential.
+        Cannot be specified at the same time as Credential or GroupManagedServiceAccount.
+
+    .PARAMETER GroupManagedServiceAccount
+        The Group Managed Service Account the service should start under. The GMSA
+        must be provided in DOMAIN\gMSA$ format or UPN format gMSA$@domain.fqdn.
+
+        Cannot be specified at the same time as BuilInAccount or Credential.
 
     .PARAMETER DesktopInteract
         Indicates whether or not the service should be able to communicate with a window on the
@@ -384,56 +430,72 @@ function Set-TargetResource
 #>
 function Test-TargetResource
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
-      
+
+        [Parameter()]
         [ValidateSet('Present', 'Absent')]
-        [String]
+        [System.String]
         $Ensure = 'Present',
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
+        [Parameter()]
         [ValidateSet('Automatic', 'Manual', 'Disabled')]
-        [String]
+        [System.String]
         $StartupType,
 
+        [Parameter()]
         [ValidateSet('LocalSystem', 'LocalService', 'NetworkService')]
-        [String]
+        [System.String]
         $BuiltInAccount,
 
-        [Boolean]
+        [Parameter()]
+        [System.String]
+        $GroupManagedServiceAccount,
+
+        [Parameter()]
+        [System.Boolean]
         $DesktopInteract = $false,
 
+        [Parameter()]
         [ValidateSet('Running', 'Stopped', 'Ignore')]
-        [String]
+        [System.String]
         $State = 'Running',
 
+        [Parameter()]
         [ValidateNotNull()]
-        [String]
+        [System.String]
         $DisplayName,
 
-        [String]
+        [Parameter()]
+        [System.String]
         [AllowEmptyString()]
         $Description,
 
-        [String[]]
+        [Parameter()]
+        [System.String[]]
         [AllowEmptyCollection()]
         $Dependencies,
 
-        [UInt32]
+        [Parameter()]
+        [System.UInt32]
         $StartupTimeout = 30000,
 
-        [UInt32]
+        [Parameter()]
+        [System.UInt32]
         $TerminateTimeout = 30000,
 
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -445,10 +507,13 @@ function Test-TargetResource
         Assert-NoStartupTypeStateConflict -ServiceName $Name -StartupType $StartupType -State $State
     }
 
-    if ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('Credential'))
+    if (($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('Credential')) -or
+        ($PSBoundParameters.ContainsKey('BuiltInAccount') -and $PSBoundParameters.ContainsKey('GroupManagedServiceAccount')) -or
+        ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount') -and $PSBoundParameters.ContainsKey('Credential'))
+    )
     {
-        $errorMessage = $script:localizedData.BuiltInAccountAndCredentialSpecified -f $Name
-        New-InvalidArgumentException -ArgumentName 'BuiltInAccount & Credential' -Message $errorMessage
+        $errorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $Name
+        New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
     }
 
     $serviceResource = Get-TargetResource -Name $Name
@@ -521,7 +586,7 @@ function Test-TargetResource
                 return $false
             }
         }
-            
+
         # Check the service desktop interation setting
         if ($PSBoundParameters.ContainsKey('DesktopInteract') -and $serviceResource.DesktopInteract -ine $DesktopInteract)
         {
@@ -534,6 +599,16 @@ function Test-TargetResource
         {
             Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'BuiltInAccount', $Name, $BuiltInAccount, $serviceResource.BuiltInAccount)
             return $false
+        }
+        elseif ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount'))
+        {
+            $expectedStartName = ConvertTo-StartName -Username $GroupManagedServiceAccount
+
+            if ($serviceResource.BuiltInAccount -ine $expectedStartName)
+            {
+                Write-Verbose -Message ($script:localizedData.GroupManagedServiceCredentialDoesNotMatch -f $Name, $GroupManagedServiceAccount, $serviceResource.BuiltInAccount)
+                return $false
+            }
         }
         elseif ($PSBoundParameters.ContainsKey('Credential'))
         {
@@ -573,7 +648,7 @@ function Test-TargetResource
 #>
 function Get-ServiceCimInstance
 {
-    [OutputType([CimInstance])]
+    [OutputType([Microsoft.Management.Infrastructure.CimInstance])]
     [CmdletBinding()]
     param
     (
@@ -595,13 +670,13 @@ function Get-ServiceCimInstance
 #>
 function ConvertTo-StartupTypeString
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateSet('Auto', 'Manual', 'Disabled')]
-        [String]
+        [System.String]
         $StartMode
     )
 
@@ -627,24 +702,24 @@ function ConvertTo-StartupTypeString
     .PARAMETER State
         The service state to check.
 #>
-function Assert-NoStartupTypeStateConflict 
+function Assert-NoStartupTypeStateConflict
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Automatic', 'Manual', 'Disabled')]
-        [String]
+        [System.String]
         $StartupType,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Running', 'Stopped', 'Ignore')]
-        [String]
+        [System.String]
         $State
     )
 
@@ -680,22 +755,22 @@ function Assert-NoStartupTypeStateConflict
 #>
 function Test-PathsMatch
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ExpectedPath,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ActualPath
     )
 
-    return (0 -eq [String]::Compare($ExpectedPath, $ActualPath, [System.Globalization.CultureInfo]::CurrentUICulture))
+    return (0 -eq [System.String]::Compare($ExpectedPath, $ActualPath, [System.Globalization.CultureInfo]::CurrentUICulture))
 }
 
 <#
@@ -708,13 +783,13 @@ function Test-PathsMatch
 #>
 function ConvertTo-StartName
 {
-    [OutputType([String])]
+    [OutputType([System.String])]
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Username
     )
 
@@ -753,18 +828,18 @@ function ConvertTo-StartName
 #>
 function Set-ServicePath
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path
     )
 
@@ -794,7 +869,7 @@ function Set-ServicePath
         {
             $serviceChangePropertyString = $changeServiceArguments.Keys -join ', '
             $errorMessage = $script:localizedData.InvokeCimMethodFailed -f 'Change', $ServiceName, $serviceChangePropertyString, $changeServiceResult.ReturnValue
-            New-InvalidArgumentException -ArgumentName 'Path' -Message $errorMessage   
+            New-InvalidArgumentException -ArgumentName 'Path' -Message $errorMessage
         }
 
         return $true
@@ -815,18 +890,18 @@ function Set-ServicePath
         SupportsShouldProcess is enabled because Invoke-CimMethod calls ShouldProcess.
         This function calls Invoke-CimMethod directly.
 #>
-function Set-ServiceDependencies
+function Set-ServiceDependency
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
-        [String[]]
+        [System.String[]]
         [AllowEmptyCollection()]
         $Dependencies
     )
@@ -890,7 +965,7 @@ function Grant-LogOnAsServiceRight
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Username
     )
 
@@ -920,7 +995,7 @@ function Grant-LogOnAsServiceRight
                 private const int UNLEN = 256;
                 private const int DNLEN = 15;
 
-                // Extra characteres for "\","@" etc.
+                // Extra characteres for '\', '@' etc.
                 private const int EXTRA_LENGTH = 3;
                 #endregion constants
 
@@ -1315,13 +1390,17 @@ function Set-ServiceAccountProperty
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter()]
-        [String]
+        [System.String]
         [ValidateSet('LocalSystem', 'LocalService', 'NetworkService')]
         $BuiltInAccount,
+
+        [Parameter()]
+        [System.String]
+        $GroupManagedServiceAccount,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -1329,7 +1408,7 @@ function Set-ServiceAccountProperty
         $Credential,
 
         [Parameter()]
-        [Boolean]
+        [System.Boolean]
         $DesktopInteract
     )
 
@@ -1345,6 +1424,17 @@ function Set-ServiceAccountProperty
         {
             $changeServiceArguments['StartName'] = $startName
             $changeServiceArguments['StartPassword'] = ''
+        }
+    }
+    elseif ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount'))
+    {
+        $startName = ConvertTo-StartName -Username $GroupManagedServiceAccount
+
+        if ($serviceCimInstance.StartName -ine $startName)
+        {
+            Grant-LogOnAsServiceRight -Username $startName
+
+            $changeServiceArguments['StartName'] = $startName
         }
     }
     elseif ($PSBoundParameters.ContainsKey('Credential'))
@@ -1402,12 +1492,12 @@ function Set-ServiceStartupType
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('Automatic', 'Manual', 'Disabled')]
-        [String]
+        [System.String]
         $StartupType
     )
 
@@ -1459,12 +1549,17 @@ function Set-ServiceStartupType
     .PARAMETER BuiltInAccount
         The built-in account the service should start under.
 
-        Cannot be specified at the same time as Credential.
+        Cannot be specified at the same time as Credential or GroupManagedServiceAccount.
+
+    .PARAMETER GroupManagedServiceAccount
+        The Group Managed Service Account that is used to run the service.
+
+        Cannot be specified at the same time as BuiltInAccount or Credential.
 
     .PARAMETER Credential
         The credential of the user account the service should start under.
 
-        Cannot be specified at the same time as BuiltInAccount.
+        Cannot be specified at the same time as BuiltInAccount or GroupManagedServiceAccount.
         The user specified by this credential will automatically be granted the Log on as a Service
         right.
 
@@ -1478,7 +1573,7 @@ function Set-ServiceStartupType
         SupportsShouldProcess is enabled because Invoke-CimMethod calls ShouldProcess.
         Here are the paths through which Set-ServiceProperty calls Invoke-CimMethod:
 
-        Set-ServiceProperty --> Set-ServiceDependencies --> Invoke-CimMethod
+        Set-ServiceProperty --> Set-ServiceDependency --> Invoke-CimMethod
                             --> Set-ServieceAccountProperty --> Invoke-CimMethod
                             --> Set-ServiceStartupType --> Invoke-CimMethod
 #>
@@ -1489,35 +1584,39 @@ function Set-ServiceProperty
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter()]
         [ValidateSet('Automatic', 'Manual', 'Disabled')]
-        [String]
+        [System.String]
         $StartupType,
 
         [Parameter()]
         [ValidateSet('LocalSystem', 'LocalService', 'NetworkService')]
-        [String]
+        [System.String]
         $BuiltInAccount,
 
         [Parameter()]
-        [Boolean]
+        [System.String]
+        $GroupManagedServiceAccount,
+
+        [Parameter()]
+        [System.Boolean]
         $DesktopInteract,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $DisplayName,
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Description,
 
         [Parameter()]
-        [String[]]
+        [System.String[]]
         [AllowEmptyCollection()]
         $Dependencies,
 
@@ -1530,7 +1629,7 @@ function Set-ServiceProperty
 
     # Update display name and/or description if needed
     $serviceCimInstance = Get-ServiceCimInstance -ServiceName $ServiceName
-    
+
     $setServiceParameters = @{}
 
     if ($PSBoundParameters.ContainsKey('DisplayName') -and $serviceCimInstance.DisplayName -ine $DisplayName)
@@ -1551,7 +1650,7 @@ function Set-ServiceProperty
     # Update service dependencies if needed
     if ($PSBoundParameters.ContainsKey('Dependencies'))
     {
-        Set-ServiceDependencies -ServiceName $ServiceName -Dependencies $Dependencies
+        Set-ServiceDependency -ServiceName $ServiceName -Dependencies $Dependencies
     }
 
     # Update service account properties if needed
@@ -1560,6 +1659,10 @@ function Set-ServiceProperty
     if ($PSBoundParameters.ContainsKey('BuiltInAccount'))
     {
         $setServiceAccountPropertyParameters['BuiltInAccount'] = $BuiltInAccount
+    }
+    elseif ($PSBoundParameters.ContainsKey('GroupManagedServiceAccount'))
+    {
+        $setServiceAccountPropertyParameters['GroupManagedServiceAccount'] = $GroupManagedServiceAccount
     }
     elseif ($PSBoundParameters.ContainsKey('Credential'))
     {
@@ -1599,7 +1702,7 @@ function Remove-Service
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name
     )
 
@@ -1623,20 +1726,20 @@ function Remove-ServiceWithTimeout
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [UInt32]
+        [System.UInt32]
         $TerminateTimeout
     )
 
     Remove-Service -Name $Name
 
     $serviceDeleted = $false
-    $start = [DateTime]::Now
+    $start = [System.DateTime]::Now
 
-    while (-not $serviceDeleted -and ([DateTime]::Now - $start).TotalMilliseconds -lt $TerminateTimeout)
+    while (-not $serviceDeleted -and ([System.DateTime]::Now - $start).TotalMilliseconds -lt $TerminateTimeout)
     {
         $service = Get-Service -Name $Name -ErrorAction 'SilentlyContinue'
 
@@ -1665,7 +1768,7 @@ function Remove-ServiceWithTimeout
     .SYNOPSIS
         Waits for the service with the given name to reach the given state within the given time
         span.
-        
+
         This is a wrapper function for unit testing.
 
     .PARAMETER ServiceName
@@ -1684,7 +1787,7 @@ function Wait-ServiceStateWithTimeout
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
@@ -1692,7 +1795,7 @@ function Wait-ServiceStateWithTimeout
         $State,
 
         [Parameter(Mandatory = $true)]
-        [TimeSpan]
+        [System.TimeSpan]
         $WaitTimeSpan
     )
 
@@ -1718,11 +1821,11 @@ function Start-ServiceWithTimeout
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
-        [UInt32]
+        [System.UInt32]
         $StartupTimeout
     )
 
@@ -1749,11 +1852,11 @@ function Stop-ServiceWithTimeout
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $ServiceName,
 
         [Parameter(Mandatory = $true)]
-        [UInt32]
+        [System.UInt32]
         $TerminateTimeout
     )
 

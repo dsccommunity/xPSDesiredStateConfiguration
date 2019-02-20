@@ -26,25 +26,25 @@ $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xScriptResource'
     .PARAMETER Credential
         The Credential to run the get script under if needed.
 #>
-function Get-TargetResource 
+function Get-TargetResource
 {
-    [OutputType([Hashtable])]
+    [OutputType([System.Collections.Hashtable])]
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GetScript,
-      
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $SetScript,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $TestScript,
 
         [Parameter()]
@@ -55,9 +55,9 @@ function Get-TargetResource
     )
 
     Write-Verbose -Message $script:localizedData.GetTargetResourceStartVerboseMessage
- 
+
     $invokeScriptParameters = @{
-        ScriptBlock = [ScriptBlock]::Create($GetScript)
+        ScriptBlock = [System.Management.Automation.ScriptBlock]::Create($GetScript)
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -72,7 +72,7 @@ function Get-TargetResource
         New-InvalidOperationException -Message $script:localizedData.GetScriptThrewError -ErrorRecord $invokeScriptResult
     }
 
-    $invokeScriptResultAsHashTable = $invokeScriptResult -as [Hashtable]
+    $invokeScriptResultAsHashTable = $invokeScriptResult -as [System.Collections.Hashtable]
 
     if ($null -eq $invokeScriptResultAsHashTable)
     {
@@ -101,24 +101,24 @@ function Get-TargetResource
     .PARAMETER Credential
         The Credential to run the set script under if needed.
 #>
-function Set-TargetResource 
+function Set-TargetResource
 {
     [CmdletBinding()]
-    param 
-    (       
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GetScript,
-      
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $SetScript,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $TestScript,
 
         [Parameter()]
@@ -131,7 +131,7 @@ function Set-TargetResource
     Write-Verbose -Message $script:localizedData.SetTargetResourceStartVerboseMessage
 
     $invokeScriptParameters = @{
-        ScriptBlock = [ScriptBlock]::Create($SetScript)
+        ScriptBlock = [System.Management.Automation.ScriptBlock]::Create($SetScript)
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -166,25 +166,25 @@ function Set-TargetResource
     .PARAMETER Credential
         The Credential to run the test script under if needed.
 #>
-function Test-TargetResource 
+function Test-TargetResource
 {
-    [OutputType([Boolean])]
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
-    param 
-    (     
+    param
+    (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $GetScript,
-      
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $SetScript,
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $TestScript,
 
         [Parameter()]
@@ -197,7 +197,7 @@ function Test-TargetResource
     Write-Verbose -Message $script:localizedData.TestTargetResourceStartVerboseMessage
 
     $invokeScriptParameters = @{
-        ScriptBlock = [ScriptBlock]::Create($TestScript)
+        ScriptBlock = [System.Management.Automation.ScriptBlock]::Create($TestScript)
     }
 
     if ($PSBoundParameters.ContainsKey('Credential'))
@@ -208,7 +208,7 @@ function Test-TargetResource
     $invokeScriptResult = Invoke-Script @invokeScriptParameters
 
     # If the script is returing multiple objects, then we consider the last object to be the result of the script execution.
-    if ($invokeScriptResult -is [Object[]] -and $invokeScriptResult.Count -gt 0)
+    if ($invokeScriptResult -is [System.Object[]] -and $invokeScriptResult.Count -gt 0)
     {
         $invokeScriptResult = $invokeScriptResult[$invokeScriptResult.Count - 1]
     }
@@ -218,7 +218,7 @@ function Test-TargetResource
         New-InvalidOperationException -Message $script:localizedData.TestScriptThrewError -ErrorRecord $invokeScriptResult
     }
 
-    if ($null -eq $invokeScriptResult -or -not ($invokeScriptResult -is [Boolean]))
+    if ($null -eq $invokeScriptResult -or -not ($invokeScriptResult -is [System.Boolean]))
     {
         New-InvalidArgumentException -ArgumentName 'TestScript' -Message $script:localizedData.TestScriptDidNotReturnBoolean
     }
@@ -243,14 +243,14 @@ function Test-TargetResource
 #>
 function Invoke-Script
 {
-    [OutputType([Object])]
+    [OutputType([System.Object])]
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory = $true)]
-        [ScriptBlock] 
+        [System.Management.Automation.ScriptBlock]
         $ScriptBlock,
-    
+
         [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
