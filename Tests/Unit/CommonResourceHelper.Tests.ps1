@@ -189,18 +189,41 @@ Describe 'CommonResourceHelper Unit Tests' {
 
         Describe 'New-InvalidOperationException' {
             $testMessage = 'Test Error'
+            $testArgumentName = 'Test Argument'
+            $testException = New-Object `
+                -TypeName System.ArgumentException `
+                -ArgumentList @($testMessage, $testArgumentName)
+            $testErrorRecord = New-Object `
+                -TypeName System.Management.Automation.ErrorRecord `
+                -ArgumentList @( $testException, $testArgumentName, 'InvalidArgument', $null )
 
             Context "When called with Message $testMessage and no ErrorRecord" {
                 It 'Should throw expected exception' {
                     $exception = New-Object -TypeName System.InvalidOperationException `
-                        -ArgumentList @($Message)
+                        -ArgumentList @( $testMessage )
                     $errorRecord = New-Object `
                         -TypeName System.Management.Automation.ErrorRecord `
-                        -ArgumentList @( $testMessage, 'MachineStateIncorrect','InvalidOperation', $null )
+                        -ArgumentList @( $exception.ToString(), 'MachineStateIncorrect', 'InvalidOperation', $null )
 
                     {
                         New-InvalidOperationException `
                             -Message $testMessage
+                    } | Should -Throw $errorRecord
+                }
+            }
+
+            Context "When called with Message $testMessage and an InvalidArgument ErrorRecord" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object -TypeName System.InvalidOperationException `
+                        -ArgumentList @( $testMessage, $testErrorRecord.Exception )
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList @( $exception.ToString(), 'MachineStateIncorrect', 'InvalidOperation', $null )
+
+                    {
+                        New-InvalidOperationException `
+                            -Message $testMessage `
+                            -ErrorRecord $testErrorRecord
                     } | Should -Throw $errorRecord
                 }
             }

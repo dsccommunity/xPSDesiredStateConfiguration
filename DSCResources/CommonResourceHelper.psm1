@@ -154,18 +154,17 @@ function New-InvalidOperationException
     elseif ($null -eq $ErrorRecord)
     {
         $invalidOperationException = New-Object -TypeName 'InvalidOperationException' `
-            -ArgumentList @($Message)
+            -ArgumentList @( $Message )
     }
     else
     {
         $invalidOperationException = New-Object -TypeName 'InvalidOperationException' `
-            -ArgumentList @($Message, $ErrorRecord.Exception)
+            -ArgumentList @( $Message, $ErrorRecord.Exception )
     }
 
     $newObjectParams = @{
         TypeName     = 'System.Management.Automation.ErrorRecord'
-        ArgumentList = @( $invalidOperationException.ToString(), 'MachineStateIncorrect',
-            'InvalidOperation', $null )
+        ArgumentList = @( $invalidOperationException.ToString(), 'MachineStateIncorrect', 'InvalidOperation', $null )
     }
 
     $errorRecordToThrow = New-Object @newObjectParams
