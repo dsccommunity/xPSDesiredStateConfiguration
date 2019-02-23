@@ -733,6 +733,13 @@ function Enter-DscResourceTestEnvironment
     $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
     $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
 
+    # Populate the variable to track whether we've updated DSCResource.Tests recently
+    if (-not (Test-Path -Path Variable:Global:UpdatedDscResourceTestsModule))
+    {
+        $Global:UpdatedDscResourceTestsModule = $false
+    }
+
+    # If DSCResource.Tests doesn't exist, perform a fresh clone of the Module
     if (-not (Test-Path -Path $dscResourceTestsPath))
     {
         Push-Location $moduleRootPath
@@ -741,20 +748,30 @@ function Enter-DscResourceTestEnvironment
 
         $Global:UpdatedDscResourceTestsModule = $true
     }
-    elseif (-not (Test-Path -Path Variable:Global:UpdatedDscResourceTestsModule) -or
-                 ($Global:UpdatedDscResourceTestsModule -eq $false))
+    # DSCResource.Tests exists, but we haven't yet checked whether it needs to be updated
+    elseif ($Global:UpdatedDscResourceTestsModule -eq $false)
     {
-        $gitInstalled = $null -ne (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue')
+        # Get the last modified date of the newest file in DSCResource.Tests
+        $newestFile = Get-ChildItem -Path $dscResourceTestsPath -Recurse | `
+                      Where-Object -FilterScript {$_.GetType() -like "FileInfo"} | `
+                      Sort-Object -Property LastWriteTime -Descending | `
+                      Select-Object -First 1
 
-        if ($gitInstalled)
+        # Update DSCResource.Tests if it hasn't been updated within the past hour
+        if ((([DateTime]::Now) - $newestFile.LastWriteTime).TotalHours -gt 1.0)
         {
-            Push-Location $dscResourceTestsPath
-            git pull origin dev --quiet
-            Pop-Location
-        }
-        else
-        {
-            Write-Verbose -Message 'Git not installed. Leaving current DSCResource.Tests as is.'
+            $gitInstalled = $null -ne (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue')
+
+            if ($gitInstalled)
+            {
+                Push-Location $dscResourceTestsPath
+                git pull origin dev --quiet
+                Pop-Location
+            }
+            else
+            {
+                Write-Verbose -Message 'Git not installed. Leaving current DSCResource.Tests as is.'
+            }
         }
 
         $Global:UpdatedDscResourceTestsModule = $true
