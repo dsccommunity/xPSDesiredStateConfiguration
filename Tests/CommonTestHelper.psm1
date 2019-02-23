@@ -758,7 +758,8 @@ function Enter-DscResourceTestEnvironment
                       Select-Object -First 1
 
         # Update DSCResource.Tests if it hasn't been updated within the past hour
-        if ((([DateTime]::Now) - $newestFile.LastWriteTime).TotalHours -gt 1.0)
+        if ($null -eq $newestFile.LastWriteTime -or
+            (([DateTime]::Now) - $newestFile.LastWriteTime).TotalHours -gt 1.0)
         {
             $gitInstalled = $null -ne (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue')
 
