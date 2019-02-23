@@ -143,6 +143,50 @@ Describe 'CommonResourceHelper Unit Tests' {
             }
         }
 
+        Describe 'New-InvalidArgumentException' {
+            $testMessage = 'Test Message'
+            $testArgumentName = 'Test Argument'
+
+            Context "When called with Message $testMessage and ArgumentRecord '$testArgumentName'" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object `
+                        -TypeName System.ArgumentException `
+                        -ArgumentList @($testMessage, $testArgumentName)
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList @($exception, $testArgumentName, 'InvalidArgument', $null)
+
+                    {
+                        New-InvalidArgumentException `
+                            -Message $testMessage `
+                            -ArgumentName $testArgumentName
+                    } | Should -Throw $errorRecord
+                }
+            }
+        }
+
+        Describe 'New-InvalidDataException' {
+            $testErrorId = 1
+            $testErrorMessage = 'Test Error'
+
+            Context "When called with ErrorId $testErrorId and ErrorMessage '$testErrorMessage'" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object `
+                        -TypeName System.InvalidOperationException `
+                        -ArgumentList $testErrorMessage
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList $exception, $testErrorId, ([System.Management.Automation.ErrorCategory]::InvalidData), $null
+
+                    {
+                        New-InvalidDataException `
+                            -ErrorId 1 `
+                            -ErrorMessage 'Test Error'
+                    } | Should -Throw $errorRecord
+                }
+            }
+        }
+
         Describe 'Test-CommandExists' {
             $testCommandName = 'TestCommandName'
 
