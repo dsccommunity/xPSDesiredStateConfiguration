@@ -13,13 +13,22 @@
 - Added unit tests for `New-InvalidArgumentException`, `New-InvalidDataException` and
   `New-InvalidOperationException` CommonResourceHelper.psm1 functions.
 - Changes to `MSFT_xDSCWebService`
-  - Fixed [issue #528](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/528): Unable to disable selfsigned certificates using AcceptSelfSignedCertificates=$false
-  - Fixed [issue #460](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/460): Redeploy DSC Pull Server fails with error
+  - Fixed
+    [issue #528](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/528)
+    : Unable to disable selfsigned certificates using AcceptSelfSignedCertificates=$false
+  - Fixed
+    [issue #460](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/460)
+    : Redeploy DSC Pull Server fails with error
+- Updates test helper Enter-DscResourceTestEnvironment to only clone or pull
+  DscResource.Tests a maximum of one time per build. Currently it will clone or
+  pull every time this function is hit.
 
 ## 8.5.0.0
 
 - Pull server module publishing
-  - Removed forced verbose logging from CreateZipFromSource, Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the console
+  - Removed forced verbose logging from CreateZipFromSource,
+    Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the
+    console
 - Corrected GitHub Pull Request template to remove referral to
   `BestPractices.MD` which has been combined into `StyleGuidelines.md`
   ([issue #520](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/520)).
@@ -104,9 +113,6 @@
   - Corrected style guideline violations. ([issue #496](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/496))
 - Changes to PSWSIISEndpoint.psm1
   - Fixes most PSScriptAnalyzer issues.
-- Updates test helper Enter-DscResourceTestEnvironment to only clone or pull
-  DscResource.Tests a maximum of one time per build. Currently it will clone or
-  pull every time this function is hit.
 - Changes to xRegistry
   - Fixed an issue that fails to remove reg key when the `Key` is specified as
     common registry path.
