@@ -753,7 +753,7 @@ function Enter-DscResourceTestEnvironment
     {
         # Get the last modified date of the newest file in DSCResource.Tests
         $newestFile = Get-ChildItem -Path $dscResourceTestsPath -Recurse | `
-                      Where-Object -FilterScript {$_.GetType() -like "FileInfo"} | `
+                      Where-Object -FilterScript {$_.GetType().Name -like 'FileInfo'} | `
                       Sort-Object -Property LastWriteTime -Descending | `
                       Select-Object -First 1
 
@@ -765,6 +765,8 @@ function Enter-DscResourceTestEnvironment
 
             if ($gitInstalled)
             {
+                Write-Verbose -Message 'DSCResource.Tests has not been updated in over an hour. Performing a git pull against repository.'
+
                 Push-Location $dscResourceTestsPath
                 git pull origin dev --quiet
                 Pop-Location
