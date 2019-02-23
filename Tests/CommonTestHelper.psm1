@@ -733,7 +733,7 @@ function Enter-DscResourceTestEnvironment
     $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
     $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
 
-    # Populate the variable to track whether we've updated DSCResource.Tests recently
+    # If necessary, populate the variable to track whether we've updated DSCResource.Tests recently
     if (-not (Test-Path -Path Variable:Global:UpdatedDscResourceTestsModule))
     {
         $Global:UpdatedDscResourceTestsModule = $false
