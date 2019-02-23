@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- xRemoteFile
+  - Updated MatchSource description in README.md.
+    [issue #409](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/409)
+  - Improved layout of MOF file to move description left.
+  - Added function help for all functions.
+  - Moved `New-InvalidDataException` to CommonResourceHelper.psm1.
+    [issue #544](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/544)
+- Added full stops to the end of all functions help in CommonResourceHelper.psm1.
+- Added unit tests for `New-InvalidArgumentException`, `New-InvalidDataException` and
+  `New-InvalidOperationException` CommonResourceHelper.psm1 functions.
+
 ## 8.5.0.0
 
 - Pull server module publishing

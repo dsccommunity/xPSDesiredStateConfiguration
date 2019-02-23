@@ -143,6 +143,92 @@ Describe 'CommonResourceHelper Unit Tests' {
             }
         }
 
+        Describe 'New-InvalidArgumentException' {
+            $testMessage = 'Test Message'
+            $testArgumentName = 'Test Argument'
+
+            Context "When called with Message $testMessage and ArgumentRecord '$testArgumentName'" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object `
+                        -TypeName System.ArgumentException `
+                        -ArgumentList @($testMessage, $testArgumentName)
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList @($exception, $testArgumentName, 'InvalidArgument', $null)
+
+                    {
+                        New-InvalidArgumentException `
+                            -Message $testMessage `
+                            -ArgumentName $testArgumentName
+                    } | Should -Throw $errorRecord
+                }
+            }
+        }
+
+        Describe 'New-InvalidDataException' {
+            $testErrorId = 1
+            $testErrorMessage = 'Test Error'
+
+            Context "When called with ErrorId $testErrorId and ErrorMessage '$testErrorMessage'" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object `
+                        -TypeName System.InvalidOperationException `
+                        -ArgumentList $testErrorMessage
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList $exception, $testErrorId, ([System.Management.Automation.ErrorCategory]::InvalidData), $null
+
+                    {
+                        New-InvalidDataException `
+                            -ErrorId $testErrorId `
+                            -ErrorMessage $testErrorMessage
+                    } | Should -Throw $errorRecord
+                }
+            }
+        }
+
+        Describe 'New-InvalidOperationException' {
+            $testMessage = 'Test Error'
+            $testArgumentName = 'Test Argument'
+            $testException = New-Object `
+                -TypeName System.ArgumentException `
+                -ArgumentList @($testMessage, $testArgumentName)
+            $testErrorRecord = New-Object `
+                -TypeName System.Management.Automation.ErrorRecord `
+                -ArgumentList @( $testException, $testArgumentName, 'InvalidArgument', $null )
+
+            Context "When called with Message $testMessage and no ErrorRecord" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object -TypeName System.InvalidOperationException `
+                        -ArgumentList @( $testMessage )
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList @( $exception.ToString(), 'MachineStateIncorrect', 'InvalidOperation', $null )
+
+                    {
+                        New-InvalidOperationException `
+                            -Message $testMessage
+                    } | Should -Throw $errorRecord
+                }
+            }
+
+            Context "When called with Message $testMessage and an InvalidArgument ErrorRecord" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object -TypeName System.InvalidOperationException `
+                        -ArgumentList @( $testMessage, $testErrorRecord.Exception )
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList @( $exception.ToString(), 'MachineStateIncorrect', 'InvalidOperation', $null )
+
+                    {
+                        New-InvalidOperationException `
+                            -Message $testMessage `
+                            -ErrorRecord $testErrorRecord
+                    } | Should -Throw $errorRecord
+                }
+            }
+        }
+
         Describe 'Test-CommandExists' {
             $testCommandName = 'TestCommandName'
 
