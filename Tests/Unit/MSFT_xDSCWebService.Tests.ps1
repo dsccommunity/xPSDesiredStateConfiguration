@@ -462,20 +462,28 @@ try
             function Get-WebBinding {}
 
             #region Mocks
-            $allowedArgs = @(
-                '('''' -ne ((& (Get-IISAppCmd) list config -section:system.webServer/globalModules) -like "*$iisSelfSignedModuleName*"))'
-                '& (Get-IISAppCmd) install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false'
-                '& (Get-IISAppCmd) add module /name:$iisSelfSignedModuleName /app.name:"$EndpointName/" $preConditionBitnessArgumentFor32BitInstall'
-                '& (Get-IISAppCmd) delete module /name:$iisSelfSignedModuleName /app.name:"$EndpointName/"'
-            )
-            $testArguments = @"
-`$line = (`$MyInvocation.Line.Trim() -replace '\s+', ' ')
-if (`$allowedArgs -notcontains `$line) {
-    throw "Mock test failed. Invalid parameters [`$line]"
-}
-"@
-
-            Mock -CommandName Get-Command -ParameterFilter {$Name -eq '.\appcmd.exe'} -MockWith {[ScriptBlock]::Create($testArguments)}
+            Mock -CommandName Get-Command -ParameterFilter {$Name -eq '.\appcmd.exe'} -MockWith {
+                <#
+                    We return a ScriptBlock here, so that the ScriptBlock is called with the parameters which are actually passed to appcmd.exe.
+                    To verify the arguments which are passed to appcmd.exe the property UnboundArguments of $MyInvocation can be used. But
+                    here's a catch: when Powershell parses the arguments into the UnboundArguments it splits arguments which start with -section:
+                    into TWO separate array elements. So -section:system.webServer/globalModules ends up in [-section:, system.webServer/globalModules]
+                    and not as [-section:system.webServer/globalModules]. If the arguments should later be verified in this mock this should be considered.
+                #>
+                {
+                    $allowedArgs = @(
+                        '('''' -ne ((& (Get-IISAppCmd) list config -section:system.webServer/globalModules) -like "*$iisSelfSignedModuleName*"))'
+                        '& (Get-IISAppCmd) install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false'
+                        '& (Get-IISAppCmd) add module /name:$iisSelfSignedModuleName /app.name:"$EndpointName/" $preConditionBitnessArgumentFor32BitInstall'
+                        '& (Get-IISAppCmd) delete module /name:$iisSelfSignedModuleName /app.name:"$EndpointName/"'
+                    )
+                    $line = $MyInvocation.Line.Trim() -replace '\s+', ' '
+                    if ($allowedArgs -notcontains $line)
+                    {
+                        throw "Mock test failed. Invalid parameters [$line]"
+                    }
+                }
+            }
             Mock -CommandName Get-OSVersion -MockWith {@{Major = 6; Minor = 3}}
             Mock -CommandName Get-Website
             #endregion
@@ -729,7 +737,7 @@ if (`$allowedArgs -notcontains `$line) {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Remove('CertificateThumbPrint')
 
-                    {$result = Set-TargetResource @altTestParameters} | Should -Throw
+                    {Set-TargetResource @altTestParameters} | Should -Throw
                 }
             }
         }
@@ -739,18 +747,19 @@ if (`$allowedArgs -notcontains `$line) {
             function Get-WebBinding {}
 
             #region Mocks
-            $allowedArgs = @(
-                '('''' -ne ((& (Get-IISAppCmd) list config -section:system.webServer/globalModules) -like "*$iisSelfSignedModuleName*"))'
-            )
-            $testArguments = @"
-`$line = (`$MyInvocation.Line.Trim() -replace '\s+', ' ')
-if (`$allowedArgs -notcontains `$line) {
-    throw "Mock test failed. Invalid parameters [`$line]"
-}
-"@
+            Mock -CommandName Get-Command -ParameterFilter {$Name -eq '.\appcmd.exe'} -MockWith {
+                {
+                    $allowedArgs = @(
+                        '('''' -ne ((& (Get-IISAppCmd) list config -section:system.webServer/globalModules) -like "*$iisSelfSignedModuleName*"))'
+                    )
 
-            Mock -CommandName Get-Command -ParameterFilter {$Name -eq '.\appcmd.exe'} -MockWith {[ScriptBlock]::Create($testArguments)}
-            Mock -CommandName Test-IISSelfSignedModuleInstalled
+                    $line = $MyInvocation.Line.Trim() -replace '\s+', ' '
+                    if ($allowedArgs -notcontains $line)
+                    {
+                        throw "Mock test failed. Invalid parameters [$line]"
+                    }
+                }
+            }
             #endregion
 
             Context -Name 'DSC Service is not installed' -Fixture {
@@ -769,20 +778,15 @@ if (`$allowedArgs -notcontains `$line) {
 
                 It 'Should return $false when Ensure is Absent' {
                     Test-TargetResource @testParameters -Ensure Absent | Should -Be $false
-
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
                 It 'Should return $false if Port doesn''t match' {
                     Test-TargetResource @testParameters -Ensure Present -Port 8081 | Should -Be $false
-
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
                 It 'Should return $false if Certificate Thumbprint is set' {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.CertificateThumbprint = $certificateData[0].Thumbprint
 
                     Test-TargetResource @altTestParameters -Ensure Present | Should -Be $false
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
                 It 'Should return $false if Physical Path doesn''t match' {
                     Mock -CommandName Test-WebsitePath -MockWith {$true} -Verifiable
@@ -790,7 +794,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 Mock -CommandName Get-WebBinding -MockWith {return @{CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash}}
@@ -800,7 +803,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -State Stopped | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
                 It 'Should return $false when dbProvider is not set' {
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {''} -Verifiable
@@ -808,7 +810,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting'; $true}
@@ -822,7 +823,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath  | Should -Be $true
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $false when dbProvider is set to ESENT and ConnectionString does match the value in web.config' {
@@ -832,7 +832,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $true when dbProvider is set to System.Data.OleDb and ConnectionString does not match the value in web.config' {
@@ -844,7 +843,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath | Should -Be $true
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $false when dbProvider is set to System.Data.OleDb and ConnectionString does match the value in web.config' {
@@ -854,7 +852,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
@@ -868,7 +865,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -ModulePath $modulePath | Should -Be $true
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $false when ModulePath is not set the same as in web.config' {
@@ -877,7 +873,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
@@ -890,7 +885,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -Be $true
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $false when ConfigurationPath is not set the same as in web.config' {
@@ -901,7 +895,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
@@ -914,7 +907,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -Be $true
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $false when RegistrationKeyPath is not set the same as in web.config' {
@@ -925,7 +917,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $true when AcceptSelfSignedCertificates is set the same as in web.config' {
@@ -937,7 +928,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -Be $true
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
 
                 It 'Should return $false when AcceptSelfSignedCertificates is not set the same as in web.config' {
@@ -949,7 +939,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled -Scope It
                 }
             }
 
@@ -960,8 +949,6 @@ if (`$allowedArgs -notcontains `$line) {
 
                 It 'Should return $false if Certificate Thumbprint is set to AllowUnencryptedTraffic' {
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
-
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled
                 }
 
                 It 'Should return $false if Certificate Subject does not match the current certificate' {
@@ -971,8 +958,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Mock -CommandName Find-CertificateThumbprintWithSubjectAndTemplateName -MockWith {'ZZYYXXWWVVUUTTSSRRQQPPOONNMMLLKKJJIIHHGG'}
 
                     Test-TargetResource @altTestParameters -Ensure Present -CertificateSubject 'Invalid Certifcate' | Should -Be $false
-
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-IISSelfSignedModuleInstalled
                 }
 
                 Mock -CommandName Test-WebsitePath -MockWith {$false} -Verifiable
@@ -990,7 +975,6 @@ if (`$allowedArgs -notcontains `$line) {
                     Test-TargetResource @altTestParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
-                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-IISSelfSignedModuleInstalled
                 }
 
             }
@@ -1000,7 +984,7 @@ if (`$allowedArgs -notcontains `$line) {
                     $altTestParameters = $testParameters.Clone()
                     $altTestParameters.Remove('CertificateThumbPrint')
 
-                    {$result = Test-TargetResource @altTestParameters} | Should -Throw
+                    {Test-TargetResource @altTestParameters} | Should -Throw
                 }
             }
         }

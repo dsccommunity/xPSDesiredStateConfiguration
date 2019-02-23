@@ -12,6 +12,9 @@
 - Added full stops to the end of all functions help in CommonResourceHelper.psm1.
 - Added unit tests for `New-InvalidArgumentException`, `New-InvalidDataException` and
   `New-InvalidOperationException` CommonResourceHelper.psm1 functions.
+- Changes to `MSFT_xDSCWebService`
+  - Fixed [issue #528](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/528): Unable to disable selfsigned certificates using AcceptSelfSignedCertificates=$false
+  - Fixed [issue #460](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/460): Redeploy DSC Pull Server fails with error
 
 ## 8.5.0.0
 
