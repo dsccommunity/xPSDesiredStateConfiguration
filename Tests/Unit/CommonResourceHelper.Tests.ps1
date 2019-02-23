@@ -180,8 +180,27 @@ Describe 'CommonResourceHelper Unit Tests' {
 
                     {
                         New-InvalidDataException `
-                            -ErrorId 1 `
-                            -ErrorMessage 'Test Error'
+                            -ErrorId $testErrorId `
+                            -ErrorMessage $testErrorMessage
+                    } | Should -Throw $errorRecord
+                }
+            }
+        }
+
+        Describe 'New-InvalidOperationException' {
+            $testMessage = 'Test Error'
+
+            Context "When called with Message $testMessage and no ErrorRecord" {
+                It 'Should throw expected exception' {
+                    $exception = New-Object -TypeName System.InvalidOperationException `
+                        -ArgumentList @($Message)
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList @( $testMessage, 'MachineStateIncorrect','InvalidOperation', $null )
+
+                    {
+                        New-InvalidOperationException `
+                            -Message $testMessage
                     } | Should -Throw $errorRecord
                 }
             }
