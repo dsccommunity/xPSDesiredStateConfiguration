@@ -79,7 +79,8 @@ the following resources:
   - [ ] WindowsOptionalFeatureSet
   - [x] WindowsPackageCab
 - [x]
-  [5. Resolve Name of New High Quality Resource Module](#resolve-name-of-new-high-quality-resource-module)  
+  [5.
+  Resolve Name of New High Quality Resource Module](#resolve-name-of-new-high-quality-resource-module)  
   The new high quality module name is PSDscResources.
 - [ ]
   [6. Move Resources to New High Quality Module](#move-resources-to-new-high-quality-module)
@@ -161,9 +162,14 @@ will change in the near future. The 'x' can be removed as part of step 5.
 
 | Resource Name | Reason Not to Move |
 |---------------|--------------------|
-| FileUpload | This should be part of the File resource. We do not want this released as an official, supported resource when we are planning to change it in the future. |
-| RemoteFile | This should be part of the File resource. We do not want this released as an official, supported resource when we are planning to change it in the future. |
-| DscWebService | This resource is currently on hold. It is not in current plans for PSDscResources. |
+| FileUpload | This should be part of the File resource. We do not want this
+released as an official, supported resource when we are planning to change it
+in the future. |
+| RemoteFile | This should be part of the File resource. We do not want this
+released as an official, supported resource when we are planning to change it
+in the future. |
+| DscWebService | This resource is currently on hold. It is not in current
+plans for PSDscResources. |
 
 ## Resolve Nano Server vs Full Server Resources
 
@@ -176,9 +182,15 @@ if-statements will make the resources difficult to maintain.
 
 | Solution | Pros | Cons |
 |----------|------|------|
-| Leave the if-statements | - No time needed for fix. | - Difficult to maintain. - User has to download/store extra code. (minimal) |
-| Use the Nano server version only | - Code will be easy to maintain. - May be a cleaner, simpler implementation for full server. - User does not have to download/store extra code. (minimal) | - May break the resources. - Requires fixing time. - Requires testing. |
-| Separate the Nano and full server versions into separate resources | - User can download only the resource version they need. | - Will have to maintain separate version. - Requires fixing time. - Requires testing. |
+| Leave the if-statements | - No time needed for fix. | - Difficult to
+maintain. - User has to download/store extra code. (minimal) |
+| Use the Nano server version only | - Code will be easy to maintain. - May be
+a cleaner, simpler implementation for full server. - User does not have to
+download/store extra code. (minimal) | - May break the resources. - Requires
+fixing time. - Requires testing. |
+| Separate the Nano and full server versions into separate resources | - User
+can download only the resource version they need. | - Will have to maintain
+separate version. - Requires fixing time. - Requires testing. |
 
 ## Update Each Resource to Be High Quality
 
