@@ -23,7 +23,7 @@
   - Common Tests - Required Script Analyzer Rules
   - Common Tests - Validate Markdown Links
 - Add .markdownlint.json file using settings from
-  (here)[https://raw.githubusercontent.com/PowerShell/PowerShell/master/.markdownlint.json]
+  (here)[https://raw.githubusercontent.com/PowerShell/SqlServerDsc/dev/.markdownlint.json]
   as a starting point.
 
 ## 8.5.0.0
