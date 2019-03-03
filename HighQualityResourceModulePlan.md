@@ -161,23 +161,23 @@ will change in the near future. The 'x' can be removed as part of step 5.
 
 ### Open-Source Resources Not Moving to HQRM
 
-#### Resource Name: FileUpload ####
+#### Resource Name: FileUpload
 
-##### Reason Not To Move #####
+##### Reason Not To Move
 
 This should be part of the File resource. We do not want this released as an 
 official, supported resource when we are planning to change it in the future.
 
-#### Resource Name: RemoteFile ####
+#### Resource Name: RemoteFile
 
-##### Reason Not To Move #####
+##### Reason Not To Move
 
 This should be part of the File resource. We do not want this released as an
 official, supported resource when we are planning to change it in the future.
 
-#### Resource Name: DscWebService ####
+#### Resource Name: DscWebService
 
-##### Reason Not To Move #####
+##### Reason Not To Move
 
 This resource is currently on hold. It is not in current plans for
 PSDscResources.
@@ -191,38 +191,38 @@ if-statements will make the resources difficult to maintain.
 
 ### Potential Solutions
 
-#### Solution: Leave the if-statements ####
+#### Solution: Leave the if-statements
 
-##### Pros #####
+##### Pros
 
 - No time needed for fix.
 
-##### Cons #####
+##### Cons
 
 - Difficult to maintain.
 - User has to download/store extra code. (minimal)
 
-#### Solution: Use the Nano server version only ####
+#### Solution: Use the Nano server version only
 
-##### Pros #####
+##### Pros
 
 - Code will be easy to maintain.
 - May be a cleaner, simpler implementation for full server.
 - User does not have to download/store extra code. (minimal)
 
-##### Cons #####
+##### Cons
 
 - May break the resources.
 - Requires fixing time.
 - Requires testing.
 
-#### Separate the Nano and full server versions into separate resources ####
+#### Separate the Nano and full server versions into separate resources
 
-##### Pros #####
+##### Pros
 
 - User can download only the resource version they need.
 
-##### Cons #####
+##### Cons
 
 - Will have to maintain separate version. 
 - Requires fixing time. 
