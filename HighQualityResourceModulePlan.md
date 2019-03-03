@@ -56,7 +56,8 @@ the following resources:
   - [x] Service
   - [x] WindowsOptionalFeature
 - [x]
-  [3. Resolve Nano Server vs. Full Server Resources](#resolve-nano-server-vs-full-server-resources)  
+  [3. Resolve Nano Server vs. Full Server Resources]
+  (#resolve-nano-server-vs-full-server-resources)
   The general consensus is to leave the if-statements for now.
 - [ ]
   [4. Update Each Resource to Be High Quality](#update-each-resource-to-be-high-quality)
@@ -79,7 +80,8 @@ the following resources:
   - [ ] WindowsOptionalFeatureSet
   - [x] WindowsPackageCab
 - [x]
-  [5. Resolve Name of New High Quality Resource Module](#resolve-name-of-new-high-quality-resource-module)  
+  [5. Resolve Name of New High Quality Resource Module]
+  (#resolve-name-of-new-high-quality-resource-module)
   The new high quality module name is PSDscResources.
 - [ ]
   [6. Move Resources to New High Quality Module](#move-resources-to-new-high-quality-module)
