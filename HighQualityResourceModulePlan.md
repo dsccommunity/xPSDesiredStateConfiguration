@@ -161,11 +161,26 @@ will change in the near future. The 'x' can be removed as part of step 5.
 
 ### Open-Source Resources Not Moving to HQRM
 
-| Resource Name | Reason Not to Move |
-|---------------|--------------------|
-| FileUpload | This should be part of the File resource. We do not want this released as an official, supported resource when we are planning to change it in the future. |
-| RemoteFile | This should be part of the File resource. We do not want this released as an official, supported resource when we are planning to change it in the future. |
-| DscWebService | This resource is currently on hold. It is not in current plans for PSDscResources. |
+#### Resource Name: FileUpload ####
+
+##### Reason Not To Move #####
+
+This should be part of the File resource. We do not want this released as an 
+official, supported resource when we are planning to change it in the future.
+
+#### Resource Name: RemoteFile ####
+
+##### Reason Not To Move #####
+
+This should be part of the File resource. We do not want this released as an
+official, supported resource when we are planning to change it in the future.
+
+#### Resource Name: DscWebService ####
+
+##### Reason Not To Move #####
+
+This resource is currently on hold. It is not in current plans for
+PSDscResources.
 
 ## Resolve Nano Server vs Full Server Resources
 
@@ -176,11 +191,42 @@ if-statements will make the resources difficult to maintain.
 
 ### Potential Solutions
 
-| Solution | Pros | Cons |
-|----------|------|------|
-| Leave the if-statements | - No time needed for fix. | - Difficult to maintain. - User has to download/store extra code. (minimal) |
-| Use the Nano server version only | - Code will be easy to maintain. - May be a cleaner, simpler implementation for full server. - User does not have to download/store extra code. (minimal) | - May break the resources. - Requires fixing time. - Requires testing. |
-| Separate the Nano and full server versions into separate resources | - User can download only the resource version they need. | - Will have to maintain separate version. - Requires fixing time. - Requires testing. |
+#### Solution: Leave the if-statements ####
+
+##### Pros #####
+
+- No time needed for fix.
+
+##### Cons #####
+
+- Difficult to maintain.
+- User has to download/store extra code. (minimal)
+
+#### Solution: Use the Nano server version only ####
+
+##### Pros #####
+
+- Code will be easy to maintain.
+- May be a cleaner, simpler implementation for full server.
+- User does not have to download/store extra code. (minimal)
+
+##### Cons #####
+
+- May break the resources.
+- Requires fixing time.
+- Requires testing.
+
+#### Separate the Nano and full server versions into separate resources ####
+
+##### Pros #####
+
+- User can download only the resource version they need.
+
+##### Cons #####
+
+- Will have to maintain separate version. 
+- Requires fixing time. 
+- Requires testing.
 
 ## Update Each Resource to Be High Quality
 
