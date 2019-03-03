@@ -165,7 +165,7 @@ will change in the near future. The 'x' can be removed as part of step 5.
 
 ##### Reason Not To Move
 
-This should be part of the File resource. We do not want this released as an 
+This should be part of the File resource. We do not want this released as an
 official, supported resource when we are planning to change it in the future.
 
 #### Resource Name: RemoteFile
@@ -224,8 +224,8 @@ if-statements will make the resources difficult to maintain.
 
 ##### Cons
 
-- Will have to maintain separate version. 
-- Requires fixing time. 
+- Will have to maintain separate version.
+- Requires fixing time.
 - Requires testing.
 
 ## Update Each Resource to Be High Quality
