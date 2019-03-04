@@ -214,7 +214,7 @@ if-statements will make the resources difficult to maintain.
 - Requires fixing time.
 - Requires testing.
 
-#### Separate the Nano and full server versions into separate resources
+#### Solution: Separate the Nano and full server versions into separate resources
 
 ##### Pros
 
