@@ -10,6 +10,7 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [write] string PhysicalPath;
   [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
   [write,ValueMap{"Started","Stopped"},Values{"Started", "Stopped"}] string State;
+  [write] string ApplicationPoolName;
   [write] string DatabasePath;
   [write] string ModulePath;
   [write] string ConfigurationPath;

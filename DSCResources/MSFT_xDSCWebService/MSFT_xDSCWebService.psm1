@@ -33,6 +33,11 @@ function Get-TargetResource
         [System.String]
         $EndpointName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = $DefaultAppPoolName,
+
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateThumbPrint')]
         [ValidateNotNullOrEmpty()]
@@ -143,6 +148,7 @@ function Get-TargetResource
         }
 
         $ConfigureFirewall = Test-PullServerFirewallConfiguration -Port $iisPort
+        $ApplicationPoolName = $webSite.applicationPool
     }
     else
     {
@@ -151,21 +157,22 @@ function Get-TargetResource
     }
 
     $output = @{
-        EndpointName                    = $EndpointName
-        Port                            = $iisPort
-        PhysicalPath                    = $website.physicalPath
-        State                           = $webSite.state
-        DatabasePath                    = $databasePath
-        ModulePath                      = $modulePath
-        ConfigurationPath               = $configurationPath
-        DSCServerUrl                    = $serverUrl
-        Ensure                          = $Ensure
-        RegistrationKeyPath             = $registrationKeyPath
-        AcceptSelfSignedCertificates    = $acceptSelfSignedCertificates
-        UseSecurityBestPractices        = $UseSecurityBestPractices
-        DisableSecurityBestPractices    = $DisableSecurityBestPractices
-        Enable32BitAppOnWin64           = $Enable32BitAppOnWin64
-        ConfigureFirewall               = $ConfigureFirewall
+        EndpointName                 = $EndpointName
+        ApplicationPoolName          = $ApplicationPoolName
+        Port                         = $iisPort
+        PhysicalPath                 = $website.physicalPath
+        State                        = $webSite.state
+        DatabasePath                 = $databasePath
+        ModulePath                   = $modulePath
+        ConfigurationPath            = $configurationPath
+        DSCServerUrl                 = $serverUrl
+        Ensure                       = $Ensure
+        RegistrationKeyPath          = $registrationKeyPath
+        AcceptSelfSignedCertificates = $acceptSelfSignedCertificates
+        UseSecurityBestPractices     = $UseSecurityBestPractices
+        DisableSecurityBestPractices = $DisableSecurityBestPractices
+        Enable32BitAppOnWin64        = $Enable32BitAppOnWin64
+        ConfigureFirewall            = $ConfigureFirewall
     }
 
     if ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic')
@@ -209,6 +216,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $EndpointName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = $DefaultAppPoolName,
 
         # Port number of the DSC Pull Server IIS Endpoint
         [Parameter()]
@@ -396,6 +408,7 @@ function Set-TargetResource
                      -path $PhysicalPath `
                      -cfgfile $webConfigFileName `
                      -port $Port `
+                     -appPool $ApplicationPoolName `
                      -applicationPoolIdentityType LocalSystem `
                      -app $EndpointName `
                      -svc $svcFileName `
@@ -510,6 +523,11 @@ function Test-TargetResource
         [System.String]
         $EndpointName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = $DefaultAppPoolName,
+
         # Port number of the DSC Pull Server IIS Endpoint
         [Parameter()]
         [System.UInt32]
@@ -620,20 +638,20 @@ function Test-TargetResource
 
     :WebSiteTests Do
     {
-        Write-Verbose -Message "Check Ensure"
-        if(($Ensure -eq "Present" -and $null -eq $website))
+        Write-Verbose -Message 'Check Ensure'
+        if(($Ensure -eq 'Present' -and $null -eq $website))
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "The Website $EndpointName is not present"
             break
         }
-        if(($Ensure -eq "Absent" -and $null -ne $website))
+        if(($Ensure -eq 'Absent' -and $null -ne $website))
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "The Website $EndpointName is present but should not be"
             break
         }
-        if(($Ensure -eq "Absent" -and $null -eq $website))
+        if(($Ensure -eq 'Absent' -and $null -eq $website))
         {
             $desiredConfigurationMatch = $true
             Write-Verbose -Message "The Website $EndpointName is not present as requested"
@@ -641,12 +659,20 @@ function Test-TargetResource
         }
         # the other case is: Ensure and exist, we continue with more checks
 
-        Write-Verbose -Message "Check Port"
+        Write-Verbose -Message 'Check Port'
         $actualPort = $website.bindings.Collection[0].bindingInformation.Split(":")[1]
         if ($Port -ne $actualPort)
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "Port for the Website $EndpointName does not match the desired state."
+            break
+        }
+
+        Write-Verbose -Message 'Check Application Pool'
+        if ($ApplicationPoolName -ne $website.applicationPool)
+        {
+            $desiredConfigurationMatch = $false
+            Write-Verbose -Message "Currently bound application pool [$($website.applicationPool)] does not match the desired state [$ApplicationPoolName]."
             break
         }
 

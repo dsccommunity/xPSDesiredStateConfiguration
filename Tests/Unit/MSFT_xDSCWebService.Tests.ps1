@@ -52,7 +52,7 @@ try
         }
 
         $websiteDataHTTP  = [System.Management.Automation.PSObject] @{
-            bindings     = [System.Management.Automation.PSObject] @{
+            bindings = [System.Management.Automation.PSObject] @{
                 collection = @(
                     @{
                         protocol           = 'http'
@@ -61,12 +61,13 @@ try
                     }
                 )
             }
-            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
-            state        = 'Started'
+            physicalPath    = 'TestDrive:\inetpub\PesterTestSite'
+            state           = 'Started'
+            applicationPool = 'PSWS'
         }
 
         $websiteDataHTTPS = [System.Management.Automation.PSObject] @{
-            bindings     = [System.Management.Automation.PSObject] @{
+            bindings = [System.Management.Automation.PSObject] @{
                 collection = @(
                     @{
                         protocol           = 'https'
@@ -75,8 +76,9 @@ try
                     }
                 )
             }
-            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
-            state        = 'Started'
+            physicalPath    = 'TestDrive:\inetpub\PesterTestSite'
+            state           = 'Started'
+            applicationPool = 'PSWS'
         }
 
         $certificateData  = @(
