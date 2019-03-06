@@ -22,6 +22,11 @@
   - Common Tests - Relative Path Length
   - Common Tests - Required Script Analyzer Rules
   - Common Tests - Validate Markdown Links
+- Changes to
+  `Tests\Integration\xWindowsOptionalFeatureSet.Integration.Tests.ps1`
+  - Fixes issue where tests fail if disabled Windows Optional Features in up
+    in a state of 'DisabledWithPayloadRemoved'.
+    [issue #586](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/586)
 
 ## 8.5.0.0
 
