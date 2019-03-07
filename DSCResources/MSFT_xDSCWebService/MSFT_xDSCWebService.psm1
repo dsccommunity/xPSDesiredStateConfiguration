@@ -252,14 +252,14 @@ function Set-TargetResource
         $CertificateTemplateName = 'WebServer',
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = "Present",
+        $Ensure = 'Present',
 
         [Parameter()]
-        [ValidateSet("Started", "Stopped")]
+        [ValidateSet('Started', 'Stopped')]
         [System.String]
-        $State = "Started",
+        $State = 'Started',
 
         # Location on the disk where the database is stored
         [Parameter()]
@@ -305,7 +305,7 @@ function Set-TargetResource
 
         # Exceptions of security best practices
         [Parameter()]
-        [ValidateSet("SecureTLSProtocols")]
+        [ValidateSet('SecureTLSProtocols')]
         [System.String[]]
         $DisableSecurityBestPractices,
 
@@ -333,7 +333,7 @@ function Set-TargetResource
     }
 
     # Check parameter values
-    if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
+    if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic'))
     {
         throw $LocalizedData.ThrowUseSecurityBestPractice
     }
@@ -342,12 +342,21 @@ function Set-TargetResource
     {
         Write-Warning -Message $LocalizedData.ConfigFirewallDeprecated
     }
+    # If the Pull Server Site should be bound to the non default AppPool
+    # ensure that the AppPool already exists
+    if ('Present' -eq $Ensure `
+        -and $ApplicationPoolName -ne $DefaultAppPoolName `
+        -and (-not (Test-Path -Path "IIS:\AppPools\$ApplicationPoolName")))
+    {
+        throw ($LocalizedData.ThrowApplicationPoolNotFound -f $ApplicationPoolName)
+    }
+
     # Initialize with default values
 
     $pathPullServer = "$pshome\modules\PSDesiredStateConfiguration\PullServer"
-    $jet4provider = "System.Data.OleDb"
-    $jet4database = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
-    $eseprovider = "ESENT"
+    $jet4provider = 'System.Data.OleDb'
+    $jet4database = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;'
+    $eseprovider = 'ESENT'
     $esedatabase = "$DatabasePath\Devices.edb"
 
     $cultureInfo = Get-Culture
@@ -355,7 +364,7 @@ function Set-TargetResource
     $language = $cultureInfo.TwoLetterISOLanguageName
 
     # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
-    if (-not (Test-Path -Path $pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll))
+    if (-not (Test-Path -Path "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll"))
     {
         $languagePath = 'en'
     }
@@ -439,9 +448,9 @@ function Set-TargetResource
 
     if($SqlProvider)
     {
-        Write-Verbose -Message "Set values into the web.config that define the SQL Connection "
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+        Write-Verbose -Message 'Set values into the web.config that define the SQL Connection'
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbprovider' -value $jet4provider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbconnectionst' -value $SqlConnectionString
         if ($isBlue)
         {
             Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
@@ -449,9 +458,9 @@ function Set-TargetResource
     }
     elseif ($isBlue)
     {
-        Write-Verbose -Message "Set values into the web.config that define the repository for BLUE OS"
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+        Write-Verbose -Message 'Set values into the web.config that define the repository for BLUE OS'
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbprovider' -value $eseprovider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbconnectionstr' -value $esedatabase
 
         Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
     }
@@ -459,40 +468,40 @@ function Set-TargetResource
     {
         if($isDownlevelOfBlue)
         {
-            Write-Verbose -Message "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
-            $repository = Join-Path -Path "$DatabasePath" -ChildPath "Devices.mdb"
+            Write-Verbose -Message 'Set values into the web.config that define the repository for non-BLUE Downlevel OS'
+            $repository = Join-Path -Path "$DatabasePath" -ChildPath 'Devices.mdb'
             Copy-Item -Path "$pathPullServer\Devices.mdb" -Destination $repository -Force
 
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbprovider' -value $jet4provider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbconnectionstr' -value $jet4database
         }
         else
         {
-            Write-Verbose -Message "Set values into the web.config that define the repository later than BLUE OS"
-            Write-Verbose -Message "Only ESENT is supported on Windows Server 2016"
+            Write-Verbose -Message 'Set values into the web.config that define the repository later than BLUE OS'
+            Write-Verbose -Message 'Only ESENT is supported on Windows Server 2016'
 
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbprovider' -value $eseprovider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'dbconnectionstr' -value $esedatabase
         }
 
     }
 
-    Write-Verbose -Message "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
+    Write-Verbose -Message 'Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules'
 
     # Create the application data directory calculated above
-    $null = New-Item -path $DatabasePath -itemType "directory" -Force
+    $null = New-Item -path $DatabasePath -itemType 'directory' -Force
 
-    $null = New-Item -path "$ConfigurationPath" -itemType "directory" -Force
+    $null = New-Item -path "$ConfigurationPath" -itemType 'directory' -Force
 
-    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ConfigurationPath" -value $configurationPath
+    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'ConfigurationPath' -value $configurationPath
 
-    $null = New-Item -path "$ModulePath" -itemType "directory" -Force
+    $null = New-Item -path "$ModulePath" -itemType 'directory' -Force
 
-    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ModulePath" -value $ModulePath
+    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'ModulePath' -value $ModulePath
 
-    $null = New-Item -path "$RegistrationKeyPath" -itemType "directory" -Force
+    $null = New-Item -path "$RegistrationKeyPath" -itemType 'directory' -Force
 
-    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "RegistrationKeyPath" -value $registrationKeyPath
+    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key 'RegistrationKeyPath' -value $registrationKeyPath
 
     if($AcceptSelfSignedCertificates)
     {

@@ -485,42 +485,42 @@ function New-IISWebSite
     {
         Write-Verbose -Message "Adding App Pool [$appPool]"
         $null = New-WebAppPool -Name $appPool
+    }
 
-        Write-Verbose -Message 'Set App Pool Properties'
-        $appPoolIdentity = 4
-        if ($applicationPoolIdentityType)
+    Write-Verbose -Message 'Set App Pool Properties'
+    $appPoolIdentity = 4
+    if ($applicationPoolIdentityType)
+    {
+        # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
+        switch ($applicationPoolIdentityType)
         {
-            # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
-            switch ($applicationPoolIdentityType)
+            'LocalSystem'
             {
-                'LocalSystem'
-                {
-                    $appPoolIdentity = 0
-                }
-                'LocalService'
-                {
-                    $appPoolIdentity = 1
-                }
-                'NetworkService'
-                {
-                    $appPoolIdentity = 2
-                }
-                'ApplicationPoolIdentity'
-                {
-                    $appPoolIdentity = 4
-                }
-                default {
-                    throw "Invalid value [$applicationPoolIdentityType] for parameter -applicationPoolIdentityType"
-                }
+                $appPoolIdentity = 0
+            }
+            'LocalService'
+            {
+                $appPoolIdentity = 1
+            }
+            'NetworkService'
+            {
+                $appPoolIdentity = 2
+            }
+            'ApplicationPoolIdentity'
+            {
+                $appPoolIdentity = 4
+            }
+            default {
+                throw "Invalid value [$applicationPoolIdentityType] for parameter -applicationPoolIdentityType"
             }
         }
-
-        $appPoolItem = Get-Item IIS:\AppPools\$appPool
-        $appPoolItem.managedRuntimeVersion = 'v4.0'
-        $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
-        $appPoolItem.processModel.identityType = $appPoolIdentity
-        $appPoolItem | Set-Item
     }
+
+    $appPoolItem = Get-Item IIS:\AppPools\$appPool
+    $appPoolItem.managedRuntimeVersion = 'v4.0'
+    $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
+    $appPoolItem.processModel.identityType = $appPoolIdentity
+    $appPoolItem | Set-Item
 
     Write-Verbose -Message 'Add and Set Site Properties'
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')

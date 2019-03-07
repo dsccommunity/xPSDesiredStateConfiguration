@@ -7,4 +7,5 @@ ConvertFrom-StringData -StringData @'
     IISInstallationPathNotFound          = IIS installation path not found
     IISWebAdministrationAssemblyNotFound = IIS version of Microsoft.Web.Administration.dll not found
     ConfigFirewallDeprecated             = The support for configuring firewall rules is deprecated. Please set ConfigureFirewall to false and use the Firewall resource from NetworkingDSC module to configure required firewall rules.
+    ThrowApplicationPoolNotFound         = IIS Application pool "{0}" not found.
 '@
