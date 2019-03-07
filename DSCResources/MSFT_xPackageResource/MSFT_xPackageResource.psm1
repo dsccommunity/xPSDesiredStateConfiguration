@@ -543,7 +543,7 @@ function Set-TargetResource
                     $id = Split-Path -Path $productEntry.Name -Leaf
                 }
 
-                $startInfo.Arguments = "/x $id /quiet /norestart"
+                $startInfo.Arguments = "/x `"$id`" /quiet /norestart"
 
                 if ($LogPath)
                 {
