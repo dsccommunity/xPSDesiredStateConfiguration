@@ -11,6 +11,18 @@ Set-StrictMode -Version 'Latest'
 $script:appVeyorAdministratorCredential = $null
 
 <#
+    This is the name of the magic file that will be written to the .git folder
+    in DSCResource.Tests to determine the last time it was updated.
+#>
+$script:dscResourceTestsMagicFile = 'DSC_LAST_FETCH'
+
+<#
+    This is the number of minutes after which the DSCResource.Tests
+    will be updated.
+#>
+$script:dscResourceTestsRefreshAfterMinutes = 120
+
+<#
     String data for unit test names to be used with the generic test functions.
     Maps command names to the appropriate test names to insert when checking that
     the correct mocks are called.
@@ -73,9 +85,11 @@ function Get-TestName
         [System.String]
         $Command,
 
+        [Parameter()]
         [System.Boolean]
         $IsCalled = $true,
 
+        [Parameter()]
         [System.String]
         $Custom = ''
     )
@@ -115,6 +129,7 @@ function Invoke-ExpectedMocksAreCalledTest
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled
     )
@@ -171,7 +186,8 @@ function Invoke-ExpectedMocksAreCalledTest
         The string that should be used to create the name of the test that checks for
         the correct error being thrown.
 #>
-function Invoke-GenericUnitTest {
+function Invoke-GenericUnitTest
+{
     [CmdletBinding()]
     param
     (
@@ -183,15 +199,19 @@ function Invoke-GenericUnitTest {
         [System.Collections.Hashtable]
         $FunctionParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
+        [Parameter()]
         [System.Boolean]
         $ShouldThrow = $false,
 
+        [Parameter()]
         [System.String]
         $ErrorMessage = '',
 
+        [Parameter()]
         [System.String]
         $ErrorTestName = ''
     )
@@ -242,6 +262,7 @@ function Invoke-GetTargetResourceUnitTest
         [System.Collections.Hashtable]
         $GetTargetResourceParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
@@ -302,7 +323,8 @@ function Invoke-GetTargetResourceUnitTest
         The string that should be used to create the name of the test that checks for
         the correct error being thrown.
 #>
-function Invoke-SetTargetResourceUnitTest {
+function Invoke-SetTargetResourceUnitTest
+{
     [CmdletBinding()]
     param
     (
@@ -310,15 +332,19 @@ function Invoke-SetTargetResourceUnitTest {
         [System.Collections.Hashtable]
         $SetTargetResourceParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
+        [Parameter()]
         [System.Boolean]
         $ShouldThrow = $false,
 
+        [Parameter()]
         [System.String]
         $ErrorMessage = '',
 
+        [Parameter()]
         [System.String]
         $ErrorTestName = ''
     )
@@ -369,6 +395,7 @@ function Invoke-TestTargetResourceUnitTest
         [System.Collections.Hashtable]
         $TestTargetResourceParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
@@ -413,6 +440,7 @@ function Test-GetTargetResourceResult
         [System.Collections.Hashtable]
         $GetTargetResourceResult,
 
+        [Parameter()]
         [System.String[]]
         $GetTargetResourceResultProperties
     )
@@ -510,6 +538,7 @@ function Wait-ScriptBlockReturnTrue
         [System.Management.Automation.ScriptBlock]
         $ScriptBlock,
 
+        [Parameter()]
         [System.Int32]
         $TimeoutSeconds = 5
     )
@@ -586,6 +615,7 @@ function Test-SetTargetResourceWithWhatIf
         [System.Collections.Hashtable]
         $Parameters,
 
+        [Parameter()]
         [System.String[]]
         $ExpectedOutput
     )
@@ -762,11 +792,10 @@ function Enter-DscResourceTestEnvironment
         specified number of minutes old then this will cause
         the function to return true.
 
-        The magic file is called DSC_LAST_FETCH.
-
     .PARAMETER RefreshAfterMinutes
         The number of minutes old the magic file should be
-        before requiring an update. Defaults to 60 minutes.
+        before requiring an update. Defaults to the value
+        defined in $script:dscResourceTestsRefreshAfterMinutes
 #>
 function Test-DscResourceTestsNeedsInstallOrUpdate
 {
@@ -776,7 +805,7 @@ function Test-DscResourceTestsNeedsInstallOrUpdate
     (
         [Parameter()]
         [System.Int32]
-        $RefreshAfterMinutes = 60
+        $RefreshAfterMinutes = $script:dscResourceTestsRefreshAfterMinutes
     )
 
     $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
@@ -784,26 +813,25 @@ function Test-DscResourceTestsNeedsInstallOrUpdate
 
     if (Test-Path -Path $dscResourceTestsPath)
     {
-        $magicFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath '.git\DSC_LAST_FETCH'
+        $magicFilePath = Get-DscResourceTestsMagicFilePath -DscResourceTestsPath $DscResourceTestsPath
 
         if (Test-Path -Path $magicFilePath)
         {
             $magicFileLastWriteTime = (Get-Item -Path $magicFilePath).LastWriteTime
-            $timeWhenUpdateRequired = (Get-Date) + [timespan]::FromMinutes($RefreshAfterMinutes)
+            $magicFileAge = New-TimeSpan -End (Get-Date) -Start $magicFileLastWriteTime
 
-            if ($magicFileLastWriteTime -and $magicFileLastWriteTime -lt $timeWhenUpdateRequired)
+            if ($magicFileAge.Minutes -lt $RefreshAfterMinutes)
             {
-                Write-Verbose -Message ('DSCResource.Tests was last updated at {0}. Update not required.' -f $magicFileLastWriteTime) -Verbose
+                Write-Debug -Message ('DSCResource.Tests was last updated {0} minutes ago. Update not required.' -f $magicFileAge.Minutes)
                 return $false
             }
             else
             {
-                Write-Verbose -Message ('DSCResource.Tests was last updated at {0}. Update is required.' -f $magicFileLastWriteTime) -Verbose
+                Write-Verbose -Message ('DSCResource.Tests was last updated {0} minutes ago. Update required.' -f $magicFileAge.Minutes) -Verbose
             }
         }
     }
 
-    Write-Verbose -Message 'DSCResource.Tests needs to be updated.' -Verbose
     return $true
 }
 
@@ -817,8 +845,6 @@ function Test-DscResourceTestsNeedsInstallOrUpdate
 
         It will then create or update the magic file in
         the .git folder in the DSCResource.Tests folder.
-
-        The magic file is called DSC_LAST_FETCH.
 
         If Git is not installed and the DSCResource.Tests
         folder is not available then an exception will
@@ -872,9 +898,30 @@ function Install-DscResourceTests
     if ($writeMagicFile)
     {
         # Write the magic file
-        $magicFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath '.git\DSC_LAST_FETCH'
+        $magicFilePath = Get-DscResourceTestsMagicFilePath -DscResourceTestsPath $DscResourceTestsPath
         $null = Set-Content -Path $magicFilePath -Value (Get-Date) -Force
     }
+}
+
+<#
+    .SYNOPSIS
+        Gets the full path of the magic file used to
+        determine the last date/time the DSCResource.Tests
+        folder was updated.
+
+    .PARAMETER DscResourceTestsPath
+        The path to the folder that contains DSCResource.Tests.
+#>
+function Get-DscResourceTestsMagicFilePath
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DscResourceTestsPath
+    )
+
+    return $DscResourceTestsPath | Join-Path -ChildPath '.git' | Join-Path -ChildPath $script:dscResourceTestsMagicFile
 }
 
 <#

@@ -35,6 +35,7 @@
   and reduce the likelihood of connectivity issues caused by inability to
   pull DSCResource.Tests.
   [issue #505](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/505)
+- Updated `CommonTestHelper.psm1` to resolve style guideline violations.
 
 ## 8.5.0.0
 
