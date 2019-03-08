@@ -27,6 +27,10 @@
   - Fixes issue where tests fail if a Windows Optional Feature that is expected
     to be disabled has a feature state of 'DisabledWithPayloadRemoved'.
     [issue #586](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/586)
+- Changes to
+  `Tests\Unit\MSFT_xPackageResource.Tests.ps1`
+  - Fixes issue where tests fail if run from a folder that contains spaces.
+    [issue #580](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/580)
 
 ## 8.5.0.0
 
