@@ -30,6 +30,10 @@
 - Add .markdownlint.json file using settings from
   [here](https://raw.githubusercontent.com/PowerShell/SqlServerDsc/dev/.markdownlint.json)
   as a starting point.
+- Changes to
+  `Tests\Unit\MSFT_xPackageResource.Tests.ps1`
+  - Fixes issue where tests fail if run from a folder that contains spaces.
+    [issue #580](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/580)
 
 ## 8.5.0.0
 
