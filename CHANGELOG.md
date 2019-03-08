@@ -22,6 +22,9 @@
   - Common Tests - Relative Path Length
   - Common Tests - Required Script Analyzer Rules
   - Common Tests - Validate Markdown Links
+- Changes to `Tests\Unit\MSFT_xMsiPackage.Tests.ps1`
+  - Fixes issue where tests fail if executed from a drive other than C:.
+    [issue #573](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/573)
 - Changes to
   `Tests\Integration\xWindowsOptionalFeatureSet.Integration.Tests.ps1`
   - Fixes issue where tests fail if a Windows Optional Feature that is expected
