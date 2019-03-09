@@ -11,6 +11,18 @@ Set-StrictMode -Version 'Latest'
 $script:appVeyorAdministratorCredential = $null
 
 <#
+    This is the name of the magic file that will be written to the .git folder
+    in DSCResource.Tests to determine the last time it was updated.
+#>
+$script:dscResourceTestsMagicFile = 'DSC_LAST_FETCH'
+
+<#
+    This is the number of minutes after which the DSCResource.Tests
+    will be updated.
+#>
+$script:dscResourceTestsRefreshAfterMinutes = 120
+
+<#
     String data for unit test names to be used with the generic test functions.
     Maps command names to the appropriate test names to insert when checking that
     the correct mocks are called.
@@ -73,9 +85,11 @@ function Get-TestName
         [System.String]
         $Command,
 
+        [Parameter()]
         [System.Boolean]
         $IsCalled = $true,
 
+        [Parameter()]
         [System.String]
         $Custom = ''
     )
@@ -115,6 +129,7 @@ function Invoke-ExpectedMocksAreCalledTest
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled
     )
@@ -171,7 +186,8 @@ function Invoke-ExpectedMocksAreCalledTest
         The string that should be used to create the name of the test that checks for
         the correct error being thrown.
 #>
-function Invoke-GenericUnitTest {
+function Invoke-GenericUnitTest
+{
     [CmdletBinding()]
     param
     (
@@ -183,15 +199,19 @@ function Invoke-GenericUnitTest {
         [System.Collections.Hashtable]
         $FunctionParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
+        [Parameter()]
         [System.Boolean]
         $ShouldThrow = $false,
 
+        [Parameter()]
         [System.String]
         $ErrorMessage = '',
 
+        [Parameter()]
         [System.String]
         $ErrorTestName = ''
     )
@@ -242,6 +262,7 @@ function Invoke-GetTargetResourceUnitTest
         [System.Collections.Hashtable]
         $GetTargetResourceParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
@@ -302,7 +323,8 @@ function Invoke-GetTargetResourceUnitTest
         The string that should be used to create the name of the test that checks for
         the correct error being thrown.
 #>
-function Invoke-SetTargetResourceUnitTest {
+function Invoke-SetTargetResourceUnitTest
+{
     [CmdletBinding()]
     param
     (
@@ -310,15 +332,19 @@ function Invoke-SetTargetResourceUnitTest {
         [System.Collections.Hashtable]
         $SetTargetResourceParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
+        [Parameter()]
         [System.Boolean]
         $ShouldThrow = $false,
 
+        [Parameter()]
         [System.String]
         $ErrorMessage = '',
 
+        [Parameter()]
         [System.String]
         $ErrorTestName = ''
     )
@@ -369,6 +395,7 @@ function Invoke-TestTargetResourceUnitTest
         [System.Collections.Hashtable]
         $TestTargetResourceParameters,
 
+        [Parameter()]
         [System.Collections.Hashtable[]]
         $MocksCalled,
 
@@ -413,6 +440,7 @@ function Test-GetTargetResourceResult
         [System.Collections.Hashtable]
         $GetTargetResourceResult,
 
+        [Parameter()]
         [System.String[]]
         $GetTargetResourceResultProperties
     )
@@ -510,6 +538,7 @@ function Wait-ScriptBlockReturnTrue
         [System.Management.Automation.ScriptBlock]
         $ScriptBlock,
 
+        [Parameter()]
         [System.Int32]
         $TimeoutSeconds = 5
     )
@@ -586,6 +615,7 @@ function Test-SetTargetResourceWithWhatIf
         [System.Collections.Hashtable]
         $Parameters,
 
+        [Parameter()]
         [System.String[]]
         $ExpectedOutput
     )
@@ -732,26 +762,9 @@ function Enter-DscResourceTestEnvironment
     $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
     $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
 
-    if (-not (Test-Path -Path $dscResourceTestsPath))
+    if (Test-DscResourceTestsNeedsInstallOrUpdate)
     {
-        Push-Location $moduleRootPath
-        git clone 'https://github.com/PowerShell/DscResource.Tests' --quiet
-        Pop-Location
-    }
-    else
-    {
-        $gitInstalled = $null -ne (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue')
-
-        if ($gitInstalled)
-        {
-            Push-Location $dscResourceTestsPath
-            git pull origin dev --quiet
-            Pop-Location
-        }
-        else
-        {
-            Write-Verbose -Message 'Git not installed. Leaving current DSCResource.Tests as is.'
-        }
+        Install-DscResourceTests
     }
 
     Import-Module -Name $testHelperFilePath
@@ -760,6 +773,155 @@ function Enter-DscResourceTestEnvironment
         -DSCModuleName $DscResourceModuleName `
         -DSCResourceName $DscResourceName `
         -TestType $TestType
+}
+
+<#
+    .SYNOPSIS
+        Tests to see if DSCResource.Tests needs to be downloaded
+        or updated.
+
+    .DESCRIPTION
+        This function returns true if the DSCResource.Tests
+        content needs to be downloaded or updated.
+
+        A magic file in the .Git folder of DSCResource.Tests
+        is used to determine if the repository needs to be
+        updated.
+
+        If the last write time of the magic file is over a
+        specified number of minutes old then this will cause
+        the function to return true.
+
+    .PARAMETER RefreshAfterMinutes
+        The number of minutes old the magic file should be
+        before requiring an update. Defaults to the value
+        defined in $script:dscResourceTestsRefreshAfterMinutes
+#>
+function Test-DscResourceTestsNeedsInstallOrUpdate
+{
+    [OutputType([System.Boolean])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter()]
+        [System.Int32]
+        $RefreshAfterMinutes = $script:dscResourceTestsRefreshAfterMinutes
+    )
+
+    $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
+    $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
+
+    if (Test-Path -Path $dscResourceTestsPath)
+    {
+        $magicFilePath = Get-DscResourceTestsMagicFilePath -DscResourceTestsPath $DscResourceTestsPath
+
+        if (Test-Path -Path $magicFilePath)
+        {
+            $magicFileLastWriteTime = (Get-Item -Path $magicFilePath).LastWriteTime
+            $magicFileAge = New-TimeSpan -End (Get-Date) -Start $magicFileLastWriteTime
+
+            if ($magicFileAge.Minutes -lt $RefreshAfterMinutes)
+            {
+                Write-Debug -Message ('DSCResource.Tests was last updated {0} minutes ago. Update not required.' -f $magicFileAge.Minutes)
+                return $false
+            }
+            else
+            {
+                Write-Verbose -Message ('DSCResource.Tests was last updated {0} minutes ago. Update required.' -f $magicFileAge.Minutes) -Verbose
+            }
+        }
+    }
+
+    return $true
+}
+
+<#
+    .SYNOPSIS
+        Installs the DSCResource.Tests content.
+
+    .DESCRIPTION
+        This function uses Git to install or update the
+        DSCResource.Tests repository.
+
+        It will then create or update the magic file in
+        the .git folder in the DSCResource.Tests folder.
+
+        If Git is not installed and the DSCResource.Tests
+        folder is not available then an exception will
+        be thrown.
+
+        If the DSCResource.Tests folder does exist but
+        Git is not installed then a warning will be
+        displayed and the repository will not be pulled.
+#>
+function Install-DscResourceTests
+{
+    [CmdletBinding()]
+    param
+    (
+    )
+
+    $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
+    $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
+    $gitInstalled = $null -ne (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue')
+    $writeMagicFile = $false
+
+    if (Test-Path -Path $dscResourceTestsPath)
+    {
+        if ($gitInstalled)
+        {
+            Push-Location -Path $dscResourceTestsPath
+            Write-Verbose -Message 'Updating DSCResource.Tests.' -Verbose
+            & git @('pull','origin','dev','--quiet')
+            $writeMagicFile = $true
+            Pop-Location
+        }
+        else
+        {
+            Write-Warning -Message 'Git not installed. DSCResource.Tests will not be updated.'
+        }
+    }
+    else
+    {
+        if (-not $gitInstalled)
+        {
+            throw 'Git not installed. Can not pull DSCResource.Tests.'
+        }
+
+        Push-Location -Path $moduleRootPath
+        Write-Verbose -Message 'Cloning DSCResource.Tests.' -Verbose
+        & git @('clone','https://github.com/PowerShell/DscResource.Tests','--quiet')
+        $writeMagicFile = $true
+        Pop-Location
+    }
+
+    if ($writeMagicFile)
+    {
+        # Write the magic file
+        $magicFilePath = Get-DscResourceTestsMagicFilePath -DscResourceTestsPath $DscResourceTestsPath
+        $null = Set-Content -Path $magicFilePath -Value (Get-Date) -Force
+    }
+}
+
+<#
+    .SYNOPSIS
+        Gets the full path of the magic file used to
+        determine the last date/time the DSCResource.Tests
+        folder was updated.
+
+    .PARAMETER DscResourceTestsPath
+        The path to the folder that contains DSCResource.Tests.
+#>
+function Get-DscResourceTestsMagicFilePath
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DscResourceTestsPath
+    )
+
+    return $DscResourceTestsPath | Join-Path -ChildPath '.git' | Join-Path -ChildPath $script:dscResourceTestsMagicFile
 }
 
 <#
