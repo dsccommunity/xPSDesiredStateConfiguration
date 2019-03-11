@@ -1221,7 +1221,13 @@ function Add-PathPermission
 
     $rule = New-Object `
                 -TypeName System.Security.AccessControl.FileSystemAccessRule `
-                -ArgumentList @( $IdentityReference, $FileSystemRight, $InheritanceFlags, $PropagationFlags, $AccessControlType )
+                -ArgumentList @(
+                    $IdentityReference,
+                    $FileSystemRight,
+                    $InheritanceFlags,
+                    $PropagationFlags,
+                    $AccessControlType
+                )
 
     $null = $acl.SetAccessRule($rule)
 
