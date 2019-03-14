@@ -15,14 +15,17 @@ function Initialize-Endpoint
     param
     (
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $appPool,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $site,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $path,
 
@@ -36,10 +39,12 @@ function Initialize-Endpoint
         $port,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $app,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $applicationPoolIdentityType,
 
@@ -54,6 +59,7 @@ function Initialize-Endpoint
         $mof,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $dispatch,
 
@@ -63,14 +69,17 @@ function Initialize-Endpoint
         $asax,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $dependentBinaries,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $language,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $dependentMUIFiles,
 
@@ -144,7 +153,7 @@ function Initialize-Endpoint
         -psFiles $psFiles
 
     New-IISWebSite -site $site `
-        -path $path
+        -path $path `
         -port $port `
         -app $app `
         -apppool $appPool `
@@ -442,23 +451,27 @@ function New-IISWebSite
     [CmdletBinding()]
     param
     (
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $site,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $path,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.Int32]
         $port,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $app,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $appPool,
 
@@ -466,7 +479,8 @@ function New-IISWebSite
         [System.String]
         $applicationPoolIdentityType,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $certificateThumbPrint,
 
@@ -479,48 +493,49 @@ function New-IISWebSite
 
     if (Test-Path IIS:\AppPools\$appPool)
     {
-        Write-Verbose -Message "Application Pool $appPool already exists"
+        Write-Verbose -Message "Application Pool [$appPool] already exists"
     }
     else
     {
         Write-Verbose -Message "Adding App Pool [$appPool]"
         $null = New-WebAppPool -Name $appPool
-    }
 
-    Write-Verbose -Message 'Set App Pool Properties'
-    $appPoolIdentity = 4
-    if ($applicationPoolIdentityType)
-    {
-        # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
-        switch ($applicationPoolIdentityType)
+        Write-Verbose -Message 'Set App Pool Properties'
+        $appPoolIdentity = 4
+        if ($applicationPoolIdentityType)
         {
-            'LocalSystem'
+            # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
+            switch ($applicationPoolIdentityType)
             {
-                $appPoolIdentity = 0
-            }
-            'LocalService'
-            {
-                $appPoolIdentity = 1
-            }
-            'NetworkService'
-            {
-                $appPoolIdentity = 2
-            }
-            'ApplicationPoolIdentity'
-            {
-                $appPoolIdentity = 4
-            }
-            default {
-                throw "Invalid value [$applicationPoolIdentityType] for parameter -applicationPoolIdentityType"
+                'LocalSystem'
+                {
+                    $appPoolIdentity = 0
+                }
+                'LocalService'
+                {
+                    $appPoolIdentity = 1
+                }
+                'NetworkService'
+                {
+                    $appPoolIdentity = 2
+                }
+                'ApplicationPoolIdentity'
+                {
+                    $appPoolIdentity = 4
+                }
+                default {
+                    throw "Invalid value [$applicationPoolIdentityType] for parameter -applicationPoolIdentityType"
+                }
             }
         }
-    }
 
-    $appPoolItem = Get-Item IIS:\AppPools\$appPool
-    $appPoolItem.managedRuntimeVersion = 'v4.0'
-    $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
-    $appPoolItem.processModel.identityType = $appPoolIdentity
-    $appPoolItem | Set-Item
+        $appPoolItem = Get-Item IIS:\AppPools\$appPool
+        $appPoolItem.managedRuntimeVersion = 'v4.0'
+        $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
+        $appPoolItem.processModel.identityType = $appPoolIdentity
+        $appPoolItem | Set-Item
+
+    }
 
     Write-Verbose -Message 'Add and Set Site Properties'
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
@@ -594,16 +609,19 @@ function New-PSWSEndpoint
     (
         # Unique Name of the IIS Site
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $site = 'PSWS',
 
         # Physical path for the IIS Endpoint on the machine (under inetpub)
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $path = "$env:SystemDrive\inetpub\PSWS",
 
         # Web.config file
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $cfgfile = 'web.config',
 
@@ -614,6 +632,7 @@ function New-PSWSEndpoint
 
         # IIS Application Name for the Site
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $app = 'PSWS',
 
@@ -630,6 +649,7 @@ function New-PSWSEndpoint
 
         # WCF Service SVC file
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $svc = 'PSWS.svc',
 
@@ -671,7 +691,6 @@ function New-PSWSEndpoint
 
         # Any dependent PowerShell Scipts/Modules that need to be deployed to the IIS endpoint application root
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $psFiles,
 
@@ -715,6 +734,7 @@ function New-PSWSEndpoint
 
     Write-Verbose ("Setting up endpoint at - $protocol//" + $cimInstance.Name + ':' + $port + '/' + $svcName)
     Initialize-Endpoint `
+        -appPool $appPool `
         -site $site `
         -path $path `
         -cfgfile $cfgfile `
@@ -783,14 +803,21 @@ function Remove-PSWSEndpoint
         # Get the path so we can delete the files
         $filePath = $site.PhysicalPath
 
-        # Remove the actual site.
-        Remove-Website -Name $siteName
+        # If the website isn't stopped before removal the directories and files might be locked
+        # and thus cannot be removed by Remove-WebSite
+        Write-Verbose -Message "Stopping website $siteName"
+        Stop-Website -Name $siteName
+
         <#
           There may be running requests, wait a little
           I had an issue where the files were still in use
           when I tried to delete them
         #>
-        Start-Sleep -Milliseconds 2000
+        Write-Verbose -Message 'Waiting for IIS to stop website'
+        Start-Sleep -Milliseconds 1000
+
+        # Remove the actual site.
+        Remove-Website -Name $siteName
 
         # Remove the files for the site
         If (Test-Path -Path $filePath)

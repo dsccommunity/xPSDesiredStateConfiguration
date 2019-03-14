@@ -401,7 +401,7 @@ function Set-TargetResource
             }
 
             # there is a web site, but there shouldn't be one
-            Write-Verbose -Message "Removing web site $EndpointName"
+            Write-Verbose -Message "Removing web site [$EndpointName]"
             PSWSIISEndpoint\Remove-PSWSEndpoint -SiteName $EndpointName
 
             $portList | ForEach-Object -Process { Remove-PullServerFirewallConfiguration -Port $_ }
@@ -413,23 +413,25 @@ function Set-TargetResource
     # ===========================================================
 
     Write-Verbose -Message "Create the IIS endpoint"
-    PSWSIISEndpoint\New-PSWSEndpoint -site $EndpointName `
-                     -path $PhysicalPath `
-                     -cfgfile $webConfigFileName `
-                     -port $Port `
-                     -appPool $ApplicationPoolName `
-                     -applicationPoolIdentityType LocalSystem `
-                     -app $EndpointName `
-                     -svc $svcFileName `
-                     -mof $pswsMofFileName `
-                     -dispatch $pswsDispatchFileName `
-                     -asax "$pathPullServer\Global.asax" `
-                     -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
-                     -language $language `
-                     -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
-                     -certificateThumbPrint $certificateThumbPrint `
-                     -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
-                     -Verbose
+    PSWSIISEndpoint\New-PSWSEndpoint `
+        -site $EndpointName `
+        -path $PhysicalPath `
+        -cfgfile $webConfigFileName `
+        -port $Port `
+        -appPool $ApplicationPoolName `
+        -applicationPoolIdentityType LocalSystem `
+        -app $EndpointName `
+        -svc $svcFileName `
+        -mof $pswsMofFileName `
+        -dispatch $pswsDispatchFileName `
+        -asax "$pathPullServer\Global.asax" `
+        -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
+        -language $language `
+        -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
+        -certificateThumbPrint $certificateThumbPrint `
+        -EnableFirewallException $true `
+        -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
+        -Verbose
 
     if ($ConfigureFirewall)
     {
