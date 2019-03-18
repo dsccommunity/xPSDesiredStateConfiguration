@@ -89,6 +89,10 @@ function Get-TargetResource
         The arguments to pass to the MSI package during installation or uninstallation
         if needed.
 
+    .PARAMETER IgnoreReboot
+        Ignore a pending reboot if requested by package installation.
+        By default is `$false` and DSC will try to reboot the system.
+
     .PARAMETER Credential
         The credential of a user account to be used to mount a UNC path if needed.
 
@@ -136,6 +140,10 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $Arguments,
+
+        [Parameter()]
+        [System.Boolean]
+        $IgnoreReboot = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
@@ -385,6 +393,10 @@ function Set-TargetResource
     .PARAMETER Arguments
         Not Used in Test-TargetResource
 
+    .PARAMETER IgnoreReboot
+        Ignore a pending reboot if requested by package installation.
+        By default is `$false` and DSC will try to reboot the system.
+
     .PARAMETER Credential
         Not Used in Test-TargetResource
 
@@ -433,6 +445,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $Arguments,
+
+        [Parameter()]
+        [System.Boolean]
+        $IgnoreReboot = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]
