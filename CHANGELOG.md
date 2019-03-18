@@ -1,7 +1,8 @@
 # Versions
 
 ## Unreleased
-
+- xPackage and xMsiPackage
+  - Add an ability to ignore reboot if package requested it
 - xRemoteFile
   - Updated MatchSource description in README.md.
     [issue #409](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/409)

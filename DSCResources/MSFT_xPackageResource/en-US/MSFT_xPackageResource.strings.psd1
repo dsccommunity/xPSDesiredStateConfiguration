@@ -27,6 +27,7 @@ ConvertFrom-StringData @'
     PackageInstalled = Package has been installed
     PackageUninstalled = Package has been uninstalled
     MachineRequiresReboot = The machine requires a reboot
+    IgnoreReboot = Ignore a pending reboot
     PackageDoesNotAppearInstalled = The package {0} is not installed
     PackageAppearsInstalled = The package {0} is installed
     PostValidationError = Package from {0} was installed, but the specified ProductId and/or Name does not match package details

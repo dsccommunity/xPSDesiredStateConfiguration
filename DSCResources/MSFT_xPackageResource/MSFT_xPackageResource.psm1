@@ -260,6 +260,10 @@ function Set-TargetResource
         $InstalledCheckRegValueData,
 
         [Parameter()]
+        [System.Boolean]
+        $IgnoreReboot = $false,
+
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $RunAsCredential
@@ -671,7 +675,13 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $registryData -or $exitcode -eq 3010 -or $exitcode -eq 1641)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
-        Set-DSCMachineRebootRequired
+        if ($IgnoreReboot)
+        {
+            Write-Verbose $script:localizedData.IgnoreReboot
+        } else
+        {
+            Set-DSCMachineRebootRequired
+        }
     }
     elseif ($Ensure -eq 'Present')
     {
@@ -791,6 +801,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $InstalledCheckRegValueData,
+
+        [Parameter()]
+        [System.Boolean]
+        $IgnoreReboot = $false,
 
         [Parameter()]
         [System.Management.Automation.PSCredential]

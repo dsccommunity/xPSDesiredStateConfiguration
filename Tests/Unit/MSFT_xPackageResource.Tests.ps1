@@ -513,7 +513,25 @@ try
 
                     { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
 
-                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 1
+                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 1 -Scope It
+                }
+
+                It 'Should not run Set-DSCMachineRebootRequired if IgnoreReboot provided' {
+                    Mock Invoke-Process { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock Test-TargetResource { return $false }
+                    Mock Get-ProductEntry { return $null }
+                    Mock -CommandName Set-DSCMachineRebootRequired
+
+                    $packageParameters = @{
+                        Path = $script:msiLocation
+                        Name = [System.String]::Empty
+                        ProductId = $script:packageId
+                        IgnoreReboot = $true
+                    }
+
+                    { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 0 -Scope It
                 }
 
                 It 'Should install package using user credentials when specified' {

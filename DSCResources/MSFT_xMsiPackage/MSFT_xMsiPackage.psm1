@@ -339,7 +339,13 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $rebootRequired)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
-        Set-DSCMachineRebootRequired
+        if ($IgnoreReboot)
+        {
+            Write-Verbose $script:localizedData.IgnoreReboot
+        } else
+        {
+            Set-DSCMachineRebootRequired
+        }
     }
     elseif ($Ensure -eq 'Present')
     {
