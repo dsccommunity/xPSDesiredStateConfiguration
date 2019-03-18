@@ -639,6 +639,8 @@ None
   default value is Present. { *Present* | Absent }.
 * **[String] Arguments** _(Write)_: The arguments to be passed to the MSI
   package during installation or uninstallation if needed.
+* **[Boolean] IgnoreReboot** _(Write): Ignore a pending reboot if requested by package installation. By default is `$false` and DSC will try to reboot the system.
+  * Check https://docs.microsoft.com/en-us/powershell/dsc/managing-nodes/metaconfig#basic-settings for more information
 * **[System.Management.Automation.PSCredential] Credential** _(Write)_: The
   credential of a user account to be used to mount a UNC path if needed.
 * **[String] LogPath** _(Write)_: The path to the log file to log the output
