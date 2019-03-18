@@ -545,6 +545,8 @@ None
 * **Arguments**: Command line arguments passed on the installation command line.
   * When installing MSI packages, the `/quiet` and `/norestart` arguments are
     automatically applied.
+* **IgnoreReboot**: Ignore a pending reboot if requested by package installation. By default is `$false` and DSC will try to reboot the system.
+  * Check https://docs.microsoft.com/en-us/powershell/dsc/managing-nodes/metaconfig#basic-settings for more information
 * **Credential**: PSCredential needed to access Path.
 * **ReturnCode**: An array of return codes that are returned after a successful
   installation.
