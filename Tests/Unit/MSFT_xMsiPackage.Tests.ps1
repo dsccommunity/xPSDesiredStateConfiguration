@@ -5,7 +5,6 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
-
 if (Test-SkipContinuousIntegrationTask -Type 'Unit')
 {
     return
@@ -29,7 +28,6 @@ Describe 'xMsiPackage Unit Tests' {
     }
 
     InModuleScope 'MSFT_xMsiPackage' {
-
 
         $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
         $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
@@ -286,8 +284,8 @@ Describe 'xMsiPackage Unit Tests' {
             }
 
             Context 'Reboot handling' {
-                Mock Start-MsiProcess { return 3010 }
-                Mock -CommandName Set-DSCMachineRebootRequired
+                Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
+                Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
 
                 it 'Should request reboot by default' {
                     $setTargetResourceParameters.IgnoreReboot = $false

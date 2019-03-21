@@ -350,7 +350,8 @@ function Set-TargetResource
         if ($IgnoreReboot)
         {
             Write-Verbose $script:localizedData.IgnoreReboot
-        } else
+        }
+        else
         {
             Set-DSCMachineRebootRequired
         }
@@ -394,8 +395,7 @@ function Set-TargetResource
         Not Used in Test-TargetResource
 
     .PARAMETER IgnoreReboot
-        Ignore a pending reboot if requested by package installation.
-        By default is `$false` and DSC will try to reboot the system.
+        Not Used in Test-TargetResource
 
     .PARAMETER Credential
         Not Used in Test-TargetResource

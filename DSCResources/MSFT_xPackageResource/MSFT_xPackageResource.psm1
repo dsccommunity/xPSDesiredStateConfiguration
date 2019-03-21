@@ -678,7 +678,8 @@ function Set-TargetResource
         if ($IgnoreReboot)
         {
             Write-Verbose $script:localizedData.IgnoreReboot
-        } else
+        }
+        else
         {
             Set-DSCMachineRebootRequired
         }

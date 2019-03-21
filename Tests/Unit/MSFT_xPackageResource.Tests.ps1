@@ -500,10 +500,10 @@ try
                 }
 
                 It 'Should not check for product installation when rebooted is required (#52)' {
-                    Mock Invoke-Process { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
-                    Mock Test-TargetResource { return $false }
-                    Mock Get-ProductEntry { return $null }
-                    Mock -CommandName Set-DSCMachineRebootRequired
+                    Mock -CommandName 'Invoke-Process' -MockWith { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
+                    Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
+                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
 
                     $packageParameters = @{
                         Path = $script:msiLocation
@@ -517,10 +517,10 @@ try
                 }
 
                 It 'Should not run Set-DSCMachineRebootRequired if IgnoreReboot provided' {
-                    Mock Invoke-Process { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
-                    Mock Test-TargetResource { return $false }
-                    Mock Get-ProductEntry { return $null }
-                    Mock -CommandName Set-DSCMachineRebootRequired
+                    Mock -CommandName 'Invoke-Process' -MockWith { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
+                    Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
+                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
 
                     $packageParameters = @{
                         Path = $script:msiLocation
