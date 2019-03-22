@@ -1155,8 +1155,8 @@ function Add-LocalGroupMemberUsingDirectoryEntry
         {
             Write-Verbose -Message "Account '$($userDE.Name)' is already a member of group at path '$($GroupDE.Path)'" -Verbose
 
-            $foundMember = $true       
-            break     
+            $foundMember = $true
+            break
         }
     }
 
@@ -1248,7 +1248,7 @@ function Get-WellKnownGroupName
     {
         $groupSID = New-Object `
                         -TypeName System.Security.Principal.SecurityIdentifier `
-                        -ArgumentList @( $Sid )        
+                        -ArgumentList @( $Sid )
     }
     else
     {
