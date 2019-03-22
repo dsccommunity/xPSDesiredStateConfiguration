@@ -1026,9 +1026,9 @@ function Initialize-TestAdministratorAccount
     $adminGroupName = Get-WellKnownGroupName `
                         -WellKnownSidType ([System.Security.Principal.WellKnownSidType]::BuiltinAdministratorsSid)
 
-    # Note: If we can find the WellKnownSidType for 'Remote Management Users'
-    # we should switch to looking up the group name based on that instead.
-    $remoteManagementGroupName = 'Remote Management Users'
+    # Get local Remote Management Users groups name
+    $remoteManagementGroupName = Get-WellKnownGroupName `
+                        -Sid 'S-1-5-32-580'
 
     $testAdminUserName = 'xPSDSCTestAdmin'
 
@@ -1038,25 +1038,21 @@ function Initialize-TestAdministratorAccount
                         -AsPlainText `
                         -Force
 
-    $adminGroup = Get-LocalGroupDE -GroupName $adminGroupName
-    $remoteManagementGroup = Get-LocalGroupDE -GroupName $remoteManagementGroupName
+    $adminGroup = Get-LocalGroupDirectoryEntry -GroupName $adminGroupName
+    $remoteManagementGroup = Get-LocalGroupDirectoryEntry -GroupName $remoteManagementGroupName
 
-    $testAdminUser = Get-LocalUserDE -UserName $testAdminUserName
+    $testAdminUser = New-LocalUserUsingDirectoryEntry -UserName $testAdminUserName
 
-    Set-UserDEPassword `
+    Set-UserPasswordUsingDirectoryEntry `
         -UserDE $testAdminUser `
         -Password $testAdminPassword
 
-    Add-MemberToGroup `
-        -UserName $testAdminUserName `
+    Add-LocalGroupMemberUsingDirectoryEntry `
         -UserDE $testAdminUser `
-        -GroupName $adminGroupName `
         -GroupDE $adminGroup
 
-    Add-MemberToGroup `
-        -UserName $testAdminUserName `
+    Add-LocalGroupMemberUsingDirectoryEntry `
         -UserDE $testAdminUser `
-        -GroupName $remoteManagementGroupName `
         -GroupDE $remoteManagementGroup
 
     $script:xPSDesiredStateConfigurationTestAdminCreds = `
@@ -1123,57 +1119,51 @@ function Get-TestPassword
         Checks whether the specified user is a member of the specified group,
         and adds them to the group if they are not a member.
 #>
-function Add-MemberToGroup
+function Add-LocalGroupMemberUsingDirectoryEntry
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $UserName,
-
-        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_.SchemaClassName -eq 'User'})]
         [System.DirectoryServices.DirectoryEntry]
         $UserDE,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $GroupName,
-
-        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_.SchemaClassName -eq 'Group'})]
         [System.DirectoryServices.DirectoryEntry]
         $GroupDE
     )
 
-    $memberOutput = net localgroup $GroupName
+    try
+    {
+        $groupMembers = $GroupDE.Invoke('Members')
+    }
+    catch
+    {
+        Write-Error -Message "Failed to look up members of group at path '$($GroupDE.Path)'"
+        return
+    }
 
     $foundMember = $false
-    $foundGroup = $true
 
-    foreach ($line in $memberOutput)
+    foreach ($member in $groupMembers)
     {
-        # The target user already exists in the group
-        if ($line -like $UserName)
-        {
-            Write-Verbose -Message "Account '$UserName' is already a member of group '$GroupName'" -Verbose
+        $memberName = $member.GetType().InvokeMember('Name', 'GetProperty', $null, $member, $null)
 
-            $foundMember = $true
-        }
-        # The target group does not exist
-        elseif ($line -like 'The specified local group does not exist.')
+        if ($userDE.Name -like $memberName)
         {
-            Write-Error -Message "Failed to look up members of group '$GroupName'"
+            Write-Verbose -Message "Account '$($userDE.Name)' is already a member of group at path '$($GroupDE.Path)'" -Verbose
 
-            $foundGroup = $false
+            $foundMember = $true       
+            break     
         }
     }
 
-    # If we found the group and the test user is not a member, make it a member
-    if ($foundGroup -and !$foundMember)
+    # If the user is not a member of the group, make it a member
+    if (!$foundMember)
     {
-        Write-Verbose -Message "Adding account '$UserName' to group '$GroupName'" -Verbose
+        Write-Verbose -Message "Adding account '$($userDE.Name)' to group at path '$($GroupDE.Path)'" -Verbose
 
         $null = $GroupDE.Add($UserDE.Path)
     }
@@ -1181,8 +1171,7 @@ function Add-MemberToGroup
 
 <#
     .SYNOPSIS
-        Generates a random string which is intended to be used as an account
-        password.
+        Adds the desired permissions to the given file system path.
 #>
 function Add-PathPermission
 {
@@ -1196,6 +1185,7 @@ function Add-PathPermission
 
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $Path,
 
@@ -1236,7 +1226,7 @@ function Add-PathPermission
 
 <#
     .SYNOPSIS
-        Retrieves the group name corresponding to the specfied
+        Retrieves the group name corresponding to the specified Sid or
         WellKnownSidType.
 #>
 function Get-WellKnownGroupName
@@ -1244,14 +1234,28 @@ function Get-WellKnownGroupName
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'UsingSid')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Sid,
+
+        [Parameter(ParameterSetName = 'UsingSidType')]
         [System.Security.Principal.WellKnownSidType]
         $WellKnownSidType
     )
 
-    $groupSID = New-Object `
-                    -TypeName System.Security.Principal.SecurityIdentifier `
-                    -ArgumentList @( $WellKnownSidType, $null )
+    if (!([String]::IsNullOrEmpty($Sid)))
+    {
+        $groupSID = New-Object `
+                        -TypeName System.Security.Principal.SecurityIdentifier `
+                        -ArgumentList @( $Sid )        
+    }
+    else
+    {
+        $groupSID = New-Object `
+                        -TypeName System.Security.Principal.SecurityIdentifier `
+                        -ArgumentList @( $WellKnownSidType, $null )
+    }
 
     $groupName = $groupSID.Translate([System.Security.Principal.NTAccount]).Value.Split('\')[1]
 
@@ -1281,7 +1285,7 @@ function Get-LocalDirectory
     .SYNOPSIS
         Creates a DirectoryEntry object representing the specified local group.
 #>
-function Get-LocalGroupDE
+function Get-LocalGroupDirectoryEntry
 {
     [OutputType([System.DirectoryServices.DirectoryEntry])]
     [CmdletBinding()]
@@ -1304,8 +1308,9 @@ function Get-LocalGroupDE
 <#
     .SYNOPSIS
         Creates a DirectoryEntry object representing the specified local user.
+        Creates the user if it does not exist.
 #>
-function Get-LocalUserDE
+function New-LocalUserUsingDirectoryEntry
 {
     [OutputType([System.DirectoryServices.DirectoryEntry])]
     [CmdletBinding()]
@@ -1338,7 +1343,7 @@ function Get-LocalUserDE
     .SYNOPSIS
         Sets a password on the specified user object.
 #>
-function Set-UserDEPassword
+function Set-UserPasswordUsingDirectoryEntry
 {
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
@@ -1347,6 +1352,7 @@ function Set-UserDEPassword
     param
     (
         [Parameter(Mandatory = $true)]
+        [ValidateScript({$_.SchemaClassName -eq 'User'})]
         [System.DirectoryServices.DirectoryEntry]
         $UserDE,
 
@@ -1356,7 +1362,7 @@ function Set-UserDEPassword
         $Password
     )
 
-    Write-Verbose -Message "Setting password on account '$($UserDE.Path)'" -Verbose
+    Write-Verbose -Message "Setting password on account at path '$($UserDE.Path)'" -Verbose
 
     $null = $UserDE.SetPassword($Password)
     $null = $UserDE.SetInfo()
