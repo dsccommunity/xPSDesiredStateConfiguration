@@ -39,7 +39,7 @@ try
         #region DEFAULT TESTS
         It 'Should compile without throwing' {
             {
-                Invoke-Expression -Command "$($script:DSCResourceName)_Config -OutputPath `$TestDrive"
+                & "$($script:DSCResourceName)_Config" -OutputPath $TestDrive
                 Start-DscConfiguration -Path $TestDrive `
                     -ComputerName localhost -Wait -Verbose -Force
             } | Should -Not -Throw
