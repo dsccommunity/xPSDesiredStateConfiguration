@@ -1,3 +1,10 @@
+<#
+    Suppress PSAvoidUsingConvertToSecureStringWithPlainText since SecureString
+    objects are used for test passwords.
+#>
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
+
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 

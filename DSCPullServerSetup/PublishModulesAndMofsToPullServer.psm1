@@ -25,8 +25,9 @@ function Publish-DSCModuleAndMof
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $True)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
-        $Source = $pwd,
+        $Source,
 
         [Parameter()]
         [System.Management.Automation.SwitchParameter]
@@ -38,7 +39,7 @@ function Publish-DSCModuleAndMof
     )
 
     # Create working directory
-    $tempFolder = "$pwd\temp"
+    $tempFolder = Join-Path -Path $Source -ChildPath 'temp'
     New-Item -Path $tempFolder -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     # Copy the mof documents from the $Source to working dir
@@ -124,7 +125,7 @@ function CreateZipFromSource
     {
         $name = $Item.Name
         $alreadyExists = Get-Module -Name $name -ListAvailable
-        if (($alreadyExists -eq $null) -or ($Force))
+        if (($null -eq $alreadyExists) -or ($Force))
         {
             # Install the modules into PowerShell module path and overwrite the content
             Copy-Item -Path $item.FullName -Recurse -Force -Destination "$env:ProgramFiles\WindowsPowerShell\Modules"
