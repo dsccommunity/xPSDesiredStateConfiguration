@@ -1244,17 +1244,25 @@ function Get-WellKnownGroupName
         $WellKnownSidType
     )
 
-    if (!([String]::IsNullOrEmpty($Sid)))
-    {
-        $groupSID = New-Object `
-                        -TypeName System.Security.Principal.SecurityIdentifier `
-                        -ArgumentList @( $Sid )
-    }
-    else
-    {
-        $groupSID = New-Object `
-                        -TypeName System.Security.Principal.SecurityIdentifier `
-                        -ArgumentList @( $WellKnownSidType, $null )
+    switch ($PSCmdlet.ParameterSetName) {
+        'UsingSid'
+        {
+            $groupSID = New-Object `
+                            -TypeName System.Security.Principal.SecurityIdentifier `
+                            -ArgumentList @( $Sid )
+        }
+
+        'UsingSid'
+        {
+            $groupSID = New-Object `
+                            -TypeName System.Security.Principal.SecurityIdentifier `
+                            -ArgumentList @( $WellKnownSidType, $null )
+        }
+
+        default
+        {
+            throw 'ParameterSet not implemented in Get-WellKnownGroupName'
+        }
     }
 
     $groupName = $groupSID.Translate([System.Security.Principal.NTAccount]).Value.Split('\')[1]
