@@ -171,12 +171,12 @@ try
                 Mock -CommandName 'Test-TargetResourceOnNanoServer' -MockWith { }
 
                 It 'Should call Assert-GroupNameValid with the given group name' {
-                    $testTargetResourceResult = Test-TargetResource -GroupName $script:testGroupName
+                    $null = Test-TargetResource -GroupName $script:testGroupName
                     Assert-MockCalled -CommandName 'Assert-GroupNameValid' -ParameterFilter { $GroupName -eq $script:testGroupName }
                 }
 
                 It 'Should call Test-TargetResourceOnFullSKU with all parameters when not on Nano Server' {
-                    $testTargetResourceResult = Test-TargetResource -GroupName $script:testGroupName -Credential $script:testCredential
+                    $null = Test-TargetResource -GroupName $script:testGroupName -Credential $script:testCredential
 
                     Assert-MockCalled -CommandName 'Test-IsNanoServer'
                     Assert-MockCalled -CommandName 'Test-TargetResourceOnFullSKU' -ParameterFilter { $GroupName -eq $script:testGroupName -and $Credential -eq $script:testCredential }
@@ -185,7 +185,7 @@ try
                 It 'Should call Test-TargetResourceOnNanoServer with all parameters when on Nano Server' {
                     Mock -CommandName 'Test-IsNanoServer' -MockWith { return $true }
 
-                    $testTargetResourceResult = Test-TargetResource -GroupName $script:testGroupName -Credential $script:testCredential
+                    $null = Test-TargetResource -GroupName $script:testGroupName -Credential $script:testCredential
 
                     Assert-MockCalled -CommandName 'Test-IsNanoServer'
                     Assert-MockCalled -CommandName 'Test-TargetResourceOnNanoServer' -ParameterFilter { $GroupName -eq $script:testGroupName -and $Credential -eq $script:testCredential }
@@ -330,7 +330,7 @@ try
                     It 'Should throw an error when Get-LocalGroup throws an exception other than GroupNotFound' {
                         Mock -CommandName 'Get-LocalGroup' -MockWith { Write-Error -Message $script:testErrorMessage -CategoryReason 'OtherException' }
 
-                        { $getTargetResourceResult = Get-TargetResourceOnNanoServer -GroupName $script:testGroupName } | Should -Throw -ExpectedMessage $script:testErrorMessage
+                        { $null = Get-TargetResourceOnNanoServer -GroupName $script:testGroupName } | Should -Throw -ExpectedMessage $script:testErrorMessage
 
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                     }
@@ -1718,7 +1718,7 @@ try
                     }
 
                     It 'Should pass Credential to appropriate functions' {
-                        $getMembersResult = Get-MembersAsPrincipalsList -Group $script:testGroup -Credential $script:testCredential -PrincipalContextCache $principalContextCache -Disposables $disposables
+                        $null = Get-MembersAsPrincipalsList -Group $script:testGroup -Credential $script:testCredential -PrincipalContextCache $principalContextCache -Disposables $disposables
 
                         Assert-MockCalled -CommandName 'Get-PrincipalContext' -ParameterFilter { $Credential -eq $script:testCredential }
                         Assert-MockCalled -CommandName 'Get-PrincipalContext' -ParameterFilter { $Credential -eq $script:testCredential}
@@ -1846,7 +1846,7 @@ try
                     It 'Should throw if principal cannot be found' {
                         $errorMessage = ($script:localizedData.CouldNotFindPrincipal -f $script:testUserPrincipal1.Name)
 
-                        { $convertToPrincipalResult = ConvertTo-Principal `
+                        { $null = ConvertTo-Principal `
                             -MemberName $script:testUserPrincipal1.Name `
                             -PrincipalContextCache $principalContextCache `
                             -Disposables $disposables } | Should -Throw -ExpectedMessage $errorMessage

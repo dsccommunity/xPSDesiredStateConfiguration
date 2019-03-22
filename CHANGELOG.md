@@ -8,6 +8,8 @@
   - PSPossibleIncorrectComparisonWithNull
   - PSAvoidDefaultValueForMandatoryParameter
   - PSAvoidUsingInvokeExpression
+  - PSUseDeclaredVarsMoreThanAssignments
+  - PSAvoidGlobalVars
 - xPackage and xMsiPackage
   - Add an ability to ignore a pending reboot if requested by package installation.
 - xRemoteFile

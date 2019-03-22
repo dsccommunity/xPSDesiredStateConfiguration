@@ -2,8 +2,9 @@ $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
 $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 Import-Module -Name $commonTestHelperFilePath
 
-$Global:DSCModuleName      = 'xPSDesiredStateConfiguration'
-$Global:DSCResourceName    = 'MSFT_xRemoteFile'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceFriendlyName = 'MSFT_xRemoteFile'
+$script:dcsResourceName = "MSFT_$($script:dscResourceFriendlyName)"
 
 if (Test-SkipContinuousIntegrationTask -Type 'Unit')
 {
@@ -21,22 +22,22 @@ if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource
 
 Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
 $TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $Global:DSCModuleName `
-    -DSCResourceName $Global:DSCResourceName `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dcsResourceName `
     -TestType Unit
 #endregion HEADER
 
 # Create a working folder that all files will be created in
-$Global:WorkingFolder = Join-Path -Path $ENV:Temp -ChildPath $Global:DSCResourceName
-if (-not (Test-Path -Path $Global:WorkingFolder))
+$script:workingFolder = Join-Path -Path $ENV:Temp -ChildPath $script:dcsResourceName
+if (-not (Test-Path -Path $script:workingFolder))
 {
-    $null = New-Item -Path $Global:WorkingFolder -ItemType Directory
+    $null = New-Item -Path $script:workingFolder -ItemType Directory
 }
 
 # Begin Testing
 try
 {
-    InModuleScope $Global:DSCResourceName {
+    InModuleScope $script:dcsResourceName {
         function Get-InvalidDataException
         {
             param(
@@ -66,15 +67,13 @@ try
         $testURINotExist = "http://contoso.com/$testURIFileNotExist"
 
         $testDestinationFolder = Join-Path `
-            -Path $Global:WorkingFolder -ChildPath 'UnitTest_Folder'
+            -Path $script:workingFolder -ChildPath 'UnitTest_Folder'
         $testDestinationFolderFile = Join-Path `
             -Path $testDestinationFolder -ChildPath $testURIFile
-        $testDestinationFolderFileNotExist = Join-Path `
-            -Path $testDestinationFolder -ChildPath $testURIFileNotExist
         $testDestinationFile = Join-Path `
-            -Path $Global:WorkingFolder -ChildPath 'UnitTest_File.xml'
+            -Path $script:workingFolder -ChildPath 'UnitTest_File.xml'
         $testDestinationNotExist = Join-Path `
-            -Path $Global:WorkingFolder -ChildPath 'UnitTest_NotExist'
+            -Path $script:workingFolder -ChildPath 'UnitTest_NotExist'
 
         # Create the splats
         $testSplatFile = @{
@@ -92,15 +91,15 @@ try
 
         # Create the test files/folders by clearing the working folder
         # if it exists and building a set of expected test files
-        if (Test-Path -Path $Global:WorkingFolder)
+        if (Test-Path -Path $script:workingFolder)
         {
-            $null = Remove-Item -Path $Global:WorkingFolder -Force -Recurse
+            $null = Remove-Item -Path $script:workingFolder -Force -Recurse
         }
         $null = New-Item -Path $testDestinationFolder -ItemType Directory
         $null = Set-Content -Path $testDestinationFile -Value 'Dummy Content'
         $null = Set-Content -Path $testDestinationFolderFile -Value 'Dummy Content'
 
-        Describe "$($Global:DSCResourceName)\Get-TargetResource" {
+        Describe "$($script:dcsResourceName)\Get-TargetResource" {
             $result = Get-TargetResource @testSplatFile
             It 'Returns "Present" when DestinationPath is a File and exists' {
                 $Result.Ensure | Should -Be 'Present'
@@ -121,9 +120,9 @@ try
             It 'Returns "Absent" when DestinationPath is Other' {
                 $Result.Ensure | Should -Be 'Absent'
             }
-        } #end Describe "$($Global:DSCResourceName)\Get-TargetResource"
+        } #end Describe "$($script:dcsResourceName)\Get-TargetResource"
 
-        Describe "$($Global:DSCResourceName)\Set-TargetResource" {
+        Describe "$($script:dcsResourceName)\Set-TargetResource" {
             Context 'URI is "bad://.."' {
                 It 'Throws a UriValidationFailure exeception' {
                     $splat = $testSplatFile.Clone()
@@ -198,9 +197,9 @@ try
                     Assert-MockCalled Update-Cache -Exactly 1
                 }
             }
-        } #end Describe "$($Global:DSCResourceName)\Set-TargetResource"
+        } #end Describe "$($script:dcsResourceName)\Set-TargetResource"
 
-        Describe "$($Global:DSCResourceName)\Test-TargetResource" {
+        Describe "$($script:dcsResourceName)\Test-TargetResource" {
             Mock Get-Cache
             Context 'URI is valid, DestinationPath is a File, file exists' {
                 It 'Returns "False"' {
@@ -257,9 +256,9 @@ try
                 }
             }
 
-        } #end Describe "$($Global:DSCResourceName)\Test-TargetResource"
+        } #end Describe "$($script:dcsResourceName)\Test-TargetResource"
 
-        Describe "$($Global:DSCResourceName)\Test-UriScheme" {
+        Describe "$($script:dcsResourceName)\Test-UriScheme" {
             It 'Returns "True" when URI is "http://.." and scheme is "http|https|file"' {
                 Test-UriScheme -Uri $testURI -Scheme 'http|https|file' | Should -Be $true
             }
@@ -272,9 +271,9 @@ try
             It 'Returns "False" when URI is "bad://.." and scheme is "http|https|file"' {
                 Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should -Be $false
             }
-        } #end Describe "$($Global:DSCResourceName)\Test-UriScheme"
+        } #end Describe "$($script:dcsResourceName)\Test-UriScheme"
 
-        Describe "$($Global:DSCResourceName)\Get-PathItemType" {
+        Describe "$($script:dcsResourceName)\Get-PathItemType" {
             It 'Returns "Directory" when Path is a Directory' {
                 Get-PathItemType -Path $testDestinationFolder | Should -Be 'Directory'
             }
@@ -287,9 +286,9 @@ try
             It 'Returns "Other" when Path is not in File System' {
                 Get-PathItemType -Path HKLM:\Software | Should -Be 'Other'
             }
-        } #end Describe "$($Global:DSCResourceName)\Get-PathItemType"
+        } #end Describe "$($script:dcsResourceName)\Get-PathItemType"
 
-        Describe "$($Global:DSCResourceName)\Get-Cache" {
+        Describe "$($script:dcsResourceName)\Get-Cache" {
             Mock Import-CliXml -MockWith { 'Expected Content' }
             Mock Test-Path -MockWith { $True }
             Context "DestinationPath 'c:\' and Uri $testURI and Cached Content exists" {
@@ -313,9 +312,9 @@ try
                     Assert-MockCalled Test-Path -Exactly 1
                 }
             }
-        } #end Describe "$($Global:DSCResourceName)\Get-Cache"
+        } #end Describe "$($script:dcsResourceName)\Get-Cache"
 
-        Describe "$($Global:DSCResourceName)\Update-Cache" {
+        Describe "$($script:dcsResourceName)\Update-Cache" {
             Mock Export-CliXml
             Mock Test-Path -MockWith { $True }
             Mock New-Item
@@ -340,22 +339,22 @@ try
                     Assert-MockCalled New-Item -Exactly 1
                 }
             }
-        } #end Describe "$($Global:DSCResourceName)\Update-Cache"
+        } #end Describe "$($script:dcsResourceName)\Update-Cache"
 
-        Describe "$($Global:DSCResourceName)\Get-CacheKey" {
+        Describe "$($script:dcsResourceName)\Get-CacheKey" {
             It "Returns -799765921 as Cache Key for DestinationPath 'c:\' and Uri $testURI" {
                 Get-CacheKey -DestinationPath 'c:\' -Uri $testURI | Should -Be -799765921
             }
             It "Returns 1266535016 as Cache Key for DestinationPath 'c:\Windows\System32' and Uri $testURINotExist" {
                 Get-CacheKey -DestinationPath 'c:\Windows\System32' -Uri $testURINotExist | Should -Be 1266535016
             }
-        } #end Describe "$($Global:DSCResourceName)\Get-CacheKey"
+        } #end Describe "$($script:dcsResourceName)\Get-CacheKey"
     }
 }
 finally
 {
     # Clean up the working folder
-    $null = Remove-Item -Path $Global:WorkingFolder -Force -Recurse
+    $null = Remove-Item -Path $script:workingFolder -Force -Recurse
 
     #region FOOTER
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
