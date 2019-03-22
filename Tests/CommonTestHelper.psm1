@@ -1252,7 +1252,7 @@ function Get-WellKnownGroupName
                             -ArgumentList @( $Sid )
         }
 
-        'UsingSid'
+        'UsingSidType'
         {
             $groupSID = New-Object `
                             -TypeName System.Security.Principal.SecurityIdentifier `
