@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- xPackage and xMsiPackage
+  - Add an ability to ignore a pending reboot if requested by package installation.
 - xRemoteFile
   - Updated MatchSource description in README.md.
     [issue #409](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/409)

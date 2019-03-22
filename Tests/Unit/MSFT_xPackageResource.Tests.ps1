@@ -500,10 +500,10 @@ try
                 }
 
                 It 'Should not check for product installation when rebooted is required (#52)' {
-                    Mock Invoke-Process { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
-                    Mock Test-TargetResource { return $false }
-                    Mock Get-ProductEntry { return $null }
-                    Mock -CommandName Set-DSCMachineRebootRequired
+                    Mock -CommandName 'Invoke-Process' -MockWith { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
+                    Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
+                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
 
                     $packageParameters = @{
                         Path = $script:msiLocation
@@ -513,7 +513,25 @@ try
 
                     { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
 
-                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 1
+                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 1 -Scope It
+                }
+
+                It 'Should not run Set-DSCMachineRebootRequired if IgnoreReboot provided' {
+                    Mock -CommandName 'Invoke-Process' -MockWith { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
+                    Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
+                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
+
+                    $packageParameters = @{
+                        Path = $script:msiLocation
+                        Name = [System.String]::Empty
+                        ProductId = $script:packageId
+                        IgnoreReboot = $true
+                    }
+
+                    { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName Set-DSCMachineRebootRequired -Times 0 -Scope It
                 }
 
                 It 'Should install package using user credentials when specified' {
