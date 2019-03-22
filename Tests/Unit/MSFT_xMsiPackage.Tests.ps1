@@ -28,7 +28,6 @@ Describe 'xMsiPackage Unit Tests' {
     }
 
     InModuleScope 'MSFT_xMsiPackage' {
-
         $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
         $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 
@@ -287,14 +286,14 @@ Describe 'xMsiPackage Unit Tests' {
                 Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
                 Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
 
-                it 'Should request reboot by default' {
+                It 'Should request reboot by default' {
                     $setTargetResourceParameters.IgnoreReboot = $false
                     { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
                     Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -Exactly 1 -Scope 'It'
                 }
 
-                it 'Should not request reboot if IgnoreReboot specified' {
+                It 'Should not request reboot if IgnoreReboot specified' {
                     $setTargetResourceParameters.IgnoreReboot = $true
                     { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
