@@ -146,6 +146,7 @@ function New-ZipFileFromHashtable
 #>
 function Test-FileStructuresMatch
 {
+    [OutputType([System.Boolean])]
     [CmdletBinding()]
     param
     (
@@ -186,7 +187,7 @@ function Test-FileStructuresMatch
         $sourceChildItemName = Split-Path -Path $sourceChildItem.FullName -Leaf
         $destinationChildItem = $destinationContents[$sourceChildItemName]
 
-        if ($destinationChildItem -eq $null)
+        if ($null -eq $destinationChildItem)
         {
             return $false
         }

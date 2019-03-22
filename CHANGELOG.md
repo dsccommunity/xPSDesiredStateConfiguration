@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Fixes all instances of the following PSScriptAnalyzer issues:
+  - PSUseOutputTypeCorrectly
+  - PSAvoidUsingConvertToSecureStringWithPlainText
+  - PSPossibleIncorrectComparisonWithNull
+  - PSAvoidDefaultValueForMandatoryParameter
+  - PSAvoidUsingInvokeExpression
 - xPackage and xMsiPackage
   - Add an ability to ignore a pending reboot if requested by package installation.
 - xRemoteFile
