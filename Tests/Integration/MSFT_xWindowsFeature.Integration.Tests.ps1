@@ -41,7 +41,7 @@ try {
             $testFeatureWithSubFeatures = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
             $script:installStateOfTestWithSubFeatures = $testFeatureWithSubFeatures.Installed
 
-            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'
+            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1' -Resolve
         }
 
         AfterAll {

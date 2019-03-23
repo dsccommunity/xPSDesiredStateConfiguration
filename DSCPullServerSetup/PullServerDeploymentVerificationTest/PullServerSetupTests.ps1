@@ -39,17 +39,17 @@ Describe PullServerInstallationTests {
         # Registration Keys info.
         $DscRegKeyName = 'RegistrationKeys.txt'
         $DscRegKeyXMLNode = "//appSettings/add[@key = 'RegistrationKeyPath']"
-        $DscRegKeyParentPath = ($DscWebConfigXML.SelectNodes($DscRegKeyXMLNode)).Value
+        $DscRegKeyParentPath = ($DscWebConfigXML.SelectSingleNode($DscRegKeyXMLNode)).Value
         $DscRegKeyPath = Join-Path -Path $DscRegKeyParentPath -ChildPath $DscRegKeyName
         $script:dscRegKey = Get-Content -Path $DscRegKeyPath
 
         # Configuration repository info.
         $DscConfigPathXMLNode = "//appSettings/add[@key = 'ConfigurationPath']"
-        $DscConfigPath  = ($DscWebConfigXML.SelectNodes($DscConfigPathXMLNode)).Value
+        $DscConfigPath  = ($DscWebConfigXML.SelectSingleNode($DscConfigPathXMLNode)).Value
 
         # Module repository info.
         $DscModulePathXMLNode = "//appSettings/add[@key = 'ModulePath']"
-        $script:dscModulePath = ($DscWebConfigXML.SelectNodes($DscModulePathXMLNode)).Value
+        $script:dscModulePath = ($DscWebConfigXML.SelectSingleNode($DscModulePathXMLNode)).Value
 
         # Testing Files/Variables
         $DscTestMetaConfigName = 'PullServerSetupTestMetaConfig'
