@@ -491,7 +491,7 @@ Configuration xFileUpload
 }
 
 # Encrypts password using the defined public key
-$getEncryptedPassword = {
+[System.Management.Automation.ScriptBlock] $getEncryptedPassword = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -549,7 +549,7 @@ $getEncryptedPassword = {
 }
 
 # Retrieves certificate by thumbprint
-$getCertificate = {
+[System.Management.Automation.ScriptBlock] $getCertificate = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -582,7 +582,7 @@ $getCertificate = {
 }
 
 # Throws terminating error specified errorCategory, errorId and errorMessage
-$throwTerminatingError = {
+[System.Management.Automation.ScriptBlock] $throwTerminatingError = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -603,7 +603,7 @@ $throwTerminatingError = {
 }
 
 # Decrypts password using the defined private key
-$getDecryptedPassword = {
+[System.Management.Automation.ScriptBlock] $getDecryptedPassword = {
     param
     (
         [Parameter(Mandatory = $true)]
