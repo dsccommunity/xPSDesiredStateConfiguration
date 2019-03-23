@@ -1,8 +1,5 @@
 <#
-    These tests should only be run in AppVeyor since they currently require the AppVeyor
-    administrator account credential to run.
-
-    Also please note that these tests are currently dependent on each other.
+    Please note that these tests are currently dependent on each other.
     They must be run in the order given and if one test fails, subsequent tests will
     also fail.
 #>
@@ -29,7 +26,7 @@ try
 {
     Describe 'xServiceSet Integration Tests' {
         BeforeAll {
-            # Import CommonResourceHelper for Get-AppveyorAdministratorCredential
+            # Import CommonResourceHelper for Get-TestAdministratorAccountCredential
             $moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
             $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
             $commonResourceHelperFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'CommonResourceHelper.psm1'
@@ -134,11 +131,14 @@ try
             }
 
             $configurationName = 'TestEditOneServiceSet'
+
+            $testAdminCreds = Get-TestAdministratorAccountCredential
+
             $resourceParameters = @{
                 Name = @( $script:service1Properties.Name )
                 Ensure = 'Present'
                 StartupType = 'Manual'
-                Credential = Get-AppVeyorAdministratorCredential
+                Credential =  $testAdminCreds
                 State = 'Stopped'
             }
 
@@ -169,8 +169,8 @@ try
                 $serviceCimInstance.StartMode | Should -Be $resourceParameters.StartupType
             }
 
-            It 'Should have set the service start name to the appveyor account name' {
-                $serviceCimInstance.StartName | Should -Be '.\appveyor'
+            It 'Should have set the service start name to the test credential account name' {
+                $serviceCimInstance.StartName | Should -Be ".\$($testAdminCreds.UserName.Split('\')[1])"
             }
         }
 

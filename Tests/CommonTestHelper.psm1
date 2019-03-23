@@ -681,50 +681,6 @@ function Test-SetTargetResourceWithWhatIf
 
 <#
     .SYNOPSIS
-        Retrieves the administrator credential on an AppVeyor machine.
-        The password will be reset so that we know what the password is.
-
-    .NOTES
-        The AppVeyor credential will be cached after the first call to this function so that the
-        password is not reset if this function is called again.
-#>
-function Get-AppVeyorAdministratorCredential
-{
-    [OutputType([System.Management.Automation.PSCredential])]
-    [CmdletBinding()]
-    param ()
-
-    if ($null -eq $script:appVeyorAdministratorCredential)
-    {
-        $password = ''
-
-        $randomGenerator = New-Object -TypeName 'System.Random'
-
-        $passwordLength = Get-Random -Minimum 15 -Maximum 126
-
-        while ($password.Length -lt $passwordLength)
-        {
-            $password = $password + [System.Char] $randomGenerator.Next(45, 126)
-        }
-
-        # Change password
-        $appVeyorAdministratorUsername = 'appveyor'
-
-        $appVeyorAdministratorUser = [System.DirectoryServices.DirectoryEntry] ("WinNT://$($env:computerName)/$appVeyorAdministratorUsername")
-
-        $null = $appVeyorAdministratorUser.SetPassword($password)
-        [Microsoft.Win32.Registry]::SetValue('HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon', 'DefaultPassword', $password)
-
-        $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
-
-        $script:appVeyorAdministratorCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @( "$($env:computerName)\$appVeyorAdministratorUsername", $securePassword )
-    }
-
-    return $script:appVeyorAdministratorCredential
-}
-
-<#
-    .SYNOPSIS
         Enters a DSC Resource test environment.
 
     .PARAMETER DscResourceModuleName
@@ -764,7 +720,7 @@ function Enter-DscResourceTestEnvironment
 
     if (Test-DscResourceTestsNeedsInstallOrUpdate)
     {
-        Install-DscResourceTests
+        Install-DscResourceTestsModule
     }
 
     Import-Module -Name $testHelperFilePath
@@ -854,7 +810,7 @@ function Test-DscResourceTestsNeedsInstallOrUpdate
         Git is not installed then a warning will be
         displayed and the repository will not be pulled.
 #>
-function Install-DscResourceTests
+function Install-DscResourceTestsModule
 {
     [CmdletBinding()]
     param
@@ -1035,19 +991,405 @@ function Install-WindowsFeatureAndVerify
     return $featureInstalled
 }
 
+<#
+    .SYNOPSIS
+        Retrieves a PSCredential object representing a test Administrator
+        account.
+#>
+function Get-TestAdministratorAccountCredential
+{
+    [OutputType([System.Management.Automation.PSCredential])]
+    [CmdletBinding()]
+    param()
+
+    if (-not (Test-Path -Path Variable:Script:xPSDesiredStateConfigurationTestAdminCreds) -or `
+        $null -eq $script:xPSDesiredStateConfigurationTestAdminCreds)
+    {
+        Initialize-TestAdministratorAccount
+    }
+
+    return $script:xPSDesiredStateConfigurationTestAdminCreds
+}
+
+<#
+    .SYNOPSIS
+        Creates a test administrator user account if it doesn't exist. Adds
+        the account to the local built-in Administrators group. Resets the
+        password on the account with a randomly generated password.
+#>
+function Initialize-TestAdministratorAccount
+{
+    [CmdletBinding()]
+    param()
+
+    # Get local Administrators group name
+    $adminGroupName = Get-WellKnownGroupName `
+                        -WellKnownSidType ([System.Security.Principal.WellKnownSidType]::BuiltinAdministratorsSid)
+
+    # Get local Remote Management Users groups name
+    $remoteManagementGroupName = Get-WellKnownGroupName `
+                        -Sid 'S-1-5-32-580'
+
+    $testAdminUserName = 'xPSDSCTestAdmin'
+
+    $testAdminPassword = Get-TestPassword
+    $securePassword = ConvertTo-SecureString `
+                        -String $testAdminPassword `
+                        -AsPlainText `
+                        -Force
+
+    $adminGroup = Get-LocalGroupDirectoryEntry -GroupName $adminGroupName
+    $remoteManagementGroup = Get-LocalGroupDirectoryEntry -GroupName $remoteManagementGroupName
+
+    $testAdminUser = New-LocalUserUsingDirectoryEntry -UserName $testAdminUserName
+
+    Set-UserPasswordUsingDirectoryEntry `
+        -UserDE $testAdminUser `
+        -Password $testAdminPassword
+
+    Add-LocalGroupMemberUsingDirectoryEntry `
+        -UserDE $testAdminUser `
+        -GroupDE $adminGroup
+
+    Add-LocalGroupMemberUsingDirectoryEntry `
+        -UserDE $testAdminUser `
+        -GroupDE $remoteManagementGroup
+
+    $script:xPSDesiredStateConfigurationTestAdminCreds = `
+        Get-PSCredentialObject `
+            -UserName "$($env:ComputerName)\$testAdminUserName" `
+            -Password $securePassword
+}
+
+<#
+    .SYNOPSIS
+        Returns a PSCredential object representing the specified user name and
+        password.
+#>
+function Get-PSCredentialObject
+{
+    [OutputType([System.Management.Automation.PSCredential])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $UserName,
+
+        [Parameter(Mandatory = $true)]
+        [System.Security.SecureString]
+        $Password
+    )
+
+    $credentials = New-Object `
+                        -TypeName 'System.Management.Automation.PSCredential' `
+                        -ArgumentList @( $UserName, $Password )
+
+    return $credentials
+}
+
+<#
+    .SYNOPSIS
+        Generates a random string which is intended to be used as an account
+        password.
+#>
+function Get-TestPassword
+{
+    [OutputType([System.String])]
+    [CmdletBinding()]
+    param()
+
+    $password = ''
+
+    $randomGenerator = New-Object -TypeName 'System.Random'
+
+    $passwordLength = Get-Random -Minimum 15 -Maximum 126
+
+    while ($password.Length -lt $passwordLength)
+    {
+        $password = $password + [System.Char] $randomGenerator.Next(45, 126)
+    }
+
+    return $password
+}
+
+<#
+    .SYNOPSIS
+        Checks whether the specified user is a member of the specified group,
+        and adds them to the group if they are not a member.
+#>
+function Add-LocalGroupMemberUsingDirectoryEntry
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_.SchemaClassName -eq 'User'})]
+        [System.DirectoryServices.DirectoryEntry]
+        $UserDE,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_.SchemaClassName -eq 'Group'})]
+        [System.DirectoryServices.DirectoryEntry]
+        $GroupDE
+    )
+
+    try
+    {
+        $groupMembers = $GroupDE.Invoke('Members')
+    }
+    catch
+    {
+        Write-Error -Message "Failed to look up members of group at path '$($GroupDE.Path)'"
+        return
+    }
+
+    $foundMember = $false
+
+    foreach ($member in $groupMembers)
+    {
+        $memberName = $member.GetType().InvokeMember('Name', 'GetProperty', $null, $member, $null)
+
+        if ($userDE.Name -like $memberName)
+        {
+            Write-Verbose -Message "Account '$($userDE.Name)' is already a member of group at path '$($GroupDE.Path)'" -Verbose
+
+            $foundMember = $true
+            break
+        }
+    }
+
+    # If the user is not a member of the group, make it a member
+    if (!$foundMember)
+    {
+        Write-Verbose -Message "Adding account '$($userDE.Name)' to group at path '$($GroupDE.Path)'" -Verbose
+
+        $null = $GroupDE.Add($UserDE.Path)
+    }
+}
+
+<#
+    .SYNOPSIS
+        Adds the desired permissions to the given file system path.
+#>
+function Add-PathPermission
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $IdentityReference,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $Path,
+
+        [ValidateSet('Allow', 'Deny')]
+        [System.String]
+        $AccessControlType = 'Allow',
+
+        [ValidateSet({[System.Security.AccessControl.FileSystemRights].GetEnumNames()})]
+        [System.String]
+        $FileSystemRight = 'FullControl',
+
+        [System.Security.AccessControl.InheritanceFlags[]]
+        $InheritanceFlags = @(
+            [System.Security.AccessControl.InheritanceFlags]::ContainerInherit
+            [System.Security.AccessControl.InheritanceFlags]::ObjectInherit
+        ),
+
+        [System.Security.AccessControl.PropagationFlags[]]
+        $PropagationFlags = [System.Security.AccessControl.PropagationFlags]::None
+    )
+
+    $acl = Get-Acl -Path $Path
+
+    $rule = New-Object `
+                -TypeName System.Security.AccessControl.FileSystemAccessRule `
+                -ArgumentList @(
+                    $IdentityReference,
+                    $FileSystemRight,
+                    $InheritanceFlags,
+                    $PropagationFlags,
+                    $AccessControlType
+                )
+
+    $null = $acl.SetAccessRule($rule)
+
+    Set-ACL -Path $Path -AclObject $acl
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the group name corresponding to the specified Sid or
+        WellKnownSidType.
+#>
+function Get-WellKnownGroupName
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(ParameterSetName = 'UsingSid')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Sid,
+
+        [Parameter(ParameterSetName = 'UsingSidType')]
+        [System.Security.Principal.WellKnownSidType]
+        $WellKnownSidType
+    )
+
+    switch ($PSCmdlet.ParameterSetName) {
+        'UsingSid'
+        {
+            $groupSID = New-Object `
+                            -TypeName System.Security.Principal.SecurityIdentifier `
+                            -ArgumentList @( $Sid )
+        }
+
+        'UsingSidType'
+        {
+            $groupSID = New-Object `
+                            -TypeName System.Security.Principal.SecurityIdentifier `
+                            -ArgumentList @( $WellKnownSidType, $null )
+        }
+
+        default
+        {
+            throw 'ParameterSet not implemented in Get-WellKnownGroupName'
+        }
+    }
+
+    $groupName = $groupSID.Translate([System.Security.Principal.NTAccount]).Value.Split('\')[1]
+
+    return $groupName
+}
+
+<#
+    .SYNOPSIS
+        Creates a DirectoryEntry object representing the local directory of the
+        test computer.
+#>
+function Get-LocalDirectory
+{
+    [OutputType([System.DirectoryServices.DirectoryEntry])]
+    [CmdletBinding()]
+    param()
+
+    Write-Verbose -Message 'Getting Local Directory Entry'
+
+    $localDirectoryString = "WinNT://$($env:COMPUTERNAME)"
+    $localDirectory = [System.DirectoryServices.DirectoryEntry] $localDirectoryString
+
+    return $localDirectory
+}
+
+<#
+    .SYNOPSIS
+        Creates a DirectoryEntry object representing the specified local group.
+#>
+function Get-LocalGroupDirectoryEntry
+{
+    [OutputType([System.DirectoryServices.DirectoryEntry])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $GroupName
+    )
+
+    Write-Verbose -Message "Getting Local Group '$GroupName' Directory Entry" -Verbose
+
+    $groupAddress = (((Get-LocalDirectory).Path) + '/' + $GroupName + ',group')
+    $groupDE = [System.DirectoryServices.DirectoryEntry] $groupAddress
+
+    return $groupDE
+}
+
+<#
+    .SYNOPSIS
+        Creates a DirectoryEntry object representing the specified local user.
+        Creates the user if it does not exist.
+#>
+function New-LocalUserUsingDirectoryEntry
+{
+    [OutputType([System.DirectoryServices.DirectoryEntry])]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $UserName
+    )
+
+    Write-Verbose -Message "Getting Local User '$UserName' Directory Entry" -Verbose
+
+    $localDirectory = Get-LocalDirectory
+
+    $userAddress = ($localDirectory.Path) + '/' + $UserName + ',user'
+    $userDE = [System.DirectoryServices.DirectoryEntry] $userAddress
+
+    if ($null -eq $userDE.distinguishedName)
+    {
+        Write-Verbose -Message "Creating account '$UserName'" -Verbose
+
+        $userDE = $localDirectory.Create('User', $UserName)
+    }
+
+    return $userDE
+}
+
+<#
+    .SYNOPSIS
+        Sets a password on the specified user object.
+#>
+function Set-UserPasswordUsingDirectoryEntry
+{
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingUserNameAndPassWordParams', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_.SchemaClassName -eq 'User'})]
+        [System.DirectoryServices.DirectoryEntry]
+        $UserDE,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Password
+    )
+
+    Write-Verbose -Message "Setting password on account at path '$($UserDE.Path)'" -Verbose
+
+    $null = $UserDE.SetPassword($Password)
+    $null = $UserDE.SetInfo()
+}
+
 Export-ModuleMember -Function @(
-    'Test-GetTargetResourceResult', `
-    'Wait-ScriptBlockReturnTrue', `
-    'Test-IsFileLocked', `
-    'Test-SetTargetResourceWithWhatIf', `
-    'Get-AppVeyorAdministratorCredential', `
-    'Enter-DscResourceTestEnvironment', `
-    'Exit-DscResourceTestEnvironment', `
-    'Invoke-GetTargetResourceUnitTest', `
-    'Invoke-SetTargetResourceUnitTest', `
-    'Invoke-TestTargetResourceUnitTest', `
-    'Invoke-ExpectedMocksAreCalledTest', `
+    'Add-PathPermission',
+    'Enter-DscResourceTestEnvironment',
+    'Exit-DscResourceTestEnvironment',
+    'Get-TestAdministratorAccountCredential',
+    'Install-WindowsFeatureAndVerify',
+    'Invoke-ExpectedMocksAreCalledTest',
     'Invoke-GenericUnitTest',
+    'Invoke-GetTargetResourceUnitTest',
+    'Invoke-SetTargetResourceUnitTest',
+    'Invoke-TestTargetResourceUnitTest',
+    'Test-GetTargetResourceResult',
+    'Test-IsFileLocked',
+    'Test-SetTargetResourceWithWhatIf',
     'Test-SkipContinuousIntegrationTask',
-    'Install-WindowsFeatureAndVerify'
+    'Wait-ScriptBlockReturnTrue'
 )
