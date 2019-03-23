@@ -26,7 +26,12 @@ Describe PullServerInstallationTests {
 
         # UPDATE THE LOCATION OF WEB.CONFIG, if it is differnet from the default path.
         $DscWebConfigChildPath = '\inetpub\wwwroot\psdscpullserver\web.config'
-        $DscWebConfigPath = Join-Path -Path $env:SystemDrive -ChildPath $DscWebConfigChildPath -Resolve -ErrorAction Stop
+        $DscWebConfigPath = Join-Path -Path $env:SystemDrive -ChildPath $DscWebConfigChildPath
+
+        # Skip all tests if web.config is not found
+        if (-not (Test-Path $DscWebConfigPath)){
+            Write-Error 'No pullserver web.config found.' -ErrorAction Stop
+        }
 
         # Get web.config content as XML
         $DscWebConfigXML = [System.Xml.XmlDocument] (Get-Content -Path $DscWebConfigPath)
@@ -35,7 +40,7 @@ Describe PullServerInstallationTests {
         $DscRegKeyName = 'RegistrationKeys.txt'
         $DscRegKeyXMLNode = "//appSettings/add[@key = 'RegistrationKeyPath']"
         $DscRegKeyParentPath = ($DscWebConfigXML.SelectSingleNode($DscRegKeyXMLNode)).Value
-        $DscRegKeyPath = Join-Path -Path $DscRegKeyParentPath -ChildPath $DscRegKeyName -Resolve -ErrorAction Stop
+        $DscRegKeyPath = Join-Path -Path $DscRegKeyParentPath -ChildPath $DscRegKeyName
         $script:dscRegKey = Get-Content -Path $DscRegKeyPath
 
         # Configuration repository info.
@@ -48,10 +53,11 @@ Describe PullServerInstallationTests {
 
         # Testing Files/Variables
         $DscTestMetaConfigName = 'PullServerSetupTestMetaConfig'
-        $script:dscTestMetaConfigPath = Join-Path -Path $PSScriptRoot -ChildPath $DscTestMetaConfigName -Resolve -ErrorAction Stop
+        $script:dscTestMetaConfigPath = Join-Path -Path $PSScriptRoot -ChildPath $DscTestMetaConfigName
         $DscTestConfigName = 'PullServerSetUpTest'
-        $script:dscTestMofPath = Join-Path -Path $DscConfigPath -ChildPath "$DscTestConfigName.mof" -Resolve -ErrorAction Stop
-
+        $script:dscTestMofPath = Join-Path -Path $DscConfigPath -ChildPath "$DscTestConfigName.mof"
+    }
+    Context "Verify general pull server functionality" {
         It "$DscRegKeyPath exists" {
             $DscRegKeyPath | Should -Exist
         }
@@ -61,8 +67,6 @@ Describe PullServerInstallationTests {
         It "Configuration repository $DscConfigPath exists" {
             $DscConfigPath | Should -Exist
         }
-    }
-    Context "Verify general pull server functionality" {
         It "Verify server $script:dscPullServerURL is up and running" {
             $DscPullServerResponse = Invoke-WebRequest -Uri $script:dscPullServerURL -UseBasicParsing
             $DscPullServerResponse.StatusCode | Should -Be 200
