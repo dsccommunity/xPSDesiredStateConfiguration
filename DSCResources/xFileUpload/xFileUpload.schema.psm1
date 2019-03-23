@@ -63,7 +63,9 @@ Configuration xFileUpload
         $username = $Credential.UserName
 
         # Encrypt password
-        $password = Get-EncryptedPassword -Credential $Credential -CertificateThumbprint $CertificateThumbprintInvoke
+        $password = Invoke-Command `
+            -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($getEncryptedPassword)) `
+            -ArgumentList $Credential, $CertificateThumbprint
     }
 
     Script FileUpload
@@ -489,8 +491,7 @@ Configuration xFileUpload
 }
 
 # Encrypts password using the defined public key
-function Get-EncryptedPassword
-{
+$getEncryptedPassword = @'
     param
     (
         [Parameter(Mandatory = $true)]
@@ -498,14 +499,15 @@ function Get-EncryptedPassword
         $Credential,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateThumbprint
     )
 
     $value = $Credential.GetNetworkCredential().Password
 
-    $cert = Get-CertificateFromThumbprint -CertificateThumbprint $CertificateThumbprint
+    $cert = Invoke-Command `
+        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($getCertificate)) `
+        -ArgumentList $CertificateThumbprint
 
     $encryptedPassword = $null
 
@@ -544,15 +546,13 @@ function Get-EncryptedPassword
     }
 
     return $encryptedPassword
-}
+'@
 
-function Get-CertificateFromThumbprint
-{
-    [CmdletBinding()]
+# Retrieves certificate by thumbprint
+$getCertificate = @'
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateThumbprint
     )
@@ -579,7 +579,7 @@ function Get-CertificateFromThumbprint
     {
         $cert
     }
-}
+'@
 
 # Throws terminating error specified errorCategory, errorId and errorMessage
 $throwTerminatingError = @'
