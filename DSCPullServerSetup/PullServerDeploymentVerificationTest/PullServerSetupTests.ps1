@@ -51,8 +51,7 @@ Describe PullServerInstallationTests {
         $script:dscTestMetaConfigPath = Join-Path -Path $PSScriptRoot -ChildPath $DscTestMetaConfigName -Resolve -ErrorAction Stop
         $DscTestConfigName = 'PullServerSetUpTest'
         $script:dscTestMofPath = Join-Path -Path $DscConfigPath -ChildPath "$DscTestConfigName.mof" -Resolve -ErrorAction Stop
-    }
-    Context "Verify general pull server functionality" {
+
         It "$DscRegKeyPath exists" {
             $DscRegKeyPath | Should -Exist
         }
@@ -62,6 +61,8 @@ Describe PullServerInstallationTests {
         It "Configuration repository $DscConfigPath exists" {
             $DscConfigPath | Should -Exist
         }
+    }
+    Context "Verify general pull server functionality" {
         It "Verify server $script:dscPullServerURL is up and running" {
             $DscPullServerResponse = Invoke-WebRequest -Uri $script:dscPullServerURL -UseBasicParsing
             $DscPullServerResponse.StatusCode | Should -Be 200
