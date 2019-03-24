@@ -156,7 +156,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -239,7 +239,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -311,7 +311,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -367,7 +367,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Throw
         }
 
@@ -426,7 +426,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -485,7 +485,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -537,7 +537,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -626,7 +626,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -696,7 +696,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -737,7 +737,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -788,7 +788,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 
@@ -843,7 +843,7 @@ Describe 'xArchive End to End Tests' {
             {
                 . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @archiveParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force -Verbose
+                Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
             } | Should -Not -Throw
         }
 

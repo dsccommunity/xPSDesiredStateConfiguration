@@ -56,7 +56,6 @@ function Invoke-CommonResourceTesting
                 Path         = $TestDrive
                 ComputerName = 'localhost'
                 Wait         = $true
-                Verbose      = $true
                 Force        = $true
                 ErrorAction  = 'Stop'
             }

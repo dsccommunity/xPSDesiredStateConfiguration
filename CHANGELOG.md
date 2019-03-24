@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Suppresses forced Verbose output in MSFT_xArchive.EndToEnd.Tests.ps1,
+  MSFT_xDSCWebService.Integration.tests.ps1, and
+  MSFT_xWindowsProcess.Integration.Tests.ps1.
+  [issue #514](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/514)
 - Fixes all instances of the following PSScriptAnalyzer issues:
   - PSUseOutputTypeCorrectly
   - PSAvoidUsingConvertToSecureStringWithPlainText
