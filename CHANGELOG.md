@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Tests\Integration\MSFT_xDSCWebService.Integration.tests.ps1:
+  - Fixes issue where tests fail if a self signed certificate for DSC does not
+    already exist.
+    [issue #581](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/581)
 - Fixes all instances of the following PSScriptAnalyzer issues:
   - PSUseOutputTypeCorrectly
   - PSAvoidUsingConvertToSecureStringWithPlainText
