@@ -96,6 +96,8 @@ function Test-GroupExistsOnFullSKU
         $MembersToExclude
     )
 
+    Add-Type -AssemblyName System.DirectoryServices.AccountManagement -ErrorAction Stop
+
     $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
         -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Machine )
 
@@ -615,6 +617,8 @@ function Test-UserExistsOnFullSKU
         [System.String]
         $Username
     )
+
+    Add-Type -AssemblyName System.DirectoryServices.AccountManagement -ErrorAction Stop
 
     $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
         -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Machine )

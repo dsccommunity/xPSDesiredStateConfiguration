@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixes issue in xGroupResource Integration tests where the tests would fail
+  if the System.DirectoryServices.AccountManagement namespace was not loaded.
 - Fixes all instances of the following PSScriptAnalyzer issues:
   - PSUseOutputTypeCorrectly
   - PSAvoidUsingConvertToSecureStringWithPlainText
