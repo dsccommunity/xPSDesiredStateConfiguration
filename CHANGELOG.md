@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
+  [issue #530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
 - Tests\Integration\MSFT_xDSCWebService.Integration.tests.ps1:
   - Fixes issue where tests fail if a self signed certificate for DSC does not
     already exist.
