@@ -1153,7 +1153,7 @@ function Add-LocalGroupMemberUsingDirectoryEntry
 
         if ($userDE.Name -like $memberName)
         {
-            Write-Verbose -Message "Account '$($userDE.Name)' is already a member of group at path '$($GroupDE.Path)'" -Verbose
+            Write-Verbose -Message "Account '$($userDE.Name)' is already a member of group at path '$($GroupDE.Path)'"
 
             $foundMember = $true
             break
@@ -1305,7 +1305,7 @@ function Get-LocalGroupDirectoryEntry
         $GroupName
     )
 
-    Write-Verbose -Message "Getting Local Group '$GroupName' Directory Entry" -Verbose
+    Write-Verbose -Message "Getting Local Group '$GroupName' Directory Entry"
 
     $groupAddress = (((Get-LocalDirectory).Path) + '/' + $GroupName + ',group')
     $groupDE = [System.DirectoryServices.DirectoryEntry] $groupAddress
@@ -1330,7 +1330,7 @@ function New-LocalUserUsingDirectoryEntry
         $UserName
     )
 
-    Write-Verbose -Message "Getting Local User '$UserName' Directory Entry" -Verbose
+    Write-Verbose -Message "Getting Local User '$UserName' Directory Entry"
 
     $localDirectory = Get-LocalDirectory
 

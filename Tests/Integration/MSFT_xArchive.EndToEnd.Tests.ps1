@@ -145,7 +145,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Present'
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {
@@ -228,7 +227,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Present'
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {
@@ -300,7 +298,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Present'
-            Verbose = $true
         }
 
         It 'Should return true from Test-TargetResource with the same parameters before configuration' {
@@ -355,7 +352,6 @@ Describe 'xArchive End to End Tests' {
             Validate = $true
             Checksum = 'SHA-256'
             Force = $false
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {
@@ -415,7 +411,6 @@ Describe 'xArchive End to End Tests' {
             Validate = $true
             Checksum = 'SHA-256'
             Force = $true
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {
@@ -474,7 +469,6 @@ Describe 'xArchive End to End Tests' {
             Validate = $true
             Checksum = 'SHA-256'
             Force = $true
-            Verbose = $true
         }
 
         It 'Should return true from Test-TargetResource with the same parameters before configuration' {
@@ -526,7 +520,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Absent'
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {
@@ -615,7 +608,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Absent'
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {
@@ -685,7 +677,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Absent'
-            Verbose = $true
         }
 
         It 'Should return true from Test-TargetResource with the same parameters before configuration' {
@@ -726,7 +717,6 @@ Describe 'xArchive End to End Tests' {
             Path = $script:testArchiveFilePath
             Destination = $destination
             Ensure = 'Absent'
-            Verbose = $true
         }
 
         It 'Should return true from Test-TargetResource with the same parameters before configuration' {
@@ -777,7 +767,6 @@ Describe 'xArchive End to End Tests' {
             Validate = $true
             Checksum = 'SHA-256'
             Force = $true
-            Verbose = $true
         }
 
         It 'Should return true from Test-TargetResource with the same parameters before configuration' {
@@ -832,7 +821,6 @@ Describe 'xArchive End to End Tests' {
             Validate = $true
             Checksum = 'SHA-256'
             Force = $true
-            Verbose = $true
         }
 
         It 'Should return false from Test-TargetResource with the same parameters before configuration' {

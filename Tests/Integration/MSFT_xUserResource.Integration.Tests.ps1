@@ -67,11 +67,11 @@ try {
                 }
 
                 It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should -Not -Throw
+                    { Get-DscConfiguration -ErrorAction Stop } | Should -Not -Throw
                 }
 
                 It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -Verbose -ErrorAction Stop
+                    $currentConfig = Get-DscConfiguration -ErrorAction Stop
                     $currentConfig.UserName | Should -Be $testUserName
                     $currentConfig.Ensure | Should -Be 'Present'
                     $currentConfig.Description | Should -Be $TestDescription
@@ -120,11 +120,11 @@ try {
                 }
 
                 It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should -Not -Throw
+                    { Get-DscConfiguration -ErrorAction Stop } | Should -Not -Throw
                 }
 
                 It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -Verbose -ErrorAction Stop
+                    $currentConfig = Get-DscConfiguration -ErrorAction Stop
                     $currentConfig.UserName | Should -Be $testUserName
                     $currentConfig.Ensure | Should -Be 'Present'
                     $currentConfig.Description | Should -Be $TestDescription
@@ -172,11 +172,11 @@ try {
                 }
 
                 It 'Should be able to call Get-DscConfiguration without throwing' {
-                    { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should -Not -Throw
+                    { Get-DscConfiguration -ErrorAction Stop } | Should -Not -Throw
                 }
 
                 It 'Should return the correct configuration' {
-                    $currentConfig = Get-DscConfiguration -Verbose -ErrorAction Stop
+                    $currentConfig = Get-DscConfiguration -ErrorAction Stop
                     $currentConfig.UserName | Should -Be $testUserName
                     $currentConfig.Ensure | Should -Be 'Absent'
                 }
