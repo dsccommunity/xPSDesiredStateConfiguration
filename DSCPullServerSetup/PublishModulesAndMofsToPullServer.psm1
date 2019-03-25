@@ -208,7 +208,8 @@ function Publish-ModulesAndChecksum
     if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $moduleRepository))
     {
         Write-LogEntry -Scope $MyInvocation -Message "Copying modules and checksums to [$moduleRepository]."
-        Copy-Item -Path "$Source\*.zip*" -Destination $moduleRepository -Force
+        $zipPath = Join-Path -Path $Source -ChildPath '*.zip*'
+        Copy-Item -Path $zipPath -Destination $moduleRepository -Force
     }
     else
     {
