@@ -102,6 +102,15 @@ function Test-DSCPullServerIsPresent
 # Using try/finally to always cleanup.
 try
 {
+    # Get a self signed certificate to use with tests
+    New-DscSelfSignedCertificate
+
+    if (!(Test-Path -Path env:DscPublicCertificatePath) -or `
+        !(Test-Path -Path env:DscCertificateThumbprint))
+    {
+        throw "A DSC certificate is required for $script:dscResourceFriendlyName integration tests."
+    }
+
     # Make sure the DSC-Service and Web-Server Windows features are installed
     if (!(Install-WindowsFeatureAndVerify -Name 'DSC-Service') -or
         !(Install-WindowsFeatureAndVerify -Name 'Web-Server'))

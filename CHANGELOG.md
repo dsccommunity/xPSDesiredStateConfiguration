@@ -9,12 +9,20 @@
   MSFT_xWindowsProcess.Integration.Tests.ps1, and
   xFileUpload.Integration.Tests.ps1.
   [issue #514](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/514)
+- Fixes issue in xGroupResource Integration tests where the tests would fail
+  if the System.DirectoryServices.AccountManagement namespace was not loaded.
+- Tests\Integration\MSFT_xDSCWebService.Integration.tests.ps1:
+  - Fixes issue where tests fail if a self signed certificate for DSC does not
+    already exist.
+    [issue #581](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/581)
 - Fixes all instances of the following PSScriptAnalyzer issues:
   - PSUseOutputTypeCorrectly
   - PSAvoidUsingConvertToSecureStringWithPlainText
   - PSPossibleIncorrectComparisonWithNull
   - PSAvoidDefaultValueForMandatoryParameter
   - PSAvoidUsingInvokeExpression
+  - PSUseDeclaredVarsMoreThanAssignments
+  - PSAvoidGlobalVars
 - xPackage and xMsiPackage
   - Add an ability to ignore a pending reboot if requested by package installation.
 - xRemoteFile

@@ -41,7 +41,7 @@ try {
             $testFeatureWithSubFeatures = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
             $script:installStateOfTestWithSubFeatures = $testFeatureWithSubFeatures.Installed
 
-            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1'
+            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1' -Resolve
         }
 
         AfterAll {
@@ -85,7 +85,7 @@ try {
 
                 It 'Should compile without throwing' {
                     {
-                        . $configFile -ConfigurationName $configurationName
+                        . $script:configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
                                              -IncludeAllSubFeature $false `
                                              -Ensure 'Present' `
@@ -134,7 +134,7 @@ try {
             {
                 It 'Should compile without throwing' {
                     {
-                        . $configFile -ConfigurationName $configurationName
+                        . $script:configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
                                              -IncludeAllSubFeature $false `
                                              -Ensure 'Absent' `
@@ -177,8 +177,6 @@ try {
             $configurationName = 'MSFT_xWindowsFeature_InstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $logPath = Join-Path -Path $TestDrive -ChildPath 'InstallSubFeatureTest.log'
-
             if (-not $script:skipLongTests)
             {
                 # Ensure that the feature is not already installed
@@ -187,7 +185,7 @@ try {
 
             It 'Should compile without throwing' -Skip:$script:skipLongTests {
                 {
-                    . $configFile -ConfigurationName $configurationName
+                    . $script:configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
                                             -Ensure 'Present' `
@@ -224,11 +222,9 @@ try {
             $configurationName = 'MSFT_xWindowsFeature_UninstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $logPath = Join-Path -Path $TestDrive -ChildPath 'UninstallSubFeatureTest.log'
-
             It 'Should compile without throwing' -Skip:$script:skipLongTests {
                 {
-                    . $configFile -ConfigurationName $configurationName
+                    . $script:configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
                                             -IncludeAllSubFeature $true `
                                             -Ensure 'Absent' `
