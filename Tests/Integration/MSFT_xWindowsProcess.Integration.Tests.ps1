@@ -90,7 +90,7 @@ try
                                          -Ensure 'Present' `
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -136,7 +136,7 @@ try
                                          -Ensure 'Present' `
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -178,7 +178,7 @@ try
                                          -Ensure 'Absent' `
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -219,7 +219,7 @@ try
                                          -Ensure 'Present' `
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -269,7 +269,7 @@ try
                                          -Ensure 'Absent' `
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -336,7 +336,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -379,7 +379,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -427,7 +427,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -471,7 +471,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -519,7 +519,7 @@ try
                                          -Credential $testCredential `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
@@ -580,7 +580,7 @@ try
                                          -ErrorAction 'Stop' `
                                          -OutputPath $configurationPath `
                                          -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force -Verbose
+                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
 
