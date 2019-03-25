@@ -1,3 +1,7 @@
+# Suppressing this rule since ConfigurationData is used by external scripts
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param()
+
 #region HEADER
 # Integration Test Config Template Version: 1.2.0
 #endregion

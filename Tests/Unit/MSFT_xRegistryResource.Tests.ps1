@@ -2899,8 +2899,6 @@ try
                     RegistryDriveName = 'HKCR'
                 }
 
-                $expectedRegistryDriveRoot = 'HKEY_CLASSES_ROOT'
-
                 It 'Should not throw' {
                     { Mount-RegistryDrive @mountRegistryDriveParameters } | Should -Not -Throw
                 }
