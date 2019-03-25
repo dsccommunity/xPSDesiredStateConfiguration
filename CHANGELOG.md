@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixes issue in xGroupResource Integration tests where the tests would fail
+  if the System.DirectoryServices.AccountManagement namespace was not loaded.
 - Tests\Integration\MSFT_xDSCWebService.Integration.tests.ps1:
   - Fixes issue where tests fail if a self signed certificate for DSC does not
     already exist.
