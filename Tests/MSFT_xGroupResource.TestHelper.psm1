@@ -172,8 +172,6 @@ function Test-GroupExistsOnFullSKU
             }
             else
             {
-                $groupMemberNames = $group.Members.Name | ForEach-Object { ($_ -split '/')[-1] }
-
                 $membersToExcludeMatch = $true
 
                 foreach ($excludedMemberName in $MembersToExclude)

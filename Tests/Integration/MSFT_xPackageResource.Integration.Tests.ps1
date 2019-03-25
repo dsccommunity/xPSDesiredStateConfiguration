@@ -73,8 +73,6 @@ try
         It 'Install a .msi package' {
             $configurationName = 'EnsurePackageIsPresent'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-            $errorPath = Join-Path -Path $TestDrive -ChildPath 'StdErrorPath.txt'
-            $outputPath = Join-Path -Path $TestDrive -ChildPath 'StdOutputPath.txt'
 
             try
             {

@@ -1,3 +1,10 @@
+<#
+    Suppressing this rule because $global:DSCMachineStatus is required to test
+    function Set-DSCMachineRebootRequired.
+#>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
+param()
+
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 

@@ -471,7 +471,6 @@ Describe 'xArchive Integration Tests' {
 
             $fileBeforeEdit = Get-Item -Path $fileToEditPath
             $lastWriteTimeBeforeEdit = $fileBeforeEdit.LastWriteTime
-            $creationTimeBeforeEdit = $fileBeforeEdit.CreationTime
 
             $null = Set-Content -Path $fileToEditPath -Value 'Different false text' -Force
             Set-ItemProperty -Path $fileToEditPath -Name 'LastWriteTime' -Value ([System.DateTime]::MaxValue)
@@ -584,7 +583,6 @@ Describe 'xArchive Integration Tests' {
 
             $fileBeforeEdit = Get-Item -Path $fileToEditPath
             $lastWriteTimeBeforeEdit = $fileBeforeEdit.LastWriteTime
-            $creationTimeBeforeEdit = $fileBeforeEdit.CreationTime
 
             $null = Set-Content -Path $fileToEditPath -Value 'Different false text' -Force
             Set-ItemProperty -Path $fileToEditPath -Name 'LastWriteTime' -Value ([System.DateTime]::MaxValue)
@@ -665,7 +663,6 @@ Describe 'xArchive Integration Tests' {
 
             $fileBeforeEdit = Get-Item -Path $fileToEditPath
             $lastWriteTimeBeforeEdit = $fileBeforeEdit.LastWriteTime
-            $creationTimeBeforeEdit = $fileBeforeEdit.CreationTime
 
             $null = Set-Content -Path $fileToEditPath -Value 'Different false text' -Force
             Set-ItemProperty -Path $fileToEditPath -Name 'LastWriteTime' -Value ([System.DateTime]::MaxValue)
@@ -700,8 +697,6 @@ Describe 'xArchive Integration Tests' {
             It 'Set-TargetResource should not throw' {
                 { Set-TargetResource -Ensure 'Absent' -Path $zipFilePath -Destination $destinationDirectoryPath -Validate $true -Checksum $possibleChecksumValue } | Should -Not -Throw
             }
-
-            $fileAfterSetTargetResource = Get-Item -Path $fileToEditPath
 
             It 'Edited file should exist at the destination after Set-TargetResource' {
                 Test-Path -Path $fileToEditPath | Should -Be $true

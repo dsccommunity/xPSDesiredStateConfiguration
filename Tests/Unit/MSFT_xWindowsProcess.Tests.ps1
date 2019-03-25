@@ -764,7 +764,7 @@ try
                 $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
                 $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
 
-                { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should -Throw -ExpectedMessage $script:exceptionMessage
+                { $null = Split-Credential -Credential $testCredential } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }
@@ -774,7 +774,7 @@ try
                 $testPassword = ConvertTo-SecureString -String 'dummy' -AsPlainText -Force
                 $testCredential = New-Object -TypeName 'PSCredential' -ArgumentList @($testUsername, $testPassword)
 
-                { $splitCredentialResult = Split-Credential -Credential $testCredential } | Should -Throw -ExpectedMessage $script:exceptionMessage
+                { $null = Split-Credential -Credential $testCredential } | Should -Throw -ExpectedMessage $script:exceptionMessage
 
                 Assert-MockCalled -CommandName New-InvalidArgumentException -Exactly 1 -Scope It
             }

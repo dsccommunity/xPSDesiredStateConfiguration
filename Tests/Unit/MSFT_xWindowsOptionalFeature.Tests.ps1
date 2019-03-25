@@ -106,7 +106,7 @@ try
                 }
 
                 It 'Should call Assert-ResourcePrerequisitesValid with the feature name' {
-                    $getTargetResourceResult = Get-TargetResource -Name $script:testFeatureName
+                    $null = Get-TargetResource -Name $script:testFeatureName
                     Assert-MockCalled Dism\Get-WindowsOptionalFeature -ParameterFilter { $FeatureName -eq $script:testFeatureName } -Scope It
                 }
 

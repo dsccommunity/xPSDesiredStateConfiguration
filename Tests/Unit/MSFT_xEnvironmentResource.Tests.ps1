@@ -373,8 +373,6 @@ try
 
             Context 'Update environment variable with Value that the environment variable is already set to' {
                 $oldPathValue = $script:mockEnvironmentVar.PATH
-                $newPathValue = 'new path value 5'
-                $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
 
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true } | Should -Not -Throw
@@ -691,8 +689,6 @@ try
 
             Context 'Update environment variable with Value that the environment variable is already set to' {
                 $oldPathValue = $script:mockEnvironmentVar.PATH
-                $newPathValue = 'new path value 5'
-                $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
 
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Process') } | Should -Not -Throw
@@ -1015,8 +1011,6 @@ try
 
             Context 'Update environment variable with Value that the environment variable is already set to' {
                 $oldPathValue = $script:mockEnvironmentVar.PATH
-                $newPathValue = 'new path value 5'
-                $newFullPathValue = ($script:mockEnvironmentVar.PATH +';' + $newPathValue)
 
                 It 'Should not throw an exception' {
                     { Set-TargetResource -Name $script:mockEnvironmentVarName -Value $oldPathValue -Path $true -Target @('Machine') } | Should -Not -Throw

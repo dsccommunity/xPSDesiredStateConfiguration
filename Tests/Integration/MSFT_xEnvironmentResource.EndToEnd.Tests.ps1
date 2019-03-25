@@ -25,52 +25,52 @@ try
 {
     Describe 'xEnvironmentResouce Integration Tests - with both Targets specified (default)' {
         BeforeAll {
-            $testEnvironmentVarName = 'TestEnvironmentVariableName'
-            $testPathEnvironmentVarName = 'TestPathEnvironmentVariableName'
-            $machineEnvironmentRegistryPath = 'HKLM:\System\CurrentControlSet\Control\Session Manager\Environment'
+            $script:testEnvironmentVarName = 'TestEnvironmentVariableName'
+            $script:testPathEnvironmentVarName = 'TestPathEnvironmentVariableName'
+            $script:machineEnvironmentRegistryPath = 'HKLM:\System\CurrentControlSet\Control\Session Manager\Environment'
 
-            $testValue = 'InitialTestValue'
-            $newTestValue = 'NewTestValue'
+            $script:testValue = 'InitialTestValue'
+            $script:newTestValue = 'NewTestValue'
 
-            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xEnvironmentResource.config.ps1'
+            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xEnvironmentResource.config.ps1'
         }
 
         AfterAll {
             # Remove variables from the process:
-            [System.Environment]::SetEnvironmentVariable($testEnvironmentVarName, $null)
-            [System.Environment]::SetEnvironmentVariable($testPathEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testPathEnvironmentVarName, $null)
 
             # Remove variables from machine:
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName
             }
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName
             }
         }
 
-        Context "Should create the environment variable $testEnvironmentVarName" {
+        Context "Should create the environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Create'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             # Ensure the environment variable doesn't exist
 
             # Remove variable from the process:
-            [System.Environment]::SetEnvironmentVariable($testEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testEnvironmentVarName, $null)
 
             # Remove variable from machine:
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName
             }
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Present' `
                                          -OutputPath $configurationPath `
                                          -ErrorAction 'Stop'
@@ -84,21 +84,21 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $testValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:testValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should update environment variable $testEnvironmentVarName" {
+        Context "Should update environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Update'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
-                                         -Value $newTestValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
+                                         -Value $script:newTestValue `
                                          -Ensure 'Present' `
                                          -OutputPath $configurationPath `
                                          -ErrorAction 'Stop'
@@ -112,8 +112,8 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
@@ -124,8 +124,8 @@ try
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
                                          -Value 'otherValue' `
                                          -Ensure 'Absent' `
                                          -OutputPath $configurationPath `
@@ -140,20 +140,20 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove environment variable $testEnvironmentVarName" {
+        Context "Should remove environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Remove'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
                                          -Value $null `
                                          -Ensure 'Absent' `
                                          -OutputPath $configurationPath `
@@ -168,32 +168,32 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
                $currentConfig.Value | Should -Be $null
                $currentConfig.Ensure | Should -Be 'Absent'
             }
         }
 
-        Context "Should create the path environment variable $testPathEnvironmentVarName" {
+        Context "Should create the path environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Create_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             # Ensure the environment variable doesn't exist
 
             # Remove variable from the process:
-            [System.Environment]::SetEnvironmentVariable($testPathEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testPathEnvironmentVarName, $null)
 
             # Remove variable from machine:
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName
             }
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Present' `
                                          -Path $true `
                                          -OutputPath $configurationPath `
@@ -208,23 +208,23 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
-               $currentConfig.Value | Should -Be $testValue
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:testValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should update environment variable $testPathEnvironmentVarName" {
+        Context "Should update environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Update_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $expectedValue = $testValue + ';' + $newTestValue
+            $expectedValue = $script:testValue + ';' + $script:newTestValue
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $newTestValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:newTestValue `
                                          -Ensure 'Present' `
                                          -Path $true `
                                          -OutputPath $configurationPath `
@@ -239,7 +239,7 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $expectedValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
@@ -249,12 +249,12 @@ try
             $configurationName = 'MSFT_xEnvironmentResource_NonRemove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $expectedValue = $testValue + ';' + $newTestValue
+            $expectedValue = $script:testValue + ';' + $script:newTestValue
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
                                          -Value 'otherValue' `
                                          -Ensure 'Absent' `
                                          -Path $true `
@@ -270,21 +270,21 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $expectedValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove only one value from environment variable $testPathEnvironmentVarName" {
+        Context "Should remove only one value from environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_PartialRemove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -OutputPath $configurationPath `
@@ -299,20 +299,20 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove the environment variable $testPathEnvironmentVarName" {
+        Context "Should remove the environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Remove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
                                          -Value $null `
                                          -Ensure 'Absent' `
                                          -Path $true `
@@ -328,7 +328,7 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $null
                $currentConfig.Ensure | Should -Be 'Absent'
             }
@@ -337,45 +337,45 @@ try
 
     Describe 'xEnvironmentResouce Integration Tests - only Process Target specified' {
         BeforeAll {
-            $testEnvironmentVarName = 'TestProcessEnvironmentVariableName'
-            $testPathEnvironmentVarName = 'TestProcessPathEnvironmentVariableName'
+            $script:testEnvironmentVarName = 'TestProcessEnvironmentVariableName'
+            $script:testPathEnvironmentVarName = 'TestProcessPathEnvironmentVariableName'
 
-            $testValue = 'InitialProcessTestValue'
-            $newTestValue = 'NewProcessTestValue'
+            $script:testValue = 'InitialProcessTestValue'
+            $script:newTestValue = 'NewProcessTestValue'
 
-            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xEnvironmentResource.config.ps1'
+            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xEnvironmentResource.config.ps1'
         }
 
         AfterAll {
             # Remove variables from the process:
-            [System.Environment]::SetEnvironmentVariable($testEnvironmentVarName, $null)
-            [System.Environment]::SetEnvironmentVariable($testPathEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testPathEnvironmentVarName, $null)
 
             # Remove variables from machine (these shouldn't have been set):
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName
             }
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName
             }
         }
 
-        Context "Should create the environment variable $testEnvironmentVarName" {
+        Context "Should create the environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Create'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             # Ensure the environment variable doesn't exist
 
             # Remove variable from the process:
-            [System.Environment]::SetEnvironmentVariable($testEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testEnvironmentVarName, $null)
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Present' `
                                          -Target @('Process') `
                                          -OutputPath $configurationPath `
@@ -390,21 +390,21 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $testValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:testValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should update environment variable $testEnvironmentVarName" {
+        Context "Should update environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Update'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
-                                         -Value $newTestValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
+                                         -Value $script:newTestValue `
                                          -Ensure 'Present' `
                                          -Target @('Process') `
                                          -OutputPath $configurationPath `
@@ -419,8 +419,8 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
@@ -431,8 +431,8 @@ try
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
                                          -Value 'otherValue' `
                                          -Ensure 'Absent' `
                                          -Target @('Process') `
@@ -448,20 +448,20 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove environment variable $testEnvironmentVarName" {
+        Context "Should remove environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Remove'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
                                          -Value $null `
                                          -Ensure 'Absent' `
                                          -Target @('Process') `
@@ -477,26 +477,26 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
                $currentConfig.Value | Should -Be $null
                $currentConfig.Ensure | Should -Be 'Absent'
             }
         }
 
-        Context "Should create the path environment variable $testPathEnvironmentVarName" {
+        Context "Should create the path environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Create_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             # Ensure the environment variable doesn't exist
 
             # Remove variable from the process:
-            [System.Environment]::SetEnvironmentVariable($testPathEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testPathEnvironmentVarName, $null)
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Present' `
                                          -Path $true `
                                          -Target @('Process') `
@@ -512,23 +512,23 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
-               $currentConfig.Value | Should -Be $testValue
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:testValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should update environment variable $testPathEnvironmentVarName" {
+        Context "Should update environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Update_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $expectedValue = $testValue + ';' + $newTestValue
+            $expectedValue = $script:testValue + ';' + $script:newTestValue
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $newTestValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:newTestValue `
                                          -Ensure 'Present' `
                                          -Path $true `
                                          -Target @('Process') `
@@ -544,7 +544,7 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $expectedValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
@@ -554,12 +554,12 @@ try
             $configurationName = 'MSFT_xEnvironmentResource_NonRemove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $expectedValue = $testValue + ';' + $newTestValue
+            $expectedValue = $script:testValue + ';' + $script:newTestValue
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
                                          -Value 'otherValue' `
                                          -Ensure 'Absent' `
                                          -Path $true `
@@ -576,21 +576,21 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $expectedValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove only one value from environment variable $testPathEnvironmentVarName" {
+        Context "Should remove only one value from environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_PartialRemove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Process') `
@@ -606,20 +606,20 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove the environment variable $testPathEnvironmentVarName" {
+        Context "Should remove the environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Remove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
                                          -Value $null `
                                          -Ensure 'Absent' `
                                          -Path $true `
@@ -636,7 +636,7 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $null
                $currentConfig.Ensure | Should -Be 'Absent'
             }
@@ -645,48 +645,48 @@ try
 
     Describe 'xEnvironmentResouce Integration Tests - only Machine Target specified' {
         BeforeAll {
-            $testEnvironmentVarName = 'TestMachineEnvironmentVariableName'
-            $testPathEnvironmentVarName = 'TestMachinePathEnvironmentVariableName'
+            $script:testEnvironmentVarName = 'TestMachineEnvironmentVariableName'
+            $script:testPathEnvironmentVarName = 'TestMachinePathEnvironmentVariableName'
 
-            $testValue = 'InitialMachineTestValue'
-            $newTestValue = 'NewMachineTestValue'
+            $script:testValue = 'InitialMachineTestValue'
+            $script:newTestValue = 'NewMachineTestValue'
 
-            $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xEnvironmentResource.config.ps1'
+            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xEnvironmentResource.config.ps1'
         }
 
         AfterAll {
             # Remove variables from the process (these shouldn't have been set):
-            [System.Environment]::SetEnvironmentVariable($testEnvironmentVarName, $null)
-            [System.Environment]::SetEnvironmentVariable($testPathEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testEnvironmentVarName, $null)
+            [System.Environment]::SetEnvironmentVariable($script:testPathEnvironmentVarName, $null)
 
             # Remove variables from machine:
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName
             }
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName
             }
         }
 
-        Context "Should create the environment variable $testEnvironmentVarName" {
+        Context "Should create the environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Create'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             # Ensure the environment variable doesn't exist:
 
             # Remove variable from machine:
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testEnvironmentVarName
             }
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Present' `
                                          -Target @('Machine') `
                                          -OutputPath $configurationPath `
@@ -701,21 +701,21 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $testValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:testValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should update environment variable $testEnvironmentVarName" {
+        Context "Should update environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Update'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
-                                         -Value $newTestValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
+                                         -Value $script:newTestValue `
                                          -Ensure 'Present' `
                                          -Target @('Machine') `
                                          -OutputPath $configurationPath `
@@ -730,8 +730,8 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
@@ -742,8 +742,8 @@ try
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
                                          -Value 'otherValue' `
                                          -Ensure 'Absent' `
                                          -Target @('Machine') `
@@ -759,20 +759,20 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove environment variable $testEnvironmentVarName" {
+        Context "Should remove environment variable $script:testEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Remove'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testEnvironmentVarName `
                                          -Value $null `
                                          -Ensure 'Absent' `
                                          -Target @('Machine') `
@@ -788,29 +788,29 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testEnvironmentVarName
                $currentConfig.Value | Should -Be $null
                $currentConfig.Ensure | Should -Be 'Absent'
             }
         }
 
-        Context "Should create the path environment variable $testPathEnvironmentVarName" {
+        Context "Should create the path environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Create_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             # Ensure the environment variable doesn't exist:
 
             # Remove variable from machine:
-            if (Get-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
+            if (Get-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName -ErrorAction 'SilentlyContinue')
             {
-                Remove-ItemProperty -Path $machineEnvironmentRegistryPath -Name $testPathEnvironmentVarName
+                Remove-ItemProperty -Path $script:machineEnvironmentRegistryPath -Name $script:testPathEnvironmentVarName
             }
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Present' `
                                          -Path $true `
                                          -Target @('Machine') `
@@ -826,23 +826,23 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
-               $currentConfig.Value | Should -Be $testValue
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:testValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should update environment variable $testPathEnvironmentVarName" {
+        Context "Should update environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Update_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $expectedValue = $testValue + ';' + $newTestValue
+            $expectedValue = $script:testValue + ';' + $script:newTestValue
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $newTestValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:newTestValue `
                                          -Ensure 'Present' `
                                          -Path $true `
                                          -Target @('Machine') `
@@ -858,7 +858,7 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $expectedValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
@@ -868,12 +868,12 @@ try
             $configurationName = 'MSFT_xEnvironmentResource_NonRemove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
-            $expectedValue = $testValue + ';' + $newTestValue
+            $expectedValue = $script:testValue + ';' + $script:newTestValue
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
                                          -Value 'otherValue' `
                                          -Ensure 'Absent' `
                                          -Path $true `
@@ -890,21 +890,21 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $expectedValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove only one value from environment variable $testPathEnvironmentVarName" {
+        Context "Should remove only one value from environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_PartialRemove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
-                                         -Value $testValue `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
+                                         -Value $script:testValue `
                                          -Ensure 'Absent' `
                                          -Path $true `
                                          -Target @('Machine') `
@@ -920,20 +920,20 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
-               $currentConfig.Value | Should -Be $newTestValue
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
+               $currentConfig.Value | Should -Be $script:newTestValue
                $currentConfig.Ensure | Should -Be 'Present'
             }
         }
 
-        Context "Should remove the environment variable $testPathEnvironmentVarName" {
+        Context "Should remove the environment variable $script:testPathEnvironmentVarName" {
             $configurationName = 'MSFT_xEnvironmentResource_Remove_Path'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' {
                 {
-                    . $configFile -ConfigurationName $configurationName
-                    & $configurationName -Name $testPathEnvironmentVarName `
+                    . $script:configFile -ConfigurationName $configurationName
+                    & $configurationName -Name $script:testPathEnvironmentVarName `
                                          -Value $null `
                                          -Ensure 'Absent' `
                                          -Path $true `
@@ -950,7 +950,7 @@ try
 
             It 'Should return the correct configuration' {
                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-               $currentConfig.Name | Should -Be $testPathEnvironmentVarName
+               $currentConfig.Name | Should -Be $script:testPathEnvironmentVarName
                $currentConfig.Value | Should -Be $null
                $currentConfig.Ensure | Should -Be 'Absent'
             }

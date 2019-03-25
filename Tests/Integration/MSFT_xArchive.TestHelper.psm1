@@ -168,9 +168,6 @@ function Test-FileStructuresMatch
         [System.Management.Automation.SwitchParameter] $CheckContents
     )
 
-    $sourcePathLength = $SourcePath.Length
-    $destinationPathLength = $DestinationPath.Length
-
     $destinationContents = @{}
     $destinationChildItems = Get-ChildItem -Path $DestinationPath -Recurse
 
