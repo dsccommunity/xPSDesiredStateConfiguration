@@ -4,6 +4,13 @@
 
 - Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
   [issue #530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
+- Suppresses forced Verbose output in MSFT_xArchive.EndToEnd.Tests.ps1,
+  MSFT_xDSCWebService.Integration.tests.ps1,
+  MSFT_xPackageResource.Integration.Tests.ps1, MSFT_xRemoteFile.Tests.ps1,
+  MSFT_xUserResource.Integration.Tests.ps1,
+  MSFT_xWindowsProcess.Integration.Tests.ps1, and
+  xFileUpload.Integration.Tests.ps1.
+  [issue #514](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/514)
 - Fixes issue in xGroupResource Integration tests where the tests would fail
   if the System.DirectoryServices.AccountManagement namespace was not loaded.
 - Tests\Integration\MSFT_xDSCWebService.Integration.tests.ps1:

@@ -56,7 +56,6 @@ function Invoke-CommonResourceTesting
                 Path         = $TestDrive
                 ComputerName = 'localhost'
                 Wait         = $true
-                Verbose      = $true
                 Force        = $true
                 ErrorAction  = 'Stop'
             }
@@ -67,12 +66,12 @@ function Invoke-CommonResourceTesting
 
     It 'Should be able to call Get-DscConfiguration without throwing' {
         {
-            $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+            $script:currentConfiguration = Get-DscConfiguration -ErrorAction Stop
         } | Should -Not -Throw
     }
 
     It 'Should return $true when Test-DscConfiguration is run' {
-        Test-DscConfiguration -Verbose | Should -Be $true
+        Test-DscConfiguration | Should -Be $true
     }
 }
 

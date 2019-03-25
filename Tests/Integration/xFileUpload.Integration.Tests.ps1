@@ -74,7 +74,6 @@ try
                         -ErrorAction 'Stop' `
                         -Wait `
                         -Force `
-                        -Verbose
                 } | Should -Not -Throw
             }
 
@@ -109,7 +108,6 @@ try
                         -ErrorAction 'Stop' `
                         -Wait `
                         -Force `
-                        -Verbose
                 } | Should -Not -Throw
             }
 
