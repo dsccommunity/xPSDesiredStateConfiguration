@@ -294,7 +294,8 @@ function Write-LogEntry
         This is the version of the module
 
     .PARAMETER PullServerWebConfig
-        Defaults to $env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config
+        Path to the Pull Server web.config file, i.e.
+        "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
 
     .PARAMETER OutputFolderPath
         Defaults to $null
@@ -326,9 +327,10 @@ function Publish-ModuleToPullServer
         [Version]
         $Version,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_ -PathType Leaf})]
         [System.String]
-        $PullServerWebConfig = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config",
+        $PullServerWebConfig,
 
         [Parameter()]
         [System.String]
