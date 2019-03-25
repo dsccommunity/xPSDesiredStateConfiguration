@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
+  [issue #530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
 - Suppresses forced Verbose output in MSFT_xArchive.EndToEnd.Tests.ps1,
   MSFT_xDSCWebService.Integration.tests.ps1,
   MSFT_xPackageResource.Integration.Tests.ps1, MSFT_xRemoteFile.Tests.ps1,
