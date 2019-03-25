@@ -16,6 +16,7 @@ ConvertFrom-StringData @'
     GetTargetResourceFound = Successfully retrieved package {0}
     GetTargetResourceNotFound = Unable to find package: {0}
     GettingTheSchemeResponseStream = Getting the {0} response stream
+    IgnoreReboot = Ignore a pending reboot
     InvalidBinaryType = The specified Path ({0}) does not appear to specify an MSI file and as such is not supported
     InvalidFileHash = File '{0}' does not match expected {2} hash value of {1}
     InvalidFileSignature = File '{0}' does not have a valid Authenticode signature.  Status: {1}

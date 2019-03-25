@@ -1,8 +1,5 @@
 <#
-    These tests should only be run in AppVeyor since the second half of the tests require
-    the AppVeyor administrator account credential to run.
-
-    Also please note that some of these tests depend on each other.
+    Please note that some of these tests depend on each other.
     They must be run in the order given - if one test fails, subsequent tests may
     also fail.
 #>
@@ -310,7 +307,7 @@ try
             )
         }
 
-        $testCredential = Get-AppVeyorAdministratorCredential
+        $testCredential = Get-TestAdministratorAccountCredential
 
         $testProcessPath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                      -ChildPath 'WindowsProcessTestProcess.exe'
@@ -502,6 +499,11 @@ try
             $configurationName = 'MSFT_xWindowsProcess_StartMultipleProcessesWithCredential'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
+            # Make sure test admin account has permissions on log folder
+            Add-PathPermission `
+                -Path (Split-Path -Path $logFilePath) `
+                -IdentityReference $testCredential.UserName
+
             It 'Should not have a logfile already present' {
                 $pathResult = Test-Path $logFilePath
                 $pathResult | Should -Be $false
@@ -524,8 +526,12 @@ try
             # Wait a moment for the process to stop/start
             $null = Start-Sleep -Seconds 2
 
+            # Start another instance of the same process using the same credentials.
             It 'Should start another process running' {
-                Start-Process -FilePath $testProcessPath -ArgumentList @($logFilePath)
+                Start-Process `
+                    -FilePath $testProcessPath `
+                    -ArgumentList @($logFilePath) `
+                    -Credential $testCredential
             }
 
             It 'Should be able to call Get-DscConfiguration without throwing' {

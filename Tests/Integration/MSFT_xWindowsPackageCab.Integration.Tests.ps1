@@ -80,7 +80,7 @@ try
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
             } | Should -Not -Throw
 
-            { $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
+            { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
 
             $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online
             $windowsPackage | Should -Not -Be $null
@@ -98,7 +98,7 @@ try
 
             Dism\Add-WindowsPackage -PackagePath $resourceParameters.SourcePath -Online -NoRestart
 
-            { $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
+            { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
 
             {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
@@ -106,7 +106,7 @@ try
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
             } | Should -Not -Throw
 
-            { $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
+            { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
         }
 
         It 'Should not install an invalid Windows package through a cab file' {

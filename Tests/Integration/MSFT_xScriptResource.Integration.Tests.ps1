@@ -20,6 +20,9 @@ try
 {
     Describe 'xScript Integration Tests' {
         BeforeAll {
+            # Get test administrator account credentials
+            $testCredential = Get-TestAdministratorAccountCredential
+
             # Import xScript module for Get-TargetResource, Test-TargetResource
             $moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
             $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
@@ -31,8 +34,21 @@ try
             $script:configurationWithCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xScriptResource_WithCredential.config.ps1'
 
             # Cannot use $TestDrive here because script is run outside of Pester
-            $script:testFilePath = Join-Path -Path $env:SystemDrive -ChildPath 'TestFile.txt'
+            $script:testFolderPath = Join-Path -Path $env:SystemDrive -ChildPath 'Test Folder'
+            $script:testFilePath = Join-Path -Path $script:testFolderPath -ChildPath 'TestFile.txt'
 
+            # Create the test folder if it doesn't exist
+            if (-not (Test-Path -Path $script:testFolderPath))
+            {
+                mkdir -Path $script:testFolderPath
+            }
+
+            # Make sure test admin account has permissions on the test folder
+            Add-PathPermission `
+                -Path $script:testFolderPath `
+                -IdentityReference $testCredential.UserName
+
+            # Remove the test file if it exists
             if (Test-Path -Path $script:testFilePath)
             {
                 Remove-Item -Path $script:testFilePath -Force
@@ -93,7 +109,7 @@ try
             $resourceParameters = @{
                 FilePath = $script:testFilePath
                 FileContent = 'Test file content'
-                Credential = Get-AppVeyorAdministratorCredential
+                Credential = $testCredential
             }
 
             It 'Should have removed test file before config runs' {
