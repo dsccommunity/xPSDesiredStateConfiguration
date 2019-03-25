@@ -41,12 +41,12 @@ try
             {
                 & "$($script:DSCResourceName)_Config" -OutputPath $TestDrive
                 Start-DscConfiguration -Path $TestDrive `
-                    -ComputerName localhost -Wait -Verbose -Force
+                    -ComputerName localhost -Wait -Force
             } | Should -Not -Throw
         }
 
         It 'should be able to call Get-DscConfiguration without throwing' {
-            { Get-DscConfiguration -Verbose -ErrorAction Stop } | Should -Not -Throw
+            { Get-DscConfiguration -ErrorAction Stop } | Should -Not -Throw
         }
         #endregion
 
