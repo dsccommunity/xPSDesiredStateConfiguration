@@ -32,7 +32,7 @@ function Publish-DSCModuleAndMof
     param
     (
         [Parameter(Mandatory = $True)]
-        [ValidateScript({Test-Path -Path $_})]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [System.String]
         $Source,
 
@@ -50,12 +50,13 @@ function Publish-DSCModuleAndMof
     New-Item -Path $tempFolder -ItemType Directory -Force -ErrorAction SilentlyContinue
 
     # Copy the mof documents from the $Source to working dir
-    Copy-Item -Path "$Source\*.mof" -Destination $tempFolder -Force
+    $mofPath = Join-Path -Path $Source -ChildPath '*.mof'
+    Copy-Item -Path $mofPath -Destination $tempFolder -Force
 
     # Start Deployment!
     Write-LogEntry -Scope $MyInvocation -Message 'Start Deployment'
-    Create-ZipFromPSModulePath -ListModuleNames $ModuleNameList -Destination $tempFolder
-    Create-ZipFromSource -Source $Source -Destination $tempFolder
+    New-ZipFromPSModulePath -ListModuleNames $ModuleNameList -Destination $tempFolder
+    New-ZipFromSource -Source $Source -Destination $tempFolder
 
     # Generate the checkSum file for all the zip and mof files.
     New-DSCCheckSum -Path $tempFolder -Force
@@ -80,7 +81,7 @@ function Publish-DSCModuleAndMof
     .PARAMETER Destination
         Destionation path to copy packaged modules to
 #>
-function Create-ZipFromPSModulePath
+function New-ZipFromPSModulePath
 {
     [CmdletBinding()]
     param
@@ -88,10 +89,10 @@ function Create-ZipFromPSModulePath
         [Parameter()]
         [System.String[]]
         $ListModuleNames,
- 
+
         [Parameter()]
-        [ValidateScript({Test-Path -Path $_})]
-        [System.String]       
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
+        [System.String]
         $Destination
     )
 
@@ -141,18 +142,18 @@ function Create-ZipFromPSModulePath
     .PARAMETER Destination
         Destination path to copy zipped DSC Resources to
 #>
-function Create-ZipFromSource
+function New-ZipFromSource
 {
     [CmdletBinding()]
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateScript({Test-Path -Path $_})]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [System.String]
         $Source,
-        
+
         [Parameter(Mandatory = $true)]
-        [ValidateScript({Test-Path -Path $_})]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         $Destination
     )
 
@@ -180,9 +181,8 @@ function Create-ZipFromSource
     }
 
     # Package the module in $destination
-    Create-ZipFromPSModulePath -ListModuleNames $modules -Destination $Destination
+    New-ZipFromPSModulePath -ListModuleNames $modules -Destination $Destination
 }
-
 
 <#
     .SYNOPSIS
@@ -197,7 +197,7 @@ function Publish-ModulesAndChecksum
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateScript({Test-Path -Path $_})]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [System.String]
         $Source
     )
@@ -229,7 +229,7 @@ function Publish-MofsInSource
     param
     (
         [Parameter(Mandatory = $true)]
-        [ValidateScript({Test-Path -Path $_})]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [System.String]
         $Source
     )
@@ -240,7 +240,8 @@ function Publish-MofsInSource
     if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $mofRepository))
     {
         Write-LogEntry -Scope $MyInvocation -Message "Copying mofs and checksums to [$mofRepository]."
-        Copy-Item -Path "$Source\*.mof*" -Destination $mofRepository -Force
+        $mofPath = Join-Path -Path $Source -ChildPath '*.mof*'
+        Copy-Item -Path $mofPath -Destination $mofRepository -Force
     }
     else
     {
@@ -273,7 +274,6 @@ function Write-LogEntry
 
     Write-Verbose -Message "$Date [$($Scope.MyCommand)] :: $Message"
 }
-
 
 <#
     .SYNOPSIS
@@ -373,7 +373,6 @@ function Publish-ModuleToPullServer
     }
 }
 
-
 <#
     .SYNOPSIS
         Deploy DSC Configuration document to the pullserver.
@@ -381,10 +380,14 @@ function Publish-ModuleToPullServer
     .DESCRIPTION
         Publish Mof file to the pullserver. It takes File Info object as
         pipeline input. It also auto detects the location of the configuration
-repository using the web.config of the pullserver.
+        repository using the web.config of the pullserver.
 
     .PARAMETER FullName
         MOF File Name
+
+    .PARAMETER PullServerWebConfig
+        Path to the Pull Server web.config file, i.e.
+        "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
 
     .EXAMPLE
         Dir <path>\*.mof | Publish-MOFToPullServer
@@ -401,9 +404,10 @@ function Publish-MOFToPullServer
         [System.String]
         $FullName,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_ -PathType Leaf})]
         [System.String]
-        $PullServerWebConfig = "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
+        $PullServerWebConfig
     )
 
     Begin
