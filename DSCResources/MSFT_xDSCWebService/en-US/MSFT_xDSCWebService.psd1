@@ -6,4 +6,7 @@ ConvertFrom-StringData -StringData @'
     FindCertificateBySubjectNotFound     = Certificate not found with subject containing {0} and using template "{1}".
     IISInstallationPathNotFound          = IIS installation path not found
     IISWebAdministrationAssemblyNotFound = IIS version of Microsoft.Web.Administration.dll not found
+    TemplateNameResolutionError          = Failed to resolve the template name from Active Directory certificate templates [{0}].
+    TemplateNameNotFound                 = No template name found in Active Directory for [{0}].
+    ActiveDirectoryTemplateSearch        = Failed to get the certificate templates from Active Directory.
 '@

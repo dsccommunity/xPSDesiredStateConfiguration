@@ -127,6 +127,120 @@ try
             Add-Member -InputObject $_.Extensions[0] -MemberType ScriptMethod -Name Format -Value {'WebServer'}
         }
 
+        $cerFileWithSan = "
+            -----BEGIN CERTIFICATE-----
+            MIIGJDCCBAygAwIBAgITewAAAAqQ+bxgiZZPtgAAAAAACjANBgkqhkiG9w0BAQsF
+            ADBDMRMwEQYKCZImiZPyLGQBGRYDY29tMRcwFQYKCZImiZPyLGQBGRYHY29udG9z
+            bzETMBEGA1UEAwwKTGFiUm9vdENBMTAeFw0xNzA1MDkxNTM5NTJaFw0xOTA1MDkx
+            NTM5NTJaMBYxFDASBgNVBAMMC3NvbWVtYWNoaW5lMIIBIjANBgkqhkiG9w0BAQEF
+            AAOCAQ8AMIIBCgKCAQEA0Id9FC2vq90HPWraZnAouit8MZI/p/DeucFiCb6mieuP
+            017DPCiQKuMQFQmx5VWvv82mpddxmTPtV6zfda0E5R12a11KHJ2mJrK5oR2iuI/I
+            P2SJBlNAkLTsvd96zUqQcWCCE/Q2nSrK7nx3oBq4Dd5+wLfUvAMKR45RXK58J4z5
+            h3mLxF+ryKnQzQHKXDC4x92hMIPJVwvPym8C3067Ry6kLHhFOk5IoJjiRmS6P1TT
+            48aHipWeiK9G/aLgKTS4UEbUMooAPfeHQXGRfS4fIEQmaaeY0wqQAVYGau2oDn6m
+            31SiNEA+NmAmHZFvM2kXf63L58lJASFqRnXquVCw9QIDAQABo4ICPDCCAjgwIQYJ
+            KwYBBAGCNxQCBBQeEgBXAGUAYgBTAGUAcgB2AGUAcjATBgNVHSUEDDAKBggrBgEF
+            BQcDATAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFGFGkDLulJ3m1Bx3DIa1BosB
+            WpOXMCgGA1UdEQQhMB+CCGZpcnN0c2FugglzZWNvbmRzYW6CCHRoaXJkc2FuMB8G
+            A1UdIwQYMBaAFN75yc566Q03FdJ4ZQ/6Kn8dohYVMIHEBgNVHR8Egbwwgbkwgbag
+            gbOggbCGga1sZGFwOi8vL0NOPUxhYlJvb3RDQTEsQ049Q0ExLENOPUNEUCxDTj1Q
+            dWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNlcyxDTj1Db25maWd1cmF0
+            aW9uLERDPWNvbnRvc28sREM9Y29tP2NlcnRpZmljYXRlUmV2b2NhdGlvbkxpc3Q/
+            YmFzZT9vYmplY3RDbGFzcz1jUkxEaXN0cmlidXRpb25Qb2ludDCBvAYIKwYBBQUH
+            AQEEga8wgawwgakGCCsGAQUFBzAChoGcbGRhcDovLy9DTj1MYWJSb290Q0ExLENO
+            PUFJQSxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2aWNlcyxDTj1D
+            b25maWd1cmF0aW9uLERDPWNvbnRvc28sREM9Y29tP2NBQ2VydGlmaWNhdGU/YmFz
+            ZT9vYmplY3RDbGFzcz1jZXJ0aWZpY2F0aW9uQXV0aG9yaXR5MA0GCSqGSIb3DQEB
+            CwUAA4ICAQBUkvBdMgZsUHDEaVyBuHzALExcEflkvCq1AmJ1U2nixnfcqc5Wb3df
+            W+gauW+YbOA9EfQrwPqMXvo0dhsjLn3H5tTWe0VVT5H8pgsdcXS/5cYDjoC6N3pd
+            NZGCDN/oHAm8BgcNPPYyG8VDMxR+atp8Iv12nCDGQlpPkANK+nUHR8Nu66l/wDqF
+            G8ftnQ7C3mSu4/baAFOAx91rXDbrs1ewrqfcBWxRQn4CZbZs9LMg+NQjrAM8WtQX
+            DZd96IMY6m8DeVbIQQiHytpjpQr8aJs6s5Cd5XzRWPXb4lDMOe/4KwpyQAHjtFPY
+            mYhUfaInXtna/li9MKLK+j641FnBJv6bjWhw1Jp++wHdjef+1RTtG1hslHQXsH48
+            +n+jHZ5A5DKgOYUJWq3NhYvQwtQmDlBNe5aJbTmAFz7qpsPFWjoOqX8RXCE3Mt+R
+            EhwMvEGNZHdsgMVXeJsqVssG2FfM7cqcslaUL/vULRWJ6LmJerjmSBRXcEHL6uTe
+            IJPSLdUdPx7uvm+P4qpuIuzZ2bdHXqiFbL6yPyWi8lTaApzT/K7Y0Q3oRWYOuThK
+            P2l4M+F7l346gaIDDZOXdrSsrPghSgkS4Xp3QtE6NnKq+V0pX2YHnns+JO97hEXt
+            2EvKX3TnKnUPPrsl/CffTBpJEsD7xugu6OAn4KnEzzVTNYqzDbYx6g==
+            -----END CERTIFICATE-----
+            "
+        $cerFileWithoutSan = "
+            -----BEGIN CERTIFICATE-----
+            MIIDBjCCAe6gAwIBAgIQRQyErZRGrolI5DfZCJDaTTANBgkqhkiG9w0BAQsFADAW
+            MRQwEgYDVQQDDAtTb21lU2VydmVyMjAeFw0xNzA1MDkxNjI0MTZaFw0xODA1MDkx
+            NjQ0MTZaMBYxFDASBgNVBAMMC1NvbWVTZXJ2ZXIyMIIBIjANBgkqhkiG9w0BAQEF
+            AAOCAQ8AMIIBCgKCAQEA2x7gR/yQYSiqszd0+e3ZMX2b/mK3XwwEHhoXARoC/Jv/
+            rmOmESB6AYabIheGmDv2qUESx6r8KtO4afunVEyoxeThQ8LffgduSo0YIUVgqyg9
+            o+HUOaV4MX5cGutgov62MCs+HO2AYcl2QvmbJ9CF/nyGOigoLNOX1pLPHHM1vIFQ
+            euBCX8KGK02kgl629QVckiUKrn5bCjboxx7JvSsb2UTcCDjR7x1FcGkxwj069koq
+            VdtmwzC3ibYSxQ2UQo1rShol8FPTMkpf8NIZmApY3RGddnAl+r0fznbqqdwzRPjp
+            1zXuNwYiG/cL/OOt50TQqCKA7CrD9m8Y3yWKK1ilOQIDAQABo1AwTjAOBgNVHQ8B
+            Af8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMBMB0GA1UdDgQW
+            BBSfthQiQydgIs0dXquThRhnkj78HTANBgkqhkiG9w0BAQsFAAOCAQEAuaACrNbE
+            clIxVjSsJA4kT7z+ajTD7EmT3iX+h1sOABTuiSjR+fBCF/7AgViK24+xdLzuptCH
+            MnoLW7epdP1tRXjs0vb5xwXRsTruwlIzCbvkH8/xkrc6YGw5LzdvxtFPYV+vSsx3
+            uUmNlrD7ElllzRVzyGBd2VBm8hCAI0297Ls9zJlWDPYTMpedleO2D9vZBAxg3iY7
+            yiMbficleMbVEE3LTNjK6iYuENZ4KOBkOJU936+lqfcVnOFTvWhLJKxTEMZ7XW4k
+            pP3LiEhYnnxMfm7OyNHL+MnQhq8OV7tY3pZofPdImEeG13qcV8EBYhefFgsSxQRe
+            JqptPVHBXySjMg==
+            -----END CERTIFICATE-----
+            "
+        $cerFileWithAltTemplateName = "
+            -----BEGIN CERTIFICATE-----
+            MIIDVjCCAj6gAwIBAgIQIA9TO/nfla5FrjJZIiI6nzANBgkqhkiG9w0BAQsFADAW
+            MRQwEgYDVQQDDAtzb21lbWFjaGluZTAeFw0xOTAyMTUxNjI3NDVaFw0yMDAyMTUx
+            NjQ3NDVaMBYxFDASBgNVBAMMC3NvbWVtYWNoaW5lMIIBIjANBgkqhkiG9w0BAQEF
+            AAOCAQ8AMIIBCgKCAQEAuwr0qT/ekYvp4RIHfEqsZyabdWUIR842P/1+t2b0W5bn
+            LqxER+mUuBOrbdNcekjQjTnq5rYy1WsIwjeuJ7zgmVINvL8KeYna750M5ngAZsqO
+            QoRR9xbQAeht2H1Q9vj/GHbakOKUW45It/0EvZLmF/FJ2+WdIGQMuqQVdr4N+w0f
+            DPIVjDCjRLT5USZOHWJGrKYDSaWSf5tEQAp/6RW3JnFkE2biWsYQ3FGZtVgRxjLS
+            4+602xnLTyjakQiXBosE0AuW36jiFPeW3WVVF1pdinPpIbtzE0CkoeEwPMfWNJaA
+            BfIVmkEKL8HeQGk4kSEvZ/zfNbPr7RfY3S925SeR5QIDAQABo4GfMIGcMA4GA1Ud
+            DwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwKAYDVR0R
+            BCEwH4IIZmlyc3RzYW6CCXNlY29uZHNhboIIdGhpcmRzYW4wIgYJKwYBBAGCNxQC
+            BBUeEgBXAGUAYgBTAGUAcgB2AGUAcgAwHQYDVR0OBBYEFNzXV7OE2NNKgKeLPTbT
+            +YBIcPJXMA0GCSqGSIb3DQEBCwUAA4IBAQBigwVwGdmE/RekuKY++7oxIrnWkQ0L
+            VN+ps5pVLM3+P1XaHdtRUVAHErBuRaqZMTHc4REzSE6PNozrznQJknEnMc6d4y4+
+            IZ5pfPl8eyuPs6nBAP5aA3KhC9lW72csjXqe+EJNHfCP0k3AOkBb1A6Cja36h8Ef
+            lJiPqE2bRualoz6iqcHftilLCF+8s7q1sW12730PK1BD+gqQo0o8N0fZrXhWU4/I
+            0nuuz7F7VEaNcpZD7leBPCiNdsyDkLIfkb2cj4R39Fbs0yuuG6Bv1jQ+adXXprCG
+            ZMCE85eAK5et3yur0hVcUHppM6oDPOyoCYnUhDthiO3rwnfRCr/1f3IB
+            -----END CERTIFICATE-----
+            "
+        $cerFileWithAltTemplateInformation = "
+            -----BEGIN CERTIFICATE-----
+            MIIDazCCAlOgAwIBAgIQJx7ZH+jq5YZLy436X4Li3TANBgkqhkiG9w0BAQsFADAW
+            MRQwEgYDVQQDDAtzb21lbWFjaGluZTAeFw0xODA4MDcwOTEwNDVaFw0xOTA4MDcw
+            OTMwNDVaMBYxFDASBgNVBAMMC3NvbWVtYWNoaW5lMIIBIjANBgkqhkiG9w0BAQEF
+            AAOCAQ8AMIIBCgKCAQEA98nll0sk4LiGTJcbZ+jIY86ongKRNE6CH+LZ0gp4mzUY
+            FRufTwmWqqoTjg6Q/Ri+CvofX1CbeaHCSdvI76/vIzF0ij+Y3wGg4Ot8YljbTjsF
+            aig3hGaWp+/Q345+O+sTlppwipcmdlp8vS8PNWx+FRbPFyPYSNTHbdFQXGjlz7Lu
+            s1gFe9VGbBqditYhvYPJeHjUSBWVDve2vd+E9ECRKssxn3UME74yuRSzEq30ly44
+            LPZYRYd8maypJERcMAkRz19bXZ1BNYp1kesxoi0KK7LLodSSzPG01Pls/K51KhZA
+            6NuFe14kA+jsAnstWQ2lIofUZxHrQ4IfykmgmP3NmQIDAQABo4G0MIGxMA4GA1Ud
+            DwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwKAYDVR0R
+            BCEwH4IIZmlyc3RzYW6CCXNlY29uZHNhboIIdGhpcmRzYW4wNwYJKwYBBAGCNxUH
+            BCowKAYgKwYBBAGCNxUIgt3/eIL6kR6HjYUJhpmDKIHSoVI+ARACAWQCAQUwHQYD
+            VR0OBBYEFNt1uNJH8KG4/X0Gzh4rnAPR5lBfMA0GCSqGSIb3DQEBCwUAA4IBAQBI
+            MyZvohjsm1wbxJvowp5QrKXvGs8XVl+97zY79h8QqtcZALtIHkZd8rj2Bvkd+qyU
+            o01rPj7+LS7HzkdqfmDRUxbAnDclOkUTCMskzxon9CzEsizomFyTq4khWh/p+7fE
+            mR2Rq/kA95aupS4Dm7HcncHn89nw9BKcP7WLgIzjRC3ZBzplEGCCL7aKDv66+dv/
+            HM2uI47A8kHCFMvaq6O0bjlJfmXvrX8OgVQlRDItiuM+pu9LMkWc0t8U4ekRRQdj
+            kVIXdpdvNQmud6JHv3OI0HrjtL7Da1dK7Q8qye3qHBzHwva6SMVbMmFC3ACxukBU
+            v+M0WvuaEOEmAQoYaY6K
+            -----END CERTIFICATE-----
+            "
+
+        $cerBytes = [System.Text.Encoding]::ASCII.GetBytes($cerFileWithSan)
+        $cerBytesWithoutSan = [System.Text.Encoding]::ASCII.GetBytes($cerFileWithoutSan)
+        $cerBytesWithAltTemplateName = [System.Text.Encoding]::ASCII.GetBytes($cerFileWithAltTemplateName)
+        $cerBytesWithAltTemplateInformation = [System.Text.Encoding]::ASCII.GetBytes($cerFileWithAltTemplateInformation)
+
+        $testCertificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($cerBytes)
+        $testCertificateWithoutSan = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($cerBytesWithoutSan)
+        $testCertificateWithAltTemplateName = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($cerBytesWithAltTemplateName)
+        $testCertificateWithAltTemplateInformation = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($cerBytesWithAltTemplateInformation)
+
         $webConfig = @'
 <?xml version="1.0"?>
 <configuration>
@@ -331,6 +445,7 @@ try
             Mock -CommandName Get-WebSite -MockWith {return $websiteDataHTTPS}
             Mock -CommandName Get-WebBinding -MockWith {return $websiteDataHTTPS.bindings.collection}
             Mock -CommandName Get-ChildItem -ParameterFilter {$Path -eq 'Cert:\LocalMachine\My\'} -MockWith {return $certificateData[0]}
+            Mock -CommandName Get-CertificateTemplateName -MockWith {'WebServer'}
             #endregion
 
             Context -Name 'DSC Web Service is installed with certificate using thumbprint' -Fixture {
@@ -1185,7 +1300,317 @@ try
                 Get-OSVersion | Should -BeOfType System.Version
             }
         }
-    }
+        Describe -Name "$dscResourceName\Get-CertificateTemplateName" -Fixture {
+            Mock -CommandName Get-CertificateTemplatesFromActiveDirectory -MockWith {
+                @(
+                    [PSCustomObject] @{
+                        'Name'                    = 'WebServer'
+                        'DisplayName'             = 'Web Server'
+                        'mspki-cert-template-oid' = '1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.1.16'
+                    }
+                )
+            }
+
+            Context 'When a certificate with the extension "Certificate Template Name" is used' {
+                It 'Should return the template name' {
+                    Get-CertificateTemplateName -Certificate $testCertificate | Should -Be 'WebServer'
+                }
+            }
+
+            Context 'When a certificate with the extension "Certificate Template Information" is used.' {
+                It 'Should return the template name when there is no display name' {
+                    Get-CertificateTemplateName -Certificate $testCertificateWithAltTemplateInformation | Should -Be 'WebServer'
+                }
+
+                Mock -CommandName Get-CertificateTemplateExtensionText -MockWith {
+@'
+Template=Web Server(1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.1.16)
+Major Version Number=100
+Minor Version Number=5
+'@
+                }
+
+                It 'Should return the template name when there is a display name' {
+                    Get-CertificateTemplateName -Certificate $testCertificateWithAltTemplateInformation | Should -Be 'WebServer'
+                }
+            }
+
+            Context 'When a certificate with no template name is used' {
+                It 'Should return null' {
+                    Get-CertificateTemplateName -Certificate $testCertificateWithoutSan | Should -BeNullOrEmpty
+                }
+            }
+        }
+
+        Describe -Name "$dscResourceName\Get-CertificateTemplatesFromActiveDirectory" -Fixture {
+            $MockSearchResults = @(
+                @{
+                    Properties = @(
+                        @{
+                            Name  = 'name'
+                            Value = 'MockData1'
+                        }
+                        @{
+                            Name  = 'displayName'
+                            Value = 'Mock Data 1'
+                        }
+                    )
+                }
+                @{
+                    Properties = @(
+                        @{
+                            Name  = 'name'
+                            Value = 'MockData2'
+                        }
+                        @{
+                            Name  = 'displayName'
+                            Value = 'Mock Data 2'
+                        }
+                    )
+                }
+                @{
+                    Properties = @(
+                        @{
+                            Name  = 'name'
+                            Value = 'MockData3'
+                        }
+                        @{
+                            Name  = 'displayName'
+                            Value = 'Mock Data 3'
+                        }
+                    )
+                }
+            )
+
+            $newObject_parameterFilter = {
+                $TypeName  -eq 'DirectoryServices.DirectorySearcher'
+            }
+
+            $newObject_mock = {
+                [PSCustomObject] @{
+                    Filter     = $null
+                    SearchRoot = $null
+                } | Add-Member -MemberType ScriptMethod -Name FindAll -Value {
+                    $MockSearchResults
+                    } -PassThru
+            }
+
+            Mock -CommandName New-Object -ParameterFilter $newObject_parameterFilter -MockWith $newObject_mock
+            Mock -CommandName Get-DirectoryEntry
+
+            Context 'When certificate templates are retrieved from Active Directory successfully' {
+                It 'Should get 3 mocked search results' {
+                    $SearchResults = Get-CertificateTemplatesFromActiveDirectory
+
+                    Assert-MockCalled -CommandName Get-DirectoryEntry -Exactly -Times 1
+                    Assert-MockCalled -CommandName New-Object         -Exactly -Times 1
+
+                    $SearchResults.Count | Should -Be 3
+                }
+            }
+
+            Context 'When certificate templates are not retrieved from Active Directory successfully' {
+                Mock -CommandName Get-DirectoryEntry -MockWith {
+                    throw 'Mock Function Failure'
+                }
+
+                It 'Should display a warning message' {
+                    $Message = 'Failed to get the certificate templates from Active Directory.'
+
+                    (Get-CertificateTemplatesFromActiveDirectory -Verbose 3>&1).Message | Should -Be $Message
+                }
+
+                It 'Should display a verbose message' {
+                    $Message = 'Mock Function Failure'
+
+                    (Get-CertificateTemplatesFromActiveDirectory -Verbose 4>&1).Message | Should -Be $Message
+                }
+            }
+        }
+
+        Describe -Name "$dscResourceName\Get-CertificateTemplateInformation" -Fixture {
+
+            $mockADTemplates = @(
+                @{
+                    'Name'                    = 'DisplayName1'
+                    'DisplayName'             = 'Display Name 1'
+                    'msPKI-Cert-Template-OID' = '1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.1234567'
+                }
+                @{
+                    'Name'                    = 'DisplayName2'
+                    'DisplayName'             = 'Display Name 2'
+                    'msPKI-Cert-Template-OID' = '1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.2345678'
+                }
+            )
+
+            $certificateTemplateExtensionFormattedText1 = @'
+Template=Display Name 1(1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.1234567)
+Major Version Number=100
+Minor Version Number=5
+'@
+
+            $certificateTemplateExtensionFormattedText1NoDisplayName = @'
+Template=1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.1234567
+Major Version Number=100
+Minor Version Number=5
+'@
+
+            $certificateTemplateExtensionFormattedText2 = @'
+Template=Display Name 2(1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.2345678)
+Major Version Number=100
+Minor Version Number=5
+'@
+
+            $certificateTemplateExtensionFormattedText2NoDisplayName = @'
+Template=1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.2345678
+Major Version Number=100
+Minor Version Number=5
+'@
+
+            $certificateTemplateExtensionFormattedText3 = @'
+Template=Display Name 3(1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.3456789)
+Major Version Number=100
+Minor Version Number=5
+'@
+
+            $certificateTemplateExtensionFormattedText3NoDisplayName = @'
+Template=1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.3384218.3456789
+Major Version Number=100
+Minor Version Number=5
+'@
+
+            $RegexTemplatePattern = '^\w+=(?<Name>.*)\((?<Oid>[\.\d]+)\)'
+
+            Mock -CommandName Get-CertificateTemplatesFromActiveDirectory -MockWith {$mockADTemplates}
+
+            Context 'When FormattedTemplate contains a Template OID with a Template Display Name' {
+
+                It 'Should return the Template Name "DisplayName1"' {
+                    $params =  @{
+                        FormattedTemplate = $certificateTemplateExtensionFormattedText1
+                    }
+
+                    (Get-CertificateTemplateInformation @params).Name | Should -Be 'DisplayName1'
+                }
+                It 'Should return the Template Name "DisplayName2"' {
+                    $params =  @{
+                        FormattedTemplate = $certificateTemplateExtensionFormattedText2
+                    }
+
+                    (Get-CertificateTemplateInformation @params).Name | Should -Be 'DisplayName2'
+                }
+                It 'Should write a warning when there is no match in Active Directory' {
+                    $templateValues = [Regex]::Match($certificateTemplateExtensionFormattedText3, $RegexTemplatePattern)
+
+                    $templateText = '{0}({1})' -f $templateValues.Groups['Name'].Value, $templateValues.Groups['Oid'].Value
+
+                    $warningMessage = $localizedData.TemplateNameResolutionError -f $templateText
+
+                    $params =  @{
+                        FormattedTemplate = $certificateTemplateExtensionFormattedText3
+                    }
+
+                    (Get-CertificateTemplateInformation @params 3>&1)[0].Message | Should -Be $warningMessage
+                }
+            }
+
+            Context 'When FormattedTemplate contains a Template OID without a Template Display Name' {
+                It 'Should return the Template Name "DisplayName1"' {
+                    $params =  @{
+                        FormattedTemplate = $certificateTemplateExtensionFormattedText1NoDisplayName
+                    }
+
+                    (Get-CertificateTemplateInformation @params).Name | Should -Be 'DisplayName1'
+                }
+                It 'Should return the Template Name "DisplayName2"' {
+                    $params =  @{
+                        FormattedTemplate = $certificateTemplateExtensionFormattedText2NoDisplayName
+                    }
+
+                    (Get-CertificateTemplateInformation @params).Name | Should -Be 'DisplayName2'
+                }
+                It 'Should write a warning when there is no match in Active Directory' {
+                    $templateValues = [Regex]::Match($certificateTemplateExtensionFormattedText3, $RegexTemplatePattern)
+
+                    $templateText = '{0}({1})' -f $templateValues.Groups['Name'].Value, $templateValues.Groups['Oid'].Value
+
+                    $warningMessage = $localizedData.TemplateNameResolutionError -f $templateText
+
+                    $params =  @{
+                        FormattedTemplate = $certificateTemplateExtensionFormattedText3
+                    }
+
+                    (Get-CertificateTemplateInformation @params 3>&1)[0].Message | Should -Be $warningMessage
+                }
+            }
+
+            Context 'When FormattedTemplate contains a the Template Name' {
+                It 'Should return the FormattedText' {
+                    $templateName  = 'TemplateName'
+
+                    (Get-CertificateTemplateInformation -FormattedTemplate $templateName).Name | Should -Be $templateName
+                }
+                It 'Should return the FormattedText Without a Trailing Carriage Return' {
+                    $templateName  = 'TemplateName' + [Char]13
+
+                    (Get-CertificateTemplateInformation -FormattedTemplate $templateName).Name | Should -Be $templateName.TrimEnd([Char]13)
+                }
+            }
+
+            Context 'When FormattedTemplate does not contain a recognised format' {
+                It 'Should write a warning when there is no match in Active Directory' {
+                    $formattedTemplate = 'Unrecognized Format'
+
+                    $warningMessage = $localizedData.TemplateNameNotFound -f $formattedTemplate
+
+                    (Get-CertificateTemplateInformation -FormattedTemplate $formattedTemplate 3>&1)[0].Message | Should -Be $warningMessage
+                }
+            }
+        }
+
+        Describe -Name "$dscResourceName\Get-CertificateTemplateExtensionText" -Fixture {
+            Context 'When a certificate contains Certificate Template Name extension' {
+                It 'Should return the Name of the Certificate Template' {
+                    $params = @{
+                        TemplateExtensions = $testCertificateWithAltTemplateName.Extensions
+                    }
+
+                    # Template Names have a trailing carriage return and linefeed.
+                    Get-CertificateTemplateExtensionText @params | Should -Be ('WebServer' + [Char]13 + [Char]10)
+                }
+            }
+
+            Context 'When a certificate contains Certificate Template Information extension' {
+                It 'Should return the Oid, Major and Minor Version of the Certificate Template' {
+                    $CertificateTemplateInformation = @'
+Template=1.3.6.1.4.1.311.21.8.5734392.6195358.14893705.12992936.3444946.62.1.16
+Major Version Number=100
+Minor Version Number=5
+
+'@
+                    
+                    $params = @{
+                        TemplateExtensions = $testCertificateWithAltTemplateInformation.Extensions
+                    }
+
+                    # Template Names have a trailing carriage return and linefeed.
+                    Get-CertificateTemplateExtensionText @params | Should -Be $CertificateTemplateInformation
+                }
+            }
+
+            Context 'When a certificate does not contain a Certificate Template extension' {
+                It 'Should not return anything' {
+                    $params = @{
+                        TemplateExtensions = $testCertificateWithoutSan.Extensions
+                    }
+
+                    # Template Names have a trailing carriage return and linefeed.
+                    Get-CertificateTemplateExtensionText @params | Should -Be $null
+                }
+            }
+
+        }
+   }
     #endregion
 }
 finally
