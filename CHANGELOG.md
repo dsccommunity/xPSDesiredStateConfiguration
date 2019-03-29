@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-- Fixes issue matching a certificate in xDscWebService when Subject and Template name
-  is used and the matching certificate contains a Certificate Template Information
-  Oid.
+- Fixes issue matching a certificate in xDscWebService when Subject and 
+  Template name is used and the matching certificate contains a Certificate
+  Template Information Oid.
   [issue #606](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/606)
 - Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
   [issue #530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
