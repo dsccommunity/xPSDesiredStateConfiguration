@@ -80,45 +80,45 @@ try
         }
 
         $certificateData  = @(
-            [System.Management.Automation.PSObject] @{
+            [PSCustomObject] @{
                 Thumbprint = 'AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTT'
                 Subject    = 'PesterTestCertificate'
                 Extensions = [System.Array] @(
-                    [System.Management.Automation.PSObject] @{
-                        Oid = [System.Management.Automation.PSObject] @{
+                    [PSCustomObject] @{
+                        Oid = [PSCustomObject] @{
                             FriendlyName = 'Certificate Template Name'
                             Value        = '1.3.6.1.4.1.311.20.2'
                         }
                     }
-                    [System.Management.Automation.PSObject] @{}
+                    [PSCustomObject] @{}
                 )
                 NotAfter   = Get-Date
             }
-            [System.Management.Automation.PSObject] @{
+            [PSCustomObject] @{
                 Thumbprint = 'AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTT'
                 Subject    = 'PesterTestDuplicateCertificate'
                 Extensions = [System.Array] @(
-                    [System.Management.Automation.PSObject] @{
-                        Oid = [System.Management.Automation.PSObject] @{
+                    [PSCustomObject] @{
+                        Oid = [PSCustomObject] @{
                             FriendlyName = 'Certificate Template Name'
                             Value        = '1.3.6.1.4.1.311.20.2'
                         }
                     }
-                    [System.Management.Automation.PSObject] @{}
+                    [PSCustomObject] @{}
                 )
                 NotAfter   = Get-Date
             }
-            [System.Management.Automation.PSObject] @{
+            [PSCustomObject] @{
                 Thumbprint = 'AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTT'
                 Subject    = 'PesterTestDuplicateCertificate'
                 Extensions = [System.Array] @(
-                    [System.Management.Automation.PSObject] @{
-                        Oid = [System.Management.Automation.PSObject] @{
+                    [PSCustomObject] @{
+                        Oid = [PSCustomObject] @{
                             FriendlyName = 'Certificate Template Name'
                             Value        = '1.3.6.1.4.1.311.20.2'
                         }
                     }
-                    [System.Management.Automation.PSObject] @{}
+                    [PSCustomObject] @{}
                 )
                 NotAfter   = Get-Date
             }
@@ -126,7 +126,6 @@ try
         $certificateData.ForEach{
             Add-Member -InputObject $_.Extensions[0] -MemberType ScriptMethod -Name Format -Value {'WebServer'}
         }
-
         $cerFileWithSan = "
             -----BEGIN CERTIFICATE-----
             MIIGJDCCBAygAwIBAgITewAAAAqQ+bxgiZZPtgAAAAAACjANBgkqhkiG9w0BAQsF

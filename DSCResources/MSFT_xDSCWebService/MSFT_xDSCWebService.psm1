@@ -167,7 +167,7 @@ function Get-TargetResource
     }
     else
     {
-        $certificate = ([System.Array] (Get-ChildItem -Path 'Cert:\LocalMachine\My\')) | Where-Object -FilterScript {
+        [System.Array] $certificate = Get-ChildItem -Path 'Cert:\LocalMachine\My\' | Where-Object -FilterScript {
             $_.Thumbprint -eq $webBinding.CertificateHash
         }
 
