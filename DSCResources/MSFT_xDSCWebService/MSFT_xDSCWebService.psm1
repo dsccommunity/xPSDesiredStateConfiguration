@@ -171,7 +171,10 @@ function Get-TargetResource
             $_.Thumbprint -eq $webBinding.CertificateHash
         }
 
-        $actualCertificateTemplateName = Get-CertificateTemplateName -Certificate $certificate
+        if ($certificate.Count -eq 1)
+        {
+            $actualCertificateTemplateName = Get-CertificateTemplateName -Certificate $certificate
+        }
         
         $output.Add('CertificateThumbPrint',   $webBinding.CertificateHash)
         $output.Add('CertificateSubject',      $certificate.Subject)
