@@ -1390,7 +1390,7 @@ Minor Version Number=5
                     Filter     = $null
                     SearchRoot = $null
                 } | Add-Member -MemberType ScriptMethod -Name FindAll -Value {
-                    $MockSearchResults
+                        $MockSearchResults
                     } -PassThru
             }
 
@@ -1410,7 +1410,7 @@ Minor Version Number=5
 
             Context 'When certificate templates are not retrieved from Active Directory successfully' {
                 Mock -CommandName Get-DirectoryEntry -MockWith {
-                    throw 'Mock Function Failure'
+                    throw 'Mock: Function failed to retrieve templates from Active Directory'
                 }
 
                 It 'Should display a warning message' {
@@ -1420,7 +1420,7 @@ Minor Version Number=5
                 }
 
                 It 'Should display a verbose message' {
-                    $Message = 'Mock Function Failure'
+                    $Message = 'Mock: Function failed to retrieve templates from Active Directory'
 
                     (Get-CertificateTemplatesFromActiveDirectory -Verbose 4>&1).Message | Should -Be $Message
                 }
@@ -1550,9 +1550,9 @@ Minor Version Number=5
                     (Get-CertificateTemplateInformation -FormattedTemplate $templateName).Name | Should -Be $templateName
                 }
                 It 'Should return the FormattedText Without a Trailing Carriage Return' {
-                    $templateName  = 'TemplateName' + [Char]13
+                    $templateName  = 'TemplateName' + [Char] 13
 
-                    (Get-CertificateTemplateInformation -FormattedTemplate $templateName).Name | Should -Be $templateName.TrimEnd([Char]13)
+                    (Get-CertificateTemplateInformation -FormattedTemplate $templateName).Name | Should -Be $templateName.TrimEnd([Char] 13)
                 }
             }
 
@@ -1575,7 +1575,7 @@ Minor Version Number=5
                     }
 
                     # Template Names have a trailing carriage return and linefeed.
-                    Get-CertificateTemplateExtensionText @params | Should -Be ('WebServer' + [Char]13 + [Char]10)
+                    Get-CertificateTemplateExtensionText @params | Should -Be ('WebServer' + [Char] 13 + [Char] 10)
                 }
             }
 

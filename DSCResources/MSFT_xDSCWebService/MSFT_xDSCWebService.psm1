@@ -175,7 +175,7 @@ function Get-TargetResource
         {
             $actualCertificateTemplateName = Get-CertificateTemplateName -Certificate $certificate
         }
-        
+
         $output.Add('CertificateThumbPrint',   $webBinding.CertificateHash)
         $output.Add('CertificateSubject',      $certificate.Subject)
         $output.Add('CertificateTemplateName', $actualCertificateTemplateName)
@@ -1470,12 +1470,13 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
     .SYNOPSIS
     Wraps a single ADSI command to get the domain naming context so it can be mocked.
 #>
-function Get-DirectoryEntry
+function Get-DomainNamingContext
 {
     [CmdletBinding()]
+    [OutputType([String])]
     param ()
 
-    return ([adsi] 'LDAP://RootDSE').Get('rootDomainNamingContext')
+    return ([System.DirectoryServices.DirectoryEntry] 'LDAP://RootDSE').Get('rootDomainNamingContext')
 }
 
 <#
@@ -1502,7 +1503,7 @@ function Get-CertificateTemplatesFromActiveDirectory
 
     try
     {
-        $domain   = Get-DirectoryEntry
+        $domain   = Get-DomainNamingContext
         $searcher = New-Object -TypeName DirectoryServices.DirectorySearcher
 
         $searcher.Filter     = '(objectclass=pKICertificateTemplate)'
@@ -1652,7 +1653,7 @@ function Get-CertificateTemplateExtensionText
         $TemplateExtensions
     )
 
-    $templateOidNames = 'Certificate Template Information', 'Certificate Template Name'
+    $templateOidNames = @('Certificate Template Information', 'Certificate Template Name')
 
     $templateExtension = $TemplateExtensions.Where({
         $_.Oid.FriendlyName -in $templateOidNames
@@ -1689,7 +1690,7 @@ function Get-CertificateTemplateName
 
     if ($Certificate -isnot [System.Security.Cryptography.X509Certificates.X509Certificate2])
     {
-        return
+        return $null
     }
 
     $templateExtensionText = Get-CertificateTemplateExtensionText -TemplateExtensions $Certificate.Extensions
