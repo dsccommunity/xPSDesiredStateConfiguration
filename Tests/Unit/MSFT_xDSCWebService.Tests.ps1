@@ -1395,13 +1395,13 @@ Minor Version Number=5
             }
 
             Mock -CommandName New-Object -ParameterFilter $newObject_parameterFilter -MockWith $newObject_mock
-            Mock -CommandName Get-DirectoryEntry
+            Mock -CommandName Get-DomainNamingContext
 
             Context 'When certificate templates are retrieved from Active Directory successfully' {
                 It 'Should get 3 mocked search results' {
                     $SearchResults = Get-CertificateTemplatesFromActiveDirectory
 
-                    Assert-MockCalled -CommandName Get-DirectoryEntry -Exactly -Times 1
+                    Assert-MockCalled -CommandName Get-DomainNamingContext -Exactly -Times 1
                     Assert-MockCalled -CommandName New-Object         -Exactly -Times 1
 
                     $SearchResults.Count | Should -Be 3
@@ -1409,7 +1409,7 @@ Minor Version Number=5
             }
 
             Context 'When certificate templates are not retrieved from Active Directory successfully' {
-                Mock -CommandName Get-DirectoryEntry -MockWith {
+                Mock -CommandName Get-DomainNamingContext -MockWith {
                     throw 'Mock: Function failed to retrieve templates from Active Directory'
                 }
 

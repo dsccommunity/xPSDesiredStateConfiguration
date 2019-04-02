@@ -1426,29 +1426,50 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
     # 1.3.6.1.4.1.311.20.2 = Certificate Template Name
     # 1.3.6.1.4.1.311.21.7 = Certificate Template Information
 
-    $adTemplates = Get-CertificateTemplatesFromActiveDirectory
-
-    $templateDisplayName = $adTemplates | Where-Object -FilterScript {
-        $_.Name -eq $TemplateName
-    } | Select-Object -ExpandProperty DisplayName
-
     $filteredCertificates = @()
 
     $certificatesWithSubject = (Get-ChildItem -Path $Store).Where({
         $_.Subject -eq $Subject
     })
 
+    $adTemplates = $null
+
     foreach ($certificate in $certificatesWithSubject)
     {
-        $certificateTemplateExtension = $certificate.Extensions.Where({
-            $_.Oid.FriendlyName -eq 'Certificate Template Information' -or
-            $_.Oid.FriendlyName -eq 'Certificate Template Name'
-        }).Format($false)
-
-        if ($certificateTemplateExtension -eq $TemplateName -or
-            $certificateTemplateExtension -like ('Template={0}*' -f $templateDisplayName))
+        switch ($certificate.Extensions.Oid.FriendlyName)
         {
-            $filteredCertificates += $certificate
+            'Certificate Template Information'
+            {
+                if ($null -eq $adTemplates)
+                {
+                    $adTemplates = Get-CertificateTemplatesFromActiveDirectory
+                }
+
+                if ($null -ne $adTemplates)
+                {
+                    $templateDisplayName = $adTemplates | Where-Object -FilterScript {
+                        $_.Name -eq $TemplateName
+                    } | Select-Object -ExpandProperty DisplayName
+
+                    if ($null -ne $templateDisplayName -and
+                        $certificate.Extensions.Where({
+                            $_.Oid.FriendlyName -eq 'Certificate Template Information'
+                        }).Format($false) -like ('Template={0}*' -f $templateDisplayName))
+                    {
+                        $filteredCertificates += $certificate
+                    }
+                }
+            }
+
+            'Certificate Template Name'
+            {
+                if ($certificate.Extensions.Where({
+                        $_.Oid.FriendlyName -eq 'Certificate Template Name'
+                    }).Format($false) -eq $TemplateName)
+                {
+                    $filteredCertificates += $certificate
+                }
+            }
         }
     }
 
