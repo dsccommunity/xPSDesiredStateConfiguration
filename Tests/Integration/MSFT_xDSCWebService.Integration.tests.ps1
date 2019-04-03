@@ -56,7 +56,6 @@ function Invoke-CommonResourceTesting
                 Path         = $TestDrive
                 ComputerName = 'localhost'
                 Wait         = $true
-                Verbose      = $true
                 Force        = $true
                 ErrorAction  = 'Stop'
             }
@@ -67,12 +66,12 @@ function Invoke-CommonResourceTesting
 
     It 'Should be able to call Get-DscConfiguration without throwing' {
         {
-            $script:currentConfiguration = Get-DscConfiguration -Verbose -ErrorAction Stop
+            $script:currentConfiguration = Get-DscConfiguration -ErrorAction Stop
         } | Should -Not -Throw
     }
 
     It 'Should return $true when Test-DscConfiguration is run' {
-        Test-DscConfiguration -Verbose | Should -Be $true
+        Test-DscConfiguration | Should -Be $true
     }
 }
 
@@ -103,6 +102,15 @@ function Test-DSCPullServerIsPresent
 # Using try/finally to always cleanup.
 try
 {
+    # Get a self signed certificate to use with tests
+    New-DscSelfSignedCertificate
+
+    if (!(Test-Path -Path env:DscPublicCertificatePath) -or `
+        !(Test-Path -Path env:DscCertificateThumbprint))
+    {
+        throw "A DSC certificate is required for $script:dscResourceFriendlyName integration tests."
+    }
+
     # Make sure the DSC-Service and Web-Server Windows features are installed
     if (!(Install-WindowsFeatureAndVerify -Name 'DSC-Service') -or
         !(Install-WindowsFeatureAndVerify -Name 'Web-Server'))

@@ -30,11 +30,15 @@
     .PARAMETER Path
         The path to the executable to install.
 
+    .PARAMETER IgnoreReboot
+        Ignore a pending reboot if requested by package installation.
+
     .EXAMPLE
         xPackage_InstallMsiConfig -PackageName 'Package Name' -Path '\\software\installer.msi'
 
         Compiles a configuration that installs a package named 'Package Name'
-        located in the path '\\software\installer.msi'.
+        located in the path '\\software\installer.msi'. Ignore a pending reboot
+        if `IgnoreReboot` switch is provided.
 #>
 Configuration xPackage_InstallMsiConfig
 {
@@ -48,7 +52,10 @@ Configuration xPackage_InstallMsiConfig
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Path
+        $Path,
+
+        [Switch]
+        $IgnoreReboot
     )
 
     Import-DscResource -ModuleName xPSDesiredStateConfiguration
@@ -57,10 +64,11 @@ Configuration xPackage_InstallMsiConfig
     {
         xPackage 'InstallMsi'
         {
-            Ensure    = 'Present'
-            Name      = $PackageName
-            Path      = $Path
-            ProductId = ''
+            Ensure       = 'Present'
+            Name         = $PackageName
+            Path         = $Path
+            ProductId    = ''
+            IgnoreReboot = $IgnoreReboot
         }
     }
 }

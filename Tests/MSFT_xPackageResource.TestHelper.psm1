@@ -1,3 +1,10 @@
+<#
+    Suppress PSAvoidUsingConvertToSecureStringWithPlainText since SecureString
+    objects are used for test passwords.
+#>
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
+
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
@@ -1299,7 +1306,7 @@ function New-TestExecutable
                 self = self.Replace("\"", "");
                 string packagePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(self), "DSCSetupProject.msi");
 
-                string msiexecargs = String.Format("/i {0} {1}", packagePath, other);
+                string msiexecargs = String.Format("/i \"{0}\" {1}", packagePath, other);
                 System.Diagnostics.Process.Start(msiexecpath, msiexecargs).WaitForExit();
             }
         }

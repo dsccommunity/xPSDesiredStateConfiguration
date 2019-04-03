@@ -1,3 +1,10 @@
+<#
+    Suppress PSAvoidUsingConvertToSecureStringWithPlainText since SecureString
+    objects are used for test passwords.
+#>
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+param ()
+
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
@@ -4961,7 +4968,7 @@ Describe 'xArchive Unit Tests' {
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -ParameterFilter $testFileMatchesArchiveEntryByChecksumParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should remove the existing item at the desired path of the archive entry at the destination' {
@@ -6466,7 +6473,7 @@ Describe 'xArchive Unit Tests' {
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -ParameterFilter $testFileMatchesArchiveEntryByChecksumParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove an existing file at the desired path of the archive entry at the destination' {
@@ -6573,7 +6580,7 @@ Describe 'xArchive Unit Tests' {
                         return $fileParameterCorrect -and $archiveEntryParameterCorrect -and $checksumParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -Exactly 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Test-FileMatchesArchiveEntryByChecksum' -ParameterFilter $testFileMatchesArchiveEntryByChecksumParameterFilter -Exactly 1 -Scope 'Context'
                 }
 
                 It 'Should remove the file at the desired path of the archive entry at the destination' {

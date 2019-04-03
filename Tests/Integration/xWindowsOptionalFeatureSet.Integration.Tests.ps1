@@ -23,7 +23,7 @@ try
             $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xWindowsOptionalFeatureSet.config.ps1'
 
             $script:enabledStates = @( 'Enabled', 'EnablePending' )
-            $script:disabledStates = @( 'Disabled', 'DisablePending' )
+            $script:disabledStates = @( 'Disabled', 'DisablePending', 'DisabledWithPayloadRemoved' )
 
             $script:validFeatureNames = @( 'RSAT-RDS-Tools-Feature', 'Xps-Foundation-Xps-Viewer' )
 

@@ -519,7 +519,8 @@ None
 * **Credential**: Specifies credential of a user which has permissions to send
   the request. Optional.
 * **MatchSource**: Determines whether the remote file should be re-downloaded
-  if file in the DestinationPath was modified locally. Optional.
+  if file in the DestinationPath was modified locally. The default value is
+  true. Optional.
 * **TimeoutSec**: Specifies how long the request can be pending before it times
   out. Optional.
 * **Proxy**: Uses a proxy server for the request, rather than connecting
@@ -544,6 +545,8 @@ None
 * **Arguments**: Command line arguments passed on the installation command line.
   * When installing MSI packages, the `/quiet` and `/norestart` arguments are
     automatically applied.
+* **IgnoreReboot**: Ignore a pending reboot if requested by package
+  installation. By default is `$false` and DSC will try to reboot the system.
 * **Credential**: PSCredential needed to access Path.
 * **ReturnCode**: An array of return codes that are returned after a successful
   installation.
@@ -636,6 +639,9 @@ None
   default value is Present. { *Present* | Absent }.
 * **[String] Arguments** _(Write)_: The arguments to be passed to the MSI
   package during installation or uninstallation if needed.
+* **[Boolean] IgnoreReboot** _(Write): Ignore a pending reboot if requested
+  by package installation. By default is `$false` and DSC will try to reboot
+  the system.
 * **[System.Management.Automation.PSCredential] Credential** _(Write)_: The
   credential of a user account to be used to mount a UNC path if needed.
 * **[String] LogPath** _(Write)_: The path to the log file to log the output

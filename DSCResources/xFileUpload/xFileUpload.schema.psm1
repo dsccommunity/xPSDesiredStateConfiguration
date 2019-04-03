@@ -64,7 +64,7 @@ Configuration xFileUpload
 
         # Encrypt password
         $password = Invoke-Command `
-            -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($getEncryptedPassword)) `
+            -ScriptBlock $getEncryptedPassword `
             -ArgumentList $Credential, $CertificateThumbprint
     }
 
@@ -86,7 +86,7 @@ Configuration xFileUpload
                 {
                     $errorMessage = 'Certificate thumbprint has to be specified if credentials are present.'
                     Invoke-Command `
-                        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                        -ScriptBlock $using:throwTerminatingError `
                         -ArgumentList 'CertificateThumbprintIsRequired', $errorMessage, 'InvalidData'
                 }
 
@@ -94,7 +94,7 @@ Configuration xFileUpload
 
                 # Decrypt password
                 $decryptedPassword = Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:getDecryptedPassword)) `
+                    -ScriptBlock $using:getDecryptedPassword `
                     -ArgumentList $using:password, $using:CertificateThumbprint
 
                 # Generate credential
@@ -109,7 +109,7 @@ Configuration xFileUpload
             {
                 $errorMessage = "Destination path $using:DestinationPath is not a valid UNC path."
                 Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                    -ScriptBlock $using:throwTerminatingError `
                     -ArgumentList 'DestinationPathIsNotUNCFailure', $errorMessage, 'InvalidData'
             }
 
@@ -118,7 +118,7 @@ Configuration xFileUpload
             {
                 $errorMessage = "Source path $using:SourcePath has to be local path."
                 Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                    -ScriptBlock $using:throwTerminatingError `
                     -ArgumentList 'SourcePathIsNotLocalFailure', $errorMessage, 'InvalidData'
             }
 
@@ -129,7 +129,7 @@ Configuration xFileUpload
             {
                 $errorMessage = "Source path $using:SourcePath does not exist."
                 Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                    -ScriptBlock $using:throwTerminatingError `
                     -ArgumentList 'SourcePathDoesNotExistFailure', $errorMessage, 'InvalidData'
             }
             else
@@ -180,7 +180,7 @@ Configuration xFileUpload
                     {
                         $errorMessage = "Cannot access destination path $using:DestinationPath with given Credential"
                         Invoke-Command `
-                            -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                            -ScriptBlock $using:throwTerminatingError `
                             -ArgumentList 'DestinationPathNotAccessibleFailure', $errorMessage, 'InvalidData'
                     }
                 }
@@ -208,7 +208,7 @@ Configuration xFileUpload
                             # DestinationPath cannot be file
                             $errorMessage = 'Invalid parameter values: DestinationPath is file, but has to be existing directory.'
                             Invoke-Command `
-                                -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                                -ScriptBlock $using:throwTerminatingError `
                                 -ArgumentList 'DestinationPathCannotBeFileFailure', $errorMessage, 'InvalidData'
                         }
 
@@ -233,7 +233,7 @@ Configuration xFileUpload
                 {
                     $errorMessage = "Could not copy source path $using:SourcePath to $using:DestinationPath : $($_.Exception)"
                     Invoke-Command `
-                        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                        -ScriptBlock $using:throwTerminatingError `
                         -ArgumentList 'CopyDirectoryOverFileFailure', $errorMessage, 'InvalidData'
                 }
 
@@ -242,7 +242,7 @@ Configuration xFileUpload
                 {
                     $errorMessage = "Destination path $using:DestinationPath could not be created"
                     Invoke-Command `
-                        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                        -ScriptBlock $using:throwTerminatingError `
                         -ArgumentList 'DestinationPathNotCreatedFailure', $errorMessage, 'InvalidData'
                 }
                 # If expectedDestinationPath exists
@@ -289,7 +289,7 @@ Configuration xFileUpload
                 {
                     $errorMessage = 'Certificate thumbprint has to be specified if credentials are present.'
                     Invoke-Command `
-                        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                        -ScriptBlock $using:throwTerminatingError `
                         -ArgumentList 'CertificateThumbprintIsRequired', $errorMessage, 'InvalidData'
                 }
 
@@ -297,7 +297,7 @@ Configuration xFileUpload
 
                 # Decrypt password
                 $decryptedPassword = Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:getDecryptedPassword)) `
+                    -ScriptBlock $using:getDecryptedPassword `
                     -ArgumentList $using:password, $using:CertificateThumbprint
 
                 # Generate credential
@@ -316,7 +316,7 @@ Configuration xFileUpload
             {
                 $errorMessage = "Destination path $using:DestinationPath is not a valid UNC path."
                 Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                    -ScriptBlock $using:throwTerminatingError `
                     -ArgumentList 'DestinationPathIsNotUNCFailure', $errorMessage, 'InvalidData'
 
             }
@@ -327,7 +327,7 @@ Configuration xFileUpload
             {
                 $errorMessage = "Source path $using:SourcePath does not exist."
                 Invoke-Command `
-                    -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                    -ScriptBlock $using:throwTerminatingError `
                     -ArgumentList 'SourcePathDoesNotExistFailure', $errorMessage, 'InvalidData'
             }
             else
@@ -378,7 +378,7 @@ Configuration xFileUpload
                     {
                         $errorMessage = "Cannot access destination path $using:DestinationPath with given Credential"
                         Invoke-Command `
-                            -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                            -ScriptBlock $using:throwTerminatingError `
                             -ArgumentList 'DestinationPathNotAccessibleFailure', $errorMessage, 'InvalidData'
                     }
                 }
@@ -394,7 +394,7 @@ Configuration xFileUpload
                     # DestinationPath has to exist
                     $errorMessage = 'Invalid parameter values: DestinationPath does not exist or is not accessible. DestinationPath has to be existing directory.'
                     Invoke-Command `
-                        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                        -ScriptBlock $using:throwTerminatingError `
                         -ArgumentList 'DestinationPathDoesNotExistFailure', $errorMessage, 'InvalidData'
                 }
                 else
@@ -408,7 +408,7 @@ Configuration xFileUpload
                             # DestinationPath cannot be file
                             $errorMessage = 'Invalid parameter values: DestinationPath is file, but has to be existing directory.'
                             Invoke-Command `
-                                -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($using:throwTerminatingError)) `
+                                -ScriptBlock $using:throwTerminatingError `
                                 -ArgumentList 'DestinationPathCannotBeFileFailure', $errorMessage, 'InvalidData'
                         }
 
@@ -491,7 +491,7 @@ Configuration xFileUpload
 }
 
 # Encrypts password using the defined public key
-$getEncryptedPassword = @'
+[System.Management.Automation.ScriptBlock] $getEncryptedPassword = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -506,7 +506,7 @@ $getEncryptedPassword = @'
     $value = $Credential.GetNetworkCredential().Password
 
     $cert = Invoke-Command `
-        -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($getCertificate)) `
+        -ScriptBlock $getCertificate `
         -ArgumentList $CertificateThumbprint
 
     $encryptedPassword = $null
@@ -520,7 +520,7 @@ $getEncryptedPassword = @'
         {
             $errorMessage = "Could not get public key from certificate with thumbprint: $CertificateThumbprint . Please verify certificate is valid for encryption."
             Invoke-Command `
-                -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($throwTerminatingError)) `
+                -ScriptBlock $throwTerminatingError `
                 -ArgumentList "DecryptionCertificateNotFound", $errorMessage, "InvalidOperation"
         }
 
@@ -541,15 +541,15 @@ $getEncryptedPassword = @'
     {
         $errorMessage = "Could not find certificate which matches thumbprint: $CertificateThumbprint . Could not encrypt password"
         Invoke-Command `
-            -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($throwTerminatingError)) `
+            -ScriptBlock $throwTerminatingError `
             -ArgumentList "EncryptionCertificateNot", $errorMessage, "InvalidOperation"
     }
 
     return $encryptedPassword
-'@
+}
 
 # Retrieves certificate by thumbprint
-$getCertificate = @'
+[System.Management.Automation.ScriptBlock] $getCertificate = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -572,17 +572,17 @@ $getCertificate = @'
     {
         $errorMessage = "Error Reading certificate store for {0}. Please verify thumbprint is correct and certificate belongs to cert:\LocalMachine\My store." -f ${CertificateThumbprint};
         Invoke-Command `
-            -ScriptBlock ([System.Management.Automation.ScriptBlock]::Create($throwTerminatingError)) `
+            -ScriptBlock $throwTerminatingError `
             -ArgumentList "InvalidPathSpecified", $errorMessage, "InvalidOperation"
     }
     else
     {
         $cert
     }
-'@
+}
 
 # Throws terminating error specified errorCategory, errorId and errorMessage
-$throwTerminatingError = @'
+[System.Management.Automation.ScriptBlock] $throwTerminatingError = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -600,10 +600,10 @@ $throwTerminatingError = @'
     $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $ErrorMessage
     $errorRecord = New-Object -TypeName System.Management.Automation.ErrorRecord -ArgumentList ($exception, $ErrorId, $ErrorCategory, $null)
     throw $errorRecord
-'@
+}
 
 # Decrypts password using the defined private key
-$getDecryptedPassword = @'
+[System.Management.Automation.ScriptBlock] $getDecryptedPassword = {
     param
     (
         [Parameter(Mandatory = $true)]
@@ -657,4 +657,4 @@ $getDecryptedPassword = @'
     $decryptedPassword = [System.Text.Encoding]::Unicode.GetString($decryptedBytes)
 
     return $decryptedPassword
-'@
+}
