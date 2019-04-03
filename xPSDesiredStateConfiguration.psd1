@@ -1,6 +1,6 @@
 @{
     # Version number of this module.
-    moduleVersion = '8.5.0.0'
+    moduleVersion = '8.6.0.0'
 
     # ID used to uniquely identify this module
     GUID              = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,107 +52,95 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
             # IconUri = ''
 
             # ReleaseNotes of this module
-        ReleaseNotes = '- Pull server module publishing
-  - Removed forced verbose logging from CreateZipFromSource, Publish-DSCModulesAndMof and Publish-MOFToPullServer as it polluted the console
-- Corrected GitHub Pull Request template to remove referral to
-  `BestPractices.MD` which has been combined into `StyleGuidelines.md`
-  ([issue 520](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/520)).
-- xWindowsOptionalFeature
-  - Suppress useless verbose output from `Import-Module` cmdlet.
-    ([issue 453](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/453)).
-- Changes to xRemoteFile
-  - Corrected a resource name in the example xRemoteFile_DownloadFileConfig.ps1
-- Fix `MSFT_xDSCWebService` to find
- `Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll`
-  when server is configured with pt-BR Locales
-  ([issue 284](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/284)).
-- Changes to xDSCWebService
-  - Fixed an issue which prevented the removal of the IIS Application Pool
-    created during deployment of an DSC Pull Server instance.
-    ([issue 464](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/464))
-  - Fixed an issue where a Pull Server cannot be deployed on a machine when IIS
-    Express is installed aside a full blown IIS
-    ([issue 191](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/191))
-- Update `CommonResourceHelper` unit tests to meet Pester 4.0.0
-  standards
-  ([issue 473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
-- Update `ResourceHelper` unit tests to meet Pester 4.0.0
-  standards
-  ([issue 473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
-- Update `MSFT_xDSCWebService` unit tests to meet Pester 4.0.0
-  standards
-  ([issue 473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
-- Update `MSFT_xDSCWebService` integration tests to meet Pester 4.0.0
-  standards
-  ([issue 473](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/473)).
-- Refactored `MSFT_xDSCWebService` integration tests to meet current
-  standards and to use Pester TestDrive.
-- xArchive
-  - Fix end-to-end tests
-    ([issue 457](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/457)).
-  - Update integration tests to meet Pester 4.0.0 standards.
-  - Update end-to-end tests to meet Pester 4.0.0 standards.
-  - Update unit and integration tests to meet Pester 4.0.0 standards.
-  - Wrapped all path and identifier strings in verbose messages with
-    quotes to make it easier to identify the limit of the string when
-    debugging.
-  - Refactored date/time checksum code to improve testability and ensure
-    tests can run on machines with localized datetime formats that are not
-    US.
-  - Fix "Get-ArchiveEntryLastWriteTime" to return `[datetime]`
-    ([issue 471](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/471)).
-  - Improved verbose logging to make debugging path issues easier.
-  - Added handling for "/" as a path seperator by backporting code from
-    PSDscResources -
-    ([issue 469](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/469)).
-  - Copied unit tests from
-    [PSDscResources](https://github.com/PowerShell/PSDscResources).
-  - Added .gitattributes file and removed git configuration from AppVeyor
-    to ensure CRLF settings are configured correctly for the repository.
-- Updated ".vscode\settings.json" to refer to AnalyzerSettings.psd1 so that
-  custom syntax problems are highlighted in Visual Studio Code.
-- Fixed style guideline violations in `CommonResourceHelper.psm1`.
-- Changes to xService
-  - Fixes issue where Get-TargetResource or Test-TargetResource will throw an
-    exception if the target service is configured with a non-existent
-    dependency.
-  - Refactored Get-TargetResource Unit tests.
-- Changes to xPackage
-  - Fixes an issue where incorrect verbose output was displayed if product
-    found.
-    ([issue 446](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/446))
-- Fixes files which are getting triggered for re-encoding after recent pull
-  request (possibly 472).
-- Moves version and change history from README.MD to new file, CHANGELOG.MD.
-- Fixes markdown issues in README.MD and HighQualityResourceModulePlan.md.
-- Opted in to "Common Tests - Validate Markdown Files"
-- Changes to xPSDesiredStateConfiguration
-  - In AppVeyor CI the tests are split into three separate jobs, and also
-    run tests on two different build worker images (Windows Server 2012R2
-    and Windows Server 2016). The common tests are only run on the
-    Windows Server 2016 build worker image. Helps with
-    [issue 477](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/477).
-- xGroup
-  - Corrected style guideline violations. ([issue 485](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/485))
-- xWindowsProcess
-  - Corrected style guideline violations. ([issue 496](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/496))
-- Changes to PSWSIISEndpoint.psm1
-  - Fixes most PSScriptAnalyzer issues.
-- Changes to xRegistry
-  - Fixed an issue that fails to remove reg key when the `Key` is specified as
-    common registry path.
-    ([issue 444](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/444))
-- Changes to xService
-  - Added support for Group Managed Service Accounts
-- Adds new Integration tests for MSFT_xDSCWebService and removes old
-  Integration test file, MSFT_xDSCWebService.xxx.ps1.
-- xRegistry
-  - Corrected style guideline violations. ([issue 489](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/489))
-...
-Continued release notes can be found at https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/CHANGELOG.md
+        ReleaseNotes = '- Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
+  [issue 530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
+- Suppresses forced Verbose output in MSFT_xArchive.EndToEnd.Tests.ps1,
+  MSFT_xDSCWebService.Integration.tests.ps1,
+  MSFT_xPackageResource.Integration.Tests.ps1, MSFT_xRemoteFile.Tests.ps1,
+  MSFT_xUserResource.Integration.Tests.ps1,
+  MSFT_xWindowsProcess.Integration.Tests.ps1, and
+  xFileUpload.Integration.Tests.ps1.
+  [issue 514](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/514)
+- Fixes issue in xGroupResource Integration tests where the tests would fail
+  if the System.DirectoryServices.AccountManagement namespace was not loaded.
+- Tests\Integration\MSFT_xDSCWebService.Integration.tests.ps1:
+  - Fixes issue where tests fail if a self signed certificate for DSC does not
+    already exist.
+    [issue 581](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/581)
+- Fixes all instances of the following PSScriptAnalyzer issues:
+  - PSUseOutputTypeCorrectly
+  - PSAvoidUsingConvertToSecureStringWithPlainText
+  - PSPossibleIncorrectComparisonWithNull
+  - PSAvoidDefaultValueForMandatoryParameter
+  - PSAvoidUsingInvokeExpression
+  - PSUseDeclaredVarsMoreThanAssignments
+  - PSAvoidGlobalVars
+- xPackage and xMsiPackage
+  - Add an ability to ignore a pending reboot if requested by package installation.
+- xRemoteFile
+  - Updated MatchSource description in README.md.
+    [issue 409](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/409)
+  - Improved layout of MOF file to move description left.
+  - Added function help for all functions.
+  - Moved `New-InvalidDataException` to CommonResourceHelper.psm1.
+    [issue 544](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/544)
+- Added full stops to the end of all functions help in CommonResourceHelper.psm1.
+- Added unit tests for `New-InvalidArgumentException`,
+  `New-InvalidDataException` and `New-InvalidOperationException`
+  CommonResourceHelper.psm1 functions.
+- Changes to `MSFT_xDSCWebService`
+  - Fixed
+    [issue 528](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/528)
+    : Unable to disable selfsigned certificates using AcceptSelfSignedCertificates=$false
+  - Fixed
+    [issue 460](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/460)
+    : Redeploy DSC Pull Server fails with error
+- Opt-in to the following Meta tests:
+  - Common Tests - Custom Script Analyzer Rules
+  - Common Tests - Flagged Script Analyzer Rules
+  - Common Tests - New Error-Level Script Analyzer Rules
+  - Common Tests - Relative Path Length
+  - Common Tests - Required Script Analyzer Rules
+  - Common Tests - Validate Markdown Links
+- Add .markdownlint.json file using settings from
+  [here](https://raw.githubusercontent.com/PowerShell/SqlServerDsc/dev/.markdownlint.json)
+  as a starting point.
+- Changes to `Tests\Unit\MSFT_xMsiPackage.Tests.ps1`
+  - Fixes issue where tests fail if executed from a drive other than C:.
+    [issue 573](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/573)
+- Changes to
+  `Tests\Integration\xWindowsOptionalFeatureSet.Integration.Tests.ps1`
+  - Fixes issue where tests fail if a Windows Optional Feature that is expected
+    to be disabled has a feature state of "DisabledWithPayloadRemoved".
+    [issue 586](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/586)
+- Changes to
+  `Tests\Unit\MSFT_xPackageResource.Tests.ps1`
+  - Fixes issue where tests fail if run from a folder that contains spaces.
+    [issue 580](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/580)
+- Changes to test helper Enter-DscResourceTestEnvironment so that it only
+  updates DSCResource.Tests when it is longer than 60 minutes since
+  it was last pulled. This is to improve performance of test execution
+  and reduce the likelihood of connectivity issues caused by inability to
+  pull DSCResource.Tests.
+  [issue 505](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/505)
+- Updated `CommonTestHelper.psm1` to resolve style guideline violations.
+- Adds helper functions for use when creating test administrator user accounts,
+  and updates the following tests to use credentials created with these
+  functions:
+  - MSFT_xScriptResource.Integration.Tests.ps1
+  - MSFT_xServiceResource.Integration.Tests.ps1
+  - MSFT_xWindowsProcess.Integration.Tests.ps1
+  - xServiceSet.Integration.Tests.ps1
+- Fixes the following issues:
+  - [issue 582](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/582)
+  - [issue 583](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/583)
+  - [issue 584](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/584)
+  - [issue 585](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/585)
+
 '
 
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 }
+
 

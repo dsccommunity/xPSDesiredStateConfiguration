@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 8.6.0.0
+
 - Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
   [issue #530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
 - Suppresses forced Verbose output in MSFT_xArchive.EndToEnd.Tests.ps1,
