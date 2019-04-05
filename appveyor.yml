@@ -78,7 +78,7 @@ for:
     only:
       - configuration: Integration
   environment:
-    SkipAllCommonTests: True
+    SkipAllCommonTests: False
 
   test_script:
     - ps: |
@@ -94,7 +94,7 @@ for:
       - configuration: Unit
         image: Visual Studio 2015
   environment:
-    SkipAllCommonTests: True
+    SkipAllCommonTests: False
 
   test_script:
     - ps: |
@@ -110,7 +110,7 @@ for:
       - configuration: Unit
         image: Visual Studio 2017
   environment:
-    SkipAllCommonTests: True
+    SkipAllCommonTests: False
 
   test_script:
     - ps: |
