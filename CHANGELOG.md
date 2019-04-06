@@ -4,6 +4,7 @@
 
 ## 8.6.0.0
 
+- Sets SkipAllCommonTests to False throughout appveyor.yml.
 - Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.
   [issue #530](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/530)
 - Suppresses forced Verbose output in MSFT_xArchive.EndToEnd.Tests.ps1,
