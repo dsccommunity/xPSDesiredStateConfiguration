@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fixes test failures in xWindowsOptionalFeatureSet.Integration.Tests.ps1 due
+  to accessing the windowsOptionalFeatureName variable before it is assigned.
+  [issue #612](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/612)
+
 ## 8.6.0.0
 
 - Fixes style inconsistencies in PublishModulesAndMofsToPullServer.psm1.

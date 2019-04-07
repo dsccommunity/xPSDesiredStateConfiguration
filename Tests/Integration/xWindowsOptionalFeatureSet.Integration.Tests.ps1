@@ -48,7 +48,7 @@ try
                     }
                     elseif ($originalFeature.State -in $script:enabledStates)
                     {
-                        Dism\Enable-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName -NoRestart
+                        Dism\Enable-WindowsOptionalFeature -Online -FeatureName $validFeatureName -NoRestart
                     }
                 }
             }
