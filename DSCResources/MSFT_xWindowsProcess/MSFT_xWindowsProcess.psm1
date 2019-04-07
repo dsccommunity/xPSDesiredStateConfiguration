@@ -315,7 +315,8 @@ function Set-TargetResource
                 }
             }
 
-            if (-not [System.String]::IsNullOrEmpty($Arguments))
+            if (-not [System.String]::IsNullOrEmpty($Arguments) -and `
+                -not ($Arguments.Trim().Length -eq 0))
             {
                 $startProcessArguments['ArgumentList'] = Add-SurroundingDoubleQuotesToString -StringIn $Arguments
             }

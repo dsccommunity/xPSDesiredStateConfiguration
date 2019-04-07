@@ -45,15 +45,22 @@ function Start-DscConfigurationAndVerify
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $ConfigFile,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $ConfigurationName,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $ConfigurationPath,
 
+        [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable]
         $DscParams
     )
@@ -89,15 +96,22 @@ function Start-GetDscConfigurationAndVerify
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [System.String]
         $Arguments,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [Nullable[System.Int32]]
         $ProcessCount
     )
@@ -140,21 +154,30 @@ function Start-TestProcessUsingDscAndVerify
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [System.String]
         $Arguments,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [Nullable[System.Int32]]
         $ProcessCount,
 
+        [Parameter()]
         [System.String]
         $ContextLabel = 'Should start a new instance of the test process',
 
+        [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable]
         $DscParams
     )
@@ -207,21 +230,30 @@ function Stop-TestProcessUsingDscAndVerify
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [System.String]
         $Arguments,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [Nullable[System.Int32]]
         $ProcessCount,
 
+        [Parameter()]
         [System.String]
         $ContextLabel = 'Should stop all instances of the test process',
 
+        [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable]
         $DscParams
     )
@@ -280,21 +312,30 @@ function Start-AdditionalTestProcessAndVerify
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [System.String]
         $Arguments,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
         $Ensure,
 
+        [Parameter()]
         [Nullable[System.Int32]]
         $ProcessCount,
 
+        [Parameter()]
         [System.String]
         $ContextLabel = 'Should return the correct amount of processes when more than 1 are running',
 
+        [Parameter(Mandatory = $true)]
         [System.Collections.Hashtable]
         $DscParams
     )
@@ -364,15 +405,21 @@ function Invoke-CommonResourceTesting
         [System.String]
         $DescribeLabel,
 
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
         [System.String]
         $Path,
 
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
         [System.String]
         $Arguments,
 
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ConfigFile,
 
+        [Parameter()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
         $Credential
@@ -459,10 +506,9 @@ function Invoke-CommonResourceTesting
 try
 {
     # Setup test process paths.
-    $system32Path = Join-Path -Path $env:SystemRoot -ChildPath System32
-    $notepadExePath = Join-Path -Path $system32Path -ChildPath notepad.exe -Resolve
-    $powershellExePath = Join-Path -Path (Join-Path -Path (Join-Path -Path $system32Path -ChildPath WindowsPowerShell) -ChildPath v1.0) -ChildPath powershell.exe -Resolve
-    $iexplorerExePath = Join-Path -Path (Join-Path -Path $env:ProgramFiles -ChildPath 'internet explorer') -ChildPath iexplore.exe -Resolve
+    $notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
+    $powershellExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'WindowsPowershell', 'v1.0', 'powershell.exe'))
+    $iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
     # Setup test combination variables
     $testPathAndArgsCombos = @(

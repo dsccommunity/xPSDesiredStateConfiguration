@@ -23,8 +23,8 @@ try
             $script:configurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xProcessSet.config.ps1'
 
             # Setup test process paths.
-            $script:notepadExePath = Join-Path -Path (Join-Path -Path $env:SystemRoot -ChildPath System32) -ChildPath notepad.exe -Resolve
-            $script:iexplorerExePath = Join-Path -Path (Join-Path -Path $env:ProgramFiles -ChildPath 'internet explorer') -ChildPath iexplore.exe -Resolve
+            $script:notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
+            $script:iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
             $script:processPaths = @( $script:notepadExePath, $script:iexplorerExePath)
         }
