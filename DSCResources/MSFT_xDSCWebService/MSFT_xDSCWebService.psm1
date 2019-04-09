@@ -429,7 +429,6 @@ function Set-TargetResource
         -language $language `
         -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
         -certificateThumbPrint $certificateThumbPrint `
-        -EnableFirewallException $true `
         -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
         -Verbose
 
