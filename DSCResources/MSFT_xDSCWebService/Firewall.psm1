@@ -1,11 +1,11 @@
 # Name and description for the Firewall rules. Used in multiple locations
-$script:FireWallRuleDisplayName = 'Desired State Configuration - Pull Server Port:{0}'
-
+New-Variable -Name fireWallRuleDisplayName -Value 'Desired State Configuration - Pull Server Port:{0}' -Option ReadOnly -Scope Script -Force
+New-Variable -Name netsh -Value "$env:windir\system32\netsh.exe" -Option ReadOnly -Scope Script -Force
 <#
     .SYNOPSIS
         Create a firewall exception so that DSC clients are able to access the configured Pull Server
 
-    .PARAMETER firewallPort
+    .PARAMETER Port
         The TCP port used to create the firewall exception
 #>
 function Add-PullServerFirewallConfiguration
@@ -18,8 +18,6 @@ function Add-PullServerFirewallConfiguration
         [System.UInt32]
         $Port
     )
-
-    $script:netsh = "$env:windir\system32\netsh.exe"
 
     Write-Verbose -Message 'Disable Inbound Firewall Notification'
     & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
@@ -35,7 +33,7 @@ function Add-PullServerFirewallConfiguration
     .SYNOPSIS
         Delete the Pull Server firewall exception
 
-    .PARAMETER firewallPort
+    .PARAMETER Port
         The TCP port for which the firewall exception should be deleted
 #>
 function Remove-PullServerFirewallConfiguration
@@ -51,11 +49,9 @@ function Remove-PullServerFirewallConfiguration
 
     if (Test-PullServerFirewallConfiguration -Port $Port)
     {
-        $script:netsh = "$env:windir\system32\netsh.exe"
-
         # remove all existing rules with that displayName
         Write-Verbose -Message "Delete Firewall Rule for port $Port"
-        & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$Port | Out-Null
+        $null = & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$Port
 
         # backwards compatibility with old code
         if (Get-Command -Name Get-NetFirewallRule -CommandType Cmdlet -ErrorAction:SilentlyContinue)
@@ -75,7 +71,7 @@ function Remove-PullServerFirewallConfiguration
     .SYNOPSIS
         Tests if a Pull Server firewall exception exists for a specific port
 
-    .PARAMETER firewallPort
+    .PARAMETER Port
         The TCP port for which the firewall exception should be tested
 #>
 function Test-PullServerFirewallConfiguration
@@ -90,9 +86,7 @@ function Test-PullServerFirewallConfiguration
         $Port
     )
 
-    $script:netsh = "$env:windir\system32\netsh.exe"
-
-    # remove all existing rules with that displayName
+    # Remove all existing rules with that displayName
     Write-Verbose -Message "Testing Firewall Rule for port $Port"
     $result = & $script:netsh advfirewall firewall show rule name=DSCPullServer_IIS_Port | Select-String -Pattern "LocalPort:\s*$Port"
     return -not [string]::IsNullOrWhiteSpace($result)

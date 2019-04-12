@@ -16,7 +16,8 @@
   to accessing the windowsOptionalFeatureName variable before it is assigned.
   [issue #612](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/612)
 - MSFT_xDSCWebService
-  - Fixes [issue #536] and starts the deprecation process for configuring a windows firewall (exception) rule using xDSCWebService
+  - Fixes [issue #536] and starts the deprecation process for configuring a 
+    windows firewall (exception) rule using xDSCWebService
 
 ## 8.6.0.0
 

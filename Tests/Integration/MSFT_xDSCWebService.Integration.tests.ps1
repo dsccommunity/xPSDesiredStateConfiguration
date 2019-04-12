@@ -11,6 +11,11 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
     & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
+# Ensure that Powershell Module 'WebAdministration' is available
+if (-not (Install-WindowsFeatureAndVerify -Name Web-Mgmt-Tools))
+{
+    Write-Error -Message 'Failed to verify for required Windows Feature. Unable to continue ...' -ErrorAction:Stop
+}
 Import-Module -Name WebAdministration -ErrorAction:Stop -Force
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -ErrorAction:Stop -Force
 $TestEnvironment = Initialize-TestEnvironment `
@@ -165,10 +170,10 @@ function Test-DSCPullServerFirewallRule
 
     Write-Verbose -Message "Test-DSCPullServerFirewallRule $RuleName for state $State."
 
-    $cnt = 0
+    $expectedRuleCount  = 0
     if ('Present' -eq $State)
     {
-        $cnt = 1
+        $expectedRuleCount  = 1
     }
 
     It ("Should $(if ('Present' -eq $State) { '' } else { 'not ' })create a firewall rule $RuleName for the chosen port")  {
@@ -176,7 +181,7 @@ function Test-DSCPullServerFirewallRule
             $_.DisplayName -eq $RuleName #'DSCPullServer_IIS_Port'
         } | Measure-Object).Count
         Write-Verbose -Message "Found $ruleCnt firewall rules with name '$RuleName'"
-        $ruleCnt | Should -Be $cnt
+        $ruleCnt | Should -Be $expectedRuleCount
     }
 }
 

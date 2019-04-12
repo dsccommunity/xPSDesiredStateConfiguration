@@ -463,9 +463,7 @@ try
             <# Create dummy functions so that Pester is able to mock them #>
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
-
 
             #region Mocks
             Mock -CommandName Get-Command -ParameterFilter {$Name -eq '.\appcmd.exe'} -MockWith {
@@ -1015,7 +1013,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $endpointPhysicalPath = 'TestDrive:\SitePath1'
@@ -1036,7 +1033,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $webConfigPath = 'TestDrive:\Web.config'
@@ -1088,7 +1084,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $webConfigPath = 'TestDrive:\Web.config'

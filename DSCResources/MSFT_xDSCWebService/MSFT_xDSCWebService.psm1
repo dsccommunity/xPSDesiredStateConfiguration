@@ -1,7 +1,7 @@
 # Import the helper functions
-Import-Module -Name (Join-Path $PSScriptRoot 'PSWSIISEndpoint.psm1') -Verbose:$false
-Import-Module -Name (Join-Path $PSScriptRoot 'UseSecurityBestPractices.psm1') -Verbose:$false
-Import-Module -NAme (Join-Path $PSScriptRoot 'Firewall.psm1') -Verbose:$false
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'PSWSIISEndpoint.psm1') -Verbose:$false
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'UseSecurityBestPractices.psm1') -Verbose:$false
+Import-Module -NAme (Join-Path -Path $PSScriptRoot -ChildPath 'Firewall.psm1') -Verbose:$false
 
 #region LocalizedData
 $script:culture = 'en-US'
@@ -375,7 +375,7 @@ function Set-TargetResource
         {
             # Get the port number for the Firewall rule
             Write-Verbose -Message "Processing bindings for $EndpointName"
-            $portList = Get-WebBinding -Name $EndpointName | ForEach-Object {
+            $portList = Get-WebBinding -Name $EndpointName | ForEach-Object -Process {
                 [System.Text.RegularExpressions.Regex]::Match($_.bindingInformation,':(\d+):').Groups[1].Value
             }
 
@@ -383,7 +383,7 @@ function Set-TargetResource
             Write-Verbose -Message "Removing web site $EndpointName"
             PSWSIISEndpoint\Remove-PSWSEndpoint -SiteName $EndpointName
 
-            $portList | ForEach-Object { Remove-PullServerFirewallConfiguration -Port $_ }
+            $portList | ForEach-Object -Process { Remove-PullServerFirewallConfiguration -Port $_ }
         }
 
         # we are done here, all stuff below is for 'Present'
