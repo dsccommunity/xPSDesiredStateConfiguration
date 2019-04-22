@@ -421,7 +421,7 @@ function Publish-MOFToPullServer
     }
     Process
     {
-        $fileInfo = New-Item -Path $FullName -ItemType File
+        $fileInfo = Get-Item -Path $FullName
         if ($fileInfo.Extension -eq '.mof')
         {
             if (Test-Path -Path $FullName)
