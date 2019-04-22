@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- PublishModulesAndMofsToPullServer.psm1:
+  - Fixes issue in Publish-MOFToPullServer that was introduced in 8.5.0.0, making
+    the function unusable.
 - MSFT_xWindowsProcess:
   - Fixes issue where a process will fail to be created if a $Path is passed
     that contains one or more spaces, and the resource is using $Credentials.
