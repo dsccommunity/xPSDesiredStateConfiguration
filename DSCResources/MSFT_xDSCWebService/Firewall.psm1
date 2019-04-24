@@ -20,13 +20,13 @@ function Add-PullServerFirewallConfiguration
     )
 
     Write-Verbose -Message 'Disable Inbound Firewall Notification'
-    & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
+    $null = & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
 
-    # remove all existing rules with that displayName
-    & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$Port | Out-Null
+    # Remove all existing rules with that displayName
+    $null = & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$Port
 
     Write-Verbose -Message "Add Firewall Rule for port $Port"
-    & $script:netsh advfirewall firewall add rule name=DSCPullServer_IIS_Port dir=in action=allow protocol=TCP localport=$Port | Out-Null
+    $null = & $script:netsh advfirewall firewall add rule name=DSCPullServer_IIS_Port dir=in action=allow protocol=TCP localport=$Port
 }
 
 <#
@@ -58,7 +58,7 @@ function Remove-PullServerFirewallConfiguration
         {
             # Remove all rules with that name
             $ruleName = ($($FireWallRuleDisplayName) -f $port)
-            Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Remove-NetFirewallRule
+            Get-NetFirewallRule | Where-Object -Property DisplayName -eq -Value "$ruleName" | Remove-NetFirewallRule
         }
     }
     else

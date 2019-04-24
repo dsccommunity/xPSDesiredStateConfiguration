@@ -170,10 +170,10 @@ function Test-DSCPullServerFirewallRule
 
     Write-Verbose -Message "Test-DSCPullServerFirewallRule $RuleName for state $State."
 
-    $expectedRuleCount  = 0
+    $expectedRuleCount = 0
     if ('Present' -eq $State)
     {
-        $expectedRuleCount  = 1
+        $expectedRuleCount = 1
     }
 
     It ("Should $(if ('Present' -eq $State) { '' } else { 'not ' })create a firewall rule $RuleName for the chosen port")  {

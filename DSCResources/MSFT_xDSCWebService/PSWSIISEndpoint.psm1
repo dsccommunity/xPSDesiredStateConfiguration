@@ -437,17 +437,17 @@ function New-IISWebSite
     Write-Verbose -Message 'Add and Set Site Properties'
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
-        New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool | Out-Null
+        $null = New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool
     }
     else
     {
-        New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool -Ssl | Out-Null
+        $null = New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool -Ssl
 
         # Remove existing binding for $port
         Remove-Item IIS:\SSLBindings\0.0.0.0!$port -ErrorAction Ignore
 
         # Create a new binding using the supplied certificate
-        Get-Item CERT:\LocalMachine\MY\$certificateThumbPrint | New-Item IIS:\SSLBindings\0.0.0.0!$port | Out-Null
+        $null = Get-Item CERT:\LocalMachine\MY\$certificateThumbPrint | New-Item IIS:\SSLBindings\0.0.0.0!$port
     }
 
     Update-Site -siteName $site -siteAction Start
@@ -460,19 +460,19 @@ function New-IISWebSite
 function Enable-PSWSETW
 {
     # Disable Analytic Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:false /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:false /q
 
     # Disable Debug Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:false /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:false /q
 
     # Clear Operational Log
-    & $script:wevtutil cl Microsoft-Windows-ManagementOdataService/Operational | Out-Null
+    $null = & $script:wevtutil cl Microsoft-Windows-ManagementOdataService/Operational
 
     # Enable/Clear Analytic Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:true /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:true /q
 
     # Enable/Clear Debug Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:true /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:true /q
 }
 
 <#
