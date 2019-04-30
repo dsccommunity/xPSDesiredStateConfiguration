@@ -11,13 +11,19 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
     & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath 'DscResource.Tests'))
 }
 
-Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
+# Ensure that Powershell Module 'WebAdministration' is available
+if (-not (Install-WindowsFeatureAndVerify -Name Web-Mgmt-Tools))
+{
+    Write-Error -Message 'Failed to verify for required Windows Feature. Unable to continue ...' -ErrorAction:Stop
+}
+Import-Module -Name WebAdministration -ErrorAction:Stop -Force
+Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -ErrorAction:Stop -Force
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dcsResourceName `
     -TestType Integration
 
-Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1') -ErrorAction:Stop -Force
 
 if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 {
@@ -79,24 +85,106 @@ function Invoke-CommonResourceTesting
     .SYNOPSIS
         Performs common tests to ensure that the DSC pull server was properly
         installed.
+
+    .PARAMETER WebsiteName
+        name of the Pull Server website
+
+    .PARAMETER ResourceState
+        state of the resource (website)
+
+    .PARAMETER WebsiteState
+        State of the website
 #>
-function Test-DSCPullServerIsPresent
+function Test-DSCPullServer
 {
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $WebsiteName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $ResourceState,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $WebsiteState
     )
 
     It 'Should create a web.config file at the web site root' {
         Test-Path -Path (Join-Path -Path $ConfigurationData.AllNodes.PhysicalPath -ChildPath 'web.config') | Should -Be $true
     }
 
-    It 'Should create a firewall rule for the chosen port' {
-        (Get-NetFirewallRule | Where-Object -FilterScript {
-            $_.DisplayName -eq 'DSCPullServer_IIS_Port'
-        } | Measure-Object).Count | Should -Be 1
+    switch ($ResourceState)
+    {
+        'Present' {
+            It ("Should exist a WebSite called $WebsiteName") {
+                Get-WebSite -Name $WebsiteName | Should Not Be $null
+            }
+
+            It ("WebSite $WebsiteName should be started") {
+                $website = Get-WebSite -Name $WebsiteName
+                $website | Should Not Be $null
+                $website.state | Should BeExactly $WebsiteState
+            }
+        }
+
+        'Absent' {
+            It ("Should not exist a WebSite called $WebsiteName") {
+                Get-WebSite -Name $WebsiteName | Should Be $null
+            }
+        }
     }
 }
+
+<#
+    .SYNOPSIS
+        Performs a test on defined firewall rules
+
+    .PARAMETER RuleName
+        name of the firewall rule
+
+    .PARAMETER State
+        state of the rule
+#>
+function Test-DSCPullServerFirewallRule
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $RuleName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $State
+    )
+
+    Write-Verbose -Message "Test-DSCPullServerFirewallRule $RuleName for state $State."
+
+    $expectedRuleCount = 0
+    if ('Present' -eq $State)
+    {
+        $expectedRuleCount = 1
+    }
+
+    It ("Should $(if ('Present' -eq $State) { '' } else { 'not ' })create a firewall rule $RuleName for the chosen port")  {
+        $ruleCnt = (Get-NetFirewallRule | Where-Object -FilterScript {
+            $_.DisplayName -eq $RuleName #'DSCPullServer_IIS_Port'
+        } | Measure-Object).Count
+        Write-Verbose -Message "Found $ruleCnt firewall rules with name '$RuleName'"
+        $ruleCnt | Should -Be $expectedRuleCount
+    }
+}
+
 #endregion
 
 # Using try/finally to always cleanup.
@@ -147,8 +235,26 @@ try
 
                 Invoke-CommonResourceTesting -ConfigurationName $configurationName
 
-                Test-DSCPullServerIsPresent
+                Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
+                Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Present'
             }
+        }
+
+        Context 'No firewall configuration' {
+            $configurationName = 'MSFT_xDSCWebService_PullTestWithoutFirewall_Config'
+
+            BeforeAll {
+                Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            }
+
+            AfterAll {
+                Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            }
+
+            Invoke-CommonResourceTesting -ConfigurationName $configurationName
+
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
         }
     }
     #endregion

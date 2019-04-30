@@ -1,9 +1,6 @@
 # This module file contains a utility to perform PSWS IIS Endpoint setup
 # Module exports New-PSWSEndpoint function to perform the endpoint setup
 
-# Name and description for the Firewall rules. Used in multiple locations
-$FireWallRuleDisplayName = 'Desired State Configuration - Pull Server Port:{0}'
-
 <#
     .SYNOPSIS
         Validate supplied configuration to setup the PSWS Endpoint Function
@@ -440,47 +437,20 @@ function New-IISWebSite
     Write-Verbose -Message 'Add and Set Site Properties'
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
-        New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool | Out-Null
+        $null = New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool
     }
     else
     {
-        New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool -Ssl | Out-Null
+        $null = New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool -Ssl
 
         # Remove existing binding for $port
         Remove-Item IIS:\SSLBindings\0.0.0.0!$port -ErrorAction Ignore
 
         # Create a new binding using the supplied certificate
-        Get-Item CERT:\LocalMachine\MY\$certificateThumbPrint | New-Item IIS:\SSLBindings\0.0.0.0!$port | Out-Null
+        $null = Get-Item CERT:\LocalMachine\MY\$certificateThumbPrint | New-Item IIS:\SSLBindings\0.0.0.0!$port
     }
 
     Update-Site -siteName $site -siteAction Start
-}
-
-<#
-    .SYNOPSIS
-        Allow Clients outsite the machine to access the setup endpoint on a
-        User Port.
-#>
-function Set-FirewallConfigurationToAllowPullServerAccess
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        [System.String]
-        $firewallPort
-    )
-
-    $script:netsh = "$env:windir\system32\netsh.exe"
-
-    Write-Verbose -Message 'Disable Inbound Firewall Notification'
-    & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
-
-    # remove all existing rules with that displayName
-    & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$firewallPort | Out-Null
-
-    Write-Verbose -Message "Add Firewall Rule for port $firewallPort"
-    & $script:netsh advfirewall firewall add rule name=DSCPullServer_IIS_Port dir=in action=allow protocol=TCP localport=$firewallPort
 }
 
 <#
@@ -490,19 +460,19 @@ function Set-FirewallConfigurationToAllowPullServerAccess
 function Enable-PSWSETW
 {
     # Disable Analytic Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:false /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:false /q
 
     # Disable Debug Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:false /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:false /q
 
     # Clear Operational Log
-    & $script:wevtutil cl Microsoft-Windows-ManagementOdataService/Operational | Out-Null
+    $null = & $script:wevtutil cl Microsoft-Windows-ManagementOdataService/Operational
 
     # Enable/Clear Analytic Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:true /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Analytic /e:true /q
 
     # Enable/Clear Debug Log
-    & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:true /q | Out-Null
+    $null = & $script:wevtutil sl Microsoft-Windows-ManagementOdataService/Debug /e:true /q
 }
 
 <#
@@ -617,11 +587,6 @@ function New-PSWSEndpoint
         [System.Boolean]
         $removeSiteFiles = $false,
 
-        # Enable Firewall Exception for the supplied port
-        [Parameter()]
-        [System.Boolean]
-        $EnableFirewallException,
-
         # Enable and Clear PSWS ETW
         [Parameter()]
         [System.Management.Automation.SwitchParameter]
@@ -658,12 +623,6 @@ function New-PSWSEndpoint
                         -removeSiteFiles $removeSiteFiles -certificateThumbPrint $certificateThumbPrint `
                         -enable32BitAppOnWin64 $Enable32BitAppOnWin64
 
-    if ($EnableFirewallException -eq $true)
-    {
-        Write-Verbose -Message "Enabling firewall exception for port $port"
-        $null = Set-FirewallConfigurationToAllowPullServerAccess $port
-    }
-
     if ($EnablePSWSETW)
     {
         Enable-PSWSETW
@@ -689,49 +648,60 @@ function Remove-PSWSEndpoint
     (
         # Unique Name of the IIS Site
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $siteName
     )
 
     # Get the site to remove
-    $site = Get-Item -Path "IIS:\sites\$siteName"
-    # And the pool it is using
-    $pool = $site.applicationPool
-
-    # Get the path so we can delete the files
-    $filePath = $site.PhysicalPath
-    # Get the port number for the Firewall rule
-    $bindings = (Get-WebBinding -Name $siteName).bindingInformation
-    $port = [System.Text.RegularExpressions.Regex]::Match($bindings,':(\d+):').Groups[1].Value
-
-    # Remove the actual site.
-    Remove-Website -Name $siteName
-    <#
-      There may be running requests, wait a little
-      I had an issue where the files were still in use
-      when I tried to delete them
-    #>
-    Start-Sleep -Milliseconds 200
-
-    # Remove the files for the site
-    If (Test-Path -Path $filePath)
+    $site = Get-Website -Name $siteName
+    if ($site)
     {
-        Get-ChildItem -Path $filePath -Recurse | Remove-Item -Recurse
-        Remove-Item -Path $filePath
-    }
+        if ('Started' -eq $site.state)
+        {
+            Write-Verbose -Message "Stopping WebSite $($site.name)"
+            $website = Stop-Website -Name $site.name -Passthru
+            if ('Started' -eq $website.state)
+            {
+                Write-Error -Message "Unable to stop WebSite $($site.name)" -ErrorAction:Stop
+            }
+        }
 
-    # Find out whether any other site is using this pool
-    $filter = "/system.applicationHost/sites/site/application[@applicationPool='" + $pool + "']"
-    $apps = (Get-WebConfigurationProperty -Filter $filter -PSPath 'machine/webroot/apphost' -name path).ItemXPath
-    if (-not $apps -or $apps.count -eq 1)
+        # And the pool it is using
+        $pool = $site.applicationPool
+
+        # Get the path so we can delete the files
+        $filePath = $site.PhysicalPath
+
+        # Remove the actual site.
+        Remove-Website -Name $siteName
+        <#
+          There may be running requests, wait a little
+          I had an issue where the files were still in use
+          when I tried to delete them
+        #>
+        Start-Sleep -Milliseconds 2000
+
+        # Remove the files for the site
+        If (Test-Path -Path $filePath)
+        {
+            Get-ChildItem -Path $filePath -Recurse | Remove-Item -Recurse -Force
+            Remove-Item -Path $filePath -Force
+        }
+
+        # Find out whether any other site is using this pool
+        $filter = "/system.applicationHost/sites/site/application[@applicationPool='" + $pool + "']"
+        $apps = (Get-WebConfigurationProperty -Filter $filter -PSPath 'machine/webroot/apphost' -name path).ItemXPath
+        if (-not $apps -or $apps.count -eq 1)
+        {
+           # If we are the only site in the pool, remove the pool as well.
+           Remove-WebAppPool -Name $pool
+        }
+    }
+    else
     {
-       # If we are the only site in the pool, remove the pool as well.
-       Remove-WebAppPool -Name $pool
+        Write-Verbose -Message "Website with name [$siteName] does not exist"
     }
-
-    # Remove all rules with that name
-    $ruleName = ($($FireWallRuleDisplayName) -f $port)
-    Get-NetFirewallRule | Where-Object DisplayName -eq "$ruleName" | Remove-NetFirewallRule
 }
 
 <#
