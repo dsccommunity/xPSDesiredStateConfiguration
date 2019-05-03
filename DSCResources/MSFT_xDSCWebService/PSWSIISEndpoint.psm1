@@ -117,11 +117,9 @@ function Initialize-Endpoint
     Test-IISInstall
 
     # First remove the site so that the binding count on the application pool is reduced
-    Write-Verbose -Message "Remove the site [$site] if it already exists"
     Update-Site -siteName $site -siteAction Remove
 
-    Write-Verbose -Message "Delete App Pool [$appPool] if it exists"
-    Remove-AppPool -apppool $appPool
+    Remove-AppPool -appPool $appPool
 
     # Check for existing binding, there should be no binding with the same port
     $allWebBindingsOnPort = Get-WebBinding | Where-Object -FilterScript {
@@ -235,28 +233,58 @@ function Update-Site
         [Parameter(ParameterSetName = 'SiteName', Mandatory = $true, Position = 1)]
         [Parameter(ParameterSetName = 'Site', Mandatory = $true, Position = 1)]
         [System.String]
+        [ValidateSet('Start', 'Stop', 'Remove')]
         $siteAction
     )
 
-    [System.String] $name = $null
-
-    if ($PSCmdlet.ParameterSetName -eq 'SiteName')
+    if ('SiteName' -eq  $PSCmdlet.ParameterSetName)
     {
-        $name = $siteName
+        $site = Get-Website -Name $siteName
     }
-    elseif ($PSCmdlet.ParameterSetName -eq 'Site')
-    {
-        $name = $site.Name
-    }
-
-    if (Test-ForIISSite -siteName $name)
+    if ($site)
     {
         switch ($siteAction)
         {
-            'Start'  {Start-Website -Name "$name"}
-            'Stop'   {Stop-Website -Name "$name" -ErrorAction SilentlyContinue}
-            'Remove' {Remove-Website -Name "$name"}
+            'Start'
+            {
+                Write-Verbose -Message "Starting IIS Website [$($site.name)]"
+                Start-Website -Name $site.name
+            }
+            'Stop'
+            {
+                if ('Started' -eq $site.state)
+                {
+                    Write-Verbose -Message "Stopping WebSite $($site.name)"
+                    $website = Stop-Website -Name $site.name -Passthru
+                    if ('Started' -eq $website.state)
+                    {
+                        Write-Error -Message "Unable to stop WebSite $($site.name)" -ErrorAction:Stop
+                    }
+
+                    <#
+                    There may be running requests, wait a little
+                    I had an issue where the files were still in use
+                    when I tried to delete them
+                    #>
+                    Write-Verbose -Message 'Waiting for IIS to stop website'
+                    Start-Sleep -Milliseconds 1000
+                }
+                else
+                {
+                    Write-Verbose -Message "IIS Website [$($site.name)] already stopped"
+                }
+            }
+            'Remove'
+            {
+                Update-Site -site $site -siteAction Stop
+                Write-Verbose -Message "Removing IIS Website [$($site.name)]"
+                Remove-Website -Name $site.name
+            }
         }
+    }
+    else
+    {
+        Write-Verbose -Message "IIS Website [$siteName] not found"
     }
 }
 
@@ -787,37 +815,13 @@ function Remove-PSWSEndpoint
     $site = Get-Website -Name $siteName
     if ($site)
     {
-        if ('Started' -eq $site.state)
-        {
-            Write-Verbose -Message "Stopping WebSite $($site.name)"
-            $website = Stop-Website -Name $site.name -Passthru
-            if ('Started' -eq $website.state)
-            {
-                Write-Error -Message "Unable to stop WebSite $($site.name)" -ErrorAction:Stop
-            }
-        }
-
         # And the pool it is using
         $pool = $site.applicationPool
-
         # Get the path so we can delete the files
         $filePath = $site.PhysicalPath
 
-        # If the website isn't stopped before removal the directories and files might be locked
-        # and thus cannot be removed by Remove-WebSite
-        Write-Verbose -Message "Stopping website $siteName"
-        Stop-Website -Name $siteName
-
-        <#
-          There may be running requests, wait a little
-          I had an issue where the files were still in use
-          when I tried to delete them
-        #>
-        Write-Verbose -Message 'Waiting for IIS to stop website'
-        Start-Sleep -Milliseconds 1000
-
         # Remove the actual site.
-        Remove-Website -Name $siteName
+        Update-Site -site $site -siteAction Remove
 
         # Remove the files for the site
         If (Test-Path -Path $filePath)
@@ -826,14 +830,7 @@ function Remove-PSWSEndpoint
             Remove-Item -Path $filePath -Force
         }
 
-        # Find out whether any other site is using this pool
-        $filter = "/system.applicationHost/sites/site/application[@applicationPool='" + $pool + "']"
-        $apps = (Get-WebConfigurationProperty -Filter $filter -PSPath 'machine/webroot/apphost' -name path).ItemXPath
-        if (-not $apps -or $apps.count -eq 1)
-        {
-           # If we are the only site in the pool, remove the pool as well.
-           Remove-WebAppPool -Name $pool
-        }
+        Remove-AppPool -appPool $pool
     }
     else
     {

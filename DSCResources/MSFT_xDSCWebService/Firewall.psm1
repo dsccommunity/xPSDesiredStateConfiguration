@@ -1,5 +1,5 @@
 # Name and description for the Firewall rules. Used in multiple locations
-New-Variable -Name fireWallRuleDisplayName -Value 'Desired State Configuration - Pull Server Port:{0}' -Option ReadOnly -Scope Script -Force
+New-Variable -Name fireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port:{0}' -Option ReadOnly -Scope Script -Force
 New-Variable -Name netsh -Value "$env:windir\system32\netsh.exe" -Option ReadOnly -Scope Script -Force
 <#
     .SYNOPSIS
@@ -22,11 +22,13 @@ function Add-PullServerFirewallConfiguration
     Write-Verbose -Message 'Disable Inbound Firewall Notification'
     $null = & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
 
+    $ruleName = $FireWallRuleDisplayName -f $port
+
     # Remove all existing rules with that displayName
-    $null = & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$Port
+    $null = & $script:netsh advfirewall firewall delete rule name=$ruleName protocol=tcp localport=$Port
 
     Write-Verbose -Message "Add Firewall Rule for port $Port"
-    $null = & $script:netsh advfirewall firewall add rule name=DSCPullServer_IIS_Port dir=in action=allow protocol=TCP localport=$Port
+    $null = & $script:netsh advfirewall firewall add rule name=$ruleName dir=in action=allow protocol=TCP localport=$Port
 }
 
 <#
@@ -51,14 +53,17 @@ function Remove-PullServerFirewallConfiguration
     {
         # remove all existing rules with that displayName
         Write-Verbose -Message "Delete Firewall Rule for port $Port"
-        $null = & $script:netsh advfirewall firewall delete rule name=DSCPullServer_IIS_Port protocol=tcp localport=$Port
+        $ruleName = $FireWallRuleDisplayName -f $port
 
         # backwards compatibility with old code
         if (Get-Command -Name Get-NetFirewallRule -CommandType Cmdlet -ErrorAction:SilentlyContinue)
         {
             # Remove all rules with that name
-            $ruleName = ($($FireWallRuleDisplayName) -f $port)
-            Get-NetFirewallRule | Where-Object -Property DisplayName -eq -Value "$ruleName" | Remove-NetFirewallRule
+            Get-NetFirewallRule -DisplayName $ruleName | Remove-NetFirewallRule
+        }
+        else
+        {
+            $null = & $script:netsh advfirewall firewall delete rule name=$ruleName protocol=tcp localport=$Port
         }
     }
     else
@@ -88,7 +93,8 @@ function Test-PullServerFirewallConfiguration
 
     # Remove all existing rules with that displayName
     Write-Verbose -Message "Testing Firewall Rule for port $Port"
-    $result = & $script:netsh advfirewall firewall show rule name=DSCPullServer_IIS_Port | Select-String -Pattern "LocalPort:\s*$Port"
+    $ruleName = $FireWallRuleDisplayName -f $port
+    $result = & $script:netsh advfirewall firewall show rule name=$ruleName | Select-String -Pattern "LocalPort:\s*$Port"
     return -not [string]::IsNullOrWhiteSpace($result)
 }
 

@@ -430,17 +430,22 @@ function Set-TargetResource
         -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
         -certificateThumbPrint $certificateThumbPrint `
         -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
-        -Verbose
 
-    if ($ConfigureFirewall)
+    switch ($Ensure)
     {
-        Write-Verbose -Message "Enabling firewall exception for port $port"
-        Add-PullServerFirewallConfiguration -Port $port
-    }
-    else
-    {
-        Write-Verbose -Message "Disabling firewall exception for port $port"
-        Remove-PullServerFirewallConfiguration -Port $port
+        'Present'
+        {
+            if ($ConfigureFirewall)
+            {
+                Write-Verbose -Message "Enabling firewall exception for port $port"
+                Add-PullServerFirewallConfiguration -Port $port
+            }
+        }
+        'Absent'
+        {
+            Write-Verbose -Message "Disabling firewall exception for port $port"
+            Remove-PullServerFirewallConfiguration -Port $port
+        }
     }
 
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
