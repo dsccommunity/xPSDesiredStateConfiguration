@@ -20,6 +20,9 @@
     #536](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/536)
     and starts the deprecation process for configuring a windows firewall
     (exception) rule using xDSCWebService
+  - Fixes [issue
+    #463](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/463)
+    and fixes some bugs introduced with the new firewall rule handling
 
 ## 8.6.0.0
 

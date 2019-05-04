@@ -166,6 +166,12 @@ None
   endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based
   endpoint.
 * **Port**: Port for web service.
+* **ApplicationPoolName**: The name of IIS ApplicationPool to use for the Pull
+  Server. If not specified a pool with name 'PSWS' will be created and bound to
+  the Pull Server instance. Preferably the new application pool is created by
+  using the __xWebAppPool__ resource from the
+  [xWebAdministration](https://github.com/PowerShell/xWebAdministration) DSC
+  module
 * **PhysicalPath**: Folder location where the content of the web service
   resides.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
@@ -208,6 +214,15 @@ All users are requested to adjust existing configurations so that the
 **ConfigureFirewall** is set to **false** and a required Windows Firewall rule
 is created by using the **Firewall** resource from the
 [NetworkingDsc](https://github.com/PowerShell/NetworkingDsc) module.
+
+#### Examples
+
+* [A Pull Server using a SQL Server as backend](./Examples/Sample_xDscWebServiceRegistration_UseSQLProvider.ps1)
+* [A Pull Server default configuration](./Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1)
+* [A Pull Server with an enhanced security configuration and a firewall rule](./Examples/Sample_xDscWebServiceRegistration.ps1)
+* [A Pull Server using the security best practice configuration](./Examples/Sample_xDscWebServiceRegistrationWithSecurityBestPractices.ps1)
+* [Removing a Pull Server instance](./Examples/Sample_xDscWebServiceRemoval.ps1)
+* [A Pull Server with a separately defined IIS Application Pool](./Examples/Sample_xDscWebServiceAppPool.ps1)
 
 ### xGroup
 
