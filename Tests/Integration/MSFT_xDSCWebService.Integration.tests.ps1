@@ -206,7 +206,7 @@ function Test-DSCPullServer
     .PARAMETER RuleName
         name of the firewall rule
 
-    .PARAMETER State
+    .PARAMETER ResourceState
         state of the rule
 #>
 function Test-DSCPullServerFirewallRule
@@ -222,18 +222,18 @@ function Test-DSCPullServerFirewallRule
         [Parameter(Mandatory = $true)]
         [ValidateSet('Present', 'Absent')]
         [System.String]
-        $State
+        $ResourceState
     )
 
-    Write-Verbose -Message "Test-DSCPullServerFirewallRule $RuleName for state $State."
+    Write-Verbose -Message "Test-DSCPullServerFirewallRule $RuleName for state $ResourceState."
 
     $expectedRuleCount = 0
-    if ('Present' -eq $State)
+    if ('Present' -eq $ResourceState)
     {
         $expectedRuleCount = 1
     }
 
-    It ("Should $(if ('Present' -eq $State) { '' } else { 'not ' })create a firewall rule $RuleName for the chosen port")  {
+    It ("Should $(if ('Present' -eq $ResourceState) { '' } else { 'not ' })create a firewall rule $RuleName for the chosen port")  {
         $ruleCnt = (Get-NetFirewallRule | Where-Object -FilterScript {
             $_.DisplayName -eq $RuleName #'DSCPullServer_IIS_Port'
         } | Measure-Object).Count
@@ -301,7 +301,7 @@ try
                 Invoke-CommonResourceTesting -ConfigurationName $configurationName
 
                 Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
-                Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Present'
+                Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Present'
             }
         }
 
@@ -314,12 +314,12 @@ try
             Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestWithSecurityBestPractices_Config'
 
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Present'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Present'
 
             Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
 
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
         }
 
         Context 'No firewall configuration' {
@@ -336,7 +336,7 @@ try
             Invoke-CommonResourceTesting -ConfigurationName $configurationName
 
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
         }
 
         Context 'Separate firewall role definition' {
@@ -347,14 +347,14 @@ try
 
             Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestWithSeparateFirewallRule_Config'
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
-            Test-DSCPullServerFirewallRule -RuleName 'DSC_PullServer_8080' -State 'Present'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSC PullServer 8080' -ResourceState 'Present'
 
 
             Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
-            Test-DSCPullServerFirewallRule -RuleName 'DSC_PullServer_8080' -State 'Present'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSC PullServer 8080' -ResourceState 'Present'
         }
 
         Context 'Separate IIS application pool definition' {
@@ -365,12 +365,12 @@ try
 
             Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestSeparateAppPool_Config'
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started' -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
 
             Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
-            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
-            Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -State 'Present'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
+            Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -ResourceState 'Present'
         }
     }
     #endregion
