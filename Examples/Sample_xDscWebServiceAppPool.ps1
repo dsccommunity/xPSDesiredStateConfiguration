@@ -118,13 +118,12 @@ Configuration Sample_xDscWebServiceRegistration
             ModulePath                   = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
             ConfigurationPath            = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"
             State                        = 'Started'
-            DependsOn                    = '[WindowsFeature]DSCServiceFeature'
             RegistrationKeyPath          = "$env:PROGRAMFILES\WindowsPowerShell\DscService"
             AcceptSelfSignedCertificates = $true
             Enable32BitAppOnWin64        = $false
             UseSecurityBestPractices     = $true
             ConfigureFirewall            = $false
-            DependsOn                    = '[xWebAppPool]PSDSCPullServerPool'
+            DependsOn                    = '[WindowsFeature]DSCServiceFeature', '[xWebAppPool]PSDSCPullServerPool'
         }
 
         File RegistrationKeyFile
