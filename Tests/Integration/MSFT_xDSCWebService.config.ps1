@@ -145,9 +145,9 @@ Configuration MSFT_xDSCWebService_PullTestWithoutFirewall_Config
 
 <#
     .SYNOPSIS
-        Sets up a DSC pull server without firewall exceptions
+        Sets up a DSC pull server with a separate firewall rule definition
 #>
-Configuration MSFT_xDSCWebService_PullTestWithExternalFirewall_Config
+Configuration MSFT_xDSCWebService_PullTestWithSeparateFirewallRule_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
     Import-DscResource -ModuleName 'NetworkingDsc'
@@ -170,14 +170,13 @@ Configuration MSFT_xDSCWebService_PullTestWithExternalFirewall_Config
             State                        = 'Started'
             UseSecurityBestPractices     = $true
             ConfigureFirewall            = $false
-            DependsOn                    = '[Firewall]DSC-FirewallRule'
         }
 
         Firewall PSDSCPullServerRule
         {
             Ensure      = 'Present'
-            Name        = "DSC_PullServer_$Port"
-            DisplayName = "DSC PullServer $Port"
+            Name        = "DSC_PullServer_$($Node.Port)"
+            DisplayName = "DSC PullServer $($Node.Port)"
             Group       = 'DSC PullServer'
             Enabled     = $true
             Action      = 'Allow'
@@ -194,7 +193,7 @@ Configuration MSFT_xDSCWebService_PullTestWithExternalFirewall_Config
     .SYNOPSIS
         Sets up a DSC pull server with an separately defined application pool
 #>
-Configuration MSFT_xDSCWebService_PullTestExternalAppPool_Config
+Configuration MSFT_xDSCWebService_PullTestSeparateAppPool_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
     Import-DscResource -ModuleName 'xWebAdministration'
@@ -202,10 +201,12 @@ Configuration MSFT_xDSCWebService_PullTestExternalAppPool_Config
     node $AllNodes.NodeName
     {
 
+        $ApplicationPool_Name = "PSDSCPullServer_$($Node.EndpointName)"
+
         xWebAppPool PSDSCPullServerPool
         {
             Ensure       = 'Present'
-            Name         = "PSDSCPullServer_$($Node.EndpointName)"
+            Name         = $ApplicationPool_Name
             IdentityType = 'NetworkService'
         }
 
@@ -216,6 +217,7 @@ Configuration MSFT_xDSCWebService_PullTestExternalAppPool_Config
             CertificateThumbPrint        = $Node.CertificateThumbprint
             ConfigurationPath            = $Node.ConfigurationPath
             Enable32BitAppOnWin64        = $false
+            ApplicationPoolName          = $ApplicationPool_Name
             EndpointName                 = $Node.EndpointName
             ModulePath                   = $Node.ModulePath
             Port                         = $Node.Port

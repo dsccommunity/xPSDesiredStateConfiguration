@@ -83,6 +83,45 @@ function Invoke-CommonResourceTesting
 
 <#
     .SYNOPSIS
+        Tests if the specified IIS application pool is absent or present
+
+    .PARAMETER ApplicationPoolName
+        name of the IIS application pool
+
+    .PARAMETER ResourceState
+        state of the IIS application pool
+#>
+function Test-IISApplicationPool
+{
+    [CmdletBinding()]
+    [OutputType([System.Boolean])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $ResourceState
+    )
+
+    $appPoolPath = Join-Path -Path 'IIS:\AppPools' -ChildPath $ApplicationPoolName
+
+    switch ($ResourceState)
+    {
+        'Present' {
+            Test-Path -Path $appPoolPath
+        }
+        'Absent' {
+            -not (Test-Path -Path $appPoolPath)
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
         Performs common tests to ensure that the DSC pull server was properly
         installed.
 
@@ -94,6 +133,9 @@ function Invoke-CommonResourceTesting
 
     .PARAMETER WebsiteState
         State of the website
+
+    .PARAMETER ApplicationPoolName
+        name of the IIS application pool
 #>
 function Test-DSCPullServer
 {
@@ -113,7 +155,12 @@ function Test-DSCPullServer
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $WebsiteState
+        $WebsiteState,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = 'PSWS'
     )
 
     switch ($ResourceState)
@@ -131,6 +178,16 @@ function Test-DSCPullServer
                 $website = Get-WebSite -Name $WebsiteName
                 $website | Should Not Be $null
                 $website.state | Should BeExactly $WebsiteState
+            }
+
+            It "IIS Application pool $ApplicationPoolName should exist" {
+                Test-IISApplicationPool -ApplicationPoolName $ApplicationPoolName -ResourceState 'Present' | Should -Be $true
+            }
+
+            It "WebSite $WebsiteName should be bound to IIS applicaiton pool $ApplicationPoolName" {
+                $website = Get-WebSite -Name $WebsiteName
+                $website | Should Not Be $null
+                $website.applicationPool | Should BeExactly $ApplicationPoolName
             }
         }
 
@@ -261,7 +318,7 @@ try
 
             Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
 
-            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'DoesNotExist'
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
         }
 
@@ -280,6 +337,40 @@ try
 
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+        }
+
+        Context 'Separate firewall role definition' {
+
+            BeforeAll {
+                Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            }
+
+            Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestWithSeparateFirewallRule_Config'
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSC_PullServer_8080' -State 'Present'
+
+
+            Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSC_PullServer_8080' -State 'Present'
+        }
+
+        Context 'Separate IIS application pool definition' {
+
+            BeforeAll {
+                Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            }
+
+            Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestSeparateAppPool_Config'
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started' -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+
+            Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+            Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -State 'Present'
         }
     }
     #endregion
