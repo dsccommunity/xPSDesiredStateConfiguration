@@ -212,7 +212,7 @@ try
 
     #region Integration Tests
     $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dcsResourceName).config.ps1"
-    $requiredModules = Get-ResourceModulesInConfiguration -ConfigurationPath $exampleToValidate.FullName |
+    $requiredModules = Get-ResourceModulesInConfiguration -ConfigurationPath $configurationFile.FullName |
         Where-Object -Property Name -ne $script:dscModuleName
 
     if ($requiredModules)
