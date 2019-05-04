@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 1.0.0
-.GUID c0a8626d-0f4f-469d-8f20-b79f860edc09
+.GUID 4321b681-da05-4486-a7db-1ce4842d40c5
 .AUTHOR Microsoft Corporation
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT
@@ -8,7 +8,7 @@
 .LICENSEURI https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/LICENSE
 .PROJECTURI https://github.com/PowerShell/xPSDesiredStateConfiguration
 .ICONURI
-.EXTERNALMODULEDEPENDENCIES NetworkingDsc, xPSDesiredStateConfiguration
+.EXTERNALMODULEDEPENDENCIES NetworkingDsc, xPSDesiredStateConfiguration, xWebAdministration
 .REQUIREDSCRIPTS
 .EXTERNALSCRIPTDEPENDENCIES
 #>
@@ -33,6 +33,8 @@
                       2 - To configure a Firewall Rule (Exception) to allow external
                           connections the [NetworkingDsc](https://github.com/PowerShell/NetworkingDsc)
                           DSC module is required.
+                      3 - The [xWebAdministration](https://github.com/PowerShell/xWebAdministration)
+                          DSC module is required to configure the IIS Application Pool
 
     .PARAMETER NodeName
         The name of the node being configured as a DSC Pull Server.
