@@ -954,7 +954,7 @@ try
                     Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $true } -ModuleName Firewall
                     Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Get-NetFirewallRule' } -MockWith { $true } -ModuleName Firewall
                     Mock -CommandName Get-NetFirewallRule -MockWith {
-                        if ($DisplayName -notlike 'DSCPullServer_IIS_Port:*')
+                        if ($DisplayName -notlike 'DSCPullServer_IIS_Port*')
                         {
                             throw "Invalid DisplayName filter [$DisplayName] for Get-NetFirewallRule"
                         }
