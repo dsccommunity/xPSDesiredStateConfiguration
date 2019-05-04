@@ -59,7 +59,7 @@
 
         Sample_xDscWebServiceRegistration -RegistrationKey $registrationkey -CertificateThumbPrint $thumbprint
 #>
-Configuration Sample_xDscWebServiceRegistration
+Configuration Sample_xDscWebServiceAppPool
 {
     param
     (
