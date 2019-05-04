@@ -116,13 +116,13 @@ function Test-DSCPullServer
         $WebsiteState
     )
 
-    It 'Should create a web.config file at the web site root' {
-        Test-Path -Path (Join-Path -Path $ConfigurationData.AllNodes.PhysicalPath -ChildPath 'web.config') | Should -Be $true
-    }
-
     switch ($ResourceState)
     {
         'Present' {
+            It 'Should create a web.config file at the web site root' {
+                Test-Path -Path (Join-Path -Path $ConfigurationData.AllNodes.PhysicalPath -ChildPath 'web.config') | Should -Be $true
+            }
+
             It ("Should exist a WebSite called $WebsiteName") {
                 Get-WebSite -Name $WebsiteName | Should Not Be $null
             }
@@ -212,6 +212,14 @@ try
 
     #region Integration Tests
     $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dcsResourceName).config.ps1"
+    $requiredModules = Get-ResourceModulesInConfiguration -ConfigurationPath $exampleToValidate.FullName |
+        Where-Object -Property Name -ne $script:dscModuleName
+
+    if ($requiredModules)
+    {
+        Install-DependentModule -Module $requiredModules
+    }
+
     . $configurationFile
 
     Describe "$($script:dcsResourceName)_Integration" {
