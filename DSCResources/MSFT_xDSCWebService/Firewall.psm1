@@ -1,5 +1,5 @@
 # Name and description for the Firewall rules. Used in multiple locations
-New-Variable -Name fireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port:{0}' -Option ReadOnly -Scope Script -Force
+New-Variable -Name fireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port' -Option ReadOnly -Scope Script -Force
 New-Variable -Name netsh -Value "$env:windir\system32\netsh.exe" -Option ReadOnly -Scope Script -Force
 <#
     .SYNOPSIS
