@@ -240,6 +240,23 @@ try
             }
         }
 
+        Context 'Verify clean removal' {
+
+            BeforeAll {
+                Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+            }
+
+            Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestWithSecurityBestPractices_Config'
+
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Present'
+
+            Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
+
+            Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'DoesNotExist'
+            Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -State 'Absent'
+        }
+
         Context 'No firewall configuration' {
             $configurationName = 'MSFT_xDSCWebService_PullTestWithoutFirewall_Config'
 
