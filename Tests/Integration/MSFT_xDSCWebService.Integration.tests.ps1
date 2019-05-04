@@ -370,7 +370,11 @@ try
             Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Absent' -WebsiteState 'Absent'
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
-            Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -ResourceState 'Present'
+
+            It "Separately created IIS Application pool should still exist after cleanup" {
+                Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -ResourceState 'Present' | Should -Be $true
+            }
+
         }
     }
     #endregion
