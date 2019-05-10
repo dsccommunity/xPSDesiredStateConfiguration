@@ -171,7 +171,7 @@ None
   the Pull Server instance. Preferably the new application pool is created by
   using the __xWebAppPool__ resource from the
   [xWebAdministration](https://github.com/PowerShell/xWebAdministration) DSC
-  module
+  module.
 * **PhysicalPath**: Folder location where the content of the web service
   resides.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
