@@ -228,7 +228,7 @@ _Pull Server_
 
 _Client_ 
 
-* [Common Client (Server) Configuration](./Examples/Sample_xDscWebService_ClientConfig.ps1)
+* [Common Client (Server) Configuration](./Examples/Sample_MetaConfigurationToRegisterWithSecurePullServer.ps1)
 
 ### xGroup
 
