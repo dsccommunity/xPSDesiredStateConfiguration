@@ -36,7 +36,7 @@ function Get-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ApplicationPoolName = $DefaultAppPoolName,
+        $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateThumbPrint')]
@@ -220,7 +220,7 @@ function Set-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ApplicationPoolName = $DefaultAppPoolName,
+        $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
         # Port number of the DSC Pull Server IIS Endpoint
         [Parameter()]
@@ -345,7 +345,7 @@ function Set-TargetResource
     # If the Pull Server Site should be bound to the non default AppPool
     # ensure that the AppPool already exists
     if ('Present' -eq $Ensure `
-        -and $ApplicationPoolName -ne $DefaultAppPoolName `
+        -and $ApplicationPoolName -ne $DscWebServiceDefaultAppPoolName `
         -and (-not (Test-Path -Path "IIS:\AppPools\$ApplicationPoolName")))
     {
         throw ($LocalizedData.ThrowApplicationPoolNotFound -f $ApplicationPoolName)
@@ -541,7 +541,7 @@ function Test-TargetResource
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ApplicationPoolName = $DefaultAppPoolName,
+        $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
         # Port number of the DSC Pull Server IIS Endpoint
         [Parameter()]

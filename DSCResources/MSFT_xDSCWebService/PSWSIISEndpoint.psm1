@@ -1,7 +1,7 @@
 # This module file contains a utility to perform PSWS IIS Endpoint setup
 # Module exports New-PSWSEndpoint function to perform the endpoint setup
 
-New-Variable -Name DefaultAppPoolName  -Value 'PSWS' -Option ReadOnly -Force -Scope Script
+New-Variable -Name DscWebServiceDefaultAppPoolName  -Value 'PSWS' -Option ReadOnly -Force -Scope Script
 
 <#
     .SYNOPSIS
@@ -258,7 +258,7 @@ function Update-Site
                     $website = Stop-Website -Name $site.name -Passthru
                     if ('Started' -eq $website.state)
                     {
-                        Write-Error -Message "Unable to stop WebSite $($site.name)" -ErrorAction:Stop
+                        throw "Unable to stop WebSite $($site.name)"
                     }
 
                     <#
@@ -338,7 +338,7 @@ function Remove-AppPool
         $appPool
     )
 
-    if ($DefaultAppPoolName -eq $appPool)
+    if ($DscWebServiceDefaultAppPoolName -eq $appPool)
     {
         # Without this tests we may get a breaking error here, despite SilentlyContinue
         if (Test-Path -Path "IIS:\AppPools\$appPool")
@@ -350,13 +350,13 @@ function Remove-AppPool
             }
             else
             {
-                Write-Verbose -Message "Unable to delete application pool [$appPool] because it's still bound to a site or application"
+                Write-Verbose -Message "Application pool [$appPool] can't be deleted because it's still bound to a site or application"
             }
         }
     }
     else
     {
-        Write-Verbose -Message "ApplicationPool name is different from built in name [$DefaultAppPoolName]. Unable to delete."
+        Write-Verbose -Message "ApplicationPool can't be deleted because the name is different from built-in name [$DscWebServiceDefaultAppPoolName]."
     }
 }
 
@@ -745,7 +745,7 @@ function New-PSWSEndpoint
 
     if (-not $appPool)
     {
-        $appPool = $DefaultAppPoolName
+        $appPool = $DscWebServiceDefaultAppPoolName
     }
 
     $script:wevtutil = "$env:windir\system32\Wevtutil.exe"
@@ -1003,4 +1003,4 @@ function Set-BindingRedirectSettingInWebConfig
 
 Export-ModuleMember `
     -Function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig, Remove-PSWSEndpoint `
-    -Variable DefaultAppPoolName
+    -Variable DscWebServiceDefaultAppPoolName

@@ -30,6 +30,19 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
     return
 }
 
+if ($env:CI -eq $false)
+{
+    # Install modules
+    $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dcsResourceName).config.ps1"
+    $requiredModules = Get-ResourceModulesInConfiguration -ConfigurationPath $configurationFile |
+        Where-Object -Property Name -ne $script:dscModuleName
+
+    if ($requiredModules)
+    {
+        Install-DependentModule -Module $requiredModules
+    }
+}
+
 <#
     .SYNOPSIS
         Performs common DSC integration tests including compiling, setting,
@@ -268,15 +281,6 @@ try
     Start-Service -Name w3svc -ErrorAction Stop
 
     #region Integration Tests
-    $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dcsResourceName).config.ps1"
-    $requiredModules = Get-ResourceModulesInConfiguration -ConfigurationPath $configurationFile |
-        Where-Object -Property Name -ne $script:dscModuleName
-
-    if ($requiredModules)
-    {
-        Install-DependentModule -Module $requiredModules
-    }
-
     . $configurationFile
 
     Describe "$($script:dcsResourceName)_Integration" {

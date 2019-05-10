@@ -164,7 +164,7 @@ try
             $null = New-Item -Path $webConfigPath -Value $webConfig
 
             Context -Name 'DSC Web Service is not installed' -Fixture {
-                Mock -CommandName Get-WebSite -MockWith {}
+                Mock -CommandName Get-WebSite
 
                 $script:result = $null
 
@@ -627,7 +627,7 @@ try
                 }
 
                 It 'Should call expected mocks' {
-                    Mock -CommandName Get-Website -MockWith { } -ModuleName PSWSIISEndpoint
+                    Mock -CommandName Get-Website -ModuleName PSWSIISEndpoint
                     Mock -CommandName Add-PullServerFirewallConfiguration
 
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
