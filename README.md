@@ -228,7 +228,7 @@ is created by using the **Firewall** resource from the
 
 ##### Client
 
-* [Common Client (Server) Configuration](./Examples/Sample_MetaConfigurationToRegisterWithSecurePullServer.ps1)
+* [Common Client (Server) Configuration](./Examples/Sample_xDscWebService_Client.ps1)
 
 ### xGroup
 
