@@ -8,13 +8,13 @@
 .LICENSEURI https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/LICENSE
 .PROJECTURI https://github.com/PowerShell/xPSDesiredStateConfiguration
 .ICONURI
-.EXTERNALMODULEDEPENDENCIES xPSDesiredStateConfiguration
+.EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
 .EXTERNALSCRIPTDEPENDENCIES
 #>
 <#
     .SYNOPSIS
-        The Sample_MetaConfigurationToRegisterWithSecurePullServer registers
+        The Sample_xDscWebService_Client registers
         a DSC client node with the pull server.
 
     .PARAMETER NodeName
@@ -36,7 +36,7 @@
     .EXAMPLE
         $registrationKey = [System.Guid]::NewGuid()
 
-        Sample_MetaConfigurationToRegisterWithSecurePullServer -RegistrationKey $registrationKey
+        Sample_xDscWebService_Client -RegistrationKey $registrationKey
 #>
 [DSCLocalConfigurationManager()]
 Configuration Sample_xDscWebService_Client
@@ -48,7 +48,6 @@ Configuration Sample_xDscWebService_Client
         [System.String]
         $NodeName = 'localhost',
 
-        [Parameter()]
         [Parameter(Mandatory = $true)]
         [System.String]
         $RegistrationKey,
