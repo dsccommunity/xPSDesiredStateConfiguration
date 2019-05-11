@@ -1,3 +1,17 @@
+<#PSScriptInfo
+.VERSION 1.0.0
+.GUID 119f0689-7410-4b2d-a805-d5df9f582cad
+.AUTHOR Microsoft Corporation
+.COMPANYNAME Microsoft Corporation
+.COPYRIGHT
+.TAGS DSCConfiguration
+.LICENSEURI https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/LICENSE
+.PROJECTURI https://github.com/PowerShell/xPSDesiredStateConfiguration
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES xPSDesiredStateConfiguration
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+#>
 <#
     .SYNOPSIS
         The Sample_MetaConfigurationToRegisterWithSecurePullServer registers
@@ -25,7 +39,7 @@
         Sample_MetaConfigurationToRegisterWithSecurePullServer -RegistrationKey $registrationKey
 #>
 [DSCLocalConfigurationManager()]
-Configuration Sample_MetaConfigurationToRegisterWithSecurePullServer
+Configuration Sample_xDscWebService_Client
 {
     param
     (
@@ -49,8 +63,6 @@ Configuration Sample_MetaConfigurationToRegisterWithSecurePullServer
         [System.UInt16]
         $Port = 8080
     )
-
-    Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
 
     Node $NodeName
     {
