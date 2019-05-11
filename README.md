@@ -217,7 +217,7 @@ is created by using the **Firewall** resource from the
 
 #### Examples
 
-_Pull Server_
+##### Pull Server
 
 * [A Pull Server using a SQL Server as backend](./Examples/Sample_xDscWebServiceRegistration_UseSQLProvider.ps1)
 * [A Pull Server default configuration](./Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1)
@@ -226,7 +226,7 @@ _Pull Server_
 * [Removing a Pull Server instance](./Examples/Sample_xDscWebServiceRemoval.ps1)
 * [A Pull Server with a separately defined IIS Application Pool](./Examples/Sample_xDscWebServiceAppPool.ps1)
 
-_Client_ 
+##### Client
 
 * [Common Client (Server) Configuration](./Examples/Sample_MetaConfigurationToRegisterWithSecurePullServer.ps1)
 
