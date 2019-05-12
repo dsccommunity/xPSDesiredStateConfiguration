@@ -53,7 +53,7 @@ function Remove-PullServerFirewallConfiguration
     {
         # remove all existing rules with that displayName
         Write-Verbose -Message "Delete Firewall Rule for port $Port"
-        $ruleName = $FireWallRuleDisplayName -f $port
+        $ruleName = $FireWallRuleDisplayName
 
         # backwards compatibility with old code
         if (Get-Command -Name Get-NetFirewallRule -CommandType Cmdlet -ErrorAction:SilentlyContinue)
@@ -93,7 +93,7 @@ function Test-PullServerFirewallConfiguration
 
     # Remove all existing rules with that displayName
     Write-Verbose -Message "Testing Firewall Rule for port $Port"
-    $ruleName = $FireWallRuleDisplayName -f $port
+    $ruleName = $FireWallRuleDisplayName
     $result = & $script:netsh advfirewall firewall show rule name=$ruleName | Select-String -Pattern "LocalPort:\s*$Port"
     return -not [string]::IsNullOrWhiteSpace($result)
 }
