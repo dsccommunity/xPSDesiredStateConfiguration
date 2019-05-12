@@ -1,5 +1,5 @@
 # Name and description for the Firewall rules. Used in multiple locations
-New-Variable -Name fireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port' -Option ReadOnly -Scope Script -Force
+New-Variable -Name FireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port' -Option ReadOnly -Scope Script -Force
 New-Variable -Name netsh -Value "$env:windir\system32\netsh.exe" -Option ReadOnly -Scope Script -Force
 <#
     .SYNOPSIS
@@ -22,7 +22,7 @@ function Add-PullServerFirewallConfiguration
     Write-Verbose -Message 'Disable Inbound Firewall Notification'
     $null = & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
 
-    $ruleName = $FireWallRuleDisplayName -f $port
+    $ruleName = $FireWallRuleDisplayName
 
     # Remove all existing rules with that displayName
     $null = & $script:netsh advfirewall firewall delete rule name=$ruleName protocol=tcp localport=$Port
