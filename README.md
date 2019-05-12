@@ -219,12 +219,13 @@ is created by using the **Firewall** resource from the
 
 ##### Pull Server
 
+* [A Pull Server with a separately defined IIS Application Pool and firewall
+  rule](./Examples/Sample_xDscWebService_Preferred.ps1)
 * [A Pull Server using a SQL Server as backend](./Examples/Sample_xDscWebServiceRegistration_UseSQLProvider.ps1)
 * [A Pull Server default configuration](./Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1)
 * [A Pull Server with an enhanced security configuration and a firewall rule](./Examples/Sample_xDscWebServiceRegistration.ps1)
 * [A Pull Server using the security best practice configuration](./Examples/Sample_xDscWebServiceRegistrationWithSecurityBestPractices.ps1)
 * [Removing a Pull Server instance](./Examples/Sample_xDscWebServiceRemoval.ps1)
-* [A Pull Server with a separately defined IIS Application Pool](./Examples/Sample_xDscWebServiceAppPool.ps1)
 
 ##### Client
 

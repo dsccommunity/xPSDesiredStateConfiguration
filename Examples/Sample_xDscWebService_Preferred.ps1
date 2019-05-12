@@ -59,9 +59,9 @@
         $thumbprint = (New-SelfSignedCertificate -DnsName $env:COMPUTERNAME -CertStoreLocation Cert:\LocalMachine\My).Thumbprint
         $registrationKey = [System.Guid]::NewGuid()
 
-        Sample_xDscWebServiceRegistration -RegistrationKey $registrationkey -CertificateThumbPrint $thumbprint
+        Sample_xDscWebService_Preferred -RegistrationKey $registrationkey -CertificateThumbPrint $thumbprint
 #>
-Configuration Sample_xDscWebServiceAppPool
+Configuration Sample_xDscWebService_Preferred
 {
     param
     (
