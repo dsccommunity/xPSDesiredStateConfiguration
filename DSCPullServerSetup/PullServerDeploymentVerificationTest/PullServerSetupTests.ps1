@@ -30,7 +30,7 @@ Describe PullServerInstallationTests {
 
         # Skip all tests if web.config is not found
         if (-not (Test-Path $DscWebConfigPath)){
-            Write-Error 'No pullserver web.config found.' -ErrorAction Stop
+            throw 'No pullserver web.config found.'
         }
 
         # Get web.config content as XML

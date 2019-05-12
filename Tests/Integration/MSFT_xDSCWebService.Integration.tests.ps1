@@ -14,7 +14,7 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
 # Ensure that Powershell Module 'WebAdministration' is available
 if (-not (Install-WindowsFeatureAndVerify -Name Web-Mgmt-Tools))
 {
-    Write-Error -Message 'Failed to verify for required Windows Feature. Unable to continue ...' -ErrorAction:Stop
+    throw 'Failed to verify for required Windows Feature. Unable to continue ...'
 }
 Import-Module -Name WebAdministration -ErrorAction:Stop -Force
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -ErrorAction:Stop -Force

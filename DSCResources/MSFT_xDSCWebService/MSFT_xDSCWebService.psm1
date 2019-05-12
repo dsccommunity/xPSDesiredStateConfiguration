@@ -1478,7 +1478,7 @@ function Test-IISSelfSignedModuleEnabled
     }
     else
     {
-        Write-Error -Message "Website [$EndpointName] not found"
+        throw "Website [$EndpointName] not found"
     }
 }
 
