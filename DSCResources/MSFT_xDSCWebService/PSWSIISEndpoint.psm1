@@ -241,6 +241,7 @@ function Update-Site
     {
         $site = Get-Website -Name $siteName
     }
+
     if ($site)
     {
         switch ($siteAction)
@@ -250,21 +251,23 @@ function Update-Site
                 Write-Verbose -Message "Starting IIS Website [$($site.name)]"
                 Start-Website -Name $site.name
             }
+
             'Stop'
             {
                 if ('Started' -eq $site.state)
                 {
                     Write-Verbose -Message "Stopping WebSite $($site.name)"
                     $website = Stop-Website -Name $site.name -Passthru
+
                     if ('Started' -eq $website.state)
                     {
                         throw "Unable to stop WebSite $($site.name)"
                     }
 
                     <#
-                    There may be running requests, wait a little
-                    I had an issue where the files were still in use
-                    when I tried to delete them
+                      There may be running requests, wait a little
+                      I had an issue where the files were still in use
+                      when I tried to delete them
                     #>
                     Write-Verbose -Message 'Waiting for IIS to stop website'
                     Start-Sleep -Milliseconds 1000
@@ -274,6 +277,7 @@ function Update-Site
                     Write-Verbose -Message "IIS Website [$($site.name)] already stopped"
                 }
             }
+
             'Remove'
             {
                 Update-Site -site $site -siteAction Stop
@@ -303,17 +307,17 @@ function Get-AppPoolBinding
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $appPool
+        $AppPool
     )
 
-    if (Test-Path -Path "IIS:\AppPools\$appPool")
+    if (Test-Path -Path "IIS:\AppPools\$AppPool")
     {
         $sites = Get-WebConfigurationProperty `
-            -Filter "/system.applicationHost/sites/site/application[@applicationPool=`'$appPool`'and @path='/']/parent::*" `
+            -Filter "/system.applicationHost/sites/site/application[@applicationPool=`'$AppPool`'and @path='/']/parent::*" `
             -PSPath 'machine/webroot/apphost' `
             -Name name
         $apps = Get-WebConfigurationProperty `
-            -Filter "/system.applicationHost/sites/site/application[@applicationPool=`'$appPool`'and @path!='/']" `
+            -Filter "/system.applicationHost/sites/site/application[@applicationPool=`'$AppPool`'and @path!='/']" `
             -PSPath 'machine/webroot/apphost' `
             -Name path
         $sites, $apps | ForEach-Object {
@@ -335,22 +339,23 @@ function Remove-AppPool
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $appPool
+        $AppPool
     )
 
-    if ($DscWebServiceDefaultAppPoolName -eq $appPool)
+    if ($DscWebServiceDefaultAppPoolName -eq $AppPool)
     {
         # Without this tests we may get a breaking error here, despite SilentlyContinue
-        if (Test-Path -Path "IIS:\AppPools\$appPool")
+        if (Test-Path -Path "IIS:\AppPools\$AppPool")
         {
-            $cntBindings = (Get-AppPoolBinding -apppool $appPool | Measure-Object).Count
-            if (0 -ge $cntBindings)
+            $bindingCount = (Get-AppPoolBinding -AppPool $AppPool | Measure-Object).Count
+
+            if (0 -ge $bindingCount)
             {
-                Remove-WebAppPool -Name $appPool -ErrorAction SilentlyContinue
+                Remove-WebAppPool -Name $AppPool -ErrorAction SilentlyContinue
             }
             else
             {
-                Write-Verbose -Message "Application pool [$appPool] can't be deleted because it's still bound to a site or application"
+                Write-Verbose -Message "Application pool [$AppPool] can't be deleted because it's still bound to a site or application"
             }
         }
     }
@@ -530,6 +535,7 @@ function New-IISWebSite
 
         Write-Verbose -Message 'Set App Pool Properties'
         $appPoolIdentity = 4
+
         if ($applicationPoolIdentityType)
         {
             # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
@@ -539,25 +545,29 @@ function New-IISWebSite
                 {
                     $appPoolIdentity = 0
                 }
+
                 'LocalService'
                 {
                     $appPoolIdentity = 1
                 }
+
                 'NetworkService'
                 {
                     $appPoolIdentity = 2
                 }
+
                 'ApplicationPoolIdentity'
                 {
                     $appPoolIdentity = 4
                 }
+
                 default {
                     throw "Invalid value [$applicationPoolIdentityType] for parameter -applicationPoolIdentityType"
                 }
             }
         }
 
-        $appPoolItem = Get-Item IIS:\AppPools\$appPool
+        $appPoolItem = Get-Item -Path IIS:\AppPools\$appPool
         $appPoolItem.managedRuntimeVersion = 'v4.0'
         $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
         $appPoolItem.processModel.identityType = $appPoolIdentity
@@ -566,6 +576,7 @@ function New-IISWebSite
     }
 
     Write-Verbose -Message 'Add and Set Site Properties'
+
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
         $null = New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool
@@ -752,6 +763,7 @@ function New-PSWSEndpoint
 
     $svcName = Split-Path $svc -Leaf
     $protocol = 'https:'
+
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
         $protocol = 'http:'
@@ -760,7 +772,7 @@ function New-PSWSEndpoint
     # Get Machine Name
     $cimInstance = Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false
 
-    Write-Verbose ("Setting up endpoint at - $protocol//" + $cimInstance.Name + ':' + $port + '/' + $svcName)
+    Write-Verbose -Message "Setting up endpoint at - $protocol//$($cimInstance.Name):$port/$svcName"
     Initialize-Endpoint `
         -appPool $appPool `
         -site $site `
@@ -813,6 +825,7 @@ function Remove-PSWSEndpoint
 
     # Get the site to remove
     $site = Get-Website -Name $siteName
+
     if ($site)
     {
         # And the pool it is using
@@ -824,7 +837,7 @@ function Remove-PSWSEndpoint
         Update-Site -site $site -siteAction Remove
 
         # Remove the files for the site
-        If (Test-Path -Path $filePath)
+        if (Test-Path -Path $filePath)
         {
             Get-ChildItem -Path $filePath -Recurse | Remove-Item -Recurse -Force
             Remove-Item -Path $filePath -Force
@@ -855,22 +868,22 @@ function Set-AppSettingsInWebconfig
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $path,
+        $Path,
 
         # Key to add/update
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $key,
+        $Key,
 
         # Value
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $value
+        $Value
     )
 
-    $webconfig = Join-Path $path 'web.config'
+    $webconfig = Join-Path -Path $Path -ChildPath 'web.config'
     [System.Boolean] $Found = $false
 
     if (Test-Path -Path $webconfig)
@@ -878,24 +891,24 @@ function Set-AppSettingsInWebconfig
         $xml = [System.Xml.XmlDocument] (Get-Content -Path $webconfig)
         $root = $xml.get_DocumentElement()
 
-        foreach( $item in $root.appSettings.add)
+        foreach ($item in $root.appSettings.add)
         {
-            if( $item.key -eq $key )
+            if ($item.key -eq $Key)
             {
-                $item.value = $value;
+                $item.value = $Value;
                 $Found = $true;
             }
         }
 
-        if( -not $Found)
+        if (-not $Found)
         {
             $newElement = $xml.CreateElement('add')
             $nameAtt1 = $xml.CreateAttribute('key')
-            $nameAtt1.psbase.value = $key;
+            $nameAtt1.psbase.value = $Key;
             $null = $newElement.SetAttributeNode($nameAtt1)
 
             $nameAtt2 = $xml.CreateAttribute('value')
-            $nameAtt2.psbase.value = $value;
+            $nameAtt2.psbase.value = $Value;
             $null = $newElement.SetAttributeNode($nameAtt2)
 
             $null = $xml.configuration['appSettings'].AppendChild($newElement)

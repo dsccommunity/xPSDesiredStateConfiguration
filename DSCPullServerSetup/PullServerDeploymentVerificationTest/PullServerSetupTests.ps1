@@ -29,7 +29,7 @@ Describe PullServerInstallationTests {
         $DscWebConfigPath = Join-Path -Path $env:SystemDrive -ChildPath $DscWebConfigChildPath
 
         # Skip all tests if web.config is not found
-        if (-not (Test-Path $DscWebConfigPath)){
+        if (-not (Test-Path -Path $DscWebConfigPath)){
             throw 'No pullserver web.config found.'
         }
 
