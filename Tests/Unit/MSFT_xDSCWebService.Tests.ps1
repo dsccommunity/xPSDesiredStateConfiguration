@@ -39,6 +39,7 @@ try
             CertificateThumbPrint    = 'AllowUnencryptedTraffic'
             EndpointName             = 'PesterTestSite'
             UseSecurityBestPractices = $false
+            ConfigureFirewall        = $false
         }
 
         $serviceData = @{
@@ -52,21 +53,27 @@ try
         }
 
         $websiteDataHTTP  = [System.Management.Automation.PSObject] @{
-            bindings     = [System.Management.Automation.PSObject] @{
+            bindings = [System.Management.Automation.PSObject] @{
                 collection = @(
                     @{
                         protocol           = 'http'
                         bindingInformation = '*:8080:'
                         certificateHash    = ''
+                    },
+                    @{
+                        protocol           = 'http'
+                        bindingInformation = '*:8090:'
+                        certificateHash    = ''
                     }
                 )
             }
-            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
-            state        = 'Started'
+            physicalPath    = 'TestDrive:\inetpub\PesterTestSite'
+            state           = 'Started'
+            applicationPool = 'PSWS'
         }
 
         $websiteDataHTTPS = [System.Management.Automation.PSObject] @{
-            bindings     = [System.Management.Automation.PSObject] @{
+            bindings = [System.Management.Automation.PSObject] @{
                 collection = @(
                     @{
                         protocol           = 'https'
@@ -75,8 +82,9 @@ try
                     }
                 )
             }
-            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
-            state        = 'Started'
+            physicalPath    = 'TestDrive:\inetpub\PesterTestSite'
+            state           = 'Started'
+            applicationPool = 'PSWS'
         }
 
         $certificateData  = @(
@@ -149,7 +157,6 @@ try
             <# Create dummy functions so that Pester is able to mock them #>
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $webConfigPath = 'TestDrive:\inetpub\PesterTestSite\Web.config'
@@ -157,7 +164,7 @@ try
             $null = New-Item -Path $webConfigPath -Value $webConfig
 
             Context -Name 'DSC Web Service is not installed' -Fixture {
-                Mock -CommandName Get-WebSite -MockWith {}
+                Mock -CommandName Get-WebSite
 
                 $script:result = $null
 
@@ -173,8 +180,8 @@ try
             }
 
             #region Mocks
-            Mock -CommandName Get-WebSite -MockWith {return $websiteDataHTTP}
-            Mock -CommandName Get-WebBinding -MockWith {return @{CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash}}
+            Mock -CommandName Get-WebSite -MockWith { return $websiteDataHTTP }
+            Mock -CommandName Get-WebBinding -MockWith { return @{ CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash } }
             Mock -CommandName Get-ChildItem -ParameterFilter {$Path -eq $websiteDataHTTP.physicalPath -and $Filter -eq '*.svc'} -MockWith {return @{Name = $serviceData.ServiceName}}
             Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'ModulePath'}          -MockWith {return $serviceData.ModulePath}
             Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'}   -MockWith {return $serviceData.ConfigurationPath}
@@ -464,6 +471,12 @@ try
             function Get-Website {}
             function Get-WebBinding {}
             function Stop-Website {}
+            function New-WebAppPool {}
+            function Remove-WebAppPool {}
+            function New-WebSite {}
+            function Start-Website {}
+            function Get-WebConfigurationProperty {}
+            function Remove-Website {}
 
             #region Mocks
             Mock -CommandName Get-Command -ParameterFilter {$Name -eq '.\appcmd.exe'} -MockWith {
@@ -489,37 +502,35 @@ try
                 }
             }
             Mock -CommandName Get-OSVersion -MockWith {@{Major = 6; Minor = 3}}
-            Mock -CommandName Get-Website
             #endregion
 
             Context -Name 'DSC Service is not installed and Ensure is Absent' -Fixture {
                 #region Mocks
                 Mock -CommandName Test-Path -ParameterFilter { $LiteralPath -like "IIS:\Sites\*" } -MockWith { $false }
                 Mock -CommandName Remove-PSWSEndpoint
+                Mock -CommandName Remove-PullServerFirewallConfiguration
                 #endregion
 
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters -Ensure Absent
 
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                     Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path
                     Assert-MockCalled -Exactly -Times 0 -CommandName Remove-PSWSEndpoint
                     Assert-MockCalled -Exactly -Times 0 -CommandName Get-Command
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Remove-PullServerFirewallConfiguration
                 }
             }
 
             Context -Name 'DSC Service is installed and Ensure is Absent' -Fixture {
                 #region Mocks
                 Mock -CommandName Test-Path -ParameterFilter { $LiteralPath -like "IIS:\Sites\*" } -MockWith { $LiteralPath -eq "IIS:\Sites\$($testParameters.EndpointName)" }
-                Mock -CommandName Get-Website -MockWith { return $websiteDataHTTP }
                 Mock -CommandName Remove-PSWSEndpoint
                 #endregion
 
                 It 'Should call expected mocks' {
                     Set-TargetResource @testParameters -Ensure Absent
 
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                     Assert-MockCalled -Exactly -Times 0 -CommandName Get-Command
                     Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path
@@ -527,15 +538,84 @@ try
                 }
             }
 
-            #region Mocks
-            Mock -CommandName Get-Culture -MockWith {@{TwoLetterISOLanguageName = 'en'}}
-            Mock -CommandName Test-Path -MockWith {$true}
-            Mock -CommandName New-PSWSEndpoint
+            #region MSFT_xDSCWebService Mocks
+            Mock -CommandName Get-Culture -MockWith { @{TwoLetterISOLanguageName = 'en'} }
+            Mock -CommandName Test-Path -MockWith { $true }
             Mock -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
             Mock -CommandName Set-AppSettingsInWebconfig
             Mock -CommandName Set-BindingRedirectSettingInWebConfig
             Mock -CommandName Copy-Item
             Mock -CommandName Test-FilesDiffer -MockWith { $false }
+            #endregion
+
+            #region PSWSIISEndpoint Mocks
+            Mock -CommandName Get-WebConfigurationProperty -ModuleName PSWSIISEndpoint
+            Mock -CommandName Test-Path -MockWith { $true } -ModuleName PSWSIISEndpoint
+            Mock -CommandName Test-IISInstall -ModuleName PSWSIISEndpoint
+            Mock -CommandName Remove-WebAppPool -ModuleName PSWSIISEndpoint
+            Mock -CommandName Remove-Item -ModuleName PSWSIISEndpoint
+            Mock -CommandName Copy-PSWSConfigurationToIISEndpointFolder -ModuleName PSWSIISEndpoint
+            Mock -CommandName New-WebAppPool -ModuleName PSWSIISEndpoint
+            Mock -CommandName Set-Item -ModuleName PSWSIISEndpoint
+            Mock -CommandName Get-Item -ParameterFilter { $Path -like 'IIS:\AppPools*' } -MockWith {
+                [PSCustomObject]@{
+                    name = Split-Path -Path $Path -Leaf
+                    managedRuntimeVersion = 'v4.0'
+                    enable32BitAppOnWin64 = $false
+                    processModel = [PSCustomObject]@{
+                        identityType = 4
+                    }
+                }
+            } -ModuleName PSWSIISEndpoint
+            Mock -CommandName Get-ChildItem -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My\' } -MockWith {
+                #####
+                # we cannot use the existing certificate definitions from $certificateData because the
+                # mock runs in a different module and thus the variable does not exist
+                #####
+                [System.Management.Automation.PSObject] @{
+                    Thumbprint = 'AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTT'
+                    Subject    = 'PesterTestDuplicateCertificate'
+                    Extensions = [System.Array] @(
+                        [System.Management.Automation.PSObject] @{
+                            Oid = [System.Management.Automation.PSObject] @{
+                                FriendlyName = 'Certificate Template Name'
+                                Value        = '1.3.6.1.4.1.311.20.2'
+                            }
+                        }
+                        [System.Management.Automation.PSObject] @{}
+                    )
+                    NotAfter   = Get-Date
+                }
+            } -ModuleName PSWSIISEndpoint
+            Mock -CommandName Get-Item -ParameterFilter { $Path -eq 'CERT:\LocalMachine\MY\AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTT' } -MockWith {
+                #####
+                # we cannot use the existing certificate definitions from $certificateData because the
+                # mock runs in a different module and thus the variable does not exist
+                #####
+                [System.Management.Automation.PSObject] @{
+                    Thumbprint = 'AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTT'
+                    Subject    = 'PesterTestDuplicateCertificate'
+                    Extensions = [System.Array] @(
+                        [System.Management.Automation.PSObject] @{
+                            Oid = [System.Management.Automation.PSObject] @{
+                                FriendlyName = 'Certificate Template Name'
+                                Value        = '1.3.6.1.4.1.311.20.2'
+                            }
+                        }
+                        [System.Management.Automation.PSObject] @{}
+                    )
+                    NotAfter   = Get-Date
+                }
+            } -ModuleName PSWSIISEndpoint
+            Mock -CommandName New-WebSite -ModuleName PSWSIISEndpoint
+            Mock -CommandName New-SiteID -ModuleName PSWSIISEndpoint -MockWith {
+                Get-Random -Maximum 10000 -Minimum 1
+            }
+            Mock -CommandName New-Item -ParameterFilter { $Path -like 'IIS:*' } -ModuleName PSWSIISEndpoint
+            Mock -CommandName Remove-Item -ModuleName PSWSIISEndpoint
+            Mock -CommandName Get-WebBinding -ModuleName PSWSIISEndpoint
+            Mock -CommandName Remove-Website -ModuleName PSWSIISEndpoint
+            Mock -CommandName Start-Website -ModuleName PSWSIISEndpoint
             #endregion
 
             Context -Name 'Ensure is Present' -Fixture {
@@ -547,14 +627,17 @@ try
                 }
 
                 It 'Should call expected mocks' {
+                    Mock -CommandName Get-Website -ModuleName PSWSIISEndpoint
+                    Mock -CommandName Add-PullServerFirewallConfiguration
+
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
                     Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
+                    Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName PSWSIISEndpoint
                     Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
-                    Assert-MockCalled -Exactly -Times 1 -CommandName New-PSWSEndpoint
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Add-PullServerFirewallConfiguration
                     Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                     Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
                     Assert-MockCalled -Exactly -Times 1 -CommandName Set-BindingRedirectSettingInWebConfig
@@ -595,14 +678,22 @@ try
                 }
 
                 It 'Should call expected mocks' {
+
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
                     Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
                     Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
-                    Assert-MockCalled -Exactly -Times 1 -CommandName New-PSWSEndpoint
                     Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                     Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
                     Assert-MockCalled -Exactly -Times 0 -CommandName Set-BindingRedirectSettingInWebConfig
@@ -624,14 +715,22 @@ try
                 }
 
                 It 'Should call expected mocks' {
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
                     Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
+                    Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName PSWSIISEndpoint
                     Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
-                    Assert-MockCalled -Exactly -Times 1 -CommandName New-PSWSEndpoint
                     Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                     Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
                     Assert-MockCalled -Exactly -Times 0 -CommandName Set-BindingRedirectSettingInWebConfig
@@ -648,14 +747,22 @@ try
                 }
 
                 It 'Should call expected mocks' {
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present -Enable32BitAppOnWin64 $true
 
                     Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
+                    Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName PSWSIISEndpoint
                     Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
-                    Assert-MockCalled -Exactly -Times 1 -CommandName New-PSWSEndpoint
                     Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                     Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
                     Assert-MockCalled -Exactly -Times 1 -CommandName Set-BindingRedirectSettingInWebConfig
@@ -673,14 +780,22 @@ try
 
 
                 It 'Should call expected mocks' {
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
                     Set-TargetResource @testParameters @setTargetPaths -Ensure Present -AcceptSelfSignedCertificates $false
 
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-Command
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
-                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-Website
+                    Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName PSWSIISEndpoint
                     Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path
                     Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
-                    Assert-MockCalled -Exactly -Times 1 -CommandName New-PSWSEndpoint
                     Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                     Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
                     Assert-MockCalled -Exactly -Times 1 -CommandName Set-BindingRedirectSettingInWebConfig
@@ -714,6 +829,15 @@ try
                 }
 
                 It 'Should call expected mocks' {
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
                     Set-TargetResource @altTestParameters @setTargetPaths -Ensure Present -CertificateSubject 'PesterTestCertificate'
 
                     Assert-MockCalled -Exactly -Times 1 -CommandName Find-CertificateThumbprintWithSubjectAndTemplateName
@@ -737,6 +861,15 @@ try
                 }
 
                 It 'Should not throw an error' {
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
                     {Set-TargetResource @altTestParameters @setTargetPaths -Ensure Present} | Should -Not -throw
                 }
 
@@ -752,6 +885,175 @@ try
                     $altTestParameters.Remove('CertificateThumbPrint')
 
                     {Set-TargetResource @altTestParameters} | Should -Throw
+                }
+            }
+
+            Context -Name 'Verify Firewall handling' -Fixture {
+
+                $setTargetPaths = @{
+                    DatabasePath        = 'TestDrive:\Database'
+                    ConfigurationPath   = 'TestDrive:\Configuration'
+                    ModulePath          = 'TestDrive:\Module'
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
+                }
+
+                Mock -CommandName Remove-PSWSEndpoint
+
+                It 'Should not create any firewall rules if disabled' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Present'
+                    $altTestParameters.ConfigureFirewall = $false
+
+                    Mock -CommandName Add-PullServerFirewallConfiguration
+                    Mock -CommandName Get-Website -MockWith { $null } -ModuleName PSWSIISEndpoint
+
+                    Set-TargetResource @altTestParameters @setTargetPaths
+
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Add-PullServerFirewallConfiguration
+                }
+
+                It 'Should create firewall rules when enabled' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Present'
+                    $altTestParameters.ConfigureFirewall = $true
+
+                    Mock -CommandName Add-PullServerFirewallConfiguration
+                    Mock -CommandName Get-Website -MockWith { $null } -ModuleName PSWSIISEndpoint
+
+                    Set-TargetResource @altTestParameters @setTargetPaths
+                    Assert-MockCalled -Exactly -Times 1 -CommandName Add-PullServerFirewallConfiguration
+                }
+
+                It 'Should always delete firewall rules which match the display internal name and port' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Absent'
+                    $altTestParameters.ConfigureFirewall = $true
+
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+                    Mock -CommandName Get-WebBinding -MockWith {
+                        [PSCustomObject]@{
+                            protocol = 'http'
+                            bindingInformation = '*:8080:'
+                        }
+                        [PSCustomObject]@{
+                            protocol = 'http'
+                            bindingInformation = '*:8090:'
+                        }
+                        [PSCustomObject]@{
+                            protocol = 'http'
+                            bindingInformation = 'http://test.local/DSCPullServer:8010:'
+                        }
+                    }
+                    Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $true } -ModuleName Firewall
+                    Mock -CommandName Get-Command -ParameterFilter { $Name -eq 'Get-NetFirewallRule' } -MockWith { $true } -ModuleName Firewall
+                    Mock -CommandName Get-NetFirewallRule -MockWith {
+                        if ($DisplayName -notlike 'DSCPullServer_IIS_Port*')
+                        {
+                            throw "Invalid DisplayName filter [$DisplayName] for Get-NetFirewallRule"
+                        }
+                    } -ModuleName Firewall
+
+                    Set-TargetResource @altTestParameters @setTargetPaths
+
+                    Assert-MockCalled -Exactly -Times 3 -CommandName Test-PullServerFirewallConfiguration -ModuleName Firewall
+                    Assert-MockCalled -Exactly -Times 3 -CommandName Get-NetFirewallRule -ModuleName Firewall
+                }
+            }
+
+            Context -Name 'Verify Application Pool handling' -Fixture {
+
+                $setTargetPaths = @{
+                    DatabasePath        = 'TestDrive:\Database'
+                    ConfigurationPath   = 'TestDrive:\Configuration'
+                    ModulePath          = 'TestDrive:\Module'
+                    RegistrationKeyPath = 'TestDrive:\RegistrationKey'
+                }
+
+                It 'Ensure is Absent - An AppPool still bound by an application should not be deleted' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Absent'
+
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PSWS'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+
+                    Mock -CommandName Get-ChildItem `
+                    -ParameterFilter { $Path -eq 'TestDrive:\inetpub\PesterTestSite' } `
+                    -ModuleName PSWSIISEndpoint
+
+                    Mock -CommandName Get-AppPoolBinding `
+                    -MockWith { "Default Web Site"} `
+                    -ModuleName PSWSIISEndpoint
+
+                    Set-TargetResource @altTestParameters @setTargetPaths
+
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Remove-WebAppPool -ModuleName PSWSIISEndpoint
+                }
+
+                It 'Ensure is Present - No standard AppPool that does not exist should throw' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Present'
+                    $altTestParameters.ApplicationPoolName = 'NonExistingAppPool'
+
+                    Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'IIS:\AppPools\NonExistingAppPool' } -MockWith {
+                        $false
+                    }
+
+                    { Set-TargetResource @altTestParameters @setTargetPaths } | Should -Throw
+                    Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path -Scope It
+                }
+
+                It 'Ensure is Present - No standard AppPool will be created if an external AppPool is specified' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Present'
+                    $altTestParameters.ApplicationPoolName = 'PullServer AppPool'
+
+                    Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'IIS:\AppPools\PullServer AppPool' } -MockWith {
+                        $true
+                    }
+                    Mock -CommandName New-WebAppPool -ModuleName PSWSIISEndpoint
+
+                    Set-TargetResource @altTestParameters @setTargetPaths
+
+                    Assert-MockCalled -Exactly -Times 0 -CommandName New-WebAppPool -ModuleName PSWSIISEndpoint
+                }
+
+                It 'Ensure is Absent - An externally defined AppPool should not be deleted' {
+                    $altTestParameters = $testParameters.Clone()
+                    $altTestParameters.Ensure = 'Absent'
+                    $altTestParameters.ApplicationPoolName = 'PullServer AppPool'
+
+                    Mock -CommandName Get-Website -MockWith {
+                        [PSCustomObject]@{
+                            Name = $Name
+                            State = 'Stopped'
+                            applicationPool = 'PullServer AppPool'
+                            physicalPath = 'TestDrive:\inetpub\PesterTestSite'
+                        }
+                    } -ModuleName PSWSIISEndpoint
+                    Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'IIS:\AppPools\PullServer AppPool' } -MockWith {
+                        $true
+                    } -ModuleName PSWSIISEndpoint
+                    Mock -CommandName Get-AppPoolBinding -MockWith { $null } -ModuleName PSWSIISEndpoint
+                    Mock -CommandName Remove-WebAppPool -ModuleName PSWSIISEndpoint
+
+                    Set-TargetResource @altTestParameters @setTargetPaths
+
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Test-Path -ModuleName PSWSIISEndpoint -ParameterFilter { $Path -eq 'IIS:\AppPools\PullServer AppPool' } -Scope It
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Get-AppPoolBinding -ModuleName PSWSIISEndpoint -Scope It
+                    Assert-MockCalled -Exactly -Times 0 -CommandName Remove-WebAppPool -ModuleName PSWSIISEndpoint -Scope It
                 }
             }
         }
@@ -778,7 +1080,7 @@ try
             #endregion
 
             Context -Name 'DSC Service is not installed' -Fixture {
-                Mock -CommandName Get-Website
+                #Mock -CommandName Get-Website
 
                 It 'Should return $true when Ensure is Absent' {
                     Test-TargetResource @testParameters -Ensure Absent | Should -Be $true
@@ -790,7 +1092,7 @@ try
 
             Context -Name 'DSC Web Service is installed as HTTP' -Fixture {
                 Mock -CommandName Get-Website -MockWith {$WebsiteDataHTTP}
-                Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $true }
+                Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $false }
 
                 It 'Should return $false when Ensure is Absent' {
                     Test-TargetResource @testParameters -Ensure Absent | Should -Be $false
@@ -965,7 +1267,7 @@ try
             Context -Name 'DSC Web Service is installed as HTTPS' -Fixture {
                 #region Mocks
                 Mock -CommandName Get-Website -MockWith {$websiteDataHTTPS}
-                Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $true }
+                Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $false }
                 #endregion
 
                 It 'Should return $false if Certificate Thumbprint is set to AllowUnencryptedTraffic' {
@@ -1125,7 +1427,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $webConfigPath = 'TestDrive:\Web.config'
@@ -1148,7 +1449,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $webConfigPath = 'TestDrive:\Web.config'
@@ -1166,7 +1466,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             $appHostConfigSection = [System.Management.Automation.PSObject] @{OverrideMode = ''}
@@ -1190,7 +1489,6 @@ try
 
             function Get-Website {}
             function Get-WebBinding {}
-
             function Stop-Website {}
 
             Mock -CommandName Get-ChildItem -MockWith {,@($certificateData)}

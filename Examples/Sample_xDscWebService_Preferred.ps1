@@ -1,12 +1,26 @@
+<#PSScriptInfo
+.VERSION 1.0.0
+.GUID 4321b681-da05-4486-a7db-1ce4842d40c5
+.AUTHOR Microsoft Corporation
+.COMPANYNAME Microsoft Corporation
+.COPYRIGHT
+.TAGS DSCConfiguration
+.LICENSEURI https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/LICENSE
+.PROJECTURI https://github.com/PowerShell/xPSDesiredStateConfiguration
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES NetworkingDsc, xPSDesiredStateConfiguration, xWebAdministration
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+#>
 <#
     .SYNOPSIS
-        The Sample_xDscWebServiceRegistration_Win2k12and2k12R2 configuration
-        sets up a DSC pull server
+        Configures a DSC Pull Server with an separately configured IIS Application Pool
 
     .DESCRIPTION
-        The Sample_xDscWebServiceRegistration_Win2k12and2k12R2 configuration
-        sets up a DSC pull server that is capable for client nodes to register
-        with it.
+        The Sample_xDscWebServiceRegistration configuration sets up a DSC pull
+        server that is capable for client nodes to register with it and
+        retrieve configuration documents with configuration names instead of
+        configuration id.
 
         Prerequisite: 1 - Install a certificate in 'CERT:\LocalMachine\MY\' store
                           For testing environments, you could use a self-signed
@@ -19,6 +33,8 @@
                       2 - To configure a Firewall Rule (Exception) to allow external
                           connections the [NetworkingDsc](https://github.com/PowerShell/NetworkingDsc)
                           DSC module is required.
+                      3 - The [xWebAdministration](https://github.com/PowerShell/xWebAdministration)
+                          DSC module is required to configure the IIS Application Pool
 
     .PARAMETER NodeName
         The name of the node being configured as a DSC Pull Server.
@@ -33,13 +49,19 @@
         (randomness) to protect the registration of clients to the pull server.
         The example creates a new GUID for the registration key.
 
+    .PARAMETER Port
+        The TCP port on which the Pull Server will listen for connections
+
+    .PARAMETER ApplicationPoolName
+        The IIS Application Pool to use with the new Pull Server
+
     .EXAMPLE
         $thumbprint = (New-SelfSignedCertificate -DnsName $env:COMPUTERNAME -CertStoreLocation Cert:\LocalMachine\My).Thumbprint
         $registrationKey = [System.Guid]::NewGuid()
 
-        Sample_xDscWebServiceRegistration_Win2k12and2k12R2 -RegistrationKey $registrationKey -certificateThumbPrint $thumbprint -Verbose
+        Sample_xDscWebService_Preferred -RegistrationKey $registrationkey -CertificateThumbPrint $thumbprint
 #>
-Configuration Sample_xDscWebServiceRegistration_Win2k12and2k12R2
+Configuration Sample_xDscWebService_Preferred
 {
     param
     (
@@ -60,13 +82,17 @@ Configuration Sample_xDscWebServiceRegistration_Win2k12and2k12R2
         [Parameter()]
         [ValidateRange(1, 65535)]
         [System.UInt16]
-        $Port = 8080
+        $Port = 8080,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName
     )
 
-    Import-DscResource -ModuleName NetworkingDsc
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
-    # To explicitly import the resource WindowsFeature and File.
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName 'NetworkingDsc'
+    Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
+    Import-DscResource -ModuleName 'xWebAdministration'
 
     Node $NodeName
     {
@@ -76,22 +102,30 @@ Configuration Sample_xDscWebServiceRegistration_Win2k12and2k12R2
             Name   = 'DSC-Service'
         }
 
+        xWebAppPool PSDSCPullServerPool
+        {
+            Ensure       = 'Present'
+            Name         = $ApplicationPoolName
+            IdentityType = 'NetworkService'
+        }
+
         xDscWebService PSDSCPullServer
         {
             Ensure                       = 'Present'
             EndpointName                 = 'PSDSCPullServer'
+            ApplicationPoolName          = $ApplicationPoolName
             Port                         = $Port
             PhysicalPath                 = "$env:SystemDrive\inetpub\PSDSCPullServer"
             CertificateThumbPrint        = $CertificateThumbPrint
             ModulePath                   = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules"
             ConfigurationPath            = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration"
             State                        = 'Started'
-            DependsOn                    = '[WindowsFeature]DSCServiceFeature'
             RegistrationKeyPath          = "$env:PROGRAMFILES\WindowsPowerShell\DscService"
             AcceptSelfSignedCertificates = $true
+            Enable32BitAppOnWin64        = $false
             UseSecurityBestPractices     = $true
-            Enable32BitAppOnWin64        = $true
             ConfigureFirewall            = $false
+            DependsOn                    = '[WindowsFeature]DSCServiceFeature', '[xWebAppPool]PSDSCPullServerPool'
         }
 
         File RegistrationKeyFile

@@ -1,6 +1,8 @@
 # This module file contains a utility to perform PSWS IIS Endpoint setup
 # Module exports New-PSWSEndpoint function to perform the endpoint setup
 
+New-Variable -Name DscWebServiceDefaultAppPoolName  -Value 'PSWS' -Option ReadOnly -Force -Scope Script
+
 <#
     .SYNOPSIS
         Validate supplied configuration to setup the PSWS Endpoint Function
@@ -13,10 +15,17 @@ function Initialize-Endpoint
     param
     (
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $appPool,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $site,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $path,
 
@@ -30,10 +39,12 @@ function Initialize-Endpoint
         $port,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $app,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $applicationPoolIdentityType,
 
@@ -48,6 +59,7 @@ function Initialize-Endpoint
         $mof,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $dispatch,
 
@@ -57,14 +69,17 @@ function Initialize-Endpoint
         $asax,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $dependentBinaries,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $language,
 
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $dependentMUIFiles,
 
@@ -101,13 +116,10 @@ function Initialize-Endpoint
 
     Test-IISInstall
 
-    $appPool = 'PSWS'
-
-    Write-Verbose -Message 'Delete the App Pool if it exists'
-    Remove-AppPool -apppool $appPool
-
-    Write-Verbose -Message 'Remove the site if it already exists'
+    # First remove the site so that the binding count on the application pool is reduced
     Update-Site -siteName $site -siteAction Remove
+
+    Remove-AppPool -appPool $appPool
 
     # Check for existing binding, there should be no binding with the same port
     $allWebBindingsOnPort = Get-WebBinding | Where-Object -FilterScript {
@@ -127,9 +139,25 @@ function Initialize-Endpoint
         }
     }
 
-    Copy-PSWSConfigurationToIISEndpointFolder -path $path -cfgfile $cfgfile -svc $svc -mof $mof -dispatch $dispatch -asax $asax -dependentBinaries $dependentBinaries -language $language -dependentMUIFiles $dependentMUIFiles -psFiles $psFiles
+    Copy-PSWSConfigurationToIISEndpointFolder -path $path `
+        -cfgfile $cfgfile `
+        -svc $svc `
+        -mof $mof `
+        -dispatch $dispatch `
+        -asax $asax `
+        -dependentBinaries $dependentBinaries `
+        -language $language `
+        -dependentMUIFiles $dependentMUIFiles `
+        -psFiles $psFiles
 
-    New-IISWebSite -site $site -path $path -port $port -app $app -apppool $appPool -applicationPoolIdentityType $applicationPoolIdentityType -certificateThumbPrint $certificateThumbPrint -enable32BitAppOnWin64 $enable32BitAppOnWin64
+    New-IISWebSite -site $site `
+        -path $path `
+        -port $port `
+        -app $app `
+        -apppool $appPool `
+        -applicationPoolIdentityType $applicationPoolIdentityType `
+        -certificateThumbPrint $certificateThumbPrint `
+        -enable32BitAppOnWin64 $enable32BitAppOnWin64
 }
 
 <#
@@ -205,27 +233,95 @@ function Update-Site
         [Parameter(ParameterSetName = 'SiteName', Mandatory = $true, Position = 1)]
         [Parameter(ParameterSetName = 'Site', Mandatory = $true, Position = 1)]
         [System.String]
+        [ValidateSet('Start', 'Stop', 'Remove')]
         $siteAction
     )
 
-    [System.String] $name = $null
-
-    if ($PSCmdlet.ParameterSetName -eq 'SiteName')
+    if ('SiteName' -eq  $PSCmdlet.ParameterSetName)
     {
-        $name = $siteName
-    }
-    elseif ($PSCmdlet.ParameterSetName -eq 'Site')
-    {
-        $name = $site.Name
+        $site = Get-Website -Name $siteName
     }
 
-    if (Test-ForIISSite -siteName $name)
+    if ($site)
     {
         switch ($siteAction)
         {
-            'Start'  {Start-Website -Name "$name"}
-            'Stop'   {Stop-Website -Name "$name" -ErrorAction SilentlyContinue}
-            'Remove' {Remove-Website -Name "$name"}
+            'Start'
+            {
+                Write-Verbose -Message "Starting IIS Website [$($site.name)]"
+                Start-Website -Name $site.name
+            }
+
+            'Stop'
+            {
+                if ('Started' -eq $site.state)
+                {
+                    Write-Verbose -Message "Stopping WebSite $($site.name)"
+                    $website = Stop-Website -Name $site.name -Passthru
+
+                    if ('Started' -eq $website.state)
+                    {
+                        throw "Unable to stop WebSite $($site.name)"
+                    }
+
+                    <#
+                      There may be running requests, wait a little
+                      I had an issue where the files were still in use
+                      when I tried to delete them
+                    #>
+                    Write-Verbose -Message 'Waiting for IIS to stop website'
+                    Start-Sleep -Milliseconds 1000
+                }
+                else
+                {
+                    Write-Verbose -Message "IIS Website [$($site.name)] already stopped"
+                }
+            }
+
+            'Remove'
+            {
+                Update-Site -site $site -siteAction Stop
+                Write-Verbose -Message "Removing IIS Website [$($site.name)]"
+                Remove-Website -Name $site.name
+            }
+        }
+    }
+    else
+    {
+        Write-Verbose -Message "IIS Website [$siteName] not found"
+    }
+}
+
+<#
+    .SYNOPSIS
+        Returns the list of bound sites and applications for a given IIS Application pool
+
+    .PARAMETER appPool
+        The application pool name
+#>
+function Get-AppPoolBinding
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $AppPool
+    )
+
+    if (Test-Path -Path "IIS:\AppPools\$AppPool")
+    {
+        $sites = Get-WebConfigurationProperty `
+            -Filter "/system.applicationHost/sites/site/application[@applicationPool=`'$AppPool`'and @path='/']/parent::*" `
+            -PSPath 'machine/webroot/apphost' `
+            -Name name
+        $apps = Get-WebConfigurationProperty `
+            -Filter "/system.applicationHost/sites/site/application[@applicationPool=`'$AppPool`'and @path!='/']" `
+            -PSPath 'machine/webroot/apphost' `
+            -Name path
+        $sites, $apps | ForEach-Object {
+            $_.Value
         }
     }
 }
@@ -240,15 +336,32 @@ function Remove-AppPool
     [CmdletBinding()]
     param
     (
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
-        $appPool
+        $AppPool
     )
 
-    # Without this tests we may get a breaking error here, despite SilentlyContinue
-    if (Test-Path -Path "IIS:\AppPools\$appPool")
+    if ($DscWebServiceDefaultAppPoolName -eq $AppPool)
     {
-        Remove-WebAppPool -Name $appPool -ErrorAction SilentlyContinue
+        # Without this tests we may get a breaking error here, despite SilentlyContinue
+        if (Test-Path -Path "IIS:\AppPools\$AppPool")
+        {
+            $bindingCount = (Get-AppPoolBinding -AppPool $AppPool | Measure-Object).Count
+
+            if (0 -ge $bindingCount)
+            {
+                Remove-WebAppPool -Name $AppPool -ErrorAction SilentlyContinue
+            }
+            else
+            {
+                Write-Verbose -Message "Application pool [$AppPool] can't be deleted because it's still bound to a site or application"
+            }
+        }
+    }
+    else
+    {
+        Write-Verbose -Message "ApplicationPool can't be deleted because the name is different from built-in name [$DscWebServiceDefaultAppPoolName]."
     }
 }
 
@@ -371,23 +484,27 @@ function New-IISWebSite
     [CmdletBinding()]
     param
     (
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $site,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $path,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.Int32]
         $port,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $app,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $appPool,
 
@@ -395,7 +512,8 @@ function New-IISWebSite
         [System.String]
         $applicationPoolIdentityType,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $certificateThumbPrint,
 
@@ -406,35 +524,59 @@ function New-IISWebSite
 
     $siteID = New-SiteID
 
-    Write-Verbose -Message 'Adding App Pool'
-    $null = New-WebAppPool -Name $appPool
-
-    Write-Verbose -Message 'Set App Pool Properties'
-    $appPoolIdentity = 4
-    if ($applicationPoolIdentityType)
+    if (Test-Path IIS:\AppPools\$appPool)
     {
-        # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
-        if ($applicationPoolIdentityType -eq 'LocalSystem')
+        Write-Verbose -Message "Application Pool [$appPool] already exists"
+    }
+    else
+    {
+        Write-Verbose -Message "Adding App Pool [$appPool]"
+        $null = New-WebAppPool -Name $appPool
+
+        Write-Verbose -Message 'Set App Pool Properties'
+        $appPoolIdentity = 4
+
+        if ($applicationPoolIdentityType)
         {
-            $appPoolIdentity = 0
+            # LocalSystem = 0, LocalService = 1, NetworkService = 2, SpecificUser = 3, ApplicationPoolIdentity = 4
+            switch ($applicationPoolIdentityType)
+            {
+                'LocalSystem'
+                {
+                    $appPoolIdentity = 0
+                }
+
+                'LocalService'
+                {
+                    $appPoolIdentity = 1
+                }
+
+                'NetworkService'
+                {
+                    $appPoolIdentity = 2
+                }
+
+                'ApplicationPoolIdentity'
+                {
+                    $appPoolIdentity = 4
+                }
+
+                default {
+                    throw "Invalid value [$applicationPoolIdentityType] for parameter -applicationPoolIdentityType"
+                }
+            }
         }
-        elseif ($applicationPoolIdentityType -eq 'LocalService')
-        {
-            $appPoolIdentity = 1
-        }
-        elseif ($applicationPoolIdentityType -eq 'NetworkService')
-        {
-            $appPoolIdentity = 2
-        }
+
+        $appPoolItem = Get-Item -Path IIS:\AppPools\$appPool
+        $appPoolItem.managedRuntimeVersion = 'v4.0'
+        $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
+        $appPoolItem.processModel.identityType = $appPoolIdentity
+        $appPoolItem | Set-Item
+
     }
 
-    $appPoolItem = Get-Item IIS:\AppPools\$appPool
-    $appPoolItem.managedRuntimeVersion = 'v4.0'
-    $appPoolItem.enable32BitAppOnWin64 = $enable32BitAppOnWin64
-    $appPoolItem.processModel.identityType = $appPoolIdentity
-    $appPoolItem | Set-Item
-
     Write-Verbose -Message 'Add and Set Site Properties'
+
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
         $null = New-WebSite -Name $site -Id $siteID -Port $port -IPAddress "*" -PhysicalPath $path -ApplicationPool $appPool
@@ -506,16 +648,19 @@ function New-PSWSEndpoint
     (
         # Unique Name of the IIS Site
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $site = 'PSWS',
 
         # Physical path for the IIS Endpoint on the machine (under inetpub)
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $path = "$env:SystemDrive\inetpub\PSWS",
 
         # Web.config file
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $cfgfile = 'web.config',
 
@@ -526,8 +671,14 @@ function New-PSWSEndpoint
 
         # IIS Application Name for the Site
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $app = 'PSWS',
+
+        # IIS Application Name for the Site
+        [Parameter()]
+        [System.String]
+        $appPool,
 
         # IIS App Pool Identity Type - must be one of LocalService, LocalSystem, NetworkService, ApplicationPoolIdentity
         [Parameter()]
@@ -537,6 +688,7 @@ function New-PSWSEndpoint
 
         # WCF Service SVC file
         [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String]
         $svc = 'PSWS.svc',
 
@@ -578,7 +730,6 @@ function New-PSWSEndpoint
 
         # Any dependent PowerShell Scipts/Modules that need to be deployed to the IIS endpoint application root
         [Parameter()]
-        [ValidateNotNullOrEmpty()]
         [System.String[]]
         $psFiles,
 
@@ -603,10 +754,16 @@ function New-PSWSEndpoint
         $Enable32BitAppOnWin64 = $false
     )
 
+    if (-not $appPool)
+    {
+        $appPool = $DscWebServiceDefaultAppPoolName
+    }
+
     $script:wevtutil = "$env:windir\system32\Wevtutil.exe"
 
     $svcName = Split-Path $svc -Leaf
     $protocol = 'https:'
+
     if ($certificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
         $protocol = 'http:'
@@ -615,13 +772,26 @@ function New-PSWSEndpoint
     # Get Machine Name
     $cimInstance = Get-CimInstance -ClassName Win32_ComputerSystem -Verbose:$false
 
-    Write-Verbose ("Setting up endpoint at - $protocol//" + $cimInstance.Name + ':' + $port + '/' + $svcName)
-    Initialize-Endpoint -site $site -path $path -cfgfile $cfgfile -port $port -app $app `
-                        -applicationPoolIdentityType $applicationPoolIdentityType -svc $svc -mof $mof `
-                        -dispatch $dispatch -asax $asax -dependentBinaries $dependentBinaries `
-                        -language $language -dependentMUIFiles $dependentMUIFiles -psFiles $psFiles `
-                        -removeSiteFiles $removeSiteFiles -certificateThumbPrint $certificateThumbPrint `
-                        -enable32BitAppOnWin64 $Enable32BitAppOnWin64
+    Write-Verbose -Message "Setting up endpoint at - $protocol//$($cimInstance.Name):$port/$svcName"
+    Initialize-Endpoint `
+        -appPool $appPool `
+        -site $site `
+        -path $path `
+        -cfgfile $cfgfile `
+        -port $port `
+        -app $app `
+        -applicationPoolIdentityType $applicationPoolIdentityType `
+        -svc $svc `
+        -mof $mof `
+        -dispatch $dispatch `
+        -asax $asax `
+        -dependentBinaries $dependentBinaries `
+        -language $language `
+        -dependentMUIFiles $dependentMUIFiles `
+        -psFiles $psFiles `
+        -removeSiteFiles $removeSiteFiles `
+        -certificateThumbPrint $certificateThumbPrint `
+        -enable32BitAppOnWin64 $Enable32BitAppOnWin64
 
     if ($EnablePSWSETW)
     {
@@ -655,48 +825,25 @@ function Remove-PSWSEndpoint
 
     # Get the site to remove
     $site = Get-Website -Name $siteName
+
     if ($site)
     {
-        if ('Started' -eq $site.state)
-        {
-            Write-Verbose -Message "Stopping WebSite $($site.name)"
-            $website = Stop-Website -Name $site.name -Passthru
-            if ('Started' -eq $website.state)
-            {
-                Write-Error -Message "Unable to stop WebSite $($site.name)" -ErrorAction:Stop
-            }
-        }
-
         # And the pool it is using
         $pool = $site.applicationPool
-
         # Get the path so we can delete the files
         $filePath = $site.PhysicalPath
 
         # Remove the actual site.
-        Remove-Website -Name $siteName
-        <#
-          There may be running requests, wait a little
-          I had an issue where the files were still in use
-          when I tried to delete them
-        #>
-        Start-Sleep -Milliseconds 2000
+        Update-Site -site $site -siteAction Remove
 
         # Remove the files for the site
-        If (Test-Path -Path $filePath)
+        if (Test-Path -Path $filePath)
         {
             Get-ChildItem -Path $filePath -Recurse | Remove-Item -Recurse -Force
             Remove-Item -Path $filePath -Force
         }
 
-        # Find out whether any other site is using this pool
-        $filter = "/system.applicationHost/sites/site/application[@applicationPool='" + $pool + "']"
-        $apps = (Get-WebConfigurationProperty -Filter $filter -PSPath 'machine/webroot/apphost' -name path).ItemXPath
-        if (-not $apps -or $apps.count -eq 1)
-        {
-           # If we are the only site in the pool, remove the pool as well.
-           Remove-WebAppPool -Name $pool
-        }
+        Remove-AppPool -appPool $pool
     }
     else
     {
@@ -721,22 +868,22 @@ function Set-AppSettingsInWebconfig
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $path,
+        $Path,
 
         # Key to add/update
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $key,
+        $Key,
 
         # Value
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $value
+        $Value
     )
 
-    $webconfig = Join-Path $path 'web.config'
+    $webconfig = Join-Path -Path $Path -ChildPath 'web.config'
     [System.Boolean] $Found = $false
 
     if (Test-Path -Path $webconfig)
@@ -744,24 +891,24 @@ function Set-AppSettingsInWebconfig
         $xml = [System.Xml.XmlDocument] (Get-Content -Path $webconfig)
         $root = $xml.get_DocumentElement()
 
-        foreach( $item in $root.appSettings.add)
+        foreach ($item in $root.appSettings.add)
         {
-            if( $item.key -eq $key )
+            if ($item.key -eq $Key)
             {
-                $item.value = $value;
+                $item.value = $Value;
                 $Found = $true;
             }
         }
 
-        if( -not $Found)
+        if (-not $Found)
         {
             $newElement = $xml.CreateElement('add')
             $nameAtt1 = $xml.CreateAttribute('key')
-            $nameAtt1.psbase.value = $key;
+            $nameAtt1.psbase.value = $Key;
             $null = $newElement.SetAttributeNode($nameAtt1)
 
             $nameAtt2 = $xml.CreateAttribute('value')
-            $nameAtt2.psbase.value = $value;
+            $nameAtt2.psbase.value = $Value;
             $null = $newElement.SetAttributeNode($nameAtt2)
 
             $null = $xml.configuration['appSettings'].AppendChild($newElement)
@@ -867,4 +1014,6 @@ function Set-BindingRedirectSettingInWebConfig
     }
 }
 
-Export-ModuleMember -function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig, Remove-PSWSEndpoint
+Export-ModuleMember `
+    -Function New-PSWSEndpoint, Set-AppSettingsInWebconfig, Set-BindingRedirectSettingInWebConfig, Remove-PSWSEndpoint `
+    -Variable DscWebServiceDefaultAppPoolName

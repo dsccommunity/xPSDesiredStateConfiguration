@@ -33,6 +33,11 @@ function Get-TargetResource
         [System.String]
         $EndpointName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
+
         # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateThumbPrint')]
         [ValidateNotNullOrEmpty()]
@@ -73,8 +78,10 @@ function Get-TargetResource
         $ConfigureFirewall = $true
     )
 
-    # If Certificate Subject is not specified then a value for CertificateThumbprint must be explicitly set instead.
-    # The Mof schema doesn't allow for a mandatory parameter in a parameter set.
+    <#
+      If Certificate Subject is not specified then a value for CertificateThumbprint must be explicitly set instead.
+      The Mof schema doesn't allow for a mandatory parameter in a parameter set.
+    #>
     if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
         throw $LocalizedData.ThrowCertificateThumbprint
@@ -120,6 +127,7 @@ function Get-TargetResource
         $urlPrefix = $website.bindings.Collection[0].protocol + "://"
 
         $ipProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()
+
         if ($ipProperties.DomainName)
         {
             $fqdn = '{0}.{1}' -f $ipProperties.HostName, $ipProperties.DomainName
@@ -143,6 +151,7 @@ function Get-TargetResource
         }
 
         $ConfigureFirewall = Test-PullServerFirewallConfiguration -Port $iisPort
+        $ApplicationPoolName = $webSite.applicationPool
     }
     else
     {
@@ -151,21 +160,22 @@ function Get-TargetResource
     }
 
     $output = @{
-        EndpointName                    = $EndpointName
-        Port                            = $iisPort
-        PhysicalPath                    = $website.physicalPath
-        State                           = $webSite.state
-        DatabasePath                    = $databasePath
-        ModulePath                      = $modulePath
-        ConfigurationPath               = $configurationPath
-        DSCServerUrl                    = $serverUrl
-        Ensure                          = $Ensure
-        RegistrationKeyPath             = $registrationKeyPath
-        AcceptSelfSignedCertificates    = $acceptSelfSignedCertificates
-        UseSecurityBestPractices        = $UseSecurityBestPractices
-        DisableSecurityBestPractices    = $DisableSecurityBestPractices
-        Enable32BitAppOnWin64           = $Enable32BitAppOnWin64
-        ConfigureFirewall               = $ConfigureFirewall
+        EndpointName                 = $EndpointName
+        ApplicationPoolName          = $ApplicationPoolName
+        Port                         = $iisPort
+        PhysicalPath                 = $website.physicalPath
+        State                        = $webSite.state
+        DatabasePath                 = $databasePath
+        ModulePath                   = $modulePath
+        ConfigurationPath            = $configurationPath
+        DSCServerUrl                 = $serverUrl
+        Ensure                       = $Ensure
+        RegistrationKeyPath          = $registrationKeyPath
+        AcceptSelfSignedCertificates = $acceptSelfSignedCertificates
+        UseSecurityBestPractices     = $UseSecurityBestPractices
+        DisableSecurityBestPractices = $DisableSecurityBestPractices
+        Enable32BitAppOnWin64        = $Enable32BitAppOnWin64
+        ConfigureFirewall            = $ConfigureFirewall
     }
 
     if ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic')
@@ -210,6 +220,11 @@ function Set-TargetResource
         [System.String]
         $EndpointName,
 
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
+
         # Port number of the DSC Pull Server IIS Endpoint
         [Parameter()]
         [ValidateRange(1, 65535)]
@@ -240,14 +255,14 @@ function Set-TargetResource
         $CertificateTemplateName = 'WebServer',
 
         [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [ValidateSet('Present', 'Absent')]
         [System.String]
-        $Ensure = "Present",
+        $Ensure = 'Present',
 
         [Parameter()]
-        [ValidateSet("Started", "Stopped")]
+        [ValidateSet('Started', 'Stopped')]
         [System.String]
-        $State = "Started",
+        $State = 'Started',
 
         # Location on the disk where the database is stored
         [Parameter()]
@@ -293,7 +308,7 @@ function Set-TargetResource
 
         # Exceptions of security best practices
         [Parameter()]
-        [ValidateSet("SecureTLSProtocols")]
+        [ValidateSet('SecureTLSProtocols')]
         [System.String[]]
         $DisableSecurityBestPractices,
 
@@ -321,7 +336,7 @@ function Set-TargetResource
     }
 
     # Check parameter values
-    if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq "AllowUnencryptedTraffic"))
+    if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic'))
     {
         throw $LocalizedData.ThrowUseSecurityBestPractice
     }
@@ -330,20 +345,32 @@ function Set-TargetResource
     {
         Write-Warning -Message $LocalizedData.ConfigFirewallDeprecated
     }
+
+    <#
+      If the Pull Server Site should be bound to the non default AppPool
+      ensure that the AppPool already exists
+    #>
+    if ('Present' -eq $Ensure `
+        -and $ApplicationPoolName -ne $DscWebServiceDefaultAppPoolName `
+        -and (-not (Test-Path -Path "IIS:\AppPools\$ApplicationPoolName")))
+    {
+        throw ($LocalizedData.ThrowApplicationPoolNotFound -f $ApplicationPoolName)
+    }
+
     # Initialize with default values
 
     $pathPullServer = "$pshome\modules\PSDesiredStateConfiguration\PullServer"
-    $jet4provider = "System.Data.OleDb"
-    $jet4database = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
-    $eseprovider = "ESENT"
+    $jet4provider = 'System.Data.OleDb'
+    $jet4database = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;'
+    $eseprovider = 'ESENT'
     $esedatabase = "$DatabasePath\Devices.edb"
 
     $cultureInfo = Get-Culture
     $languagePath = $cultureInfo.IetfLanguageTag
     $language = $cultureInfo.TwoLetterISOLanguageName
 
-    # the two letter iso languagename is not actually implemented in the source path, it's always 'en'
-    if (-not (Test-Path -Path $pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll))
+    # The two letter iso languagename is not actually implemented in the source path, it's always 'en'
+    if (-not (Test-Path -Path "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll"))
     {
         $languagePath = 'en'
     }
@@ -368,7 +395,6 @@ function Set-TargetResource
     $pswsMofFileName = "$pathPullServer\PSDSCPullServer.mof"
     $pswsDispatchFileName = "$pathPullServer\PSDSCPullServer.xml"
 
-    # ============ Absent block to remove existing site =========
     if(($Ensure -eq "Absent"))
     {
         if(Test-Path -LiteralPath "IIS:\Sites\$EndpointName")
@@ -379,109 +405,116 @@ function Set-TargetResource
                 [System.Text.RegularExpressions.Regex]::Match($_.bindingInformation,':(\d+):').Groups[1].Value
             }
 
-            # there is a web site, but there shouldn't be one
-            Write-Verbose -Message "Removing web site $EndpointName"
+            # There is a web site, but there shouldn't be one
+            Write-Verbose -Message "Removing web site [$EndpointName]"
             PSWSIISEndpoint\Remove-PSWSEndpoint -SiteName $EndpointName
 
             $portList | ForEach-Object -Process { Remove-PullServerFirewallConfiguration -Port $_ }
         }
 
-        # we are done here, all stuff below is for 'Present'
+        # We are done here, all stuff below is for 'Present'
         return
     }
-    # ===========================================================
 
-    Write-Verbose -Message "Create the IIS endpoint"
-    PSWSIISEndpoint\New-PSWSEndpoint -site $EndpointName `
-                     -path $PhysicalPath `
-                     -cfgfile $webConfigFileName `
-                     -port $Port `
-                     -applicationPoolIdentityType LocalSystem `
-                     -app $EndpointName `
-                     -svc $svcFileName `
-                     -mof $pswsMofFileName `
-                     -dispatch $pswsDispatchFileName `
-                     -asax "$pathPullServer\Global.asax" `
-                     -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
-                     -language $language `
-                     -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
-                     -certificateThumbPrint $certificateThumbPrint `
-                     -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
-                     -Verbose
+    Write-Verbose -Message 'Create the IIS endpoint'
+    PSWSIISEndpoint\New-PSWSEndpoint `
+        -site $EndpointName `
+        -Path $PhysicalPath `
+        -cfgfile $webConfigFileName `
+        -port $Port `
+        -appPool $ApplicationPoolName `
+        -applicationPoolIdentityType LocalSystem `
+        -app $EndpointName `
+        -svc $svcFileName `
+        -mof $pswsMofFileName `
+        -dispatch $pswsDispatchFileName `
+        -asax "$pathPullServer\Global.asax" `
+        -dependentBinaries  "$pathPullServer\Microsoft.Powershell.DesiredStateConfiguration.Service.dll" `
+        -language $language `
+        -dependentMUIFiles  "$pathPullServer\$languagePath\Microsoft.Powershell.DesiredStateConfiguration.Service.Resources.dll" `
+        -certificateThumbPrint $certificateThumbPrint `
+        -Enable32BitAppOnWin64 $Enable32BitAppOnWin64 `
 
-    if ($ConfigureFirewall)
+    switch ($Ensure)
     {
-        Write-Verbose -Message "Enabling firewall exception for port $port"
-        Add-PullServerFirewallConfiguration -Port $port
-    }
-    else
-    {
-        Write-Verbose -Message "Disabling firewall exception for port $port"
-        Remove-PullServerFirewallConfiguration -Port $port
+        'Present'
+        {
+            if ($ConfigureFirewall)
+            {
+                Write-Verbose -Message "Enabling firewall exception for port $port"
+                Add-PullServerFirewallConfiguration -Port $port
+            }
+        }
+
+        'Absent'
+        {
+            Write-Verbose -Message "Disabling firewall exception for port $port"
+            Remove-PullServerFirewallConfiguration -Port $port
+        }
     }
 
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
     Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "windows"
 
-    if($SqlProvider)
+    if ($SqlProvider)
     {
-        Write-Verbose -Message "Set values into the web.config that define the SQL Connection "
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $SqlConnectionString
+        Write-Verbose -Message 'Set values into the web.config that define the SQL Connection'
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $jet4provider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionst' -Value $SqlConnectionString
         if ($isBlue)
         {
-            Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
+            Set-BindingRedirectSettingInWebConfig -Path $PhysicalPath
         }
     }
     elseif ($isBlue)
     {
-        Write-Verbose -Message "Set values into the web.config that define the repository for BLUE OS"
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+        Write-Verbose -Message 'Set values into the web.config that define the repository for BLUE OS'
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $eseprovider
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionstr' -Value $esedatabase
 
-        Set-BindingRedirectSettingInWebConfig -path $PhysicalPath
+        Set-BindingRedirectSettingInWebConfig -Path $PhysicalPath
     }
     else
     {
-        if($isDownlevelOfBlue)
+        if ($isDownlevelOfBlue)
         {
-            Write-Verbose -Message "Set values into the web.config that define the repository for non-BLUE Downlevel OS"
-            $repository = Join-Path -Path "$DatabasePath" -ChildPath "Devices.mdb"
+            Write-Verbose -Message 'Set values into the web.config that define the repository for non-BLUE Downlevel OS'
+            $repository = Join-Path -Path $DatabasePath -ChildPath 'Devices.mdb'
             Copy-Item -Path "$pathPullServer\Devices.mdb" -Destination $repository -Force
 
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $jet4provider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr" -value $jet4database
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $jet4provider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionstr' -Value $jet4database
         }
         else
         {
-            Write-Verbose -Message "Set values into the web.config that define the repository later than BLUE OS"
-            Write-Verbose -Message "Only ESENT is supported on Windows Server 2016"
+            Write-Verbose -Message 'Set values into the web.config that define the repository later than BLUE OS'
+            Write-Verbose -Message 'Only ESENT is supported on Windows Server 2016'
 
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbprovider" -value $eseprovider
-            PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "dbconnectionstr"-value $esedatabase
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $eseprovider
+            PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionstr' -Value $esedatabase
         }
 
     }
 
-    Write-Verbose -Message "Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules"
+    Write-Verbose -Message 'Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules'
 
     # Create the application data directory calculated above
-    $null = New-Item -path $DatabasePath -itemType "directory" -Force
+    $null = New-Item -Path $DatabasePath -ItemType 'directory' -Force
 
-    $null = New-Item -path "$ConfigurationPath" -itemType "directory" -Force
+    $null = New-Item -Path $ConfigurationPath -ItemType 'directory' -Force
 
-    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ConfigurationPath" -value $configurationPath
+    PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'ConfigurationPath' -Value $configurationPath
 
-    $null = New-Item -path "$ModulePath" -itemType "directory" -Force
+    $null = New-Item -Path $ModulePath -ItemType 'directory' -Force
 
-    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "ModulePath" -value $ModulePath
+    PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'ModulePath' -Value $ModulePath
 
-    $null = New-Item -path "$RegistrationKeyPath" -itemType "directory" -Force
+    $null = New-Item -Path $RegistrationKeyPath -ItemType 'directory' -Force
 
-    PSWSIISEndpoint\Set-AppSettingsInWebconfig -path $PhysicalPath -key "RegistrationKeyPath" -value $registrationKeyPath
+    PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'RegistrationKeyPath' -Value $registrationKeyPath
 
-    if($AcceptSelfSignedCertificates)
+    if ($AcceptSelfSignedCertificates)
     {
         Write-Verbose -Message 'Accepting self signed certificates from incoming hosts'
         Enable-IISSelfSignedModule -EndpointName $EndpointName -Enable32BitAppOnWin64:$Enable32BitAppOnWin64
@@ -491,7 +524,7 @@ function Set-TargetResource
         Disable-IISSelfSignedModule -EndpointName $EndpointName
     }
 
-    if($UseSecurityBestPractices)
+    if ($UseSecurityBestPractices)
     {
         UseSecurityBestPractices\Set-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices
     }
@@ -509,6 +542,11 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [System.String]
         $EndpointName,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
         # Port number of the DSC Pull Server IIS Endpoint
         [Parameter()]
@@ -620,33 +658,47 @@ function Test-TargetResource
 
     :WebSiteTests Do
     {
-        Write-Verbose -Message "Check Ensure"
-        if(($Ensure -eq "Present" -and $null -eq $website))
+        Write-Verbose -Message 'Check Ensure'
+
+        if (($Ensure -eq 'Present' -and $null -eq $website))
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "The Website $EndpointName is not present"
             break
         }
-        if(($Ensure -eq "Absent" -and $null -ne $website))
+
+        if (($Ensure -eq 'Absent' -and $null -ne $website))
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "The Website $EndpointName is present but should not be"
             break
         }
-        if(($Ensure -eq "Absent" -and $null -eq $website))
+
+        if (($Ensure -eq 'Absent' -and $null -eq $website))
         {
             $desiredConfigurationMatch = $true
             Write-Verbose -Message "The Website $EndpointName is not present as requested"
             break
         }
-        # the other case is: Ensure and exist, we continue with more checks
 
-        Write-Verbose -Message "Check Port"
+        # The other case is: Ensure and exist, we continue with more checks
+
+        Write-Verbose -Message 'Check Port'
         $actualPort = $website.bindings.Collection[0].bindingInformation.Split(":")[1]
+
         if ($Port -ne $actualPort)
         {
             $desiredConfigurationMatch = $false
             Write-Verbose -Message "Port for the Website $EndpointName does not match the desired state."
+            break
+        }
+
+        Write-Verbose -Message 'Check Application Pool'
+
+        if ($ApplicationPoolName -ne $website.applicationPool)
+        {
+            $desiredConfigurationMatch = $false
+            Write-Verbose -Message "Currently bound application pool [$($website.applicationPool)] does not match the desired state [$ApplicationPoolName]."
             break
         }
 
@@ -1437,7 +1489,7 @@ function Test-IISSelfSignedModuleEnabled
     }
     else
     {
-        Write-Error -Message "Website [$EndpointName] not found"
+        throw "Website [$EndpointName] not found"
     }
 }
 
