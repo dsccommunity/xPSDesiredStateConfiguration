@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+param ()
+
 <#
     Please note that some of these tests depend on each other.
     They must be run in the order given - if one test fails, subsequent tests may
@@ -20,281 +23,409 @@ $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceName 'MSFT_xWindowsProcess' `
     -TestType 'Integration'
 
-try
+<#
+    .SYNOPSIS
+        Starts the specified DSC Configuration and verifies that it executes
+        without throwing.
+
+    .PARAMETER ConfigFile
+        Path to the DSC Config script.
+
+    .PARAMETER ConfigurationName
+        The Name of the DSC Configuration.
+
+    .PARAMETER ConfigurationPath
+        Path to the Compiled DSC Configuration.
+
+    .PARAMETER DscParams
+        Parameters to pass to Start-DscConfiguration.
+#>
+function Start-DscConfigurationAndVerify
 {
-    Describe 'xWindowsProcess Integration Tests without Credential' {
-        $testProcessPath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                                     -ChildPath 'WindowsProcessTestProcess.exe'
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $ConfigFile,
 
-        $logFilePath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                                 -ChildPath 'processTestLog.txt'
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ConfigurationName,
 
-        $configFile = Join-Path -Path $PSScriptRoot `
-                                -ChildPath 'MSFT_xWindowsProcess.config.ps1'
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $ConfigurationPath,
 
-        Context 'Should stop any current instances of the testProcess running' {
-            $configurationName = 'MSFT_xWindowsProcess_Setup'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $DscParams
+    )
 
-            It 'Should compile without throwing' {
-                {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
+    It 'Should compile without throwing' {
+        {
+            .$configFile -ConfigurationName $configurationName
+            & $configurationName @dscParams
+            Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
+        } | Should -Not -Throw
+    }
+}
 
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Absent' `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+<#
+    .SYNOPSIS
+        Performs common post Set-DscConfiguration tests.
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
+    .PARAMETER Path
+        Corresponds to the Path parameter of xWindowsProcess.
 
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
+    .PARAMETER Arguments
+        Corresponds to the Arguments parameter of xWindowsProcess.
 
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Absent'
-            }
+    .PARAMETER Ensure
+        Corresponds to the Ensure parameter of xWindowsProcess.
 
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-        }
+    .PARAMETER ProcessCount
+        The expected count of running processes for the specified Process.
+        Allows Null.
+#>
+function Start-GetDscConfigurationAndVerify
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $Path,
 
-        Context 'Should start a new testProcess instance as running' {
-            $configurationName = 'MSFT_xWindowsProcess_StartProcess'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Arguments,
 
-            It 'Should not have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure,
 
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Present' `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+        [Parameter()]
+        [Nullable[System.Int32]]
+        $ProcessCount
+    )
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
+    It 'Should call Get-DscConfiguration without throwing and get expected results' {
+        { $script:currentConfig = Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
 
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
+        $script:currentConfig.Path | Should -Be $Path
+        $script:currentConfig.Arguments | Should -Be $Arguments
+        $script:currentConfig.Ensure | Should -Be $Ensure
+        $script:currentConfig.ProcessCount | Should -Be $ProcessCount
+    }
+}
 
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Present'
-                $currentConfig.ProcessCount | Should -Be 1
-            }
+<#
+    .SYNOPSIS
+        Starts the test process using DSC and verifies that it is started.
 
-            It 'Should create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
-        }
+    .PARAMETER Path
+        Corresponds to the Path parameter of xWindowsProcess.
 
-        Context 'Should not start a second new testProcess instance when one is already running' {
-            $configurationName = 'MSFT_xWindowsProcess_StartSecondProcess'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+    .PARAMETER Arguments
+        Corresponds to the Arguments parameter of xWindowsProcess.
 
-            It 'Should have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
+    .PARAMETER Ensure
+        Corresponds to the Ensure parameter of xWindowsProcess.
 
-            It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should -Not -Throw
-            }
+    .PARAMETER ProcessCount
+        The expected count of running processes for the specified Process.
+        Allows Null.
 
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Present' `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+    .PARAMETER ContextLabel
+        The Context label to pass to Pester.
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
+    .PARAMETER DscParams
+        Parameters to pass to Start and Get-DscConfiguration.
+#>
+function Start-TestProcessUsingDscAndVerify
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $Path,
 
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Arguments,
 
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Present'
-                $currentConfig.ProcessCount | Should -Be 1
-            }
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure,
 
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-        }
+        [Parameter()]
+        [Nullable[System.Int32]]
+        $ProcessCount,
 
-        Context 'Should stop the testProcess instance from running' {
-            $configurationName = 'MSFT_xWindowsProcess_StopProcesses'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        [Parameter()]
+        [System.String]
+        $ContextLabel = 'Should start a new instance of the test process',
 
-            It 'Should not have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $DscParams
+    )
 
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Absent' `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+    Context $ContextLabel {
+        $configurationName = 'MSFT_xWindowsProcess_StartProcess'
+        $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        $dscParams.OutputPath = $configurationPath
+        $dscParams.Ensure = 'Present'
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
+        Start-DscConfigurationAndVerify `
+            -ConfigFile $configFile `
+            -ConfigurationName $configurationName `
+            -ConfigurationPath $configurationPath `
+            -DscParams $dscParams
 
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
+        Start-GetDscConfigurationAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Present' `
+            -ProcessCount 1
+    }
+}
 
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Absent'
-            }
+<#
+    .SYNOPSIS
+        Stops the test process using DSC and verifies that it is stopped.
 
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-        }
+    .PARAMETER Path
+        Corresponds to the Path parameter of xWindowsProcess.
 
-        Context 'Should return correct amount of processes running when more than 1 are running' {
-            $configurationName = 'MSFT_xWindowsProcess_StartMultipleProcesses'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+    .PARAMETER Arguments
+        Corresponds to the Arguments parameter of xWindowsProcess.
 
-            It 'Should not have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
+    .PARAMETER Ensure
+        Corresponds to the Ensure parameter of xWindowsProcess.
 
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Present' `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+    .PARAMETER ProcessCount
+        The expected count of running processes for the specified Process.
+        Allows Null.
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
+    .PARAMETER ContextLabel
+        The Context label to pass to Pester.
 
-            It 'Should start another process running' {
-                Start-Process -FilePath $testProcessPath -ArgumentList @($logFilePath)
-            }
+    .PARAMETER DscParams
+        Parameters to pass to Start and Get-DscConfiguration.
+#>
+function Stop-TestProcessUsingDscAndVerify
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $Path,
 
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Arguments,
 
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Present'
-                $currentConfig.ProcessCount | Should -Be 2
-            }
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure,
 
-            It 'Should create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
-        }
+        [Parameter()]
+        [Nullable[System.Int32]]
+        $ProcessCount,
 
-        Context 'Should stop all of the testProcess instances from running' {
-            $configurationName = 'MSFT_xWindowsProcess_StopAllProcesses'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        [Parameter()]
+        [System.String]
+        $ContextLabel = 'Should stop all instances of the test process',
 
-            It 'Should have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $DscParams
+    )
 
-            It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should -Not -Throw
-            }
+    Context $ContextLabel {
+        $configurationName = 'MSFT_xWindowsProcess_StopAllProcesses'
+        $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        $dscParams.OutputPath = $configurationPath
+        $dscParams.Ensure = 'Absent'
 
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Absent' `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+        Start-DscConfigurationAndVerify `
+            -ConfigFile $configFile `
+            -ConfigurationName $configurationName `
+            -ConfigurationPath $configurationPath `
+            -DscParams $dscParams
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
-
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Absent'
-            }
-
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-        }
+        Start-GetDscConfigurationAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Absent' `
+            -ProcessCount $null
     }
 
-    Describe 'xWindowsProcess Integration Tests with Credential' {
+    # Force a stop on any running test processes just in case they failed to stop via DSC
+    Get-Process | Where-Object -FilterScript {$_.Path -like $Path} | `
+        Stop-Process -Confirm:$false -Force
+}
+
+<#
+    .SYNOPSIS
+        Starts two instances of the test process, one using DSC, and one manually,
+        and tests whether Get-DscConfiguration returns the right number of
+        processes.
+
+    .PARAMETER Path
+        Corresponds to the Path parameter of xWindowsProcess.
+
+    .PARAMETER Arguments
+        Corresponds to the Arguments parameter of xWindowsProcess.
+
+    .PARAMETER Ensure
+        Corresponds to the Ensure parameter of xWindowsProcess.
+
+    .PARAMETER ProcessCount
+        The expected count of running processes for the specified Process.
+        Allows Null.
+
+    .PARAMETER ContextLabel
+        The Context label to pass to Pester.
+
+    .PARAMETER DscParams
+        Parameters to pass to Start and Get-DscConfiguration.
+#>
+function Start-AdditionalTestProcessAndVerify
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $Path,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Arguments,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure,
+
+        [Parameter()]
+        [Nullable[System.Int32]]
+        $ProcessCount,
+
+        [Parameter()]
+        [System.String]
+        $ContextLabel = 'Should return the correct amount of processes when more than 1 are running',
+
+        [Parameter(Mandatory = $true)]
+        [System.Collections.Hashtable]
+        $DscParams
+    )
+
+    Context $ContextLabel {
+        $configurationName = 'MSFT_xWindowsProcess_CheckForMultipleProcesses'
+        $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        $dscParams.OutputPath = $configurationPath
+        $dscParams.Ensure = 'Present'
+
+        Start-DscConfigurationAndVerify `
+            -ConfigFile $configFile `
+            -ConfigurationName $configurationName `
+            -ConfigurationPath $configurationPath `
+            -DscParams $dscParams
+
+        # Start another instance of the same process using the same credentials.
+        $startProcessParams = @{
+            FilePath = $Path
+        }
+
+        if (!([String]::IsNullOrEmpty($Arguments)))
+        {
+            $startProcessParams.ArgumentList = @("`"$Arguments`"")
+        }
+
+        if ($null -ne $Credential)
+        {
+            $startProcessParams.Add('Credential', $Credential)
+        }
+
+        Start-Process @startProcessParams
+
+        # Run Get-DscConfiguration and verify that 2 processes are detected
+        Start-GetDscConfigurationAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Present' `
+            -ProcessCount 2
+    }
+}
+
+<#
+    .SYNOPSIS
+        Performs commmon sets of tests using
+        Start, Get, Set, and Test - DscConfiguration.
+
+    .PARAMETER Path
+        Corresponds to the Path parameter of xWindowsProcess.
+
+    .PARAMETER Arguments
+        Corresponds to the Arguments parameter of xWindowsProcess.
+
+    .PARAMETER ConfigFile
+        Path to the DSC Configuration script.
+
+    .PARAMETER Credential
+        Corresponds to the Credential parameter of xWindowsProcess.
+#>
+function Invoke-CommonResourceTesting
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DescribeLabel,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_})]
+        [System.String]
+        $Path,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [System.String]
+        $Arguments,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ConfigFile,
+
+        [Parameter()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credential
+    )
+
+    Describe $DescribeLabel {
         $ConfigData = @{
             AllNodes = @(
                 @{
@@ -307,296 +438,148 @@ try
             )
         }
 
-        $testCredential = Get-TestAdministratorAccountCredential
-
-        $testProcessPath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                                     -ChildPath 'WindowsProcessTestProcess.exe'
-        $logFilePath = Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                                 -ChildPath 'processTestLog.txt'
-
-        $configFile = Join-Path -Path $PSScriptRoot `
-                                -ChildPath 'MSFT_xWindowsProcessWithCredential.config.ps1'
-
-        Context 'Should stop any current instances of the testProcess running' {
-            $configurationName = 'MSFT_xWindowsProcess_SetupWithCredential'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-
-            It 'Should compile without throwing' {
-                {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Absent' `
-                                         -Credential $testCredential `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath `
-                                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
-
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
-
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Absent'
-            }
-
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
+        $dscParams = @{
+            Path = $Path
+            Arguments = $Arguments
+            Ensure = 'Present'
+            ErrorAction = 'Stop'
+            OutputPath = ''
+            ConfigurationData = $ConfigData
         }
 
-        Context 'Should start a new testProcess instance as running' {
-            $configurationName = 'MSFT_xWindowsProcess_StartProcessWithCredential'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-
-            It 'Should not have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Present' `
-                                         -Credential $testCredential `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath `
-                                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
-
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
-
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Present'
-                $currentConfig.ProcessCount | Should -Be 1
-            }
-
-            It 'Should create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
+        if ($null -ne $Credential)
+        {
+            $dscParams.Add('Credential', $Credential)
         }
 
-        Context 'Should not start a second new testProcess instance when one is already running' {
-            $configurationName = 'MSFT_xWindowsProcess_StartSecondProcessWithCredential'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        # Stop all test process instances and DSC configurations.
+        Stop-TestProcessUsingDscAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Absent' `
+            -ProcessCount $null `
+            -DscParams $dscParams
 
-            It 'Should have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
+        # Start test process using DSC.
+        Start-TestProcessUsingDscAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Present' `
+            -ProcessCount 1 `
+            -DscParams $dscParams
 
-            It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should -Not -Throw
-            }
+        # Run same config again. Should not start a second new test Process instance when one is already running.
+        Start-TestProcessUsingDscAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Present' `
+            -ProcessCount 1 `
+            -ContextLabel 'Should detect when multiple process instances are running' `
+            -DscParams $dscParams
 
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Present' `
-                                         -Credential $testCredential `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath `
-                                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+        # Stop all test process instances and DSC configurations.
+        Stop-TestProcessUsingDscAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Absent' `
+            -ProcessCount $null `
+            -DscParams $dscParams
 
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
+        # Start test process using DSC, then start a test process outside of DSC
+        Start-AdditionalTestProcessAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Absent' `
+            -ProcessCount 2 `
+            -DscParams $dscParams
 
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
+        # Stop all test process instances and DSC configurations.
+        Stop-TestProcessUsingDscAndVerify `
+            -Path $Path `
+            -Arguments $Arguments `
+            -Ensure 'Absent' `
+            -ProcessCount $null `
+            -DscParams $dscParams
+    }
+}
 
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Present'
-                $currentConfig.ProcessCount | Should -Be 1
-            }
+try
+{
+    # Setup test process paths.
+    $notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
+    $powershellExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'WindowsPowershell', 'v1.0', 'powershell.exe'))
+    $iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
+    # Setup test combination variables
+    $testPathAndArgsCombos = @(
+        @{
+            Description = 'Process Path Without Spaces, No Arguments'
+            Path = $notepadExePath
+            Arguments = ''
         }
 
-        Context 'Should stop the testProcess instance from running' {
-            $configurationName = 'MSFT_xWindowsProcess_StopProcessesWithCredential'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-
-            It 'Should not have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Absent' `
-                                         -Credential $testCredential `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath `
-                                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
-
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
-
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Absent'
-            }
-
-            It 'Should not create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
+        @{
+            Description = 'Process Path With Spaces, No Arguments'
+            Path = $iexplorerExePath
+            Arguments = ''
         }
 
-        Context 'Should return correct amount of processes running when more than 1 are running' {
-            $configurationName = 'MSFT_xWindowsProcess_StartMultipleProcessesWithCredential'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-
-            # Make sure test admin account has permissions on log folder
-            Add-PathPermission `
-                -Path (Split-Path -Path $logFilePath) `
-                -IdentityReference $testCredential.UserName
-
-            It 'Should not have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $false
-            }
-
-            It 'Should compile without throwing' {
-                {
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Present' `
-                                         -ErrorAction 'Stop' `
-                                         -Credential $testCredential `
-                                         -OutputPath $configurationPath `
-                                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
-
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
-
-            # Start another instance of the same process using the same credentials.
-            It 'Should start another process running' {
-                Start-Process `
-                    -FilePath $testProcessPath `
-                    -ArgumentList @($logFilePath) `
-                    -Credential $testCredential
-            }
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
-
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Present'
-                $currentConfig.ProcessCount | Should -Be 2
-            }
-
-            It 'Should create a logfile' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
-            }
+        @{
+            Description = 'Process Path Without Spaces, Arguments Without Spaces'
+            Path = $powershellExePath
+            Arguments = "30|Start-Sleep"
         }
 
-        Context 'Should stop all of the testProcess instances from running' {
-            $configurationName = 'MSFT_xWindowsProcess_StopAllProcessesWithCredential'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+        @{
+            Description = 'Process Path With Spaces, Arguments Without Spaces'
+            Path = $iexplorerExePath
+            Arguments = 'https://github.com/PowerShell/xPSDesiredStateConfiguration'
+        }
 
-            It 'Should have a logfile already present' {
-                $pathResult = Test-Path $logFilePath
-                $pathResult | Should -Be $true
+        @{
+            Description = 'Process Path Without Spaces, Arguments With Spaces'
+            Path = $powershellExePath
+            Arguments = "Start-Sleep -Seconds 30"
+        }
+
+        @{
+            Description = 'Process Path With Spaces, Arguments With Spaces'
+            Path = $iexplorerExePath
+            Arguments = "https://github.com/PowerShell/xPSDesiredStateConfiguration with spaces"
+        }
+    )
+
+    $credentialCombos = @(
+        @{
+            Description = 'No Credentials'
+            Credential = $null
+            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsProcess.config.ps1'
+        }
+
+        @{
+            Description = 'With Credentials'
+            Credential = Get-TestAdministratorAccountCredential
+            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsProcessWithCredential.config.ps1'
+        }
+    )
+
+    # Perform tests on each variable combination
+    foreach ($pathAndArgsCombo in $testPathAndArgsCombos)
+    {
+        foreach ($credentialCombo in $credentialCombos)
+        {
+            $params = @{
+                Path = $pathAndArgsCombo.Path
+                Arguments = $pathAndArgsCombo.Arguments
+                Credential = $credentialCombo.Credential
+                ConfigFile = $credentialCombo.ConfigFile
             }
 
-            It 'Should not throw when removing the log file' {
-                { Remove-Item -Path $logFilePath } | Should -Not -Throw
-            }
+            $params.Add('DescribeLabel', "$($pathAndArgsCombo.Description), $($credentialCombo.Description)")
+            $params.Remove('FolderDescription')
+            $params.Remove('CredentialDescription')
 
-            It 'Should compile without throwing' {
-                {
-                    if (Test-Path -Path $logFilePath)
-                    {
-                        Remove-Item -Path $logFilePath
-                    }
-
-                    .$configFile -ConfigurationName $configurationName
-                    & $configurationName -Path $testProcessPath `
-                                         -Arguments $logFilePath `
-                                         -Ensure 'Absent' `
-                                         -Credential $testCredential `
-                                         -ErrorAction 'Stop' `
-                                         -OutputPath $configurationPath `
-                                         -ConfigurationData $ConfigData
-                    Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
-
-            # Wait a moment for the process to stop/start
-            $null = Start-Sleep -Seconds 2
-
-            It 'Should be able to call Get-DscConfiguration without throwing' {
-                { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
-            }
-
-            It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Path | Should -Be $testProcessPath
-                $currentConfig.Arguments | Should -Be $logFilePath
-                $currentConfig.Ensure | Should -Be 'Absent'
-            }
+            Invoke-CommonResourceTesting @params
         }
     }
 }

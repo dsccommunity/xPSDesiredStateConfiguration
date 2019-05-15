@@ -22,24 +22,18 @@ try
         BeforeAll {
             $script:configurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xProcessSet.config.ps1'
 
-            $originalProcessPath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'WindowsProcessTestProcessSet.exe'
-            $copiedProcessPath = Join-Path -Path $TestDrive -ChildPath 'TestWindowsProcess2.exe'
+            # Setup test process paths.
+            $script:notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
+            $script:iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
-            Copy-Item -Path $originalProcessPath -Destination $copiedProcessPath -Force
-
-            $script:processPaths = @( $originalProcessPath, $copiedProcessPath)
+            $script:processPaths = @( $script:notepadExePath, $script:iexplorerExePath)
         }
 
         AfterAll {
             foreach ($processPath in $script:processPaths)
             {
-                $processName = [System.IO.Path]::GetFileNameWithoutExtension($processPath)
-                $process = Get-Process -Name $processName -ErrorAction 'SilentlyContinue'
-
-                if ($null -ne $process)
-                {
-                    Stop-Process -Name $processName -ErrorAction 'SilentlyContinue' -Force
-                }
+                Get-Process | Where-Object -FilterScript {$_.Path -like $processPath} | `
+                    Stop-Process -Confirm:$false -Force
             }
         }
 

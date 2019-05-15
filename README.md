@@ -166,6 +166,12 @@ None
   endpoint. Use "AllowUnencryptedTraffic" for setting up a non SSL based
   endpoint.
 * **Port**: Port for web service.
+* **ApplicationPoolName**: The name of IIS ApplicationPool to use for the Pull
+  Server. If not specified a pool with name 'PSWS' will be created and bound to
+  the Pull Server instance. Preferably the new application pool is created by
+  using the __xWebAppPool__ resource from the
+  [xWebAdministration](https://github.com/PowerShell/xWebAdministration) DSC
+  module.
 * **PhysicalPath**: Folder location where the content of the web service
   resides.
 * **Ensure**: Ensures that the web service is **Present** or **Absent**
@@ -188,6 +194,42 @@ None
   best practice security settings.
 * **Enable32BitAppOnWin64**: When this property is set to true, Pull Server
   will run on a 32 bit process on a 64 bit machine.
+* **ConfigureFirewall**: When this property is set to true, a Windows Firewall
+  rule will be created, which allows incoming HTTP traffic for the
+  selected **Port**. Default: **true**
+
+**Remark:**
+
+Configuring a Windows Firewall rule (exception) for a DSC Pull Server instance
+by using the xDscWebService resource is **considered deprecated** and thus will
+be removed in the future.
+
+DSC will issue a warning when the **ConfigureFirewall** property is set to
+**true**. Currently the default value is **true** to maintain backwards
+compatibility with existing configurations. At a later time the default value
+will be set to **false** and in the last step the  support to create a
+firewall rule using xDscWebService will be removed.
+
+All users are requested to adjust existing configurations so that the
+**ConfigureFirewall** is set to **false** and a required Windows Firewall rule
+is created by using the **Firewall** resource from the
+[NetworkingDsc](https://github.com/PowerShell/NetworkingDsc) module.
+
+#### Examples
+
+##### Pull Server
+
+* [A Pull Server with a separately defined IIS Application Pool and firewall
+  rule](./Examples/Sample_xDscWebService_Preferred.ps1)
+* [A Pull Server using a SQL Server as backend](./Examples/Sample_xDscWebServiceRegistration_UseSQLProvider.ps1)
+* [A Pull Server default configuration](./Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1)
+* [A Pull Server with an enhanced security configuration and a firewall rule](./Examples/Sample_xDscWebServiceRegistration.ps1)
+* [A Pull Server using the security best practice configuration](./Examples/Sample_xDscWebServiceRegistrationWithSecurityBestPractices.ps1)
+* [Removing a Pull Server instance](./Examples/Sample_xDscWebServiceRemoval.ps1)
+
+##### Client
+
+* [Common Client (Server) Configuration](./Examples/Sample_xDscWebService_Client.ps1)
 
 ### xGroup
 
