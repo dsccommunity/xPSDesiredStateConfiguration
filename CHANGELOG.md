@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 8.7.0.0
+
 - MSFT_xWindowsProcess:
   - Fixes issue where a process will fail to be created if a $Path is passed
     that contains one or more spaces, and the resource is using $Credentials.
