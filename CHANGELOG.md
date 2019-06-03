@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+* Ports fix for the following issue:
+  [Issue #142](https://github.com/PowerShell/PSDscResources/issues/142)
+  Fixes issue where MsiPackage Integration tests fail if the test HttpListener
+  fails to start. Moves the test HttpListener objects to dynamically assigned,
+  higher numbered ports to avoid conflicts with other services, and also checks
+  to ensure that the ports are available before using them. Adds checks to
+  ensure that no outstanding HTTP server jobs are running before attempting to
+  setup a new one. Also adds additional instrumentation to make it easier to
+  troubleshoot issues with the test HttpListener objects in the future.
+
 ## 8.7.0.0
 
 - MSFT_xWindowsProcess:
