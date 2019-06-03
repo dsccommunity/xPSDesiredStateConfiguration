@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Ports fix for the following issue:
+- Ports fix for the following issue:
   [Issue #142](https://github.com/PowerShell/PSDscResources/issues/142)
   Fixes issue where MsiPackage Integration tests fail if the test HttpListener
   fails to start. Moves the test HttpListener objects to dynamically assigned,
