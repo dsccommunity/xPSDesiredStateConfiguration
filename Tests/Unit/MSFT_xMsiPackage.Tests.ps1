@@ -236,13 +236,13 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Assert-PathExtensionValid'; Times = 1 }
                     @{ Command = 'New-LogFile'; Times = 1 }
                     @{ Command = 'New-PSDrive'; Times = 0 }
-                    @{ Command = 'Test-Path'; Times = 2; Custom = 'to the package cache' }
+                    @{ Command = 'Test-Path'; Times = 3; Custom = 'to the package cache' }
                     @{ Command = 'New-Item'; Times = 0; Custom = 'directory for the package cache' }
                     @{ Command = 'New-Object'; Times = 1; Custom = 'file stream to copy the response to' }
                     @{ Command = 'Get-WebRequestResponse'; Times = 1 }
                     @{ Command = 'Copy-ResponseStreamToFileStream'; Times = 1 }
                     @{ Command = 'Close-Stream'; Times = 2 }
-                    @{ Command = 'Test-Path'; Times = 2; Custom = 'to the MSI file' }
+                    @{ Command = 'Test-Path'; Times = 3; Custom = 'to the MSI file' }
                     @{ Command = 'Assert-FileValid'; Times = 1 }
                     @{ Command = 'Get-MsiProductCode'; Times = 1 }
                     @{ Command = 'Start-MsiProcess'; Times = 1 }
@@ -267,13 +267,13 @@ Describe 'xMsiPackage Unit Tests' {
                     @{ Command = 'Assert-PathExtensionValid'; Times = 1 }
                     @{ Command = 'New-LogFile'; Times = 1 }
                     @{ Command = 'New-PSDrive'; Times = 0 }
-                    @{ Command = 'Test-Path'; Times = 2; Custom = 'to the package cache' }
+                    @{ Command = 'Test-Path'; Times = 3; Custom = 'to the package cache' }
                     @{ Command = 'New-Item'; Times = 0; Custom = 'directory for the package cache' }
                     @{ Command = 'New-Object'; Times = 1; Custom = 'file stream to copy the response to' }
                     @{ Command = 'Get-WebRequestResponse'; Times = 1 }
                     @{ Command = 'Copy-ResponseStreamToFileStream'; Times = 1 }
                     @{ Command = 'Close-Stream'; Times = 2 }
-                    @{ Command = 'Test-Path'; Times = 2; Custom = 'to the MSI file' }
+                    @{ Command = 'Test-Path'; Times = 3; Custom = 'to the MSI file' }
                     @{ Command = 'Assert-FileValid'; Times = 1 }
                     @{ Command = 'Get-MsiProductCode'; Times = 1 }
                     @{ Command = 'Start-MsiProcess'; Times = 1 }
@@ -530,23 +530,25 @@ Describe 'xMsiPackage Unit Tests' {
                 }
 
                 It 'Should return the expected URI when scheme is http' {
-                    $filePath = 'http://localhost:1242/testMsi.msi'
-                    $expectedReturnValue = [System.Uri] $filePath
+                    $uriBuilder = [System.UriBuilder]::new('http', 'localhost')
+                    $uriBuilder.Path = 'testMsi.msi'
+                    $filePath = $uriBuilder.Uri.AbsoluteUri
 
-                    Convert-PathToUri -Path $filePath | Should -Be $expectedReturnValue
+                    Convert-PathToUri -Path $filePath | Should -Be $uriBuilder.Uri
                 }
 
                 It 'Should return the expected URI when scheme is https' {
-                    $filePath = 'https://localhost:1243/testMsi.msi'
-                    $expectedReturnValue = [System.Uri] $filePath
+                    $uriBuilder = [System.UriBuilder]::new('https', 'localhost')
+                    $uriBuilder.Path = 'testMsi.msi'
+                    $filePath = $uriBuilder.Uri.AbsoluteUri
 
-                    Convert-PathToUri -Path $filePath | Should -Be $expectedReturnValue
+                    Convert-PathToUri -Path $filePath | Should -Be $uriBuilder.Uri
                 }
             }
 
             Context 'Invalid path passed in' {
                 It 'Should throw an error when uri scheme is invalid' {
-                    $filePath = 'ht://localhost:1243/testMsi.msi'
+                    $filePath = 'ht://localhost/testMsi.msi'
                     $expectedErrorMessage = ($script:localizedData.InvalidPath -f $filePath)
 
                     { Convert-PathToUri -Path $filePath } | Should -Throw -ExpectedMessage $expectedErrorMessage

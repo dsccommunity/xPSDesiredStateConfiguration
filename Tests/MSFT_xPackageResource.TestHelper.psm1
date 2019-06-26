@@ -8,6 +8,8 @@ param ()
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
+$testJobPrefix = 'MsiPackageTestJob'
+
 <#
     .SYNOPSIS
         Tests if the package with the given Id is installed.
@@ -62,9 +64,15 @@ function Test-PackageInstalledById
 
     .PARAMETER Https
         Indicates whether the server should use Https. If True then the file server will use Https
-        and listen on port 'https://localhost:1243'. Otherwise the file server will use Http and
-        listen on port 'http://localhost:1242'
+        and listen on port 'https://localhost:HttpsPort'. Otherwise the file server will use Http and
+        listen on port 'http://localhost:HttpPort'
         Default value is False (Http).
+
+    .PARAMETER HttpPort
+        Specifies the TCP port to register an Http based HttpListener on.
+
+    .PARAMETER HttspPort
+        Specifies the TCP port to register an Https based HttpListener on.
 #>
 function Start-Server
 {
@@ -81,7 +89,17 @@ function Start-Server
         $LogPath = (Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'),
 
         [System.Boolean]
-        $Https = $false
+        $Https = $false,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_ -gt 0})]
+        [System.UInt16]
+        $HttpPort,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({$_ -gt 0})]
+        [System.UInt16]
+        $HttpsPort
     )
 
     # Create an event object to let the client know when the server is ready to begin receiving requests.
@@ -97,7 +115,7 @@ function Start-Server
     #>
     $server =
     {
-        param($FilePath, $LogPath, $Https)
+        param($FilePath, $LogPath, $Https, $HttpPort, $HttpsPort)
 
         <#
             .SYNOPSIS
@@ -108,6 +126,9 @@ function Start-Server
 
             .PARAMETER Https
                 Indicates whether https was used and if so, removes the SSL binding.
+
+            .PARAMETER HttspPort
+                Specifies the TCP port to de-register an Https based HttpListener from.
         #>
         function Stop-Listener
         {
@@ -120,12 +141,17 @@ function Start-Server
 
                 [Parameter(Mandatory = $true)]
                 [System.Boolean]
-                $Https
+                $Https,
+
+                [Parameter(Mandatory = $true)]
+                [ValidateScript({$_ -gt 0})]
+                [System.UInt16]
+                $HttpsPort
             )
 
             Write-Log -LogFile $LogPath -Message 'Finished listening for requests. Shutting down HTTP server.'
 
-            $ipPort = '0.0.0.0:1243'
+            $ipPort = "0.0.0.0:$HttpsPort"
 
             if ($null -eq $HttpListener)
             {
@@ -166,11 +192,20 @@ function Start-Server
         <#
             .SYNOPSIS
                 Creates and registers an SSL certificate for Https connections.
+
+            .PARAMETER HttspPort
+                Specifies the TCP port to register an Https based HttpListener on.
         #>
         function Register-Ssl
         {
             [CmdletBinding()]
-            param()
+            param
+            (
+                [Parameter(Mandatory = $true)]
+                [ValidateScript({$_ -gt 0})]
+                [System.UInt16]
+                $HttpsPort
+            )
 
             # Create certificate
             $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName localhost
@@ -187,7 +222,7 @@ function Start-Server
             Write-Log -LogFile $LogPath -Message 'Finished importing certificate into root. About to bind it to port.'
 
             # Use net shell command to directly bind certificate to designated testing port
-            $null = netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
+            $null = netsh http add sslcert ipport=0.0.0.0:$HttpsPort certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
         }
 
         <#
@@ -339,11 +374,11 @@ function Start-Server
             # Set up the listener
             if ($Https)
             {
-                $HttpListener.Prefixes.Add([System.Uri] 'https://localhost:1243')
+                $HttpListener.Prefixes.Add([Uri] "https://localhost:$HttpsPort")
 
                 try
                 {
-                    Register-SSL
+                    Register-SSL -HttpsPort $HttpsPort
                 }
                 catch
                 {
@@ -356,7 +391,7 @@ function Start-Server
             }
             else
             {
-                $HttpListener.Prefixes.Add([System.Uri] 'http://localhost:1242')
+                $HttpListener.Prefixes.Add([Uri] "http://localhost:$HttpPort")
             }
 
             Write-Log -LogFile $LogPath -Message 'Finished listener setup - about to start listener'
@@ -457,8 +492,22 @@ function Start-Server
         catch
         {
             $errorMessage = "There were problems setting up the HTTP(s) listener. Error: $_"
+
             Write-Log -LogFile $LogPath -Message $errorMessage
-            throw $errorMessage
+
+            'Error Record Info' >> $LogPath
+            $_ | ConvertTo-Xml -As String >> $LogPath
+
+            'Exception Info' >> $LogPath
+            $_.Exception | ConvertTo-Xml -As String >> $LogPath
+
+            'Running Process Info' >> $LogPath
+            Get-Process | Format-List | Out-String >> $LogPath
+
+            'Open TCP Connections Info' >> $LogPath
+            Get-NetTCPConnection | Format-List | Out-String >> $LogPath
+
+            throw $_
         }
         finally
         {
@@ -468,11 +517,31 @@ function Start-Server
             }
 
             Write-Log -LogFile $LogPath -Message 'Stopping the Server'
-            Stop-Listener -HttpListener $HttpListener -Https $Https
+            Stop-Listener -HttpListener $HttpListener -Https $Https -HttpsPort $HttpsPort
         }
     }
 
-    $job = Start-Job -ScriptBlock $server -ArgumentList @( $FilePath, $LogPath, $Https )
+    if ($Https)
+    {
+        $jobName = $testJobPrefix + 'Https'
+    }
+    else
+    {
+        $jobName = $testJobPrefix + 'Http'
+    }
+
+    $job = Start-Job -ScriptBlock $server -Name $jobName -ArgumentList @( $FilePath, $LogPath, $Https, $HttpPort, $HttpsPort )
+
+    # Verify that the job is receivable and does not contain an exception. If it does, re-throw it.
+    try
+    {
+        $null = $job | Receive-Job
+    }
+    catch
+    {
+        Write-Error -Message 'Failed to setup HTTP(S) listener for MsiPackage Tests'
+        throw $_
+    }
 
     <#
         Return the event object so that client knows when it can start sending requests and
@@ -521,6 +590,20 @@ function Stop-Server
         Stop-Job -Job $Job
         Remove-Job -Job $Job
     }
+}
+
+<#
+    .SYNOPSIS
+        Removes any jobs associated with HTTP(S) servers that were created
+        for MsiPackage tests.
+#>
+function Stop-EveryTestServerInstance
+{
+    [CmdletBinding()]
+    param ()
+
+    Get-Job -Name "$($testJobPrefix)*" | Stop-Job
+    Get-Job -Name "$($testJobPrefix)*" | Remove-Job
 }
 
 <#
@@ -1149,115 +1232,6 @@ function Get-LocalizedRegistryKeyValue
 
 <#
     .SYNOPSIS
-        Mimics a simple http or https file server.
-        Used only by the xPackage resource - xMsiPackage uses Start-Server instead
-
-    .PARAMETER FilePath
-        The path to the file to add on the mock file server.
-
-    .PARAMETER Https
-        Indicates that the new file server should use https.
-        Otherwise the new file server will use http.
-        Https functionality is not currently implemented in
-        this function - Start-Server should be used instead.
-#>
-function New-MockFileServer
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $FilePath,
-
-        [System.Management.Automation.SwitchParameter]
-        $Https
-    )
-
-    if ($null -eq (Get-NetFirewallRule -DisplayName 'UnitTestRule' -ErrorAction 'SilentlyContinue'))
-    {
-        $null = New-NetFirewallRule -DisplayName 'UnitTestRule' -Direction 'Inbound' -Program "$PSHome\powershell.exe" -Authentication 'NotRequired' -Action 'Allow'
-    }
-
-    netsh advfirewall set allprofiles state off
-
-    Start-Job -ArgumentList @( $FilePath ) -ScriptBlock {
-
-        # Create certificate
-        $certificate = Get-ChildItem -Path 'Cert:\LocalMachine\My' -Recurse | Where-Object { $_.EnhancedKeyUsageList.FriendlyName -eq 'Server Authentication' }
-
-        if ($certificate.Count -gt 1)
-        {
-            # Just use the first one
-            $certificate = $certificate[0]
-        }
-        elseif ($certificate.count -eq 0)
-        {
-            # Create a self-signed one
-            $certificate = New-SelfSignedCertificate -CertStoreLocation 'Cert:\LocalMachine\My' -DnsName $env:computerName
-        }
-
-        $hash = $certificate.Thumbprint
-
-        # Use net shell command to directly bind certificate to designated testing port
-        netsh http add sslcert ipport=0.0.0.0:1243 certhash=$hash appid='{833f13c2-319a-4799-9d1a-5b267a0c3593}' clientcertnegotiation=enable
-
-        # Start listening endpoints
-        $httpListener = New-Object -TypeName 'System.Net.HttpListener'
-
-        if ($Https)
-        {
-            $httpListener.Prefixes.Add([System.Uri] 'https://localhost:1243')
-        }
-        else
-        {
-            $httpListener.Prefixes.Add([System.Uri] 'http://localhost:1242')
-        }
-
-        $httpListener.AuthenticationSchemes = [System.Net.AuthenticationSchemes]::Negotiate
-        $httpListener.Start()
-
-        # Create a pipe to flag http/https client
-        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest1' )
-        $pipe.Connect()
-        $pipe.Dispose()
-
-        # Prepare binary buffer for http/https response
-        $fileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $args[0] )
-        $numBytes = $fileInfo.Length
-        $fileStream = New-Object -TypeName 'System.IO.FileStream' -ArgumentList @(  $args[0], 'Open' )
-        $binaryReader = New-Object -TypeName 'System.IO.BinaryReader' -ArgumentList @( $fileStream )
-        [System.Byte[]] $buf = $binaryReader.ReadBytes($numBytes)
-        $fileStream.Close()
-
-        # Send response
-        $response = ($httpListener.GetContext()).Response
-        $response.ContentType = 'application/octet-stream'
-        $response.ContentLength64 = $buf.Length
-        $response.OutputStream.Write($buf, 0, $buf.Length)
-        $response.OutputStream.Flush()
-
-        # Wait for client to finish downloading
-        $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest2' )
-        $pipe.WaitForConnection()
-        $pipe.Dispose()
-
-        $response.Dispose()
-        $httpListener.Stop()
-        $httpListener.Close()
-
-        # Close pipe
-
-        # Use net shell command to clean up the certificate binding
-        netsh http delete sslcert ipport=0.0.0.0:1243
-    }
-
-    netsh advfirewall set allprofiles state on
-}
-
-<#
-    .SYNOPSIS
         Creates a new test executable.
 
     .PARAMETER DestinationPath
@@ -1320,8 +1294,8 @@ Export-ModuleMember -Function `
     New-TestMsi, `
     Clear-PackageCache, `
     New-TestExecutable, `
-    New-MockFileServer, `
     Start-Server, `
     Stop-Server, `
     Test-PackageInstalledByName, `
-    Test-PackageInstalledById
+    Test-PackageInstalledById, `
+    Stop-EveryTestServerInstance

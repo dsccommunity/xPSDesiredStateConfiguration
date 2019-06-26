@@ -53,6 +53,9 @@ Describe 'xMsiPackage End to End Tests' {
 
         $null = New-TestMsi -DestinationPath $script:msiLocation
 
+        $script:testHttpPort = Get-UnusedTcpPort
+        $script:testHttpsPort = Get-UnusedTcpPort -ExcludePorts @($script:testHttpPort)
+
         # Clear the log file
         'Beginning integration tests' > $script:logFile
     }
@@ -370,8 +373,9 @@ Describe 'xMsiPackage End to End Tests' {
     Context 'Install package from HTTP Url' {
         $configurationName = 'UninstallExistingMsiPackageFromHttp'
 
-        $baseUrl = 'http://localhost:1242/'
-        $msiUrl = "$baseUrl" + 'package.msi'
+        $uriBuilder = [System.UriBuilder]::new('http', 'localhost', $script:testHttpPort)
+        $uriBuilder.Path = 'package.msi'
+        $msiUrl = $uriBuilder.Uri.AbsoluteUri
 
         $fileServerStarted = $null
         $job = $null
@@ -403,7 +407,10 @@ Describe 'xMsiPackage End to End Tests' {
 
         try
         {
-            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false
+            # Make sure no existing HTTP(S) test servers are running
+            Stop-EveryTestServerInstance
+
+            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
             $fileServerStarted = $serverResult.FileServerStarted
             $job = $serverResult.Job
 
@@ -438,8 +445,9 @@ Describe 'xMsiPackage End to End Tests' {
     Context 'Uninstall Msi package from HTTP Url' {
         $configurationName = 'InstallMsiPackageFromHttp'
 
-        $baseUrl = 'http://localhost:1242/'
-        $msiUrl = "$baseUrl" + 'package.msi'
+        $uriBuilder = [System.UriBuilder]::new('http', 'localhost', $script:testHttpPort)
+        $uriBuilder.Path = 'package.msi'
+        $msiUrl = $uriBuilder.Uri.AbsoluteUri
 
         $fileServerStarted = $null
         $job = $null
@@ -471,7 +479,10 @@ Describe 'xMsiPackage End to End Tests' {
 
         try
         {
-            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false
+            # Make sure no existing HTTP(S) test servers are running
+            Stop-EveryTestServerInstance
+
+            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
             $fileServerStarted = $serverResult.FileServerStarted
             $job = $serverResult.Job
 
@@ -506,8 +517,9 @@ Describe 'xMsiPackage End to End Tests' {
     Context 'Install Msi package from HTTPS Url' {
         $configurationName = 'InstallMsiPackageFromHttpS'
 
-        $baseUrl = 'https://localhost:1243/'
-        $msiUrl = "$baseUrl" + 'package.msi'
+        $uriBuilder = [System.UriBuilder]::new('https', 'localhost', $script:testHttpsPort)
+        $uriBuilder.Path = 'package.msi'
+        $msiUrl = $uriBuilder.Uri.AbsoluteUri
 
         $fileServerStarted = $null
         $job = $null
@@ -539,7 +551,10 @@ Describe 'xMsiPackage End to End Tests' {
 
         try
         {
-            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true
+            # Make sure no existing HTTP(S) test servers are running
+            Stop-EveryTestServerInstance
+
+            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
             $fileServerStarted = $serverResult.FileServerStarted
             $job = $serverResult.Job
 
@@ -574,8 +589,9 @@ Describe 'xMsiPackage End to End Tests' {
     Context 'Uninstall Msi package from HTTPS Url' {
         $configurationName = 'UninstallMsiPackageFromHttps'
 
-        $baseUrl = 'https://localhost:1243/'
-        $msiUrl = "$baseUrl" + 'package.msi'
+        $uriBuilder = [System.UriBuilder]::new('https', 'localhost', $script:testHttpsPort)
+        $uriBuilder.Path = 'package.msi'
+        $msiUrl = $uriBuilder.Uri.AbsoluteUri
 
         $fileServerStarted = $null
         $job = $null
@@ -607,7 +623,10 @@ Describe 'xMsiPackage End to End Tests' {
 
         try
         {
-            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true
+            # Make sure no existing HTTP(S) test servers are running
+            Stop-EveryTestServerInstance
+
+            $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
             $fileServerStarted = $serverResult.FileServerStarted
             $job = $serverResult.Job
 
