@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 8.8.0.0
+
 - Ports fix for the following issue:
   [Issue #142](https://github.com/PowerShell/PSDscResources/issues/142)
   Fixes issue where MsiPackage Integration tests fail if the test HttpListener
