@@ -253,8 +253,28 @@ function Set-TargetResource
         $ProgressPreference = 'SilentlyContinue'
 
         Write-Verbose -Message ($script:localizedData.DownloadingURI -f $DestinationPath, $URI)
-
-        Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -OutFile $DestinationPath
+        $nbAttempt = 0
+        $success = $false
+        do
+        {
+            try
+            {
+                $nbAttempt++
+                Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -OutFile $DestinationPath
+                $success = $true
+            }
+            catch [System.Exception]
+            {
+                Write-Verbose -Message ($script:localizedData.DownloadingFailedRetry -f $URI, $nbAttempt, $_.Exception.Message)
+                if ($nbAttempt -gt 5)
+                {
+                    # Inside catch variable $_ is not the exception itself, but a System.Management.Automation.ErrorRecord that contains the actual Exception
+                    throw $_.Exception
+                }
+				Start-Sleep -Seconds 5
+            }
+        }
+        while ($success -eq $false)
     }
     catch [System.OutOfMemoryException]
     {
@@ -274,6 +294,7 @@ function Set-TargetResource
     {
         $ProgressPreference = $currentProgressPreference
     }
+
 
     # Update cache
     if (Test-Path -Path $DestinationPath)
