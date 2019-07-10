@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- MSFT_xRemoteFile:
+  - Add a retry mechanism when the download fails.
+
 ## 8.8.0.0
 
 - Ports fix for the following issue:

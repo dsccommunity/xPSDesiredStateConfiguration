@@ -271,7 +271,7 @@ function Set-TargetResource
                     # Inside catch variable $_ is not the exception itself, but a System.Management.Automation.ErrorRecord that contains the actual Exception
                     throw $_.Exception
                 }
-				Start-Sleep -Seconds 5
+                Start-Sleep -Seconds 5
             }
         }
         while ($success -eq $false)
