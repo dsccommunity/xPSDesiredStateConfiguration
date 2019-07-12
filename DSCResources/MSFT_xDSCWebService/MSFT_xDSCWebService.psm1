@@ -461,7 +461,7 @@ function Set-TargetResource
     {
         Write-Verbose -Message 'Set values into the web.config that define the SQL Connection'
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $jet4provider
-        PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionst' -Value $SqlConnectionString
+        PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionstr' -Value $SqlConnectionString
         if ($isBlue)
         {
             Set-BindingRedirectSettingInWebConfig -Path $PhysicalPath
