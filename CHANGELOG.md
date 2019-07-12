@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixes #631, typo in SQL connection string property name
+
 ## 8.8.0.0
 
 - Ports fix for the following issue:
