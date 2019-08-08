@@ -1,6 +1,6 @@
 @{
     # Version number of this module.
-    moduleVersion = '8.8.0.0'
+    moduleVersion = '8.9.0.0'
 
     # ID used to uniquely identify this module
     GUID              = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,21 +52,16 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
             # IconUri = ''
 
             # ReleaseNotes of this module
-        ReleaseNotes = '- Ports fix for the following issue:
-  [Issue 142](https://github.com/PowerShell/PSDscResources/issues/142)
-  Fixes issue where MsiPackage Integration tests fail if the test HttpListener
-  fails to start. Moves the test HttpListener objects to dynamically assigned,
-  higher numbered ports to avoid conflicts with other services, and also checks
-  to ensure that the ports are available before using them. Adds checks to
-  ensure that no outstanding HTTP server jobs are running before attempting to
-  setup a new one. Also adds additional instrumentation to make it easier to
-  troubleshoot issues with the test HttpListener objects in the future.
+        ReleaseNotes = '- MSFT_xRemoteFile:
+  - Add a retry mechanism when the download fails.
+- Fixes 631, typo in SQL connection string property name
 
 '
 
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 }
+
 
 
 

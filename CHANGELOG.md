@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 8.9.0.0
+
+- MSFT_xRemoteFile:
+  - Add a retry mechanism when the download fails.
+- Fixes #631, typo in SQL connection string property name
+
 ## 8.8.0.0
 
 - Ports fix for the following issue:
