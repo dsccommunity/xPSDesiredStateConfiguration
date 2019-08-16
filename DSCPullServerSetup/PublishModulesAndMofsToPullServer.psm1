@@ -343,7 +343,7 @@ function Publish-ModuleToPullServer
 
     Begin
     {
-        if (-not($OutputFolderPath) -and -not Test-Path $OutputFolderPath)
+        if (-not($OutputFolderPath) -or -not (Test-Path $OutputFolderPath))
         {
             if ( -not(Test-Path $PullServerWebConfig))
             {
@@ -429,7 +429,7 @@ function Publish-MOFToPullServer
 
     Begin
     {
-        if (-not($OutputFolderPath) -and -not Test-Path $OutputFolderPath)
+        if (-not($OutputFolderPath) -or -not (Test-Path $OutputFolderPath))
         {
             if ( -not(Test-Path $PullServerWebConfig))
             {
