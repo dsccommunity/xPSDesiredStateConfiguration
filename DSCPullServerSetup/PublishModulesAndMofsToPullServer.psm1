@@ -299,9 +299,13 @@ function Write-LogEntry
 
     .PARAMETER OutputFolderPath
         Defaults to $null
+		Path to the Location where the MOF files should be published.
+		This should be used when the PullServer is a SMB share pull server.
+		(https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
 
     .EXAMPLE
        Get-Module <ModuleName> | Publish-ModuleToPullServer
+	   Get-Module <ModuleName> | Publish-ModuleToPullServer -OutputFolderPath "\\Server01\DscService\Module"
 #>
 function Publish-ModuleToPullServer
 {
@@ -339,11 +343,11 @@ function Publish-ModuleToPullServer
 
     Begin
     {
-        if (-not($OutputFolderPath))
+        if (-not($OutputFolderPath) -and -not Test-Path $OutputFolderPath)
         {
             if ( -not(Test-Path $PullServerWebConfig))
             {
-                throw "Web.Config of the pullserver does not exist on the default path $PullServerWebConfig. Please provide the location of your pullserver web configuration using the parameter -PullServerWebConfig or an alternate path where you want to publish the pullserver modules to"
+                throw "Web.Config of the pullserver does not exist on the default path $PullServerWebConfig. Please provide the location of your pullserver web configuration using the parameter -PullServerWebConfig or an alternate path where you want to publish the pullserver modules to. This path should exist."
             }
             else
             {
@@ -370,7 +374,7 @@ function Publish-ModuleToPullServer
     }
     End
     {
-        # Now that all the modules are published generate thier checksum.
+        # Now that all the modules are published generate their checksum.
         New-DscChecksum -Path $OutputFolderPath
 
     }
@@ -392,8 +396,14 @@ function Publish-ModuleToPullServer
         Path to the Pull Server web.config file, i.e.
         "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
 
+	.PARAMETER OutputFolderPath
+		Defaults to $null
+		Path to the Location where the MOF files should be published.
+		This should be used when the PullServer is a SMB share pull server.
+		(https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
     .EXAMPLE
         Dir <path>\*.mof | Publish-MOFToPullServer
+		Dir <path>\*.mof | Publish-MOFToPullServer -OutputFolderPath "\\Server01\DscService\Configuration"
 #>
 function Publish-MOFToPullServer
 {
@@ -410,14 +420,29 @@ function Publish-MOFToPullServer
         [Parameter(Mandatory = $true)]
         [ValidateScript({Test-Path -Path $_ -PathType Leaf})]
         [System.String]
-        $PullServerWebConfig
+        $PullServerWebConfig,
+
+        [Parameter()]
+        [System.String]
+        $OutputFolderPath = $null
     )
 
     Begin
     {
-        $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
-        $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
-        $OutputFolderPath = $configXElement.Value
+	    if (-not($OutputFolderPath) -and -not Test-Path $OutputFolderPath)
+        {
+            if ( -not(Test-Path $PullServerWebConfig))
+            {
+                throw "Web.Config of the pullserver does not exist on the default path $PullServerWebConfig. Please provide the location of your pullserver web configuration using the parameter -PullServerWebConfig or an alternate path where you want to publish the pullserver MOFs to. This Path should exist."
+            }
+            else
+            {
+                # Pull Server exist figure out the module path of the pullserver and use this value as output folder path.
+				$webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
+				$configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
+				$OutputFolderPath = $configXElement.Value
+			}
+		}
     }
     Process
     {
