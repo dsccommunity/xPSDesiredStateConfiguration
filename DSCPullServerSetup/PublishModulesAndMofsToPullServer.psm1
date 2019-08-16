@@ -299,13 +299,13 @@ function Write-LogEntry
 
     .PARAMETER OutputFolderPath
         Defaults to $null
-		Path to the Location where the MOF files should be published.
-		This should be used when the PullServer is a SMB share pull server.
-		(https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
+        Path to the Location where the MOF files should be published.
+        This should be used when the PullServer is a SMB share pull server.
+       (https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
 
     .EXAMPLE
        Get-Module <ModuleName> | Publish-ModuleToPullServer
-	   Get-Module <ModuleName> | Publish-ModuleToPullServer -OutputFolderPath "\\Server01\DscService\Module"
+       Get-Module <ModuleName> | Publish-ModuleToPullServer -OutputFolderPath "\\Server01\DscService\Module"
 #>
 function Publish-ModuleToPullServer
 {
@@ -396,14 +396,14 @@ function Publish-ModuleToPullServer
         Path to the Pull Server web.config file, i.e.
         "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
 
-	.PARAMETER OutputFolderPath
-		Defaults to $null
-		Path to the Location where the MOF files should be published.
-		This should be used when the PullServer is a SMB share pull server.
-		(https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
+    .PARAMETER OutputFolderPath
+        Defaults to $null
+        Path to the Location where the MOF files should be published.
+        This should be used when the PullServer is a SMB share pull server.
+        (https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
     .EXAMPLE
         Dir <path>\*.mof | Publish-MOFToPullServer
-		Dir <path>\*.mof | Publish-MOFToPullServer -OutputFolderPath "\\Server01\DscService\Configuration"
+        Dir <path>\*.mof | Publish-MOFToPullServer -OutputFolderPath "\\Server01\DscService\Configuration"
 #>
 function Publish-MOFToPullServer
 {
@@ -429,7 +429,7 @@ function Publish-MOFToPullServer
 
     Begin
     {
-	    if (-not($OutputFolderPath) -and -not Test-Path $OutputFolderPath)
+        if (-not($OutputFolderPath) -and -not Test-Path $OutputFolderPath)
         {
             if ( -not(Test-Path $PullServerWebConfig))
             {
@@ -438,11 +438,11 @@ function Publish-MOFToPullServer
             else
             {
                 # Pull Server exist figure out the module path of the pullserver and use this value as output folder path.
-				$webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
-				$configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
-				$OutputFolderPath = $configXElement.Value
-			}
-		}
+                $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
+                $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
+                $OutputFolderPath = $configXElement.Value
+            }
+        }
     }
     Process
     {
