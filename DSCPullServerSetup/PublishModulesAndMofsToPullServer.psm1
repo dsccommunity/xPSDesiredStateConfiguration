@@ -400,7 +400,7 @@ function Publish-ModuleToPullServer
         Path to the Pull Server web.config file, i.e.
         "$env:SystemDrive\inetpub\wwwroot\PSDSCPullServer\web.config"
 
-    .PARAMETER OutputFolderPath        
+    .PARAMETER OutputFolderPath
         Path to the Location where the MOF files should be published.
         This should be used when the PullServer is a SMB share pull server.
         (https://docs.microsoft.com/nl-nl/powershell/dsc/pull-server/pullserversmb)
