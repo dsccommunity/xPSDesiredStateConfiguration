@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added SMB PullServer support for publishing.
+
 ## 8.9.0.0
 
 - MSFT_xRemoteFile:
