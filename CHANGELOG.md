@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Added SMB PullServer support for publishing.
+- Changes to xDSCWebService
+  - Fix keywords to lower-case to align with guideline.
 
 ## 8.9.0.0
 
