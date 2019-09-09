@@ -28,7 +28,7 @@ Import-Module -Name $script:resourceSetHelperFilePath
     .PARAMETER Credential
         The credential to resolve all groups and user accounts.
 #>
-Configuration xGroupSet
+configuration xGroupSet
 {
     [CmdletBinding()]
     param
