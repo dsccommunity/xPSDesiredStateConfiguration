@@ -33,7 +33,7 @@ Import-Module -Name $script:resourceSetHelperFilePath
         The custom file path to which to log this operation.
         If not passed in, the default log path will be used (%windir%\logs\ServerManager.log).
 #>
-Configuration xWindowsFeatureSet
+configuration xWindowsFeatureSet
 {
     [CmdletBinding()]
     param

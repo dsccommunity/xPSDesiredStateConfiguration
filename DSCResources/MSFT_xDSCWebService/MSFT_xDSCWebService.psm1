@@ -656,7 +656,7 @@ function Test-TargetResource
     $website = Get-Website -Name $EndpointName
     $stop = $true
 
-    :WebSiteTests Do
+    :WebSiteTests do
     {
         Write-Verbose -Message 'Check Ensure'
 
@@ -909,7 +909,7 @@ function Test-TargetResource
         }
         $stop = $false
     }
-    While($stop)
+    while ($stop)
 
     $desiredConfigurationMatch
 }
