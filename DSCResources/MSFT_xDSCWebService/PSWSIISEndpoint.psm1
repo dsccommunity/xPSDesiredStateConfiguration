@@ -133,7 +133,7 @@ function Initialize-Endpoint
 
     if ($removeSiteFiles)
     {
-        if(Test-Path -Path $path)
+        if (Test-Path -Path $path)
         {
             Remove-Item -Path $path -Recurse -Force
         }
@@ -168,7 +168,7 @@ function Initialize-Endpoint
 function Test-IISInstall
 {
     [CmdletBinding()]
-    param()
+    param ()
 
     Write-Verbose -Message 'Checking IIS requirements'
     $iisVersion = (Get-ItemProperty HKLM:\SOFTWARE\Microsoft\InetStp -ErrorAction silentlycontinue).MajorVersion
@@ -373,7 +373,7 @@ function Remove-AppPool
 function New-SiteID
 {
     [CmdletBinding()]
-    param()
+    param ()
 
     return ((Get-Website | Foreach-Object -Process { $_.Id } | Measure-Object -Maximum).Maximum + 1)
 }
@@ -962,7 +962,7 @@ function Set-BindingRedirectSettingInWebConfig
     {
         $xml = [System.Xml.XmlDocument] (Get-Content -Path $webconfig)
 
-        if(-not($xml.get_DocumentElement().runtime))
+        if (-not($xml.get_DocumentElement().runtime))
         {
             # Create the <runtime> section
             $runtimeSetting = $xml.CreateElement('runtime')
