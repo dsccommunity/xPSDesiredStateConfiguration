@@ -5,9 +5,9 @@ class MSFT_xDSCWebService : OMI_BaseResource
   [Write, Description("The IIS ApplicationPool to use for the Pull Server. If not specified a pool with name 'PSWS' will be created.")] string ApplicationPoolName;
   [Write, Description("The port number of the DSC Pull Server IIS Endpoint.")] uint32 Port;
   [Write, Description("The physical path for the IIS Endpoint on the machine (usually under inetpub).")] string PhysicalPath;
-  [Write, Description("The thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.")] string CertificateThumbPrint;
-  [Write, Description("The subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.")] string CertificateSubject;
-  [Write, Description("The certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.")] string CertificateTemplateName;
+  [Write, Description("The thumbprint of the Certificate in CERT:\\LocalMachine\\MY\\ for Pull Server.")] string CertificateThumbPrint;
+  [Write, Description("The subject of the Certificate in CERT:\\LocalMachine\\MY\\ for Pull Server.")] string CertificateSubject;
+  [Write, Description("The certificate Template Name of the Certificate in CERT:\\LocalMachine\\MY\\ for Pull Server.")] string CertificateTemplateName;
   [Write, Description("Specifies if the DSC Web Service should be installed."), ValueMap{"Present","Absent"},Values{"Present","Absent"}] string Ensure;
   [Write, Description("Specifies the state of the DSC Web Service."), ValueMap{"Started","Stopped"},Values{"Started","Stopped"}] string State;
   [Write, Description("The location on the disk where the database is stored.")] string DatabasePath;
