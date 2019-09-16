@@ -516,7 +516,7 @@ configuration xFileUpload
         # Cast the public key correctly
         $rsaProvider = [System.Security.Cryptography.RSACryptoServiceProvider] $cert.PublicKey.Key
 
-        if($rsaProvider -eq $null)
+        if ($rsaProvider -eq $null)
         {
             $errorMessage = "Could not get public key from certificate with thumbprint: $CertificateThumbprint . Please verify certificate is valid for encryption."
             Invoke-Command `
@@ -568,7 +568,7 @@ configuration xFileUpload
         }
     }
 
-    if(-not $cert)
+    if (-not $cert)
     {
         $errorMessage = "Error Reading certificate store for {0}. Please verify thumbprint is correct and certificate belongs to cert:\LocalMachine\My store." -f ${CertificateThumbprint};
         Invoke-Command `
@@ -639,7 +639,7 @@ configuration xFileUpload
     # Get RSA provider
     $rsaProvider = [System.Security.Cryptography.RSACryptoServiceProvider] $cert.PrivateKey
 
-    if($rsaProvider -eq $null)
+    if ($rsaProvider -eq $null)
     {
         $errorMessage = "Could not get private key from certificate with thumbprint: $CertificateThumbprint . Please verify certificate is valid for decryption."
         $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $errorMessage

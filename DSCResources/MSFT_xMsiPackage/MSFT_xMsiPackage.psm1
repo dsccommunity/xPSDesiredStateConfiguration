@@ -1,5 +1,5 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-param()
+param ()
 
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
