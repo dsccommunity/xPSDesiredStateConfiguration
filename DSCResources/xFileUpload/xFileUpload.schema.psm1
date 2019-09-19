@@ -30,10 +30,10 @@
             -SourcePath 'C:\folder\file.txt' `
             -Credential $credential
 #>
-Configuration xFileUpload
+configuration xFileUpload
 {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-Keyword', '', Justification = 'Script resource name is seen as a keyword if this is not used.')]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -56,7 +56,7 @@ Configuration xFileUpload
         $CertificateThumbprint
     )
 
-    $cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\MSFT_xFileUpload"
+    $cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\configuration\BuiltinProvCache\MSFT_xFileUpload"
 
     if ($Credential)
     {

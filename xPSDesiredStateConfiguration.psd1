@@ -1,6 +1,6 @@
 @{
     # Version number of this module.
-    moduleVersion = '8.9.0.0'
+    moduleVersion = '8.10.0.0'
 
     # ID used to uniquely identify this module
     GUID              = 'cc8dc021-fa5f-4f96-8ecf-dfd68a6d9d48'
@@ -52,15 +52,16 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
             # IconUri = ''
 
             # ReleaseNotes of this module
-        ReleaseNotes = '- MSFT_xRemoteFile:
-  - Add a retry mechanism when the download fails.
-- Fixes 631, typo in SQL connection string property name
+        ReleaseNotes = '- Changes to xPSDesiredStateConfiguration
+  - Fix keywords to lower-case to align with guideline.
+- Added SMB PullServer support for publishing.
 
 '
 
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 }
+
 
 
 

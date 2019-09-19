@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 8.10.0.0
+
+- Changes to xPSDesiredStateConfiguration
+  - Fix keywords to lower-case to align with guideline.
+- Added SMB PullServer support for publishing.
+
 ## 8.9.0.0
 
 - MSFT_xRemoteFile:
