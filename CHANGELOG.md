@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Fix minor style issues with missing spaces between `param` statements and '('.
+- MSFT_xDSCWebService:
+  - Removal of commented out code.
+  - Updated to meet HQRM style guidelines - Fixes [issue #623](https://github.com/PowerShell/PSDscResources/issues/623)
+  - Added MOF descriptions.
+- Corrected minor style issues.
+
 ## 8.10.0.0
 
 - Changes to xPSDesiredStateConfiguration

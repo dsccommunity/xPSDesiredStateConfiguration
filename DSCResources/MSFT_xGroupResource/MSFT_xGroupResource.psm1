@@ -1003,7 +1003,7 @@ function Set-TargetResourceOnNanoServer
                 #>
                 foreach ($includedMember in $uniqueMembersToInclude)
                 {
-                    foreach($excludedMember in $uniqueMembersToExclude)
+                    foreach ($excludedMember in $uniqueMembersToExclude)
                     {
                         if ($includedMember -eq $excludedMember)
                         {
@@ -1022,7 +1022,7 @@ function Set-TargetResourceOnNanoServer
                     }
                 }
 
-                foreach($excludedMember in $uniqueMembersToExclude)
+                foreach ($excludedMember in $uniqueMembersToExclude)
                 {
                     if ($groupMembers -contains $excludedMember)
                     {
@@ -1496,7 +1496,7 @@ function Test-TargetResourceOnNanoServer
         #>
         foreach ($includedMember in $uniqueMembersToInclude)
         {
-            foreach($excludedMember in $uniqueMembersToExclude)
+            foreach ($excludedMember in $uniqueMembersToExclude)
             {
                 if ($includedMember -eq $excludedMember)
                 {
@@ -1515,7 +1515,7 @@ function Test-TargetResourceOnNanoServer
             }
         }
 
-        foreach($excludedMember in $uniqueMembersToExclude)
+        foreach ($excludedMember in $uniqueMembersToExclude)
         {
             if ($groupMembers -contains $excludedMember)
             {

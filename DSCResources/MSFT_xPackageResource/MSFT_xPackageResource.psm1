@@ -1,5 +1,5 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-param()
+param ()
 
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
@@ -569,7 +569,7 @@ function Set-TargetResource
             try
             {
                 [System.Int32] $exitCode = 0
-                if($PSBoundParameters.ContainsKey('RunAsCredential'))
+                if ($PSBoundParameters.ContainsKey('RunAsCredential'))
                 {
                     $commandLine = '"{0}" {1}' -f $startInfo.FileName, $startInfo.Arguments
                     $exitCode = Invoke-PInvoke -CommandLine $commandLine -Credential $RunAsCredential
@@ -598,7 +598,7 @@ function Set-TargetResource
                 $masterEvents = @() + $outputEvents + $errorEvents
                 $masterEvents = $masterEvents | Sort-Object -Property TimeGenerated
 
-                foreach($event in $masterEvents)
+                foreach ($event in $masterEvents)
                 {
                     $logStream.Write($event.SourceEventArgs.Data);
                 }

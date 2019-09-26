@@ -20,14 +20,47 @@ $ImportLocalizedDataParams = @{
 Import-LocalizedData @ImportLocalizedDataParams
 #endregion
 
-# The Get-TargetResource cmdlet.
+<#
+    .SYNOPSIS
+        Get the state of the DSC Web Service.
+
+    .PARAMETER EndpointName
+        Prefix of the WCF SVC file.
+
+    .PARAMETER ApplicationPoolName
+        The IIS ApplicationPool to use for the Pull Server. If not specified a
+        pool with name 'PSWS' will be created.
+
+    .PARAMETER CertificateSubject
+        The subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
+
+    .PARAMETER CertificateTemplateName
+        The certificate Template Name of the Certificate in CERT:\LocalMachine\MY\
+        for Pull Server.
+
+    .PARAMETER CertificateThumbPrint
+        The thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
+
+    .PARAMETER ConfigureFirewall
+        Enable incomming firewall exceptions for the configured DSC Pull Server
+        port. Defaults to true.
+
+    .PARAMETER DisableSecurityBestPractices
+        A list of exceptions to the security best practices to apply.
+
+    .PARAMETER Enable32BitAppOnWin64
+        Enable the DSC Pull Server to run in a 32-bit process on a 64-bit operating
+        system.
+
+    .PARAMETER UseSecurityBestPractices
+        Ensure that the DSC Pull Server is created using security best practices.
+#>
 function Get-TargetResource
 {
     [CmdletBinding(DefaultParameterSetName = 'CertificateThumbPrint')]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        # Prefix of the WCF SVC File
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -38,51 +71,47 @@ function Get-TargetResource
         [System.String]
         $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
-        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
-        [Parameter(ParameterSetName = 'CertificateThumbPrint')]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $CertificateThumbPrint,
-
-        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateSubject,
 
-        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateTemplateName = 'WebServer',
 
-        # Pull Server is created with the most secure practices
-        [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'CertificateThumbPrint')]
         [ValidateNotNullOrEmpty()]
-        [System.Boolean]
-        $UseSecurityBestPractices,
+        [System.String]
+        $CertificateThumbPrint,
 
-        # Exceptions of security best practices
         [Parameter()]
-        [ValidateSet("SecureTLSProtocols")]
+        [System.Boolean]
+        $ConfigureFirewall = $true,
+
+        [Parameter()]
+        [ValidateSet('SecureTLSProtocols')]
         [System.String[]]
         $DisableSecurityBestPractices,
 
-        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
         [Parameter()]
         [System.Boolean]
         $Enable32BitAppOnWin64 = $false,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $ConfigureFirewall = $true
+        $UseSecurityBestPractices
     )
 
     <#
-      If Certificate Subject is not specified then a value for CertificateThumbprint must be explicitly set instead.
-      The Mof schema doesn't allow for a mandatory parameter in a parameter set.
+        If Certificate Subject is not specified then a value for
+        CertificateThumbprint must be explicitly set instead. The
+        Mof schema doesn't allow for a mandatory parameter in a parameter set.
     #>
-    if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
+    if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' `
+        -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
         throw $LocalizedData.ThrowCertificateThumbprint
     }
@@ -91,28 +120,30 @@ function Get-TargetResource
 
     if ($webSite)
     {
-        Write-Verbose -Message "PullServer is deployed at $EndpointName"
+        Write-Verbose -Message "PullServer is deployed at '$EndpointName'."
 
         $Ensure = 'Present'
         $acceptSelfSignedCertificates = $false
 
         # Get Full Path for Web.config file
-        $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath "web.config"
+        $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath 'web.config'
 
         # Get module and configuration path
-        $modulePath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "ModulePath"
-        $configurationPath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "ConfigurationPath"
-        $registrationKeyPath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "RegistrationKeyPath"
+        $modulePath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'ModulePath'
+        $configurationPath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'ConfigurationPath'
+        $registrationKeyPath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'RegistrationKeyPath'
 
         # Get database path
-        switch ((Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbprovider"))
+        switch ((Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'dbprovider'))
         {
-            "ESENT" {
-                $databasePath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr" | Split-Path -Parent
+            'ESENT'
+            {
+                $databasePath = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'dbconnectionstr' | Split-Path -Parent
             }
 
-            "System.Data.OleDb" {
-                $connectionString = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr"
+            'System.Data.OleDb'
+            {
+                $connectionString = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'dbconnectionstr'
                 if ($connectionString -match 'Data Source=(.*)\\Devices\.mdb')
                 {
                     $databasePath = $Matches[0]
@@ -124,7 +155,7 @@ function Get-TargetResource
             }
         }
 
-        $urlPrefix = $website.bindings.Collection[0].protocol + "://"
+        $urlPrefix = $website.bindings.Collection[0].protocol + '://'
 
         $ipProperties = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties()
 
@@ -137,15 +168,15 @@ function Get-TargetResource
             $fqdn = $ipProperties.HostName
         }
 
-        $iisPort = $website.bindings.Collection[0].bindingInformation.Split(":")[1]
+        $iisPort = $website.bindings.Collection[0].bindingInformation.Split(':')[1]
 
-        $svcFileName = (Get-ChildItem -Path $website.physicalPath -Filter "*.svc").Name
+        $svcFileName = (Get-ChildItem -Path $website.physicalPath -Filter '*.svc').Name
 
-        $serverUrl = $urlPrefix + $fqdn + ":" + $iisPort + "/" + $svcFileName
+        $serverUrl = $urlPrefix + $fqdn + ':' + $iisPort + '/' + $svcFileName
 
         $webBinding = Get-WebBinding -Name $EndpointName
 
-        if((Test-IISSelfSignedModuleEnabled -EndpointName $EndpointName))
+        if ((Test-IISSelfSignedModuleEnabled -EndpointName $EndpointName))
         {
             $acceptSelfSignedCertificates = $true
         }
@@ -155,7 +186,7 @@ function Get-TargetResource
     }
     else
     {
-        Write-Verbose -Message "No website found with name $EndpointName"
+        Write-Verbose -Message "No website found with name '$EndpointName'."
         $Ensure = 'Absent'
     }
 
@@ -180,14 +211,15 @@ function Get-TargetResource
 
     if ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic')
     {
-        Write-Verbose -Message "Current PullServer configuration allows unencrypted traffic"
+        Write-Verbose -Message 'Current PullServer configuration allows unencrypted traffic.'
         $output.Add('CertificateThumbPrint', $certificateThumbPrint)
     }
     else
     {
-        $certificate = ([System.Array] (Get-ChildItem -Path 'Cert:\LocalMachine\My\')) | Where-Object -FilterScript {
-            $_.Thumbprint -eq $webBinding.CertificateHash
-        }
+        $certificate = ([System.Array] (Get-ChildItem -Path 'Cert:\LocalMachine\My\')) |
+            Where-Object -FilterScript {
+                $_.Thumbprint -eq $webBinding.CertificateHash
+            }
 
         # Try to parse the Certificate Template Name. The property is not available on all Certificates.
         $actualCertificateTemplateName = ''
@@ -200,59 +232,138 @@ function Get-TargetResource
             $actualCertificateTemplateName = $certificateTemplateProperty.Format($false)
         }
 
-        $output.Add('CertificateThumbPrint',   $webBinding.CertificateHash)
-        $output.Add('CertificateSubject',      $certificate.Subject)
+        $output.Add('CertificateThumbPrint', $webBinding.CertificateHash)
+        $output.Add('CertificateSubject', $certificate.Subject)
         $output.Add('CertificateTemplateName', $actualCertificateTemplateName)
     }
 
     return $output
 }
 
-# The Set-TargetResource cmdlet.
+<#
+    .SYNOPSIS
+        Set the state of the DSC Web Service.
+
+    .PARAMETER EndpointName
+        Prefix of the WCF SVC file.
+
+    .PARAMETER AcceptSelfSignedCertificates
+        Specifies is self-signed certs will be accepted for client authentication.
+
+    .PARAMETER ApplicationPoolName
+        The IIS ApplicationPool to use for the Pull Server. If not specified a
+        pool with name 'PSWS' will be created.
+
+    .PARAMETER CertificateSubject
+        The subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
+
+    .PARAMETER CertificateTemplateName
+        The certificate Template Name of the Certificate in CERT:\LocalMachine\MY\
+        for Pull Server.
+
+    .PARAMETER CertificateThumbPrint
+        The thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
+
+    .PARAMETER ConfigurationPath
+        The location on the disk where the Configuration is stored.
+
+    .PARAMETER ConfigureFirewall
+        Enable incomming firewall exceptions for the configured DSC Pull Server
+        port. Defaults to true.
+
+    .PARAMETER DatabasePath
+        The location on the disk where the database is stored.
+
+    .PARAMETER DisableSecurityBestPractices
+        A list of exceptions to the security best practices to apply.
+
+    .PARAMETER Enable32BitAppOnWin64
+        Enable the DSC Pull Server to run in a 32-bit process on a 64-bit operating
+        system.
+
+    .PARAMETER Ensure
+        Specifies if the DSC Web Service should be installed.
+
+    .PARAMETER PhysicalPath
+        The physical path for the IIS Endpoint on the machine (usually under inetpub).
+
+    .PARAMETER Port
+        The port number of the DSC Pull Server IIS Endpoint.
+
+    .PARAMETER ModulePath
+        The location on the disk where the Modules are stored.
+
+    .PARAMETER RegistrationKeyPath
+        The location on the disk where the RegistrationKeys file is stored.
+
+    .PARAMETER SqlConnectionString
+        The connection string to use to connect to the SQL server backend database.
+        Required if SqlProvider is true.
+
+    .PARAMETER SqlProvider
+        Enable DSC Pull Server to use SQL server as the backend database.
+
+    .PARAMETER State
+        Specifies the state of the DSC Web Service.
+
+    .PARAMETER UseSecurityBestPractices
+        Ensure that the DSC Pull Server is created using security best practices.
+#>
 function Set-TargetResource
 {
     [CmdletBinding(DefaultParameterSetName = 'CertificateThumbPrint')]
     param
     (
-        # Prefix of the WCF SVC File
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $EndpointName,
 
         [Parameter()]
+        [System.Boolean]
+        $AcceptSelfSignedCertificates = $true,
+
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
-        # Port number of the DSC Pull Server IIS Endpoint
-        [Parameter()]
-        [ValidateRange(1, 65535)]
-        [System.UInt32]
-        $Port = 8080,
-
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub)
-        [Parameter()]
-        [System.String]
-        $PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
-
-        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
-        [Parameter(ParameterSetName = 'CertificateThumbPrint')]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $CertificateThumbPrint,
-
-        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateSubject,
 
-        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateTemplateName = 'WebServer',
+
+        [Parameter(ParameterSetName = 'CertificateThumbPrint')]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $CertificateThumbPrint,
+
+        [Parameter()]
+        [System.String]
+        $ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
+
+        [Parameter()]
+        [System.Boolean]
+        $ConfigureFirewall = $true,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
+
+        [Parameter()]
+        [ValidateSet('SecureTLSProtocols')]
+        [System.String[]]
+        $DisableSecurityBestPractices,
+
+        [Parameter()]
+        [System.Boolean]
+        $Enable32BitAppOnWin64 = $false,
 
         [Parameter()]
         [ValidateSet('Present', 'Absent')]
@@ -260,70 +371,46 @@ function Set-TargetResource
         $Ensure = 'Present',
 
         [Parameter()]
-        [ValidateSet('Started', 'Stopped')]
-        [System.String]
-        $State = 'Started',
-
-        # Location on the disk where the database is stored
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
-
-        # Location on the disk where the Modules are stored
-        [Parameter()]
         [System.String]
         $ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
 
-        # Location on the disk where the Configuration is stored
         [Parameter()]
         [System.String]
-        $ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
+        $PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
 
-        # Location on the disk where the RegistrationKeys file is stored
+        [Parameter()]
+        [ValidateRange(1, 65535)]
+        [System.UInt32]
+        $Port = 8080,
+
         [Parameter()]
         [System.String]
         $RegistrationKeyPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
-        # Add the IISSelfSignedCertModule native module to prevent self-signed certs being rejected.
-        [Parameter()]
-        [System.Boolean]
-        $AcceptSelfSignedCertificates = $true,
-
-        # Required Field when user want to enable DSC to use SQL server as backend DB
-        [Parameter()]
-        [System.Boolean]
-        $SqlProvider = $false,
-
-        # User is required to provide the SQL Connection String with the ServerProvider , ServerName , UserID , and Passwords fields  to enable DSC to use SQL server as backend DB
         [Parameter()]
         [System.String]
         $SqlConnectionString,
 
-        # Pull Server is created with the most secure practices
+        [Parameter()]
+        [System.Boolean]
+        $SqlProvider = $false,
+
+        [Parameter()]
+        [ValidateSet('Started', 'Stopped')]
+        [System.String]
+        $State = 'Started',
+
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.Boolean]
-        $UseSecurityBestPractices,
-
-        # Exceptions of security best practices
-        [Parameter()]
-        [ValidateSet('SecureTLSProtocols')]
-        [System.String[]]
-        $DisableSecurityBestPractices,
-
-        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
-        [Parameter()]
-        [System.Boolean]
-        $Enable32BitAppOnWin64 = $false,
-
-        [Parameter()]
-        [System.Boolean]
-        $ConfigureFirewall = $true
+        $UseSecurityBestPractices
     )
 
-    # If Certificate Subject is not specified then a value for CertificateThumbprint must be explicitly set instead.
-    # The Mof schema doesn't allow for a mandatory parameter in a parameter set.
+    <#
+        If Certificate Subject is not specified then a value for CertificateThumbprint
+        must be explicitly set instead. The Mof schema doesn't allow for a mandatory parameter
+        in a parameter set.
+    #>
     if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
         throw $LocalizedData.ThrowCertificateThumbprint
@@ -347,18 +434,17 @@ function Set-TargetResource
     }
 
     <#
-      If the Pull Server Site should be bound to the non default AppPool
-      ensure that the AppPool already exists
+        If the Pull Server Site should be bound to the non default AppPool
+        ensure that the AppPool already exists
     #>
     if ('Present' -eq $Ensure `
-        -and $ApplicationPoolName -ne $DscWebServiceDefaultAppPoolName `
-        -and (-not (Test-Path -Path "IIS:\AppPools\$ApplicationPoolName")))
+            -and $ApplicationPoolName -ne $DscWebServiceDefaultAppPoolName `
+            -and (-not (Test-Path -Path "IIS:\AppPools\$ApplicationPoolName")))
     {
         throw ($LocalizedData.ThrowApplicationPoolNotFound -f $ApplicationPoolName)
     }
 
     # Initialize with default values
-
     $pathPullServer = "$pshome\modules\PSDesiredStateConfiguration\PullServer"
     $jet4provider = 'System.Data.OleDb'
     $jet4database = 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;'
@@ -378,15 +464,17 @@ function Set-TargetResource
     $os = Get-OSVersion
 
     $isBlue = $false
-    if($os.Major -eq 6 -and $os.Minor -eq 3)
+
+    if ($os.Major -eq 6 -and $os.Minor -eq 3)
     {
         $isBlue = $true
     }
 
     $isDownlevelOfBlue = $false
-    if($os.Major -eq 6 -and $os.Minor -lt 3)
+
+    if ($os.Major -eq 6 -and $os.Minor -lt 3)
     {
-        $isDownlevelOfBlue= $true
+        $isDownlevelOfBlue = $true
     }
 
     # Use Pull Server values for defaults
@@ -395,18 +483,18 @@ function Set-TargetResource
     $pswsMofFileName = "$pathPullServer\PSDSCPullServer.mof"
     $pswsDispatchFileName = "$pathPullServer\PSDSCPullServer.xml"
 
-    if(($Ensure -eq "Absent"))
+    if (($Ensure -eq 'Absent'))
     {
-        if(Test-Path -LiteralPath "IIS:\Sites\$EndpointName")
+        if (Test-Path -LiteralPath "IIS:\Sites\$EndpointName")
         {
             # Get the port number for the Firewall rule
-            Write-Verbose -Message "Processing bindings for $EndpointName"
+            Write-Verbose -Message "Processing bindings for '$EndpointName'."
             $portList = Get-WebBinding -Name $EndpointName | ForEach-Object -Process {
-                [System.Text.RegularExpressions.Regex]::Match($_.bindingInformation,':(\d+):').Groups[1].Value
+                [System.Text.RegularExpressions.Regex]::Match($_.bindingInformation, ':(\d+):').Groups[1].Value
             }
 
             # There is a web site, but there shouldn't be one
-            Write-Verbose -Message "Removing web site [$EndpointName]"
+            Write-Verbose -Message "Removing web site '$EndpointName'."
             PSWSIISEndpoint\Remove-PSWSEndpoint -SiteName $EndpointName
 
             $portList | ForEach-Object -Process { Remove-PullServerFirewallConfiguration -Port $_ }
@@ -441,27 +529,28 @@ function Set-TargetResource
         {
             if ($ConfigureFirewall)
             {
-                Write-Verbose -Message "Enabling firewall exception for port $port"
+                Write-Verbose -Message "Enabling firewall exception for port $port."
                 Add-PullServerFirewallConfiguration -Port $port
             }
         }
 
         'Absent'
         {
-            Write-Verbose -Message "Disabling firewall exception for port $port"
+            Write-Verbose -Message "Disabling firewall exception for port $port."
             Remove-PullServerFirewallConfiguration -Port $port
         }
     }
 
-    Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "anonymous"
-    Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "basic"
-    Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication "windows"
+    Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication 'anonymous'
+    Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication 'basic'
+    Update-LocationTagInApplicationHostConfigForAuthentication -WebSite $EndpointName -Authentication 'windows'
 
     if ($SqlProvider)
     {
         Write-Verbose -Message 'Set values into the web.config that define the SQL Connection'
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $jet4provider
         PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionstr' -Value $SqlConnectionString
+
         if ($isBlue)
         {
             Set-BindingRedirectSettingInWebConfig -Path $PhysicalPath
@@ -494,7 +583,6 @@ function Set-TargetResource
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbprovider' -Value $eseprovider
             PSWSIISEndpoint\Set-AppSettingsInWebconfig -Path $PhysicalPath -Key 'dbconnectionstr' -Value $esedatabase
         }
-
     }
 
     Write-Verbose -Message 'Pull Server: Set values into the web.config that indicate the location of repository, configuration, modules'
@@ -530,122 +618,178 @@ function Set-TargetResource
     }
 }
 
-# The Test-TargetResource cmdlet.
+<#
+    .SYNOPSIS
+        Test the state of the DSC Web Service.
+
+    .PARAMETER EndpointName
+        Prefix of the WCF SVC file.
+
+    .PARAMETER AcceptSelfSignedCertificates
+        Specifies is self-signed certs will be accepted for client authentication.
+
+    .PARAMETER ApplicationPoolName
+        The IIS ApplicationPool to use for the Pull Server. If not specified a
+        pool with name 'PSWS' will be created.
+
+    .PARAMETER CertificateSubject
+        The subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
+
+    .PARAMETER CertificateTemplateName
+        The certificate Template Name of the Certificate in CERT:\LocalMachine\MY\
+        for Pull Server.
+
+    .PARAMETER CertificateThumbPrint
+        The thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
+
+    .PARAMETER ConfigurationPath
+        The location on the disk where the Configuration is stored.
+
+    .PARAMETER ConfigureFirewall
+        Enable incomming firewall exceptions for the configured DSC Pull Server
+        port. Defaults to true.
+
+    .PARAMETER DatabasePath
+        The location on the disk where the database is stored.
+
+    .PARAMETER DisableSecurityBestPractices
+        A list of exceptions to the security best practices to apply.
+
+    .PARAMETER Enable32BitAppOnWin64
+        Enable the DSC Pull Server to run in a 32-bit process on a 64-bit operating
+        system.
+
+    .PARAMETER Ensure
+        Specifies if the DSC Web Service should be installed.
+
+    .PARAMETER PhysicalPath
+        The physical path for the IIS Endpoint on the machine (usually under inetpub).
+
+    .PARAMETER Port
+        The port number of the DSC Pull Server IIS Endpoint.
+
+    .PARAMETER ModulePath
+        The location on the disk where the Modules are stored.
+
+    .PARAMETER RegistrationKeyPath
+        The location on the disk where the RegistrationKeys file is stored.
+
+    .PARAMETER SqlConnectionString
+        The connection string to use to connect to the SQL server backend database.
+        Required if SqlProvider is true.
+
+    .PARAMETER SqlProvider
+        Enable DSC Pull Server to use SQL server as the backend database.
+
+    .PARAMETER State
+        Specifies the state of the DSC Web Service.
+
+    .PARAMETER UseSecurityBestPractices
+        Ensure that the DSC Pull Server is created using security best practices.
+#>
 function Test-TargetResource
 {
     [CmdletBinding(DefaultParameterSetName = 'CertificateThumbPrint')]
     [OutputType([System.Boolean])]
     param
     (
-        # Prefix of the WCF SVC File
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $EndpointName,
 
         [Parameter()]
+        [System.Boolean]
+        $AcceptSelfSignedCertificates,
+
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ApplicationPoolName = $DscWebServiceDefaultAppPoolName,
 
-        # Port number of the DSC Pull Server IIS Endpoint
-        [Parameter()]
-        [System.UInt32]
-        $Port = 8080,
-
-        # Physical path for the IIS Endpoint on the machine (usually under inetpub)
-        [Parameter()]
-        [System.String]
-        $PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
-
-        # Thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
-        [Parameter(ParameterSetName = 'CertificateThumbPrint')]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $CertificateThumbPrint,
-
-        # Subject of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateSubject,
 
-        # Certificate Template Name of the Certificate in CERT:\LocalMachine\MY\ for Pull Server
         [Parameter(ParameterSetName = 'CertificateSubject')]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $CertificateTemplateName = 'WebServer',
 
-        [Parameter()]
-        [ValidateSet("Present", "Absent")]
+        [Parameter(ParameterSetName = 'CertificateThumbPrint')]
+        [ValidateNotNullOrEmpty()]
         [System.String]
-        $Ensure = "Present",
+        $CertificateThumbPrint,
 
         [Parameter()]
-        [ValidateSet("Started", "Stopped")]
         [System.String]
-        $State = "Started",
+        $ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
 
-        # Location on the disk where the database is stored
+        [Parameter()]
+        [System.Boolean]
+        $ConfigureFirewall = $true,
+
         [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $DatabasePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService",
 
-        # Location on the disk where the Modules are stored
         [Parameter()]
-        [System.String]
-        $ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
-
-        # Location on the disk where the Configuration is stored
-        [Parameter()]
-        [System.String]
-        $ConfigurationPath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Configuration",
-
-        # Location on the disk where the RegistrationKeys file is stored
-        [Parameter()]
-        [System.String]
-        $RegistrationKeyPath,
-
-        # Are self-signed certs being accepted for client auth.
-        [Parameter()]
-        [System.Boolean]
-        $AcceptSelfSignedCertificates,
-
-        # Required Field when user want to enable DSC to use SQL server as backend DB
-        [Parameter()]
-        [System.Boolean]
-        $SqlProvider = $false,
-
-        # User is required to provide the SQL Connection String with the ServerProvider , ServerName , UserID , and Passwords fields  to enable DSC to use SQL server as backend DB
-        [Parameter()]
-        [System.String]
-        $SqlConnectionString,
-
-        # Pull Server is created with the most secure practices
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.Boolean]
-        $UseSecurityBestPractices,
-
-        # Exceptions of security best practices
-        [Parameter()]
-        [ValidateSet("SecureTLSProtocols")]
+        [ValidateSet('SecureTLSProtocols')]
         [System.String[]]
         $DisableSecurityBestPractices,
 
-        # When this property is set to true, Pull Server will run on a 32 bit process on a 64 bit machine
         [Parameter()]
         [System.Boolean]
         $Enable32BitAppOnWin64 = $false,
 
         [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [System.String]
+        $Ensure = 'Present',
+
+        [Parameter()]
+        [System.String]
+        $ModulePath = "$env:PROGRAMFILES\WindowsPowerShell\DscService\Modules",
+
+        [Parameter()]
+        [System.String]
+        $PhysicalPath = "$env:SystemDrive\inetpub\$EndpointName",
+
+        [Parameter()]
+        [ValidateRange(1, 65535)]
+        [System.UInt32]
+        $Port = 8080,
+
+        [Parameter()]
+        [System.String]
+        $RegistrationKeyPath,
+
+        [Parameter()]
+        [System.String]
+        $SqlConnectionString,
+
+        [Parameter()]
         [System.Boolean]
-        $ConfigureFirewall = $true
+        $SqlProvider = $false,
+
+        [Parameter()]
+        [ValidateSet('Started', 'Stopped')]
+        [System.String]
+        $State = 'Started',
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.Boolean]
+        $UseSecurityBestPractices
     )
 
-    # If Certificate Subject is not specified then a value for CertificateThumbprint must be explicitly set instead.
-    # The Mof schema doesn't allow for a mandatory parameter in a parameter set.
+    <#
+        If Certificate Subject is not specified then a value for CertificateThumbprint
+        must be explicitly set instead. The Mof schema doesn't allow for a mandatory
+        parameter in a parameter set.
+    #>
     if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
         throw $LocalizedData.ThrowCertificateThumbprint
@@ -658,56 +802,56 @@ function Test-TargetResource
 
     :WebSiteTests do
     {
-        Write-Verbose -Message 'Check Ensure'
+        Write-Verbose -Message 'Check Ensure.'
 
         if (($Ensure -eq 'Present' -and $null -eq $website))
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message "The Website $EndpointName is not present"
+            Write-Verbose -Message "The Website '$EndpointName' is not present."
             break
         }
 
         if (($Ensure -eq 'Absent' -and $null -ne $website))
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message "The Website $EndpointName is present but should not be"
+            Write-Verbose -Message "The Website '$EndpointName' is present but should not be."
             break
         }
 
         if (($Ensure -eq 'Absent' -and $null -eq $website))
         {
             $desiredConfigurationMatch = $true
-            Write-Verbose -Message "The Website $EndpointName is not present as requested"
+            Write-Verbose -Message "The Website '$EndpointName' is not present as requested."
             break
         }
 
         # The other case is: Ensure and exist, we continue with more checks
-
-        Write-Verbose -Message 'Check Port'
-        $actualPort = $website.bindings.Collection[0].bindingInformation.Split(":")[1]
+        Write-Verbose -Message 'Check Port.'
+        $actualPort = $website.bindings.Collection[0].bindingInformation.Split(':')[1]
 
         if ($Port -ne $actualPort)
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message "Port for the Website $EndpointName does not match the desired state."
+            Write-Verbose -Message "Port for the Website '$EndpointName' does not match the desired state."
             break
         }
 
-        Write-Verbose -Message 'Check Application Pool'
+        Write-Verbose -Message 'Check Application Pool.'
 
         if ($ApplicationPoolName -ne $website.applicationPool)
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message "Currently bound application pool [$($website.applicationPool)] does not match the desired state [$ApplicationPoolName]."
+            Write-Verbose -Message "Currently bound application pool '$($website.applicationPool)' does not match the desired state '$ApplicationPoolName'."
             break
         }
 
-        Write-Verbose -Message 'Check Binding'
+        Write-Verbose -Message 'Check Binding.'
         $actualCertificateHash = $website.bindings.Collection[0].certificateHash
-        $websiteProtocol       = $website.bindings.collection[0].Protocol
+        $websiteProtocol = $website.bindings.collection[0].Protocol
 
-        Write-Verbose -Message 'Checking firewall rule settings'
+        Write-Verbose -Message 'Checking firewall rule settings.'
         $ruleExists = Test-PullServerFirewallConfiguration -Port $Port
+
         if ($ruleExists -and -not $ConfigureFirewall)
         {
             $desiredConfigurationMatch = $false
@@ -725,36 +869,21 @@ function Test-TargetResource
         {
             'CertificateThumbprint'
             {
-#                # If a site had a binding and then has it removed then the certificateHash and certificteStoreName will still be populated
-
-#                if ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic' -and $actualCertificateHash -ne $null)
-#                {
-#                    $desiredConfigurationMatch = $false
-#                    Write-Verbose -Message "Certificate Hash for the Website $EndpointName is not null."
-#                    break
-#                }
-
                 if ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic' -and $websiteProtocol -ne 'http')
                 {
                     $desiredConfigurationMatch = $false
-                    Write-Verbose -Message "Website $EndpointName is not configured for http and does not match the desired state."
+                    Write-Verbose -Message "Website '$EndpointName' is not configured for http and does not match the desired state."
                     break WebSiteTests
                 }
-
-#                if ($CertificateThumbPrint -ne $actualCertificateHash)
-#                {
-#                    $desiredConfigurationMatch = $false
-#                    Write-Verbose -Message "Certificate Hash for the Website $EndpointName does not match the desired state."
-#                    break
-#                }
 
                 if ($CertificateThumbPrint -ne 'AllowUnencryptedTraffic' -and $websiteProtocol -ne 'https')
                 {
                     $desiredConfigurationMatch = $false
-                    Write-Verbose -Message "Website $EndpointName is not configured for https and does not match the desired state."
+                    Write-Verbose -Message "Website '$EndpointName' is not configured for https and does not match the desired state."
                     break WebSiteTests
                 }
             }
+
             'CertificateSubject'
             {
                 $certificateThumbPrint = Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $CertificateSubject -TemplateName $CertificateTemplateName
@@ -762,48 +891,57 @@ function Test-TargetResource
                 if ($CertificateThumbPrint -ne $actualCertificateHash)
                 {
                     $desiredConfigurationMatch = $false
-                    Write-Verbose -Message "Certificate Hash for the Website $EndpointName does not match the desired state."
+                    Write-Verbose -Message "Certificate Hash for the Website '$EndpointName' does not match the desired state."
                     break WebSiteTests
                 }
             }
         }
 
-        Write-Verbose -Message "Check Physical Path property"
-        if(Test-WebsitePath -EndpointName $EndpointName -PhysicalPath $PhysicalPath)
+        Write-Verbose -Message 'Check Physical Path property.'
+
+        if (Test-WebsitePath -EndpointName $EndpointName -PhysicalPath $PhysicalPath)
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message "Physical Path of Website $EndpointName does not match the desired state."
+            Write-Verbose -Message "Physical Path of Website '$EndpointName' does not match the desired state."
             break
         }
 
-        Write-Verbose -Message "Check State"
-        if($website.state -ne $State -and $null -ne $State)
+        Write-Verbose -Message 'Check State.'
+
+        if ($website.state -ne $State -and $null -ne $State)
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message "The state of Website $EndpointName does not match the desired state."
+            Write-Verbose -Message "The state of Website '$EndpointName' does not match the desired state."
             break
         }
 
-        Write-Verbose -Message "Get Full Path for Web.config file"
-        $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath "web.config"
+        Write-Verbose -Message 'Get Full Path for Web.config file.'
+        $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath 'web.config'
 
         # Changed from -eq $false to -ne $true as $IsComplianceServer is never set. This section was always being skipped
         if ($IsComplianceServer -ne $true)
         {
-            Write-Verbose -Message "Check DatabasePath"
-            switch ((Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbprovider"))
+            Write-Verbose -Message 'Check DatabasePath.'
+
+            switch ((Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'dbprovider'))
             {
-                "ESENT" {
+                'ESENT'
+                {
                     $expectedConnectionString = "$DatabasePath\Devices.edb"
                 }
-                "System.Data.OleDb" {
+
+                'System.Data.OleDb'
+                {
                     $expectedConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=$DatabasePath\Devices.mdb;"
                 }
-                default {
+
+                default
+                {
                     $expectedConnectionString = [System.String]::Empty
                 }
             }
-            if($SqlProvider)
+
+            if ($SqlProvider)
             {
                 $expectedConnectionString = $SqlConnectionString
             }
@@ -811,50 +949,67 @@ function Test-TargetResource
             if (([System.String]::IsNullOrEmpty($expectedConnectionString)))
             {
                 $desiredConfigurationMatch = $false
-                Write-Verbose -Message "The DB provider does not have a valid value: 'ESENT' or 'System.Data.OleDb'"
+                Write-Verbose -Message "The DB provider does not have a valid value: 'ESENT' or 'System.Data.OleDb'."
                 break
             }
 
-            if (-not (Test-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "dbconnectionstr" -ExpectedAppSettingValue $expectedConnectionString))
+            if (-not (Test-WebConfigAppSetting `
+                -WebConfigFullPath $webConfigFullPath `
+                -AppSettingName 'dbconnectionstr' `
+                -ExpectedAppSettingValue $expectedConnectionString))
             {
                 $desiredConfigurationMatch = $false
                 break
             }
 
-            Write-Verbose -Message "Check ModulePath"
+            Write-Verbose -Message 'Check ModulePath.'
+
             if ($ModulePath)
             {
-                if (-not (Test-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "ModulePath" -ExpectedAppSettingValue $ModulePath))
+                if (-not (Test-WebConfigAppSetting `
+                    -WebConfigFullPath $webConfigFullPath `
+                    -AppSettingName 'ModulePath' `
+                    -ExpectedAppSettingValue $ModulePath))
                 {
                     $desiredConfigurationMatch = $false
                     break
                 }
             }
 
-            Write-Verbose -Message "Check ConfigurationPath"
+            Write-Verbose -Message 'Check ConfigurationPath.'
+
             if ($ConfigurationPath)
             {
-                if (-not (Test-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "ConfigurationPath" -ExpectedAppSettingValue $configurationPath))
+                if (-not (Test-WebConfigAppSetting `
+                    -WebConfigFullPath $webConfigFullPath `
+                    -AppSettingName 'ConfigurationPath' `
+                    -ExpectedAppSettingValue $configurationPath))
                 {
                     $desiredConfigurationMatch = $false
                     break
                 }
             }
 
-            Write-Verbose -Message "Check RegistrationKeyPath"
+            Write-Verbose -Message 'Check RegistrationKeyPath.'
+
             if ($RegistrationKeyPath)
             {
-                if (-not (Test-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName "RegistrationKeyPath" -ExpectedAppSettingValue $registrationKeyPath))
+                if (-not (Test-WebConfigAppSetting `
+                    -WebConfigFullPath $webConfigFullPath `
+                    -AppSettingName 'RegistrationKeyPath' `
+                    -ExpectedAppSettingValue $registrationKeyPath))
                 {
                     $desiredConfigurationMatch = $false
                     break
                 }
             }
 
-            Write-Verbose -Message "Check AcceptSelfSignedCertificates"
+            Write-Verbose -Message 'Check AcceptSelfSignedCertificates.'
+
             if ($AcceptSelfSignedCertificates)
             {
-                Write-Verbose -Message "AcceptSelfSignedCertificates is enabled. Checking if module Selfsigned IIS module is configured for web site at [$webConfigFullPath]."
+                Write-Verbose -Message "AcceptSelfSignedCertificates is enabled. Checking if module Selfsigned IIS module is configured for web site at '$webConfigFullPath'."
+
                 if (Test-IISSelfSignedModuleInstalled)
                 {
                     if (-not (Test-IISSelfSignedModuleEnabled -EndpointName $EndpointName))
@@ -876,7 +1031,8 @@ function Test-TargetResource
             }
             else
             {
-                Write-Verbose -Message "AcceptSelfSignedCertificates is disabled. Checking if module Selfsigned IIS module is NOT configured for web site at [$webConfigFullPath]."
+                Write-Verbose -Message "AcceptSelfSignedCertificates is disabled. Checking if module Selfsigned IIS module is NOT configured for web site at '$webConfigFullPath'."
+
                 if (Test-IISSelfSignedModuleInstalled)
                 {
                     if (-not (Test-IISSelfSignedModuleEnabled -EndpointName $EndpointName))
@@ -897,7 +1053,8 @@ function Test-TargetResource
             }
         }
 
-        Write-Verbose -Message 'Check UseSecurityBestPractices'
+        Write-Verbose -Message 'Check UseSecurityBestPractices.'
+
         if ($UseSecurityBestPractices)
         {
             if (-not (UseSecurityBestPractices\Test-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices))
@@ -907,23 +1064,25 @@ function Test-TargetResource
                 break
             }
         }
+
         $stop = $false
     }
     while ($stop)
 
-    $desiredConfigurationMatch
+    return $desiredConfigurationMatch
 }
 
 <#
     .SYNOPSIS
-        The function returns the OS version string detected by .Net
+        The function returns the OS version string detected by .NET.
 
     .DESCRIPTION
-        The function returns the OS version which ahs been detected by .NET.
-        The function is added so that the dectection of the OS is mockable in Pester tests.
+        The function returns the OS version which ahs been detected
+        by .NET. The function is added so that the dectection of the OS
+        is mockable in Pester tests.
 
     .OUTPUTS
-        System.String. The operating system version
+        System.String. The operating system version.
 #>
 function Get-OSVersion
 {
@@ -939,16 +1098,17 @@ function Get-OSVersion
 
 <#
     .SYNOPSIS
-        Returns the configuration value for a module settings from web.config
+        Returns the configuration value for a module settings from
+        web.config.
 
     .PARAMETER WebConfigFullPath
-        The full path to the web.config
+        The full path to the web.config.
 
     .PARAMETER ModuleName
-        The name of the IIS module
+        The name of the IIS module.
 
     .OUTPUTS
-        System.String. The configured value
+        System.String. The configured value.
 #>
 function Get-WebConfigModulesSetting
 {
@@ -957,23 +1117,24 @@ function Get-WebConfigModulesSetting
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $WebConfigFullPath,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $ModuleName
     )
 
-    $moduleValue = ""
+    $moduleValue = ''
+
     if (Test-Path -Path $WebConfigFullPath)
     {
         $webConfigXml = [Xml] (Get-Content -Path $WebConfigFullPath)
         $root = $webConfigXml.get_DocumentElement()
 
-        foreach ($item in $root."system.webServer".modules.add)
+        foreach ($item in $root.'system.webServer'.modules.add)
         {
-            if( $item.name -eq $ModuleName )
+            if ($item.name -eq $ModuleName)
             {
                 $moduleValue = $item.name
                 break
@@ -981,21 +1142,21 @@ function Get-WebConfigModulesSetting
         }
     }
 
-    $moduleValue
+    return $moduleValue
 }
 
 <#
     .SYNOPSIS
-        Unlocks a specifc authentication configuration section for a IIS website
+        Unlocks a specifc authentication configuration section for a IIS website.
 
     .PARAMETER WebSite
-        The name of the website
+        The name of the website.
 
     .PARAMETER Authentication
-        The authentication section which should be unlocked
+        The authentication section which should be unlocked.
 
     .OUTPUTS
-        System.String. The configured value
+        System.String. The configured value.
 #>
 function Update-LocationTagInApplicationHostConfigForAuthentication
 {
@@ -1003,12 +1164,12 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $WebSite,
 
         [Parameter(Mandatory = $true)]
         [ValidateSet('anonymous', 'basic', 'windows')]
-        [String]
+        [System.String]
         $Authentication
     )
 
@@ -1023,10 +1184,10 @@ function Update-LocationTagInApplicationHostConfigForAuthentication
 
 <#
     .SYNOPSIS
-        Returns an instance of the Microsoft.Web.Administration.ServerManager
+        Returns an instance of the Microsoft.Web.Administration.ServerManager.
 
     .OUTPUTS
-        Microsoft.Web.Administration.ServerManager. The server manager
+        The server manager as Microsoft.Web.Administration.ServerManager.
 #>
 function Get-IISServerManager
 {
@@ -1035,12 +1196,14 @@ function Get-IISServerManager
     param ()
 
     $iisInstallPath = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\INetStp' -Name InstallPath).InstallPath
+
     if (-not $iisInstallPath)
     {
         throw ($LocalizedData.IISInstallationPathNotFound)
     }
 
     $assyPath = Join-Path -Path $iisInstallPath -ChildPath 'Microsoft.Web.Administration.dll' -Resolve -ErrorAction:SilentlyContinue
+
     if (-not $assyPath)
     {
         throw ($LocalizedData.IISWebAdministrationAssemblyNotFound)
@@ -1055,16 +1218,17 @@ function Get-IISServerManager
         Tests if a module installation status is equal to an expected status.
 
     .PARAMETER WebConfigFullPath
-        The full path to the web.config
+        The full path to the web.config.
 
     .PARAMETER ModuleName
-        The name of the IIS module for which the state should be checked
+        The name of the IIS module for which the state should be checked.
 
     .PARAMETER ExpectedInstallationStatus
-        Test if the module is installed ($true) or absent ($false)
+        Test if the module is installed ($true) or absent ($false).
 
     .OUTPUTS
-        System.Boolean. true if the current installation status is equal to the expected installation status
+        Returns true if the current installation status is equal to the expected
+        installation status.
 #>
 function Test-WebConfigModulesSetting
 {
@@ -1073,11 +1237,11 @@ function Test-WebConfigModulesSetting
     param
     (
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $WebConfigFullPath,
 
         [Parameter(Mandatory = $true)]
-        [String]
+        [System.String]
         $ModuleName,
 
         [Parameter(Mandatory = $true)]
@@ -1090,9 +1254,9 @@ function Test-WebConfigModulesSetting
         $webConfigXml = [Xml] (Get-Content -Path $WebConfigFullPath)
         $root = $webConfigXml.get_DocumentElement()
 
-        foreach ($item in $root."system.webServer".modules.add)
+        foreach ($item in $root.'system.webServer'.modules.add)
         {
-            if( $item.name -eq $ModuleName )
+            if ( $item.name -eq $ModuleName )
             {
                 return $ExpectedInstallationStatus -eq $true
             }
@@ -1100,23 +1264,26 @@ function Test-WebConfigModulesSetting
     }
     else
     {
-        Write-Warning -Message "Test-WebConfigModulesSetting: web.config file not found at [$WebConfigFullPath]"
+        Write-Warning -Message "Test-WebConfigModulesSetting: web.config file not found at '$WebConfigFullPath'"
     }
+
     return $ExpectedInstallationStatus -eq $false
 }
 
 <#
     .SYNOPSIS
-        Tests if a the currently configured path for a website is equal to a given path
+        Tests if a the currently configured path for a website is equal to a given
+        path.
 
     .PARAMETER EndpointName
-        The endpoint name (website name) to test
+        The endpoint name (website name) to test.
 
     .PARAMETER PhysicalPath
-        The full physical path to check
+        The full physical path to check.
 
     .OUTPUTS
-        System.Boolean. true if the current installation status is equal to the expected installation status
+        Returns true if the current installation status is equal to the expected
+        installation status.
 #>
 function Test-WebsitePath
 {
@@ -1135,29 +1302,29 @@ function Test-WebsitePath
 
     $pathNeedsUpdating = $false
 
-    if((Get-ItemProperty -Path "IIS:\Sites\$EndpointName" -Name physicalPath) -ne $PhysicalPath)
+    if ((Get-ItemProperty -Path "IIS:\Sites\$EndpointName" -Name physicalPath) -ne $PhysicalPath)
     {
         $pathNeedsUpdating = $true
     }
 
-    $pathNeedsUpdating
+    return $pathNeedsUpdating
 }
 
 <#
     .SYNOPSIS
-        Test if a currently configured app setting is equal to a given value
+        Test if a currently configured app setting is equal to a given value.
 
     .PARAMETER WebConfigFullPath
-        The full path to the web.config
+        The full path to the web.config.
 
     .PARAMETER AppSettingName
-        The app setting name to check
+        The app setting name to check.
 
     .PARAMETER ExpectedAppSettingValue
-        The expected value
+        The expected value.
 
     .OUTPUTS
-        System.Boolean. true if the current value is equal to the expected value
+        Returns true if the current value is equal to the expected value.
 #>
 function Test-WebConfigAppSetting
 {
@@ -1187,34 +1354,34 @@ function Test-WebConfigAppSetting
 
         foreach ($item in $root.appSettings.add)
         {
-            if( $item.key -eq $AppSettingName )
+            if ( $item.key -eq $AppSettingName )
             {
                 break
             }
         }
 
-        if($item.value -ne $ExpectedAppSettingValue)
+        if ($item.value -ne $ExpectedAppSettingValue)
         {
             $returnValue = $false
-            Write-Verbose -Message "The state of Web.Config AppSetting $AppSettingName does not match the desired state."
+            Write-Verbose -Message "The state of Web.Config AppSetting '$AppSettingName' does not match the desired state."
         }
-
     }
-    $returnValue
+
+    return $returnValue
 }
 
 <#
     .SYNOPSIS
-        Helper function to Get the specified Web.Config App Setting
+        Helper function to Get the specified Web.Config App Setting.
 
     .PARAMETER WebConfigFullPath
-        The full path to the web.config
+        The full path to the web.config.
 
     .PARAMETER AppSettingName
-        The app settings name to get the value for
+        The app settings name to get the value for.
 
     .OUTPUTS
-        System.String. the current app settings value
+        The current app settings value.
 #>
 function Get-WebConfigAppSetting
 {
@@ -1231,7 +1398,8 @@ function Get-WebConfigAppSetting
         $AppSettingName
     )
 
-    $appSettingValue = ""
+    $appSettingValue = ''
+
     if (Test-Path -Path $WebConfigFullPath)
     {
         $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $WebConfigFullPath)
@@ -1239,7 +1407,7 @@ function Get-WebConfigAppSetting
 
         foreach ($item in $root.appSettings.add)
         {
-            if( $item.key -eq $AppSettingName )
+            if ($item.key -eq $AppSettingName)
             {
                 $appSettingValue = $item.value
                 break
@@ -1247,7 +1415,7 @@ function Get-WebConfigAppSetting
         }
     }
 
-    $appSettingValue
+    return $appSettingValue
 }
 
 #endregion
@@ -1259,16 +1427,16 @@ New-Variable -Name iisSelfSignedModuleName -Value 'IISSelfSignedCertModule(32bit
 
 <#
     .SYNOPSIS
-        Get a powershell command instance for appcmd.exe
+        Get a powershell command instance for appcmd.exe.
 
     .OUTPUTS
-        System.Management.Automation.CommandInfo. The appcmd.exe
+        The appcmd.exe as System.Management.Automation.CommandInfo.
 #>
 function Get-IISAppCmd
 {
     [CmdletBinding()]
     [OutputType([System.Management.Automation.CommandInfo])]
-    param()
+    param ()
 
     Push-Location -Path "$env:windir\system32\inetsrv"
     $appCmd = Get-Command -Name '.\appcmd.exe' -CommandType 'Application' -ErrorAction:Stop
@@ -1278,16 +1446,16 @@ function Get-IISAppCmd
 
 <#
     .SYNOPSIS
-        Tests if two files differ
+        Tests if two files differ.
 
     .PARAMETER SourceFilePath
-        Path to the source file
+        Path to the source file.
 
     .PARAMETER DestinationFilePath
-        Path to the destination file
+        Path to the destination file.
 
     .OUTPUTS
-        System.Boolean. true if the two files differ
+        Returns true if the two files differ.
 #>
 function Test-FilesDiffer
 {
@@ -1295,17 +1463,17 @@ function Test-FilesDiffer
     [OutputType([System.Boolean])]
     param
     (
-        [Parameter(Mandatory  = $true)]
-        [ValidateScript({ Test-Path -PathType Leaf -LiteralPath $_ })]
-        [String]
+        [Parameter(Mandatory = $true)]
+        [ValidateScript( { Test-Path -PathType Leaf -LiteralPath $_ })]
+        [System.String]
         $SourceFilePath,
 
         [Parameter()]
-        [String]
+        [System.String]
         $DestinationFilePath
     )
 
-    Write-Verbose -Message "Testing for file difference between $SourceFilePath and $DestinationFilePath"
+    Write-Verbose -Message "Testing for file difference between '$SourceFilePath' and '$DestinationFilePath'."
 
     if (Test-Path -LiteralPath $DestinationFilePath)
     {
@@ -1313,25 +1481,25 @@ function Test-FilesDiffer
         {
             throw "$DestinationFilePath is a container (Directory) not a leaf (File)"
         }
-        Write-Verbose -Message "Destination file already exists at $DestinationFilePath"
 
+        Write-Verbose -Message "Destination file already exists at '$DestinationFilePath'."
         $md5Dest = Get-FileHash -LiteralPath $destinationFilePath -Algorithm MD5
         $md5Src = Get-FileHash -LiteralPath $sourceFilePath -Algorithm MD5
         return $md5Src.Hash -ne $md5Dest.Hash
     }
     else
     {
-        Write-Verbose -Message "Destination file does not exist at $DestinationFilePath"
+        Write-Verbose -Message "Destination file does not exist at '$DestinationFilePath'."
         return $true
     }
 }
 
 <#
     .SYNOPSIS
-        Tests if the IISSelfSignedModule module is installed
+        Tests if the IISSelfSignedModule module is installed.
 
     .OUTPUTS
-        System.Boolean. true if the module is installed
+        Returns true if the module is installed.
 #>
 function Test-IISSelfSignedModuleInstalled
 {
@@ -1344,10 +1512,10 @@ function Test-IISSelfSignedModuleInstalled
 
 <#
     .SYNOPSIS
-        Install the IISSelfSignedModule module
+        Install the IISSelfSignedModule module.
 
     .PARAMETER Enable32BitAppOnWin64
-        If set install the module as 32bit module
+        If set install the module as 32bit module.
 #>
 function Install-IISSelfSignedModule
 {
@@ -1361,7 +1529,7 @@ function Install-IISSelfSignedModule
 
     if ($Enable32BitAppOnWin64)
     {
-        Write-Verbose -Message "Install-IISSelfSignedModule: Providing $iisSelfSignedModuleAssemblyName to run in a 32 bit process"
+        Write-Verbose -Message "Install-IISSelfSignedModule: Providing '$iisSelfSignedModuleAssemblyName' to run in a 32 bit process."
 
         $sourceFilePath = Join-Path -Path "$env:windir\SysWOW64\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" `
             -ChildPath $iisSelfSignedModuleAssemblyName
@@ -1372,11 +1540,11 @@ function Install-IISSelfSignedModule
 
     if (Test-IISSelfSignedModuleInstalled)
     {
-        Write-Verbose -Message "Install-IISSelfSignedModule: module $iisSelfSignedModuleName already installed"
+        Write-Verbose -Message "Install-IISSelfSignedModule: module '$iisSelfSignedModuleName' already installed."
     }
     else
     {
-        Write-Verbose -Message "Install-IISSelfSignedModule: Installing module $iisSelfSignedModuleName"
+        Write-Verbose -Message "Install-IISSelfSignedModule: Installing module '$iisSelfSignedModuleName'."
         $sourceFilePath = Join-Path -Path "$env:windir\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PullServer" `
             -ChildPath $iisSelfSignedModuleAssemblyName
         $destinationFolderPath = "$env:windir\System32\inetsrv"
@@ -1390,23 +1558,23 @@ function Install-IISSelfSignedModule
         }
         else
         {
-            Write-Verbose -Message "Install-IISSelfSignedModule: module $iisSelfSignedModuleName already installed at $destinationFilePath with the correct version"
+            Write-Verbose -Message "Install-IISSelfSignedModule: module '$iisSelfSignedModuleName' already installed at '$destinationFilePath' with the correct version."
         }
 
-        Write-Verbose -Message "Install-IISSelfSignedModule: globally activating module $iisSelfSignedModuleName"
+        Write-Verbose -Message "Install-IISSelfSignedModule: globally activating module '$iisSelfSignedModuleName'."
         & (Get-IISAppCmd) install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false
     }
 }
 
 <#
     .SYNOPSIS
-        Enable the IISSelfSignedModule module for a specific website (endpoint)
+        Enable the IISSelfSignedModule module for a specific website (endpoint).
 
     .PARAMETER EndpointName
-        The endpoint (website) for which the module should be enabled
+        The endpoint (website) for which the module should be enabled.
 
     .PARAMETER Enable32BitAppOnWin64
-        If set enable the module as a 32bit module
+        If set enable the module as a 32bit module.
 #>
 function Enable-IISSelfSignedModule
 {
@@ -1415,7 +1583,7 @@ function Enable-IISSelfSignedModule
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $EndpointName,
 
         [Parameter()]
@@ -1423,23 +1591,25 @@ function Enable-IISSelfSignedModule
         $Enable32BitAppOnWin64
     )
 
-    Write-Verbose -Message "Enable-IISSelfSignedModule: EndpointName [$EndpointName]; Enable32BitAppOnWin64 [$Enable32BitAppOnWin64]"
+    Write-Verbose -Message "Enable-IISSelfSignedModule: EndpointName '$EndpointName' and Enable32BitAppOnWin64 '$Enable32BitAppOnWin64'"
 
     Install-IISSelfSignedModule -Enable32BitAppOnWin64:$Enable32BitAppOnWin64
-    $preConditionBitnessArgumentFor32BitInstall=""
+    $preConditionBitnessArgumentFor32BitInstall = ''
+
     if ($Enable32BitAppOnWin64)
     {
-        $preConditionBitnessArgumentFor32BitInstall = "/preCondition:bitness32"
+        $preConditionBitnessArgumentFor32BitInstall = '/preCondition:bitness32'
     }
+
     & (Get-IISAppCmd) add module /name:$iisSelfSignedModuleName /app.name:"$EndpointName/" $preConditionBitnessArgumentFor32BitInstall
 }
 
 <#
     .SYNOPSIS
-        Disable the IISSelfSignedModule module for a specific website (endpoint)
+        Disable the IISSelfSignedModule module for a specific website (endpoint).
 
     .PARAMETER EndpointName
-        The endpoint (website) for which the module should be disabled
+        The endpoint (website) for which the module should be disabled.
 #>
 function Disable-IISSelfSignedModule
 {
@@ -1448,22 +1618,23 @@ function Disable-IISSelfSignedModule
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]$EndpointName
+        [System.String]$EndpointName
     )
-    Write-Verbose -Message "Disable-IISSelfSignedModule: EndpointName [$EndpointName]"
+
+    Write-Verbose -Message "Disable-IISSelfSignedModule: EndpointName '$EndpointName'"
 
     & (Get-IISAppCmd) delete module /name:$iisSelfSignedModuleName  /app.name:"$EndpointName/"
 }
 
 <#
     .SYNOPSIS
-        Tests if the IISSelfSignedModule module is enabled for a website (endpoint)
+        Tests if the IISSelfSignedModule module is enabled for a website (endpoint).
 
     .PARAMETER EndpointName
-        The endpoint (website) for which the status should be checked
+        The endpoint (website) for which the status should be checked.
 
     .OUTPUTS
-        System.Boolean. true if the module is enabled
+        Returns true if the module is enabled.
 #>
 function Test-IISSelfSignedModuleEnabled
 {
@@ -1473,23 +1644,23 @@ function Test-IISSelfSignedModuleEnabled
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $EndpointName
     )
 
-    Write-Verbose -Message "Test-IISSelfSignedModuleEnabled: EndpointName [$EndpointName]"
+    Write-Verbose -Message "Test-IISSelfSignedModuleEnabled: EndpointName '$EndpointName'"
 
     $webSite = Get-Website -Name $EndpointName
 
     if ($webSite)
     {
-        $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath "web.config"
-        Write-Verbose -Message "Test-IISSelfSignedModuleEnabled: web.confg path [$webConfigFullPath]"
+        $webConfigFullPath = Join-Path -Path $website.physicalPath -ChildPath 'web.config'
+        Write-Verbose -Message "Test-IISSelfSignedModuleEnabled: web.confg path '$webConfigFullPath'"
         Test-WebConfigModulesSetting -WebConfigFullPath $webConfigFullPath -ModuleName $iisSelfSignedModuleName -ExpectedInstallationStatus $true
     }
     else
     {
-        throw "Website [$EndpointName] not found"
+        throw "Website '$EndpointName' not found"
     }
 }
 
@@ -1514,6 +1685,11 @@ function Test-IISSelfSignedModuleEnabled
 
     .PARAMETER Store
         The certificate store to retrieve certificates from.
+
+    .NOTES
+        Uses certificate Oid mapping:
+        1.3.6.1.4.1.311.20.2 = Certificate Template Name
+        1.3.6.1.4.1.311.21.7 = Certificate Template Information
 #>
 function Find-CertificateThumbprintWithSubjectAndTemplateName
 {
@@ -1534,9 +1710,6 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
         $Store = 'Cert:\LocalMachine\My'
     )
 
-    # 1.3.6.1.4.1.311.20.2 = Certificate Template Name
-    # 1.3.6.1.4.1.311.21.7 = Certificate Template Information
-
     $filteredCertificates = @()
 
     foreach ($oidFriendlyName in 'Certificate Template Name', 'Certificate Template Information')
@@ -1548,8 +1721,15 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
 
         switch ($oidFriendlyName)
         {
-            'Certificate Template Name'        {$templateMatchString = $TemplateName}
-            'Certificate Template Information' {$templateMatchString = '^Template={0}' -f $TemplateName}
+            'Certificate Template Name'
+            {
+                $templateMatchString = $TemplateName
+            }
+
+            'Certificate Template Information'
+            {
+                $templateMatchString = '^Template={0}' -f $TemplateName
+            }
         }
 
         $filteredCertificates += $certificatesFromTemplates.Where{
