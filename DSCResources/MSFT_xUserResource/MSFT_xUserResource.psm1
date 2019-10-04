@@ -4,7 +4,7 @@
 param ()
 
 Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonResourceHelper.psm1')
+        -ChildPath 'CommonResourceHelper.psm1')
 
 # Localized messages for Write-Verbose statements in this resource
 $script:localizedData = Get-LocalizedData -ResourceName 'MSFT_xUserResource'
@@ -258,39 +258,40 @@ function Get-TargetResourceOnFullSKU
 
     # Try to find a user by a name
     $principalContext = New-Object `
-                -TypeName System.DirectoryServices.AccountManagement.PrincipalContext `
-                -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+        -TypeName System.DirectoryServices.AccountManagement.PrincipalContext `
+        -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
     {
         Write-Verbose -Message 'Starting Get-TargetResource on FullSKU'
         $user = [System.DirectoryServices.AccountManagement.UserPrincipal]::FindByIdentity($principalContext, $UserName)
+
         if ($null -ne $user)
         {
             # The user is found. Return all user properties and Ensure='Present'.
             $returnValue = @{
-                                UserName = $user.Name
-                                Ensure = 'Present'
-                                FullName = $user.DisplayName
-                                Description = $user.Description
-                                Disabled = -not $user.Enabled
-                                PasswordNeverExpires = $user.PasswordNeverExpires
-                                PasswordChangeRequired = $null
-                                PasswordChangeNotAllowed = $user.UserCannotChangePassword
-                            }
+                UserName                 = $user.Name
+                Ensure                   = 'Present'
+                FullName                 = $user.DisplayName
+                Description              = $user.Description
+                Disabled                 = -not $user.Enabled
+                PasswordNeverExpires     = $user.PasswordNeverExpires
+                PasswordChangeRequired   = $null
+                PasswordChangeNotAllowed = $user.UserCannotChangePassword
+            }
 
             return $returnValue
         }
 
         # The user is not found. Return Ensure = Absent.
         return @{
-                    UserName = $UserName
-                    Ensure = 'Absent'
-                }
+            UserName = $UserName
+            Ensure   = 'Absent'
+        }
     }
     catch
     {
-         New-ConnectionException -ErrorId 'MultipleMatches' -ErrorMessage ($script:localizedData.MultipleMatches + $_)
+        New-ConnectionException -ErrorId 'MultipleMatches' -ErrorMessage ($script:localizedData.MultipleMatches + $_)
     }
     finally
     {
@@ -398,8 +399,8 @@ function Set-TargetResourceOnFullSKU
 
     # Try to find a user by name.
     $principalContext = New-Object `
-                -TypeName System.DirectoryServices.AccountManagement.PrincipalContext `
-                -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+        -TypeName System.DirectoryServices.AccountManagement.PrincipalContext `
+        -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
     {
@@ -409,7 +410,7 @@ function Set-TargetResourceOnFullSKU
         }
         catch
         {
-             New-InvalidOperationException -Message ($script:localizedData.MultipleMatches + $_)
+            New-InvalidOperationException -Message ($script:localizedData.MultipleMatches + $_)
         }
 
         if ($Ensure -eq 'Present')
@@ -438,8 +439,8 @@ function Set-TargetResourceOnFullSKU
                 {
                     # The user with the provided name does not exist so add a new user
                     $user = New-Object `
-                                -TypeName System.DirectoryServices.AccountManagement.UserPrincipal `
-                                -ArgumentList $principalContext
+                        -TypeName System.DirectoryServices.AccountManagement.UserPrincipal `
+                        -ArgumentList $principalContext
                     $user.Name = $UserName
                     $saveChanges = $true
                 }
@@ -543,7 +544,7 @@ function Set-TargetResourceOnFullSKU
     }
     catch
     {
-         New-InvalidOperationException -Message $_
+        New-InvalidOperationException -Message $_
     }
     finally
     {
@@ -645,7 +646,7 @@ function Test-TargetResourceOnFullSKU
 
     # Try to find a user by a name
     $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext `
-                -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
+        -ArgumentList ([System.DirectoryServices.AccountManagement.ContextType]::Machine)
 
     try
     {
@@ -724,7 +725,7 @@ function Test-TargetResourceOnFullSKU
     }
     catch
     {
-         New-ConnectionException -ErrorId 'ConnectionError' -ErrorMessage ($script:localizedData.ConnectionError + $_)
+        New-ConnectionException -ErrorId 'ConnectionError' -ErrorMessage ($script:localizedData.ConnectionError + $_)
     }
 
     finally
@@ -779,23 +780,23 @@ function Get-TargetResourceOnNanoServer
         {
             # The user is not found
             return @{
-                        UserName = $UserName
-                        Ensure = 'Absent'
-                    }
+                UserName = $UserName
+                Ensure   = 'Absent'
+            }
         }
         New-InvalidOperationException -ErrorRecord $_
     }
 
     # The user is found. Return all user properties and Ensure = 'Present'.
     $returnValue = @{
-                        UserName = $user.Name
-                        Ensure = 'Present'
-                        FullName = $user.FullName
-                        Description = $user.Description
-                        Disabled = -not $user.Enabled
-                        PasswordChangeRequired = $null
-                        PasswordChangeNotAllowed = -not $user.UserMayChangePassword
-                    }
+        UserName                 = $user.Name
+        Ensure                   = 'Present'
+        FullName                 = $user.FullName
+        Description              = $user.Description
+        Disabled                 = -not $user.Enabled
+        PasswordChangeRequired   = $null
+        PasswordChangeNotAllowed = -not $user.UserMayChangePassword
+    }
 
     if ($user.PasswordExpires)
     {
