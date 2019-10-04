@@ -52,7 +52,7 @@ function Get-TargetResource
     if ($null -eq $productEntry)
     {
         $packageResourceResult = @{
-            Ensure = 'Absent'
+            Ensure    = 'Absent'
             ProductId = $identifyingNumber
         }
 
@@ -229,9 +229,9 @@ function Set-TargetResource
             if ($uri.IsUnc)
             {
                 $psDriveArgs = @{
-                    Name = [System.Guid]::NewGuid()
+                    Name       = [System.Guid]::NewGuid()
                     PSProvider = 'FileSystem'
-                    Root = Split-Path -Path $localPath
+                    Root       = Split-Path -Path $localPath
                 }
 
                 if ($PSBoundParameters.ContainsKey('Credential'))
@@ -334,11 +334,14 @@ function Set-TargetResource
         Check if a reboot is required, if so notify CA. The MSFT_ServerManagerTasks provider is
         missing on some client SKUs (worked on both Server and Client Skus in Windows 10).
     #>
-    $serverFeatureData = Invoke-CimMethod -Name 'GetServerFeature' `
-                                          -Namespace 'root\microsoft\windows\servermanager' `
-                                          -Class 'MSFT_ServerManagerTasks' `
-                                          -Arguments @{ BatchSize = 256 } `
-                                          -ErrorAction 'Ignore'
+    $serverFeatureData = Invoke-CimMethod `
+        -Name 'GetServerFeature' `
+        -Namespace 'root\microsoft\windows\servermanager' `
+        -Class 'MSFT_ServerManagerTasks' `
+        -Arguments @{
+        BatchSize = 256
+    } `
+        -ErrorAction 'Ignore'
 
     $registryData = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction 'Ignore'
 
@@ -666,7 +669,7 @@ function Get-ProductEntryInfo
     {
         try
         {
-            $installDate = '{0:d}' -f [System.DateTime]::ParseExact($installDate, 'yyyyMMdd',[System.Globalization.CultureInfo]::CurrentCulture).Date
+            $installDate = '{0:d}' -f [System.DateTime]::ParseExact($installDate, 'yyyyMMdd', [System.Globalization.CultureInfo]::CurrentCulture).Date
         }
         catch
         {
@@ -692,13 +695,13 @@ function Get-ProductEntryInfo
     $installSource = Get-ProductEntryValue -ProductEntry $ProductEntry -Property 'InstallSource'
 
     return @{
-        Name = $displayName
-        InstallSource = $installSource
-        InstalledOn = $installDate
-        Size = $estimatedSizeInMB
-        Version = $displayVersion
+        Name               = $displayName
+        InstallSource      = $installSource
+        InstalledOn        = $installDate
+        Size               = $estimatedSizeInMB
+        Version            = $displayVersion
         PackageDescription = $comments
-        Publisher = $publisher
+        Publisher          = $publisher
     }
 }
 
@@ -823,7 +826,7 @@ function Get-WebRequestResponse
     }
     catch
     {
-         New-InvalidOperationException -Message ($script:localizedData.CouldNotGetResponseFromWebRequest -f $uriScheme, $Uri.OriginalString) -ErrorRecord $_
+        New-InvalidOperationException -Message ($script:localizedData.CouldNotGetResponseFromWebRequest -f $uriScheme, $Uri.OriginalString) -ErrorRecord $_
     }
 }
 
@@ -1255,10 +1258,10 @@ function Invoke-PInvoke
     [System.Int32] $exitCode = 0
 
     $null = [Source.NativeMethods]::CreateProcessAsUser($CommandLine, `
-        $RunAsCredential.GetNetworkCredential().Domain, `
-        $RunAsCredential.GetNetworkCredential().UserName, `
-        $RunAsCredential.GetNetworkCredential().Password, `
-        [ref] $exitCode
+            $RunAsCredential.GetNetworkCredential().Domain, `
+            $RunAsCredential.GetNetworkCredential().UserName, `
+            $RunAsCredential.GetNetworkCredential().Password, `
+            [ref] $exitCode
     )
 
     return $exitCode

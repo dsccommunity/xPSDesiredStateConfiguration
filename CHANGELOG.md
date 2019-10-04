@@ -8,6 +8,7 @@
   - Updated to meet HQRM style guidelines - Fixes [issue #623](https://github.com/PowerShell/PSDscResources/issues/623)
   - Added MOF descriptions.
 - Corrected minor style issues.
+- Fix minor style issues in hashtable layout.
 
 ## 8.10.0.0
 
