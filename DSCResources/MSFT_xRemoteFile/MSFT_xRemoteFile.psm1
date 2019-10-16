@@ -144,6 +144,12 @@ function Get-TargetResource
     .PARAMETER ProxyCredential
         Specifies a user account that has permission to use the proxy server that
         is specified by the Proxy parameter.
+
+    .PARAMETER Checksum
+        Specifies the expected checksum value of downloaded file.
+
+    .PARAMETER ChecksumType
+        The algorithm used to calculate the checksum of the file.
 #>
 function Set-TargetResource
 {
@@ -188,7 +194,16 @@ function Set-TargetResource
         [Parameter()]
         [System.Management.Automation.Credential()]
         [System.Management.Automation.PSCredential]
-        $ProxyCredential
+        $ProxyCredential,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet('None', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'MACTripleDES', 'MD5', 'RIPEMD160')]
+        $ChecksumType = 'None',
+
+        [Parameter()]
+        [System.String]
+        $Checksum
     )
 
     # Validate Uri
@@ -253,6 +268,21 @@ function Set-TargetResource
     {
         $DestinationPath = Join-Path -Path $DestinationPath -ChildPath $uriFileName
     }
+
+    <#
+        If checksum is needed create splat for Get-FileHash and an alternate variables for the
+        checksum as the PSBoundParameters need to be removed as they are not parameters of Invoke-WebRequest
+    #>
+    if ($ChecksumType -ine 'None' -and -not [string]::IsNullOrEmpty($Checksum))
+    {
+        $fileHashSplat = @{
+            Path      = $DestinationPath
+            Algorithm = $ChecksumType
+        }
+        $checksumValue = $Checksum
+    }
+    $null = $PSBoundParameters.Remove('ChecksumType')
+    $null = $PSBoundParameters.Remove('Checksum')
 
     # Remove DestinationPath and MatchSource from parameters as they are not parameters of Invoke-WebRequest
     $null = $PSBoundParameters.Remove('DestinationPath')
@@ -320,6 +350,20 @@ function Set-TargetResource
     finally
     {
         $ProgressPreference = $currentProgressPreference
+    }
+
+    # Check checksum
+    if (-not [string]::IsNullOrEmpty($checksumValue))
+    {
+        $fileHash = (Get-FileHash @fileHashSplat).Hash
+        if ($fileHash -ine $checksumValue)
+        {
+            # the checksum failed
+            $errorMessage = $script:localizedData.ChecksumDoesNotMatch -f $checksumValue, $fileHash
+            New-InvalidDataException `
+                -ErrorId 'ChecksumDoesNotMatch' `
+                -ErrorMessage $errorMessage
+        }
     }
 
     # Update cache
