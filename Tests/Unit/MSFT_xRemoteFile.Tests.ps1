@@ -222,6 +222,39 @@ try
                         Assert-MockCalled Update-Cache -Exactly 1
                     }
                 }
+
+                Mock Invoke-WebRequest
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a file, Checksum provided, download successful' {
+                    $splat = $testSplatFile.Clone()
+                    $splat.Checksum = $testFileHash.Hash
+                    $splat.ChecksumType = 'MD5'
+
+                    It 'Does not throw' {
+                        { Set-TargetResource @Splat } | Should -Not -Throw
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 1
+                    }
+                }
+                Mock Invoke-WebRequest
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a file, Checksum provided, Checksum fails' {
+                    $splat = $testSplatFile.Clone()
+                    $splat.Checksum = 'badhash'
+                    $splat.ChecksumType = 'MD5'
+
+                    It 'Does not throw' {
+                        { Set-TargetResource @Splat } | Should -Throw
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 0
+                    }
+                }
             } #end Describe "$($script:dscResourceName)\Set-TargetResource"
 
             Describe "$($script:dscResourceName)\Test-TargetResource" {
