@@ -8,6 +8,8 @@ class MSFT_xRemoteFile : OMI_BaseResource
     [Write, Description("Headers of the web request."), EmbeddedInstance("MSFT_KeyValuePair")] String Headers[];
     [Write, Description("Specifies a user account that has permission to send the request."), EmbeddedInstance("MSFT_Credential")] String Credential;
     [Write, Description("A boolean value to indicate whether the remote file should be re-downloaded if the file in the DestinationPath was modified locally. The default value is true.")] Boolean MatchSource;
+    [Write, Description("Specifies the checksum type to verify the downloaded file")] ValueMap{"None","SHA1","SHA256","SHA384","SHA512","MACTripleDES","MD5","RIPEMD160"}, Values{"None","SHA1","SHA256","SHA384","SHA512","MACTripleDES","MD5","RIPEMD160"}] String ChecksumType;
+    [Write, Description("Specifies the checksum value to compare against the downloaded file")] String Checksum;
     [Write, Description("Specifies how long the request can be pending before it times out.")] Uint32 TimeoutSec;
     [Write, Description("Uses a proxy server for the request, rather than connecting directly to the Internet resource. Should be the URI of a network proxy server (e.g 'http://10.20.30.1').")] String Proxy;
     [Write, Description("Specifies a user account that has permission to use the proxy server that is specified by the Proxy parameter."), EmbeddedInstance("MSFT_Credential")] String ProxyCredential;
