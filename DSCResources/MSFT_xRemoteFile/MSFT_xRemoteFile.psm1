@@ -21,6 +21,9 @@ $script:cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configura
     .PARAMETER Uri
         Uri of a file which should be copied or downloaded. This parameter
         supports HTTP and HTTPS values.
+
+    .PARAMETER ChecksumType
+        The algorithm used to calculate the checksum of the file.
 #>
 function Get-TargetResource
 {
@@ -36,12 +39,19 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Uri
+        $Uri,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet('None', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'MACTripleDES', 'MD5', 'RIPEMD160')]
+        $ChecksumType = 'None'
+
     )
 
     # Check whether DestinationPath is existing file
     $ensure = 'Absent'
     $pathItemType = Get-PathItemType -Path $DestinationPath
+    $checksumValue = ''
 
     switch ($pathItemType)
     {
@@ -49,6 +59,11 @@ function Get-TargetResource
         {
             Write-Verbose -Message ($script:localizedData.DestinationPathIsExistingFile -f $DestinationPath)
             $ensure = 'Present'
+
+            if ($ChecksumType -ine 'None')
+            {
+                $checksumValue = (Get-FileHash -Path $DestinationPath -Algorithm $ChecksumType).Hash
+            }
         }
 
         'Directory'
@@ -63,6 +78,11 @@ function Get-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.FileExistsInDestinationPath -f $uriFileName)
                 $ensure = 'Present'
+
+                if ($ChecksumType -ine 'None')
+                {
+                    $checksumValue = (Get-FileHash -Path $DestinationPath -Algorithm $ChecksumType).Hash
+                }
             }
         }
 
@@ -81,6 +101,7 @@ function Get-TargetResource
         DestinationPath = $DestinationPath
         Uri             = $Uri
         Ensure          = $ensure
+        Checksum        = $checksumValue
     }
 }
 
@@ -198,7 +219,7 @@ function Set-TargetResource
     }
 
     # Validate DestinationPath does not contain invalid characters
-    @('*', '?', '"', '<', '>', '|') | Foreach-Object -Process {
+    @('*', '?', '"', '<', '>', '|') | ForEach-Object -Process {
         if ($DestinationPath.Contains($_))
         {
             $errorMessage = $script:localizedData.DestinationPathHasInvalidCharactersError -f $DestinationPath
@@ -307,7 +328,7 @@ function Set-TargetResource
         $downloadedFile = Get-Item -Path $DestinationPath
         $lastWriteTime = $downloadedFile.LastWriteTimeUtc
         $filesize = $downloadedFile.Length
-        $inputObject = @{}
+        $inputObject = @{ }
         $inputObject['LastWriteTime'] = $lastWriteTime
         $inputObject['FileSize'] = $filesize
         Update-Cache -DestinationPath $DestinationPath -Uri $Uri -InputObject $inputObject
@@ -586,7 +607,7 @@ function Convert-KeyValuePairArrayToHashtable
         $Array
     )
 
-    $hashtable = @{}
+    $hashtable = @{ }
 
     foreach ($item in $Array)
     {
@@ -638,7 +659,7 @@ function Get-Cache
     }
     else
     {
-        $cacheContent = Import-CliXml -Path $path
+        $cacheContent = Import-Clixml -Path $path
         Write-Verbose -Message ($script:localizedData.CacheFoundForPath -f $DestinationPath, $Uri, $Key)
     }
 
@@ -688,7 +709,7 @@ function Update-Cache
 
     Write-Verbose -Message ($script:localizedData.UpdatingCache -f $DestinationPath, $Uri, $Key)
 
-    Export-CliXml -Path $path -InputObject $InputObject -Force
+    Export-Clixml -Path $path -InputObject $InputObject -Force
 }
 
 <#
