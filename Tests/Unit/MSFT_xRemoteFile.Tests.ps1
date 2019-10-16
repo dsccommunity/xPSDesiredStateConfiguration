@@ -33,12 +33,12 @@ try
     InModuleScope $script:dscResourceName {
         function Get-InvalidDataException
         {
-            param(
-                [parameter(Mandatory = $true)]
+            param (
+                [Parameter(Mandatory = $true)]
                 [System.String]
                 $errorId,
 
-                [parameter(Mandatory = $true)]
+                [Parameter(Mandatory = $true)]
                 [System.String]
                 $errorMessage
             )
@@ -82,15 +82,24 @@ try
                 DestinationPath = $testDestinationFile;
                 Uri = $testURI;
             }
+            $testSplatFileChecksum = $testSplatFile.clone()
+            $testSplatFileChecksum.ChecksumType = 'MD5'
+
             $testSplatFolderFileExists = @{
                 DestinationPath = $testDestinationFolder;
                 Uri = $testURI;
             }
+            $testSplatFolderFileExistsChecksum = $testSplatFolderFileExists.clone()
+            $testSplatFolderFileExistsChecksum.ChecksumType = 'MD5'
+
             $testSplatFolderFileNotExist = @{
                 DestinationPath = $testDestinationFolder;
                 Uri = $testURINotExist;
             }
 
+            $testFileHash = @{
+                Hash = 'abc12345'
+            }
             # Create the test files/folders by clearing the working folder
             # if it exists and building a set of expected test files
             if (Test-Path -Path $script:workingFolder)
@@ -107,9 +116,23 @@ try
                     $Result.Ensure | Should -Be 'Present'
                 }
 
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                $result = Get-TargetResource @testSplatFileChecksum
+                It 'Returns "Present" and file checksum value when DestinationPath is a File and exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Checksum | Should -Be $testFileHash.Hash
+                }
+
                 $result = Get-TargetResource @testSplatFolderFileExists
                 It 'Returns "Present" when DestinationPath is a Directory and exists and URI file exists' {
                     $Result.Ensure | Should -Be 'Present'
+                }
+
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                $result = Get-TargetResource @testSplatFolderFileExistsChecksum
+                It 'Returns "Present" and a file checksum when DestinationPath is a Directory and exists and URI file exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Checksum | Should -Be $testFileHash.Hash
                 }
 
                 $result = Get-TargetResource @testSplatFolderFileNotExist
