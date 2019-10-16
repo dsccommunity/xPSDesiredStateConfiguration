@@ -19,5 +19,6 @@ ConvertFrom-StringData @'
     CacheLookingForPath=Looking for cache path '{0}'.
     CacheNotFoundForPath=No cache found for DestinationPath '{0}' and Uri '{1}' CacheKey '{2}'.
     CacheFoundForPath=Found cache found for DestinationPath '{0}' and Uri '{1}' CacheKey '{2}'.
+    ChecksumDoesNotMatch=Checksum does not match specified value - Desired: '{0}', Actual: '{1}'.
     UpdatingCache=Updating cache for DestinationPath '{0}' and Uri '{1}' CacheKey '{2}'.
 '@
