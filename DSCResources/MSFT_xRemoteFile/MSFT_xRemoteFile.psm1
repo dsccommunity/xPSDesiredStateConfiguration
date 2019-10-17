@@ -81,7 +81,7 @@ function Get-TargetResource
 
                 if ($ChecksumType -ine 'None')
                 {
-                    $checksumValue = (Get-FileHash -Path $DestinationPath -Algorithm $ChecksumType).Hash
+                    $checksumValue = (Get-FileHash -Path $expectedDestinationPath -Algorithm $ChecksumType).Hash
                 }
             }
         }
