@@ -417,6 +417,12 @@ function Set-TargetResource
     .PARAMETER ProxyCredential
         Specifies a user account that has permission to use the proxy server that
         is specified by the Proxy parameter.
+
+    .PARAMETER Checksum
+        Specifies the expected checksum value of downloaded file.
+
+    .PARAMETER ChecksumType
+        The algorithm used to calculate the checksum of the file.
 #>
 function Test-TargetResource
 {
@@ -462,7 +468,16 @@ function Test-TargetResource
         [Parameter()]
         [System.Management.Automation.Credential()]
         [System.Management.Automation.PSCredential]
-        $ProxyCredential
+        $ProxyCredential,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet('None', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'MACTripleDES', 'MD5', 'RIPEMD160')]
+        $ChecksumType = 'None',
+
+        [Parameter()]
+        [System.String]
+        $Checksum
     )
 
     # Check whether DestinationPath points to existing file or directory
@@ -499,6 +514,27 @@ function Test-TargetResource
                 Write-Verbose -Message $script:localizedData.MatchSourceFalse
                 $fileExists = $true
             }
+
+            if ($ChecksumType -ine 'None' `
+                    -and -not [string]::IsNullOrEmpty($Checksum) `
+                    -and $fileExists -eq $true)
+            {
+                $fileHashSplat = @{
+                    Path      = $DestinationPath
+                    Algorithm = $ChecksumType
+                }
+                $fileHash = (Get-FileHash @fileHashSplat).Hash
+
+                if ($fileHash -ieq $Checksum)
+                {
+                    $fileExists = $true
+                }
+                else
+                {
+                    # The checksum does not match. The file may match what is in the cached data. resetting it to false
+                    $fileExists = $false
+                }
+            }
         }
 
         'Directory'
@@ -529,6 +565,27 @@ function Test-TargetResource
                     Write-Verbose -Message $script:localizedData.MatchSourceFalse
                     $fileExists = $true
                 }
+
+                if ($ChecksumType -ine 'None' `
+                    -and -not [string]::IsNullOrEmpty($Checksum) `
+                    -and $fileExists -eq $true)
+            {
+                $fileHashSplat = @{
+                    Path      = $expectedDestinationPath
+                    Algorithm = $ChecksumType
+                }
+                $fileHash = (Get-FileHash @fileHashSplat).Hash
+
+                if ($fileHash -ieq $Checksum)
+                {
+                    $fileExists = $true
+                }
+                else
+                {
+                    # The checksum does not match. The file may match what is in the cached data. resetting it to false
+                    $fileExists = $false
+                }
+            }
             }
         }
 
