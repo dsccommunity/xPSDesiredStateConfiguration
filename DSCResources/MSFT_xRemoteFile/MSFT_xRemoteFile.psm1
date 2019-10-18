@@ -62,7 +62,8 @@ function Get-TargetResource
 
             if ($ChecksumType -ine 'None')
             {
-                $checksumValue = (Get-FileHash -Path $DestinationPath -Algorithm $ChecksumType).Hash
+                $getFileHash = Get-FileHash -Path $DestinationPath -Algorithm $ChecksumType
+                $checksumValue = $getFileHash.Hash
             }
         }
 
@@ -81,7 +82,8 @@ function Get-TargetResource
 
                 if ($ChecksumType -ine 'None')
                 {
-                    $checksumValue = (Get-FileHash -Path $expectedDestinationPath -Algorithm $ChecksumType).Hash
+                    $getFileHash = Get-FileHash -Path $expectedDestinationPath -Algorithm $ChecksumType
+                    $checksumValue = $getFileHash.Hash
                 }
             }
         }
@@ -269,18 +271,7 @@ function Set-TargetResource
         $DestinationPath = Join-Path -Path $DestinationPath -ChildPath $uriFileName
     }
 
-    <#
-        If checksum is needed create splat for Get-FileHash and an alternate variables for the
-        checksum as the PSBoundParameters need to be removed as they are not parameters of Invoke-WebRequest
-    #>
-    if ($ChecksumType -ine 'None' -and -not [string]::IsNullOrEmpty($Checksum))
-    {
-        $fileHashSplat = @{
-            Path      = $DestinationPath
-            Algorithm = $ChecksumType
-        }
-        $checksumValue = $Checksum
-    }
+    # Remove ChecksumType and Checksum from parameters as they are not parameters of Invoke-WebRequest.
     $null = $PSBoundParameters.Remove('ChecksumType')
     $null = $PSBoundParameters.Remove('Checksum')
 
@@ -353,13 +344,20 @@ function Set-TargetResource
     }
 
     # Check checksum
-    if (-not [string]::IsNullOrEmpty($checksumValue))
+    if ($ChecksumType -ine 'None' -and -not [String]::IsNullOrEmpty($Checksum))
     {
-        $fileHash = (Get-FileHash @fileHashSplat).Hash
-        if ($fileHash -ine $checksumValue)
+        $fileHashSplat = @{
+            Path      = $DestinationPath
+            Algorithm = $ChecksumType
+        }
+
+        $getFileHash = Get-FileHash @fileHashSplat
+        $fileHash = $getFileHash.Hash
+
+        if ($fileHash -ine $Checksum)
         {
             # the checksum failed
-            $errorMessage = $script:localizedData.ChecksumDoesNotMatch -f $checksumValue, $fileHash
+            $errorMessage = $script:localizedData.ChecksumDoesNotMatch -f $Checksum, $fileHash
             New-InvalidDataException `
                 -ErrorId 'ChecksumDoesNotMatch' `
                 -ErrorMessage $errorMessage
@@ -516,14 +514,15 @@ function Test-TargetResource
             }
 
             if ($ChecksumType -ine 'None' `
-                    -and -not [string]::IsNullOrEmpty($Checksum) `
+                    -and -not [String]::IsNullOrEmpty($Checksum) `
                     -and $fileExists -eq $true)
             {
                 $fileHashSplat = @{
                     Path      = $DestinationPath
                     Algorithm = $ChecksumType
                 }
-                $fileHash = (Get-FileHash @fileHashSplat).Hash
+                $getFileHash = Get-FileHash @fileHashSplat
+                $fileHash = $getFileHash.Hash
 
                 if ($fileHash -ieq $Checksum)
                 {
@@ -531,7 +530,7 @@ function Test-TargetResource
                 }
                 else
                 {
-                    # The checksum does not match. The file may match what is in the cached data. resetting it to false
+                    # The checksum does not match. The file may match what is in the cached data. Resetting it to false.
                     $fileExists = $false
                 }
             }
@@ -567,14 +566,15 @@ function Test-TargetResource
                 }
 
                 if ($ChecksumType -ine 'None' `
-                    -and -not [string]::IsNullOrEmpty($Checksum) `
+                    -and -not [String]::IsNullOrEmpty($Checksum) `
                     -and $fileExists -eq $true)
             {
                 $fileHashSplat = @{
                     Path      = $expectedDestinationPath
                     Algorithm = $ChecksumType
                 }
-                $fileHash = (Get-FileHash @fileHashSplat).Hash
+                $getFileHash = Get-FileHash @fileHashSplat
+                $fileHash = $getFileHash.Hash
 
                 if ($fileHash -ieq $Checksum)
                 {
@@ -582,7 +582,7 @@ function Test-TargetResource
                 }
                 else
                 {
-                    # The checksum does not match. The file may match what is in the cached data. resetting it to false
+                    # The checksum does not match. The file may match what is in the cached data. Resetting it to false.
                     $fileExists = $false
                 }
             }
