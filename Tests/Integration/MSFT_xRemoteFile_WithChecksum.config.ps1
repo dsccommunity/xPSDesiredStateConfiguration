@@ -7,7 +7,7 @@ $TestChecksum = '31C1D431BBEB65E66113A8EBB06630DC'
 
 
 # Integration Test Config Template Version: 1.0.0
-configuration MSFT_xRemoteFile_WithChecksum_config {
+Configuration MSFT_xRemoteFile_WithChecksum_config {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
     node localhost {
         xRemoteFile Integration_Test {

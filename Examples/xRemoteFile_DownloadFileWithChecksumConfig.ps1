@@ -72,7 +72,7 @@
 
         Replace the <resource-group> and <automation-account> with correct values.
 #>
-configuration xRemoteFile_DownloadFileWithChecksumConfig
+Configuration xRemoteFile_DownloadFileWithChecksumConfig
 {
     param
     (
