@@ -33,12 +33,12 @@ try
     InModuleScope $script:dscResourceName {
         function Get-InvalidDataException
         {
-            param(
-                [parameter(Mandatory = $true)]
+            param (
+                [Parameter(Mandatory = $true)]
                 [System.String]
                 $errorId,
 
-                [parameter(Mandatory = $true)]
+                [Parameter(Mandatory = $true)]
                 [System.String]
                 $errorMessage
             )
@@ -82,15 +82,24 @@ try
                 DestinationPath = $testDestinationFile;
                 Uri = $testURI;
             }
+            $testSplatFileChecksum = $testSplatFile.clone()
+            $testSplatFileChecksum.ChecksumType = 'MD5'
+
             $testSplatFolderFileExists = @{
                 DestinationPath = $testDestinationFolder;
                 Uri = $testURI;
             }
+            $testSplatFolderFileExistsChecksum = $testSplatFolderFileExists.clone()
+            $testSplatFolderFileExistsChecksum.ChecksumType = 'MD5'
+
             $testSplatFolderFileNotExist = @{
                 DestinationPath = $testDestinationFolder;
                 Uri = $testURINotExist;
             }
 
+            $testFileHash = @{
+                Hash = 'abc12345'
+            }
             # Create the test files/folders by clearing the working folder
             # if it exists and building a set of expected test files
             if (Test-Path -Path $script:workingFolder)
@@ -107,9 +116,23 @@ try
                     $Result.Ensure | Should -Be 'Present'
                 }
 
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                $result = Get-TargetResource @testSplatFileChecksum
+                It 'Returns "Present" and file checksum value when DestinationPath is a File and exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Checksum | Should -Be $testFileHash.Hash
+                }
+
                 $result = Get-TargetResource @testSplatFolderFileExists
                 It 'Returns "Present" when DestinationPath is a Directory and exists and URI file exists' {
                     $Result.Ensure | Should -Be 'Present'
+                }
+
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                $result = Get-TargetResource @testSplatFolderFileExistsChecksum
+                It 'Returns "Present" and a file checksum when DestinationPath is a Directory and exists and URI file exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Checksum | Should -Be $testFileHash.Hash
                 }
 
                 $result = Get-TargetResource @testSplatFolderFileNotExist
@@ -199,6 +222,39 @@ try
                         Assert-MockCalled Update-Cache -Exactly 1
                     }
                 }
+
+                Mock Invoke-WebRequest
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a file, Checksum provided, download successful' {
+                    $splat = $testSplatFile.Clone()
+                    $splat.Checksum = $testFileHash.Hash
+                    $splat.ChecksumType = 'MD5'
+
+                    It 'Does not throw' {
+                        { Set-TargetResource @Splat } | Should -Not -Throw
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 1
+                    }
+                }
+                Mock Invoke-WebRequest
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a file, Checksum provided, Checksum fails' {
+                    $splat = $testSplatFile.Clone()
+                    $splat.Checksum = 'badhash'
+                    $splat.ChecksumType = 'MD5'
+
+                    It 'Does not throw' {
+                        { Set-TargetResource @Splat } | Should -Throw
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 0
+                    }
+                }
             } #end Describe "$($script:dscResourceName)\Set-TargetResource"
 
             Describe "$($script:dscResourceName)\Test-TargetResource" {
@@ -211,6 +267,20 @@ try
                         Assert-MockCalled Get-Cache -Exactly 1
                     }
                 }
+
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a File, file exists, Does not check checksum when MatchSource fails' {
+                    It 'Returns "False"' {
+                        $splat = $testSplatFile.Clone()
+                        $splat.Checksum = $testFileHash.Hash
+                        Test-TargetResource @Splat | Should -Be $False
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 0
+                    }
+                }
+
                 Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False"' {
                     It 'Returns "True"' {
                         $splat = $testSplatFile.Clone()
@@ -221,6 +291,35 @@ try
                         Assert-MockCalled Get-Cache -Exactly 0
                     }
                 }
+
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum matches' {
+                    It 'Returns "True"' {
+                        $splat = $testSplatFileChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = $testFileHash.Hash
+                        Test-TargetResource @splat | Should -Be $True
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum does not match' {
+                    It 'Returns "False"' {
+                        $splat = $testSplatFileChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = 'badHash'
+                        Test-TargetResource @splat | Should -Be $False
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
+                }
+
                 Context 'URI is valid, DestinationPath is a Folder, file exists' {
                     It 'Returns "False"' {
                         Test-TargetResource @testSplatFolderFileExists | Should -Be $False
@@ -247,6 +346,8 @@ try
                         Assert-MockCalled Get-Cache -Exactly 0
                     }
                 }
+
+                Mock Get-FileHash
                 Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
                     It 'Returns "False"' {
                         $splat = $testSplatFolderFileNotExist.Clone()
@@ -255,6 +356,34 @@ try
                     }
                     It 'Calls expected mocks' {
                         Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 0
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum matches' {
+                    It 'Returns "True"' {
+                        $splat = $testSplatFolderFileExistsChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = $testFileHash.Hash
+                        Test-TargetResource @splat | Should -Be $True
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
+                }
+                Mock Get-FileHash -MockWith { return $testFileHash }
+                Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum does not match' {
+                    It 'Returns "False"' {
+                        $splat = $testSplatFolderFileExistsChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = 'badHash'
+                        Test-TargetResource @splat | Should -Be $False
+                    }
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
                     }
                 }
 

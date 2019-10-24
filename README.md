@@ -572,11 +572,16 @@ None
   proxy server that is specified by the Proxy parameter. Optional.
 * **Ensure**: Says whether DestinationPath exists on the machine. It's a read
   only property.
+* **ChecksumType**: Specifies the algorithm used to calculate the checksum of
+  the file. Optional.
+  { *None* | SHA1 | SHA256 | SHA384 | SHA512 | MACTripleDES | MD5 | RIPEMD160 }.
+* **Checksum**: Specifies the expected checksum value of downloaded file. Optional.
 
 #### Examples
 
 * [Download a file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileConfig.ps1)
 * [Download a file using proxy](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileUsingProxyConfig.ps1)
+* [Download a file with checksum](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileWithChecksumConfig.ps1)
 
 ### xPackage
 

@@ -9,6 +9,7 @@
   - Added MOF descriptions.
 - Corrected minor style issues.
 - Fix minor style issues in hashtable layout.
+- Added support for Checksum on xRemoteFile - [issue #423](https://github.com/PowerShell/PSDscResources/issues/423)
 
 ## 8.10.0.0
 
