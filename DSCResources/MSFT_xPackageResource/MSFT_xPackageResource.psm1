@@ -1,5 +1,5 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-param()
+param ()
 
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
@@ -72,14 +72,14 @@ function Get-TargetResource
     $packageResourceResult = @{}
 
     $getProductEntryParameters = @{
-        Name = $Name
+        Name              = $Name
         IdentifyingNumber = $identifyingNumber
     }
 
     $checkRegistryValueParameters = @{
-        CreateCheckRegValue = $CreateCheckRegValue
-        InstalledCheckRegHive = $InstalledCheckRegHive
-        InstalledCheckRegKey = $InstalledCheckRegKey
+        CreateCheckRegValue        = $CreateCheckRegValue
+        InstalledCheckRegHive      = $InstalledCheckRegHive
+        InstalledCheckRegKey       = $InstalledCheckRegKey
         InstalledCheckRegValueName = $InstalledCheckRegValueName
         InstalledCheckRegValueData = $InstalledCheckRegValueData
     }
@@ -97,10 +97,10 @@ function Get-TargetResource
     if ($null -eq $productEntry)
     {
         $packageResourceResult += @{
-            Ensure = 'Absent'
-            Name = $Name
+            Ensure    = 'Absent'
+            Name      = $Name
             ProductId = $identifyingNumber
-            Path = $Path
+            Path      = $Path
             Installed = $false
         }
 
@@ -109,10 +109,10 @@ function Get-TargetResource
     elseif ($CreateCheckRegValue)
     {
         $packageResourceResult += @{
-            Ensure = 'Present'
-            Name = $Name
+            Ensure    = 'Present'
+            Name      = $Name
             ProductId = $identifyingNumber
-            Path = $Path
+            Path      = $Path
             Installed = $true
         }
 
@@ -134,7 +134,7 @@ function Get-TargetResource
     {
         try
         {
-            $installDate = '{0:d}' -f [System.DateTime]::ParseExact($installDate, 'yyyyMMdd',[System.Globalization.CultureInfo]::CurrentCulture).Date
+            $installDate = '{0:d}' -f [System.DateTime]::ParseExact($installDate, 'yyyyMMdd', [System.Globalization.CultureInfo]::CurrentCulture).Date
         }
         catch
         {
@@ -158,16 +158,16 @@ function Get-TargetResource
     $displayName = Get-LocalizedRegistryKeyValue -RegistryKey $productEntry -ValueName 'DisplayName'
 
     $packageResourceResult += @{
-        Ensure = 'Present'
-        Name = $displayName
-        Path = $Path
-        InstalledOn = $installDate
-        ProductId = $identifyingNumber
-        Size = $estimatedSize
-        Installed = $true
-        Version = $displayVersion
+        Ensure             = 'Present'
+        Name               = $displayName
+        Path               = $Path
+        InstalledOn        = $installDate
+        ProductId          = $identifyingNumber
+        Size               = $estimatedSize
+        Installed          = $true
+        Version            = $displayVersion
         PackageDescription = $comments
-        Publisher = $publisher
+        Publisher          = $publisher
     }
 
     return $packageResourceResult
@@ -344,9 +344,9 @@ function Set-TargetResource
             if ($uri.IsUnc -and $PSCmdlet.ShouldProcess($script:localizedData.MountSharePath, $null, $null))
             {
                 $psDriveArgs = @{
-                    Name = [System.Guid]::NewGuid()
+                    Name       = [System.Guid]::NewGuid()
                     PSProvider = 'FileSystem'
-                    Root = Split-Path -Path $uri.LocalPath
+                    Root       = Split-Path -Path $uri.LocalPath
                 }
 
                 # If we pass a null for Credential, a dialog will pop up.
@@ -414,8 +414,8 @@ function Set-TargetResource
                     }
                     catch
                     {
-                         Write-Verbose -Message ($script:localizedData.ErrorOutString -f ($_ | Out-String))
-                         New-InvalidOperationException -Message ($script:localizedData.CouldNotGetHttpStream -f $uriScheme, $Path) -ErrorRecord $_
+                        Write-Verbose -Message ($script:localizedData.ErrorOutString -f ($_ | Out-String))
+                        New-InvalidOperationException -Message ($script:localizedData.CouldNotGetHttpStream -f $uriScheme, $Path) -ErrorRecord $_
                     }
 
                     try
@@ -569,15 +569,15 @@ function Set-TargetResource
             try
             {
                 [System.Int32] $exitCode = 0
-                if($PSBoundParameters.ContainsKey('RunAsCredential'))
+                if ($PSBoundParameters.ContainsKey('RunAsCredential'))
                 {
                     $commandLine = '"{0}" {1}' -f $startInfo.FileName, $startInfo.Arguments
                     $exitCode = Invoke-PInvoke -CommandLine $commandLine -Credential $RunAsCredential
                 }
                 else
                 {
-                   $process = Invoke-Process -Process $process -LogStream ($null -ne $logStream)
-                   $exitCode = $process.ExitCode
+                    $process = Invoke-Process -Process $process -LogStream ($null -ne $logStream)
+                    $exitCode = $process.ExitCode
                 }
             }
             catch
@@ -598,7 +598,7 @@ function Set-TargetResource
                 $masterEvents = @() + $outputEvents + $errorEvents
                 $masterEvents = $masterEvents | Sort-Object -Property TimeGenerated
 
-                foreach($event in $masterEvents)
+                foreach ($event in $masterEvents)
                 {
                     $logStream.Write($event.SourceEventArgs.Data);
                 }
@@ -669,8 +669,18 @@ function Set-TargetResource
         missing on some client SKUs (worked on both Server and Client Skus in Windows 10).
     #>
 
-    $serverFeatureData = Invoke-CimMethod -Name 'GetServerFeature' -Namespace 'root\microsoft\windows\servermanager' -Class 'MSFT_ServerManagerTasks' -Arguments @{ BatchSize = 256 } -ErrorAction 'Ignore'
-    $registryData = Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name 'PendingFileRenameOperations' -ErrorAction 'Ignore'
+    $serverFeatureData = Invoke-CimMethod `
+        -Name 'GetServerFeature' `
+        -Namespace 'root\microsoft\windows\servermanager' `
+        -Class 'MSFT_ServerManagerTasks' `
+        -Arguments @{
+            BatchSize = 256
+        } `
+        -ErrorAction 'Ignore'
+    $registryData = Get-ItemProperty `
+        -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' `
+        -Name 'PendingFileRenameOperations' `
+        -ErrorAction 'Ignore'
 
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $registryData -or $exitcode -eq 3010 -or $exitcode -eq 1641)
     {
@@ -687,14 +697,14 @@ function Set-TargetResource
     elseif ($Ensure -eq 'Present')
     {
         $getProductEntryParameters = @{
-            Name = $Name
+            Name              = $Name
             IdentifyingNumber = $identifyingNumber
         }
 
         $checkRegistryValueParameters = @{
-            CreateCheckRegValue = $CreateCheckRegValue
-            InstalledCheckRegHive = $InstalledCheckRegHive
-            InstalledCheckRegKey = $InstalledCheckRegKey
+            CreateCheckRegValue        = $CreateCheckRegValue
+            InstalledCheckRegHive      = $InstalledCheckRegHive
+            InstalledCheckRegKey       = $InstalledCheckRegKey
             InstalledCheckRegValueName = $InstalledCheckRegValueName
             InstalledCheckRegValueData = $InstalledCheckRegValueData
         }
@@ -821,14 +831,14 @@ function Test-TargetResource
     }
 
     $getProductEntryParameters = @{
-        Name = $Name
+        Name              = $Name
         IdentifyingNumber = $identifyingNumber
     }
 
     $checkRegistryValueParameters = @{
-        CreateCheckRegValue = $CreateCheckRegValue
-        InstalledCheckRegHive = $InstalledCheckRegHive
-        InstalledCheckRegKey = $InstalledCheckRegKey
+        CreateCheckRegValue        = $CreateCheckRegValue
+        InstalledCheckRegHive      = $InstalledCheckRegHive
+        InstalledCheckRegKey       = $InstalledCheckRegKey
         InstalledCheckRegValueName = $InstalledCheckRegValueName
         InstalledCheckRegValueData = $InstalledCheckRegValueData
     }
@@ -1198,7 +1208,7 @@ function Get-RegistryValueWithErrorsIgnored
     try
     {
         $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, $RegistryView)
-        $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key)
+        $subRegistryKey = $baseRegistryKey.OpenSubKey($Key)
 
         if ($null -ne $subRegistryKey)
         {
@@ -1566,10 +1576,10 @@ function Invoke-PInvoke
     [System.Int32] $exitCode = 0
 
     [Source.NativeMethods]::CreateProcessAsUser($CommandLine, `
-        $Credential.GetNetworkCredential().Domain, `
-        $Credential.GetNetworkCredential().UserName, `
-        $Credential.GetNetworkCredential().Password, `
-        [ref] $exitCode
+            $Credential.GetNetworkCredential().Domain, `
+            $Credential.GetNetworkCredential().UserName, `
+            $Credential.GetNetworkCredential().Password, `
+            [ref] $exitCode
     )
 
     return $exitCode;
@@ -1710,7 +1720,7 @@ function Remove-RegistryValue
     {
         $baseRegistryKey = [Microsoft.Win32.RegistryKey]::OpenBaseKey($RegistryHive, [Microsoft.Win32.RegistryView]::Default)
 
-        $subRegistryKey =  $baseRegistryKey.OpenSubKey($Key, $true)
+        $subRegistryKey = $baseRegistryKey.OpenSubKey($Key, $true)
         $subRegistryKey.DeleteValue($Value)
         $subRegistryKey.Close()
     }

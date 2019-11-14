@@ -30,10 +30,10 @@
             -SourcePath 'C:\folder\file.txt' `
             -Credential $credential
 #>
-Configuration xFileUpload
+configuration xFileUpload
 {
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
-
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-Keyword', '', Justification = 'Script resource name is seen as a keyword if this is not used.')]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -56,7 +56,7 @@ Configuration xFileUpload
         $CertificateThumbprint
     )
 
-    $cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\MSFT_xFileUpload"
+    $cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\configuration\BuiltinProvCache\MSFT_xFileUpload"
 
     if ($Credential)
     {
@@ -516,7 +516,7 @@ Configuration xFileUpload
         # Cast the public key correctly
         $rsaProvider = [System.Security.Cryptography.RSACryptoServiceProvider] $cert.PublicKey.Key
 
-        if($rsaProvider -eq $null)
+        if ($rsaProvider -eq $null)
         {
             $errorMessage = "Could not get public key from certificate with thumbprint: $CertificateThumbprint . Please verify certificate is valid for encryption."
             Invoke-Command `
@@ -568,7 +568,7 @@ Configuration xFileUpload
         }
     }
 
-    if(-not $cert)
+    if (-not $cert)
     {
         $errorMessage = "Error Reading certificate store for {0}. Please verify thumbprint is correct and certificate belongs to cert:\LocalMachine\My store." -f ${CertificateThumbprint};
         Invoke-Command `
@@ -639,7 +639,7 @@ Configuration xFileUpload
     # Get RSA provider
     $rsaProvider = [System.Security.Cryptography.RSACryptoServiceProvider] $cert.PrivateKey
 
-    if($rsaProvider -eq $null)
+    if ($rsaProvider -eq $null)
     {
         $errorMessage = "Could not get private key from certificate with thumbprint: $CertificateThumbprint . Please verify certificate is valid for decryption."
         $exception = New-Object -TypeName System.InvalidOperationException -ArgumentList $errorMessage

@@ -39,6 +39,12 @@ try
 
                 $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
 
+                <#
+                    This log file is used to log messages from the mock server which is important for debugging since
+                    most of the work of the mock server is done within a separate process.
+                #>
+                $script:logFile = Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'
+
                 $script:msiName = 'DSCSetupProject.msi'
                 $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
                 $script:msiArguments = '/NoReboot'
@@ -47,6 +53,9 @@ try
                 $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
 
                 $null = New-TestMsi -DestinationPath $script:msiLocation
+
+                $script:testHttpPort = Get-UnusedTcpPort
+                $script:testHttpsPort = Get-UnusedTcpPort -ExcludePorts @($script:testHttpPort)
 
                 $script:testExecutablePath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestExecutable.exe'
 
@@ -423,49 +432,99 @@ try
                 }
 
                 It 'Should correctly install and remove a package from a HTTP URL' {
-                    $baseUrl = 'http://localhost:1242/'
-                    $msiUrl = "$baseUrl" + 'package.msi'
-                    New-MockFileServer -FilePath $script:msiLocation
+                    $uriBuilder = [System.UriBuilder]::new('http', 'localhost', $script:testHttpPort)
+                    $baseUrl = $uriBuilder.Uri.AbsoluteUri
 
-                    # Test pipe connection as testing server readiness
-                    $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest1' )
-                    $pipe.WaitForConnection()
-                    $pipe.Dispose()
+                    $uriBuilder.Path = 'package.msi'
+                    $msiUrl = $uriBuilder.Uri.AbsoluteUri
 
-                    { Set-TargetResource -Ensure 'Present' -Path $baseUrl -Name $script:packageName -ProductId $script:packageId } | Should -Throw
+                    $fileServerStarted = $null
+                    $job = $null
 
-                    Set-TargetResource -Ensure 'Present' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+                    try
+                    {
+                        'Http tests:' >> $script:logFile
 
-                    Set-TargetResource -Ensure 'Absent' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalledByName -Name $script:packageName | Should -Be $false
+                        # Make sure no existing HTTP(S) test servers are running
+                        Stop-EveryTestServerInstance
 
-                    $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest2' )
-                    $pipe.Connect()
-                    $pipe.Dispose()
+                        $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
+                        $fileServerStarted = $serverResult.FileServerStarted
+                        $job = $serverResult.Job
+
+                        # Wait for the file server to be ready to receive requests
+                        $fileServerStarted.WaitOne(30000)
+
+                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -Name $script:packageName -ProductId $script:packageId } | Should -Throw
+
+                        Set-TargetResource -Ensure 'Present' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
+                        Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+
+                        Set-TargetResource -Ensure 'Absent' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
+                        Test-PackageInstalledByName -Name $script:packageName | Should -Be $false
+                    }
+                    catch
+                    {
+                        Write-Warning -Message 'Caught exception performing HTTP server tests. Outputting HTTP server log.' -Verbose
+                        Get-Content -Path $script:logFile | Write-Verbose -Verbose
+                        throw $_
+                    }
+                    finally
+                    {
+                        <#
+                            This must be called after Start-Server to ensure the listening port is closed,
+                            otherwise subsequent tests may fail until the machine is rebooted.
+                        #>
+                        Stop-Server -FileServerStarted $fileServerStarted -Job $job
+                    }
                 }
 
                 It 'Should correctly install and remove a package from a HTTPS URL' -Skip:$script:skipHttpsTest {
-                    $baseUrl = 'https://localhost:1243/'
-                    $msiUrl = "$baseUrl" + 'package.msi'
-                    New-MockFileServer -FilePath $script:msiLocation -Https
+                    $uriBuilder = [System.UriBuilder]::new('https', 'localhost', $script:testHttpsPort)
+                    $baseUrl = $uriBuilder.Uri.AbsoluteUri
 
-                    # Test pipe connection as testing server reasdiness
-                    $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeServerStream' -ArgumentList @( '\\.\pipe\dsctest1' )
-                    $pipe.WaitForConnection()
-                    $pipe.Dispose()
+                    $uriBuilder.Path = 'package.msi'
+                    $msiUrl = $uriBuilder.Uri.AbsoluteUri
 
-                    { Set-TargetResource -Ensure 'Present' -Path $baseUrl -Name $script:packageName -ProductId $script:packageId } | Should -Throw
+                    $fileServerStarted = $null
+                    $job = $null
 
-                    Set-TargetResource -Ensure 'Present' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+                    try
+                    {
+                        'Https tests:' >> $script:logFile
 
-                    Set-TargetResource -Ensure 'Absent' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
-                    Test-PackageInstalledByName -Name $script:packageName | Should -Be $false
+                        # Make sure no existing HTTP(S) test servers are running
+                        Stop-EveryTestServerInstance
 
-                    $pipe = New-Object -TypeName 'System.IO.Pipes.NamedPipeClientStream' -ArgumentList @( '\\.\pipe\dsctest2' )
-                    $pipe.Connect()
-                    $pipe.Dispose()
+                        $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
+                        $fileServerStarted = $serverResult.FileServerStarted
+                        $job = $serverResult.Job
+
+                        # Wait for the file server to be ready to receive requests
+                        $fileServerStarted.WaitOne(30000)
+
+                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -Name $script:packageName -ProductId $script:packageId } | Should -Throw
+
+                        Set-TargetResource -Ensure 'Present' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
+                        Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+
+                        Set-TargetResource -Ensure 'Absent' -Path $msiUrl -Name $script:packageName -ProductId $script:packageId
+                        Test-PackageInstalledByName -Name $script:packageName | Should -Be $false
+                    }
+                    catch
+                    {
+                        Write-Warning -Message 'Caught exception performing HTTPS server tests. Outputting HTTPS server log.' -Verbose
+                        Get-Content -Path $script:logFile | Write-Verbose -Verbose
+                        throw $_
+                    }
+                    finally
+                    {
+                        <#
+                            This must be called after Start-Server to ensure the listening port is closed,
+                            otherwise subsequent tests may fail until the machine is rebooted.
+                        #>
+                        Stop-Server -FileServerStarted $fileServerStarted -Job $job
+                    }
                 }
 
                 It 'Should write to the specified log path' {

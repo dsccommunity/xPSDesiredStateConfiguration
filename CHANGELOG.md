@@ -5,6 +5,41 @@
 - PublishModulesAndMofsToPullServer.psm1:
   - Fixes issue in Publish-MOFToPullServer that was introduced in 8.5.0.0, making
     the function unusable.
+- Fix minor style issues with missing spaces between `param` statements and '('.
+- MSFT_xDSCWebService:
+  - Removal of commented out code.
+  - Updated to meet HQRM style guidelines - Fixes [issue #623](https://github.com/PowerShell/PSDscResources/issues/623)
+  - Added MOF descriptions.
+- Corrected minor style issues.
+- Fix minor style issues in hashtable layout.
+- Added support for Checksum on xRemoteFile - [issue #423](https://github.com/PowerShell/PSDscResources/issues/423)
+
+## 8.10.0.0
+
+- Changes to xPSDesiredStateConfiguration
+  - Fix keywords to lower-case to align with guideline.
+- Added SMB PullServer support for publishing.
+
+## 8.9.0.0
+
+- MSFT_xRemoteFile:
+  - Add a retry mechanism when the download fails.
+- Fixes #631, typo in SQL connection string property name
+
+## 8.8.0.0
+
+- Ports fix for the following issue:
+  [Issue #142](https://github.com/PowerShell/PSDscResources/issues/142)
+  Fixes issue where MsiPackage Integration tests fail if the test HttpListener
+  fails to start. Moves the test HttpListener objects to dynamically assigned,
+  higher numbered ports to avoid conflicts with other services, and also checks
+  to ensure that the ports are available before using them. Adds checks to
+  ensure that no outstanding HTTP server jobs are running before attempting to
+  setup a new one. Also adds additional instrumentation to make it easier to
+  troubleshoot issues with the test HttpListener objects in the future.
+
+## 8.7.0.0
+
 - MSFT_xWindowsProcess:
   - Fixes issue where a process will fail to be created if a $Path is passed
     that contains one or more spaces, and the resource is using $Credentials.
@@ -18,6 +53,14 @@
 - Fixes test failures in xWindowsOptionalFeatureSet.Integration.Tests.ps1 due
   to accessing the windowsOptionalFeatureName variable before it is assigned.
   [issue #612](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/612)
+- MSFT_xDSCWebService
+  - Fixes [issue
+    #536](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/536)
+    and starts the deprecation process for configuring a windows firewall
+    (exception) rule using xDSCWebService
+  - Fixes [issue
+    #463](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/463)
+    and fixes some bugs introduced with the new firewall rule handling
 
 ## 8.6.0.0
 

@@ -21,6 +21,9 @@ $script:cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configura
     .PARAMETER Uri
         Uri of a file which should be copied or downloaded. This parameter
         supports HTTP and HTTPS values.
+
+    .PARAMETER ChecksumType
+        The algorithm used to calculate the checksum of the file.
 #>
 function Get-TargetResource
 {
@@ -36,12 +39,19 @@ function Get-TargetResource
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $Uri
+        $Uri,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet('None', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'MACTripleDES', 'MD5', 'RIPEMD160')]
+        $ChecksumType = 'None'
+
     )
 
     # Check whether DestinationPath is existing file
     $ensure = 'Absent'
     $pathItemType = Get-PathItemType -Path $DestinationPath
+    $checksumValue = ''
 
     switch ($pathItemType)
     {
@@ -49,6 +59,12 @@ function Get-TargetResource
         {
             Write-Verbose -Message ($script:localizedData.DestinationPathIsExistingFile -f $DestinationPath)
             $ensure = 'Present'
+
+            if ($ChecksumType -ine 'None')
+            {
+                $getFileHash = Get-FileHash -Path $DestinationPath -Algorithm $ChecksumType
+                $checksumValue = $getFileHash.Hash
+            }
         }
 
         'Directory'
@@ -63,6 +79,12 @@ function Get-TargetResource
             {
                 Write-Verbose -Message ($script:localizedData.FileExistsInDestinationPath -f $uriFileName)
                 $ensure = 'Present'
+
+                if ($ChecksumType -ine 'None')
+                {
+                    $getFileHash = Get-FileHash -Path $expectedDestinationPath -Algorithm $ChecksumType
+                    $checksumValue = $getFileHash.Hash
+                }
             }
         }
 
@@ -81,6 +103,7 @@ function Get-TargetResource
         DestinationPath = $DestinationPath
         Uri             = $Uri
         Ensure          = $ensure
+        Checksum        = $checksumValue
     }
 }
 
@@ -123,6 +146,12 @@ function Get-TargetResource
     .PARAMETER ProxyCredential
         Specifies a user account that has permission to use the proxy server that
         is specified by the Proxy parameter.
+
+    .PARAMETER Checksum
+        Specifies the expected checksum value of downloaded file.
+
+    .PARAMETER ChecksumType
+        The algorithm used to calculate the checksum of the file.
 #>
 function Set-TargetResource
 {
@@ -167,7 +196,16 @@ function Set-TargetResource
         [Parameter()]
         [System.Management.Automation.Credential()]
         [System.Management.Automation.PSCredential]
-        $ProxyCredential
+        $ProxyCredential,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet('None', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'MACTripleDES', 'MD5', 'RIPEMD160')]
+        $ChecksumType = 'None',
+
+        [Parameter()]
+        [System.String]
+        $Checksum
     )
 
     # Validate Uri
@@ -198,7 +236,7 @@ function Set-TargetResource
     }
 
     # Validate DestinationPath does not contain invalid characters
-    @('*', '?', '"', '<', '>', '|') | Foreach-Object -Process {
+    @('*', '?', '"', '<', '>', '|') | ForEach-Object -Process {
         if ($DestinationPath.Contains($_))
         {
             $errorMessage = $script:localizedData.DestinationPathHasInvalidCharactersError -f $DestinationPath
@@ -233,6 +271,10 @@ function Set-TargetResource
         $DestinationPath = Join-Path -Path $DestinationPath -ChildPath $uriFileName
     }
 
+    # Remove ChecksumType and Checksum from parameters as they are not parameters of Invoke-WebRequest.
+    $null = $PSBoundParameters.Remove('ChecksumType')
+    $null = $PSBoundParameters.Remove('Checksum')
+
     # Remove DestinationPath and MatchSource from parameters as they are not parameters of Invoke-WebRequest
     $null = $PSBoundParameters.Remove('DestinationPath')
     $null = $PSBoundParameters.Remove('MatchSource')
@@ -253,8 +295,34 @@ function Set-TargetResource
         $ProgressPreference = 'SilentlyContinue'
 
         Write-Verbose -Message ($script:localizedData.DownloadingURI -f $DestinationPath, $URI)
+        $count = 0
+        $success = $false
 
-        Invoke-WebRequest @PSBoundParameters -Headers $headersHashtable -OutFile $DestinationPath
+        do
+        {
+            try
+            {
+                $count++
+                Invoke-WebRequest `
+                    @PSBoundParameters `
+                    -Headers $headersHashtable `
+                    -OutFile $DestinationPath
+                $success = $true
+            }
+            catch [System.Exception]
+            {
+                Write-Verbose -Message ($script:localizedData.DownloadingFailedRetry -f $URI, $count, $_.Exception.Message)
+
+                if ($count -gt 5)
+                {
+                    # Inside catch variable $_ is not the exception itself, but a System.Management.Automation.ErrorRecord that contains the actual Exception
+                    throw $_.Exception
+                }
+
+                Start-Sleep -Seconds 5
+            }
+        }
+        while ($success -eq $false)
     }
     catch [System.OutOfMemoryException]
     {
@@ -275,13 +343,34 @@ function Set-TargetResource
         $ProgressPreference = $currentProgressPreference
     }
 
+    # Check checksum
+    if ($ChecksumType -ine 'None' -and -not [String]::IsNullOrEmpty($Checksum))
+    {
+        $fileHashSplat = @{
+            Path      = $DestinationPath
+            Algorithm = $ChecksumType
+        }
+
+        $getFileHash = Get-FileHash @fileHashSplat
+        $fileHash = $getFileHash.Hash
+
+        if ($fileHash -ine $Checksum)
+        {
+            # the checksum failed
+            $errorMessage = $script:localizedData.ChecksumDoesNotMatch -f $Checksum, $fileHash
+            New-InvalidDataException `
+                -ErrorId 'ChecksumDoesNotMatch' `
+                -ErrorMessage $errorMessage
+        }
+    }
+
     # Update cache
     if (Test-Path -Path $DestinationPath)
     {
         $downloadedFile = Get-Item -Path $DestinationPath
         $lastWriteTime = $downloadedFile.LastWriteTimeUtc
         $filesize = $downloadedFile.Length
-        $inputObject = @{}
+        $inputObject = @{ }
         $inputObject['LastWriteTime'] = $lastWriteTime
         $inputObject['FileSize'] = $filesize
         Update-Cache -DestinationPath $DestinationPath -Uri $Uri -InputObject $inputObject
@@ -326,6 +415,12 @@ function Set-TargetResource
     .PARAMETER ProxyCredential
         Specifies a user account that has permission to use the proxy server that
         is specified by the Proxy parameter.
+
+    .PARAMETER Checksum
+        Specifies the expected checksum value of downloaded file.
+
+    .PARAMETER ChecksumType
+        The algorithm used to calculate the checksum of the file.
 #>
 function Test-TargetResource
 {
@@ -371,7 +466,16 @@ function Test-TargetResource
         [Parameter()]
         [System.Management.Automation.Credential()]
         [System.Management.Automation.PSCredential]
-        $ProxyCredential
+        $ProxyCredential,
+
+        [Parameter()]
+        [System.String]
+        [ValidateSet('None', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'MACTripleDES', 'MD5', 'RIPEMD160')]
+        $ChecksumType = 'None',
+
+        [Parameter()]
+        [System.String]
+        $Checksum
     )
 
     # Check whether DestinationPath points to existing file or directory
@@ -408,6 +512,28 @@ function Test-TargetResource
                 Write-Verbose -Message $script:localizedData.MatchSourceFalse
                 $fileExists = $true
             }
+
+            if ($ChecksumType -ine 'None' `
+                    -and -not [String]::IsNullOrEmpty($Checksum) `
+                    -and $fileExists -eq $true)
+            {
+                $fileHashSplat = @{
+                    Path      = $DestinationPath
+                    Algorithm = $ChecksumType
+                }
+                $getFileHash = Get-FileHash @fileHashSplat
+                $fileHash = $getFileHash.Hash
+
+                if ($fileHash -ieq $Checksum)
+                {
+                    $fileExists = $true
+                }
+                else
+                {
+                    # The checksum does not match. The file may match what is in the cached data. Resetting it to false.
+                    $fileExists = $false
+                }
+            }
         }
 
         'Directory'
@@ -438,6 +564,28 @@ function Test-TargetResource
                     Write-Verbose -Message $script:localizedData.MatchSourceFalse
                     $fileExists = $true
                 }
+
+                if ($ChecksumType -ine 'None' `
+                    -and -not [String]::IsNullOrEmpty($Checksum) `
+                    -and $fileExists -eq $true)
+            {
+                $fileHashSplat = @{
+                    Path      = $expectedDestinationPath
+                    Algorithm = $ChecksumType
+                }
+                $getFileHash = Get-FileHash @fileHashSplat
+                $fileHash = $getFileHash.Hash
+
+                if ($fileHash -ieq $Checksum)
+                {
+                    $fileExists = $true
+                }
+                else
+                {
+                    # The checksum does not match. The file may match what is in the cached data. Resetting it to false.
+                    $fileExists = $false
+                }
+            }
             }
         }
 
@@ -560,7 +708,7 @@ function Convert-KeyValuePairArrayToHashtable
         $Array
     )
 
-    $hashtable = @{}
+    $hashtable = @{ }
 
     foreach ($item in $Array)
     {
@@ -612,7 +760,7 @@ function Get-Cache
     }
     else
     {
-        $cacheContent = Import-CliXml -Path $path
+        $cacheContent = Import-Clixml -Path $path
         Write-Verbose -Message ($script:localizedData.CacheFoundForPath -f $DestinationPath, $Uri, $Key)
     }
 
@@ -662,7 +810,7 @@ function Update-Cache
 
     Write-Verbose -Message ($script:localizedData.UpdatingCache -f $DestinationPath, $Uri, $Key)
 
-    Export-CliXml -Path $path -InputObject $InputObject -Force
+    Export-Clixml -Path $path -InputObject $InputObject -Force
 }
 
 <#
