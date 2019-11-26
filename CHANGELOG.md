@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- PublishModulesAndMofsToPullServer.psm1:
+  - Fixes issue in Publish-MOFToPullServer that was introduced in 8.5.0.0,
+    making the function unusable.
 - Fix minor style issues with missing spaces between `param` statements and '('.
 - MSFT_xDSCWebService:
   - Removal of commented out code.
