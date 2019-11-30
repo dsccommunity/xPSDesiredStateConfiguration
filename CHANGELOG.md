@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- PublishModulesAndMofsToPullServer.psm1:
+  - Fixes issue in Publish-MOFToPullServer that incorrectly tries to create a
+    new MOF file instead of reading the existing one.
+    [issue #575](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/575)
 - Fix minor style issues with missing spaces between `param` statements and '('.
 - MSFT_xDSCWebService:
   - Removal of commented out code.

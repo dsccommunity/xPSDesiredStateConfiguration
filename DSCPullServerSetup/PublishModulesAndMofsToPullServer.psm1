@@ -421,6 +421,7 @@ function Publish-MOFToPullServer
         [Parameter(Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
             Position = 0)]
+        [ValidateScript({Test-Path -Path $_ -PathType Leaf})]
         [System.String]
         $FullName,
 
@@ -438,35 +439,22 @@ function Publish-MOFToPullServer
     {
         if (-not($OutputFolderPath) -or -not (Test-Path -Path $OutputFolderPath))
         {
-            if (-not(Test-Path $PullServerWebConfig))
-            {
-                throw "Web.Config of the pullserver does not exist on the default path $PullServerWebConfig. Please provide the location of your pullserver web configuration using the parameter -PullServerWebConfig or an alternate path where you want to publish the pullserver MOFs to. This Path should exist."
-            }
-            else
-            {
-                <#
-                    Web.Config of Pull Server found so figure out the module path of the pullserver.
-                    Use this value as output folder path.
-                #>
-                $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
-                $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
-                $OutputFolderPath = $configXElement.Value
-            }
+            <#
+                Web.Config of Pull Server found so figure out the module path of the pullserver.
+                Use this value as output folder path.
+            #>
+            $webConfigXml = [System.Xml.XmlDocument] (Get-Content -Path $PullServerWebConfig)
+            $configXElement = $webConfigXml.SelectNodes("//appSettings/add[@key = 'ConfigurationPath']")
+            $OutputFolderPath = $configXElement.Value
         }
     }
     Process
     {
-        $fileInfo = New-Item -Path $FullName -ItemType File
-        if ($fileInfo.Extension -eq '.mof')
+        $fileItem = Get-Item -Path $FullName
+
+        if ($fileItem.Extension -eq '.mof')
         {
-            if (Test-Path -Path $FullName)
-            {
-                Copy-Item -Path $FullName -Destination $OutputFolderPath -Force
-            }
-            else
-            {
-                throw "File not found at $FullName"
-            }
+            Copy-Item -Path $FullName -Destination $OutputFolderPath -Force
         }
         else
         {
