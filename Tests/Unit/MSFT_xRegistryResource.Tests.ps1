@@ -450,6 +450,7 @@ try
             Mock -CommandName 'ConvertTo-Qword' -MockWith { return $RegistryKeyValue }
             Mock -CommandName 'ConvertTo-String' -MockWith { return $RegistryKeyValue }
             Mock -CommandName 'Get-RegistryKeyName' -MockWith { return $setTargetResourceParameters.Key }
+            Mock -CommandName 'Get-RegistryKeyValueType' -MockWith { if($setTargetResourceParameters.ValueType){$setTargetResourceParameters.ValueType}else{'String'} }
             Mock -CommandName 'Set-RegistryKeyValue' -MockWith { }
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
             Mock -CommandName 'Remove-RegistryKey' -MockWith { }
@@ -1620,6 +1621,190 @@ try
                     }
 
                     Assert-MockCalled -CommandName 'Set-RegistryKeyValue' -ParameterFilter $setRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the registry key value' {
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the default registry key value' {
+                    Assert-MockCalled -CommandName 'Remove-DefaultRegistryKeyValue' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to retrieve the registry key subkey count' {
+                    Assert-MockCalled -CommandName 'Get-RegistryKeySubKeyCount' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the registry key' {
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not return' {
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
+                }
+            }
+
+            Mock -CommandName 'Get-RegistryKeyValueType' -MockWith { return 'ValueTypeNotDesired' }
+            Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
+
+            Context 'Registry key exists, Ensure specified as Present, specified registry value exists, specified value type does not match actual value type, and Force specified as True' {
+                $setTargetResourceParameters = @{
+                    Key = 'TestRegistryKey'
+                    ValueName = 'TestRegistryValueName'
+                    ValueType = 'Dword'
+                    ValueData = '123'
+                    Ensure = 'Present'
+                    Force = $true
+                }
+
+                It 'Should not throw' {
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+                }
+
+                It 'Should retrieve the registry key' {
+                    $getRegistryKeyParameterFilter = {
+                        $registryKeyPathParameterCorrect = $RegistryKeyPath -eq $setTargetResourceParameters.Key
+                        return $registryKeyPathParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKey' -ParameterFilter $getRegistryKeyParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to create a new registry key' {
+                    Assert-MockCalled -CommandName 'New-RegistryKey' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should retrieve the registry key value display name' {
+                    $getRegistryKeyValueDisplayNameParameterFilter = {
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                        return $registryKeyValueNameParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKeyValueDisplayName' -ParameterFilter $getRegistryKeyValueDisplayNameParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should retrieve the registry key value' {
+                    $getRegistryKeyValueParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        return $registryKeyParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKeyValue' -ParameterFilter $getRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should retrieve the type of the registry key value' {
+                    $getRegistryKeyValueTypeParameterFilter = {
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                        return $registryKeyValueNameParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKeyValueType' -ParameterFilter $getRegistryKeyValueTypeParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to test if the specified registry key value matches the retrieved registry key value' {
+                    Assert-MockCalled -CommandName 'Test-RegistryKeyValuesMatch' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should set the registry key value' {
+                    $setRegistryKeyValueParameterFilter = {
+                        $registryKeyNameParameterCorrect = $RegistryKeyName -eq $setTargetResourceParameters.Key
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                        $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
+                        $valueTypeParameterCorrect = $ValueType -eq $setTargetResourceParameters.ValueType
+
+                        return $registryKeyNameParameterCorrect -and $registryKeyValueNameParameterCorrect -and $registryKeyValueParameterCorrect -and $valueTypeParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Set-RegistryKeyValue' -ParameterFilter $setRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the registry key value' {
+                    Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the default registry key value' {
+                    Assert-MockCalled -CommandName 'Remove-DefaultRegistryKeyValue' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to retrieve the registry key subkey count' {
+                    Assert-MockCalled -CommandName 'Get-RegistryKeySubKeyCount' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not attempt to remove the registry key' {
+                    Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should not return' {
+                    Set-TargetResource @setTargetResourceParameters | Should -Be $null
+                }
+            }
+
+            Context 'Registry key exists, Ensure specified as Present, specified registry value exists, ValueType not specified, and Force specified as True' {
+                $setTargetResourceParameters = @{
+                    Key = 'TestRegistryKey'
+                    ValueName = 'TestRegistryValueName'
+                    ValueData = '123'
+                    Ensure = 'Present'
+                    Force = $true
+                }
+
+                It 'Should not throw' {
+                    { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+                }
+
+                It 'Should retrieve the registry key' {
+                    $getRegistryKeyParameterFilter = {
+                        $registryKeyPathParameterCorrect = $RegistryKeyPath -eq $setTargetResourceParameters.Key
+                        return $registryKeyPathParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKey' -ParameterFilter $getRegistryKeyParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to create a new registry key' {
+                    Assert-MockCalled -CommandName 'New-RegistryKey' -Times 0 -Scope 'Context'
+                }
+
+                It 'Should retrieve the registry key value display name' {
+                    $getRegistryKeyValueDisplayNameParameterFilter = {
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                        return $registryKeyValueNameParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKeyValueDisplayName' -ParameterFilter $getRegistryKeyValueDisplayNameParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should retrieve the registry key value' {
+                    $getRegistryKeyValueParameterFilter = {
+                        $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                        return $registryKeyParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKeyValue' -ParameterFilter $getRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should retrieve the type of the registry key value' {
+                    $getRegistryKeyValueTypeParameterFilter = {
+                        $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                        return $registryKeyValueNameParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-RegistryKeyValueType' -ParameterFilter $getRegistryKeyValueTypeParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should test if the specified registry key value matches the retrieved registry key value' {
+                    $testRegistryKeyValuesMatchParameterFilter = {
+                        $expectedRegistryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $ExpectedRegistryKeyValue)
+                        $actualRegistryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $ActualRegistryKeyValue)
+
+                        return $expectedRegistryKeyValueParameterCorrect -and $actualRegistryKeyValueParameterCorrect
+                    }
+
+                    Assert-MockCalled -CommandName 'Test-RegistryKeyValuesMatch' -ParameterFilter $testRegistryKeyValuesMatchParameterFilter -Times 1 -Scope 'Context'
+                }
+
+                It 'Should not attempt to set the registry key value' {
+                    Assert-MockCalled -CommandName 'Set-RegistryKeyValue' -Times 0 -Scope 'Context'
                 }
 
                 It 'Should not attempt to remove the registry key value' {
