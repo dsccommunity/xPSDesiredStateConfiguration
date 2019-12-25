@@ -1878,7 +1878,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -1919,7 +1919,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -1984,7 +1984,7 @@ try
                     Assert-MockCalled -CommandName 'Get-RegistryKeyValueDisplayName' -ParameterFilter $getRegistryKeyValueDisplayNameParameterFilter -Times 1 -Scope 'Context'
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2021,7 +2021,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2073,7 +2073,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2114,7 +2114,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2144,7 +2144,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Absent, and registry key value name specified' {
+            Context 'Registry key value exists, Ensure set to Absent, and registry key value name specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = 'TestRegistryKeyValueName'
@@ -2155,7 +2155,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2190,7 +2190,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Absent, and registry key value type specified' {
+            Context 'Registry key value exists, Ensure set to Absent, and registry key value type specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = ''
@@ -2202,7 +2202,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2237,7 +2237,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Absent, and registry key value data specified' {
+            Context 'Registry key value exists, Ensure set to Absent, and registry key value data specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = ''
@@ -2249,7 +2249,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2284,7 +2284,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Present, and registry key value name specified' {
+            Context 'Registry key value exists, Ensure set to Present, and registry key value name specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = 'TestRegistryKeyValueName'
@@ -2295,7 +2295,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                It 'Should retrieve the registry resource with the specified registry key and value name' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2337,7 +2337,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Present, and matching registry key value type specified' {
+            Context 'Registry key value exists, Ensure set to Present, and matching registry key value type specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = ''
@@ -2349,7 +2349,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key, value name, and value type' {
+                It 'Should retrieve the registry resource with the specified registry key, value name, and value type' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2393,7 +2393,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Present, and matching registry key value data specified' {
+            Context 'Registry key value exists, Ensure set to Present, and matching registry key value data specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = ''
@@ -2405,7 +2405,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key, value name, and value data' {
+                It 'Should retrieve the registry resource with the specified registry key, value name, and value data' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2456,7 +2456,7 @@ try
                 }
             }
 
-            Context 'Registry key value exists, Enusre set to Present, and mismatching registry key value type specified' {
+            Context 'Registry key value exists, Ensure set to Present, and mismatching registry key value type specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = ''
@@ -2468,7 +2468,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key, value name, and value type' {
+                It 'Should retrieve the registry resource with the specified registry key, value name, and value type' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2516,7 +2516,7 @@ try
 
             Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $false }
 
-            Context 'Registry key value exists, Enusre set to Present, and mismatching registry key value data specified' {
+            Context 'Registry key value exists, Ensure set to Present, and mismatching registry key value data specified' {
                 $testTargetResourceParameters = @{
                     Key = 'TestRegistryKey'
                     ValueName = ''
@@ -2528,7 +2528,7 @@ try
                     { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                 }
 
-                It 'Should retrieve the registry resource with the specified reigstry key, value name, and value data' {
+                It 'Should retrieve the registry resource with the specified registry key, value name, and value data' {
                     $getTargetResourceParameterFilter = {
                         $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                         $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2641,7 +2641,7 @@ try
                         { $null = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters } | Should -Not -Throw
                     }
 
-                    $expcetedRegistryDriveName = switch ($validRegistryDriveRoot)
+                    $expectedRegistryDriveName = switch ($validRegistryDriveRoot)
                     {
                         'HKEY_CLASSES_ROOT' { 'HKCR' }
                         'HKEY_CURRENT_USER' { 'HKCU' }
@@ -2652,8 +2652,8 @@ try
 
                     $convertToRegistryDriveNameResult = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters
 
-                    It "Should return correct registry drive name $expcetedRegistryDriveName" {
-                        $convertToRegistryDriveNameResult | Should -Be $expcetedRegistryDriveName
+                    It "Should return correct registry drive name $expectedRegistryDriveName" {
+                        $convertToRegistryDriveNameResult | Should -Be $expectedRegistryDriveName
                     }
                 }
             }
@@ -2838,16 +2838,16 @@ try
                 }
 
                 It 'Should retrieve the registry drive with specified name' {
-                    $getPSDriveParamterFilter = {
+                    $getPSDriveParameterFilter = {
                         $nameParameterCorrect = $Name -eq $mountRegistryDriveParameters.RegistryDriveName
                         return $nameParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParamterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should create the registry drive with specified name' {
-                    $newPSDriveParamterFilter = {
+                    $newPSDriveParameterFilter = {
                         $nameParameterCorrect = $Name -eq $mountRegistryDriveParameters.RegistryDriveName
                         $rootParameterCorrect = $Root -eq $expectedRegistryDriveRoot
                         $psProviderParameterCorrect = $PSProvider -eq 'Registry'
@@ -2856,7 +2856,7 @@ try
                         return $nameParameterCorrect -and $rootParameterCorrect -and $psProviderParameterCorrect -and $scopeParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'New-PSDrive' -ParameterFilter $newPSDriveParamterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'New-PSDrive' -ParameterFilter $newPSDriveParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not return anything' {
@@ -2904,12 +2904,12 @@ try
                 }
 
                 It 'Should retrieve the registry drive with specified name' {
-                    $getPSDriveParamterFilter = {
+                    $getPSDriveParameterFilter = {
                         $nameParameterCorrect = $Name -eq $mountRegistryDriveParameters.RegistryDriveName
                         return $nameParameterCorrect
                     }
 
-                    Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParamterFilter -Times 1 -Scope 'Context'
+                    Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParameterFilter -Times 1 -Scope 'Context'
                 }
 
                 It 'Should not attempt to create a registry drive with specified name' {
