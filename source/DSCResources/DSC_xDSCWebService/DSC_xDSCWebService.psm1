@@ -1,24 +1,20 @@
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Networking Resource Helper Module
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
+
+# Import Localization Strings
+$script:localizedData = Get-LocalizedData -ResourceName 'DSC_xDSCWebService'
+
 # Import the helper functions
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'PSWSIISEndpoint.psm1') -Verbose:$false
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'UseSecurityBestPractices.psm1') -Verbose:$false
-Import-Module -NAme (Join-Path -Path $PSScriptRoot -ChildPath 'Firewall.psm1') -Verbose:$false
-
-#region LocalizedData
-$script:culture = 'en-US'
-
-if (Test-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath $PSUICulture))
-{
-    $script:culture = $PSUICulture
-}
-
-$ImportLocalizedDataParams = @{
-    BindingVariable = 'LocalizedData'
-    Filename        = 'MSFT_xDSCWebService.psd1'
-    BaseDirectory   = $PSScriptRoot
-    UICulture       = $script:culture
-}
-Import-LocalizedData @ImportLocalizedDataParams
-#endregion
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'Firewall.psm1') -Verbose:$false
 
 <#
     .SYNOPSIS
@@ -113,7 +109,7 @@ function Get-TargetResource
     if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' `
         -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
-        throw $LocalizedData.ThrowCertificateThumbprint
+        throw $script:localizedData.ThrowCertificateThumbprint
     }
 
     $webSite = Get-Website -Name $EndpointName
@@ -413,7 +409,7 @@ function Set-TargetResource
     #>
     if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
-        throw $LocalizedData.ThrowCertificateThumbprint
+        throw $script:localizedData.ThrowCertificateThumbprint
     }
 
     # Find a certificate that matches the Subject and Template Name
@@ -425,12 +421,12 @@ function Set-TargetResource
     # Check parameter values
     if ($UseSecurityBestPractices -and ($CertificateThumbPrint -eq 'AllowUnencryptedTraffic'))
     {
-        throw $LocalizedData.ThrowUseSecurityBestPractice
+        throw $script:localizedData.ThrowUseSecurityBestPractice
     }
 
     if ($ConfigureFirewall)
     {
-        Write-Warning -Message $LocalizedData.ConfigFirewallDeprecated
+        Write-Warning -Message $script:localizedData.ConfigFirewallDeprecated
     }
 
     <#
@@ -441,7 +437,7 @@ function Set-TargetResource
             -and $ApplicationPoolName -ne $DscWebServiceDefaultAppPoolName `
             -and (-not (Test-Path -Path "IIS:\AppPools\$ApplicationPoolName")))
     {
-        throw ($LocalizedData.ThrowApplicationPoolNotFound -f $ApplicationPoolName)
+        throw ($script:localizedData.ThrowApplicationPoolNotFound -f $ApplicationPoolName)
     }
 
     # Initialize with default values
@@ -792,7 +788,7 @@ function Test-TargetResource
     #>
     if ($PScmdlet.ParameterSetName -eq 'CertificateThumbPrint' -and $PSBoundParameters.ContainsKey('CertificateThumbPrint') -ne $true)
     {
-        throw $LocalizedData.ThrowCertificateThumbprint
+        throw $script:localizedData.ThrowCertificateThumbprint
     }
 
     $desiredConfigurationMatch = $true
@@ -1199,14 +1195,14 @@ function Get-IISServerManager
 
     if (-not $iisInstallPath)
     {
-        throw ($LocalizedData.IISInstallationPathNotFound)
+        throw ($script:localizedData.IISInstallationPathNotFound)
     }
 
     $assyPath = Join-Path -Path $iisInstallPath -ChildPath 'Microsoft.Web.Administration.dll' -Resolve -ErrorAction:SilentlyContinue
 
     if (-not $assyPath)
     {
-        throw ($LocalizedData.IISWebAdministrationAssemblyNotFound)
+        throw ($script:localizedData.IISWebAdministrationAssemblyNotFound)
     }
 
     $assy = [System.Reflection.Assembly]::LoadFrom($assyPath)
@@ -1746,11 +1742,11 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
     }
     elseif ($filteredCertificates.Count -gt 1)
     {
-        throw ($LocalizedData.FindCertificateBySubjectMultiple -f $Subject, $TemplateName)
+        throw ($script:localizedData.FindCertificateBySubjectMultiple -f $Subject, $TemplateName)
     }
     else
     {
-        throw ($LocalizedData.FindCertificateBySubjectNotFound -f $Subject, $TemplateName)
+        throw ($script:localizedData.FindCertificateBySubjectNotFound -f $Subject, $TemplateName)
     }
 }
 

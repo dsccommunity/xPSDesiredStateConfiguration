@@ -343,7 +343,7 @@ function Publish-ModuleToPullServer
         $OutputFolderPath = $null
     )
 
-    Begin
+    begin
     {
         if (-not($OutputFolderPath) -or -not (Test-Path -Path $OutputFolderPath))
         {
@@ -363,7 +363,8 @@ function Publish-ModuleToPullServer
             }
         }
     }
-    Process
+
+    process
     {
         Write-Verbose -Message "Name: $Name , ModuleBase : $ModuleBase ,Version: $Version"
         $targetPath = Join-Path $OutputFolderPath "$($Name)_$($Version).zip"
@@ -377,7 +378,8 @@ function Publish-ModuleToPullServer
             Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*"
         }
     }
-    End
+
+    end
     {
         # Now that all the modules are published generate their checksum.
         New-DscChecksum -Path $OutputFolderPath
@@ -435,7 +437,7 @@ function Publish-MOFToPullServer
         $OutputFolderPath = $null
     )
 
-    Begin
+    begin
     {
         if (-not($OutputFolderPath) -or -not (Test-Path -Path $OutputFolderPath))
         {
@@ -448,7 +450,8 @@ function Publish-MOFToPullServer
             $OutputFolderPath = $configXElement.Value
         }
     }
-    Process
+
+    process
     {
         $fileItem = Get-Item -Path $FullName
 
@@ -461,7 +464,8 @@ function Publish-MOFToPullServer
             throw "Invalid file $FullName. Only mof files can be copied to the pullserver configuration repository"
         }
     }
-    End
+
+    end
     {
         New-DscChecksum -Path $OutputFolderPath -Force
     }

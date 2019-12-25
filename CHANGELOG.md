@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Moved strings to localization file.
   - DSC_xScriptResource:
     - Updated parameter descriptions to match MOF file.
+  - Correct miscellaneous style issues.
 - DSCPullServerSetup
   - Fixed markdown errors in README.MD.
 
