@@ -56,7 +56,7 @@ configuration xFileUpload
         $CertificateThumbprint
     )
 
-    $cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\configuration\BuiltinProvCache\MSFT_xFileUpload"
+    $cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\configuration\BuiltinProvCache\DSC_xFileUpload"
 
     if ($Credential)
     {

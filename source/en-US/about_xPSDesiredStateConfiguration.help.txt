@@ -23,5 +23,5 @@ SEE ALSO
 
 KEYWORDS
       DSC, DscResource, Archive, Environment, Group, MSI, Package, File,
-      RemoteFile, Registry, Script, Service,
+      RemoteFile, Registry, Script, Service, User,
       WindowsFeature, WindowsOptionalFeature, WindowsPackageCab, WindowsProcess
