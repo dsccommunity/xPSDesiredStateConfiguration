@@ -14,6 +14,8 @@
 - Corrected minor style issues.
 - Fix minor style issues in hashtable layout.
 - Added support for Checksum on xRemoteFile - [issue #423](https://github.com/PowerShell/PSDscResources/issues/423)
+- MSFT_xRegistryResource
+  - Fixes issue that the `Set-TargetResource` does not determine the type of registry value correctly. - [issue #436](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/436)
 
 ## 8.10.0.0
 
