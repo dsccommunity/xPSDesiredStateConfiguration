@@ -1,10 +1,16 @@
 # xPSDesiredStateConfiguration
 
+[![Build Status](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_apis/build/status/dsccommunity.xPSDesiredStateConfiguration?branchName=master)](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_build/latest?definitionId=6&branchName=master)
+![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/xPSDesiredStateConfiguration/6/master)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xPSDesiredStateConfiguration/6/master)](https://dsccommunity.visualstudio.com/xPSDesiredStateConfiguration/_test/analytics?definitionId=6&contextType=build)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration%20Preview)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
+
 The **xPSDesiredStateConfiguration** module is a more recent, experimental
 version of the PSDesiredStateConfiguration module that ships in Windows as part
 of PowerShell 4.0.
 
-The high quality, supported version of this module is available as
+The supported version of this module is available as
 [PSDscResources](https://github.com/PowerShell/PSDscResources).
 
 This module is automatically tested using PowerShell 5.1 on servers running
@@ -14,33 +20,24 @@ versions going back to PowerShell 4, there is no automatic testing performed
 for these versions, and thus no guarantee that the module will work as
 expected.
 
+## Code of Conduct
+
 This project has adopted [this code of conduct](CODE_OF_CONDUCT.md).
 
-## Branches
+## Releases
 
-### master
-
-[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/master?svg=true)](https://ci.appveyor.com/project/PowerShell/xPSDesiredStateConfiguration/branch/master)
-[![codecov](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/master/graph/badge.svg)](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/master)
-
-This is the branch containing the latest release -
-no contributions should be made directly to this branch.
-
-### dev
-
-[![Build status](https://ci.appveyor.com/api/projects/status/s35s7sxuyym8yu6c/branch/dev?svg=true)](https://ci.appveyor.com/project/PowerShell/xPSDesiredStateConfiguration/branch/dev)
-[![codecov](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/dev/graph/badge.svg)](https://codecov.io/gh/PowerShell/xPSDesiredStateConfiguration/branch/dev)
-
-This is the development branch
-to which contributions should be proposed by contributors as pull requests.
-This development branch will periodically be merged to the master branch,
-and be released to [PowerShell Gallery](https://www.powershellgallery.com/).
+For each merge to the branch `master` a preview release will be
+deployed to [PowerShell Gallery](https://www.powershellgallery.com/).
+Periodically a release version tag will be pushed which will deploy a
+full release to [PowerShell Gallery](https://www.powershellgallery.com/).
 
 ## Contributing
 
-If you would like to contribute to this module, please review the common DSC
-Resources
-[contributing guidelines](https://github.com/PowerShell/DscResource.Kit/blob/master/CONTRIBUTING.md).
+Please check out common DSC Community [contributing guidelines](https://dsccommunity.org/guidelines/contributing).
+
+## Change log
+
+A full list of changes in each version can be found in the [change log](CHANGELOG.md).
 
 ## Resources
 
@@ -152,12 +149,12 @@ None
 
 #### Examples
 
-* [Expand an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveNoValidationConfig.ps1)
-* [Expand an archive under a credential without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveNoValidationCredentialConfig.ps1)
-* [Expand an archive with default file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveDefaultValidationAndForceConfig.ps1)
-* [Expand an archive with SHA-256 file validation and file overwrite allowed](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_ExpandArchiveChecksumAndForceConfig.ps1)
-* [Remove an archive without file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_RemoveArchiveNoValidationConfig.ps1)
-* [Remove an archive with SHA-256 file validation](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xArchive_RemoveArchiveChecksumConfig.ps1)
+* [Expand an archive without file validation](/source/Examples/xArchive_ExpandArchiveNoValidationConfig.ps1)
+* [Expand an archive under a credential without file validation](/source/Examples/xArchive_ExpandArchiveNoValidationCredentialConfig.ps1)
+* [Expand an archive with default file validation and file overwrite allowed](/source/Examples/xArchive_ExpandArchiveDefaultValidationAndForceConfig.ps1)
+* [Expand an archive with SHA-256 file validation and file overwrite allowed](/source/Examples/xArchive_ExpandArchiveChecksumAndForceConfig.ps1)
+* [Remove an archive without file validation](/source/Examples/xArchive_RemoveArchiveNoValidationConfig.ps1)
+* [Remove an archive with SHA-256 file validation](/source/Examples/xArchive_RemoveArchiveChecksumConfig.ps1)
 
 ### xDscWebService
 
@@ -213,7 +210,7 @@ firewall rule using xDscWebService will be removed.
 All users are requested to adjust existing configurations so that the
 **ConfigureFirewall** is set to **false** and a required Windows Firewall rule
 is created by using the **Firewall** resource from the
-[NetworkingDsc](https://github.com/PowerShell/NetworkingDsc) module.
+[NetworkingDsc](https://github.com/dsccommunity/NetworkingDsc) module.
 
 #### Examples
 
@@ -279,8 +276,8 @@ None
 
 #### Examples
 
-* [Remove members from a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroup_RemoveMembersConfig.ps1)
-* [Set the members of a group](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroup_SetMembersConfig.ps1)
+* [Remove members from a group](/source/Examples/xGroup_RemoveMembersConfig.ps1)
+* [Set the members of a group](/source/Examples/xGroup_SetMembersConfig.ps1)
 
 ### xGroupSet
 
@@ -320,7 +317,7 @@ None
 
 #### Examples
 
-* [Add members to multiple groups](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xGroupSet_AddMembersConfig.ps1)
+* [Add members to multiple groups](/source/Examples/xGroupSet_AddMembersConfig.ps1)
 
 ### xWindowsProcess
 
@@ -374,10 +371,10 @@ None
 
 #### Examples
 
-* [Start a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StartProcessConfig.ps1)
-* [Stop a process](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StopProcessConfig.ps1)
-* [Start a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StartProcessUnderUserConfig.ps1)
-* [Stop a process under a user](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsProcess_StopProcessUnderUserConfig.ps1)
+* [Start a process](/source/Examples/xWindowsProcess_StartProcessConfig.ps1)
+* [Stop a process](/source/Examples/xWindowsProcess_StopProcessConfig.ps1)
+* [Start a process under a user](/source/Examples/xWindowsProcess_StartProcessUnderUserConfig.ps1)
+* [Stop a process under a user](/source/Examples/xWindowsProcess_StopProcessUnderUserConfig.ps1)
 
 ### xProcessSet
 
@@ -434,8 +431,8 @@ The following parameters will be the same for each process in the set:
 
 #### Examples
 
-* [Start multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xProcessSet_StartProcessConfig.ps1)
-* [Stop multiple processes](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xProcessSet_StopProcessConfig.ps1)
+* [Start multiple processes](/source/Examples/xProcessSet_StartProcessConfig.ps1)
+* [Stop multiple processes](/source/Examples/xProcessSet_StopProcessConfig.ps1)
 
 ### xService
 
@@ -500,10 +497,10 @@ None
 
 #### Examples
 
-* [Create a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_CreateServiceConfig.ps1)
-* [Delete a service](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_RemoveServiceConfig.ps1)
-* [Change the state of a service to started or stopped](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_ChangeServiceStateConfig.ps1.ps1)
-* [Update startup type for a service, and ignoring the current state](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xService_UpdateStartupTypeIgnoreStateConfig.ps1)
+* [Create a service](/source/Examples/xService_CreateServiceConfig.ps1)
+* [Delete a service](/source/Examples/xService_RemoveServiceConfig.ps1)
+* [Change the state of a service to started or stopped](/source/Examples/xService_ChangeServiceStateConfig.ps1.ps1)
+* [Update startup type for a service, and ignoring the current state](/source/Examples/xService_UpdateStartupTypeIgnoreStateConfig.ps1)
 
 ### xServiceSet
 
@@ -547,8 +544,8 @@ None
 
 #### Examples
 
-* [Ensure that multiple services are running](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xServiceSet_StartServicesConfig.ps1)
-* [Set multiple services to run under the built-in account LocalService](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xServiceSet_EnsureBuiltInAccountConfig.ps1)
+* [Ensure that multiple services are running](/source/Examples/xServiceSet_StartServicesConfig.ps1)
+* [Set multiple services to run under the built-in account LocalService](/source/Examples/xServiceSet_EnsureBuiltInAccountConfig.ps1)
 
 ### xRemoteFile
 
@@ -579,9 +576,9 @@ None
 
 #### Examples
 
-* [Download a file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileConfig.ps1)
-* [Download a file using proxy](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileUsingProxyConfig.ps1)
-* [Download a file with checksum](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRemoteFile_DownloadFileWithChecksumConfig.ps1)
+* [Download a file](/source/Examples/xRemoteFile_DownloadFileConfig.ps1)
+* [Download a file using proxy](/source/Examples/xRemoteFile_DownloadFileUsingProxyConfig.ps1)
+* [Download a file with checksum](/source/Examples/xRemoteFile_DownloadFileWithChecksumConfig.ps1)
 
 ### xPackage
 
@@ -629,10 +626,10 @@ None
 
 #### Examples
 
-* [Install an .exe using credentials](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallExeUsingCredentialsConfig.ps1)
-* [Install an .exe using credentials and using custom registry data to discover the package](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallExeUsingCredentialsAndRegistryConfig.ps1)
-* [Simple installer for an msi package that matches via the Name](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallMsiConfig.ps1)
-* [Simple installer for an msi package and matches based on the product id](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPackage_InstallMsiUsingProductIdConfig.ps1)
+* [Install an .exe using credentials](/source/Examples/xPackage_InstallExeUsingCredentialsConfig.ps1)
+* [Install an .exe using credentials and using custom registry data to discover the package](/source/Examples/xPackage_InstallExeUsingCredentialsAndRegistryConfig.ps1)
+* [Simple installer for an msi package that matches via the Name](/source/Examples/xPackage_InstallMsiConfig.ps1)
+* [Simple installer for an msi package and matches based on the product id](/source/Examples/xPackage_InstallMsiUsingProductIdConfig.ps1)
 
 ### xPSEndpoint (xPSSessionConfiguration)
 
@@ -661,10 +658,10 @@ Creates and registers a new session configuration endpoint.
 
 #### Examples
 
-* [Register a new session configuration endpoint with optional access mode](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewConfig.ps1)
-* [Register a new session configuration endpoint with default values](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewWithDefaultsConfig.ps1)
-* [Register a new session configuration endpoint with custom values](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_NewCustomConfig.ps1)
-* [Removes an existing session configuration endpoint](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xPSEndpoint_RemoveConfig.ps1)
+* [Register a new session configuration endpoint with optional access mode](/source/Examples/xPSEndpoint_NewConfig.ps1)
+* [Register a new session configuration endpoint with default values](/source/Examples/xPSEndpoint_NewWithDefaultsConfig.ps1)
+* [Register a new session configuration endpoint with custom values](/source/Examples/xPSEndpoint_NewCustomConfig.ps1)
+* [Removes an existing session configuration endpoint](/source/Examples/xPSEndpoint_RemoveConfig.ps1)
 
 ### xMsiPackage
 
@@ -720,9 +717,9 @@ None
 
 #### Examples
 
-* [Install the MSI file with the given ID at the given file path or HTTP URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_InstallPackageConfig.ps1)
-* [Uninstall the MSI file with the given ID at the given Path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_UninstallPackageFromFileConfig.ps1)
-* [Uninstall the MSI file with the given ID at the given HTTPS URL](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xMsiPackage_UninstallPackageFromHttpsConfig.ps1)
+* [Install the MSI file with the given ID at the given file path or HTTP URL](/source/Examples/xMsiPackage_InstallPackageConfig.ps1)
+* [Uninstall the MSI file with the given ID at the given Path](/source/Examples/xMsiPackage_UninstallPackageFromFileConfig.ps1)
+* [Uninstall the MSI file with the given ID at the given HTTPS URL](/source/Examples/xMsiPackage_UninstallPackageFromHttpsConfig.ps1)
 
 ### xFileUpload
 
@@ -734,7 +731,7 @@ None
 
 #### Examples
 
-* [Upload file or folder to a SMB share](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xFileUpload_UploadToSMBShareConfig.ps1)
+* [Upload file or folder to a SMB share](/source/Examples/xFileUpload_UploadToSMBShareConfig.ps1)
 
 ### xEnvironment
 
@@ -772,10 +769,10 @@ None
 
 #### Examples
 
-* [Create a regular (non-path) environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_CreateNonPathVariableConfig.ps1)
-* [Create or update a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_AddMultiplePathsConfig.ps1)
-* [Remove paths from a path environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_RemoveMultiplePathsConfig.ps1)
-* [Remove an environment variable](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xEnvironment_RemoveVariableConfig.ps1)
+* [Create a regular (non-path) environment variable](/source/Examples/xEnvironment_CreateNonPathVariableConfig.ps1)
+* [Create or update a path environment variable](/source/Examples/xEnvironment_AddMultiplePathsConfig.ps1)
+* [Remove paths from a path environment variable](/source/Examples/xEnvironment_RemoveMultiplePathsConfig.ps1)
+* [Remove an environment variable](/source/Examples/xEnvironment_RemoveVariableConfig.ps1)
 
 xEnvironment_AddMultiplePaths
 
@@ -817,7 +814,7 @@ None
 
 #### Examples
 
-* [Create a file with content through xScript](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xScript_WatchFileContentConfig.ps1)
+* [Create a file with content through xScript](/source/Examples/xScript_WatchFileContentConfig.ps1)
 
 ### xRegistry
 
@@ -859,10 +856,10 @@ None
 
 #### Examples
 
-* [Add a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_AddKeyConfig.ps1)
-* [Add or modify a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_AddOrModifyValueConfig.ps1)
-* [Remove a registry key value](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_RemoveValueConfig.ps1)
-* [Remove a registry key](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xRegistryResource_RemoveKeyConfig.ps1)
+* [Add a registry key](/source/Examples/xRegistryResource_AddKeyConfig.ps1)
+* [Add or modify a registry key value](/source/Examples/xRegistryResource_AddOrModifyValueConfig.ps1)
+* [Remove a registry key value](/source/Examples/xRegistryResource_RemoveValueConfig.ps1)
+* [Remove a registry key](/source/Examples/xRegistryResource_RemoveKeyConfig.ps1)
 
 ### xUser
 
@@ -909,9 +906,9 @@ None
 
 #### Examples
 
-* [Create a new local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_CreateUserConfig.ps1)
-* [Remove a local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_RemoveUserConfig.ps1)
-* [Create a new detailed local user account](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xUser_CreateUserDetailedConfig.ps1)
+* [Create a new local user account](/source/Examples/xUser_CreateUserConfig.ps1)
+* [Remove a local user account](/source/Examples/xUser_RemoveUserConfig.ps1)
+* [Create a new detailed local user account](/source/Examples/xUser_CreateUserDetailedConfig.ps1)
 
 ### xWindowsFeature
 
@@ -947,10 +944,10 @@ target node.
 
 #### Examples
 
-* [Install a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureConfig.ps1)
-* [Uninstall a Windows feature](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_RemoveFeatureConfig.ps1)
-* [Install a Windows feature using credentials](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureUsingCredentialConfig.ps1)
-* [Install a Windows feature, output the log to file](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeature_AddFeatureWithLogPathConfig.ps1)
+* [Install a Windows feature](/source/Examples/xWindowsFeature_AddFeatureConfig.ps1)
+* [Uninstall a Windows feature](/source/Examples/xWindowsFeature_RemoveFeatureConfig.ps1)
+* [Install a Windows feature using credentials](/source/Examples/xWindowsFeature_AddFeatureUsingCredentialConfig.ps1)
+* [Install a Windows feature, output the log to file](/source/Examples/xWindowsFeature_AddFeatureWithLogPathConfig.ps1)
 
 ### xWindowsFeatureSet
 
@@ -991,8 +988,8 @@ on a target node.
 
 #### Examples
 
-* [Install multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeatureSet_AddFeaturesConfig.ps1)
-* [Uninstall multiple Windows features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsFeatureSet_RemoveFeaturesConfig.ps1)
+* [Install multiple Windows features](/source/Examples/xWindowsFeatureSet_AddFeaturesConfig.ps1)
+* [Uninstall multiple Windows features](/source/Examples/xWindowsFeatureSet_RemoveFeaturesConfig.ps1)
 
 ### xWindowsOptionalFeature
 
@@ -1039,8 +1036,8 @@ This resource works on Nano Server.
 
 #### Examples
 
-* [Enable the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeature_EnableConfig.ps1)
-* [Disables the specified windows optional feature and output logs to the specified path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeature_DisableConfig.ps1)
+* [Enable the specified windows optional feature and output logs to the specified path](/source/Examples/xWindowsOptionalFeature_EnableConfig.ps1)
+* [Disables the specified windows optional feature and output logs to the specified path](/source/Examples/xWindowsOptionalFeature_DisableConfig.ps1)
 
 ### xWindowsOptionalFeatureSet
 
@@ -1081,8 +1078,8 @@ None
 
 #### Examples
 
-* [Enable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeatureSet_EnableConfig.ps1)
-* [Disable multiple features](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsOptionalFeatureSet_DisableConfig.ps1)
+* [Enable multiple features](/source/Examples/xWindowsOptionalFeatureSet_EnableConfig.ps1)
+* [Disable multiple features](/source/Examples/xWindowsOptionalFeatureSet_DisableConfig.ps1)
 
 ### xWindowsPackageCab
 
@@ -1112,7 +1109,7 @@ None
 
 #### Examples
 
-* [Install a cab file with the given name from the given path](https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/dev/Examples/xWindowsPackageCab_InstallPackageConfig.ps1)
+* [Install a cab file with the given name from the given path](/source/Examples/xWindowsPackageCab_InstallPackageConfig.ps1)
 
 ## Functions
 
