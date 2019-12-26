@@ -584,6 +584,7 @@ try
 
             It 'Should throw invalid operation when feature equals null' {
                 $nonexistentName = 'NonexistentFeatureName'
+
                 { Assert-SingleInstanceOfFeature -Feature $null -Name $nonexistentName } |
                     Should Throw ($script:localizedData.FeatureNotFoundError -f $nonexistentName)
             }
@@ -600,6 +601,7 @@ try
                 Version = '6.1.'
                 OperatingSystemSKU = 10
             }
+
             Mock -CommandName Get-WmiObject -MockWith { return $mockOperatingSystem }
 
             It 'Should Not Throw' {

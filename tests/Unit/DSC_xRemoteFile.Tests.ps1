@@ -55,7 +55,7 @@ try
         }
 
         # Create a working folder that all files will be created in
-        $script:workingFolder = Join-Path -Path $ENV:Temp -ChildPath 'xRemoteFile.Temp'
+        $script:workingFolder = Join-Path -Path $TestDrive -ChildPath 'xRemoteFile.Temp'
 
         if (-not (Test-Path -Path $script:workingFolder))
         {

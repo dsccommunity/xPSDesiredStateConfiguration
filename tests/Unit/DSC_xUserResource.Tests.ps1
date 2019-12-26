@@ -41,39 +41,38 @@ try
 
         $script:skipMe = $true
 
-        $existingUserName = 'TestUserName12345'
-        $existingUserPassword = 'StrongOne7.'
-        $existingDescription = 'Some Description'
-        $existingSecurePassword = ConvertTo-SecureString $existingUserPassword -AsPlainText -Force
-        $existingTestCredential = New-Object PSCredential ($existingUserName, $existingSecurePassword)
+        $script:existingUserName = 'TestUserName12345'
+        $script:existingUserPassword = 'StrongOne7.'
+        $script:existingDescription = 'Some Description'
+        $script:existingSecurePassword = ConvertTo-SecureString $script:existingUserPassword -AsPlainText -Force
+        $script:existingTestCredential = New-Object PSCredential ($script:existingUserName, $script:existingSecurePassword)
 
-        New-User -Credential $existingTestCredential -Description $existingDescription
+        New-User -Credential $script:existingTestCredential -Description $script:existingDescription
 
-        $newUserName1 = 'NewTestUserName12345'
-        $newUserPassword1 = 'NewStrongOne123.'
-        $newFullName1 = 'Fullname1'
-        $newUserDescription1 = 'New Description1'
-        $newSecurePassword1 = ConvertTo-SecureString $newUserPassword1 -AsPlainText -Force
-        $newCredential1 = New-Object PSCredential ($newUserName1, $newSecurePassword1)
+        $script:newUserName1 = 'NewTestUserName12345'
+        $script:newUserPassword1 = 'NewStrongOne123.'
+        $script:newFullName1 = 'Fullname1'
+        $script:newUserDescription1 = 'New Description1'
+        $script:newSecurePassword1 = ConvertTo-SecureString $script:newUserPassword1 -AsPlainText -Force
+        $script:newCredential1 = New-Object PSCredential ($script:newUserName1, $script:newSecurePassword1)
 
-        $newUserName2 = 'newUser1234'
-        $newPassword2 = 'ThisIsAStrongPassword543!'
-        $newFullName2 = 'Fullname2'
-        $newUserDescription2 = 'New Description2'
-        $newSecurePassword2 = ConvertTo-SecureString $newPassword2 -AsPlainText -Force
-        $newCredential2 = New-Object PSCredential ($newUserName2, $newSecurePassword2)
+        $script:newUserName2 = 'newUser1234'
+        $script:newPassword2 = 'ThisIsAStrongPassword543!'
+        $script:newFullName2 = 'Fullname2'
+        $script:newUserDescription2 = 'New Description2'
+        $script:newSecurePassword2 = ConvertTo-SecureString $script:newPassword2 -AsPlainText -Force
+        $script:newCredential2 = New-Object PSCredential ($script:newUserName2, $script:newSecurePassword2)
 
         Describe 'xUserResource/Get-TargetResource' {
-
             Context 'Tests on FullSKU' {
                 Mock -CommandName Test-IsNanoServer -MockWith { return $false }
 
                 It 'Should return the user as Present' {
-                    $getTargetResourceResult = Get-TargetResource $existingUserName
+                    $getTargetResourceResult = Get-TargetResource $script:existingUserName
 
-                    $getTargetResourceResult['UserName']                | Should -Be $existingUserName
+                    $getTargetResourceResult['UserName']                | Should -Be $script:existingUserName
                     $getTargetResourceResult['Ensure']                  | Should -Be 'Present'
-                    $getTargetResourceResult['Description']             | Should -Be $existingDescription
+                    $getTargetResourceResult['Description']             | Should -Be $script:existingDescription
                     $getTargetResourceResult['PasswordChangeRequired']  | Should -Be $null
                 }
 
@@ -89,11 +88,11 @@ try
                 Mock -CommandName Test-IsNanoServer -MockWith { return $true }
 
                 It 'Should return the user as Present on Nano Server' -Skip:$script:skipMe {
-                    $getTargetResourceResult = Get-TargetResource $existingUserName
+                    $getTargetResourceResult = Get-TargetResource $script:existingUserName
 
-                    $getTargetResourceResult['UserName']                | Should -Be $existingUserName
+                    $getTargetResourceResult['UserName']                | Should -Be $script:existingUserName
                     $getTargetResourceResult['Ensure']                  | Should -Be 'Present'
-                    $getTargetResourceResult['Description']             | Should -Be $existingDescription
+                    $getTargetResourceResult['Description']             | Should -Be $script:existingDescription
                     $getTargetResourceResult['PasswordChangeRequired']  | Should -Be $null
                 }
 
@@ -108,84 +107,82 @@ try
 
         Describe 'xUserResource/Set-TargetResource' {
             Context 'Tests on FullSKU' {
+                BeforeAll {
+                    Remove-User -UserName $script:newUserName1
+                    Remove-User -UserName $script:newUserName2
+                }
+
                 Mock -CommandName Test-IsNanoServer -MockWith { return $false }
 
-                try
-                {
-                    New-User -Credential $newCredential1 -Description $newUserDescription1
+                New-User -Credential $script:newCredential1 -Description $script:newUserDescription1
 
-                    It 'Should remove the user' {
-                        Test-User -UserName $newUserName1 | Should -Be $true
-                        Set-TargetResource -UserName $newUserName1 -Ensure 'Absent'
-                        Test-User -UserName $newUserName1 | Should -Be $false
-                    }
-
-                    It 'Should add the new user' {
-                        Set-TargetResource -UserName $newUserName2 -Password $newCredential2 -Ensure 'Present'
-                        Test-User -UserName $newUserName2 | Should -Be $true
-                    }
-
-                    It 'Should update the user' {
-                        $disabled = $false
-                        $passwordNeverExpires = $true
-                        $passwordChangeRequired = $false
-                        $passwordChangeNotAllowed = $true
-
-                        Set-TargetResource -UserName $newUserName2 `
-                                            -Password $newCredential2 `
-                                            -Ensure 'Present' `
-                                            -FullName $newFullName1 `
-                                            -Description $newUserDescription1 `
-                                            -Disabled $disabled `
-                                            -PasswordNeverExpires $passwordNeverExpires `
-                                            -PasswordChangeRequired $passwordChangeRequired `
-                                            -PasswordChangeNotAllowed $passwordChangeNotAllowed
-
-                        Test-User -UserName $newUserName2 | Should -Be $true
-                        $testTargetResourceResult1 =
-                                Test-TargetResource -UserName $newUserName2 `
-                                                    -Password $newCredential2 `
-                                                    -Ensure 'Present' `
-                                                    -FullName $newFullName1 `
-                                                    -Description $newUserDescription1 `
-                                                    -Disabled $disabled `
-                                                    -PasswordNeverExpires $passwordNeverExpires `
-                                                    -PasswordChangeNotAllowed $passwordChangeNotAllowed
-                        $testTargetResourceResult1 | Should -Be $true
-                    }
-                    It 'Should update the user again with different values' {
-                        $disabled = $false
-                        $passwordNeverExpires = $false
-                        $passwordChangeRequired = $true
-                        $passwordChangeNotAllowed = $false
-
-                        Set-TargetResource -UserName $newUserName2 `
-                                            -Password $newCredential1 `
-                                            -Ensure 'Present' `
-                                            -FullName $newFullName2 `
-                                            -Description $newUserDescription2 `
-                                            -Disabled $disabled `
-                                            -PasswordNeverExpires $passwordNeverExpires `
-                                            -PasswordChangeRequired $passwordChangeRequired `
-                                            -PasswordChangeNotAllowed $passwordChangeNotAllowed
-
-                        Test-User -UserName $newUserName2 | Should -Be $true
-                        $testTargetResourceResult2 =
-                                Test-TargetResource -UserName $newUserName2 `
-                                                    -Password $newCredential1 `
-                                                    -Ensure 'Present' `
-                                                    -FullName $newFullName2 `
-                                                    -Description $newUserDescription2 `
-                                                    -Disabled $disabled `
-                                                    -PasswordNeverExpires $passwordNeverExpires `
-                                                    -PasswordChangeNotAllowed $passwordChangeNotAllowed
-                        $testTargetResourceResult2 | Should -Be $true
-                    }
+                It 'Should remove the user' {
+                    Test-User -UserName $script:newUserName1 | Should -Be $true
+                    Set-TargetResource -UserName $script:newUserName1 -Ensure 'Absent'
+                    Test-User -UserName $script:newUserName1 | Should -Be $false
                 }
-                finally
-                {
-                    Remove-User -UserName $newUserName1
-                    Remove-User -UserName $newUserName2
+
+                It 'Should add the new user' {
+                    Set-TargetResource -UserName $script:newUserName2 -Password $script:newCredential2 -Ensure 'Present'
+                    Test-User -UserName $script:newUserName2 | Should -Be $true
+                }
+
+                It 'Should update the user' {
+                    $disabled = $false
+                    $passwordNeverExpires = $true
+                    $passwordChangeRequired = $false
+                    $passwordChangeNotAllowed = $true
+
+                    Set-TargetResource -UserName $script:newUserName2 `
+                                        -Password $script:newCredential2 `
+                                        -Ensure 'Present' `
+                                        -FullName $script:newFullName1 `
+                                        -Description $script:newUserDescription1 `
+                                        -Disabled $disabled `
+                                        -PasswordNeverExpires $passwordNeverExpires `
+                                        -PasswordChangeRequired $passwordChangeRequired `
+                                        -PasswordChangeNotAllowed $passwordChangeNotAllowed
+
+                    Test-User -UserName $script:newUserName2 | Should -Be $true
+                    $testTargetResourceResult1 =
+                            Test-TargetResource -UserName $script:newUserName2 `
+                                                -Password $script:newCredential2 `
+                                                -Ensure 'Present' `
+                                                -FullName $script:newFullName1 `
+                                                -Description $script:newUserDescription1 `
+                                                -Disabled $disabled `
+                                                -PasswordNeverExpires $passwordNeverExpires `
+                                                -PasswordChangeNotAllowed $passwordChangeNotAllowed
+                    $testTargetResourceResult1 | Should -Be $true
+                }
+
+                It 'Should update the user again with different values' {
+                    $disabled = $false
+                    $passwordNeverExpires = $false
+                    $passwordChangeRequired = $true
+                    $passwordChangeNotAllowed = $false
+
+                    Set-TargetResource -UserName $script:newUserName2 `
+                                        -Password $script:newCredential1 `
+                                        -Ensure 'Present' `
+                                        -FullName $script:newFullName2 `
+                                        -Description $script:newUserDescription2 `
+                                        -Disabled $disabled `
+                                        -PasswordNeverExpires $passwordNeverExpires `
+                                        -PasswordChangeRequired $passwordChangeRequired `
+                                        -PasswordChangeNotAllowed $passwordChangeNotAllowed
+
+                    Test-User -UserName $script:newUserName2 | Should -Be $true
+                    $testTargetResourceResult2 =
+                            Test-TargetResource -UserName $script:newUserName2 `
+                                                -Password $script:newCredential1 `
+                                                -Ensure 'Present' `
+                                                -FullName $script:newFullName2 `
+                                                -Description $script:newUserDescription2 `
+                                                -Disabled $disabled `
+                                                -PasswordNeverExpires $passwordNeverExpires `
+                                                -PasswordChangeNotAllowed $passwordChangeNotAllowed
+                    $testTargetResourceResult2 | Should -Be $true
                 }
             }
 
@@ -195,17 +192,17 @@ try
 
                 try
                 {
-                    New-User -Credential $newCredential1 -Description $newUserDescription1
+                    New-User -Credential $script:newCredential1 -Description $script:newUserDescription1
 
                     It 'Should remove the user' -Skip:$script:skipMe {
-                        Test-User -UserName $newUserName1 | Should -Be $true
-                        Set-TargetResource -UserName $newUserName1 -Ensure 'Absent'
-                        Test-User -UserName $newUserName1 | Should -Be $false
+                        Test-User -UserName $script:newUserName1 | Should -Be $true
+                        Set-TargetResource -UserName $script:newUserName1 -Ensure 'Absent'
+                        Test-User -UserName $script:newUserName1 | Should -Be $false
                     }
 
                     It 'Should add the new user' -Skip:$script:skipMe {
-                        Set-TargetResource -UserName $newUserName2 -Password $newCredential2 -Ensure 'Present'
-                        Test-User -UserName $newUserName2 | Should -Be $true
+                        Set-TargetResource -UserName $script:newUserName2 -Password $script:newCredential2 -Ensure 'Present'
+                        Test-User -UserName $script:newUserName2 | Should -Be $true
                     }
 
                     It 'Should update the user' -Skip:$script:skipMe {
@@ -214,23 +211,23 @@ try
                         $passwordChangeRequired = $false
                         $passwordChangeNotAllowed = $true
 
-                        Set-TargetResource -UserName $newUserName2 `
-                                            -Password $newCredential2 `
+                        Set-TargetResource -UserName $script:newUserName2 `
+                                            -Password $script:newCredential2 `
                                             -Ensure 'Present' `
-                                            -FullName $newFullName1 `
-                                            -Description $newUserDescription1 `
+                                            -FullName $script:newFullName1 `
+                                            -Description $script:newUserDescription1 `
                                             -Disabled $disabled `
                                             -PasswordNeverExpires $passwordNeverExpires `
                                             -PasswordChangeRequired $passwordChangeRequired `
                                             -PasswordChangeNotAllowed $passwordChangeNotAllowed
 
-                        Test-User -UserName $newUserName2 | Should -Be $true
+                        Test-User -UserName $script:newUserName2 | Should -Be $true
                         $testTargetResourceResult1 =
-                                Test-TargetResource -UserName $newUserName2 `
-                                                    -Password $newCredential2 `
+                                Test-TargetResource -UserName $script:newUserName2 `
+                                                    -Password $script:newCredential2 `
                                                     -Ensure 'Present' `
-                                                    -FullName $newFullName1 `
-                                                    -Description $newUserDescription1 `
+                                                    -FullName $script:newFullName1 `
+                                                    -Description $script:newUserDescription1 `
                                                     -Disabled $disabled `
                                                     -PasswordNeverExpires $passwordNeverExpires `
                                                     -PasswordChangeNotAllowed $passwordChangeNotAllowed
@@ -242,23 +239,23 @@ try
                         $passwordChangeRequired = $true
                         $passwordChangeNotAllowed = $false
 
-                        Set-TargetResource -UserName $newUserName2 `
-                                            -Password $newCredential1 `
+                        Set-TargetResource -UserName $script:newUserName2 `
+                                            -Password $script:newCredential1 `
                                             -Ensure 'Present' `
-                                            -FullName $newFullName2 `
-                                            -Description $newUserDescription2 `
+                                            -FullName $script:newFullName2 `
+                                            -Description $script:newUserDescription2 `
                                             -Disabled $disabled `
                                             -PasswordNeverExpires $passwordNeverExpires `
                                             -PasswordChangeRequired $passwordChangeRequired `
                                             -PasswordChangeNotAllowed $passwordChangeNotAllowed
 
-                        Test-User -UserName $newUserName2 | Should -Be $true
+                        Test-User -UserName $script:newUserName2 | Should -Be $true
                         $testTargetResourceResult2 =
-                                Test-TargetResource -UserName $newUserName2 `
-                                                    -Password $newCredential1 `
+                                Test-TargetResource -UserName $script:newUserName2 `
+                                                    -Password $script:newCredential1 `
                                                     -Ensure 'Present' `
-                                                    -FullName $newFullName2 `
-                                                    -Description $newUserDescription2 `
+                                                    -FullName $script:newFullName2 `
+                                                    -Description $script:newUserDescription2 `
                                                     -Disabled $disabled `
                                                     -PasswordNeverExpires $passwordNeverExpires `
                                                     -PasswordChangeNotAllowed $passwordChangeNotAllowed
@@ -267,8 +264,8 @@ try
                 }
                 finally
                 {
-                    Remove-User -UserName $newUserName1
-                    Remove-User -UserName $newUserName2
+                    Remove-User -UserName $script:newUserName1
+                    Remove-User -UserName $script:newUserName2
                 }
             }
         }
@@ -279,9 +276,9 @@ try
                 $absentUserName = 'AbsentUserUserName123456789'
 
                 It 'Should return true when user Present and correct values' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
-                                                                    -Description $existingDescription `
-                                                                    -Password $existingTestCredential `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
+                                                                    -Description $script:existingDescription `
+                                                                    -Password $script:existingTestCredential `
                                                                     -Disabled $false `
                                                                     -PasswordNeverExpires $false `
                                                                     -PasswordChangeNotAllowed $false
@@ -301,7 +298,7 @@ try
                 }
 
                 It 'Should return false when user Present and Ensure = Absent' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Ensure 'Absent'
                     $testTargetResourceResult | Should -Be $false
                 }
@@ -309,39 +306,39 @@ try
                 It 'Should return false when Password is wrong' {
                     $badPassword = 'WrongPassword'
                     $secureBadPassword = ConvertTo-SecureString $badPassword -AsPlainText -Force
-                    $badTestCredential = New-Object PSCredential ($existingUserName, $secureBadPassword)
+                    $badTestCredential = New-Object PSCredential ($script:existingUserName, $secureBadPassword)
 
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Password $badTestCredential
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when user Present and wrong Description' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Description 'Wrong description'
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when FullName is incorrect' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -FullName 'Wrong FullName'
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when Disabled is incorrect' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Disabled $true
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when PasswordNeverExpires is incorrect' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -PasswordNeverExpires $true
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when PasswordChangeNotAllowed is incorrect' {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -PasswordChangeNotAllowed $true
                     $testTargetResourceResult | Should -Be $false
                 }
@@ -355,9 +352,9 @@ try
                 It 'Should return true when user Present and correct values' -Skip:$script:skipMe {
                     Mock -CommandName Test-CredentialsValidOnNanoServer { return $true }
 
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
-                                                                    -Description $existingDescription `
-                                                                    -Password $existingTestCredential `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
+                                                                    -Description $script:existingDescription `
+                                                                    -Password $script:existingTestCredential `
                                                                     -Disabled $false `
                                                                     -PasswordNeverExpires $false `
                                                                     -PasswordChangeNotAllowed $false
@@ -377,7 +374,7 @@ try
                 }
 
                 It 'Should return false when user Present and Ensure = Absent' -Skip:$script:skipMe {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Ensure 'Absent'
                     $testTargetResourceResult | Should -Be $false
                 }
@@ -387,39 +384,39 @@ try
 
                     $badPassword = 'WrongPassword'
                     $secureBadPassword = ConvertTo-SecureString $badPassword -AsPlainText -Force
-                    $badTestCredential = New-Object PSCredential ($existingUserName, $secureBadPassword)
+                    $badTestCredential = New-Object PSCredential ($script:existingUserName, $secureBadPassword)
 
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Password $badTestCredential
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when user Present and wrong Description' -Skip:$script:skipMe {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Description 'Wrong description'
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when FullName is incorrect' -Skip:$script:skipMe {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -FullName 'Wrong FullName'
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when Disabled is incorrect' -Skip:$script:skipMe {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -Disabled $true
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when PasswordNeverExpires is incorrect' -Skip:$script:skipMe {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -PasswordNeverExpires $true
                     $testTargetResourceResult | Should -Be $false
                 }
 
                 It 'Should return false when PasswordChangeNotAllowed is incorrect' -Skip:$script:skipMe {
-                    $testTargetResourceResult = Test-TargetResource -UserName $existingUserName `
+                    $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                     -PasswordChangeNotAllowed $true
                     $testTargetResourceResult | Should -Be $false
                 }
@@ -455,7 +452,7 @@ try
 }
 finally
 {
-    Remove-User -UserName $existingUserName
+    Remove-User -UserName $script:existingUserName
 
     Invoke-TestCleanup
 }

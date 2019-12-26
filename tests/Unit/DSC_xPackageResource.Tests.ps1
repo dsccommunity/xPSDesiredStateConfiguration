@@ -1,5 +1,5 @@
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
-$script:dscResourceName = 'DSC_xMsiPackage'
+$script:dscResourceName = 'DSC_xPackageResource'
 
 function Invoke-TestSetup
 {
@@ -72,8 +72,6 @@ try
         $null = Clear-PackageCache
 
         Describe 'xPackageResource' {
-            # Override helper functions from CommonResourceHelper.psm1
-
             BeforeEach {
                 $null = Clear-PackageCache
 
