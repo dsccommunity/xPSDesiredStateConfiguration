@@ -17,9 +17,8 @@
  * If default values are not used during deployment , please update these values in the 'BeforeAll' block accordingly.
  #>
 
-
 Describe PullServerInstallationTests {
-    BeforeAll{
+    BeforeAll {
         # UPDATE THE PULLSERVER URL, If it is different from the default value.
         $DscHostFQDN = [System.Net.Dns]::GetHostEntry([System.String] $env:computername).HostName
         $script:dscPullServerURL = "https://$($DscHostFQDN):8080/PSDSCPullserver.svc"
@@ -57,22 +56,27 @@ Describe PullServerInstallationTests {
         $DscTestConfigName = 'PullServerSetUpTest'
         $script:dscTestMofPath = Join-Path -Path $DscConfigPath -ChildPath "$DscTestConfigName.mof"
     }
-    Context "Verify general pull server functionality" {
+
+    Context 'Verify general pull server functionality' {
         It "$DscRegKeyPath exists" {
             $DscRegKeyPath | Should -Exist
         }
+
         It "Module repository $script:dscModulePath exists" {
             $script:dscModulePath | Should -Exist
         }
+
         It "Configuration repository $DscConfigPath exists" {
             $DscConfigPath | Should -Exist
         }
+
         It "Verify server $script:dscPullServerURL is up and running" {
             $DscPullServerResponse = Invoke-WebRequest -Uri $script:dscPullServerURL -UseBasicParsing
             $DscPullServerResponse.StatusCode | Should -Be 200
         }
     }
-    Context "Verify pull end to end works" {
+
+    Context 'Verify pull end to end works' {
         It 'Tests local configuration manager' {
             [DscLocalConfigurationManager()]
             Configuration $DscTestMetaConfigName
@@ -95,6 +99,7 @@ Describe PullServerInstallationTests {
             $DscLocalConfigNames = (Get-DscLocalConfigurationManager).ConfigurationDownloadManagers.ConfigurationNames
             $DscLocalConfigNames -contains $DscTestConfigName | Should -Be $true
         }
+
         It "Creates mof and checksum files in $DscConfigPath" {
             # Sample test configuration
             Configuration NoOpConfig {
@@ -120,6 +125,7 @@ Describe PullServerInstallationTests {
             New-DscChecksum $DscConfigPath -Verbose:$VerbosePreference -Force
             "$script:dscTestMofPath.checksum" | Should -Exist
         }
+
         It 'Updates DscConfiguration Successfully' {
             Update-DscConfiguration -Wait -Verbose:$VerbosePreference
             (Get-DscConfiguration).ConfigurationName | Should -Be 'NoOpConfig'

@@ -1,7 +1,7 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'source\Modules'
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
 # Import the Networking Resource Helper Module
 Import-Module -Name (Join-Path -Path $modulePath `
@@ -10,15 +10,14 @@ Import-Module -Name (Join-Path -Path $modulePath `
 
 # Import Localization Strings
 $script:localizedData = Get-LocalizedData `
-    -ResourceName 'PublishModulesAndMofsToPullServer' `
-    -ScriptRoot $PSScriptRoot
+    -ResourceName 'DscPullServerSetup'
 
 <#
     .SYNOPSIS
         Package DSC modules and mof configuration document and publish them on an enterprise DSC pull server in the required format.
 
     .DESCRIPTION
-        Uses Publish-DSCModulesAndMof function to package DSC modules into zip files with the version info.
+        Uses Publish-DscModulesAndMof function to package DSC modules into zip files with the version info.
         Publishes the zip modules on "$env:ProgramFiles\WindowsPowerShell\DscService\Modules".
         Publishes all mof configuration documents that are present in the $Source folder on "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"-
         Use $Force to overwrite the version of the module that exists in the PowerShell module path with the version from the $source folder.
@@ -36,12 +35,12 @@ $script:localizedData = Get-LocalizedData `
 
     .EXAMPLE
         $ModuleList = @("xWebAdministration", "xPhp")
-        Publish-DSCModuleAndMof -Source C:\LocalDepot -ModuleNameList $ModuleList
+        Publish-DscModuleAndMof -Source C:\LocalDepot -ModuleNameList $ModuleList
 
     .EXAMPLE
-        Publish-DSCModuleAndMof -Source C:\LocalDepot -Force
+        Publish-DscModuleAndMof -Source C:\LocalDepot -Force
 #>
-function Publish-DSCModuleAndMof
+function Publish-DscModuleAndMof
 {
     [CmdletBinding()]
     param
@@ -409,7 +408,7 @@ function Publish-ModuleToPullServer
         Deploy DSC Configuration document to the pullserver.
 
     .DESCRIPTION
-        Publish Mof file to the pullserver. It takes File Info object as
+        Publish MOF file to the pullserver. It takes File Info object as
         pipeline input. It also auto detects the location of the configuration
         repository using the web.config of the pullserver.
 
@@ -432,7 +431,7 @@ function Publish-ModuleToPullServer
     .EXAMPLE
         Dir <path>\*.mof | Publish-MOFToPullServer -OutputFolderPath "\\Server01\DscService\Configuration"
 #>
-function Publish-MOFToPullServer
+function Publish-MofToPullServer
 {
     [CmdletBinding()]
     [OutputType([System.Void])]

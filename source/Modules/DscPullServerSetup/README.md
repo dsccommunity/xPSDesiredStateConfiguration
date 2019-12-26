@@ -1,12 +1,12 @@
-# DSCPullServer
+# DSCPullServerSetup
 
 The DSCPullServerSetup module contains utilities to automate DSC module and
 configuration document packaging and deployment on an enterprise DSC Pull
 Server, with examples.
 
-## Publish-DSCModuleAndMof cmdlet
+## Publish-DscModuleAndMof
 
-Use `Publish-DSCModuleAndMof` cmdlet to package a module containing DSC Resources
+Use `Publish-DscModuleAndMof` cmdlet to package a module containing DSC Resources
 that are present in `$Source` or in `$ModuleNameList` into zip files with version
 info, then publish them with MOF configuration documents that are present
 in `$Source` to the Pull server.

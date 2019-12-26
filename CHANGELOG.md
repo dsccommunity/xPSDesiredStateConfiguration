@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DSC_xDSCWebService
   - Merged util modules `Firewall.psm1`, `PSWSIISEndpoint.psm1`,
     `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` into resource.
+- BREAKING CHANGE: Renamed `PublishModulesAndMofsToPullServer` module to
+  `DscPullServerSetup` and moved to Modules folder.
 
 ### Deprecated
 
