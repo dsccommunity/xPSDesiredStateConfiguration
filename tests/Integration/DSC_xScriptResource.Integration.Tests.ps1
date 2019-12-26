@@ -13,7 +13,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xScriptResource' `
+    -DscResourceName 'DSC_xScriptResource' `
     -TestType 'Integration'
 
 try
@@ -26,12 +26,12 @@ try
             # Import xScript module for Get-TargetResource, Test-TargetResource
             $moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
             $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-            $scriptResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xScriptResource'
-            $scriptResourceModuleFilePath = Join-Path -Path $scriptResourceFolderFilePath -ChildPath 'MSFT_xScriptResource.psm1'
+            $scriptResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xScriptResource'
+            $scriptResourceModuleFilePath = Join-Path -Path $scriptResourceFolderFilePath -ChildPath 'DSC_xScriptResource.psm1'
             Import-Module -Name $scriptResourceModuleFilePath
 
-            $script:configurationNoCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xScriptResource_NoCredential.config.ps1'
-            $script:configurationWithCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xScriptResource_WithCredential.config.ps1'
+            $script:configurationNoCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xScriptResource_NoCredential.config.ps1'
+            $script:configurationWithCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xScriptResource_WithCredential.config.ps1'
 
             # Cannot use $TestDrive here because script is run outside of Pester
             $script:testFolderPath = Join-Path -Path $env:SystemDrive -ChildPath 'Test Folder'

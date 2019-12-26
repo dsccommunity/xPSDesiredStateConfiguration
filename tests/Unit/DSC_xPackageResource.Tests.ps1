@@ -89,7 +89,7 @@ try
                 }
             }
 
-            Context 'Get-TargetResource' {
+            Context 'xPackageResource\Get-TargetResource' {
                 It 'Should return only basic properties for absent package' {
                     $packageParameters = @{
                         Path      = $script:msiLocation
@@ -170,7 +170,7 @@ try
                 }
             }
 
-            Context 'Test-TargetResource' {
+            Context 'xPackageResource\Test-TargetResource' {
                 It 'Should return correct value when package is absent' {
                     $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Present' `
@@ -303,7 +303,7 @@ try
                 }
             }
 
-            Context 'Set-TargetResource' {
+            Context 'xPackageResource\Set-TargetResource' {
                 It 'Should correctly install and remove a .msi package without registry parameters' {
                     Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId -Name ([System.String]::Empty)
 
@@ -613,7 +613,7 @@ try
                 }
             }
 
-            Context 'Get-MsiTool' {
+            Context 'xPackageResource\Get-MsiTool' {
                 It 'Should add MSI tools in the Microsoft.Windows.DesiredStateConfiguration.xPackageResource namespace' {
                     $addTypeResult = @{
                         Namespace = 'Mock not called'

@@ -19,7 +19,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xServiceResource' `
+    -DscResourceName 'DSC_xServiceResource' `
     -TestType 'Integration'
 
 try
@@ -38,17 +38,17 @@ try
             Import-Module -Name $dscResourceTestHelperFilePath
 
             # Import xService test helper for New-ServiceBinary, Test-ServiceExists, Remove-ServiceWithTimeout
-            $serviceTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xServiceResource.TestHelper.psm1'
+            $serviceTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'DSC_xServiceResource.TestHelper.psm1'
             Import-Module -Name $serviceTestHelperFilePath
 
             # Import xService resource module for Test-TargetResource
-            $serviceResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xServiceResource'
-            $serviceResourceModuleFilePath = Join-Path -Path $serviceResourceFolderFilePath -ChildPath 'MSFT_xServiceResource.psm1'
+            $serviceResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xServiceResource'
+            $serviceResourceModuleFilePath = Join-Path -Path $serviceResourceFolderFilePath -ChildPath 'DSC_xServiceResource.psm1'
             Import-Module -Name $serviceResourceModuleFilePath
 
             # Configuration file paths
-            $script:configurationAllExceptCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xServiceResource_AllExceptCredential.config.ps1'
-            $script:configurationCredentialOnlyFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xServiceResource_CredentialOnly.config.ps1'
+            $script:configurationAllExceptCredentialFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xServiceResource_AllExceptCredential.config.ps1'
+            $script:configurationCredentialOnlyFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xServiceResource_CredentialOnly.config.ps1'
 
             # Create test service binary to be the existing service
             $script:existingServiceProperties = @{
@@ -170,7 +170,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
+                DSC_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
             }
         }
 
@@ -233,7 +233,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
+                DSC_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
             }
         }
 
@@ -276,7 +276,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
+                DSC_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
             }
         }
 
@@ -329,7 +329,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
+                DSC_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
             }
         }
 
@@ -367,7 +367,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
+                DSC_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
             }
         }
 
@@ -398,7 +398,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
+                DSC_xServiceResource\Test-TargetResource @resourceParameters | Should -Be $true
             }
         }
     }

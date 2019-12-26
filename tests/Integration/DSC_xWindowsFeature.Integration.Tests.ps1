@@ -19,7 +19,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xWindowsFeature' `
+    -DscResourceName 'DSC_xWindowsFeature' `
     -TestType 'Integration'
 
 <#
@@ -41,7 +41,7 @@ try {
             $testFeatureWithSubFeatures = Get-WindowsFeature -Name $script:testFeatureWithSubFeaturesName
             $script:installStateOfTestWithSubFeatures = $testFeatureWithSubFeatures.Installed
 
-            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsFeature.config.ps1' -Resolve
+            $script:configFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsFeature.config.ps1' -Resolve
         }
 
         AfterAll {
@@ -73,7 +73,7 @@ try {
         }
 
         Context "Should Install the Windows Feature: $script:testFeatureName" {
-            $configurationName = 'MSFT_xWindowsFeature_InstallFeature'
+            $configurationName = 'DSC_xWindowsFeature_InstallFeature'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'InstallFeatureTest.log'
@@ -125,7 +125,7 @@ try {
         }
 
         Context "Should Uninstall the Windows Feature: $script:testFeatureName" {
-            $configurationName = 'MSFT_xWindowsFeature_UninstallFeature'
+            $configurationName = 'DSC_xWindowsFeature_UninstallFeature'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'UninstallFeatureTest.log'
@@ -174,7 +174,7 @@ try {
         }
 
         Context "Should Install the Windows Feature: $script:testFeatureWithSubFeaturesName" {
-            $configurationName = 'MSFT_xWindowsFeature_InstallFeatureWithSubFeatures'
+            $configurationName = 'DSC_xWindowsFeature_InstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             if (-not $script:skipLongTests)
@@ -219,7 +219,7 @@ try {
         }
 
         Context "Should Uninstall the Windows Feature: $script:testFeatureWithSubFeaturesName" {
-            $configurationName = 'MSFT_xWindowsFeature_UninstallFeatureWithSubFeatures'
+            $configurationName = 'DSC_xWindowsFeature_UninstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             It 'Should compile without throwing' -Skip:$script:skipLongTests {

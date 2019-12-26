@@ -120,7 +120,7 @@ try
                 because they are wrapper functions for .NET class function calls.
             #>
 
-            Context 'Get-TargetResource' {
+            Context 'xGroupResource\Get-TargetResource' {
                 Mock -CommandName 'Assert-GroupNameValid' -MockWith { }
                 Mock -CommandName 'Test-IsNanoServer' -MockWith { return $false }
                 Mock -CommandName 'Get-TargetResourceOnFullSKU' -MockWith { return @{ TestResult = 'OnFullSKU' } }
@@ -150,7 +150,7 @@ try
                 }
             }
 
-            Context 'Set-TargetResource' {
+            Context 'xGroupResource\Set-TargetResource' {
                 Mock -CommandName 'Assert-GroupNameValid' -MockWith { }
                 Mock -CommandName 'Test-IsNanoServer' -MockWith { return $false }
                 Mock -CommandName 'Set-TargetResourceOnFullSKU' -MockWith { }
@@ -178,7 +178,7 @@ try
                 }
             }
 
-            Context 'Test-TargetResource' {
+            Context 'xGroupResource\Test-TargetResource' {
                 Mock -CommandName 'Assert-GroupNameValid' -MockWith { }
                 Mock -CommandName 'Test-IsNanoServer' -MockWith { return $false }
                 Mock -CommandName 'Test-TargetResourceOnFullSKU' -MockWith { }
@@ -206,7 +206,7 @@ try
                 }
             }
 
-            Context 'Assert-GroupNameValid' {
+            Context 'xGroupResource\Assert-GroupNameValid' {
                 $invalidCharacters = @( '\', '/', '"', '[', ']', ':', '|', '<', '>', '+', '=', ';', ',', '?', '*', '@' )
 
                 foreach ($invalidCharacter in $invalidCharacters)
@@ -238,7 +238,7 @@ try
                 }
             }
 
-            Context 'Test-IsLocalMachine' {
+            Context 'xGroupResource\Test-IsLocalMachine' {
                 Mock -CommandName 'Get-CimInstance' -MockWith { }
 
                 $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1' )
@@ -269,7 +269,7 @@ try
                 }
             }
 
-            Context 'Split-MemberName' {
+            Context 'xGroupResource\Split-MemberName' {
                 Mock -CommandName 'Test-IsLocalMachine' -MockWith { return $true }
 
                 It 'Should split a member name in the domain\username format with the machine domain' {
@@ -323,7 +323,7 @@ try
 
             if ($script:onNanoServer)
             {
-                Context 'Get-TargetResourceOnNanoServer' {
+                Context 'xGroupResource\Get-TargetResourceOnNanoServer' {
                     $testMembers = @('User1', 'User2')
 
                     Mock -CommandName 'Get-MembersOnNanoServer' -MockWith { return @() }
@@ -387,7 +387,7 @@ try
                     }
                 }
 
-                Context 'Set-TargetResourceOnNanoServer' {
+                Context 'xGroupResource\Set-TargetResourceOnNanoServer' {
                     Mock -CommandName 'Get-LocalGroup' -MockWith { Write-Error -Message 'Test error message' -CategoryReason 'GroupNotFoundException' }
                     Mock -CommandName 'New-LocalGroup' -MockWith { return $script:testLocalGroup }
                     Mock -CommandName 'Set-LocalGroup' -MockWith { }
@@ -676,7 +676,7 @@ try
                     }
                 }
 
-                Context 'Test-TargetResourceOnNanoServer' {
+                Context 'xGroupResource\Test-TargetResourceOnNanoServer' {
                     Mock -CommandName 'Get-LocalGroup' -MockWith { Write-Error -Message 'Test error message' -CategoryReason 'GroupNotFoundException' }
                     Mock -CommandName 'Get-MembersOnNanoServer' -MockWith { }
 
@@ -830,7 +830,7 @@ try
                     }
                 }
 
-                Context 'Get-MembersOnNanoServer' {
+                Context 'xGroupResource\Get-MembersOnNanoServer' {
                     Mock -CommandName 'Get-LocalGroupMember' -MockWith { }
 
                     It 'Should return nothing if group does not have members' {
@@ -860,7 +860,7 @@ try
             }
             else
             {
-                Context 'Get-TargetResourceOnFullSKU' {
+                Context 'xGroupResource\Get-TargetResourceOnFullSKU' {
                     $testMembers = @($script:testuserPrincipal1.Name, $script:testuserPrincipal2.Name)
 
                     Mock -CommandName 'Get-Group' -MockWith { }
@@ -919,7 +919,7 @@ try
                     }
                 }
 
-                Context 'Set-TargetResourceOnFullSKU' {
+                Context 'xGroupResource\Set-TargetResourceOnFullSKU' {
                     Mock -CommandName 'Get-Group' -MockWith { }
                     Mock -CommandName 'Get-MembersAsPrincipalsList' -MockWith { }
                     Mock -CommandName 'ConvertTo-UniquePrincipalsList' -MockWith {
@@ -1364,7 +1364,7 @@ try
 
                 }
 
-                Context 'Test-TargetResourceOnFullSKU' {
+                Context 'xGroupResource\Test-TargetResourceOnFullSKU' {
                     Mock -CommandName 'Get-Group' -MockWith { }
                     Mock -CommandName 'Get-MembersAsPrincipalsList' -MockWith { }
                     Mock -CommandName 'ConvertTo-UniquePrincipalsList' -MockWith {
@@ -1581,7 +1581,7 @@ try
                     }
                 }
 
-                Context 'Get-MembersOnFullSKU' {
+                Context 'xGroupResource\Get-MembersOnFullSKU' {
                     $principalContextCache = @{}
                     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
@@ -1639,7 +1639,7 @@ try
                     }
                 }
 
-                Context 'Get-MembersAsPrincipalsList' {
+                Context 'xGroupResource\Get-MembersAsPrincipalsList' {
                     $principalContextCache = @{}
                     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
@@ -1747,7 +1747,7 @@ try
                     }
                 }
 
-                Context 'ConvertTo-UniquePrincipalsList' {
+                Context 'xGroupResource\ConvertTo-UniquePrincipalsList' {
                     $principalContextCache = @{}
                     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
@@ -1803,7 +1803,7 @@ try
                     }
                 }
 
-                Context 'ConvertTo-Principal' {
+                Context 'xGroupResource\ConvertTo-Principal' {
                     $principalContextCache = @{}
                     $disposables = New-Object -TypeName 'System.Collections.ArrayList'
 
@@ -1867,7 +1867,7 @@ try
                     }
                 }
 
-                Context 'Resolve-SidToPrincipal' {
+                Context 'xGroupResource\Resolve-SidToPrincipal' {
                     Mock -CommandName 'Find-Principal' -MockWith { }
                     Mock -CommandName 'Test-IsLocalMachine' -MockWith { return $true }
 
@@ -1903,7 +1903,7 @@ try
                     }
                 }
 
-                Context 'Get-PrincipalContext' {
+                Context 'xGroupResource\Get-PrincipalContext' {
                     $fakePrincipalContext = 'FakePrincipalContext'
 
                     Mock -CommandName 'Test-IsLocalMachine' -MockWith { return $true }

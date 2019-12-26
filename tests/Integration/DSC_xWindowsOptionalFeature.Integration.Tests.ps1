@@ -7,7 +7,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xWindowsOptionalFeature' `
+    -DscResourceName 'DSC_xWindowsOptionalFeature' `
     -TestType 'Integration'
 
 try
@@ -17,7 +17,7 @@ try
             $script:enabledStates = @( 'Enabled', 'EnablePending' )
             $script:disabledStates = @( 'Disabled', 'DisablePending' )
 
-            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsOptionalFeature.config.ps1'
+            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsOptionalFeature.config.ps1'
         }
 
         It 'Should enable a valid Windows optional feature' {

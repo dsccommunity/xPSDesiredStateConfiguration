@@ -331,6 +331,41 @@ function New-InvalidArgumentException
 
 <#
     .SYNOPSIS
+        Creates and throws an invalid data exception.
+
+    .PARAMETER ErrorId
+        The error Id to assign to the exception.
+
+    .PARAMETER ErrorMessage
+        The error message to assign to the exception.
+#>
+function New-InvalidDataException
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ErrorId,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ErrorMessage
+    )
+
+    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
+    $exception = New-Object `
+        -TypeName System.InvalidOperationException `
+        -ArgumentList $ErrorMessage
+    $errorRecord = New-Object `
+        -TypeName System.Management.Automation.ErrorRecord `
+        -ArgumentList $exception, $ErrorId, $errorCategory, $null
+
+    throw $errorRecord
+}
+
+<#
+    .SYNOPSIS
         Creates and throws an invalid operation exception.
 
     .PARAMETER Message
@@ -1809,6 +1844,7 @@ Export-ModuleMember -Function @(
         'Test-IsNanoServer',
         'Test-DscParameterState',
         'New-InvalidArgumentException',
+        'New-InvalidDataException',
         'New-InvalidOperationException',
         'New-ObjectNotFoundException',
         'New-InvalidResultException',

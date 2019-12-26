@@ -12,16 +12,16 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xMsiPackage' `
+    -DscResourceName 'DSC_xMsiPackage' `
     -TestType 'Integration'
 
 try
 {
-    InModuleScope 'MSFT_xMsiPackage' {
-        Describe 'MSFT_xMsiPackage Integration Tests' {
+    InModuleScope 'DSC_xMsiPackage' {
+        Describe 'DSC_xMsiPackage Integration Tests' {
             BeforeAll {
                 $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-                $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'MSFT_xPackageResource.TestHelper.psm1'
+                $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'DSC_xPackageResource.TestHelper.psm1'
                 $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 
                 Import-Module -Name $packageTestHelperFilePath -Force

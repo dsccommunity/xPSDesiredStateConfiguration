@@ -87,7 +87,7 @@ try
             PostValidationError = 'not being able to find the package after installation'
         }
 
-        Describe 'Get-TargetResource' {
+        Describe 'xMsiPackage\Get-TargetResource' {
             Mock -CommandName 'Convert-ProductIdToIdentifyingNumber' -MockWith { return $script:testIdentifyingNumber }
             Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
             Mock -CommandName 'Get-ProductEntryInfo' -MockWith { return $script:mockProductEntryInfo }
@@ -154,7 +154,7 @@ try
             }
         }
 
-        Describe 'Set-TargetResource' {
+        Describe 'xMsiPackage\Set-TargetResource' {
             $setTargetResourceParameters = @{
                 ProductId = 'TestProductId'
                 Path = $script:testPath
@@ -432,7 +432,7 @@ try
             }
         }
 
-        Describe 'Test-TargetResource' {
+        Describe 'xMsiPackage\Test-TargetResource' {
             Mock -CommandName 'Convert-ProductIdToIdentifyingNumber' -MockWith { return $script:testIdentifyingNumber }
             Mock -CommandName 'Get-ProductEntry' -MockWith { return $script:mockProductEntry }
             Mock -CommandName 'Get-ProductEntryValue' -MockWith { return $script:mockProductEntryInfo.Name }
@@ -512,7 +512,7 @@ try
             }
         }
 
-        Describe 'Assert-PathExtensionValid' {
+        Describe 'xMsiPackage\Assert-PathExtensionValid' {
             Context 'Path is a valid .msi path' {
                 It 'Should not throw' {
                     { Assert-PathExtensionValid -Path 'testMsiFile.msi' } | Should -Not -Throw
@@ -536,7 +536,7 @@ try
             }
         }
 
-        Describe 'Convert-PathToUri' {
+        Describe 'xMsiPackage\Convert-PathToUri' {
             Context 'Path has a valid URI scheme' {
                 It 'Should return the expected URI when scheme is a file' {
                     $filePath = (Join-Path -Path $PSScriptRoot -ChildPath 'testMsi.msi')
@@ -579,7 +579,7 @@ try
             }
         }
 
-        Describe 'Convert-ProductIdToIdentifyingNumber' {
+        Describe 'xMsiPackage\Convert-ProductIdToIdentifyingNumber' {
             Context 'Valid Product ID is passed in' {
                 It 'Should return the same value that is passed in when the Product ID is already in the correct format' {
                     Convert-ProductIdToIdentifyingNumber -ProductId $script:testIdentifyingNumber | Should -Be $script:testIdentifyingNumber
@@ -598,7 +598,7 @@ try
             }
         }
 
-        Describe 'Get-ProductEntry' {
+        Describe 'xMsiPackage\Get-ProductEntry' {
             $uninstallRegistryKeyLocation = (Join-Path -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall' -ChildPath $script:testIdentifyingNumber)
             $uninstallRegistryKeyWow64Location = (Join-Path -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall' -ChildPath $script:testIdentifyingNumber)
 
@@ -640,7 +640,7 @@ try
             }
         }
 
-        Describe 'Get-ProductEntryInfo' {
+        Describe 'xMsiPackage\Get-ProductEntryInfo' {
             Mock -CommandName Get-ProductEntryValue -MockWith { return '20170404' } -ParameterFilter { $Property -eq 'InstallDate' }
             Mock -CommandName Get-ProductEntryValue -MockWith { return $script:mockProductEntryInfo.Publisher } -ParameterFilter { $Property -eq 'Publisher' }
             Mock -CommandName Get-ProductEntryValue -MockWith { return $script:mockProductEntryInfo.Size } -ParameterFilter { $Property -eq 'EstimatedSize' }
@@ -696,7 +696,7 @@ try
             }
         }
 
-        Describe 'New-LogFile' {
+        Describe 'xMsiPackage\New-LogFile' {
             Mock -CommandName 'Test-Path' -MockWith { return $true }
             Mock -CommandName 'Remove-Item' -MockWith {}
             Mock -CommandName 'New-Item' -MockWith {}
@@ -740,7 +740,7 @@ try
             }
         }
 
-        Describe 'Get-WebRequestResponse' {
+        Describe 'xMsiPackage\Get-WebRequestResponse' {
             Mock -CommandName 'Get-WebRequest' -MockWith { return $script:mockWebRequest }
             Mock -CommandName 'Get-ScriptBlock' -MockWith { return { Write-Verbose 'Hello World' } }
             Mock -CommandName 'Get-WebRequestResponseStream' -MockWith { return $script:mockStream }
@@ -797,7 +797,7 @@ try
             }
         }
 
-        Describe 'Assert-FileValid' {
+        Describe 'xMsiPackage\Assert-FileValid' {
             Mock -CommandName 'Assert-FileHashValid' -MockWith {}
             Mock -CommandName 'Assert-FileSignatureValid' -MockWith {}
 
@@ -885,7 +885,7 @@ try
             }
         }
 
-        Describe 'Assert-FileHashValid' {
+        Describe 'xMsiPackage\Assert-FileHashValid' {
             $mockHash = @{ Hash = 'testHash' }
             Mock -CommandName 'Get-FileHash' -MockWith { return $mockHash }
 
@@ -909,7 +909,7 @@ try
             }
         }
 
-        Describe 'Assert-FileSignatureValid' {
+        Describe 'xMsiPackage\Assert-FileSignatureValid' {
             $mockThumbprint = 'mockThumbprint'
             $mockSubject = 'mockSubject'
             $mockSignature = @{
@@ -971,7 +971,7 @@ try
             }
         }
 
-        Describe 'Start-MsiProcess' {
+        Describe 'xMsiPackage\Start-MsiProcess' {
             Mock -CommandName 'New-Object' -MockWith { return $script:mockStartInfo } -ParameterFilter { $TypeName -eq 'System.Diagnostics.ProcessStartInfo' }
             Mock -CommandName 'New-Object' -MockWith { return $script:mockProcess } -ParameterFilter { $TypeName -eq 'System.Diagnostics.Process' }
             Mock -CommandName 'Get-ProductEntry' -MockWith { return $script:mockProductEntryInfo }

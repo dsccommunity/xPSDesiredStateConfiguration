@@ -38,7 +38,7 @@ try
             Import-Module -Name $dscResourceTestHelperFilePath
 
             # Import xService test helper for New-ServiceBinary, Test-ServiceExists, Remove-ServiceWithTimeout
-            $serviceTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xServiceResource.TestHelper.psm1'
+            $serviceTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'DSC_xServiceResource.TestHelper.psm1'
             Import-Module -Name $serviceTestHelperFilePath
 
             # Configuration file paths

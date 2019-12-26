@@ -16,18 +16,18 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xGroupResource' `
+    -DscResourceName 'DSC_xGroupResource' `
     -TestType 'Integration'
 
 try
 {
     Describe 'xGroup Integration Tests'  {
         BeforeAll {
-            Import-Module -Name (Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xGroupResource.TestHelper.psm1')
+            Import-Module -Name (Join-Path -Path $script:testsFolderFilePath -ChildPath 'DSC_xGroupResource.TestHelper.psm1')
 
-            $script:confgurationNoMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xGroupResource_NoMembers.config.ps1'
-            $script:confgurationWithMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xGroupResource_Members.config.ps1'
-            $script:confgurationWithMembersToIncludeExcludeFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xGroupResource_MembersToIncludeExclude.config.ps1'
+            $script:confgurationNoMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_NoMembers.config.ps1'
+            $script:confgurationWithMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_Members.config.ps1'
+            $script:confgurationWithMembersToIncludeExcludeFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_MembersToIncludeExclude.config.ps1'
 
             # Fake users for testing
             $testUsername1 = 'TestUser1'

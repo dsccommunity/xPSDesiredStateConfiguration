@@ -20,7 +20,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xWindowsProcess' `
+    -DscResourceName 'DSC_xWindowsProcess' `
     -TestType 'Integration'
 
 <#
@@ -183,7 +183,7 @@ function Start-TestProcessUsingDscAndVerify
     )
 
     Context $ContextLabel {
-        $configurationName = 'MSFT_xWindowsProcess_StartProcess'
+        $configurationName = 'DSC_xWindowsProcess_StartProcess'
         $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
         $dscParams.OutputPath = $configurationPath
         $dscParams.Ensure = 'Present'
@@ -259,7 +259,7 @@ function Stop-TestProcessUsingDscAndVerify
     )
 
     Context $ContextLabel {
-        $configurationName = 'MSFT_xWindowsProcess_StopAllProcesses'
+        $configurationName = 'DSC_xWindowsProcess_StopAllProcesses'
         $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
         $dscParams.OutputPath = $configurationPath
         $dscParams.Ensure = 'Absent'
@@ -341,7 +341,7 @@ function Start-AdditionalTestProcessAndVerify
     )
 
     Context $ContextLabel {
-        $configurationName = 'MSFT_xWindowsProcess_CheckForMultipleProcesses'
+        $configurationName = 'DSC_xWindowsProcess_CheckForMultipleProcesses'
         $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
         $dscParams.OutputPath = $configurationPath
         $dscParams.Ensure = 'Present'
@@ -553,13 +553,13 @@ try
         @{
             Description = 'No Credentials'
             Credential = $null
-            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsProcess.config.ps1'
+            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsProcess.config.ps1'
         }
 
         @{
             Description = 'With Credentials'
             Credential = Get-TestAdministratorAccountCredential
-            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsProcessWithCredential.config.ps1'
+            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsProcessWithCredential.config.ps1'
         }
     )
 

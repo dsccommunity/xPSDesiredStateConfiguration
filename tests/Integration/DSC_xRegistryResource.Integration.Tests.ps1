@@ -20,7 +20,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xRegistryResource' `
+    -DscResourceName 'DSC_xRegistryResource' `
     -TestType 'Integration'
 
 try
@@ -28,14 +28,14 @@ try
     Describe 'xRegistry Integration Tests' {
         BeforeAll {
             # Import Registry test helper
-            $registryTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xRegistryResource.TestHelper.psm1'
+            $registryTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'DSC_xRegistryResource.TestHelper.psm1'
             Import-Module -Name $registryTestHelperFilePath -Force
 
             # Import Registry resource module for Get-TargetResource, Test-TargetResource, Set-TargetResource
             $moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
             $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-            $registryResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xRegistryResource'
-            $registryResourceModuleFilePath = Join-Path -Path $registryResourceFolderFilePath -ChildPath 'MSFT_xRegistryResource.psm1'
+            $registryResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xRegistryResource'
+            $registryResourceModuleFilePath = Join-Path -Path $registryResourceFolderFilePath -ChildPath 'DSC_xRegistryResource.psm1'
             Import-Module -Name $registryResourceModuleFilePath -Force
 
             $baseRegistryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\TestKey'

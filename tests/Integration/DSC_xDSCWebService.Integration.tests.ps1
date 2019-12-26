@@ -1,6 +1,6 @@
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
 $script:dscResourceFriendlyName = 'xDSCWebService'
-$script:dcsResourceName = "MSFT_$($script:dscResourceFriendlyName)"
+$script:dcsResourceName = "DSC_$($script:dscResourceFriendlyName)"
 
 #region HEADER
 # Integration Test Template Version: 1.3.1
@@ -285,11 +285,11 @@ try
     . $configurationFile
 
     Describe "$($script:dcsResourceName)_Integration" {
-        $ensureAbsentConfigurationName = 'MSFT_xDSCWebService_PullTestRemoval_Config'
+        $ensureAbsentConfigurationName = 'DSC_xDSCWebService_PullTestRemoval_Config'
 
         $ensurePresentConfigurationNames = @(
-            'MSFT_xDSCWebService_PullTestWithSecurityBestPractices_Config',
-            'MSFT_xDSCWebService_PullTestWithoutSecurityBestPractices_Config'
+            'DSC_xDSCWebService_PullTestWithSecurityBestPractices_Config',
+            'DSC_xDSCWebService_PullTestWithoutSecurityBestPractices_Config'
         )
 
         foreach ($configurationName in $ensurePresentConfigurationNames)
@@ -316,7 +316,7 @@ try
                 Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
             }
 
-            Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestWithSecurityBestPractices_Config'
+            Invoke-CommonResourceTesting -ConfigurationName 'DSC_xDSCWebService_PullTestWithSecurityBestPractices_Config'
 
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Present'
@@ -328,7 +328,7 @@ try
         }
 
         Context 'No firewall configuration' {
-            $configurationName = 'MSFT_xDSCWebService_PullTestWithoutFirewall_Config'
+            $configurationName = 'DSC_xDSCWebService_PullTestWithoutFirewall_Config'
 
             BeforeAll {
                 Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
@@ -350,7 +350,7 @@ try
                 Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
             }
 
-            Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestWithSeparateFirewallRule_Config'
+            Invoke-CommonResourceTesting -ConfigurationName 'DSC_xDSCWebService_PullTestWithSeparateFirewallRule_Config'
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started'
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
             Test-DSCPullServerFirewallRule -RuleName 'DSC PullServer 8080' -ResourceState 'Present'
@@ -368,7 +368,7 @@ try
                 Invoke-CommonResourceTesting -ConfigurationName $ensureAbsentConfigurationName
             }
 
-            Invoke-CommonResourceTesting -ConfigurationName 'MSFT_xDSCWebService_PullTestSeparateAppPool_Config'
+            Invoke-CommonResourceTesting -ConfigurationName 'DSC_xDSCWebService_PullTestSeparateAppPool_Config'
             Test-DSCPullServer -WebsiteName 'PSDSCPullServer' -ResourceState 'Present' -WebsiteState 'Started' -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer'
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
 

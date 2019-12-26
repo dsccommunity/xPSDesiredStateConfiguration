@@ -49,7 +49,7 @@ try
 
         $script:testGuid = [System.Guid]::NewGuid()
 
-        Describe 'Get-TargetResource' {
+        Describe 'xArchive\Get-TargetResource' {
             $testPSDrive = @{
                 Root = 'Test PSDrive Name'
             }
@@ -671,7 +671,7 @@ try
             }
         }
 
-        Describe 'Set-TargetResource' {
+        Describe 'xArchive\Set-TargetResource' {
             $testPSDrive = @{
                 Root = 'Test PSDrive Name'
             }
@@ -1391,7 +1391,7 @@ try
             }
         }
 
-        Describe 'Test-TargetResource' {
+        Describe 'xArchive\Test-TargetResource' {
             Mock -CommandName 'Get-TargetResource' -MockWith {
                 return @{
                     Ensure = 'Absent'
@@ -1569,7 +1569,7 @@ try
             }
         }
 
-        Describe 'Mount-PSDriveWithCredential' {
+        Describe 'xArchive\Mount-PSDriveWithCredential' {
             Mock -CommandName 'Test-Path' -MockWith { return $true }
             Mock -CommandName 'New-Guid' -MockWith { return $script:testGuid }
             Mock -CommandName 'Invoke-NewPSDrive' -MockWith { throw 'Test error from New-PSDrive' }
@@ -1729,7 +1729,7 @@ try
             }
         }
 
-        Describe 'Assert-PathExistsAsLeaf' {
+        Describe 'xArchive\Assert-PathExistsAsLeaf' {
             Mock -CommandName 'Test-Path' -MockWith { return $true }
 
             Context 'When path exists as a leaf' {
@@ -1767,7 +1767,7 @@ try
             }
         }
 
-        Describe 'Assert-DestinationDoesNotExistAsFile' {
+        Describe 'xArchive\Assert-DestinationDoesNotExistAsFile' {
             Mock -CommandName 'Get-Item' -MockWith { return $null }
 
             Context 'When item at destination does not exist' {
@@ -1827,7 +1827,7 @@ try
             }
         }
 
-        Describe 'Test-ChecksumIsSha' {
+        Describe 'xArchive\Test-ChecksumIsSha' {
             Context 'When specified checksum method name is a SHA method name' {
                 $testChecksumIsShaParameters = @{
                     Checksum = 'SHA-256'
@@ -1877,7 +1877,7 @@ try
             }
         }
 
-        Describe 'ConvertTo-PowerShellHashAlgorithmName' {
+        Describe 'xArchive\ConvertTo-PowerShellHashAlgorithmName' {
             $convertToPowerShellHashAlgorithmNameParameters = @{
                 DscHashAlgorithmName = 'SHA-256'
             }
@@ -1893,7 +1893,7 @@ try
             }
         }
 
-        Describe 'Test-FileHashMatchesArchiveEntryHash' {
+        Describe 'xArchive\Test-FileHashMatchesArchiveEntryHash' {
             $testArchiveEntryFullName = 'TestArchiveEntryFullName'
             $expectedPowerShellHashAlgorithmName = 'SHA256'
 
@@ -2116,7 +2116,7 @@ try
             }
         }
 
-        Describe 'Get-ChecksumFromFileTimestamp' {
+        Describe 'xArchive\Get-ChecksumFromFileTimestamp' {
             $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
             $testFileCreationTimeChecksum = (Get-Date -Date $testFileInfo.CreationTime -Format 'G')
             $testFileLastWriteTimeChecksum = (Get-Date -Date $testFileInfo.LastWriteTime -Format 'G')
@@ -2152,7 +2152,7 @@ try
             }
         }
 
-        Describe 'Get-TimestampForChecksum' {
+        Describe 'xArchive\Get-TimestampForChecksum' {
             $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
 
             Context 'When checksum specified as CreatedDate' {
@@ -2185,7 +2185,7 @@ try
             }
         }
 
-        Describe 'Get-TimestampFromFile' {
+        Describe 'xArchive\Get-TimestampFromFile' {
             $testFileInfo = New-Object -TypeName 'System.IO.FileInfo' -ArgumentList @( $TestDrive )
 
             Context 'When Timestamp specified as CreationTime' {
@@ -2219,7 +2219,7 @@ try
             }
         }
 
-        Describe 'ConvertTo-CheckSumFromDateTime' {
+        Describe 'xArchive\ConvertTo-CheckSumFromDateTime' {
             $testDate = Get-Date
             $testDateFromChecksum = (Get-Date -Date $testDate -Format 'G')
 
@@ -2238,7 +2238,7 @@ try
             }
         }
 
-        Describe 'Test-FileMatchesArchiveEntryByChecksum' {
+        Describe 'xArchive\Test-FileMatchesArchiveEntryByChecksum' {
             $testArchiveEntryFullName = 'TestArchiveEntryFullName'
             $testArchiveEntryLastWriteTime = Get-Date -Month 1
             $testTimestampFromChecksum = Get-Date -Month 2
@@ -2486,7 +2486,7 @@ try
             }
         }
 
-        Describe 'Test-ArchiveEntryIsDirectory' {
+        Describe 'xArchive\Test-ArchiveEntryIsDirectory' {
             Context 'When archive entry name does not contain a backslash or a foward slash' {
                 $testArchiveEntryNameIsDirectoryPathParameters = @{
                     ArchiveEntryName = 'TestArchiveEntryName'
@@ -2558,7 +2558,7 @@ try
             }
         }
 
-        Describe 'Test-ArchiveExistsAtDestination' {
+        Describe 'xArchive\Test-ArchiveExistsAtDestination' {
             $testArchiveEntryFullName = 'TestArchiveEntryFullName'
             $testItemPathAtDestination = 'TestItemPathAtDestination'
 
@@ -3447,7 +3447,7 @@ try
             }
         }
 
-        Describe 'Copy-ArchiveEntryToDestination' {
+        Describe 'xArchive\Copy-ArchiveEntryToDestination' {
             $testArchiveEntryFullName = 'TestArchiveEntryFullName'
             $testArchiveEntryLastWriteTime = Get-Date
 
@@ -3734,7 +3734,7 @@ try
             }
         }
 
-        Describe 'Expand-ArchiveToDestination' {
+        Describe 'xArchive\Expand-ArchiveToDestination' {
             $testArchiveEntryFullName = 'TestArchiveEntryFullName'
             $testItemPathAtDestination = 'TestItemPathAtDestination'
             $testParentDirectoryPath = 'TestParentDirectoryPath'
@@ -5118,7 +5118,7 @@ try
             }
         }
 
-        Describe 'Remove-DirectoryFromDestination' {
+        Describe 'xArchive\Remove-DirectoryFromDestination' {
             $sortedTestDirectories = @( 'SortedTestDirectory' )
             $testDirectoryPathAtDestination = 'TestDirectoryPathAtDestination'
             $testDirectoryChildItem = @( 'TestChildItem' )
@@ -5314,7 +5314,7 @@ try
             }
         }
 
-        Describe 'Remove-ArchiveFromDestination' {
+        Describe 'xArchive\Remove-ArchiveFromDestination' {
             $testArchiveEntryFullName = 'TestArchiveEntryFullName'
             $testItemPathAtDestination = 'TestItemPathAtDestination'
             $testParentDirectoryPath = 'TestParentDirectoryPath'

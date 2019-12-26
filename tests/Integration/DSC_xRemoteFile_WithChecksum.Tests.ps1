@@ -2,7 +2,7 @@ Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
                                -ChildPath 'CommonTestHelper.psm1')
 
 $script:DSCModuleName      = 'xPSDesiredStateConfiguration' # Example xNetworking
-$script:DSCResourceName    = 'MSFT_xRemoteFile' # Example MSFT_xFirewall
+$script:DSCResourceName    = 'DSC_xRemoteFile' # Example DSC_xFirewall
 
 if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 {

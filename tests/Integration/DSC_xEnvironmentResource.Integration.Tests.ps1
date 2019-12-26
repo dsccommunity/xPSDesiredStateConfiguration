@@ -15,7 +15,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xEnvironmentResource' `
+    -DscResourceName 'DSC_xEnvironmentResource' `
     -TestType 'Integration'
 
 try
@@ -25,8 +25,8 @@ try
             # Import environment resource module for Get-TargetResource, Test-TargetResource, Set-TargetResource
             $moduleRootFilePath = Split-Path -Path (Split-Path $PSScriptRoot -Parent) -Parent
             $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-            $environmentResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xEnvironmentResource'
-            $environmentResourceModuleFilePath = Join-Path -Path $environmentResourceFolderFilePath -ChildPath 'MSFT_xEnvironmentResource.psm1'
+            $environmentResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xEnvironmentResource'
+            $environmentResourceModuleFilePath = Join-Path -Path $environmentResourceFolderFilePath -ChildPath 'DSC_xEnvironmentResource.psm1'
             Import-Module -Name $environmentResourceModuleFilePath -Force
         }
 

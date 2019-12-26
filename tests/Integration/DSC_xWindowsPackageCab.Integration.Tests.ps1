@@ -7,7 +7,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xWindowsPackageCab' `
+    -DscResourceName 'DSC_xWindowsPackageCab' `
     -TestType 'Integration'
 
 try
@@ -17,7 +17,7 @@ try
             Import-Module -Name 'Dism'
 
             $script:installedStates = @( 'Installed', 'InstallPending' )
-            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xWindowsPackageCab.config.ps1'
+            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsPackageCab.config.ps1'
 
             $script:testPackageName = ''
             $script:testSourcePath = Join-Path -Path $PSScriptRoot -ChildPath ''

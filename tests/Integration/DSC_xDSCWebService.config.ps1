@@ -34,7 +34,7 @@ else
     .SYNOPSIS
         Removes a configured DSC pull server
 #>
-Configuration MSFT_xDSCWebService_PullTestRemoval_Config
+Configuration DSC_xDSCWebService_PullTestRemoval_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
@@ -62,7 +62,7 @@ Configuration MSFT_xDSCWebService_PullTestRemoval_Config
     .SYNOPSIS
         Sets up a DSC pull server using security best practices
 #>
-Configuration MSFT_xDSCWebService_PullTestWithSecurityBestPractices_Config
+Configuration DSC_xDSCWebService_PullTestWithSecurityBestPractices_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
@@ -90,7 +90,7 @@ Configuration MSFT_xDSCWebService_PullTestWithSecurityBestPractices_Config
     .SYNOPSIS
         Sets up a DSC pull server without using security best practices
 #>
-Configuration MSFT_xDSCWebService_PullTestWithoutSecurityBestPractices_Config
+Configuration DSC_xDSCWebService_PullTestWithoutSecurityBestPractices_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
@@ -118,7 +118,7 @@ Configuration MSFT_xDSCWebService_PullTestWithoutSecurityBestPractices_Config
     .SYNOPSIS
         Sets up a DSC pull server without firewall exceptions
 #>
-Configuration MSFT_xDSCWebService_PullTestWithoutFirewall_Config
+Configuration DSC_xDSCWebService_PullTestWithoutFirewall_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
 
@@ -147,7 +147,7 @@ Configuration MSFT_xDSCWebService_PullTestWithoutFirewall_Config
     .SYNOPSIS
         Sets up a DSC pull server with a separate firewall rule definition
 #>
-Configuration MSFT_xDSCWebService_PullTestWithSeparateFirewallRule_Config
+Configuration DSC_xDSCWebService_PullTestWithSeparateFirewallRule_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
     Import-DscResource -ModuleName 'NetworkingDsc'
@@ -193,7 +193,7 @@ Configuration MSFT_xDSCWebService_PullTestWithSeparateFirewallRule_Config
     .SYNOPSIS
         Sets up a DSC pull server with an separately defined application pool
 #>
-Configuration MSFT_xDSCWebService_PullTestSeparateAppPool_Config
+Configuration DSC_xDSCWebService_PullTestSeparateAppPool_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
     Import-DscResource -ModuleName 'xWebAdministration'

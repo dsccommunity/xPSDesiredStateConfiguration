@@ -21,23 +21,23 @@ Describe 'xMsiPackage End to End Tests' {
     BeforeAll {
         $script:testEnvironment = Enter-DscResourceTestEnvironment `
             -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-            -DscResourceName 'MSFT_xMsiPackage' `
+            -DscResourceName 'DSC_xMsiPackage' `
             -TestType 'Integration'
 
         # Import xMsiPackage resource module for Test-TargetResource
         $moduleRootFilePath = Split-Path -Path $testsFolderFilePath -Parent
         $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-        $msiPackageResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xMsiPackage'
-        $msiPackageResourceModuleFilePath = Join-Path -Path $msiPackageResourceFolderFilePath -ChildPath 'MSFT_xMsiPackage.psm1'
+        $msiPackageResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xMsiPackage'
+        $msiPackageResourceModuleFilePath = Join-Path -Path $msiPackageResourceFolderFilePath -ChildPath 'DSC_xMsiPackage.psm1'
         Import-Module -Name $msiPackageResourceModuleFilePath -Force
 
         # Import the xPackage test helper
-        $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'MSFT_xPackageResource.TestHelper.psm1'
+        $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'DSC_xPackageResource.TestHelper.psm1'
         Import-Module -Name $packageTestHelperFilePath -Force
 
         # Set up the paths to the test configurations
-        $script:configurationFilePathNoOptionalParameters = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xMsiPackage_NoOptionalParameters'
-        $script:configurationFilePathLogPath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xMsiPackage_LogPath'
+        $script:configurationFilePathNoOptionalParameters = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xMsiPackage_NoOptionalParameters'
+        $script:configurationFilePathLogPath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xMsiPackage_LogPath'
 
         <#
             This log file is used to log messages from the mock server which is important for debugging since
@@ -86,7 +86,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $true
 
             if ($testTargetResourceInitialResult -ne $true)
@@ -113,7 +113,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should not exist on the machine' {
@@ -131,7 +131,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -158,7 +158,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should exist on the machine' {
@@ -176,7 +176,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $true
 
             if ($testTargetResourceInitialResult -ne $true)
@@ -203,7 +203,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should exist on the machine' {
@@ -221,7 +221,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -248,7 +248,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should not exist on the machine' {
@@ -274,7 +274,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -301,7 +301,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Should have created the log file' {
@@ -331,7 +331,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -358,7 +358,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Should have created the log file' {
@@ -387,7 +387,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -434,7 +434,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should exist on the machine' {
@@ -459,7 +459,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -506,7 +506,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return true from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should not exist on the machine' {
@@ -531,7 +531,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -578,7 +578,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return true from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should exist on the machine' {
@@ -603,7 +603,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return False from Test-TargetResource with the same parameters before configuration' {
-            $testTargetResourceInitialResult = MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters
+            $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
             $testTargetResourceInitialResult | Should -Be $false
 
             if ($testTargetResourceInitialResult -ne $false)
@@ -650,7 +650,7 @@ Describe 'xMsiPackage End to End Tests' {
         }
 
         It 'Should return true from Test-TargetResource with the same parameters after configuration' {
-            MSFT_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+            DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
         }
 
         It 'Package should not exist on the machine' {

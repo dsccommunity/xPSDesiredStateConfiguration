@@ -20,7 +20,7 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xRegistryResource' `
+    -DscResourceName 'DSC_xRegistryResource' `
     -TestType 'Integration'
 
 try
@@ -30,16 +30,16 @@ try
             # Import Registry resource module for Get-TargetResource, Test-TargetResource, Set-TargetResource
             $moduleRootFilePath = Split-Path -Path $script:testsFolderFilePath -Parent
             $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-            $registryResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'MSFT_xRegistryResource'
-            $registryResourceModuleFilePath = Join-Path -Path $registryResourceFolderFilePath -ChildPath 'MSFT_xRegistryResource.psm1'
+            $registryResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xRegistryResource'
+            $registryResourceModuleFilePath = Join-Path -Path $registryResourceFolderFilePath -ChildPath 'DSC_xRegistryResource.psm1'
             Import-Module -Name $registryResourceModuleFilePath -Force
 
             $script:registryKeyValueTypes = @( 'String', 'Binary', 'DWord', 'QWord', 'MultiString', 'ExpandString' )
             $script:testRegistryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\TestKey2'
 
             # Force is specified as true for both of these configurations
-            $script:confgurationFilePathKeyAndNameOnly = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xRegistryResource_KeyAndNameOnly.config.ps1'
-            $script:confgurationFilePathWithDataAndType = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xRegistryResource_WithDataAndType.config.ps1'
+            $script:confgurationFilePathKeyAndNameOnly = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xRegistryResource_KeyAndNameOnly.config.ps1'
+            $script:confgurationFilePathWithDataAndType = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xRegistryResource_WithDataAndType.config.ps1'
         }
 
         Context 'Create a new registry key' {
@@ -70,7 +70,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -106,7 +106,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -144,7 +144,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -204,7 +204,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
                 }
             }
         }
@@ -245,7 +245,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -277,7 +277,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -311,7 +311,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
 
@@ -343,7 +343,7 @@ try
             }
 
             It 'Should return true from Test-TargetResource with the same parameters' {
-                MSFT_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
             }
         }
     }

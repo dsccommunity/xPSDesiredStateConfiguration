@@ -18,12 +18,12 @@ if (Test-SkipContinuousIntegrationTask -Type 'Integration')
 
 $script:testEnvironment = Enter-DscResourceTestEnvironment `
     -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xUserResource' `
+    -DscResourceName 'DSC_xUserResource' `
     -TestType 'Integration'
 
 try {
 
-    $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xUserResource.config.ps1'
+    $configFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xUserResource.config.ps1'
 
 
     Describe 'xUserResource Integration Tests' {
@@ -40,7 +40,7 @@ try {
         }
 
         Context 'Should create a new user' {
-            $configurationName = 'MSFT_xUser_NewUser'
+            $configurationName = 'DSC_xUser_NewUser'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'NewUser.log'
@@ -93,7 +93,7 @@ try {
         }
 
         Context 'Should update an existing user' {
-            $configurationName = 'MSFT_xUser_UpdateUser'
+            $configurationName = 'DSC_xUser_UpdateUser'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'UpdateUser.log'
@@ -146,7 +146,7 @@ try {
         }
 
         Context 'Should delete an existing user' {
-            $configurationName = 'MSFT_xUser_DeleteUser'
+            $configurationName = 'DSC_xUser_DeleteUser'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
             $logPath = Join-Path -Path $TestDrive -ChildPath 'DeleteUser.log'

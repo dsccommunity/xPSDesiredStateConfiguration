@@ -24,7 +24,7 @@ try
     Describe 'xGroupSet Integration Tests' {
         BeforeAll {
             # Import xGroup Test Helper for TestGroupExists, New-Group, Remove-Group, New-User, Remove-User
-            $groupTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'MSFT_xGroupResource.TestHelper.psm1'
+            $groupTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'DSC_xGroupResource.TestHelper.psm1'
             Import-Module -Name $groupTestHelperFilePath
 
             $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xGroupSet.config.ps1'
