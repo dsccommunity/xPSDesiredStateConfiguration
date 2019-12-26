@@ -1,4 +1,4 @@
-# Localized resources for PublishModulesAndMofsToPullServer
+# Localized resources for DscPullServerSetup
 
 ConvertFrom-StringData @'
     StartDeploymentMessage = Start deployment of Pull Server.

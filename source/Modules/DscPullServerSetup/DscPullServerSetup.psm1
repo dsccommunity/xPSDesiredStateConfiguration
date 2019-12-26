@@ -1,7 +1,7 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+$modulePath = Split-Path -Path $PSScriptRoot -Parent
 
 # Import the Networking Resource Helper Module
 Import-Module -Name (Join-Path -Path $modulePath `
@@ -10,7 +10,8 @@ Import-Module -Name (Join-Path -Path $modulePath `
 
 # Import Localization Strings
 $script:localizedData = Get-LocalizedData `
-    -ResourceName 'DscPullServerSetup'
+    -ResourceName 'DscPullServerSetup' `
+    -ScriptRoot $PSScriptRoot
 
 <#
     .SYNOPSIS
