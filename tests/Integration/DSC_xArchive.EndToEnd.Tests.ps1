@@ -33,105 +33,107 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        # Set up the paths to the test configurations
-        $script:confgurationFilePathValidateOnly = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xArchive_ValidateOnly.config.ps1'
-        $script:confgurationFilePathValidateAndChecksum = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xArchive_ValidateAndChecksum.config.ps1'
-        $script:confgurationFilePathCredentialOnly = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xArchive_CredentialOnly.config.ps1'
-
-        # Create the test archive
-        $script:testArchiveName = 'TestArchive1'
-
-        $script:testArchiveFileStructure = @{
-            Folder1 = @{ }
-            Folder2 = @{
-                Folder21 = @{
-                    Folder22 = @{
-                        Folder23 = @{ }
-                    }
-                }
-            }
-            Folder3 = @{
-                Folder31 = @{
-                    Folder31 = @{
-                        Folder33 = @{
-                            Folder34 = @{
-                                File31 = 'Fake file contents'
-                            }
-                        }
-                    }
-                }
-            }
-            Folder4 = @{
-                Folder41 = @{
-                    Folder42 = @{
-                        Folder43 = @{
-                            Folder44 = @{ }
-                        }
-                    }
-                }
-            }
-            File1   = 'Fake file contents'
-            File2   = 'Fake file contents'
-        }
-
-        $newZipFileFromHashtableParameters = @{
-            Name             = $script:testArchiveName
-            ParentPath       = $TestDrive
-            ZipFileStructure = $script:testArchiveFileStructure
-        }
-
-        $script:testArchiveFilePath = New-ZipFileFromHashtable @newZipFileFromHashtableParameters
-        $script:testArchiveFilePathWithoutExtension = $script:testArchiveFilePath.Replace('.zip', '')
-
-        # Create another test archive with the same name and file structure but different file content
-        $script:testArchiveWithDifferentFileContentName = $script:testArchiveName
-
-        $script:testArchiveFileWithDifferentFileContentStructure = @{
-            Folder1 = @{ }
-            Folder2 = @{
-                Folder21 = @{
-                    Folder22 = @{
-                        Folder23 = @{ }
-                    }
-                }
-            }
-            Folder3 = @{
-                Folder31 = @{
-                    Folder31 = @{
-                        Folder33 = @{
-                            Folder34 = @{
-                                File31 = 'Different fake file contents'
-                            }
-                        }
-                    }
-                }
-            }
-            Folder4 = @{
-                Folder41 = @{
-                    Folder42 = @{
-                        Folder43 = @{
-                            Folder44 = @{ }
-                        }
-                    }
-                }
-            }
-            File1   = 'Different fake file contents'
-            File2   = 'Different fake file contents'
-        }
-
-        $script:testArchiveFileWithDifferentFileContentParentPath = Join-Path -Path $TestDrive -ChildPath 'MismatchingArchive'
-        $null = New-Item -Path $script:testArchiveFileWithDifferentFileContentParentPath -ItemType 'Directory'
-
-        $newZipFileFromHashtableParameters = @{
-            Name             = $script:testArchiveWithDifferentFileContentName
-            ParentPath       = $script:testArchiveFileWithDifferentFileContentParentPath
-            ZipFileStructure = $script:testArchiveFileWithDifferentFileContentStructure
-        }
-
-        $script:testArchiveFileWithDifferentFileContentPath = New-ZipFileFromHashtable @newZipFileFromHashtableParameters
-        $script:testArchiveFileWithDifferentFileContentPathWithoutExtension = $script:testArchiveFileWithDifferentFileContentPath.Replace('.zip', '')
-
         Describe 'xArchive End to End Tests' {
+            BeforeAll {
+                # Set up the paths to the test configurations
+                $script:confgurationFilePathValidateOnly = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xArchive_ValidateOnly.config.ps1'
+                $script:confgurationFilePathValidateAndChecksum = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xArchive_ValidateAndChecksum.config.ps1'
+                $script:confgurationFilePathCredentialOnly = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xArchive_CredentialOnly.config.ps1'
+
+                # Create the test archive
+                $script:testArchiveName = 'TestArchive1'
+
+                $script:testArchiveFileStructure = @{
+                    Folder1 = @{ }
+                    Folder2 = @{
+                        Folder21 = @{
+                            Folder22 = @{
+                                Folder23 = @{ }
+                            }
+                        }
+                    }
+                    Folder3 = @{
+                        Folder31 = @{
+                            Folder31 = @{
+                                Folder33 = @{
+                                    Folder34 = @{
+                                        File31 = 'Fake file contents'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Folder4 = @{
+                        Folder41 = @{
+                            Folder42 = @{
+                                Folder43 = @{
+                                    Folder44 = @{ }
+                                }
+                            }
+                        }
+                    }
+                    File1   = 'Fake file contents'
+                    File2   = 'Fake file contents'
+                }
+
+                $newZipFileFromHashtableParameters = @{
+                    Name             = $script:testArchiveName
+                    ParentPath       = $TestDrive
+                    ZipFileStructure = $script:testArchiveFileStructure
+                }
+
+                $script:testArchiveFilePath = New-ZipFileFromHashtable @newZipFileFromHashtableParameters
+                $script:testArchiveFilePathWithoutExtension = $script:testArchiveFilePath.Replace('.zip', '')
+
+                # Create another test archive with the same name and file structure but different file content
+                $script:testArchiveWithDifferentFileContentName = $script:testArchiveName
+
+                $script:testArchiveFileWithDifferentFileContentStructure = @{
+                    Folder1 = @{ }
+                    Folder2 = @{
+                        Folder21 = @{
+                            Folder22 = @{
+                                Folder23 = @{ }
+                            }
+                        }
+                    }
+                    Folder3 = @{
+                        Folder31 = @{
+                            Folder31 = @{
+                                Folder33 = @{
+                                    Folder34 = @{
+                                        File31 = 'Different fake file contents'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Folder4 = @{
+                        Folder41 = @{
+                            Folder42 = @{
+                                Folder43 = @{
+                                    Folder44 = @{ }
+                                }
+                            }
+                        }
+                    }
+                    File1   = 'Different fake file contents'
+                    File2   = 'Different fake file contents'
+                }
+
+                $script:testArchiveFileWithDifferentFileContentParentPath = Join-Path -Path $TestDrive -ChildPath 'MismatchingArchive'
+                $null = New-Item -Path $script:testArchiveFileWithDifferentFileContentParentPath -ItemType 'Directory'
+
+                $newZipFileFromHashtableParameters = @{
+                    Name             = $script:testArchiveWithDifferentFileContentName
+                    ParentPath       = $script:testArchiveFileWithDifferentFileContentParentPath
+                    ZipFileStructure = $script:testArchiveFileWithDifferentFileContentStructure
+                }
+
+                $script:testArchiveFileWithDifferentFileContentPath = New-ZipFileFromHashtable @newZipFileFromHashtableParameters
+                $script:testArchiveFileWithDifferentFileContentPathWithoutExtension = $script:testArchiveFileWithDifferentFileContentPath.Replace('.zip', '')
+            }
+
             Context 'When expanding an archive to a destination that does not yet exist' {
                 $configurationName = 'ExpandArchiveToNonExistentDestination'
 
