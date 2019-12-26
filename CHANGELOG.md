@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Moved `Firewall.psm1` module into `xPSDesiredStateConfiguration.Firewall`.
     - Moved `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` module
       into `xPSDesiredStateConfiguration.Security`.
+    - Fix issue with `Get-TargetResource` when a DSC Pull Server website is not
+      installed.
   - DSC_xWindowsFeature
     - Changed tests to be able to run on machines without `*-WindowsFeature` cmdlets.
     - Changed `Assert-SingleInstanceOfFeature` to accept an array.

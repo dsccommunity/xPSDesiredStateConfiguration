@@ -1,6 +1,3 @@
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
 $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
 # Import the shared modules
@@ -144,6 +141,7 @@ function Get-TargetResource
             'System.Data.OleDb'
             {
                 $connectionString = Get-WebConfigAppSetting -WebConfigFullPath $webConfigFullPath -AppSettingName 'dbconnectionstr'
+
                 if ($connectionString -match 'Data Source=(.*)\\Devices\.mdb')
                 {
                     $databasePath = $Matches[0]
@@ -183,6 +181,8 @@ function Get-TargetResource
 
         $ConfigureFirewall = Test-PullServerFirewallConfiguration -Port $iisPort
         $ApplicationPoolName = $webSite.applicationPool
+        $physicalPath = $website.physicalPath
+        $state = $webSite.state
     }
     else
     {
@@ -194,8 +194,8 @@ function Get-TargetResource
         EndpointName                 = $EndpointName
         ApplicationPoolName          = $ApplicationPoolName
         Port                         = $iisPort
-        PhysicalPath                 = $website.physicalPath
-        State                        = $webSite.state
+        PhysicalPath                 = $physicalPath
+        State                        = $state
         DatabasePath                 = $databasePath
         ModulePath                   = $modulePath
         ConfigurationPath            = $configurationPath
@@ -613,7 +613,7 @@ function Set-TargetResource
 
     if ($UseSecurityBestPractices)
     {
-        UseSecurityBestPractices\Set-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices
+        Set-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices
     }
 }
 
@@ -1056,7 +1056,7 @@ function Test-TargetResource
 
         if ($UseSecurityBestPractices)
         {
-            if (-not (UseSecurityBestPractices\Test-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices))
+            if (-not (Test-UseSecurityBestPractice -DisableSecurityBestPractices $DisableSecurityBestPractices))
             {
                 $desiredConfigurationMatch = $false
                 Write-Verbose -Message 'The state of security settings does not match the desired state.'
@@ -1506,7 +1506,7 @@ function Test-IISSelfSignedModuleInstalled
     [OutputType([System.Boolean])]
     param ()
 
-    return ('' -ne ((& (Get-IISAppCmd) list config -section:system.webServer/globalModules) -like "*$iisSelfSignedModuleName*"))
+    ('' -ne ((& (Get-IISAppCmd) list config -section:system.webServer/globalModules) -like "*$iisSelfSignedModuleName*"))
 }
 
 <#
@@ -1561,6 +1561,7 @@ function Install-IISSelfSignedModule
         }
 
         Write-Verbose -Message "Install-IISSelfSignedModule: globally activating module '$iisSelfSignedModuleName'."
+
         & (Get-IISAppCmd) install module /name:$iisSelfSignedModuleName /image:$destinationFilePath /add:false /lock:false
     }
 }
