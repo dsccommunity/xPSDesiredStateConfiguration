@@ -1,3 +1,13 @@
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Networking Resource Helper Module
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
+
 <#
     .SYNOPSIS
         DSC Composite Resource uploads file or folder to an SMB share.

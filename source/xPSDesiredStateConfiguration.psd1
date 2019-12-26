@@ -40,6 +40,14 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
     # Aliases to export from this module
     AliasesToExport   = @()
 
+    # DSC resources to export from this module
+    DscResourcesToExport  = @(
+        'xArchive', 'xDSCWebService', 'xEnvironmentResource','xGroupResource','xMsiPackage',
+        'xPackageResource','xPSSessionConfiguration','xRegistryResource','xRemoteFile',
+        'xScriptResource','xServiceResource','xUserResource','xWindowsFeature','xWindowsOptionalFeature',
+        'xWindowsPackageCab','xWindowsProcess'
+    )
+
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData       = @{
 

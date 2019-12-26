@@ -1,10 +1,12 @@
 $errorActionPreference = 'Stop'
 Set-StrictMode -Version 'Latest'
 
-# Import ResourceSetHelper for New-ResourceSetConfigurationScriptBlock
-$script:dscResourcesFolderFilePath = Split-Path -Path $PSScriptRoot -Parent
-$script:resourceSetHelperFilePath = Join-Path -Path $script:dscResourcesFolderFilePath -ChildPath 'ResourceSetHelper.psm1'
-Import-Module -Name $script:resourceSetHelperFilePath
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+
+# Import the Networking Resource Helper Module
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
 <#
     .SYNOPSIS

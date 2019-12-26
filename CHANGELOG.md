@@ -27,9 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Added MOF descriptions.
   - Corrected minor style issues.
   - Fix minor style issues in hashtable layout.
-  - Shared modules moved to `source/Modules` folder and renamed:
+  - Shared modules moved to `source/Module` folder and renamed:
     - `CommonResourceHelper.psm1` -> `xPSDesiredStateConfiguration.Common.psm1`
-    - `xPSDesiredStateConfiguration.psm1` -> `xPSDesiredStateConfiguration.ResourceSetHelper.psm1`
+  - Moved functions from `ResourceSetHelper.psm1` into
+    `xPSDesiredStateConfiguration.Common.psm1`.
   - BREAKING CHANGE: Changed resource prefix from MSFT to DSC.
   - Pinned `ModuleBuilder` to v1.0.0.
   - Updated build badges in README.MD.
@@ -37,22 +38,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Adopt DSC Community Code of Conduct.
   - DSC_xPSSessionConfiguration:
     - Moved strings to localization file.
-  - DSC_xScriptResource:
+  - DSC_xScriptResource
     - Updated parameter descriptions to match MOF file.
   - Correct miscellaneous style issues.
+  - DSC_xWindowsOptionalFeature
+    - Fix localization strings.
+  - DSC_xEnvironmentResource
+    - Remove unused localization strings.
+  - DSC_xDSCWebService
+    - Merged util modules `Firewall.psm1`, `PSWSIISEndpoint.psm1`,
+      `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` into resource.
+  - BREAKING CHANGE: Renamed `PublishModulesAndMofsToPullServer` module to
+    `DscPullServerSetup` and moved to Modules folder.
 - DSCPullServerSetup
   - Fixed markdown errors in README.MD.
   - Moved strings to Localization file.
   - Corrected style violations.
-- DSC_xWindowsOptionalFeature
-  - Fix localization strings.
-- DSC_xEnvironmentResource
-  - Remove unused localization strings.
-- DSC_xDSCWebService
-  - Merged util modules `Firewall.psm1`, `PSWSIISEndpoint.psm1`,
-    `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` into resource.
-- BREAKING CHANGE: Renamed `PublishModulesAndMofsToPullServer` module to
-  `DscPullServerSetup` and moved to Modules folder.
 
 ### Deprecated
 
