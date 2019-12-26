@@ -1,3 +1,5 @@
+# Localized resources for xPSDesiredStateConfiguration.Common
+
 ConvertFrom-StringData @'
     PropertyTypeInvalidForDesiredValues = Property 'DesiredValues' must be either a [System.Collections.Hashtable], [CimInstance] or [PSBoundParametersDictionary]. The type detected was {0}.
     PropertyTypeInvalidForValuesToCheck = If 'DesiredValues' is a CimInstance, then property 'ValuesToCheck' must contain a value.
