@@ -8,7 +8,7 @@ Set-StrictMode -Version 'Latest'
 
 $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
-# Import the Networking Resource Helper Module
+# Import the shared modules
 Import-Module -Name (Join-Path -Path $modulePath `
     -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
@@ -402,7 +402,6 @@ function Set-TargetResourceOnFullSKU
     Write-Verbose -Message ($script:localizedData.ConfigurationStarted -f $UserName)
 
     Assert-UserNameValid -UserName $UserName
-
 
     # Try to find a user by name.
     $principalContext = New-Object `

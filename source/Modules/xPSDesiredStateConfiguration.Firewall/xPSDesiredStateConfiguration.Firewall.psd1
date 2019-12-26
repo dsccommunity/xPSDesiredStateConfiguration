@@ -3,7 +3,7 @@
     ModuleVersion     = '1.0.0.0'
 
     # ID used to uniquely identify this module
-    GUID              = 'b4768e4d-0786-4e9c-9866-6f6e5efc4d63'
+    GUID              = 'e400c89a-064f-4b3c-8197-6a7be06d55f3'
 
     # Author of this module
     Author            = 'DSC Community'
@@ -15,7 +15,7 @@
     Copyright         = 'Copyright the DSC Community contributors. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'Functions used by the DSC resources in xPSDesiredStateConfiguration.'
+    Description       = 'Functions used by the DSC Web Service resource to configure firewall settings.'
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @()

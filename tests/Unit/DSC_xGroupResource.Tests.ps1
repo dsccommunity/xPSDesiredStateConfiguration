@@ -1360,8 +1360,6 @@ try
                         Assert-MockCalled -CommandName 'Get-MembersAsPrincipalsList' -ParameterFilter { $Credential -eq $script:testCredential }
                         Assert-MockCalled -CommandName 'ConvertTo-UniquePrincipalsList' -ParameterFilter { $Credential -eq $script:testCredential  }
                     }
-
-
                 }
 
                 Context 'xGroupResource\Test-TargetResourceOnFullSKU' {

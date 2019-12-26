@@ -46,8 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - DSC_xEnvironmentResource
     - Remove unused localization strings.
   - DSC_xDSCWebService
-    - Merged util modules `Firewall.psm1`, `PSWSIISEndpoint.psm1`,
-      `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` into resource.
+    - Moved `PSWSIISEndpoint.psm1` module into `xPSDesiredStateConfiguration.PSWSIIS`.
+    - Moved `Firewall.psm1` module into `xPSDesiredStateConfiguration.Firewall`.
+    - Moved `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` module
+      into `xPSDesiredStateConfiguration.Security`.
+  - DSC_xWindowsFeature
+    - Changed tests to be able to run on machines without `*-WindowsFeature` cmdlets.
+    - Changed `Assert-SingleInstanceOfFeature` to accept an array.
   - BREAKING CHANGE: Renamed `PublishModulesAndMofsToPullServer` module to
     `DscPullServerSetup` and moved to Modules folder.
   - Moved test helper modules into `tests\TestHelpers` folder.

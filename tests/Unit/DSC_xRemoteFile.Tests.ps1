@@ -32,519 +32,514 @@ Invoke-TestSetup
 try
 {
     InModuleScope $script:dscResourceName {
-        function Get-InvalidDataException
-        {
-            param (
-                [Parameter(Mandatory = $true)]
-                [System.String]
-                $errorId,
+        Describe 'xRemoteFile Unit Tests' {
+            BeforeAll {
+                function Get-InvalidDataException
+                {
+                    param (
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $errorId,
 
-                [Parameter(Mandatory = $true)]
-                [System.String]
-                $errorMessage
-            )
+                        [Parameter(Mandatory = $true)]
+                        [System.String]
+                        $errorMessage
+                    )
 
-            $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
-            $exception = New-Object `
-                -TypeName System.InvalidOperationException `
-                -ArgumentList $errorMessage
-            $errorRecord = New-Object `
-                -TypeName System.Management.Automation.ErrorRecord `
-                -ArgumentList $exception, $errorId, $errorCategory, $null
-            return $errorRecord
-        }
+                    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
+                    $exception = New-Object `
+                        -TypeName System.InvalidOperationException `
+                        -ArgumentList $errorMessage
+                    $errorRecord = New-Object `
+                        -TypeName System.Management.Automation.ErrorRecord `
+                        -ArgumentList $exception, $errorId, $errorCategory, $null
+                    return $errorRecord
+                }
 
-        # Create a working folder that all files will be created in
-        $script:workingFolder = Join-Path -Path $TestDrive -ChildPath 'xRemoteFile.Temp'
+                $script:testDirectoryPath = Join-Path -Path $TestDrive -ChildPath 'MSFT_xRemoteFile.Tests'
 
-        if (-not (Test-Path -Path $script:workingFolder))
-        {
-            $null = New-Item -Path $script:workingFolder -ItemType Directory
-        }
+                if (Test-Path -Path $script:testDirectoryPath)
+                {
+                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
+                }
 
-        #region Pester Tests
-        $testURIFile = 'test.xml'
-        $testURI = "http://contoso.com/$testURIFile"
-        $testURIFileNotExist = 'testnotexist.xml'
-        $testURINotExist = "http://contoso.com/$testURIFileNotExist"
+                $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
 
-        $testDestinationFolder = Join-Path `
-            -Path $script:workingFolder -ChildPath 'UnitTest_Folder'
-        $testDestinationFolderFile = Join-Path `
-            -Path $testDestinationFolder -ChildPath $testURIFile
-        $testDestinationFile = Join-Path `
-            -Path $script:workingFolder -ChildPath 'UnitTest_File.xml'
-        $testDestinationNotExist = Join-Path `
-            -Path $script:workingFolder -ChildPath 'UnitTest_NotExist'
+                $script:testURIFile = 'test.xml'
+                $script:testURI = "http://contoso.com/$script:testURIFile"
+                $script:testURIFileNotExist = 'testnotexist.xml'
+                $script:testURINotExist = "http://contoso.com/$script:testURIFileNotExist"
 
-        # Create the splats
-        $testSplatFile = @{
-            DestinationPath = $testDestinationFile;
-            Uri = $testURI;
-        }
-        $testSplatFileChecksum = $testSplatFile.clone()
-        $testSplatFileChecksum.ChecksumType = 'MD5'
+                $script:testDestinationFolder = Join-Path `
+                    -Path $script:testDirectoryPath -ChildPath 'UnitTest_Folder'
+                $script:testDestinationFolderFile = Join-Path `
+                    -Path $script:testDestinationFolder -ChildPath $script:testURIFile
+                $script:testDestinationFile = Join-Path `
+                    -Path $script:testDirectoryPath -ChildPath 'UnitTest_File.xml'
+                $script:testDestinationNotExist = Join-Path `
+                    -Path $script:testDirectoryPath -ChildPath 'UnitTest_NotExist'
 
-        $testSplatFolderFileExists = @{
-            DestinationPath = $testDestinationFolder;
-            Uri = $testURI;
-        }
-        $testSplatFolderFileExistsChecksum = $testSplatFolderFileExists.clone()
-        $testSplatFolderFileExistsChecksum.ChecksumType = 'MD5'
+                # Create the splats
+                $script:testSplatFile = @{
+                    DestinationPath = $script:testDestinationFile
+                    Uri = $script:testURI
+                }
+                $script:testSplatFileChecksum = $script:testSplatFile.clone()
+                $script:testSplatFileChecksum.ChecksumType = 'MD5'
 
-        $testSplatFolderFileNotExist = @{
-            DestinationPath = $testDestinationFolder;
-            Uri = $testURINotExist;
-        }
+                $script:testSplatFolderFileExists = @{
+                    DestinationPath = $script:testDestinationFolder;
+                    Uri = $script:testURI;
+                }
+                $script:testSplatFolderFileExistsChecksum = $script:testSplatFolderFileExists.clone()
+                $script:testSplatFolderFileExistsChecksum.ChecksumType = 'MD5'
 
-        $testFileHash = @{
-            Hash = 'abc12345'
-        }
+                $script:testSplatFolderFileNotExist = @{
+                    DestinationPath = $script:testDestinationFolder;
+                    Uri = $script:testURINotExist;
+                }
 
-        # Create the test files/folders by clearing the working folder
-        # if it exists and building a set of expected test files
-        if (Test-Path -Path $script:workingFolder)
-        {
-            $null = Remove-Item -Path $script:workingFolder -Force -Recurse
-        }
+                $script:testFileHash = @{
+                    Hash = 'abc12345'
+                }
 
-        $null = New-Item -Path $testDestinationFolder -ItemType Directory
-        $null = Set-Content -Path $testDestinationFile -Value 'Dummy Content'
-        $null = Set-Content -Path $testDestinationFolderFile -Value 'Dummy Content'
-
-        Describe 'xRemoteFile\Get-TargetResource' {
-            $result = Get-TargetResource @testSplatFile
-
-            It 'Returns "Present" when DestinationPath is a File and exists' {
-                $Result.Ensure | Should -Be 'Present'
+                $null = New-Item -Path $script:testDestinationFolder -ItemType Directory
+                $null = Set-Content -Path $script:testDestinationFile -Value 'Dummy Content'
+                $null = Set-Content -Path $script:testDestinationFolderFile -Value 'Dummy Content'
             }
 
-            Mock Get-FileHash -MockWith { return $testFileHash }
-            $result = Get-TargetResource @testSplatFileChecksum
+            Describe 'xRemoteFile\Get-TargetResource' {
+                $result = Get-TargetResource @testSplatFile
 
-            It 'Returns "Present" and file checksum value when DestinationPath is a File and exists' {
-                $Result.Ensure | Should -Be 'Present'
-                $Result.Checksum | Should -Be $testFileHash.Hash
-            }
+                It 'Returns "Present" when DestinationPath is a File and exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                }
 
-            $result = Get-TargetResource @testSplatFolderFileExists
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+                $result = Get-TargetResource @testSplatFileChecksum
 
-            It 'Returns "Present" when DestinationPath is a Directory and exists and URI file exists' {
-                $Result.Ensure | Should -Be 'Present'
-            }
+                It 'Returns "Present" and file checksum value when DestinationPath is a File and exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Checksum | Should -Be $script:testFileHash.Hash
+                }
 
-            Mock Get-FileHash -MockWith { return $testFileHash }
-            $result = Get-TargetResource @testSplatFolderFileExistsChecksum
+                $result = Get-TargetResource @testSplatFolderFileExists
 
-            It 'Returns "Present" and a file checksum when DestinationPath is a Directory and exists and URI file exists' {
-                $Result.Ensure | Should -Be 'Present'
-                $Result.Checksum | Should -Be $testFileHash.Hash
-            }
+                It 'Returns "Present" when DestinationPath is a Directory and exists and URI file exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                }
 
-            $result = Get-TargetResource @testSplatFolderFileNotExist
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+                $result = Get-TargetResource @testSplatFolderFileExistsChecksum
 
-            It 'Returns "Absent" when DestinationPath is a Directory and exists but URI file does not' {
-                $Result.Ensure | Should -Be 'Absent'
-            }
+                It 'Returns "Present" and a file checksum when DestinationPath is a Directory and exists and URI file exists' {
+                    $Result.Ensure | Should -Be 'Present'
+                    $Result.Checksum | Should -Be $script:testFileHash.Hash
+                }
 
-            Mock Get-PathItemType -MockWith { return 'Other' }
-            $result = Get-TargetResource @testSplatFile
+                $result = Get-TargetResource @testSplatFolderFileNotExist
 
-            It 'Returns "Absent" when DestinationPath is Other' {
-                $Result.Ensure | Should -Be 'Absent'
-            }
-        }
+                It 'Returns "Absent" when DestinationPath is a Directory and exists but URI file does not' {
+                    $Result.Ensure | Should -Be 'Absent'
+                }
 
-        Describe 'xRemoteFile\Set-TargetResource' {
-            Context 'URI is "bad://.."' {
-                It 'Throws a UriValidationFailure exeception' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.Uri = 'bad://contoso.com/test.xml'
-                    $errorMessage = $($LocalizedData.InvalidWebUriError) `
-                                -f $splat.Uri
-                    $errorRecord = Get-InvalidDataException `
-                        -errorId "UriValidationFailure" `
-                        -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+                Mock Get-PathItemType -MockWith { return 'Other' }
+                $result = Get-TargetResource @testSplatFile
+
+                It 'Returns "Absent" when DestinationPath is Other' {
+                    $Result.Ensure | Should -Be 'Absent'
                 }
             }
 
-            Context 'DestinationPath is "bad://.."' {
-                It 'Throws a DestinationPathSchemeValidationFailure exeception' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.DestinationPath = 'bad://c:\test.xml'
-                    $errorMessage = $($LocalizedData.InvalidDestinationPathSchemeError) `
-                                -f $splat.DestinationPath
-                    $errorRecord = Get-InvalidDataException `
-                        -errorId "DestinationPathSchemeValidationFailure" `
-                        -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+            Describe 'xRemoteFile\Set-TargetResource' {
+                Context 'URI is "bad://.."' {
+                    It 'Throws a UriValidationFailure exeception' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.Uri = 'bad://contoso.com/test.xml'
+                        $errorMessage = $($LocalizedData.InvalidWebUriError) `
+                                    -f $splat.Uri
+                        $errorRecord = Get-InvalidDataException `
+                            -errorId "UriValidationFailure" `
+                            -errorMessage $errorMessage
+                        { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+                    }
+                }
+
+                Context 'DestinationPath is "bad://.."' {
+                    It 'Throws a DestinationPathSchemeValidationFailure exeception' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.DestinationPath = 'bad://c:\test.xml'
+                        $errorMessage = $($LocalizedData.InvalidDestinationPathSchemeError) `
+                                    -f $splat.DestinationPath
+                        $errorRecord = Get-InvalidDataException `
+                            -errorId "DestinationPathSchemeValidationFailure" `
+                            -errorMessage $errorMessage
+                        { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+                    }
+                }
+
+                Context 'DestinationPath starts with "\\"' {
+                    It 'Throws a DestinationPathIsUncFailure exeception' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.DestinationPath = '\\myserver\share\test.xml'
+                        $errorMessage = $($LocalizedData.DestinationPathIsUncError) `
+                                    -f $splat.DestinationPath
+                        $errorRecord = Get-InvalidDataException `
+                            -errorId "DestinationPathIsUncFailure" `
+                            -errorMessage $errorMessage
+                        { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+                    }
+                }
+
+                Context 'DestinationPath contains invalid characters "*"' {
+                    It 'Throws a DestinationPathHasInvalidCharactersError exeception' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.DestinationPath = 'c:\*.xml'
+                        $errorMessage = $($LocalizedData.DestinationPathHasInvalidCharactersError) `
+                                    -f $splat.DestinationPath
+                        $errorRecord = Get-InvalidDataException `
+                            -errorId "DestinationPathHasInvalidCharactersError" `
+                            -errorMessage $errorMessage
+                        { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+                    }
+                }
+
+                Mock Update-Cache
+
+                Context 'URI is invalid, DestinationPath is a file' {
+                    It 'Throws a DownloadException exeception' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.Uri = 'http://definitelydoesnotexist.com/reallydoesntexist.xml'
+                        $errorMessage = $($LocalizedData.DownloadException) `
+                                    -f "The remote name could not be resolved: 'definitelydoesnotexist.com'"
+                        $errorRecord = Get-InvalidDataException `
+                            -errorId "DownloadException" `
+                            -errorMessage $errorMessage
+                        { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Update-Cache -Exactly 0
+                    }
+                }
+
+                Mock Invoke-WebRequest
+
+                Context 'URI is valid, DestinationPath is a file, download successful' {
+                    It 'Does not throw' {
+                        { Set-TargetResource @testSplatFile } | Should -Not -Throw
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 1
+                    }
+                }
+
+                Mock Invoke-WebRequest
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a file, Checksum provided, download successful' {
+                    $splat = $script:testSplatFile.Clone()
+                    $splat.Checksum = $script:testFileHash.Hash
+                    $splat.ChecksumType = 'MD5'
+
+                    It 'Does not throw' {
+                        { Set-TargetResource @Splat } | Should -Not -Throw
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 1
+                    }
+                }
+
+                Mock Invoke-WebRequest
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a file, Checksum provided, Checksum fails' {
+                    $splat = $script:testSplatFile.Clone()
+                    $splat.Checksum = 'badhash'
+                    $splat.ChecksumType = 'MD5'
+
+                    It 'Does not throw' {
+                        { Set-TargetResource @Splat } | Should -Throw
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Invoke-WebRequest -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                        Assert-MockCalled Update-Cache -Exactly 0
+                    }
                 }
             }
 
-            Context 'DestinationPath starts with "\\"' {
-                It 'Throws a DestinationPathIsUncFailure exeception' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.DestinationPath = '\\myserver\share\test.xml'
-                    $errorMessage = $($LocalizedData.DestinationPathIsUncError) `
-                                -f $splat.DestinationPath
-                    $errorRecord = Get-InvalidDataException `
-                        -errorId "DestinationPathIsUncFailure" `
-                        -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+            Describe 'xRemoteFile\Test-TargetResource' {
+                Mock Get-Cache
+
+                Context 'URI is valid, DestinationPath is a File, file exists' {
+                    It 'Returns "False"' {
+                        Test-TargetResource @testSplatFile | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 1
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a File, file exists, Does not check checksum when MatchSource fails' {
+                    It 'Returns "False"' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.Checksum = $script:testFileHash.Hash
+                        Test-TargetResource @Splat | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 1
+                        Assert-MockCalled Get-FileHash -Exactly 0
+                    }
+                }
+
+                Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False"' {
+                    It 'Returns "True"' {
+                        $splat = $script:testSplatFile.Clone()
+                        $splat.MatchSource = $False
+                        Test-TargetResource @splat | Should -Be $True
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum matches' {
+                    It 'Returns "True"' {
+                        $splat = $script:testSplatFileChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = $script:testFileHash.Hash
+                        Test-TargetResource @splat | Should -Be $True
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum does not match' {
+                    It 'Returns "False"' {
+                        $splat = $script:testSplatFileChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = 'badHash'
+                        Test-TargetResource @splat | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
+                }
+
+                Context 'URI is valid, DestinationPath is a Folder, file exists' {
+                    It 'Returns "False"' {
+                        Test-TargetResource @testSplatFolderFileExists | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 1
+                    }
+                }
+
+                Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
+                    It 'Returns "True"' {
+                        $splat = $script:testSplatFolderFileExists.Clone()
+                        $splat.MatchSource = $False
+                        Test-TargetResource @splat | Should -Be $True
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                    }
+                }
+
+                Context 'URI is valid, DestinationPath is a Folder, file does not exist' {
+                    It 'Returns "False"' {
+                        Test-TargetResource @testSplatFolderFileNotExist | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                    }
+                }
+
+                Mock Get-FileHash
+
+                Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
+                    It 'Returns "False"' {
+                        $splat = $script:testSplatFolderFileNotExist.Clone()
+                        $splat.MatchSource = $False
+                        Test-TargetResource @splat | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 0
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum matches' {
+                    It 'Returns "True"' {
+                        $splat = $script:testSplatFolderFileExistsChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = $script:testFileHash.Hash
+                        Test-TargetResource @splat | Should -Be $True
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
+                }
+
+                Mock Get-FileHash -MockWith { return $script:testFileHash }
+
+                Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum does not match' {
+                    It 'Returns "False"' {
+                        $splat = $script:testSplatFolderFileExistsChecksum.Clone()
+                        $splat.MatchSource = $False
+                        $splat.Checksum = 'badHash'
+                        Test-TargetResource @splat | Should -Be $False
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Get-Cache -Exactly 0
+                        Assert-MockCalled Get-FileHash -Exactly 1
+                    }
                 }
             }
 
-            Context 'DestinationPath contains invalid characters "*"' {
-                It 'Throws a DestinationPathHasInvalidCharactersError exeception' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.DestinationPath = 'c:\*.xml'
-                    $errorMessage = $($LocalizedData.DestinationPathHasInvalidCharactersError) `
-                                -f $splat.DestinationPath
-                    $errorRecord = Get-InvalidDataException `
-                        -errorId "DestinationPathHasInvalidCharactersError" `
-                        -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+            Describe 'xRemoteFile\Test-UriScheme' {
+                It 'Returns "True" when URI is "http://.." and scheme is "http|https|file"' {
+                    Test-UriScheme -Uri $script:testURI -Scheme 'http|https|file' | Should -Be $true
+                }
+
+                It 'Returns "True" when URI is "http://.." and scheme is "http"' {
+                    Test-UriScheme -Uri $script:testURI -Scheme 'http' | Should -Be $true
+                }
+
+                It 'Returns "False" when URI is "http://.." and scheme is "https"' {
+                    Test-UriScheme -Uri $script:testURI -Scheme 'https' | Should -Be $false
+                }
+
+                It 'Returns "False" when URI is "bad://.." and scheme is "http|https|file"' {
+                    Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should -Be $false
                 }
             }
 
-            Mock Update-Cache
-
-            Context 'URI is invalid, DestinationPath is a file' {
-                It 'Throws a DownloadException exeception' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.Uri = 'http://definitelydoesnotexist.com/reallydoesntexist.xml'
-                    $errorMessage = $($LocalizedData.DownloadException) `
-                                -f "The remote name could not be resolved: 'definitelydoesnotexist.com'"
-                    $errorRecord = Get-InvalidDataException `
-                        -errorId "DownloadException" `
-                        -errorMessage $errorMessage
-                    { Set-TargetResource @splat } | Should -Throw -ExpectedMessage $errorRecord
+            Describe 'xRemoteFile\Get-PathItemType' {
+                It 'Returns "Directory" when Path is a Directory' {
+                    Get-PathItemType -Path $script:testDestinationFolder | Should -Be 'Directory'
                 }
 
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Update-Cache -Exactly 0
+                It 'Returns "File" when Path is a File' {
+                    Get-PathItemType -Path $script:testDestinationFile | Should -Be 'File'
+                }
+
+                It 'Returns "NotExists" when Path does not exist' {
+                    Get-PathItemType -Path $script:testDestinationNotExist | Should -Be 'NotExists'
+                }
+                It 'Returns "Other" when Path is not in File System' {
+                    Get-PathItemType -Path HKLM:\Software | Should -Be 'Other'
                 }
             }
 
-            Mock Invoke-WebRequest
+            Describe 'xRemoteFile\Get-Cache' {
+                Mock Import-CliXml -MockWith { 'Expected Content' }
+                Mock Test-Path -MockWith { $True }
 
-            Context 'URI is valid, DestinationPath is a file, download successful' {
-                It 'Does not throw' {
-                    { Set-TargetResource @testSplatFile } | Should -Not -Throw
+                Context "DestinationPath 'c:\' and Uri $script:testURI and Cached Content exists" {
+                    $Result = Get-Cache -DestinationPath 'c:\' -Uri $script:testURI
+
+                    It "Returns Expected Content" {
+                        $Result | Should -Be 'Expected Content'
+                    }
+
+                    It "Calls expected mocks" {
+                        Assert-MockCalled Import-CliXml -Exactly 1
+                        Assert-MockCalled Test-Path -Exactly 1
+                    }
                 }
 
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Invoke-WebRequest -Exactly 1
-                    Assert-MockCalled Update-Cache -Exactly 1
-                }
-            }
+                Mock Test-Path -MockWith { $False }
 
-            Mock Invoke-WebRequest
-            Mock Get-FileHash -MockWith { return $testFileHash }
+                Context "DestinationPath 'c:\' and Uri $script:testURI and Cached Content does not exist" {
+                    $Result = Get-Cache -DestinationPath 'c:\' -Uri $script:testURI
 
-            Context 'URI is valid, DestinationPath is a file, Checksum provided, download successful' {
-                $splat = $testSplatFile.Clone()
-                $splat.Checksum = $testFileHash.Hash
-                $splat.ChecksumType = 'MD5'
+                    It 'Returns Null' {
+                        $Result | Should -BeNullOrEmpty
+                    }
 
-                It 'Does not throw' {
-                    { Set-TargetResource @Splat } | Should -Not -Throw
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Invoke-WebRequest -Exactly 1
-                    Assert-MockCalled Get-FileHash -Exactly 1
-                    Assert-MockCalled Update-Cache -Exactly 1
-                }
-            }
-
-            Mock Invoke-WebRequest
-            Mock Get-FileHash -MockWith { return $testFileHash }
-
-            Context 'URI is valid, DestinationPath is a file, Checksum provided, Checksum fails' {
-                $splat = $testSplatFile.Clone()
-                $splat.Checksum = 'badhash'
-                $splat.ChecksumType = 'MD5'
-
-                It 'Does not throw' {
-                    { Set-TargetResource @Splat } | Should -Throw
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Invoke-WebRequest -Exactly 1
-                    Assert-MockCalled Get-FileHash -Exactly 1
-                    Assert-MockCalled Update-Cache -Exactly 0
-                }
-            }
-        }
-
-        Describe 'xRemoteFile\Test-TargetResource' {
-            Mock Get-Cache
-
-            Context 'URI is valid, DestinationPath is a File, file exists' {
-                It 'Returns "False"' {
-                    Test-TargetResource @testSplatFile | Should -Be $False
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 1
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Import-CliXml -Exactly 0
+                        Assert-MockCalled Test-Path -Exactly 1
+                    }
                 }
             }
 
-            Mock Get-FileHash -MockWith { return $testFileHash }
+            Describe 'xRemoteFile\Update-Cache' {
+                Mock Export-CliXml
+                Mock Test-Path -MockWith { $True }
+                Mock New-Item
 
-            Context 'URI is valid, DestinationPath is a File, file exists, Does not check checksum when MatchSource fails' {
-                It 'Returns "False"' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.Checksum = $testFileHash.Hash
-                    Test-TargetResource @Splat | Should -Be $False
+                Context "DestinationPath 'c:\' and Uri $script:testURI and CacheLocation Exists" {
+                    It 'Does Not Throw' {
+                        { Update-Cache -DestinationPath 'c:\' -Uri $script:testURI -InputObject @{} } | Should -Not -Throw
+                    }
+
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Export-CliXml -Exactly 1
+                        Assert-MockCalled Test-Path -Exactly 1
+                        Assert-MockCalled New-Item -Exactly 0
+                    }
                 }
 
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 1
-                    Assert-MockCalled Get-FileHash -Exactly 0
-                }
-            }
+                Mock Test-Path -MockWith { $False }
 
-            Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False"' {
-                It 'Returns "True"' {
-                    $splat = $testSplatFile.Clone()
-                    $splat.MatchSource = $False
-                    Test-TargetResource @splat | Should -Be $True
-                }
+                Context "DestinationPath 'c:\' and Uri $script:testURI and CacheLocation does not exist" {
+                    It 'Does Not Throw' {
+                        { Update-Cache -DestinationPath 'c:\' -Uri $script:testURI -InputObject @{} } | Should -Not -Throw
+                    }
 
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                }
-            }
-
-            Mock Get-FileHash -MockWith { return $testFileHash }
-
-            Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum matches' {
-                It 'Returns "True"' {
-                    $splat = $testSplatFileChecksum.Clone()
-                    $splat.MatchSource = $False
-                    $splat.Checksum = $testFileHash.Hash
-                    Test-TargetResource @splat | Should -Be $True
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                    Assert-MockCalled Get-FileHash -Exactly 1
+                    It 'Calls expected mocks' {
+                        Assert-MockCalled Export-CliXml -Exactly 1
+                        Assert-MockCalled Test-Path -Exactly 1
+                        Assert-MockCalled New-Item -Exactly 1
+                    }
                 }
             }
 
-            Mock Get-FileHash -MockWith { return $testFileHash }
-
-            Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum does not match' {
-                It 'Returns "False"' {
-                    $splat = $testSplatFileChecksum.Clone()
-                    $splat.MatchSource = $False
-                    $splat.Checksum = 'badHash'
-                    Test-TargetResource @splat | Should -Be $False
+            Describe 'xRemoteFile\Get-CacheKey' {
+                It "Returns -799765921 as Cache Key for DestinationPath 'c:\' and Uri $script:testURI" {
+                    Get-CacheKey -DestinationPath 'c:\' -Uri $script:testURI | Should -Be -799765921
                 }
 
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                    Assert-MockCalled Get-FileHash -Exactly 1
+                It "Returns 1266535016 as Cache Key for DestinationPath 'c:\Windows\System32' and Uri $script:testURINotExist" {
+                    Get-CacheKey -DestinationPath 'c:\Windows\System32' -Uri $script:testURINotExist | Should -Be 1266535016
                 }
-            }
-
-            Context 'URI is valid, DestinationPath is a Folder, file exists' {
-                It 'Returns "False"' {
-                    Test-TargetResource @testSplatFolderFileExists | Should -Be $False
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 1
-                }
-            }
-
-            Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
-                It 'Returns "True"' {
-                    $splat = $testSplatFolderFileExists.Clone()
-                    $splat.MatchSource = $False
-                    Test-TargetResource @splat | Should -Be $True
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                }
-            }
-
-            Context 'URI is valid, DestinationPath is a Folder, file does not exist' {
-                It 'Returns "False"' {
-                    Test-TargetResource @testSplatFolderFileNotExist | Should -Be $False
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                }
-            }
-
-            Mock Get-FileHash
-
-            Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
-                It 'Returns "False"' {
-                    $splat = $testSplatFolderFileNotExist.Clone()
-                    $splat.MatchSource = $False
-                    Test-TargetResource @splat | Should -Be $False
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                    Assert-MockCalled Get-FileHash -Exactly 0
-                }
-            }
-
-            Mock Get-FileHash -MockWith { return $testFileHash }
-
-            Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum matches' {
-                It 'Returns "True"' {
-                    $splat = $testSplatFolderFileExistsChecksum.Clone()
-                    $splat.MatchSource = $False
-                    $splat.Checksum = $testFileHash.Hash
-                    Test-TargetResource @splat | Should -Be $True
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                    Assert-MockCalled Get-FileHash -Exactly 1
-                }
-            }
-
-            Mock Get-FileHash -MockWith { return $testFileHash }
-
-            Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum does not match' {
-                It 'Returns "False"' {
-                    $splat = $testSplatFolderFileExistsChecksum.Clone()
-                    $splat.MatchSource = $False
-                    $splat.Checksum = 'badHash'
-                    Test-TargetResource @splat | Should -Be $False
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Get-Cache -Exactly 0
-                    Assert-MockCalled Get-FileHash -Exactly 1
-                }
-            }
-        }
-
-        Describe 'xRemoteFile\Test-UriScheme' {
-            It 'Returns "True" when URI is "http://.." and scheme is "http|https|file"' {
-                Test-UriScheme -Uri $testURI -Scheme 'http|https|file' | Should -Be $true
-            }
-
-            It 'Returns "True" when URI is "http://.." and scheme is "http"' {
-                Test-UriScheme -Uri $testURI -Scheme 'http' | Should -Be $true
-            }
-
-            It 'Returns "False" when URI is "http://.." and scheme is "https"' {
-                Test-UriScheme -Uri $testURI -Scheme 'https' | Should -Be $false
-            }
-
-            It 'Returns "False" when URI is "bad://.." and scheme is "http|https|file"' {
-                Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should -Be $false
-            }
-        }
-
-        Describe 'xRemoteFile\Get-PathItemType' {
-            It 'Returns "Directory" when Path is a Directory' {
-                Get-PathItemType -Path $testDestinationFolder | Should -Be 'Directory'
-            }
-
-            It 'Returns "File" when Path is a File' {
-                Get-PathItemType -Path $testDestinationFile | Should -Be 'File'
-            }
-
-            It 'Returns "NotExists" when Path does not exist' {
-                Get-PathItemType -Path $testDestinationNotExist | Should -Be 'NotExists'
-            }
-            It 'Returns "Other" when Path is not in File System' {
-                Get-PathItemType -Path HKLM:\Software | Should -Be 'Other'
-            }
-        }
-
-        Describe 'xRemoteFile\Get-Cache' {
-            Mock Import-CliXml -MockWith { 'Expected Content' }
-            Mock Test-Path -MockWith { $True }
-
-            Context "DestinationPath 'c:\' and Uri $testURI and Cached Content exists" {
-                $Result = Get-Cache -DestinationPath 'c:\' -Uri $testURI
-
-                It "Returns Expected Content" {
-                    $Result | Should -Be 'Expected Content'
-                }
-
-                It "Calls expected mocks" {
-                    Assert-MockCalled Import-CliXml -Exactly 1
-                    Assert-MockCalled Test-Path -Exactly 1
-                }
-            }
-
-            Mock Test-Path -MockWith { $False }
-
-            Context "DestinationPath 'c:\' and Uri $testURI and Cached Content does not exist" {
-                $Result = Get-Cache -DestinationPath 'c:\' -Uri $testURI
-
-                It 'Returns Null' {
-                    $Result | Should -BeNullOrEmpty
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Import-CliXml -Exactly 0
-                    Assert-MockCalled Test-Path -Exactly 1
-                }
-            }
-        }
-
-        Describe 'xRemoteFile\Update-Cache' {
-            Mock Export-CliXml
-            Mock Test-Path -MockWith { $True }
-            Mock New-Item
-
-            Context "DestinationPath 'c:\' and Uri $testURI and CacheLocation Exists" {
-                It 'Does Not Throw' {
-                    { Update-Cache -DestinationPath 'c:\' -Uri $testURI -InputObject @{} } | Should -Not -Throw
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Export-CliXml -Exactly 1
-                    Assert-MockCalled Test-Path -Exactly 1
-                    Assert-MockCalled New-Item -Exactly 0
-                }
-            }
-
-            Mock Test-Path -MockWith { $False }
-
-            Context "DestinationPath 'c:\' and Uri $testURI and CacheLocation does not exist" {
-                It 'Does Not Throw' {
-                    { Update-Cache -DestinationPath 'c:\' -Uri $testURI -InputObject @{} } | Should -Not -Throw
-                }
-
-                It 'Calls expected mocks' {
-                    Assert-MockCalled Export-CliXml -Exactly 1
-                    Assert-MockCalled Test-Path -Exactly 1
-                    Assert-MockCalled New-Item -Exactly 1
-                }
-            }
-        }
-
-        Describe 'xRemoteFile\Get-CacheKey' {
-            It "Returns -799765921 as Cache Key for DestinationPath 'c:\' and Uri $testURI" {
-                Get-CacheKey -DestinationPath 'c:\' -Uri $testURI | Should -Be -799765921
-            }
-
-            It "Returns 1266535016 as Cache Key for DestinationPath 'c:\Windows\System32' and Uri $testURINotExist" {
-                Get-CacheKey -DestinationPath 'c:\Windows\System32' -Uri $testURINotExist | Should -Be 1266535016
             }
         }
     }
 }
 finally
 {
-    $null = Remove-Item -Path $script:workingFolder -Force -Recurse
-
     Invoke-TestCleanup
 }

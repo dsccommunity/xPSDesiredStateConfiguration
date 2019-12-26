@@ -3,10 +3,19 @@ Set-StrictMode -Version 'Latest'
 
 $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
 
-# Import the Networking Resource Helper Module
+# Import the shared modules
 Import-Module -Name (Join-Path -Path $modulePath `
     -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.PSWSIIS' `
+        -ChildPath 'xPSDesiredStateConfiguration.PSWSIIS.psm1'))
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Firewall' `
+        -ChildPath 'xPSDesiredStateConfiguration.Firewall.psm1'))
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Security' `
+        -ChildPath 'xPSDesiredStateConfiguration.Security.psm1'))
 
 # Import Localization Strings
 $script:localizedData = Get-LocalizedData -ResourceName 'DSC_xDSCWebService'
@@ -1741,227 +1750,6 @@ function Find-CertificateThumbprintWithSubjectAndTemplateName
     else
     {
         throw ($script:localizedData.FindCertificateBySubjectNotFound -f $Subject, $TemplateName)
-    }
-}
-
-#endregion
-
-#region Firewall Utils
-
-# Name and description for the Firewall rules. Used in multiple locations
-New-Variable -Name FireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port' -Option ReadOnly -Scope Script -Force
-New-Variable -Name netsh -Value "$env:windir\system32\netsh.exe" -Option ReadOnly -Scope Script -Force
-
-<#
-    .SYNOPSIS
-        Create a firewall exception so that DSC clients are able to access the configured Pull Server
-
-    .PARAMETER Port
-        The TCP port used to create the firewall exception
-#>
-function Add-PullServerFirewallConfiguration
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        [ValidateRange(1, 65535)]
-        [System.UInt32]
-        $Port
-    )
-
-    Write-Verbose -Message 'Disable Inbound Firewall Notification'
-    $null = & $script:netsh advfirewall set currentprofile settings inboundusernotification disable
-
-    $ruleName = $FireWallRuleDisplayName
-
-    # Remove all existing rules with that displayName
-    $null = & $script:netsh advfirewall firewall delete rule name=$ruleName protocol=tcp localport=$Port
-
-    Write-Verbose -Message "Add Firewall Rule for port $Port"
-    $null = & $script:netsh advfirewall firewall add rule name=$ruleName dir=in action=allow protocol=TCP localport=$Port
-}
-
-<#
-    .SYNOPSIS
-        Delete the Pull Server firewall exception
-
-    .PARAMETER Port
-        The TCP port for which the firewall exception should be deleted
-#>
-function Remove-PullServerFirewallConfiguration
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        [ValidateRange(1, 65535)]
-        [System.UInt32]
-        $Port
-    )
-
-    if (Test-PullServerFirewallConfiguration -Port $Port)
-    {
-        # remove all existing rules with that displayName
-        Write-Verbose -Message "Delete Firewall Rule for port $Port"
-        $ruleName = $FireWallRuleDisplayName
-
-        # backwards compatibility with old code
-        if (Get-Command -Name Get-NetFirewallRule -CommandType Cmdlet -ErrorAction:SilentlyContinue)
-        {
-            # Remove all rules with that name
-            Get-NetFirewallRule -DisplayName $ruleName | Remove-NetFirewallRule
-        }
-        else
-        {
-            $null = & $script:netsh advfirewall firewall delete rule name=$ruleName protocol=tcp localport=$Port
-        }
-    }
-    else
-    {
-        Write-Verbose -Message "No DSC PullServer firewall rule found with port $Port. No cleanup required"
-    }
-}
-
-<#
-    .SYNOPSIS
-        Tests if a Pull Server firewall exception exists for a specific port
-
-    .PARAMETER Port
-        The TCP port for which the firewall exception should be tested
-#>
-function Test-PullServerFirewallConfiguration
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter()]
-        [ValidateRange(1, 65535)]
-        [System.UInt32]
-        $Port
-    )
-
-    # Remove all existing rules with that displayName
-    Write-Verbose -Message "Testing Firewall Rule for port $Port"
-    $ruleName = $FireWallRuleDisplayName
-    $result = & $script:netsh advfirewall firewall show rule name=$ruleName | Select-String -Pattern "LocalPort:\s*$Port"
-    return -not [string]::IsNullOrWhiteSpace($result)
-}
-
-#endregion
-
-#region Secure TLS Protocols Utils
-
-# Best Practice Security Settings Block
-$insecureProtocols            = @("SSL 2.0", "SSL 3.0", "TLS 1.0", "PCT 1.0", "Multi-Protocol Unified Hello")
-$secureProtocols              = @("TLS 1.1", "TLS 1.2")
-
-<#
-    .SYNOPSIS
-        This function tests if the SChannel protocols are enabled.
-#>
-function Test-SChannelProtocol
-{
-    [CmdletBinding()]
-    param ()
-
-    foreach ($protocol in $insecureProtocols)
-    {
-        $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-
-        if ((Test-Path -Path $registryPath) `
-            -and ($null -ne (Get-ItemProperty -Path $registryPath)) `
-            -and ((Get-ItemProperty -Path $registryPath).Enabled -ne 0))
-        {
-            return $false
-        }
-    }
-
-    foreach ($protocol in $secureProtocols)
-    {
-        $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-
-        if ((-not (Test-Path -Path $registryPath)) `
-            -or ($null -eq (Get-ItemProperty -Path $registryPath)) `
-            -or ((Get-ItemProperty -Path $registryPath).Enabled -eq 0))
-        {
-            return $false
-        }
-    }
-
-    return $true
-}
-
-<#
-    .SYNOPSIS
-        This function enables the SChannel protocols.
-#>
-function Set-SChannelProtocol
-{
-    [CmdletBinding()]
-    param ()
-
-    foreach ($protocol in $insecureProtocols)
-    {
-        $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-        $null = New-Item -Path $registryPath -Force
-        $null = New-ItemProperty -Path $registryPath -Name Enabled -Value 0 -PropertyType 'DWord' -Force
-    }
-
-    foreach ($protocol in $secureProtocols)
-    {
-        $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
-        $null = New-Item -Path $registryPath -Force
-        $null = New-ItemProperty -Path $registryPath -Name Enabled -Value '0xffffffff' -PropertyType 'DWord' -Force
-        $null = New-ItemProperty -Path $registryPath -Name DisabledByDefault -Value 0 -PropertyType 'DWord' -Force
-    }
-}
-
-#endregion
-
-#region Use Security Best Practices Utils
-
-# This list corresponds to the ValueMap definition of DisableSecurityBestPractices parameter defined in MSFT_xDSCWebService.Schema.mof
-$SecureTLSProtocols = 'SecureTLSProtocols'
-
-<#
-    .SYNOPSIS
-        This function tests whether the node uses security best practices for non-disabled items
-#>
-function Test-UseSecurityBestPractice
-{
-    [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    param
-    (
-        [Parameter()]
-        [System.String[]]
-        $DisableSecurityBestPractices
-    )
-
-    $usedProtocolsBestPractices = ($DisableSecurityBestPractices -icontains $SecureTLSProtocols) -or (Test-SChannelProtocol)
-
-    return $usedProtocolsBestPractices
-}
-
-<#
-    .SYNOPSIS
-        This function sets the node to use security best practices for non-disabled items
-#>
-function Set-UseSecurityBestPractice
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        [System.String[]]
-        $DisableSecurityBestPractices
-    )
-
-    if (-not ($DisableSecurityBestPractices -icontains $SecureTLSProtocols))
-    {
-        Set-SChannelProtocol
     }
 }
 
