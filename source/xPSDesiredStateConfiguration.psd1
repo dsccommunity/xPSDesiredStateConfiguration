@@ -1,4 +1,7 @@
 @{
+    # Root module
+    RootModule        = 'Modules\DscPullServerSetup\DscPullServerSetup.psm1'
+
     # Version number of this module.
     moduleVersion     = '0.0.1'
 
@@ -36,9 +39,6 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
 
     # Aliases to export from this module
     AliasesToExport   = @()
-
-    # Root module
-    RootModule        = 'DSCPullServerSetup\PublishModulesAndMofsToPullServer.psm1'
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData       = @{
