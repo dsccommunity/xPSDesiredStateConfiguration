@@ -29,7 +29,7 @@ function Get-TargetResource
         $Name
     )
 
-    Write-Verbose -Message ($LocalizedData.GetTargetResourceStartMessage -f $Name)
+    Write-Verbose -Message ($script:localizedData.GetTargetResourceStartMessage -f $Name)
 
     Assert-ResourcePrerequisitesValid
 

@@ -42,6 +42,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Correct miscellaneous style issues.
 - DSCPullServerSetup
   - Fixed markdown errors in README.MD.
+  - Moved strings to Localization file.
+  - Corrected style violations.
+- DSC_xWindowsOptionalFeature
+  - Fix localization strings.
+- DSC_xEnvironmentResource
+  - Remove unused localization strings.
 
 ### Deprecated
 

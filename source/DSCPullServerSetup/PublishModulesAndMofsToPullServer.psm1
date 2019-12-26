@@ -1,3 +1,18 @@
+$errorActionPreference = 'Stop'
+Set-StrictMode -Version 'Latest'
+
+$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'source\Modules'
+
+# Import the Networking Resource Helper Module
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
+
+# Import Localization Strings
+$script:localizedData = Get-LocalizedData `
+    -ResourceName 'PublishModulesAndMofsToPullServer' `
+    -ScriptRoot $PSScriptRoot
+
 <#
     .SYNOPSIS
         Package DSC modules and mof configuration document and publish them on an enterprise DSC pull server in the required format.
@@ -31,8 +46,10 @@ function Publish-DSCModuleAndMof
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $True)]
-        [ValidateScript({Test-Path -Path $_ -PathType Container})]
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({
+            Test-Path -Path $_ -PathType Container
+        })]
         [System.String]
         $Source,
 
@@ -54,7 +71,7 @@ function Publish-DSCModuleAndMof
     Copy-Item -Path $mofPath -Destination $tempFolder -Force
 
     # Start Deployment!
-    Write-LogEntry -Scope $MyInvocation -Message 'Start Deployment'
+    Write-LogEntry -Scope $MyInvocation -Message $script:localizedData.StartDeploymentMessage
     New-ZipFromPSModulePath -ListModuleNames $ModuleNameList -Destination $tempFolder
     New-ZipFromSource -Source $Source -Destination $tempFolder
 
@@ -67,7 +84,7 @@ function Publish-DSCModuleAndMof
 
     # Deployment is complete!
     Remove-Item -Path $tempFolder -Recurse -Force -ErrorAction SilentlyContinue
-    Write-LogEntry -Scope $MyInvocation -Message 'End Deployment'
+    Write-LogEntry -Scope $MyInvocation -Message $script:localizedData.EndDeploymentMessage
 }
 
 <#
@@ -99,7 +116,7 @@ function New-ZipFromPSModulePath
     # Move all required  modules from powershell module path to a temp folder and package them
     if ([System.String]::IsNullOrEmpty($ListModuleNames))
     {
-        Write-LogEntry -Scope $MyInvocation -Message 'No additional modules are specified to be packaged.'
+        Write-LogEntry -Scope $MyInvocation -Message $script:localizedData.NoAdditionalModulesPackagedMessage
     }
 
     foreach ($module in $ListModuleNames)
@@ -120,12 +137,12 @@ function New-ZipFromPSModulePath
             $newName = "$Destination\$name" + '_' + "$version" + '.zip'
 
             # Rename the module folder to contain the version info.
-            if (Test-Path $newName)
+            if (Test-Path -Path $newName)
             {
-                Remove-Item $newName -Recurse -Force
+                $null = Remove-Item -Path $newName -Recurse -Force
             }
 
-            Rename-Item -Path "$source.zip" -NewName $newName -Force
+            $null = Rename-Item -Path "$source.zip" -NewName $newName -Force
         }
     }
 }
@@ -173,8 +190,7 @@ function New-ZipFromSource
         }
         else
         {
-            Write-Warning -Message "Skipping module overwrite. Module with the name $name already exists."
-            Write-Warning -Message "Please specify -Force to overwrite the module with the local version of the module located in $Source or list names of the modules in ModuleNameList parameter to be packaged from PowerShell module path instead and remove them from $Source folder"
+            Write-Warning -Message ($script:localizedData.SkippingModuleOverwriteMessage -f $name, $Source)
         }
 
         $modules += @("$name")
@@ -205,15 +221,15 @@ function Publish-ModulesAndChecksum
     # Check if the current machine is a server sku.
     $moduleRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Modules"
 
-    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $moduleRepository))
+    if ((Get-Module -Name ServerManager -ListAvailable) -and (Test-Path -Path $moduleRepository))
     {
-        Write-LogEntry -Scope $MyInvocation -Message "Copying modules and checksums to [$moduleRepository]."
+        Write-LogEntry -Scope $MyInvocation -Message ($script:localizedData.CopyingModulesAndChecksumsMessage -f $moduleRepository)
         $zipPath = Join-Path -Path $Source -ChildPath '*.zip*'
         Copy-Item -Path $zipPath -Destination $moduleRepository -Force
     }
     else
     {
-        Write-Warning -Message 'Copying modules to Pull server module repository skipped because the machine is not a server sku or Pull server endpoint is not deployed.'
+        Write-Warning -Message $script:localizedData.CopyingModulesToPullServerMessage
     }
 }
 
@@ -238,15 +254,15 @@ function Publish-MofsInSource
     # Check if the current machine is a server sku.
     $mofRepository = "$env:ProgramFiles\WindowsPowerShell\DscService\Configuration"
 
-    if ((Get-Module ServerManager -ListAvailable) -and (Test-Path $mofRepository))
+    if ((Get-Module -Name ServerManager -ListAvailable) -and (Test-Path -Path $mofRepository))
     {
-        Write-LogEntry -Scope $MyInvocation -Message "Copying mofs and checksums to [$mofRepository]."
+        Write-LogEntry -Scope $MyInvocation -Message ($script:localizedData.CopyingMOFsAndChecksumsMessage -f $mofRepository)
         $mofPath = Join-Path -Path $Source -ChildPath '*.mof*'
         Copy-Item -Path $mofPath -Destination $mofRepository -Force
     }
     else
     {
-        Write-Warning -Message 'Copying configuration(s) to Pull server configuration repository skipped because the machine is not a server sku or Pull server endpoint is not deployed.'
+        Write-Warning -Message $script:localizedData.CopyingConfigurationsToPullServerMessage
     }
 }
 
@@ -347,9 +363,11 @@ function Publish-ModuleToPullServer
     {
         if (-not($OutputFolderPath) -or -not (Test-Path -Path $OutputFolderPath))
         {
-            if (-not(Test-Path $PullServerWebConfig))
+            if (-not(Test-Path -Path $PullServerWebConfig))
             {
-                throw "Web.Config of the pullserver does not exist on the default path $PullServerWebConfig. Please provide the location of your pullserver web configuration using the parameter -PullServerWebConfig or an alternate path where you want to publish the pullserver modules to. This path should exist."
+                New-InvalidArgumentException `
+                    -Message ($script:localizedData.InvalidWebConfigPathError -f $PullServerWebConfig) `
+                    -ArgumentName 'PullServerWebConfig'
             }
             else
             {
@@ -366,10 +384,10 @@ function Publish-ModuleToPullServer
 
     process
     {
-        Write-Verbose -Message "Name: $Name , ModuleBase : $ModuleBase ,Version: $Version"
-        $targetPath = Join-Path $OutputFolderPath "$($Name)_$($Version).zip"
+        Write-Verbose -Message ($script:localizedData.PublishModuleMessage -f $Name, $Version, $ModuleBase)
+        $targetPath = Join-Path -Path $OutputFolderPath -ChildPath "$($Name)_$($Version).zip"
 
-        if (Test-Path $targetPath)
+        if (Test-Path -Path $targetPath)
         {
             Compress-Archive -DestinationPath $targetPath -Path "$($ModuleBase)\*" -Update
         }
@@ -461,7 +479,9 @@ function Publish-MOFToPullServer
         }
         else
         {
-            throw "Invalid file $FullName. Only mof files can be copied to the pullserver configuration repository"
+            New-InvalidArgumentException `
+                -Message ($script:localizedData.InvalidFileTypeError -f $FullName) `
+                -ArgumentName 'FullName'
         }
     }
 

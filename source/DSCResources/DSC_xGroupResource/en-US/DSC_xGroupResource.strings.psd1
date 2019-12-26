@@ -22,7 +22,6 @@ ConvertFrom-StringData @'
     PropertyMismatch = The value of the {0} property is expected to be {1} but it is {2}.
     MembersNumberMismatch = The number of provided unique group members {1} in {0} is different from the number of actual group members {2}.
     MembersMemberMismatch = At least one member {0} of the provided {1} parameter does not match a user in the existing group {2}.
-    MemberToExcludeMatch = At least one member {0} of the provided {1} parameter matches a user in the existing group {2}.
     ResolvingLocalAccount = Resolving {0} as a local account.
     ResolvingDomainAccount = Resolving {0} in the domain {1}.
     ResolvingDomainAccountWithTrust = Resolving {0} with domain trust.
