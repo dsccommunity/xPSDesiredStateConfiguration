@@ -1,68 +1,78 @@
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $script:commonTestHelperFilePath
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xMsiPackage'
 
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xPackageResource.TestHelper.psm1')
 }
 
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xPackageResource' `
-    -TestType 'Unit'
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
+Invoke-TestSetup
+
+# Begin Testing
 try
 {
-    InModuleScope 'MSFT_xPackageResource' {
-        Describe 'MSFT_xPackageResource Unit Tests' {
+    InModuleScope $script:dscResourceName {
+        function Set-DSCMachineRebootRequired
+        {
+        }
+
+        $script:skipHttpsTest = $true
+
+        $script:testDirectoryPath = Join-Path -Path $TestDrive -ChildPath 'MSFT_xPackageResourceTests'
+
+        if (Test-Path -Path $script:testDirectoryPath)
+        {
+            $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
+        }
+
+        $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
+
+        <#
+            This log file is used to log messages from the mock server which is important for debugging since
+            most of the work of the mock server is done within a separate process.
+        #>
+        $script:logFile = Join-Path -Path $TestDrive -ChildPath 'PackageTestLogFile.txt'
+
+        $script:msiName = 'DSCSetupProject.msi'
+        $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
+        $script:msiArguments = '/NoReboot'
+        $script:packageName = 'DSCUnitTestPackage'
+        $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
+
+        $null = New-TestMsi -DestinationPath $script:msiLocation
+
+        $script:testHttpPort = Get-UnusedTcpPort
+        $script:testHttpsPort = Get-UnusedTcpPort -ExcludePorts @($script:testHttpPort)
+
+        $script:testExecutablePath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestExecutable.exe'
+
+        $null = New-TestExecutable -DestinationPath $script:testExecutablePath
+
+        $null = Clear-PackageCache
+
+        Describe 'xPackageResource' {
             # Override helper functions from CommonResourceHelper.psm1
-            function Set-DSCMachineRebootRequired {}
-
-            BeforeAll {
-                $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-                $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'MSFT_xPackageResource.TestHelper.psm1'
-                $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-
-                Import-Module -Name $packageTestHelperFilePath
-                # The common test helper file needs to be imported twice because of the InModuleScope
-                Import-Module -Name $commonTestHelperFilePath
-
-                $script:skipHttpsTest = $true
-
-                $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'MSFT_xPackageResourceTests'
-
-                if (Test-Path -Path $script:testDirectoryPath)
-                {
-                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
-                }
-
-                $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
-
-                <#
-                    This log file is used to log messages from the mock server which is important for debugging since
-                    most of the work of the mock server is done within a separate process.
-                #>
-                $script:logFile = Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'
-
-                $script:msiName = 'DSCSetupProject.msi'
-                $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
-                $script:msiArguments = '/NoReboot'
-
-                $script:packageName = 'DSCUnitTestPackage'
-                $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
-
-                $null = New-TestMsi -DestinationPath $script:msiLocation
-
-                $script:testHttpPort = Get-UnusedTcpPort
-                $script:testHttpsPort = Get-UnusedTcpPort -ExcludePorts @($script:testHttpPort)
-
-                $script:testExecutablePath = Join-Path -Path $script:testDirectoryPath -ChildPath 'TestExecutable.exe'
-
-                $null = New-TestExecutable -DestinationPath $script:testExecutablePath
-
-                $null = Clear-PackageCache
-            }
 
             BeforeEach {
                 $null = Clear-PackageCache
@@ -79,31 +89,11 @@ try
                 }
             }
 
-            AfterAll {
-                if (Test-Path -Path $script:testDirectoryPath)
-                {
-                    $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
-                }
-
-                $null = Clear-PackageCache
-
-                if (Test-PackageInstalledByName -Name $script:packageName)
-                {
-                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
-                    $null = Start-Sleep -Seconds 1
-                }
-
-                if (Test-PackageInstalledByName -Name $script:packageName)
-                {
-                    throw 'Test output will not be valid - package could not be removed.'
-                }
-            }
-
             Context 'Get-TargetResource' {
                 It 'Should return only basic properties for absent package' {
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = $script:packageName
+                        Path      = $script:msiLocation
+                        Name      = $script:packageName
                         ProductId = $script:packageId
                     }
 
@@ -115,12 +105,12 @@ try
 
                 It 'Should return basic and registry properties for present package with registry check parameters specified and CreateCheckRegValue true' {
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = $script:packageName
-                        ProductId = $script:packageId
-                        CreateCheckRegValue = $true
-                        InstalledCheckRegHive = 'LocalMachine'
-                        InstalledCheckRegKey = 'SOFTWARE\xPackageTestKey'
+                        Path                       = $script:msiLocation
+                        Name                       = $script:packageName
+                        ProductId                  = $script:packageId
+                        CreateCheckRegValue        = $true
+                        InstalledCheckRegHive      = 'LocalMachine'
+                        InstalledCheckRegKey       = 'SOFTWARE\xPackageTestKey'
                         InstalledCheckRegValueName = 'xPackageTestValue'
                         InstalledCheckRegValueData = 'installed'
                     }
@@ -145,11 +135,11 @@ try
 
                 It 'Should return full package properties for present package with registry check parameters specified and CreateCheckRegValue false' {
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = $script:packageName
-                        ProductId = $script:packageId
-                        CreateCheckRegValue = $false
-                        InstalledCheckRegKey = ''
+                        Path                       = $script:msiLocation
+                        Name                       = $script:packageName
+                        ProductId                  = $script:packageId
+                        CreateCheckRegValue        = $false
+                        InstalledCheckRegKey       = ''
                         InstalledCheckRegValueName = ''
                         InstalledCheckRegValueData = ''
                     }
@@ -165,8 +155,8 @@ try
 
                 It 'Should return full package properties for present package without registry check parameters specified' {
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = $script:packageName
+                        Path      = $script:msiLocation
+                        Name      = $script:packageName
                         ProductId = $script:packageId
                     }
 
@@ -223,10 +213,10 @@ try
                     Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
 
                     $testTargetResourceResult = Test-TargetResource `
-                            -Ensure 'Present' `
-                            -Path $script:msiLocation `
-                            -ProductId $script:packageId `
-                            -Name ([System.String]::Empty)
+                        -Ensure 'Present' `
+                        -Path $script:msiLocation `
+                        -ProductId $script:packageId `
+                        -Name ([System.String]::Empty)
 
                     $testTargetResourceResult | Should -Be $true
 
@@ -256,12 +246,12 @@ try
                 }
 
                 $existingPackageParameters = @{
-                    Path = $script:testExecutablePath
-                    Name = [System.String]::Empty
-                    ProductId = [System.String]::Empty
-                    CreateCheckRegValue = $true
-                    InstalledCheckRegHive = 'LocalMachine'
-                    InstalledCheckRegKey = 'SOFTWARE\xPackageTestKey'
+                    Path                       = $script:testExecutablePath
+                    Name                       = [System.String]::Empty
+                    ProductId                  = [System.String]::Empty
+                    CreateCheckRegValue        = $true
+                    InstalledCheckRegHive      = 'LocalMachine'
+                    InstalledCheckRegKey       = 'SOFTWARE\xPackageTestKey'
                     InstalledCheckRegValueName = 'xPackageTestValue'
                     InstalledCheckRegValueData = 'installed'
                 }
@@ -339,12 +329,12 @@ try
 
                 It 'Should correctly install and remove a .msi package with registry parameters' {
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = [System.String]::Empty
-                        ProductId = $script:packageId
-                        CreateCheckRegValue = $true
-                        InstalledCheckRegHive = 'LocalMachine'
-                        InstalledCheckRegKey = 'SOFTWARE\xPackageTestKey'
+                        Path                       = $script:msiLocation
+                        Name                       = [System.String]::Empty
+                        ProductId                  = $script:packageId
+                        CreateCheckRegValue        = $true
+                        InstalledCheckRegHive      = 'LocalMachine'
+                        InstalledCheckRegKey       = 'SOFTWARE\xPackageTestKey'
                         InstalledCheckRegValueName = 'xPackageTestValue'
                         InstalledCheckRegValueData = 'installed'
                     }
@@ -380,12 +370,12 @@ try
 
                 It 'Should correctly install and remove a .exe package with registry parameters' {
                     $packageParameters = @{
-                        Path = $script:testExecutablePath
-                        Name = [System.String]::Empty
-                        ProductId = [System.String]::Empty
-                        CreateCheckRegValue = $true
-                        InstalledCheckRegHive = 'LocalMachine'
-                        InstalledCheckRegKey = 'SOFTWARE\xPackageTestKey'
+                        Path                       = $script:testExecutablePath
+                        Name                       = [System.String]::Empty
+                        ProductId                  = [System.String]::Empty
+                        CreateCheckRegValue        = $true
+                        InstalledCheckRegHive      = 'LocalMachine'
+                        InstalledCheckRegKey       = 'SOFTWARE\xPackageTestKey'
                         InstalledCheckRegValueName = 'xPackageTestValue'
                         InstalledCheckRegValueData = 'installed'
                     }
@@ -542,13 +532,17 @@ try
                 }
 
                 It 'Should add space after .MSI installation arguments (#195)' {
-                    Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } { return @{ ExitCode = 0 } }
+                    Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } {
+                        return @{
+                            ExitCode = 0
+                        }
+                    }
                     Mock Test-TargetResource { return $false }
                     Mock Get-ProductEntry { return $script:packageId }
 
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = [System.String]::Empty
+                        Path      = $script:msiLocation
+                        Name      = [System.String]::Empty
                         ProductId = $script:packageId
                         Arguments = $script:msiArguments
                     }
@@ -559,14 +553,18 @@ try
                 }
 
                 It 'Should not check for product installation when rebooted is required (#52)' {
-                    Mock -CommandName 'Invoke-Process' -MockWith { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock -CommandName 'Invoke-Process' -MockWith {
+                        return [System.Management.Automation.PSObject] @{
+                            ExitCode = 3010
+                        }
+                    }
                     Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
                     Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
-                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
+                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith { }
 
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = [System.String]::Empty
+                        Path      = $script:msiLocation
+                        Name      = [System.String]::Empty
                         ProductId = $script:packageId
                     }
 
@@ -576,15 +574,19 @@ try
                 }
 
                 It 'Should not run Set-DSCMachineRebootRequired if IgnoreReboot provided' {
-                    Mock -CommandName 'Invoke-Process' -MockWith { return [System.Management.Automation.PSObject] @{ ExitCode = 3010 } }
+                    Mock -CommandName 'Invoke-Process' -MockWith {
+                        return [System.Management.Automation.PSObject] @{
+                            ExitCode = 3010
+                        }
+                    }
                     Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
                     Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
-                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
+                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith { }
 
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = [System.String]::Empty
-                        ProductId = $script:packageId
+                        Path         = $script:msiLocation
+                        Name         = [System.String]::Empty
+                        ProductId    = $script:packageId
                         IgnoreReboot = $true
                     }
 
@@ -600,21 +602,25 @@ try
 
                     $packageCredential = [System.Management.Automation.PSCredential]::Empty
                     $packageParameters = @{
-                        Path = $script:msiLocation
-                        Name = [System.String]::Empty
-                        ProductId = $script:packageId
+                        Path            = $script:msiLocation
+                        Name            = [System.String]::Empty
+                        ProductId       = $script:packageId
                         RunAsCredential = $packageCredential
                     }
                     Set-TargetResource -Ensure 'Present' @packageParameters
 
-                    Assert-MockCalled Invoke-PInvoke -ParameterFilter { $Credential -eq $packageCredential} -Scope It
+                    Assert-MockCalled Invoke-PInvoke -ParameterFilter { $Credential -eq $packageCredential } -Scope It
                 }
             }
 
             Context 'Get-MsiTool' {
                 It 'Should add MSI tools in the Microsoft.Windows.DesiredStateConfiguration.xPackageResource namespace' {
-                    $addTypeResult = @{ Namespace = 'Mock not called' }
-                    Mock -CommandName 'Add-Type' -MockWith { $addTypeResult['Namespace'] = $Namespace }
+                    $addTypeResult = @{
+                        Namespace = 'Mock not called'
+                    }
+                    Mock -CommandName 'Add-Type' -MockWith {
+                        $addTypeResult['Namespace'] = $Namespace
+                    }
 
                     $msiTool = Get-MsiTool
 
@@ -638,5 +644,23 @@ try
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    if (Test-Path -Path $script:testDirectoryPath)
+    {
+        $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
+    }
+
+    $null = Clear-PackageCache
+
+    if (Test-PackageInstalledByName -Name $script:packageName)
+    {
+        $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+        $null = Start-Sleep -Seconds 1
+    }
+
+    if (Test-PackageInstalledByName -Name $script:packageName)
+    {
+        throw 'Test output will not be valid - package could not be removed.'
+    }
+
+    Invoke-TestCleanup
 }

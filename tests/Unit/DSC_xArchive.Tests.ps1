@@ -5,36 +5,40 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xArchive'
 
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
-
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 }
 
-Describe 'xArchive Unit Tests' {
-    BeforeAll {
-        # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-        $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-        Import-Module -Name $commonTestHelperFilePath
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-        $script:testEnvironment = Enter-DscResourceTestEnvironment `
-            -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-            -DscResourceName 'MSFT_xArchive' `
-            -TestType 'Unit'
-    }
+Invoke-TestSetup
 
-    AfterAll {
-        Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
-    }
-
-    InModuleScope 'MSFT_xArchive' {
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
         $script:validChecksumValues = @( 'SHA-1', 'SHA-256', 'SHA-512', 'CreatedDate', 'ModifiedDate' )
 
         $testUsername = 'TestUsername'
@@ -1388,7 +1392,11 @@ Describe 'xArchive Unit Tests' {
         }
 
         Describe 'Test-TargetResource' {
-            Mock -CommandName 'Get-TargetResource' -MockWith { return @{ Ensure = 'Absent' } }
+            Mock -CommandName 'Get-TargetResource' -MockWith {
+                return @{
+                    Ensure = 'Absent'
+                }
+            }
 
             Context 'When archive with specified path is not expanded at the specified destination and Ensure is specified as Present' {
                 $testTargetResourceParameters = @{
@@ -6636,4 +6644,8 @@ Describe 'xArchive Unit Tests' {
             }
         }
     }
+}
+finally
+{
+    Invoke-TestCleanup
 }

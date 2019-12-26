@@ -1,6 +1,3 @@
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
 <#
     .SYNOPSIS
         Creates a service executable.

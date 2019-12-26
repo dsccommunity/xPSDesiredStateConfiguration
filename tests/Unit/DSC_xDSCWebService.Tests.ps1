@@ -1,37 +1,37 @@
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xDSCWebService'
 
-$script:dscModuleName   = 'xPSDesiredStateConfiguration'
-$script:dscResourceName = 'MSFT_xDSCWebService'
-
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 }
 
-#region HEADER
-# Integration Test Template Version: 1.1.0
-[System.String] $script:moduleRoot = Split-Path -Parent -Path (Split-Path -Parent -Path $PSScriptRoot)
-if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+function Invoke-TestCleanup
 {
-    & git.exe @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $script:moduleRoot -ChildPath '\DSCResource.Tests'))
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$testEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:dscModuleName `
-    -DSCResourceName $script:dscResourceName `
-    -TestType Unit
-#endregion
+Invoke-TestSetup
 
 # Begin Testing
 try
 {
-    #region Pester Tests
-    InModuleScope -ModuleName $script:dscResourceName -ScriptBlock {
-
+    InModuleScope $script:dscResourceName {
         $dscResourceName = 'MSFT_xDSCWebService'
 
         #region Test Data
@@ -181,14 +181,46 @@ try
 
             #region Mocks
             Mock -CommandName Get-WebSite -MockWith { return $websiteDataHTTP }
-            Mock -CommandName Get-WebBinding -MockWith { return @{ CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash } }
-            Mock -CommandName Get-ChildItem -ParameterFilter {$Path -eq $websiteDataHTTP.physicalPath -and $Filter -eq '*.svc'} -MockWith {return @{Name = $serviceData.ServiceName}}
-            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'ModulePath'}          -MockWith {return $serviceData.ModulePath}
-            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'}   -MockWith {return $serviceData.ConfigurationPath}
-            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'} -MockWith {return $serviceData.RegistrationKeyPath}
-            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'dbprovider'}          -MockWith {return $serviceData.dbprovider}
-            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'}     -MockWith {return $serviceData.dbconnectionstr}
-            Mock -CommandName Stop-Website -MockWith { Write-Verbose "MOCK:Stop-WebSite $Name" }
+            Mock -CommandName Get-WebBinding -MockWith {
+                return @{
+                    CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash
+                }
+            }
+            Mock -CommandName Get-ChildItem -ParameterFilter {
+                $Path -eq $websiteDataHTTP.physicalPath -and $Filter -eq '*.svc'
+            } -MockWith {
+                return @{
+                    Name = $serviceData.ServiceName
+                }
+            }
+            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {
+                $AppSettingName -eq 'ModulePath'
+            } -MockWith {
+                return $serviceData.ModulePath
+            }
+            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {
+                $AppSettingName -eq 'ConfigurationPath'
+            } -MockWith {
+                return $serviceData.ConfigurationPath
+            }
+            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {
+                $AppSettingName -eq 'RegistrationKeyPath'
+            } -MockWith {
+                return $serviceData.RegistrationKeyPath
+            }
+            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {
+                $AppSettingName -eq 'dbprovider'
+            } -MockWith {
+                return $serviceData.dbprovider
+            }
+            Mock -CommandName Get-WebConfigAppSetting -ParameterFilter {
+                $AppSettingName -eq 'dbconnectionstr'
+            } -MockWith {
+                return $serviceData.dbconnectionstr
+            }
+            Mock -CommandName Stop-Website -MockWith {
+                Write-Verbose "MOCK:Stop-WebSite $Name"
+            }
             #endregion
 
             Context -Name 'DSC Web Service is installed without certificate' -Fixture {
@@ -211,7 +243,7 @@ try
                         Variable = 'EndpointName'
                         Data     = $testParameters.EndpointName
                     }
-                     @{
+                    @{
                         Variable = 'Port'
                         Data     = ($websiteDataHTTP.bindings.collection[0].bindingInformation -split ':')[1]
                     }
@@ -353,7 +385,7 @@ try
                         Variable = 'CertificateThumbPrint'
                         Data     = $certificateData[0].Thumbprint
                     }
-                     @{
+                    @{
                         Variable = 'CertificateSubject'
                         Data     = $certificateData[0].Subject
                     }
@@ -407,7 +439,7 @@ try
                         Variable = 'CertificateThumbPrint'
                         Data     = $certificateData[0].Thumbprint
                     }
-                     @{
+                    @{
                         Variable = 'CertificateSubject'
                         Data     = $certificateData[0].Subject
                     }
@@ -501,7 +533,10 @@ try
                     }
                 }
             }
-            Mock -CommandName Get-OSVersion -MockWith {@{Major = 6; Minor = 3}}
+            Mock -CommandName Get-OSVersion -MockWith {@{
+                Major = 6
+                Minor = 3
+            }}
             #endregion
 
             Context -Name 'DSC Service is not installed and Ensure is Absent' -Fixture {
@@ -524,7 +559,11 @@ try
 
             Context -Name 'DSC Service is installed and Ensure is Absent' -Fixture {
                 #region Mocks
-                Mock -CommandName Test-Path -ParameterFilter { $LiteralPath -like "IIS:\Sites\*" } -MockWith { $LiteralPath -eq "IIS:\Sites\$($testParameters.EndpointName)" }
+                Mock -CommandName Test-Path -ParameterFilter {
+                    $LiteralPath -like "IIS:\Sites\*"
+                } -MockWith {
+                    $LiteralPath -eq "IIS:\Sites\$($testParameters.EndpointName)"
+                }
                 Mock -CommandName Remove-PSWSEndpoint
                 #endregion
 
@@ -539,7 +578,11 @@ try
             }
 
             #region MSFT_xDSCWebService Mocks
-            Mock -CommandName Get-Culture -MockWith { @{TwoLetterISOLanguageName = 'en'} }
+            Mock -CommandName Get-Culture -MockWith {
+                @{
+                    TwoLetterISOLanguageName = 'en'
+                }
+            }
             Mock -CommandName Test-Path -MockWith { $true }
             Mock -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
             Mock -CommandName Set-AppSettingsInWebconfig
@@ -644,7 +687,12 @@ try
                     Assert-MockCalled -Exactly -Times 0 -CommandName Copy-Item
                 }
 
-                $testCases = $setTargetPaths.Keys.ForEach{@{Name = $_; Value = $setTargetPaths.$_}}
+                $testCases = $setTargetPaths.Keys.ForEach{
+                    @{
+                        Name = $_
+                        Value = $setTargetPaths.$_
+                    }
+                }
 
                 It 'Should create the <Name> directory' -TestCases $testCases {
                     param
@@ -665,9 +713,13 @@ try
             }
 
             Context -Name 'Ensure is Present - isDownLevelOfBlue' -Fixture {
-
                 #region Mocks
-                Mock -CommandName Get-OSVersion -MockWith {@{Major = 6; Minor = 2}}
+                Mock -CommandName Get-OSVersion -MockWith {
+                    @{
+                        Major = 6
+                        Minor = 2
+                    }
+                }
                 #endregion
 
                 $setTargetPaths = @{
@@ -702,9 +754,13 @@ try
             }
 
             Context -Name 'Ensure is Present - isUpLevelOfBlue' -Fixture {
-
                 #region Mocks
-                Mock -CommandName Get-OSVersion -MockWith {@{Major = 10; Minor = 0}}
+                Mock -CommandName Get-OSVersion -MockWith {
+                    @{
+                        Major = 10
+                        Minor = 0
+                    }
+                }
                 #endregion
 
                 $setTargetPaths = @{
@@ -1117,7 +1173,11 @@ try
                     Assert-VerifiableMock
                 }
 
-                Mock -CommandName Get-WebBinding -MockWith {return @{CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash}}
+                Mock -CommandName Get-WebBinding -MockWith {
+                    return @{
+                        CertificateHash = $websiteDataHTTPS.bindings.collection[0].certificateHash
+                    }
+                }
                 Mock -CommandName Test-WebsitePath -MockWith {$false} -Verifiable
 
                 It 'Should return $false when State is set to Stopped' {
@@ -1140,7 +1200,12 @@ try
                     $DatabasePath = 'TestDrive:\DatabasePath'
 
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (ESENT)'; ('{0}\Devices.edb' -f $DatabasePath) -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (ESENT)'
+                        ('{0}\Devices.edb' -f $DatabasePath) -eq $ExpectedAppSettingValue
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'dbconnectionstr'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath  | Should -Be $true
 
@@ -1149,7 +1214,12 @@ try
 
                 It 'Should return $false when dbProvider is set to ESENT and ConnectionString does match the value in web.config' {
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (ESENT)'; $false} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (ESENT)'
+                        $false
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'dbconnectionstr'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
@@ -1160,7 +1230,12 @@ try
                     $DatabasePath = 'TestDrive:\DatabasePath'
 
                     Mock -CommandName Get-WebConfigAppSetting -MockWith {'System.Data.OleDb'} -Verifiable
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (OLE)'; ('Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0}\Devices.mdb;' -f $DatabasePath) -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - dbconnectionstr (OLE)'
+                        ('Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0}\Devices.mdb;' -f $DatabasePath) -eq $ExpectedAppSettingValue
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'dbconnectionstr'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath | Should -Be $true
 
@@ -1182,7 +1257,12 @@ try
                 It 'Should return $true when ModulePath is set the same as in web.config' {
                     $modulePath = 'TestDrive:\ModulePath'
 
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - ModulePath'; $modulePath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - ModulePath'
+                        $modulePath -eq $ExpectedAppSettingValue
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'ModulePath'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -ModulePath $modulePath | Should -Be $true
 
@@ -1190,19 +1270,31 @@ try
                 }
 
                 It 'Should return $false when ModulePath is not set the same as in web.config' {
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting - ModulePath'; $false} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - ModulePath'
+                        $false
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'ModulePath'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present | Should -Be $false
 
                     Assert-VerifiableMock
                 }
 
-                Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
+                Mock -CommandName Test-WebConfigAppSetting -MockWith {$true} -ParameterFilter {
+                    $AppSettingName -eq 'ModulePath'
+                } -Verifiable
 
                 It 'Should return $true when ConfigurationPath is set the same as in web.config' {
                     $configurationPath = 'TestDrive:\ConfigurationPath'
 
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - ConfigurationPath';  $configurationPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - ConfigurationPath'
+                        $configurationPath -eq $ExpectedAppSettingValue
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'ConfigurationPath'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -Be $true
 
@@ -1212,7 +1304,12 @@ try
                 It 'Should return $false when ConfigurationPath is not set the same as in web.config' {
                     $configurationPath = 'TestDrive:\ConfigurationPath'
 
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting - ConfigurationPath'; $false} -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - ConfigurationPath'
+                        $false
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'ConfigurationPath'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -Be $false
 
@@ -1224,7 +1321,10 @@ try
                 It 'Should return $true when RegistrationKeyPath is set the same as in web.config' {
                     $registrationKeyPath = 'TestDrive:\RegistrationKeyPath'
 
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {param ($ExpectedAppSettingValue) Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath';  $registrationKeyPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath'
+                        $registrationKeyPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -Be $true
 
@@ -1234,7 +1334,12 @@ try
                 It 'Should return $false when RegistrationKeyPath is not set the same as in web.config' {
                     $registrationKeyPath = 'TestDrive:\RegistrationKeyPath'
 
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith {Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath'; $false} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath'
+                        $false
+                    } -ParameterFilter {
+                        $AppSettingName -eq 'RegistrationKeyPath'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -Be $false
 
@@ -1245,7 +1350,12 @@ try
                     $acceptSelfSignedCertificates = $true
 
                     Mock -CommandName Test-IISSelfSignedModuleInstalled -MockWith { $true }
-                    Mock -CommandName Test-WebConfigModulesSetting -MockWith {param ($ExpectedInstallationStatus) Write-Verbose -Message 'Test-WebConfigAppSetting - IISSelfSignedCertModule'; $acceptSelfSignedCertificates -eq $ExpectedInstallationStatus} -ParameterFilter {$ModuleName -eq 'IISSelfSignedCertModule(32bit)'} -Verifiable
+                    Mock -CommandName Test-WebConfigModulesSetting -MockWith {
+                        Write-Verbose -Message 'Test-WebConfigAppSetting - IISSelfSignedCertModule'
+                        $acceptSelfSignedCertificates -eq $ExpectedInstallationStatus
+                    } -ParameterFilter {
+                        $ModuleName -eq 'IISSelfSignedCertModule(32bit)'
+                    } -Verifiable
 
                     Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -Be $true
 
@@ -1468,7 +1578,9 @@ try
             function Get-WebBinding {}
             function Stop-Website {}
 
-            $appHostConfigSection = [System.Management.Automation.PSObject] @{OverrideMode = ''}
+            $appHostConfigSection = [System.Management.Automation.PSObject] @{
+                OverrideMode = ''
+            }
             $appHostConfig        = [System.Management.Automation.PSObject] @{}
             $webAdminSrvMgr       = [System.Management.Automation.PSObject] @{}
 
@@ -1516,11 +1628,8 @@ try
             }
         }
     }
-    #endregion
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $testEnvironment
-    #endregion
+    Invoke-TestCleanup
 }

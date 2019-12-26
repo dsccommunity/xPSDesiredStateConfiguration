@@ -5,9 +5,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
 $testJobPrefix = 'MsiPackageTestJob'
 
 <#
@@ -23,6 +20,7 @@ function Test-PackageInstalledById
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [System.String]
         $ProductId
     )
@@ -85,9 +83,11 @@ function Start-Server
         [System.String]
         $FilePath,
 
+        [Parameter()]
         [System.String]
         $LogPath = (Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'),
 
+        [Parameter()]
         [System.Boolean]
         $Https = $false,
 
@@ -115,7 +115,22 @@ function Start-Server
     #>
     $server =
     {
-        param($FilePath, $LogPath, $Https, $HttpPort, $HttpsPort)
+        param (
+            [Parameter()]
+            $FilePath,
+
+            [Parameter()]
+            $LogPath,
+
+            [Parameter()]
+            $Https,
+
+            [Parameter()]
+            $HttpPort,
+
+            [Parameter()]
+            $HttpsPort
+        )
 
         <#
             .SYNOPSIS
@@ -423,6 +438,7 @@ function Start-Server
                 [CmdletBinding()]
                 param
                 (
+                    [Parameter()]
                     [IAsyncResult]
                     $Result
                 )
@@ -480,7 +496,10 @@ function Start-Server
             }
 
             # Register the request listener scriptblock as the async callback
-            $HttpListener.BeginGetContext((New-ScriptBlockCallback -Callback $requestListener), @{ Listener = $Httplistener; FilePath = $FilePath }) | Out-Null
+            $HttpListener.BeginGetContext((New-ScriptBlockCallback -Callback $requestListener), @{
+                Listener = $Httplistener
+                FilePath = $FilePath
+            }) | Out-Null
             Write-Log -LogFile $LogPath -Message 'First BeginGetContext called'
 
             # Ensure that the request listener stays on until the server is done receiving responses - client is responsible for stopping the server.
@@ -573,9 +592,11 @@ function Stop-Server
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [System.Threading.EventWaitHandle]
         $FileServerStarted,
 
+        [Parameter()]
         [System.Management.Automation.Job]
         $Job
     )
@@ -1175,6 +1196,7 @@ function Test-PackageInstalledByName
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [System.String]
         $Name
     )
@@ -1211,6 +1233,7 @@ function Get-LocalizedRegistryKeyValue
     [CmdletBinding()]
     param
     (
+        [Parameter()]
         [System.Object]
         $RegistryKey,
 

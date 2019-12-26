@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       `SecureTLSProtocols.psm1` and `UseSecurityBestPractices.psm1` into resource.
   - BREAKING CHANGE: Renamed `PublishModulesAndMofsToPullServer` module to
     `DscPullServerSetup` and moved to Modules folder.
+  - Moved test helper modules into `tests\TestHelpers` folder.
 - DSCPullServerSetup
   - Fixed markdown errors in README.MD.
   - Moved strings to Localization file.

@@ -1,12 +1,3 @@
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
-# Import CommonResourceHelper for Test-IsNanoServer
-$moduleRootFilePath = Split-Path -Path $PSScriptRoot -Parent
-$dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DSCResources'
-$commonResourceHelperFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'CommonResourceHelper.psm1'
-Import-Module -Name $commonResourceHelperFilePath
-
 <#
     .SYNOPSIS
         Tests if a Windows group with the given name and members exists.

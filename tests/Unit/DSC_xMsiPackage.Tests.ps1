@@ -5,42 +5,40 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xMsiPackage'
 
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
-
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 }
 
-Describe 'xMsiPackage Unit Tests' {
-    BeforeAll {
-        # Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-        $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-        Import-Module -Name $commonTestHelperFilePath -Force
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-        $script:testEnvironment = Enter-DscResourceTestEnvironment `
-            -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-            -DscResourceName 'MSFT_xMsiPackage' `
-            -TestType 'Unit'
-    }
+Invoke-TestSetup
 
-    AfterAll {
-        Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
-    }
-
-    InModuleScope 'MSFT_xMsiPackage' {
-        $script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-        $script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-
-        # This must be imported again within the InModuleScope so that the helper functions can be accessed
-        Import-Module -Name $commonTestHelperFilePath
-
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
         $testUsername = 'TestUsername'
         $testPassword = 'TestPassword'
         $secureTestPassword = ConvertTo-SecureString -String $testPassword -AsPlainText -Force
@@ -101,9 +99,18 @@ Describe 'xMsiPackage Unit Tests' {
                 }
 
                 $mocksCalled = @(
-                    @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
-                    @{ Command = 'Get-ProductEntry'; Times = 1 }
-                    @{ Command = 'Get-ProductEntryInfo'; Times = 0 }
+                    @{
+                        Command = 'Convert-ProductIdToIdentifyingNumber'
+                        Times = 1
+                    }
+                    @{
+                        Command = 'Get-ProductEntry'
+                        Times = 1
+                    }
+                    @{
+                        Command = 'Get-ProductEntryInfo'
+                        Times = 0
+                    }
                 )
 
                 $expectedReturnValue = @{
@@ -125,9 +132,18 @@ Describe 'xMsiPackage Unit Tests' {
                 }
 
                 $mocksCalled = @(
-                    @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
-                    @{ Command = 'Get-ProductEntry'; Times = 1 }
-                    @{ Command = 'Get-ProductEntryInfo'; Times = 1 }
+                    @{
+                        Command = 'Convert-ProductIdToIdentifyingNumber'
+                        Times = 1
+                    }
+                    @{
+                        Command = 'Get-ProductEntry'
+                        Times = 1
+                    }
+                    @{
+                        Command = 'Get-ProductEntryInfo'
+                        Times = 1
+                    }
                 )
 
                 $expectedReturnValue = $script:mockProductEntryInfo
@@ -634,35 +650,34 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName Get-ProductEntryValue -MockWith { return $script:mockProductEntryInfo.InstallSource } -ParameterFilter { $Property -eq 'InstallSource' }
 
             Context 'All properties are retrieved successfully' {
-
                 $getProductEntryInfoResult = Get-ProductEntryInfo -ProductEntry $script:mockProductEntry
 
                 It 'Should return the expected installed date' {
-                     $getProductEntryInfoResult.InstalledOn | Should -Be $script:mockProductEntryInfo.InstalledOn
+                    $getProductEntryInfoResult.InstalledOn | Should -Be $script:mockProductEntryInfo.InstalledOn
                 }
 
                 It 'Should return the expected publisher' {
-                     $getProductEntryInfoResult.Publisher | Should -Be $script:mockProductEntryInfo.Publisher
+                    $getProductEntryInfoResult.Publisher | Should -Be $script:mockProductEntryInfo.Publisher
                 }
 
                 It 'Should return the expected size' {
-                     $getProductEntryInfoResult.Size | Should -Be ($script:mockProductEntryInfo.Size / 1024)
+                    $getProductEntryInfoResult.Size | Should -Be ($script:mockProductEntryInfo.Size / 1024)
                 }
 
                 It 'Should return the expected Version' {
-                     $getProductEntryInfoResult.Version | Should -Be $script:mockProductEntryInfo.Version
+                    $getProductEntryInfoResult.Version | Should -Be $script:mockProductEntryInfo.Version
                 }
 
                 It 'Should return the expected package description' {
-                     $getProductEntryInfoResult.PackageDescription | Should -Be $script:mockProductEntryInfo.PackageDescription
+                    $getProductEntryInfoResult.PackageDescription | Should -Be $script:mockProductEntryInfo.PackageDescription
                 }
 
                 It 'Should return the expected name' {
-                     $getProductEntryInfoResult.Name | Should -Be $script:mockProductEntryInfo.Name
+                    $getProductEntryInfoResult.Name | Should -Be $script:mockProductEntryInfo.Name
                 }
 
                 It 'Should return the expected install source' {
-                     $getProductEntryInfoResult.InstallSource | Should -Be $script:mockProductEntryInfo.InstallSource
+                    $getProductEntryInfoResult.InstallSource | Should -Be $script:mockProductEntryInfo.InstallSource
                 }
 
                 It 'Should retrieve 7 product entry values' {
@@ -673,7 +688,6 @@ Describe 'xMsiPackage Unit Tests' {
             Mock -CommandName Get-ProductEntryValue -MockWith { return '4/4/2017' } -ParameterFilter { $Property -eq 'InstallDate' }
 
             Context 'Install date is in incorrect format' {
-
                 $getProductEntryInfoResult = Get-ProductEntryInfo -ProductEntry $script:mockProductEntry
 
                 It 'Should return $null for InstalledOn' {
@@ -1047,4 +1061,8 @@ Describe 'xMsiPackage Unit Tests' {
             }
         }
     }
+}
+finally
+{
+    Invoke-TestCleanup
 }

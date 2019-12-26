@@ -1,6 +1,3 @@
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
 <#
     .SYNOPSIS
         Stops all instances of the process with the given name.

@@ -2,23 +2,40 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1') `
-                               -Force
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xWindowsFeature'
 
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 }
 
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DSCResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xWindowsFeature' `
-    -TestType Unit
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-try {
-    InModuleScope 'MSFT_xWindowsFeature' {
+Invoke-TestSetup
 
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
         $testUserName = 'TestUserName12345'
         $testUserPassword = 'StrongOne7.'
         $testSecurePassword = ConvertTo-SecureString -String $testUserPassword -AsPlainText -Force
@@ -614,5 +631,5 @@ try {
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Invoke-TestCleanup
 }

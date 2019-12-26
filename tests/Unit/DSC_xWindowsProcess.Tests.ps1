@@ -1,26 +1,41 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xWindowsProcess'
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1')
-
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xWindowsProcess.TestHelper.psm1')
 }
 
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'MSFT_xWindowsProcess' `
-    -TestType 'Unit'
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
+Invoke-TestSetup
+
+# Begin Testing
 try
 {
-    InModuleScope 'MSFT_xWindowsProcess' {
-
+    InModuleScope $script:dscResourceName {
         # Mock objects
         $script:validPath1 = 'ValidPath1'
         $script:validPath2 = 'ValidPath2'
@@ -783,5 +798,5 @@ try
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Invoke-TestCleanup
 }

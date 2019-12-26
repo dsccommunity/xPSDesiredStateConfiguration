@@ -1,31 +1,32 @@
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
-
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
-$script:dscResourceFriendlyName = 'xRemoteFile'
-$script:dscResourceName = "MSFT_$($script:dscResourceFriendlyName)"
+$script:dscResourceName = 'DSC_xRemoteFile'
 
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 }
 
-#region HEADER
-# Unit Test Template Version: 1.1.0
-[System.String] $moduleRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $Script:MyInvocation.MyCommand.Path))
-if ( (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests'))) -or `
-     (-not (Test-Path -Path (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1'))) )
+function Invoke-TestCleanup
 {
-    & git @('clone', 'https://github.com/PowerShell/DscResource.Tests.git', (Join-Path -Path $moduleRoot -ChildPath '\DSCResource.Tests\'))
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
 
-Import-Module (Join-Path -Path $moduleRoot -ChildPath 'DSCResource.Tests\TestHelper.psm1') -Force
-$TestEnvironment = Initialize-TestEnvironment `
-    -DSCModuleName $script:dscModuleName `
-    -DSCResourceName $script:dscResourceName `
-    -TestType Unit
-#endregion HEADER
+Invoke-TestSetup
 
 # Begin Testing
 try
@@ -110,7 +111,7 @@ try
             $null = Set-Content -Path $testDestinationFile -Value 'Dummy Content'
             $null = Set-Content -Path $testDestinationFolderFile -Value 'Dummy Content'
 
-            Describe "$($script:dscResourceName)\Get-TargetResource" {
+            Describe 'xRemoteFile\Get-TargetResource' {
                 $result = Get-TargetResource @testSplatFile
                 It 'Returns "Present" when DestinationPath is a File and exists' {
                     $Result.Ensure | Should -Be 'Present'
@@ -147,7 +148,7 @@ try
                 }
             } #end Describe "$($script:dscResourceName)\Get-TargetResource"
 
-            Describe "$($script:dscResourceName)\Set-TargetResource" {
+            Describe 'xRemoteFile\Set-TargetResource' {
                 Context 'URI is "bad://.."' {
                     It 'Throws a UriValidationFailure exeception' {
                         $splat = $testSplatFile.Clone()
@@ -257,7 +258,7 @@ try
                 }
             } #end Describe "$($script:dscResourceName)\Set-TargetResource"
 
-            Describe "$($script:dscResourceName)\Test-TargetResource" {
+            Describe 'xRemoteFile\Test-TargetResource' {
                 Mock Get-Cache
                 Context 'URI is valid, DestinationPath is a File, file exists' {
                     It 'Returns "False"' {
@@ -389,7 +390,7 @@ try
 
             } #end Describe "$($script:dscResourceName)\Test-TargetResource"
 
-            Describe "$($script:dscResourceName)\Test-UriScheme" {
+            Describe 'xRemoteFile\Test-UriScheme' {
                 It 'Returns "True" when URI is "http://.." and scheme is "http|https|file"' {
                     Test-UriScheme -Uri $testURI -Scheme 'http|https|file' | Should -Be $true
                 }
@@ -404,7 +405,7 @@ try
                 }
             } #end Describe "$($script:dscResourceName)\Test-UriScheme"
 
-            Describe "$($script:dscResourceName)\Get-PathItemType" {
+            Describe 'xRemoteFile\Get-PathItemType' {
                 It 'Returns "Directory" when Path is a Directory' {
                     Get-PathItemType -Path $testDestinationFolder | Should -Be 'Directory'
                 }
@@ -419,7 +420,7 @@ try
                 }
             } #end Describe "$($script:dscResourceName)\Get-PathItemType"
 
-            Describe "$($script:dscResourceName)\Get-Cache" {
+            Describe 'xRemoteFile\Get-Cache' {
                 Mock Import-CliXml -MockWith { 'Expected Content' }
                 Mock Test-Path -MockWith { $True }
                 Context "DestinationPath 'c:\' and Uri $testURI and Cached Content exists" {
@@ -445,7 +446,7 @@ try
                 }
             } #end Describe "$($script:dscResourceName)\Get-Cache"
 
-            Describe "$($script:dscResourceName)\Update-Cache" {
+            Describe 'xRemoteFile\Update-Cache' {
                 Mock Export-CliXml
                 Mock Test-Path -MockWith { $True }
                 Mock New-Item
@@ -472,7 +473,7 @@ try
                 }
             } #end Describe "$($script:dscResourceName)\Update-Cache"
 
-            Describe "$($script:dscResourceName)\Get-CacheKey" {
+            Describe 'xRemoteFile\Get-CacheKey' {
                 It "Returns -799765921 as Cache Key for DestinationPath 'c:\' and Uri $testURI" {
                     Get-CacheKey -DestinationPath 'c:\' -Uri $testURI | Should -Be -799765921
                 }
@@ -490,7 +491,5 @@ try
 }
 finally
 {
-    #region FOOTER
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-    #endregion
+    Invoke-TestCleanup
 }

@@ -5,26 +5,40 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param ()
 
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xScriptResource'
 
-# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
-
-if (Test-SkipContinuousIntegrationTask -Type 'Unit')
+function Invoke-TestSetup
 {
-    return
+    try
+    {
+        Import-Module -Name DscResource.Test -Force
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+    }
+
+    $script:testEnvironment = Initialize-TestEnvironment `
+        -DSCModuleName $script:dscModuleName `
+        -DSCResourceName $script:dscResourceName `
+        -ResourceType 'Mof' `
+        -TestType 'Unit'
+
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 }
 
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DSCResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DSCResourceName 'MSFT_xScriptResource' `
-    -TestType 'Unit'
+function Invoke-TestCleanup
+{
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
+}
 
-try {
-    InModuleScope 'MSFT_xScriptResource' {
+Invoke-TestSetup
+
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
         $testUsername = 'TestUsername'
         $testPassword = 'TestPassword'
         $secureTestPassword = ConvertTo-SecureString -String $testPassword -AsPlainText -Force
@@ -462,5 +476,5 @@ try {
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Invoke-TestCleanup
 }
