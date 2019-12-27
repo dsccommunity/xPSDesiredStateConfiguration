@@ -17,7 +17,7 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -TestType 'Integration'
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
-Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xArchive.TestHelper.psm1') -Force
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xArchive.TestHelper.psm1')
 
 # Begin Testing
 try

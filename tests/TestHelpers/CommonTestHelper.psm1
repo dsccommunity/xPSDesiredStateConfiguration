@@ -681,58 +681,6 @@ function Test-SetTargetResourceWithWhatIf
 
 <#
     .SYNOPSIS
-        Enters a DSC Resource test environment.
-
-    .PARAMETER DscResourceModuleName
-        The name of the module that contains the DSC Resource to test.
-
-    .PARAMETER DscResourceName
-        The name of the DSC resource to test.
-
-    .PARAMETER TestType
-        Specifies whether the test environment will run a Unit test or an Integration test.
-#>
-function Enter-DscResourceTestEnvironment
-{
-    [OutputType([System.Collections.Hashtable])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DscResourceModuleName,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $DscResourceName,
-
-        [Parameter(Mandatory = $true)]
-        [ValidateSet('Unit', 'Integration')]
-        [System.String]
-        $TestType
-    )
-
-    $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
-    $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
-    $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
-
-    if (Test-DscResourceTestsNeedsInstallOrUpdate)
-    {
-        Install-DscResourceTestsModule
-    }
-
-    Import-Module -Name $testHelperFilePath
-
-    return Initialize-TestEnvironment `
-        -DSCModuleName $DscResourceModuleName `
-        -DSCResourceName $DscResourceName `
-        -TestType $TestType
-}
-
-<#
-    .SYNOPSIS
         Tests to see if DSCResource.Tests needs to be downloaded
         or updated.
 
@@ -878,74 +826,6 @@ function Get-DscResourceTestsMagicFilePath
     )
 
     return $DscResourceTestsPath | Join-Path -ChildPath '.git' | Join-Path -ChildPath $script:dscResourceTestsMagicFile
-}
-
-<#
-    .SYNOPSIS
-        Exits the specified DSC Resource test environment.
-
-    .PARAMETER TestEnvironment
-        The test environment to exit.
-#>
-function Exit-DscResourceTestEnvironment
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.Collections.Hashtable]
-        $TestEnvironment
-    )
-
-    $moduleRootPath = Split-Path -Path $PSScriptRoot -Parent
-    $dscResourceTestsPath = Join-Path -Path $moduleRootPath -ChildPath 'DSCResource.Tests'
-    $testHelperFilePath = Join-Path -Path $dscResourceTestsPath -ChildPath 'TestHelper.psm1'
-
-    Import-Module -Name $testHelperFilePath
-
-    Restore-TestEnvironment -TestEnvironment $TestEnvironment
-}
-
-<#
-    .SYNOPSIS
-        Returns $true if the the environment variable APPVEYOR is set to $true,
-        and the environment variable CONFIGURATION is set to the value passed
-        in the parameter Type.
-
-    .PARAMETER Name
-        Name of the test script that is called. Defaults to the name of the
-        calling script.
-
-    .PARAMETER Type
-        Type of tests in the test file. Can be set to Unit or Integration.
-#>
-function Test-SkipContinuousIntegrationTask
-{
-    [OutputType([System.Boolean])]
-    [CmdletBinding()]
-    param
-    (
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Name = $MyInvocation.PSCommandPath.Split('\')[-1],
-
-        [Parameter(Mandatory = $true)]
-        [ValidateSet('Unit', 'Integration')]
-        [System.String]
-        $Type
-    )
-
-    $result = $false
-
-    if ($env:APPVEYOR -eq $true -and $env:CONFIGURATION -ne $Type)
-    {
-        Write-Verbose -Message ('{1} tests in {0} will be skipped unless $env:CONFIGURATION is set to ''{1}''.' -f $Name, $Type) -Verbose
-        $result = $true
-    }
-
-    return $result
 }
 
 <#
@@ -1458,8 +1338,6 @@ function Get-UnusedTcpPort
 
 Export-ModuleMember -Function @(
     'Add-PathPermission',
-    'Enter-DscResourceTestEnvironment',
-    'Exit-DscResourceTestEnvironment',
     'Get-TestAdministratorAccountCredential',
     'Install-WindowsFeatureAndVerify',
     'Invoke-ExpectedMocksAreCalledTest',
@@ -1470,7 +1348,6 @@ Export-ModuleMember -Function @(
     'Test-GetTargetResourceResult',
     'Test-IsFileLocked',
     'Test-SetTargetResourceWithWhatIf',
-    'Test-SkipContinuousIntegrationTask',
     'Wait-ScriptBlockReturnTrue', `
     'Get-UnusedTcpPort'
 )

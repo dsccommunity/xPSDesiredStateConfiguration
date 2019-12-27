@@ -19,9 +19,10 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
     -ResourceType 'Mof' `
-    -TestType 'Integration'
+    -TestType 'Unit'
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xPackageResource.TestHelper.psm1')
 
 # Begin Testing
 try
@@ -29,22 +30,6 @@ try
     InModuleScope $script:dscResourceName {
         Describe 'xMsiPackage End to End Tests' {
             BeforeAll {
-                $script:testEnvironment = Enter-DscResourceTestEnvironment `
-                    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-                    -DscResourceName 'DSC_xMsiPackage' `
-                    -TestType 'Integration'
-
-                # Import xMsiPackage resource module for Test-TargetResource
-                $moduleRootFilePath = Split-Path -Path $testsFolderFilePath -Parent
-                $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-                $msiPackageResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xMsiPackage'
-                $msiPackageResourceModuleFilePath = Join-Path -Path $msiPackageResourceFolderFilePath -ChildPath 'DSC_xMsiPackage.psm1'
-                Import-Module -Name $msiPackageResourceModuleFilePath -Force
-
-                # Import the xPackage test helper
-                $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'DSC_xPackageResource.TestHelper.psm1'
-                Import-Module -Name $packageTestHelperFilePath -Force
-
                 # Set up the paths to the test configurations
                 $script:configurationFilePathNoOptionalParameters = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xMsiPackage_NoOptionalParameters'
                 $script:configurationFilePathLogPath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xMsiPackage_LogPath'
@@ -82,8 +67,6 @@ try
                 {
                     throw 'Test package could not be uninstalled after running all tests. It may cause errors in subsequent test runs.'
                 }
-
-                Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
             }
 
             Context 'Uninstall package that is already Absent' {

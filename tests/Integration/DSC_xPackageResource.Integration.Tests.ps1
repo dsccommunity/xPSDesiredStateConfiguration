@@ -1,108 +1,119 @@
-Import-Module "$PSScriptRoot\..\CommonTestHelper.psm1"
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xMsiPackage'
 
-if (Test-SkipContinuousIntegrationTask -Type 'Integration')
-{
-    return
-}
-
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'DSC_xPackageResource' `
-    -TestType 'Integration'
 try
 {
-    Describe 'xPackage Integration Tests' {
-        BeforeAll {
-            Import-Module "$PSScriptRoot\..\DSC_xPackageResource.TestHelper.psm1" -Force
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+}
 
-            $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xPackageResourceTests'
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Unit'
 
-            if (Test-Path -Path $script:testDirectoryPath)
-            {
-                Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
-            }
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xPackageResource.TestHelper.psm1')
 
-            New-Item -Path $script:testDirectoryPath -ItemType 'Directory' | Out-Null
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
+        Describe 'xPackageResource Integration Tests' {
+            BeforeAll {
+                $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xPackageResourceTests'
 
-            $script:msiName = 'DSCSetupProject.msi'
-            $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
-
-            $script:packageName = 'DSCUnitTestPackage'
-            $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
-
-            New-TestMsi -DestinationPath $script:msiLocation | Out-Null
-
-            Clear-PackageCache | Out-Null
-        }
-
-        BeforeEach {
-            Clear-PackageCache | Out-Null
-
-            if (Test-PackageInstalledByName -Name $script:packageName)
-            {
-                Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                Start-Sleep -Seconds 1 | Out-Null
-            }
-
-            if (Test-PackageInstalledByName -Name $script:packageName)
-            {
-                throw 'Package could not be removed.'
-            }
-        }
-
-        AfterAll {
-            if (Test-Path -Path $script:testDirectoryPath)
-            {
-                Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
-            }
-
-            Clear-PackageCache | Out-Null
-
-            if (Test-PackageInstalledByName -Name $script:packageName)
-            {
-                Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                Start-Sleep -Seconds 1 | Out-Null
-            }
-
-            if (Test-PackageInstalledByName -Name $script:packageName)
-            {
-                throw 'Test output will not be valid - package could not be removed.'
-            }
-        }
-
-        It 'Install a .msi package' {
-            $configurationName = 'EnsurePackageIsPresent'
-            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
-
-            try
-            {
-                $configurationScriptText = @"
-                Configuration $configurationName
+                if (Test-Path -Path $script:testDirectoryPath)
                 {
-                    Import-DscResource -ModuleName xPSDesiredStateConfiguration
-
-                    xPackage Package1
-                    {
-                        Path = '$script:msiLocation'
-                        Ensure = "Present"
-                        Name = '$script:packageName'
-                        ProductId = '$script:packageId'
-                    }
+                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
                 }
-"@
-                .([System.Management.Automation.ScriptBlock]::Create($configurationScriptText))
 
-                & $configurationName -OutputPath $configurationPath
+                New-Item -Path $script:testDirectoryPath -ItemType 'Directory' | Out-Null
 
-                Start-DscConfiguration -Path $configurationPath -Wait -Force
+                $script:msiName = 'DSCSetupProject.msi'
+                $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
 
-                Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+                $script:packageName = 'DSCUnitTestPackage'
+                $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
+
+                New-TestMsi -DestinationPath $script:msiLocation | Out-Null
+
+                Clear-PackageCache | Out-Null
             }
-            finally
-            {
-                if (Test-Path -Path $configurationPath)
+
+            BeforeEach {
+                Clear-PackageCache | Out-Null
+
+                if (Test-PackageInstalledByName -Name $script:packageName)
                 {
-                    Remove-Item -Path $configurationPath -Recurse -Force
+                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
+                    Start-Sleep -Seconds 1 | Out-Null
+                }
+
+                if (Test-PackageInstalledByName -Name $script:packageName)
+                {
+                    throw 'Package could not be removed.'
+                }
+            }
+
+            AfterAll {
+                if (Test-Path -Path $script:testDirectoryPath)
+                {
+                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
+                }
+
+                Clear-PackageCache | Out-Null
+
+                if (Test-PackageInstalledByName -Name $script:packageName)
+                {
+                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
+                    Start-Sleep -Seconds 1 | Out-Null
+                }
+
+                if (Test-PackageInstalledByName -Name $script:packageName)
+                {
+                    throw 'Test output will not be valid - package could not be removed.'
+                }
+            }
+
+            It 'Install a .msi package' {
+                $configurationName = 'EnsurePackageIsPresent'
+                $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+
+                try
+                {
+                    $configurationScriptText = @"
+Configuration $configurationName
+{
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
+    xPackage Package1
+    {
+        Path = '$script:msiLocation'
+        Ensure = "Present"
+        Name = '$script:packageName'
+        ProductId = '$script:packageId'
+    }
+}
+"@
+                    .([System.Management.Automation.ScriptBlock]::Create($configurationScriptText))
+
+                    & $configurationName -OutputPath $configurationPath
+
+                    Start-DscConfiguration -Path $configurationPath -Wait -Force
+
+                    Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+                }
+                finally
+                {
+                    if (Test-Path -Path $configurationPath)
+                    {
+                        Remove-Item -Path $configurationPath -Recurse -Force
+                    }
                 }
             }
         }
@@ -110,5 +121,5 @@ try
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

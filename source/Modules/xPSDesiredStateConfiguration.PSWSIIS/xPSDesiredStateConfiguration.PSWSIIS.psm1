@@ -2,7 +2,8 @@ $modulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
 
 # Import the shared modules
 Import-Module -Name (Join-Path -Path $modulePath `
-    -ChildPath 'xPSDesiredStateConfiguration.Common')
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
 # Import Localization Strings
 $script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.PSWSIIS'

@@ -17,260 +17,263 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
     -ResourceType 'Mof' `
-    -TestType 'Integration'
+    -TestType 'Unit'
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xGroupResource.TestHelper.psm1')
 
+# Begin Testing
 try
 {
-    Describe 'xGroup Integration Tests'  {
-        BeforeAll {
-            $script:confgurationNoMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_NoMembers.config.ps1'
-            $script:confgurationWithMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_Members.config.ps1'
-            $script:confgurationWithMembersToIncludeExcludeFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_MembersToIncludeExclude.config.ps1'
+    InModuleScope $script:dscResourceName {
+        Describe 'xGroup Integration Tests'  {
+            BeforeAll {
+                $script:confgurationNoMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_NoMembers.config.ps1'
+                $script:confgurationWithMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_Members.config.ps1'
+                $script:confgurationWithMembersToIncludeExcludeFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_MembersToIncludeExclude.config.ps1'
 
-            # Fake users for testing
-            $testUsername1 = 'TestUser1'
-            $testUsername2 = 'TestUser2'
+                # Fake users for testing
+                $script:testUsername1 = 'TestUser1'
+                $script:testUsername2 = 'TestUser2'
 
-            $testUsernames = @( $testUsername1, $testUsername2 )
+                $script:testUsernames = @( $script:testUsername1, $script:testUsername2 )
 
-            $testPassword = 'T3stPassw0rd#'
-            $secureTestPassword = ConvertTo-SecureString -String $testPassword -AsPlainText -Force
+                $script:testPassword = 'T3stPassw0rd#'
+                $script:secureTestPassword = ConvertTo-SecureString -String $script:testPassword -AsPlainText -Force
 
-            foreach ($username in $testUsernames)
-            {
-                $testUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @( $username, $secureTestPassword )
-                $null = New-User -Credential $testUserCredential
-            }
-        }
-
-        AfterAll {
-            foreach ($username in $testUsernames)
-            {
-                Remove-User -UserName $username
-            }
-        }
-
-        It 'Should create an empty group' {
-            $configurationName = 'CreateEmptyGroup'
-            $testGroupName = 'TestEmptyGroup1'
-
-            $resourceParameters = @{
-                Ensure = 'Present'
-                GroupName = $testGroupName
-            }
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $false
-
-            try
-            {
+                foreach ($username in $script:testUsernames)
                 {
-                    . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
+                    $testUserCredential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList @( $username, $script:secureTestPassword )
+                    $null = DSC_xGroupResource.TestHelper\New-User -Credential $testUserCredential
+                }
+            }
+
+            AfterAll {
+                foreach ($username in $script:testUsernames)
+                {
+                    DSC_xGroupResource.TestHelper\Remove-User -UserName $username
+                }
+            }
+
+            It 'Should create an empty group' {
+                $configurationName = 'CreateEmptyGroup'
+                $testGroupName = 'TestEmptyGroup1'
+
+                $resourceParameters = @{
+                    Ensure = 'Present'
+                    GroupName = $testGroupName
+                }
+
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+
+                try
+                {
+                    {
+                        . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @resourceParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
+
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -Members @() | Should -Be $true
+                }
+                finally
+                {
+                    if (DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName)
+                    {
+                        DSC_xGroupResource.TestHelper\Remove-Group -GroupName $testGroupName
+                    }
+                }
+            }
+
+            It 'Should not change the state of the present built-in Users group when no Members specified' {
+                $configurationName = 'BuiltInGroup'
+                $testGroupName = 'Users'
+
+                $resourceParameters = @{
+                    Ensure = 'Present'
+                    GroupName = $testGroupName
+                }
+
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+
+                {
+                    . $script:confgurationNoMembersFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -Members @() | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
             }
-            finally
-            {
-                if (Test-GroupExists -GroupName $testGroupName)
-                {
-                    Remove-Group -GroupName $testGroupName
+
+            It 'Should add a member to the built-in Users group with MembersToInclude' {
+                $configurationName = 'BuiltInGroup'
+                $testGroupName = 'Users'
+
+                $resourceParameters = @{
+                    Ensure = 'Present'
+                    GroupName = $testGroupName
+                    MembersToInclude = $script:testUsername1
                 }
-            }
-        }
 
-        It 'Should not change the state of the present built-in Users group when no Members specified' {
-            $configurationName = 'BuiltInGroup'
-            $testGroupName = 'Users'
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
 
-            $resourceParameters = @{
-                Ensure = 'Present'
-                GroupName = $testGroupName
-            }
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $true
-
-            {
-                . $script:confgurationNoMembersFilePath -ConfigurationName $configurationName
-                & $configurationName -OutputPath $TestDrive @resourceParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should -Not -Throw
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $true
-        }
-
-        It 'Should add a member to the built-in Users group with MembersToInclude' {
-            $configurationName = 'BuiltInGroup'
-            $testGroupName = 'Users'
-
-            $resourceParameters = @{
-                Ensure = 'Present'
-                GroupName = $testGroupName
-                MembersToInclude = $testUsername1
-            }
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $true
-
-            {
-                . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
-                & $configurationName -OutputPath $TestDrive @resourceParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should -Not -Throw
-
-            Test-GroupExists -GroupName $testGroupName -MembersToInclude $testUsername1 | Should -Be $true
-        }
-
-        It 'Should create a group with two test users using Members' {
-            $configurationName = 'CreateGroupWithTwoMembers'
-            $testGroupName = 'TestGroupWithMembers2'
-
-            $groupMembers = $testUsernames
-
-            $resourceParameters = @{
-                Ensure = 'Present'
-                GroupName = $testGroupName
-                Members = $groupMembers
-            }
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $false
-
-            try
-            {
-                {
-                    . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
-                    & $configurationName -OutputPath $TestDrive @resourceParameters
-                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-
-                Test-GroupExists -GroupName $testGroupName -Members $groupMembers | Should -Be $true
-            }
-            finally
-            {
-                if (Test-GroupExists -GroupName $testGroupName)
-                {
-                    Remove-Group -GroupName $testGroupName
-                }
-            }
-        }
-
-        It 'Should add a member to a group with MembersToInclude' {
-            $configurationName = 'CreateGroupWithTwoMembers'
-            $testGroupName = 'TestGroupWithMembersToInclude3'
-
-            $groupMembers = @( $testUsername1 )
-
-            $resourceParameters = @{
-                Ensure = 'Present'
-                GroupName = $testGroupName
-                MembersToInclude = $groupMembers
-            }
-
-            try
-            {
-                New-Group -GroupName $testGroupName
-            }
-            catch
-            {
-                Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
-            }
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $true
-
-            try
-            {
                 {
                     . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToInclude $script:testUsername1 | Should -Be $true
             }
-            finally
-            {
-                if (Test-GroupExists -GroupName $testGroupName)
+
+            It 'Should create a group with two test users using Members' {
+                $configurationName = 'CreateGroupWithTwoMembers'
+                $testGroupName = 'TestGroupWithMembers2'
+
+                $groupMembers = $script:testUsernames
+
+                $resourceParameters = @{
+                    Ensure = 'Present'
+                    GroupName = $testGroupName
+                    Members = $groupMembers
+                }
+
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+
+                try
                 {
-                    Remove-Group -GroupName $testGroupName
+                    {
+                        . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @resourceParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
+
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -Members $groupMembers | Should -Be $true
+                }
+                finally
+                {
+                    if (DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName)
+                    {
+                        DSC_xGroupResource.TestHelper\Remove-Group -GroupName $testGroupName
+                    }
                 }
             }
-        }
 
-        It 'Should remove a member from a group with MembersToExclude' {
-            $configurationName = 'CreateGroupWithTwoMembers'
-            $testGroupName = 'TestGroupWithMembersToInclude3'
+            It 'Should add a member to a group with MembersToInclude' {
+                $configurationName = 'CreateGroupWithTwoMembers'
+                $testGroupName = 'TestGroupWithMembersToInclude3'
 
-            $groupMembersToExclude = @( $testUsername1 )
+                $groupMembers = @( $script:testUsername1 )
 
-            $resourceParameters = @{
-                Ensure = 'Present'
-                GroupName = $testGroupName
-                MembersToExclude = $groupMembersToExclude
-            }
+                $resourceParameters = @{
+                    Ensure = 'Present'
+                    GroupName = $testGroupName
+                    MembersToInclude = $groupMembers
+                }
 
-            try
-            {
-                New-Group -GroupName $testGroupName -Members $groupMembersToExclude
-            }
-            catch
-            {
-                Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
-            }
-
-            Test-GroupExists -GroupName $testGroupName | Should -Be $true
-
-            try
-            {
+                try
                 {
-                    . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
-                    & $configurationName -OutputPath $TestDrive @resourceParameters
-                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-
-                Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should -Be $true
-            }
-            finally
-            {
-                if (Test-GroupExists -GroupName $testGroupName)
+                    DSC_xGroupResource.TestHelper\New-Group -GroupName $testGroupName
+                }
+                catch
                 {
-                    Remove-Group -GroupName $testGroupName
+                    Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
+                }
+
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+
+                try
+                {
+                    {
+                        . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @resourceParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
+
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should -Be $true
+                }
+                finally
+                {
+                    if (DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName)
+                    {
+                        DSC_xGroupResource.TestHelper\Remove-Group -GroupName $testGroupName
+                    }
                 }
             }
-        }
 
-        It 'Should remove a group' {
-            $configurationName = 'RemoveGroup'
-            $testGroupName = 'TestRemoveGroup1'
+            It 'Should remove a member from a group with MembersToExclude' {
+                $configurationName = 'CreateGroupWithTwoMembers'
+                $testGroupName = 'TestGroupWithMembersToInclude3'
 
-            $resourceParameters = @{
-                Ensure = 'Absent'
-                GroupName = $testGroupName
+                $groupMembersToExclude = @( $script:testUsername1 )
+
+                $resourceParameters = @{
+                    Ensure = 'Present'
+                    GroupName = $testGroupName
+                    MembersToExclude = $groupMembersToExclude
+                }
+
+                try
+                {
+                    DSC_xGroupResource.TestHelper\New-Group -GroupName $testGroupName -Members $groupMembersToExclude
+                }
+                catch
+                {
+                    Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
+                }
+
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+
+                try
+                {
+                    {
+                        . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @resourceParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
+
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should -Be $true
+                }
+                finally
+                {
+                    if (DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName)
+                    {
+                        DSC_xGroupResource.TestHelper\Remove-Group -GroupName $testGroupName
+                    }
+                }
             }
 
-            Test-GroupExists -GroupName $testGroupName | Should -Be $false
+            It 'Should remove a group' {
+                $configurationName = 'RemoveGroup'
+                $testGroupName = 'TestRemoveGroup1'
 
-            New-Group -GroupName $testGroupName
+                $resourceParameters = @{
+                    Ensure = 'Absent'
+                    GroupName = $testGroupName
+                }
 
-            Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
 
-            try
-            {
+                DSC_xGroupResource.TestHelper\New-Group -GroupName $testGroupName
+
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+
+                try
                 {
-                    . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
-                    & $configurationName -OutputPath $TestDrive @resourceParameters
-                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
+                    {
+                        . $script:confgurationWithMembersFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @resourceParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
 
-                Test-GroupExists -GroupName $testGroupName | Should -Be $false
-            }
-            finally
-            {
-                if (Test-GroupExists -GroupName $testGroupName)
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+                }
+                finally
                 {
-                    Remove-Group -GroupName $testGroupName
+                    if (DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName)
+                    {
+                        DSC_xGroupResource.TestHelper\Remove-Group -GroupName $testGroupName
+                    }
                 }
             }
         }

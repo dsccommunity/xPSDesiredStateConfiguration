@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Fix localization strings.
   - DSC_xEnvironmentResource
     - Remove unused localization strings.
+  - DSC_xRemoteFile
+    - Updated end-to-end tests to use the same pattern as the other end-to-end
+      tests in this module.
   - DSC_xDSCWebService
     - Moved `PSWSIISEndpoint.psm1` module into `xPSDesiredStateConfiguration.PSWSIIS`.
     - Moved `Firewall.psm1` module into `xPSDesiredStateConfiguration.Firewall`.

@@ -14,7 +14,7 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
     -ResourceType 'Mof' `
-    -TestType 'Integration'
+    -TestType 'Unit'
 
 # Ensure that Powershell Module 'WebAdministration' is available
 if (-not (Install-WindowsFeatureAndVerify -Name Web-Mgmt-Tools))

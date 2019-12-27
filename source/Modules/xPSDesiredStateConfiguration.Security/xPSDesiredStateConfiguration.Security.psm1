@@ -1,3 +1,13 @@
+$modulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+
+# Import the shared modules
+Import-Module -Name (Join-Path -Path $modulePath `
+    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
+
+# Import Localization Strings
+$script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.Security'
+
 # Best Practice Security Settings Block
 $insecureProtocols = @("SSL 2.0", "SSL 3.0", "TLS 1.0", "PCT 1.0", "Multi-Protocol Unified Hello")
 $secureProtocols = @("TLS 1.1", "TLS 1.2")

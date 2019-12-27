@@ -14,7 +14,7 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
     -ResourceType 'Mof' `
-    -TestType 'Integration'
+    -TestType 'Unit'
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 
