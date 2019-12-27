@@ -1,326 +1,328 @@
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $script:testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $script:commonTestHelperFilePath
-
-if (Test-SkipContinuousIntegrationTask -Type 'Integration')
-{
-    return
-}
-
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'DSC_xMsiPackage' `
-    -TestType 'Integration'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xMsiPackage'
 
 try
 {
-    InModuleScope 'DSC_xMsiPackage' {
-        Describe 'DSC_xMsiPackage Integration Tests' {
-            BeforeAll {
-                $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-                $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'DSC_xPackageResource.TestHelper.psm1'
-                $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+}
 
-                Import-Module -Name $packageTestHelperFilePath -Force
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Integration'
 
-                # The common test helper file needs to be imported twice because of the InModuleScope
-                Import-Module -Name $commonTestHelperFilePath
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xPackageResource.TestHelper.psm1')
 
-                $script:skipHttpsTest = $false
+try
+{
+    Describe 'xMsiPackage Integration Tests' {
+        BeforeAll {
+            $testsFolderFilePath = Split-Path $PSScriptRoot -Parent
+            $packageTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'DSC_xPackageResource.TestHelper.psm1'
+            $commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
 
-                <#
-                    This log file is used to log messages from the mock server which is important for debugging since
-                    most of the work of the mock server is done within a separate process.
-                #>
-                $script:logFile = Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'
+            Import-Module -Name $packageTestHelperFilePath -Force
 
-                $script:msiName = 'DSCSetupProject.msi'
-                $script:msiLocation = Join-Path -Path $TestDrive -ChildPath $script:msiName
-                $script:msiArguments = '/NoReboot'
+            # The common test helper file needs to be imported twice because of the InModuleScope
+            Import-Module -Name $commonTestHelperFilePath
 
-                $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
+            $script:skipHttpsTest = $false
 
-                $null = New-TestMsi -DestinationPath $script:msiLocation
+            <#
+                This log file is used to log messages from the mock server which is important for debugging since
+                most of the work of the mock server is done within a separate process.
+            #>
+            $script:logFile = Join-Path -Path $PSScriptRoot -ChildPath 'PackageTestLogFile.txt'
 
-                $script:testHttpPort = Get-UnusedTcpPort
-                $script:testHttpsPort = Get-UnusedTcpPort -ExcludePorts @($script:testHttpPort)
+            $script:msiName = 'DSCSetupProject.msi'
+            $script:msiLocation = Join-Path -Path $TestDrive -ChildPath $script:msiName
+            $script:msiArguments = '/NoReboot'
 
-                # Clear the log file
-                'Beginning integration tests' > $script:logFile
+            $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
+
+            $null = New-TestMsi -DestinationPath $script:msiLocation
+
+            $script:testHttpPort = Get-UnusedTcpPort
+            $script:testHttpsPort = Get-UnusedTcpPort -ExcludePorts @($script:testHttpPort)
+
+            # Clear the log file
+            'Beginning integration tests' > $script:logFile
+        }
+
+        BeforeEach {
+            if (Test-PackageInstalledById -ProductId $script:packageId)
+            {
+                $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                $null = Start-Sleep -Seconds 1
             }
 
-            BeforeEach {
-                if (Test-PackageInstalledById -ProductId $script:packageId)
-                {
-                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
-                    $null = Start-Sleep -Seconds 1
-                }
+            if (Test-PackageInstalledById -ProductId $script:packageId)
+            {
+                throw 'Test package could not be uninstalled after running all tests. It may cause errors in subsequent test runs.'
+            }
+        }
 
-                if (Test-PackageInstalledById -ProductId $script:packageId)
-                {
-                    throw 'Test package could not be uninstalled after running all tests. It may cause errors in subsequent test runs.'
-                }
+        AfterAll {
+            if (Test-PackageInstalledById -ProductId $script:packageId)
+            {
+                $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                $null = Start-Sleep -Seconds 1
             }
 
-            AfterAll {
-                if (Test-PackageInstalledById -ProductId $script:packageId)
-                {
-                    $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
-                    $null = Start-Sleep -Seconds 1
+            if (Test-PackageInstalledById -ProductId $script:packageId)
+            {
+                throw 'Test package could not be uninstalled after running test'
+            }
+        }
+
+        Context 'Get-TargetResource' {
+            It 'Should return only basic properties for absent package' {
+                $packageParameters = @{
+                    Path = $script:msiLocation
+                    ProductId = $script:packageId
                 }
 
-                if (Test-PackageInstalledById -ProductId $script:packageId)
-                {
-                    throw 'Test package could not be uninstalled after running test'
-                }
+                $getTargetResourceResult = Get-TargetResource @packageParameters
+                $getTargetResourceResultProperties = @( 'Ensure', 'ProductId' )
+
+                Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
             }
 
-            Context 'Get-TargetResource' {
-                It 'Should return only basic properties for absent package' {
-                    $packageParameters = @{
-                        Path = $script:msiLocation
-                        ProductId = $script:packageId
-                    }
-
-                    $getTargetResourceResult = Get-TargetResource @packageParameters
-                    $getTargetResourceResultProperties = @( 'Ensure', 'ProductId' )
-
-                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
+            It 'Should return full package properties for present package without registry check parameters specified' {
+                $packageParameters = @{
+                    Path = $script:msiLocation
+                    ProductId = $script:packageId
                 }
 
-                It 'Should return full package properties for present package without registry check parameters specified' {
-                    $packageParameters = @{
-                        Path = $script:msiLocation
-                        ProductId = $script:packageId
-                    }
+                Set-TargetResource -Ensure 'Present' @packageParameters
 
-                    Set-TargetResource -Ensure 'Present' @packageParameters
+                $getTargetResourceResult = Get-TargetResource @packageParameters
+                $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'InstallSource', 'InstalledOn', 'ProductId', 'Size', 'Version', 'PackageDescription', 'Publisher' )
 
-                    $getTargetResourceResult = Get-TargetResource @packageParameters
-                    $getTargetResourceResultProperties = @( 'Ensure', 'Name', 'InstallSource', 'InstalledOn', 'ProductId', 'Size', 'Version', 'PackageDescription', 'Publisher' )
+                Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
+            }
+        }
 
-                    Test-GetTargetResourceResult -GetTargetResourceResult $getTargetResourceResult -GetTargetResourceResultProperties $getTargetResourceResultProperties
-                }
+        Context 'Test-TargetResource' {
+            It 'Should return correct value when package is absent' {
+                $testTargetResourceResult = Test-TargetResource `
+                    -Ensure 'Present' `
+                    -Path $script:msiLocation `
+                    -ProductId $script:packageId
+
+                $testTargetResourceResult | Should -Be $false
+
+                $testTargetResourceResult = Test-TargetResource `
+                    -Ensure 'Absent' `
+                    -Path $script:msiLocation `
+                    -ProductId $script:packageId
+
+                $testTargetResourceResult | Should -Be $true
             }
 
-            Context 'Test-TargetResource' {
-                It 'Should return correct value when package is absent' {
-                    $testTargetResourceResult = Test-TargetResource `
+            It 'Should return correct value when package is present' {
+                Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId
+
+                Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+
+                $testTargetResourceResult = Test-TargetResource `
                         -Ensure 'Present' `
-                        -Path $script:msiLocation `
-                        -ProductId $script:packageId
-
-                    $testTargetResourceResult | Should -Be $false
-
-                    $testTargetResourceResult = Test-TargetResource `
-                        -Ensure 'Absent' `
-                        -Path $script:msiLocation `
-                        -ProductId $script:packageId
-
-                    $testTargetResourceResult | Should -Be $true
-                }
-
-                It 'Should return correct value when package is present' {
-                    Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId
-
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
-
-                    $testTargetResourceResult = Test-TargetResource `
-                            -Ensure 'Present' `
-                            -Path $script:msiLocation `
-                            -ProductId $script:packageId `
-
-                    $testTargetResourceResult | Should -Be $true
-
-                    $testTargetResourceResult = Test-TargetResource `
-                        -Ensure 'Absent' `
                         -Path $script:msiLocation `
                         -ProductId $script:packageId `
 
-                    $testTargetResourceResult | Should -Be $false
+                $testTargetResourceResult | Should -Be $true
+
+                $testTargetResourceResult = Test-TargetResource `
+                    -Ensure 'Absent' `
+                    -Path $script:msiLocation `
+                    -ProductId $script:packageId `
+
+                $testTargetResourceResult | Should -Be $false
+            }
+        }
+
+        Context 'Set-TargetResource' {
+            It 'Should correctly install and remove a .msi package' {
+                Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId
+
+                Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+
+                $getTargetResourceResult = Get-TargetResource -Path $script:msiLocation -ProductId $script:packageId
+
+                $getTargetResourceResult.Version | Should -Be '1.2.3.4'
+                $getTargetResourceResult.InstalledOn | Should -Be ('{0:d}' -f [System.DateTime]::Now.Date)
+                $getTargetResourceResult.ProductId | Should -Be $script:packageId
+
+                [Math]::Round($getTargetResourceResult.Size, 2) | Should -Be 0.03
+
+                Set-TargetResource -Ensure 'Absent' -Path $script:msiLocation -ProductId $script:packageId
+
+                Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+            }
+
+            It 'Should throw with incorrect product id' {
+                $wrongPackageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a050272}'
+
+                { Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $wrongPackageId } | Should -Throw
+            }
+
+            It 'Should correctly install and remove a package from a HTTP URL' {
+                $uriBuilder = [System.UriBuilder]::new('http', 'localhost', $script:testHttpPort)
+                $baseUrl = $uriBuilder.Uri.AbsoluteUri
+
+                $uriBuilder.Path = 'package.msi'
+                $msiUrl = $uriBuilder.Uri.AbsoluteUri
+
+                $fileServerStarted = $null
+                $job = $null
+
+                try
+                {
+                    'Http tests:' >> $script:logFile
+
+                    # Make sure no existing HTTP(S) test servers are running
+                    Stop-EveryTestServerInstance
+
+                    $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
+                    $fileServerStarted = $serverResult.FileServerStarted
+                    $job = $serverResult.Job
+
+                    # Wait for the file server to be ready to receive requests
+                    $fileServerStarted.WaitOne(30000)
+
+                    { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should -Throw
+
+                    Set-TargetResource -Ensure 'Present' -Path $msiUrl -ProductId $script:packageId
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+
+                    Set-TargetResource -Ensure 'Absent' -Path $msiUrl -ProductId $script:packageId
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                }
+                catch
+                {
+                    Write-Warning -Message 'Caught exception performing HTTP server tests. Outputting HTTP server log.' -Verbose
+                    Get-Content -Path $script:logFile | Write-Verbose -Verbose
+                    throw $_
+                }
+                finally
+                {
+                    <#
+                        This must be called after Start-Server to ensure the listening port is closed,
+                        otherwise subsequent tests may fail until the machine is rebooted.
+                    #>
+                    Stop-Server -FileServerStarted $fileServerStarted -Job $job
                 }
             }
 
-            Context 'Set-TargetResource' {
-                It 'Should correctly install and remove a .msi package' {
-                    Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $script:packageId
+            It 'Should correctly install and remove a package from a HTTPS URL' -Skip:$script:skipHttpsTest {
+                $uriBuilder = [System.UriBuilder]::new('https', 'localhost', $script:testHttpsPort)
+                $baseUrl = $uriBuilder.Uri.AbsoluteUri
 
+                $uriBuilder.Path = 'package.msi'
+                $msiUrl = $uriBuilder.Uri.AbsoluteUri
+
+                $fileServerStarted = $null
+                $job = $null
+
+                try
+                {
+                    'Https tests:' >> $script:logFile
+
+                    # Make sure no existing HTTP(S) test servers are running
+                    Stop-EveryTestServerInstance
+
+                    $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
+                    $fileServerStarted = $serverResult.FileServerStarted
+                    $job = $serverResult.Job
+
+                    # Wait for the file server to be ready to receive requests
+                    $fileServerStarted.WaitOne(30000)
+
+                    { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should -Throw
+
+                    Set-TargetResource -Ensure 'Present' -Path $msiUrl -ProductId $script:packageId
                     Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
 
-                    $getTargetResourceResult = Get-TargetResource -Path $script:msiLocation -ProductId $script:packageId
-
-                    $getTargetResourceResult.Version | Should -Be '1.2.3.4'
-                    $getTargetResourceResult.InstalledOn | Should -Be ('{0:d}' -f [System.DateTime]::Now.Date)
-                    $getTargetResourceResult.ProductId | Should -Be $script:packageId
-
-                    [Math]::Round($getTargetResourceResult.Size, 2) | Should -Be 0.03
-
-                    Set-TargetResource -Ensure 'Absent' -Path $script:msiLocation -ProductId $script:packageId
-
+                    Set-TargetResource -Ensure 'Absent' -Path $msiUrl -ProductId $script:packageId
                     Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
                 }
+                catch
+                {
+                    Write-Warning -Message 'Caught exception performing HTTPS server tests. Outputting HTTPS server log.' -Verbose
+                    Get-Content -Path $script:logFile | Write-Verbose -Verbose
+                    throw $_
+                }
+                finally
+                {
+                    <#
+                        This must be called after Start-Server to ensure the listening port is closed,
+                        otherwise subsequent tests may fail until the machine is rebooted.
+                    #>
+                    Stop-Server -FileServerStarted $fileServerStarted -Job $job
+                }
+            }
 
-                It 'Should throw with incorrect product id' {
-                    $wrongPackageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a050272}'
+            It 'Should write to the specified log path' {
+                $logPath = Join-Path -Path $TestDrive -ChildPath 'TestMsiLog.txt'
 
-                    { Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -ProductId $wrongPackageId } | Should -Throw
+                if (Test-Path -Path $logPath)
+                {
+                    Remove-Item -Path $logPath -Force
                 }
 
-                It 'Should correctly install and remove a package from a HTTP URL' {
-                    $uriBuilder = [System.UriBuilder]::new('http', 'localhost', $script:testHttpPort)
-                    $baseUrl = $uriBuilder.Uri.AbsoluteUri
+                Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -LogPath $logPath -ProductId $script:packageId
 
-                    $uriBuilder.Path = 'package.msi'
-                    $msiUrl = $uriBuilder.Uri.AbsoluteUri
+                Test-Path -Path $logPath | Should -Be $true
+                Get-Content -Path $logPath | Should -Not -Be $null
+            }
 
-                    $fileServerStarted = $null
-                    $job = $null
+            It 'Should add space after .MSI installation arguments' {
+                Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } { return @{ ExitCode = 0 } }
+                Mock Get-ProductEntry { return $script:packageId }
 
-                    try
-                    {
-                        'Http tests:' >> $script:logFile
-
-                        # Make sure no existing HTTP(S) test servers are running
-                        Stop-EveryTestServerInstance
-
-                        $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $false -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
-                        $fileServerStarted = $serverResult.FileServerStarted
-                        $job = $serverResult.Job
-
-                        # Wait for the file server to be ready to receive requests
-                        $fileServerStarted.WaitOne(30000)
-
-                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should -Throw
-
-                        Set-TargetResource -Ensure 'Present' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
-
-                        Set-TargetResource -Ensure 'Absent' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
-                    }
-                    catch
-                    {
-                        Write-Warning -Message 'Caught exception performing HTTP server tests. Outputting HTTP server log.' -Verbose
-                        Get-Content -Path $script:logFile | Write-Verbose -Verbose
-                        throw $_
-                    }
-                    finally
-                    {
-                        <#
-                            This must be called after Start-Server to ensure the listening port is closed,
-                            otherwise subsequent tests may fail until the machine is rebooted.
-                        #>
-                        Stop-Server -FileServerStarted $fileServerStarted -Job $job
-                    }
+                $packageParameters = @{
+                    Path = $script:msiLocation
+                    ProductId = $script:packageId
+                    Arguments = $script:msiArguments
                 }
 
-                It 'Should correctly install and remove a package from a HTTPS URL' -Skip:$script:skipHttpsTest {
-                    $uriBuilder = [System.UriBuilder]::new('https', 'localhost', $script:testHttpsPort)
-                    $baseUrl = $uriBuilder.Uri.AbsoluteUri
+                Set-TargetResource -Ensure 'Present' @packageParameters
 
-                    $uriBuilder.Path = 'package.msi'
-                    $msiUrl = $uriBuilder.Uri.AbsoluteUri
+                Assert-MockCalled Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith(" $script:msiArguments") } -Scope It
+            }
 
-                    $fileServerStarted = $null
-                    $job = $null
+            It 'Should not check for product installation when rebooted is required' {
+                Mock Invoke-Process { return 3010 }
+                Mock Get-ProductEntry { }
 
-                    try
-                    {
-                        'Https tests:' >> $script:logFile
-
-                        # Make sure no existing HTTP(S) test servers are running
-                        Stop-EveryTestServerInstance
-
-                        $serverResult = Start-Server -FilePath $script:msiLocation -LogPath $script:logFile -Https $true -HttpPort $script:testHttpPort -HttpsPort $script:testHttpsPort
-                        $fileServerStarted = $serverResult.FileServerStarted
-                        $job = $serverResult.Job
-
-                        # Wait for the file server to be ready to receive requests
-                        $fileServerStarted.WaitOne(30000)
-
-                        { Set-TargetResource -Ensure 'Present' -Path $baseUrl -ProductId $script:packageId } | Should -Throw
-
-                        Set-TargetResource -Ensure 'Present' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
-
-                        Set-TargetResource -Ensure 'Absent' -Path $msiUrl -ProductId $script:packageId
-                        Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
-                    }
-                    catch
-                    {
-                        Write-Warning -Message 'Caught exception performing HTTPS server tests. Outputting HTTPS server log.' -Verbose
-                        Get-Content -Path $script:logFile | Write-Verbose -Verbose
-                        throw $_
-                    }
-                    finally
-                    {
-                        <#
-                            This must be called after Start-Server to ensure the listening port is closed,
-                            otherwise subsequent tests may fail until the machine is rebooted.
-                        #>
-                        Stop-Server -FileServerStarted $fileServerStarted -Job $job
-                    }
+                $packageParameters = @{
+                    Path = $script:msiLocation
+                    ProductId = $script:packageId
                 }
 
-                It 'Should write to the specified log path' {
-                    $logPath = Join-Path -Path $TestDrive -ChildPath 'TestMsiLog.txt'
+                { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
+            }
 
-                    if (Test-Path -Path $logPath)
-                    {
-                        Remove-Item -Path $logPath -Force
-                    }
+            It 'Should install package using user credentials when specified' {
+                Mock Invoke-PInvoke { }
+                Mock Get-ProductEntry { return $script:packageId }
 
-                    Set-TargetResource -Ensure 'Present' -Path $script:msiLocation -LogPath $logPath -ProductId $script:packageId
-
-                    Test-Path -Path $logPath | Should -Be $true
-                    Get-Content -Path $logPath | Should -Not -Be $null
+                $packageCredential = [System.Management.Automation.PSCredential]::Empty
+                $packageParameters = @{
+                    Path = $script:msiLocation
+                    ProductId = $script:packageId
+                    RunAsCredential = $packageCredential
                 }
 
-                It 'Should add space after .MSI installation arguments' {
-                    Mock Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith($script:msiArguments) } { return @{ ExitCode = 0 } }
-                    Mock Get-ProductEntry { return $script:packageId }
+                Set-TargetResource -Ensure 'Present' @packageParameters
 
-                    $packageParameters = @{
-                        Path = $script:msiLocation
-                        ProductId = $script:packageId
-                        Arguments = $script:msiArguments
-                    }
-
-                    Set-TargetResource -Ensure 'Present' @packageParameters
-
-                    Assert-MockCalled Invoke-Process -ParameterFilter { $Process.StartInfo.Arguments.EndsWith(" $script:msiArguments") } -Scope It
-                }
-
-                It 'Should not check for product installation when rebooted is required' {
-                    Mock Invoke-Process { return 3010 }
-                    Mock Get-ProductEntry { }
-
-                    $packageParameters = @{
-                        Path = $script:msiLocation
-                        ProductId = $script:packageId
-                    }
-
-                    { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
-                }
-
-                It 'Should install package using user credentials when specified' {
-                    Mock Invoke-PInvoke { }
-                    Mock Get-ProductEntry { return $script:packageId }
-
-                    $packageCredential = [System.Management.Automation.PSCredential]::Empty
-                    $packageParameters = @{
-                        Path = $script:msiLocation
-                        ProductId = $script:packageId
-                        RunAsCredential = $packageCredential
-                    }
-
-                    Set-TargetResource -Ensure 'Present' @packageParameters
-
-                    Assert-MockCalled Invoke-PInvoke -ParameterFilter { $RunAsCredential -eq $packageCredential} -Scope It
-                }
+                Assert-MockCalled Invoke-PInvoke -ParameterFilter { $RunAsCredential -eq $packageCredential} -Scope It
             }
         }
     }

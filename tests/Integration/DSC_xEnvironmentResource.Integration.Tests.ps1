@@ -1,5 +1,5 @@
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
-$script:dscResourceName = 'DSC_xArchive'
+$script:dscResourceName = 'DSC_xEnvironmentResource'
 
 try
 {
@@ -16,18 +16,11 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -ResourceType 'Mof' `
     -TestType 'Integration'
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+
 try
 {
     Describe 'xEnvironment Integration Tests' {
-        BeforeAll {
-            # Import environment resource module for Get-TargetResource, Test-TargetResource, Set-TargetResource
-            $moduleRootFilePath = Split-Path -Path (Split-Path $PSScriptRoot -Parent) -Parent
-            $dscResourcesFolderFilePath = Join-Path -Path $moduleRootFilePath -ChildPath 'DscResources'
-            $environmentResourceFolderFilePath = Join-Path -Path $dscResourcesFolderFilePath -ChildPath 'DSC_xEnvironmentResource'
-            $environmentResourceModuleFilePath = Join-Path -Path $environmentResourceFolderFilePath -ChildPath 'DSC_xEnvironmentResource.psm1'
-            Import-Module -Name $environmentResourceModuleFilePath -Force
-        }
-
         It 'Should return the correct value for an environment variable that exists' {
             $envVar = 'Username'
             $retrievedVar = Get-TargetResource -Name $envVar

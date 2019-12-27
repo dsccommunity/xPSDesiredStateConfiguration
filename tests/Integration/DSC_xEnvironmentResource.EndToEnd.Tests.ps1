@@ -1,32 +1,22 @@
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
 $script:dscResourceName = 'DSC_xEnvironmentResource'
 
-function Invoke-TestSetup
+try
 {
-    try
-    {
-        Import-Module -Name DscResource.Test -Force
-    }
-    catch [System.IO.FileNotFoundException]
-    {
-        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
-    }
-
-    $script:testEnvironment = Initialize-TestEnvironment `
-        -DSCModuleName $script:dscModuleName `
-        -DSCResourceName $script:dscResourceName `
-        -ResourceType 'Mof' `
-        -TestType 'Unit'
-
-    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
 }
 
-function Invoke-TestCleanup
-{
-    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
-}
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Integration'
 
-Invoke-TestSetup
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 
 # Begin Testing
 try

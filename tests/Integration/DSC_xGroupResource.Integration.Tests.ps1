@@ -1,30 +1,31 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
 param ()
 
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xGroupResource'
 
-# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
-
-if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+try
 {
-    return
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
 }
 
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'DSC_xGroupResource' `
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
     -TestType 'Integration'
+
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xGroupResource.TestHelper.psm1')
 
 try
 {
     Describe 'xGroup Integration Tests'  {
         BeforeAll {
-            Import-Module -Name (Join-Path -Path $script:testsFolderFilePath -ChildPath 'DSC_xGroupResource.TestHelper.psm1')
-
             $script:confgurationNoMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_NoMembers.config.ps1'
             $script:confgurationWithMembersFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_Members.config.ps1'
             $script:confgurationWithMembersToIncludeExcludeFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xGroupResource_MembersToIncludeExclude.config.ps1'
@@ -277,5 +278,5 @@ try
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }
