@@ -126,7 +126,7 @@ try
 
                     It 'Should return a hashtable' {
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return the output from the specified get script' {
@@ -164,7 +164,7 @@ try
 
                     It 'Should return a hashtable' {
                         $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return the output from the specified get script' {
@@ -414,12 +414,12 @@ try
 
                     It 'Should return an error record' {
                         $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                        $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should -Be $true
+                        $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should -BeTrue
                     }
 
                     It 'Should return an error record' {
                         $scriptExecutionHelperResult = Invoke-Script @scriptExecutionHelperParameters
-                        $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should -Be $true
+                        $scriptExecutionHelperResult -is [System.Management.Automation.ErrorRecord] | Should -BeTrue
                     }
 
                     It 'Should return error with expected message from script' {

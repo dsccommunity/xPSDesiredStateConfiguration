@@ -106,7 +106,7 @@ Configuration $configurationName
 
                     Start-DscConfiguration -Path $configurationPath -Wait -Force
 
-                    Test-PackageInstalledByName -Name $script:packageName | Should -Be $true
+                    Test-PackageInstalledByName -Name $script:packageName | Should -BeTrue
                 }
                 finally
                 {

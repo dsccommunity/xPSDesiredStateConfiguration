@@ -68,7 +68,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
 
@@ -104,7 +104,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
 
@@ -142,7 +142,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
 
@@ -202,7 +202,7 @@ try
                     }
 
                     It 'Should return true from Test-TargetResource with the same parameters' {
-                        DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                        DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                     }
                 }
             }
@@ -243,7 +243,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
 
@@ -275,7 +275,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
 
@@ -309,7 +309,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
 
@@ -341,7 +341,7 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters' {
-                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -Be $true
+                    DSC_xRegistryResource\Test-TargetResource @registryParameters | Should -BeTrue
                 }
             }
         }

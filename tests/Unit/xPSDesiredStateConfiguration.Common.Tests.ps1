@@ -64,7 +64,7 @@ InModuleScope $script:subModuleName {
                 }
 
                 It 'Should return true' {
-                    Test-IsNanoServer | Should -Be $true
+                    Test-IsNanoServer | Should -BeTrue
                 }
             }
 
@@ -88,7 +88,7 @@ InModuleScope $script:subModuleName {
                 }
 
                 It 'Should return false' {
-                    Test-IsNanoServer | Should -Be $false
+                    Test-IsNanoServer | Should -BeFalse
                 }
             }
 
@@ -112,7 +112,7 @@ InModuleScope $script:subModuleName {
                 }
 
                 It 'Should return false' {
-                    Test-IsNanoServer | Should -Be $false
+                    Test-IsNanoServer | Should -BeFalse
                 }
             }
         }
@@ -137,7 +137,7 @@ InModuleScope $script:subModuleName {
             }
 
             It 'Should return false' {
-                Test-IsNanoServer | Should -Be $false
+                Test-IsNanoServer | Should -BeFalse
             }
         }
     }
@@ -152,7 +152,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when a value is different for [System.String]' {
@@ -164,7 +164,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [System.Int32]' {
@@ -176,7 +176,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [Int16]' {
@@ -188,7 +188,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [UInt16]' {
@@ -200,7 +200,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is different for [Boolean]' {
@@ -212,7 +212,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when a value is missing' {
@@ -224,7 +224,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return true when only a specified value matches, but other non-listed values do not' {
@@ -237,7 +237,7 @@ InModuleScope $script:subModuleName {
                     ValuesToCheck = @('Example')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when only specified values do not match, but other non-listed values do ' {
@@ -250,7 +250,7 @@ InModuleScope $script:subModuleName {
                     ValuesToCheck = @('SecondExample')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when an empty hash table is used in the current values' {
@@ -262,7 +262,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return true when evaluating a table against a CimInstance' {
@@ -288,7 +288,7 @@ InModuleScope $script:subModuleName {
                     ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when evaluating a table against a CimInstance and a value is wrong' {
@@ -314,7 +314,7 @@ InModuleScope $script:subModuleName {
                     ValuesToCheck = @('Handle', 'ProcessId')
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return true when evaluating a hash table containing an array' {
@@ -326,7 +326,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $true
+                Test-DscParameterState @testParameters | Should -BeTrue
             }
 
             It 'Should return false when evaluating a hash table containing an array with wrong values' {
@@ -338,7 +338,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when evaluating a hash table containing an array, but the CurrentValues are missing an array' {
@@ -350,7 +350,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
 
             It 'Should return false when evaluating a hash table containing an array, but the property i CurrentValues is $null' {
@@ -362,7 +362,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
             }
         }
 
@@ -407,7 +407,7 @@ InModuleScope $script:subModuleName {
                     DesiredValues = $mockDesiredValues
                 }
 
-                Test-DscParameterState @testParameters | Should -Be $false
+                Test-DscParameterState @testParameters | Should -BeFalse
 
                 Assert-MockCalled -CommandName Write-Warning -Exactly -Times 1
             }
@@ -707,10 +707,10 @@ InModuleScope $script:subModuleName {
             $keyParameterName = 'Name'
 
             $commonParameterString = New-ResourceSetCommonParameterString -KeyParameterName $keyParameterName -Parameters $parameters
-            $commonParameterString.Contains("CommonStringParameter1 = `"CommonParameter1`"`r`n") | Should -Be $true
-            $commonParameterString.Contains("CommonStringParameter2 = `"CommonParameter2`"`r`n") | Should -Be $true
-            $commonParameterString.Contains("CommonIntParameter1 = `$CommonIntParameter1`r`n") | Should -Be $true
-            $commonParameterString.Contains("CommonIntParameter2 = `$CommonIntParameter2`r`n") | Should -Be $true
+            $commonParameterString.Contains("CommonStringParameter1 = `"CommonParameter1`"`r`n") | Should -BeTrue
+            $commonParameterString.Contains("CommonStringParameter2 = `"CommonParameter2`"`r`n") | Should -BeTrue
+            $commonParameterString.Contains("CommonIntParameter1 = `$CommonIntParameter1`r`n") | Should -BeTrue
+            $commonParameterString.Contains("CommonIntParameter2 = `$CommonIntParameter2`r`n") | Should -BeTrue
         }
     }
 
@@ -760,7 +760,7 @@ InModuleScope $script:subModuleName {
         $newResourceSetConfigurationScriptBlock = New-ResourceSetConfigurationScriptBlock @newResourceSetConfigurationParams
 
         It 'Should return a ScriptBlock' {
-            $newResourceSetConfigurationScriptBlock -is [System.Management.Automation.ScriptBlock] | Should -Be $true
+            $newResourceSetConfigurationScriptBlock -is [System.Management.Automation.ScriptBlock] | Should -BeTrue
         }
 
         It 'Should return ScriptBlock of string returned from New-ResourceSetConfigurationString' {

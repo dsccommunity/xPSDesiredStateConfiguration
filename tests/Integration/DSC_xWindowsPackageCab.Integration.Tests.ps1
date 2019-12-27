@@ -1,139 +1,150 @@
-Import-Module -Name (Join-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -ChildPath 'CommonTestHelper.psm1')
-
-if (Test-SkipContinuousIntegrationTask -Type 'Integration')
-{
-    return
-}
-
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'DSC_xWindowsPackageCab' `
-    -TestType 'Integration'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xWindowsPackageCab'
 
 try
 {
-    Describe 'xWindowsPackageCab Integration Tests' {
-        BeforeAll {
-            Import-Module -Name 'Dism'
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+}
 
-            $script:installedStates = @( 'Installed', 'InstallPending' )
-            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsPackageCab.config.ps1'
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Unit'
 
-            $script:testPackageName = ''
-            $script:testSourcePath = Join-Path -Path $PSScriptRoot -ChildPath ''
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 
-            $script:cabPackageNotProvided = $script:testPackageName -eq [System.String]::Empty
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
+        Describe 'xWindowsPackageCab Integration Tests' {
+            BeforeAll {
+                Import-Module -Name 'Dism'
 
-            try
-            {
-                $originalPackage = Dism\Get-WindowsPackage -PackageName $script:testPackageName -Online
-                if ($null -ne $originalPackage -and $originalPackage.PackageState -in $script:installedStates)
-                {
-                    $script:packageOriginallyInstalled = $true
-                }
-                else
-                {
-                    $script:packageOriginallyInstalled = $false
-                }
-            }
-            catch
-            {
-                $script:packageOriginallyInstalled = $false
-            }
+                $script:installedStates = @( 'Installed', 'InstallPending' )
+                $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsPackageCab.config.ps1'
 
-            if ($script:packageOriginallyInstalled)
-            {
-                throw "Package $script:testPackageName is currently installed on this machine. These tests may destroy this package. Aborting."
-            }
-        }
+                $script:testPackageName = ''
+                $script:testSourcePath = Join-Path -Path $PSScriptRoot -ChildPath ''
 
-        AfterEach {
-            if (-not $script:packageOriginallyInstalled)
-            {
+                $script:cabPackageNotProvided = $script:testPackageName -eq [System.String]::Empty
+
                 try
                 {
-                    $windowsPackage = Dism\Get-WindowsPackage -PackageName $script:testPackageName -Online
-                    if ($null -ne $windowsPackage -and $windowsPackage.PackageState -in $script:installedStates)
+                    $originalPackage = Dism\Get-WindowsPackage -PackageName $script:testPackageName -Online
+                    if ($null -ne $originalPackage -and $originalPackage.PackageState -in $script:installedStates)
                     {
-                        Dism\Remove-WindowsPackage -PackageName $script:testPackageName.Name -Online -NoRestart
+                        $script:packageOriginallyInstalled = $true
+                    }
+                    else
+                    {
+                        $script:packageOriginallyInstalled = $false
                     }
                 }
                 catch
                 {
-                    Write-Verbose -Message "No test cleanup needed. Package $script:testPackageName not found."
+                    $script:packageOriginallyInstalled = $false
+                }
+
+                if ($script:packageOriginallyInstalled)
+                {
+                    throw "Package $script:testPackageName is currently installed on this machine. These tests may destroy this package. Aborting."
                 }
             }
-        }
 
-        It 'Should install a Windows package through a cab file' -Skip:$script:cabPackageNotProvided {
-            $configurationName = 'InstallWindowsPackageCab'
-
-            $resourceParameters = @{
-                Name = $script:testPackageName
-                SourcePath = $script:testSourcePath
-                Ensure = 'Present'
+            AfterEach {
+                if (-not $script:packageOriginallyInstalled)
+                {
+                    try
+                    {
+                        $windowsPackage = Dism\Get-WindowsPackage -PackageName $script:testPackageName -Online
+                        if ($null -ne $windowsPackage -and $windowsPackage.PackageState -in $script:installedStates)
+                        {
+                            Dism\Remove-WindowsPackage -PackageName $script:testPackageName.Name -Online -NoRestart
+                        }
+                    }
+                    catch
+                    {
+                        Write-Verbose -Message "No test cleanup needed. Package $script:testPackageName not found."
+                    }
+                }
             }
 
-            {
-                . $script:confgurationFilePath -ConfigurationName $configurationName
-                & $configurationName -OutputPath $TestDrive @resourceParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should -Not -Throw
+            It 'Should install a Windows package through a cab file' -Skip:$script:cabPackageNotProvided {
+                $configurationName = 'InstallWindowsPackageCab'
 
-            { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
+                $resourceParameters = @{
+                    Name = $script:testPackageName
+                    SourcePath = $script:testSourcePath
+                    Ensure = 'Present'
+                }
 
-            $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online
-            $windowsPackage | Should -Not -Be $null
-            $windowsPackage.PackageState -in $script:installedStates | Should -Be $true
-        }
+                {
+                    . $script:confgurationFilePath -ConfigurationName $configurationName
+                    & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                } | Should -Not -Throw
 
-        It 'Should uninstall a Windows package through a cab file' -Skip:$script:cabPackageNotProvided {
-            $configurationName = 'UninstallWindowsPackageCab'
+                { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
 
-            $resourceParameters = @{
-                Name = $script:testPackageName
-                SourcePath = $script:testSourcePath
-                Ensure = 'Absent'
+                $windowsPackage = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online
+                $windowsPackage | Should -Not -Be $null
+                $windowsPackage.PackageState -in $script:installedStates | Should -BeTrue
             }
 
-            Dism\Add-WindowsPackage -PackagePath $resourceParameters.SourcePath -Online -NoRestart
+            It 'Should uninstall a Windows package through a cab file' -Skip:$script:cabPackageNotProvided {
+                $configurationName = 'UninstallWindowsPackageCab'
 
-            { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
+                $resourceParameters = @{
+                    Name = $script:testPackageName
+                    SourcePath = $script:testSourcePath
+                    Ensure = 'Absent'
+                }
 
-            {
-                . $script:confgurationFilePath -ConfigurationName $configurationName
-                & $configurationName -OutputPath $TestDrive @resourceParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should -Not -Throw
+                Dism\Add-WindowsPackage -PackagePath $resourceParameters.SourcePath -Online -NoRestart
 
-            { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
-        }
+                { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Not -Throw
 
-        It 'Should not install an invalid Windows package through a cab file' {
-            $configurationName = 'InstallInvalidWindowsPackageCab'
+                {
+                    . $script:confgurationFilePath -ConfigurationName $configurationName
+                    & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                } | Should -Not -Throw
 
-            $resourceParameters = @{
-                Name = 'NonExistentWindowsPackageCab'
-                SourcePath = (Join-Path -Path $TestDrive -ChildPath 'FakePath.cab')
-                Ensure = 'Present'
-                LogPath = (Join-Path -Path $TestDrive -ChildPath 'InvalidWindowsPackageCab.log')
+                { $null = Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
             }
 
-            { Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
+            It 'Should not install an invalid Windows package through a cab file' {
+                $configurationName = 'InstallInvalidWindowsPackageCab'
 
-            {
-                . $script:confgurationFilePath -ConfigurationName $configurationName
-                & $configurationName -OutputPath $TestDrive @resourceParameters
-                Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-            } | Should -Throw
+                $resourceParameters = @{
+                    Name = 'NonExistentWindowsPackageCab'
+                    SourcePath = (Join-Path -Path $TestDrive -ChildPath 'FakePath.cab')
+                    Ensure = 'Present'
+                    LogPath = (Join-Path -Path $TestDrive -ChildPath 'InvalidWindowsPackageCab.log')
+                }
 
-            Test-Path -Path $resourceParameters.LogPath | Should -Be $true
+                { Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
 
-            { Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
+                {
+                    . $script:confgurationFilePath -ConfigurationName $configurationName
+                    & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                } | Should -Throw
+
+                Test-Path -Path $resourceParameters.LogPath | Should -BeTrue
+
+                { Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
+            }
         }
     }
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

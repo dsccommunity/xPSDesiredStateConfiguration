@@ -280,7 +280,7 @@ try
 
                 Context 'URI is valid, DestinationPath is a File, file exists' {
                     It 'Returns "False"' {
-                        Test-TargetResource @testSplatFile | Should -Be $False
+                        Test-TargetResource @testSplatFile | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -294,7 +294,7 @@ try
                     It 'Returns "False"' {
                         $splat = $script:testSplatFile.Clone()
                         $splat.Checksum = $script:testFileHash.Hash
-                        Test-TargetResource @Splat | Should -Be $False
+                        Test-TargetResource @Splat | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -307,7 +307,7 @@ try
                     It 'Returns "True"' {
                         $splat = $script:testSplatFile.Clone()
                         $splat.MatchSource = $False
-                        Test-TargetResource @splat | Should -Be $True
+                        Test-TargetResource @splat | Should -BeTrue
                     }
 
                     It 'Calls expected mocks' {
@@ -322,7 +322,7 @@ try
                         $splat = $script:testSplatFileChecksum.Clone()
                         $splat.MatchSource = $False
                         $splat.Checksum = $script:testFileHash.Hash
-                        Test-TargetResource @splat | Should -Be $True
+                        Test-TargetResource @splat | Should -BeTrue
                     }
 
                     It 'Calls expected mocks' {
@@ -338,7 +338,7 @@ try
                         $splat = $script:testSplatFileChecksum.Clone()
                         $splat.MatchSource = $False
                         $splat.Checksum = 'badHash'
-                        Test-TargetResource @splat | Should -Be $False
+                        Test-TargetResource @splat | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -349,7 +349,7 @@ try
 
                 Context 'URI is valid, DestinationPath is a Folder, file exists' {
                     It 'Returns "False"' {
-                        Test-TargetResource @testSplatFolderFileExists | Should -Be $False
+                        Test-TargetResource @testSplatFolderFileExists | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -361,7 +361,7 @@ try
                     It 'Returns "True"' {
                         $splat = $script:testSplatFolderFileExists.Clone()
                         $splat.MatchSource = $False
-                        Test-TargetResource @splat | Should -Be $True
+                        Test-TargetResource @splat | Should -BeTrue
                     }
 
                     It 'Calls expected mocks' {
@@ -371,7 +371,7 @@ try
 
                 Context 'URI is valid, DestinationPath is a Folder, file does not exist' {
                     It 'Returns "False"' {
-                        Test-TargetResource @testSplatFolderFileNotExist | Should -Be $False
+                        Test-TargetResource @testSplatFolderFileNotExist | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -385,7 +385,7 @@ try
                     It 'Returns "False"' {
                         $splat = $script:testSplatFolderFileNotExist.Clone()
                         $splat.MatchSource = $False
-                        Test-TargetResource @splat | Should -Be $False
+                        Test-TargetResource @splat | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -401,7 +401,7 @@ try
                         $splat = $script:testSplatFolderFileExistsChecksum.Clone()
                         $splat.MatchSource = $False
                         $splat.Checksum = $script:testFileHash.Hash
-                        Test-TargetResource @splat | Should -Be $True
+                        Test-TargetResource @splat | Should -BeTrue
                     }
 
                     It 'Calls expected mocks' {
@@ -417,7 +417,7 @@ try
                         $splat = $script:testSplatFolderFileExistsChecksum.Clone()
                         $splat.MatchSource = $False
                         $splat.Checksum = 'badHash'
-                        Test-TargetResource @splat | Should -Be $False
+                        Test-TargetResource @splat | Should -BeFalse
                     }
 
                     It 'Calls expected mocks' {
@@ -429,19 +429,19 @@ try
 
             Describe 'xRemoteFile\Test-UriScheme' {
                 It 'Returns "True" when URI is "http://.." and scheme is "http|https|file"' {
-                    Test-UriScheme -Uri $script:testURI -Scheme 'http|https|file' | Should -Be $true
+                    Test-UriScheme -Uri $script:testURI -Scheme 'http|https|file' | Should -BeTrue
                 }
 
                 It 'Returns "True" when URI is "http://.." and scheme is "http"' {
-                    Test-UriScheme -Uri $script:testURI -Scheme 'http' | Should -Be $true
+                    Test-UriScheme -Uri $script:testURI -Scheme 'http' | Should -BeTrue
                 }
 
                 It 'Returns "False" when URI is "http://.." and scheme is "https"' {
-                    Test-UriScheme -Uri $script:testURI -Scheme 'https' | Should -Be $false
+                    Test-UriScheme -Uri $script:testURI -Scheme 'https' | Should -BeFalse
                 }
 
                 It 'Returns "False" when URI is "bad://.." and scheme is "http|https|file"' {
-                    Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should -Be $false
+                    Test-UriScheme -Uri 'bad://contoso.com' -Scheme 'http|https|file' | Should -BeFalse
                 }
             }
 

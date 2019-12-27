@@ -431,14 +431,14 @@ try
                     $testTargetResourceResult = Test-TargetResource -Path $script:validPath1 `
                                                                     -Arguments $script:mockProcess1.Arguments `
                                                                     -Ensure 'Present'
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return false when Ensure set to Present and process is not running' {
                     $testTargetResourceResult = Test-TargetResource -Path $script:invalidPath `
                                                                     -Arguments $script:mockProcess1.Arguments `
                                                                     -Ensure 'Present'
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
 
                 It 'Should return true when Ensure set to Absent and process is not running and Credential passed' {
@@ -446,14 +446,14 @@ try
                                                                     -Arguments $script:mockProcess1.Arguments `
                                                                     -Credential $script:testCredential `
                                                                     -Ensure 'Absent'
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return false when Ensure set to Absent and process is running' {
                     $testTargetResourceResult = Test-TargetResource -Path $script:validPath1 `
                                                                     -Arguments $script:mockProcess1.Arguments `
                                                                     -Ensure 'Absent'
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
 
             }
@@ -689,14 +689,14 @@ try
 
                 It 'Should return true when all processes are returned' {
                     $processCountResult = Wait-ProcessCount -ProcessSettings $mockProcessSettings -ProcessCount 2
-                    $processCountResult | Should -Be $true
+                    $processCountResult | Should -BeTrue
                 }
 
                 It 'Should return false when not all processes are returned' {
                     $processCountResult = Wait-ProcessCount -ProcessSettings $mockProcessSettings `
                                                             -ProcessCount 3 `
                                                             -WaitTime 10
-                    $processCountResult | Should -Be $false
+                    $processCountResult | Should -BeFalse
                 }
             }
 

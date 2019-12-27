@@ -83,10 +83,10 @@ Configuration Sample_xDscWebServiceRegistrationWithSecurityBestPractices
         $Port = 8080
     )
 
-    Import-DscResource -ModuleName NetworkingDsc
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName 'NetworkingDsc' -ModuleVersion 7.4.0.0
+    Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
     # To explicitly import the resource WindowsFeature and File.
-    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 
     Node $NodeName
     {

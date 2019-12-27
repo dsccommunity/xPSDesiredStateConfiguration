@@ -80,7 +80,7 @@ try
 
                 It 'Should return True from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $true
+                    $testTargetResourceInitialResult | Should -BeTrue
 
                     if ($testTargetResourceInitialResult -ne $true)
                     {
@@ -94,7 +94,7 @@ try
                 }
 
                 It 'Package should not exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
 
                 It 'Should compile and run configuration' {
@@ -106,11 +106,11 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should not exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
             }
 
@@ -125,7 +125,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -139,7 +139,7 @@ try
                 }
 
                 It 'Package should not exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
 
                 It 'Should compile and run configuration' {
@@ -151,11 +151,11 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
             }
 
@@ -170,7 +170,7 @@ try
 
                 It 'Should return True from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $true
+                    $testTargetResourceInitialResult | Should -BeTrue
 
                     if ($testTargetResourceInitialResult -ne $true)
                     {
@@ -184,7 +184,7 @@ try
                 }
 
                 It 'Package should exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
 
                 It 'Should compile and run configuration' {
@@ -196,11 +196,11 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
             }
 
@@ -215,7 +215,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -229,7 +229,7 @@ try
                 }
 
                 It 'Package should exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
 
                 It 'Should compile and run configuration' {
@@ -241,11 +241,11 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should not exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
             }
 
@@ -268,7 +268,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -282,7 +282,7 @@ try
                 }
 
                 It 'Package should not exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
 
                 It 'Should compile and run configuration' {
@@ -294,15 +294,15 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Should have created the log file' {
-                    Test-Path -Path $logPath | Should -Be $true
+                    Test-Path -Path $logPath | Should -BeTrue
                 }
 
                 It 'Package should exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
             }
 
@@ -325,7 +325,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -339,7 +339,7 @@ try
                 }
 
                 It 'Package should exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
 
                 It 'Should compile and run configuration' {
@@ -351,15 +351,15 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Should have created the log file' {
-                    Test-Path -Path $logPath | Should -Be $true
+                    Test-Path -Path $logPath | Should -BeTrue
                 }
 
                 It 'Package should not exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
             }
 
@@ -381,7 +381,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -395,7 +395,7 @@ try
                 }
 
                 It 'Package should not exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
 
                 try
@@ -427,11 +427,11 @@ try
                 }
 
                 It 'Should return True from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
             }
 
@@ -453,7 +453,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -467,7 +467,7 @@ try
                 }
 
                 It 'Package should exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
 
                 try
@@ -499,11 +499,11 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should not exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
             }
 
@@ -525,7 +525,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -539,7 +539,7 @@ try
                 }
 
                 It 'Package should not exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
 
                 try
@@ -571,11 +571,11 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
             }
 
@@ -597,7 +597,7 @@ try
 
                 It 'Should return False from Test-TargetResource with the same parameters before configuration' {
                     $testTargetResourceInitialResult = DSC_xMsiPackage\Test-TargetResource @msiPackageParameters
-                    $testTargetResourceInitialResult | Should -Be $false
+                    $testTargetResourceInitialResult | Should -BeFalse
 
                     if ($testTargetResourceInitialResult -ne $false)
                     {
@@ -611,7 +611,7 @@ try
                 }
 
                 It 'Package should exist on the machine before configuration is run' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $true
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeTrue
                 }
 
                 try
@@ -643,11 +643,11 @@ try
                 }
 
                 It 'Should return true from Test-TargetResource with the same parameters after configuration' {
-                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -Be $true
+                    DSC_xMsiPackage\Test-TargetResource @msiPackageParameters | Should -BeTrue
                 }
 
                 It 'Package should not exist on the machine' {
-                    Test-PackageInstalledById -ProductId $script:packageId | Should -Be $false
+                    Test-PackageInstalledById -ProductId $script:packageId | Should -BeFalse
                 }
             }
         }

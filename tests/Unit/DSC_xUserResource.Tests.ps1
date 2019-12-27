@@ -124,14 +124,14 @@ try
                     New-User -Credential $script:newCredential1 -Description $script:newUserDescription1
 
                     It 'Should remove the user' {
-                        Test-User -UserName $script:newUserName1 | Should -Be $true
+                        Test-User -UserName $script:newUserName1 | Should -BeTrue
                         Set-TargetResource -UserName $script:newUserName1 -Ensure 'Absent'
-                        Test-User -UserName $script:newUserName1 | Should -Be $false
+                        Test-User -UserName $script:newUserName1 | Should -BeFalse
                     }
 
                     It 'Should add the new user' {
                         Set-TargetResource -UserName $script:newUserName2 -Password $script:newCredential2 -Ensure 'Present'
-                        Test-User -UserName $script:newUserName2 | Should -Be $true
+                        Test-User -UserName $script:newUserName2 | Should -BeTrue
                     }
 
                     It 'Should update the user' {
@@ -150,7 +150,7 @@ try
                                             -PasswordChangeRequired $passwordChangeRequired `
                                             -PasswordChangeNotAllowed $passwordChangeNotAllowed
 
-                        Test-User -UserName $script:newUserName2 | Should -Be $true
+                        Test-User -UserName $script:newUserName2 | Should -BeTrue
                         $testTargetResourceResult1 =
                                 Test-TargetResource -UserName $script:newUserName2 `
                                                     -Password $script:newCredential2 `
@@ -160,7 +160,7 @@ try
                                                     -Disabled $disabled `
                                                     -PasswordNeverExpires $passwordNeverExpires `
                                                     -PasswordChangeNotAllowed $passwordChangeNotAllowed
-                        $testTargetResourceResult1 | Should -Be $true
+                        $testTargetResourceResult1 | Should -BeTrue
                     }
 
                     It 'Should update the user again with different values' {
@@ -179,7 +179,7 @@ try
                                             -PasswordChangeRequired $passwordChangeRequired `
                                             -PasswordChangeNotAllowed $passwordChangeNotAllowed
 
-                        Test-User -UserName $script:newUserName2 | Should -Be $true
+                        Test-User -UserName $script:newUserName2 | Should -BeTrue
                         $testTargetResourceResult2 =
                                 Test-TargetResource -UserName $script:newUserName2 `
                                                     -Password $script:newCredential1 `
@@ -189,7 +189,7 @@ try
                                                     -Disabled $disabled `
                                                     -PasswordNeverExpires $passwordNeverExpires `
                                                     -PasswordChangeNotAllowed $passwordChangeNotAllowed
-                        $testTargetResourceResult2 | Should -Be $true
+                        $testTargetResourceResult2 | Should -BeTrue
                     }
                 }
 
@@ -202,14 +202,14 @@ try
                         New-User -Credential $script:newCredential1 -Description $script:newUserDescription1
 
                         It 'Should remove the user' -Skip:$script:skipMe {
-                            Test-User -UserName $script:newUserName1 | Should -Be $true
+                            Test-User -UserName $script:newUserName1 | Should -BeTrue
                             Set-TargetResource -UserName $script:newUserName1 -Ensure 'Absent'
-                            Test-User -UserName $script:newUserName1 | Should -Be $false
+                            Test-User -UserName $script:newUserName1 | Should -BeFalse
                         }
 
                         It 'Should add the new user' -Skip:$script:skipMe {
                             Set-TargetResource -UserName $script:newUserName2 -Password $script:newCredential2 -Ensure 'Present'
-                            Test-User -UserName $script:newUserName2 | Should -Be $true
+                            Test-User -UserName $script:newUserName2 | Should -BeTrue
                         }
 
                         It 'Should update the user' -Skip:$script:skipMe {
@@ -228,7 +228,7 @@ try
                                                 -PasswordChangeRequired $passwordChangeRequired `
                                                 -PasswordChangeNotAllowed $passwordChangeNotAllowed
 
-                            Test-User -UserName $script:newUserName2 | Should -Be $true
+                            Test-User -UserName $script:newUserName2 | Should -BeTrue
                             $testTargetResourceResult1 =
                                     Test-TargetResource -UserName $script:newUserName2 `
                                                         -Password $script:newCredential2 `
@@ -238,7 +238,7 @@ try
                                                         -Disabled $disabled `
                                                         -PasswordNeverExpires $passwordNeverExpires `
                                                         -PasswordChangeNotAllowed $passwordChangeNotAllowed
-                            $testTargetResourceResult1 | Should -Be $true
+                            $testTargetResourceResult1 | Should -BeTrue
                         }
                         It 'Should update the user again with different values' -Skip:$script:skipMe {
                             $disabled = $false
@@ -256,7 +256,7 @@ try
                                                 -PasswordChangeRequired $passwordChangeRequired `
                                                 -PasswordChangeNotAllowed $passwordChangeNotAllowed
 
-                            Test-User -UserName $script:newUserName2 | Should -Be $true
+                            Test-User -UserName $script:newUserName2 | Should -BeTrue
                             $testTargetResourceResult2 =
                                     Test-TargetResource -UserName $script:newUserName2 `
                                                         -Password $script:newCredential1 `
@@ -266,7 +266,7 @@ try
                                                         -Disabled $disabled `
                                                         -PasswordNeverExpires $passwordNeverExpires `
                                                         -PasswordChangeNotAllowed $passwordChangeNotAllowed
-                            $testTargetResourceResult2 | Should -Be $true
+                            $testTargetResourceResult2 | Should -BeTrue
                         }
                     }
                     finally
@@ -289,25 +289,25 @@ try
                                                                         -Disabled $false `
                                                                         -PasswordNeverExpires $false `
                                                                         -PasswordChangeNotAllowed $false
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
 
                     It 'Should return true when user Absent and Ensure = Absent' {
                         $testTargetResourceResult = Test-TargetResource -UserName $absentUserName `
                                                                         -Ensure 'Absent'
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
 
                     It 'Should return false when user Absent and Ensure = Present' {
                         $testTargetResourceResult = Test-TargetResource -UserName $absentUserName `
                                                                         -Ensure 'Present'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when user Present and Ensure = Absent' {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Ensure 'Absent'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when Password is wrong' {
@@ -317,37 +317,37 @@ try
 
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Password $badTestCredential
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when user Present and wrong Description' {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Description 'Wrong description'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when FullName is incorrect' {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -FullName 'Wrong FullName'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when Disabled is incorrect' {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Disabled $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when PasswordNeverExpires is incorrect' {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -PasswordNeverExpires $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when PasswordChangeNotAllowed is incorrect' {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -PasswordChangeNotAllowed $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -365,25 +365,25 @@ try
                                                                         -Disabled $false `
                                                                         -PasswordNeverExpires $false `
                                                                         -PasswordChangeNotAllowed $false
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
 
                     It 'Should return true when user Absent and Ensure = Absent' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $absentUserName `
                                                                         -Ensure 'Absent'
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
 
                     It 'Should return false when user Absent and Ensure = Present' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $absentUserName `
                                                                         -Ensure 'Present'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when user Present and Ensure = Absent' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Ensure 'Absent'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when Password is wrong' -Skip:$script:skipMe {
@@ -395,37 +395,37 @@ try
 
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Password $badTestCredential
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when user Present and wrong Description' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Description 'Wrong description'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when FullName is incorrect' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -FullName 'Wrong FullName'
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when Disabled is incorrect' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -Disabled $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when PasswordNeverExpires is incorrect' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -PasswordNeverExpires $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
 
                     It 'Should return false when PasswordChangeNotAllowed is incorrect' -Skip:$script:skipMe {
                         $testTargetResourceResult = Test-TargetResource -UserName $script:existingUserName `
                                                                         -PasswordChangeNotAllowed $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
             }

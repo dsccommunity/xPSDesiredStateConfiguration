@@ -121,7 +121,7 @@ try
 
                 It 'Should return a Hashtable' {
                     $getTargetResourceResult = Get-TargetResource -Name $script:testFeatureName
-                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                    $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                 }
 
                 It 'Should call Assert-ResourcePrerequisitesValid with the feature name' {
@@ -151,11 +151,11 @@ try
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { return $script:fakeEnabledFeature }
 
                 It 'Should return true when Ensure set to Present' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -Be $true
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -BeTrue
                 }
 
                 It 'Should return false when Ensure set to Absent' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -Be $false
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -BeFalse
                 }
 
             }
@@ -165,11 +165,11 @@ try
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { return $script:fakeDisabledFeature }
 
                 It 'Should return false when Ensure set to Present' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -Be $false
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -BeFalse
                 }
 
                 It 'Should return true when Ensure set to Absent' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -Be $true
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -BeTrue
                 }
             }
 
@@ -178,11 +178,11 @@ try
                 Mock Dism\Get-WindowsOptionalFeature { $FeatureName -eq $script:testFeatureName } -MockWith { }
 
                 It 'Should return false when Ensure set to Present' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -Be $false
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Present' | Should -BeFalse
                 }
 
                 It 'Should return true when Ensure set to Absent' {
-                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -Be $true
+                    Test-TargetResource -Name $testFeatureName -Ensure 'Absent' | Should -BeTrue
                 }
             }
 
@@ -333,7 +333,7 @@ try
 
                     foreach ($objectNumber in @(1, 2, 3))
                     {
-                        $propertiesAsStrings.Contains("Name = Object $objectNumber, Value = Value $objectNumber, Path = Path $objectNumber") | Should -Be $true
+                        $propertiesAsStrings.Contains("Name = Object $objectNumber, Value = Value $objectNumber, Path = Path $objectNumber") | Should -BeTrue
                     }
                 }
             }

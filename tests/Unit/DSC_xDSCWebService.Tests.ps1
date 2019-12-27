@@ -728,7 +728,7 @@ try
 
                         Set-TargetResource @testParameters @setTargetPaths -Ensure Present
 
-                        Test-Path -Path $Value | Should -Be $true
+                        Test-Path -Path $Value | Should -BeTrue
                     }
                 }
 
@@ -1165,10 +1165,10 @@ try
 
                 Context -Name 'DSC Service is not installed' -Fixture {
                     It 'Should return $true when Ensure is Absent' {
-                        Test-TargetResource @testParameters -Ensure Absent | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Absent | Should -BeTrue
                     }
                     It 'Should return $false when Ensure is Present' {
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
                     }
                 }
 
@@ -1179,24 +1179,24 @@ try
                     Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $false }
 
                     It 'Should return $false when Ensure is Absent' {
-                        Test-TargetResource @testParameters -Ensure Absent | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Absent | Should -BeFalse
                     }
 
                     It 'Should return $false if Port doesn''t match' {
-                        Test-TargetResource @testParameters -Ensure Present -Port 8081 | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present -Port 8081 | Should -BeFalse
                     }
 
                     It 'Should return $false if Certificate Thumbprint is set' {
                         $altTestParameters = $script:testParameters.Clone()
                         $altTestParameters.CertificateThumbprint = $script:certificateData[0].Thumbprint
 
-                        Test-TargetResource @altTestParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @altTestParameters -Ensure Present | Should -BeFalse
                     }
 
                     It 'Should return $false if Physical Path doesn''t match' {
                         Mock -CommandName Test-WebsitePath -MockWith { $true } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1209,7 +1209,7 @@ try
                     Mock -CommandName Test-WebsitePath -MockWith { $false } -Verifiable
 
                     It 'Should return $false when State is set to Stopped' {
-                        Test-TargetResource @testParameters -Ensure Present -State Stopped | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present -State Stopped | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1217,7 +1217,7 @@ try
                     It 'Should return $false when dbProvider is not set' {
                         Mock -CommandName Get-WebConfigAppSetting -MockWith {''} -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1235,7 +1235,7 @@ try
                             $AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath  | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath  | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1249,7 +1249,7 @@ try
                             $AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1265,7 +1265,7 @@ try
                             $AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1277,7 +1277,7 @@ try
                             $false} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1297,7 +1297,7 @@ try
                             $AppSettingName -eq 'ModulePath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -ModulePath $modulePath | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Present -ModulePath $modulePath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1310,7 +1310,7 @@ try
                             $AppSettingName -eq 'ModulePath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1329,7 +1329,7 @@ try
                             $AppSettingName -eq 'ConfigurationPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1344,7 +1344,7 @@ try
                             $AppSettingName -eq 'ConfigurationPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1359,7 +1359,7 @@ try
                             $registrationKeyPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1374,7 +1374,7 @@ try
                             $AppSettingName -eq 'RegistrationKeyPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1390,7 +1390,7 @@ try
                             $ModuleName -eq 'IISSelfSignedCertModule(32bit)'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -Be $true
+                        Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1406,7 +1406,7 @@ try
                             $ModuleName -eq 'IISSelfSignedCertModule(32bit)'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1419,7 +1419,7 @@ try
                     #endregion
 
                     It 'Should return $false if Certificate Thumbprint is set to AllowUnencryptedTraffic' {
-                        Test-TargetResource @testParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
                     }
 
                     It 'Should return $false if Certificate Subject does not match the current certificate' {
@@ -1428,7 +1428,7 @@ try
 
                         Mock -CommandName Find-CertificateThumbprintWithSubjectAndTemplateName -MockWith {'ZZYYXXWWVVUUTTSSRRQQPPOONNMMLLKKJJIIHHGG'}
 
-                        Test-TargetResource @altTestParameters -Ensure Present -CertificateSubject 'Invalid Certifcate' | Should -Be $false
+                        Test-TargetResource @altTestParameters -Ensure Present -CertificateSubject 'Invalid Certifcate' | Should -BeFalse
                     }
 
                     Mock -CommandName Test-WebsitePath -MockWith { $false } -Verifiable
@@ -1443,7 +1443,7 @@ try
                         Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
                         Mock -CommandName Test-UseSecurityBestPractice -MockWith { $false } -Verifiable
 
-                        Test-TargetResource @altTestParameters -Ensure Present | Should -Be $false
+                        Test-TargetResource @altTestParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1469,12 +1469,12 @@ try
                 Mock -CommandName Get-ItemProperty -MockWith {$endpointPhysicalPath}
 
                 It 'Should return $true if Endpoint PhysicalPath doesn''t match PhysicalPath' {
-                    Test-WebsitePath -EndpointName 'PesterSite' -PhysicalPath 'TestDrive:\SitePath2' | Should -Be $true
+                    Test-WebsitePath -EndpointName 'PesterSite' -PhysicalPath 'TestDrive:\SitePath2' | Should -BeTrue
 
                     Assert-VerifiableMock
                 }
                 It 'Should return $true if Endpoint PhysicalPath doesn''t match PhysicalPath' {
-                    Test-WebsitePath -EndpointName 'PesterSite' -PhysicalPath $endpointPhysicalPath | Should -Be $false
+                    Test-WebsitePath -EndpointName 'PesterSite' -PhysicalPath $endpointPhysicalPath | Should -BeFalse
 
                     Assert-VerifiableMock
                 }
@@ -1514,7 +1514,7 @@ try
                         [System.String]
                         $Value
                     )
-                    Test-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key -ExpectedAppSettingValue $Value | Should -Be $true
+                    Test-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key -ExpectedAppSettingValue $Value | Should -BeTrue
                 }
                 It 'Should return $false when ExpectedAppSettingValue is not <Value> for <Key>.' -TestCases $testCases {
                     param
@@ -1527,7 +1527,7 @@ try
                         [System.String]
                         $Value
                     )
-                    Test-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key -ExpectedAppSettingValue 'InvalidValue' | Should -Be $false
+                    Test-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key -ExpectedAppSettingValue 'InvalidValue' | Should -BeFalse
                 }
             }
             Describe -Name 'DSC_xDSCWebService\Get-WebConfigAppSetting' -Fixture {
@@ -1581,16 +1581,16 @@ try
                 $null = New-Item -Path $script:webConfigPath -Value $script:webConfig
 
                 It 'Should return $true if Module is present in Web.config and expected to be installed.' {
-                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' -ExpectedInstallationStatus $true | Should -Be $true
+                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' -ExpectedInstallationStatus $true | Should -BeTrue
                 }
                 It 'Should return $false if Module is present in Web.config and not expected to be installed.' {
-                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' -ExpectedInstallationStatus $false | Should -Be $false
+                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' -ExpectedInstallationStatus $false | Should -BeFalse
                 }
                 It 'Should return $true if Module is not present in Web.config and not expected to be installed.' {
-                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' -ExpectedInstallationStatus $false | Should -Be $true
+                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' -ExpectedInstallationStatus $false | Should -BeTrue
                 }
                 It 'Should return $false if Module is not present in Web.config and expected to be installed.' {
-                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' -ExpectedInstallationStatus $true | Should -Be $false
+                    Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' -ExpectedInstallationStatus $true | Should -BeFalse
                 }
             }
             Describe -Name 'DSC_xDSCWebService\Get-WebConfigModulesSetting' -Fixture {

@@ -191,7 +191,7 @@ try
                 Set-TargetResource -Name $envVar -Value $val
 
                 # Test the created environmnet variable
-                Test-TargetResource -Name $envVar | Should -Be $true
+                Test-TargetResource -Name $envVar | Should -BeTrue
 
                 # Remove the created test variable
                 Set-TargetResource -Name $envVar -Ensure Absent
@@ -203,7 +203,7 @@ try
                 Set-TargetResource -Name $envVar -Value $val
 
                 # Verify the environmnet variable exists
-                Test-TargetResource -Name $envVar -Value $val | Should -Be $true
+                Test-TargetResource -Name $envVar -Value $val | Should -BeTrue
 
                 # Remove the created test variable
                 Set-TargetResource -Name $envVar -Ensure Absent
@@ -214,7 +214,7 @@ try
                 Set-TargetResource -Name $envVar -Ensure Absent
 
                 # Verify the environmnet variable exists
-                Test-TargetResource -Name $envVar -Ensure Absent | Should -Be $true
+                Test-TargetResource -Name $envVar -Ensure Absent | Should -BeTrue
 
                 # Remove the created test variable
                 Set-TargetResource -Name $envVar -Ensure Absent
@@ -228,7 +228,7 @@ try
                 $subpath = 'B'
 
                 # Test a sub-path exists in environment variable
-                Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should -Be $true
+                Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should -BeTrue
 
                 # Remove the created test variable
                 Set-TargetResource -Name $envVar -Ensure Absent
@@ -241,7 +241,7 @@ try
 
                 $subpath = 'B;a;c'
 
-                Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should -Be $true
+                Test-TargetResource -Name $envVar -Value $subpath -Path $true | Should -BeTrue
 
                 # Remove the created test variable
                 Set-TargetResource -Name $envVar -Ensure Absent
@@ -254,7 +254,7 @@ try
 
                 $subpath = 'D;E'
 
-                Test-TargetResource -Name $envVar -Value $subpath -Path $true -Ensure Absent | Should -Be $true
+                Test-TargetResource -Name $envVar -Value $subpath -Path $true -Ensure Absent | Should -BeTrue
 
                 # Remove the created test variable
                 Set-TargetResource -Name $envVar -Ensure Absent

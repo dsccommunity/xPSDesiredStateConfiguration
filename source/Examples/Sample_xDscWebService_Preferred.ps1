@@ -90,9 +90,9 @@ Configuration Sample_xDscWebService_Preferred
         $ApplicationPoolName
     )
 
-    Import-DscResource -ModuleName 'NetworkingDsc'
+    Import-DscResource -ModuleName 'NetworkingDsc' -ModuleVersion 7.4.0.0
     Import-DSCResource -ModuleName 'xPSDesiredStateConfiguration'
-    Import-DscResource -ModuleName 'xWebAdministration'
+    Import-DscResource -ModuleName 'xWebAdministration' -ModuleVersion 3.0.0.0
 
     Node $NodeName
     {

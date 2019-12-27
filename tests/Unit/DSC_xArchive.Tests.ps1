@@ -159,7 +159,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -233,7 +233,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -314,7 +314,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -396,7 +396,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -477,7 +477,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -559,7 +559,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -653,7 +653,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a Hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return a Hashtable with 3 properties' {
@@ -1424,7 +1424,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-TargetResource @testTargetResourceParameters | Should -Be $false
+                        Test-TargetResource @testTargetResourceParameters | Should -BeFalse
                     }
                 }
 
@@ -1451,7 +1451,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-TargetResource @testTargetResourceParameters | Should -Be $true
+                        Test-TargetResource @testTargetResourceParameters | Should -BeTrue
                     }
                 }
 
@@ -1480,7 +1480,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-TargetResource @testTargetResourceParameters | Should -Be $true
+                        Test-TargetResource @testTargetResourceParameters | Should -BeTrue
                     }
                 }
 
@@ -1507,7 +1507,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-TargetResource @testTargetResourceParameters | Should -Be $false
+                        Test-TargetResource @testTargetResourceParameters | Should -BeFalse
                     }
                 }
 
@@ -1538,7 +1538,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-TargetResource @testTargetResourceParameters | Should -Be $true
+                        Test-TargetResource @testTargetResourceParameters | Should -BeTrue
                     }
                 }
 
@@ -1567,7 +1567,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-TargetResource @testTargetResourceParameters | Should -Be $true
+                        Test-TargetResource @testTargetResourceParameters | Should -BeTrue
                     }
                 }
             }
@@ -1843,7 +1843,7 @@ try
                     $testChecksumIsShaResult = Test-ChecksumIsSha @testChecksumIsShaParameters
 
                     It 'Should return true' {
-                        $testChecksumIsShaResult | Should -Be $true
+                        $testChecksumIsShaResult | Should -BeTrue
                     }
                 }
 
@@ -1859,7 +1859,7 @@ try
                     $testChecksumIsShaResult = Test-ChecksumIsSha @testChecksumIsShaParameters
 
                     It 'Should return false' {
-                        $testChecksumIsShaResult | Should -Be $false
+                        $testChecksumIsShaResult | Should -BeFalse
                     }
                 }
 
@@ -1875,7 +1875,7 @@ try
                     $testChecksumIsShaResult = Test-ChecksumIsSha @testChecksumIsShaParameters
 
                     It 'Should return false' {
-                        $testChecksumIsShaResult | Should -Be $false
+                        $testChecksumIsShaResult | Should -BeFalse
                     }
                 }
             }
@@ -2025,7 +2025,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should -Be $true
+                        Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should -BeTrue
                     }
                 }
 
@@ -2114,7 +2114,7 @@ try
 
                     It 'Should return false' {
                         $script:timesGetFileHashCalled = 0
-                        Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should -Be $false
+                        Test-FileHashMatchesArchiveEntryHash @testFileHashMatchesArchiveEntryHashParameters | Should -BeFalse
                     }
                 }
             }
@@ -2312,7 +2312,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $false
+                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -BeFalse
                     }
                 }
 
@@ -2372,7 +2372,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $true
+                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -BeTrue
                     }
                 }
 
@@ -2428,7 +2428,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $false
+                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -BeFalse
                     }
                 }
 
@@ -2484,7 +2484,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -Be $true
+                        Test-FileMatchesArchiveEntryByChecksum @testFileMatchesArchiveEntryByChecksumParameters | Should -BeTrue
                     }
                 }
             }
@@ -2500,7 +2500,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $false
+                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -BeFalse
                     }
                 }
 
@@ -2514,7 +2514,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $false
+                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -BeFalse
                     }
                 }
 
@@ -2528,7 +2528,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $false
+                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -BeFalse
                     }
                 }
 
@@ -2542,7 +2542,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $true
+                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -BeTrue
                     }
                 }
 
@@ -2556,7 +2556,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -Be $true
+                        Test-ArchiveEntryIsDirectory @testArchiveEntryNameIsDirectoryPathParameters | Should -BeTrue
                     }
                 }
             }
@@ -2654,7 +2654,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -2740,7 +2740,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -2826,7 +2826,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -2917,7 +2917,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $true
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeTrue
                     }
                 }
 
@@ -2999,7 +2999,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -3085,7 +3085,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -3171,7 +3171,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -3257,7 +3257,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $true
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeTrue
                     }
                 }
 
@@ -3350,7 +3350,7 @@ try
                     }
 
                     It 'Should return false' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $false
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeFalse
                     }
                 }
 
@@ -3445,7 +3445,7 @@ try
                     }
 
                     It 'Should return true' {
-                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -Be $true
+                        Test-ArchiveExistsAtDestination @testArchiveExistsAtDestinationParameters | Should -BeTrue
                     }
                 }
             }

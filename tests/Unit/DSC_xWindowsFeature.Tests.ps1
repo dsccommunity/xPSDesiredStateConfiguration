@@ -237,7 +237,7 @@ try
                         $getTargetResourceResult.Name | Should -Be $script:testWindowsFeatureName2
                         $getTargetResourceResult.DisplayName | Should -Be $script:mockWindowsFeatures[$script:testWindowsFeatureName2].DisplayName
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
-                        $getTargetResourceResult.IncludeAllSubFeature | Should -Be $false
+                        $getTargetResourceResult.IncludeAllSubFeature | Should -BeFalse
                     }
 
                     It 'Should return the correct hashtable when on a 2008 Server' {
@@ -247,7 +247,7 @@ try
                         $getTargetResourceResult.Name | Should -Be $script:testWindowsFeatureName2
                         $getTargetResourceResult.DisplayName | Should -Be $script:mockWindowsFeatures[$script:testWindowsFeatureName2].DisplayName
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
-                        $getTargetResourceResult.IncludeAllSubFeature | Should -Be $false
+                        $getTargetResourceResult.IncludeAllSubFeature | Should -BeFalse
                     }
 
                     It 'Should return the correct hashtable when on a 2008 Server and Credential is passed' {
@@ -264,7 +264,7 @@ try
                         $getTargetResourceResult.Name | Should -Be $script:testWindowsFeatureName2
                         $getTargetResourceResult.DisplayName | Should -Be $script:mockWindowsFeatures[$script:testWindowsFeatureName2].DisplayName
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
-                        $getTargetResourceResult.IncludeAllSubFeature | Should -Be $false
+                        $getTargetResourceResult.IncludeAllSubFeature | Should -BeFalse
 
                         Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
 
@@ -279,7 +279,7 @@ try
                         $getTargetResourceResult.Name | Should -Be $script:testWindowsFeatureName1
                         $getTargetResourceResult.DisplayName | Should -Be $script:mockWindowsFeatures[$script:testWindowsFeatureName1].DisplayName
                         $getTargetResourceResult.Ensure | Should -Be 'Absent'
-                        $getTargetResourceResult.IncludeAllSubFeature | Should -Be $true
+                        $getTargetResourceResult.IncludeAllSubFeature | Should -BeTrue
 
                         Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
                     }
@@ -292,7 +292,7 @@ try
                         $getTargetResourceResult.Name | Should -Be $script:testWindowsFeatureName1
                         $getTargetResourceResult.DisplayName | Should -Be $script:mockWindowsFeatures[$script:testWindowsFeatureName1].DisplayName
                         $getTargetResourceResult.Ensure | Should -Be 'Absent'
-                        $getTargetResourceResult.IncludeAllSubFeature | Should -Be $false
+                        $getTargetResourceResult.IncludeAllSubFeature | Should -BeFalse
 
                         Assert-MockCalled -CommandName Test-IsWinServer2008R2SP1 -Times 1 -Exactly -Scope It
 
@@ -488,7 +488,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Absent' `
                                                     -IncludeAllSubFeature $false
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     }
 
@@ -499,7 +499,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Present' `
                                                     -IncludeAllSubFeature $false
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                         $script:mockWindowsFeatures[$script:testWindowsFeatureName1].Installed = $false
                     }
@@ -511,7 +511,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Present' `
                                                     -IncludeAllSubFeature $true
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 4 -Exactly -Scope It
                         $script:mockWindowsFeatures[$script:testWindowsFeatureName1].Installed = $false
                     }
@@ -523,7 +523,7 @@ try
                                                     -Ensure 'Absent' `
                                                     -IncludeAllSubFeature $false `
                                                     -Credential $script:testCredential
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                         Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
                     }
                 }
@@ -535,7 +535,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Present' `
                                                     -IncludeAllSubFeature $false
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     }
 
@@ -544,7 +544,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Absent' `
                                                     -IncludeAllSubFeature $false
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                         $script:mockWindowsFeatures[$script:testWindowsFeatureName1].Installed = $false
                     }
@@ -553,7 +553,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Present' `
                                                     -IncludeAllSubFeature $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                     }
 
@@ -561,7 +561,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Absent' `
                                                     -IncludeAllSubFeature $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 2 -Exactly -Scope It
                     }
 
@@ -570,7 +570,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Absent' `
                                                     -IncludeAllSubFeature $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 1 -Exactly -Scope It
                         $script:mockWindowsFeatures[$script:testWindowsFeatureName1].Installed = $false
                     }
@@ -581,7 +581,7 @@ try
                         $testTargetResourceResult = Test-TargetResource -Name $script:testWindowsFeatureName1 `
                                                     -Ensure 'Present' `
                                                     -IncludeAllSubFeature $true
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Get-WindowsFeature -Times 3 -Exactly -Scope It
                         $script:mockWindowsFeatures[$script:testWindowsFeatureName1].Installed = $false
                         $script:mockWindowsFeatures[$script:testSubFeatureName2].Installed = $true
@@ -594,7 +594,7 @@ try
                                                     -Ensure 'Present' `
                                                     -IncludeAllSubFeature $false `
                                                     -Credential $script:testCredential
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                         Assert-MockCalled -CommandName Invoke-Command -Times 1 -Exactly -Scope It
                     }
                 }

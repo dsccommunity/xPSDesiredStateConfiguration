@@ -64,7 +64,7 @@ try
                     GroupName = $testGroupName
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeFalse
 
                 try
                 {
@@ -74,7 +74,7 @@ try
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
 
-                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -Members @() | Should -Be $true
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -Members @() | Should -BeTrue
                 }
                 finally
                 {
@@ -94,7 +94,7 @@ try
                     GroupName = $testGroupName
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeTrue
 
                 {
                     . $script:confgurationNoMembersFilePath -ConfigurationName $configurationName
@@ -102,7 +102,7 @@ try
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeTrue
             }
 
             It 'Should add a member to the built-in Users group with MembersToInclude' {
@@ -115,7 +115,7 @@ try
                     MembersToInclude = $script:testUsername1
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeTrue
 
                 {
                     . $script:confgurationWithMembersToIncludeExcludeFilePath -ConfigurationName $configurationName
@@ -123,7 +123,7 @@ try
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToInclude $script:testUsername1 | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToInclude $script:testUsername1 | Should -BeTrue
             }
 
             It 'Should create a group with two test users using Members' {
@@ -138,7 +138,7 @@ try
                     Members = $groupMembers
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeFalse
 
                 try
                 {
@@ -148,7 +148,7 @@ try
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
 
-                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -Members $groupMembers | Should -Be $true
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -Members $groupMembers | Should -BeTrue
                 }
                 finally
                 {
@@ -180,7 +180,7 @@ try
                     Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeTrue
 
                 try
                 {
@@ -190,7 +190,7 @@ try
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
 
-                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should -Be $true
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToInclude $groupMembers | Should -BeTrue
                 }
                 finally
                 {
@@ -222,7 +222,7 @@ try
                     Write-Verbose "Group $testGroupName already exists OR there was an error creating it."
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeTrue
 
                 try
                 {
@@ -232,7 +232,7 @@ try
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
 
-                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should -Be $true
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName -MembersToExclude $groupMembersToExclude | Should -BeTrue
                 }
                 finally
                 {
@@ -252,11 +252,11 @@ try
                     GroupName = $testGroupName
                 }
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeFalse
 
                 DSC_xGroupResource.TestHelper\New-Group -GroupName $testGroupName
 
-                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $true
+                DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeTrue
 
                 try
                 {
@@ -266,7 +266,7 @@ try
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
 
-                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -Be $false
+                    DSC_xGroupResource.TestHelper\Test-GroupExists -GroupName $testGroupName | Should -BeFalse
                 }
                 finally
                 {

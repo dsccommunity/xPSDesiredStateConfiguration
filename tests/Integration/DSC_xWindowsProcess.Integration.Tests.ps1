@@ -6,23 +6,31 @@ param ()
     They must be run in the order given - if one test fails, subsequent tests may
     also fail.
 #>
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
 
-Import-Module -Name (Join-Path -Path (Split-Path $PSScriptRoot -Parent) `
-                               -ChildPath 'CommonTestHelper.psm1') `
-                               -Force
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'DSC_xWindowsProcess'
 
-if (Test-SkipContinuousIntegrationTask -Type 'Integration')
+try
 {
-    return
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
 }
 
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'DSC_xWindowsProcess' `
-    -TestType 'Integration'
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Unit'
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
 <#
     .SYNOPSIS
         Starts the specified DSC Configuration and verifies that it executes
@@ -503,87 +511,86 @@ function Invoke-CommonResourceTesting
     }
 }
 
-try
-{
-    # Setup test process paths.
-    $notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
-    $powershellExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'WindowsPowershell', 'v1.0', 'powershell.exe'))
-    $iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
+        # Setup test process paths.
+        $notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
+        $powershellExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'WindowsPowershell', 'v1.0', 'powershell.exe'))
+        $iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
-    # Setup test combination variables
-    $testPathAndArgsCombos = @(
-        @{
-            Description = 'Process Path Without Spaces, No Arguments'
-            Path = $notepadExePath
-            Arguments = ''
-        }
-
-        @{
-            Description = 'Process Path With Spaces, No Arguments'
-            Path = $iexplorerExePath
-            Arguments = ''
-        }
-
-        @{
-            Description = 'Process Path Without Spaces, Arguments Without Spaces'
-            Path = $powershellExePath
-            Arguments = "30|Start-Sleep"
-        }
-
-        @{
-            Description = 'Process Path With Spaces, Arguments Without Spaces'
-            Path = $iexplorerExePath
-            Arguments = 'https://github.com/PowerShell/xPSDesiredStateConfiguration'
-        }
-
-        @{
-            Description = 'Process Path Without Spaces, Arguments With Spaces'
-            Path = $powershellExePath
-            Arguments = "Start-Sleep -Seconds 30"
-        }
-
-        @{
-            Description = 'Process Path With Spaces, Arguments With Spaces'
-            Path = $iexplorerExePath
-            Arguments = "https://github.com/PowerShell/xPSDesiredStateConfiguration with spaces"
-        }
-    )
-
-    $credentialCombos = @(
-        @{
-            Description = 'No Credentials'
-            Credential = $null
-            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsProcess.config.ps1'
-        }
-
-        @{
-            Description = 'With Credentials'
-            Credential = Get-TestAdministratorAccountCredential
-            ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsProcessWithCredential.config.ps1'
-        }
-    )
-
-    # Perform tests on each variable combination
-    foreach ($pathAndArgsCombo in $testPathAndArgsCombos)
-    {
-        foreach ($credentialCombo in $credentialCombos)
-        {
-            $params = @{
-                Path = $pathAndArgsCombo.Path
-                Arguments = $pathAndArgsCombo.Arguments
-                Credential = $credentialCombo.Credential
-                ConfigFile = $credentialCombo.ConfigFile
+        # Setup test combination variables
+        $testPathAndArgsCombos = @(
+            @{
+                Description = 'Process Path Without Spaces, No Arguments'
+                Path = $notepadExePath
+                Arguments = ''
             }
 
-            $params.Add('DescribeLabel', "$($pathAndArgsCombo.Description), $($credentialCombo.Description)")
-            $params.Remove('FolderDescription')
-            $params.Remove('CredentialDescription')
+            @{
+                Description = 'Process Path With Spaces, No Arguments'
+                Path = $iexplorerExePath
+                Arguments = ''
+            }
 
-            Invoke-CommonResourceTesting @params
+            @{
+                Description = 'Process Path Without Spaces, Arguments Without Spaces'
+                Path = $powershellExePath
+                Arguments = "30|Start-Sleep"
+            }
+
+            @{
+                Description = 'Process Path With Spaces, Arguments Without Spaces'
+                Path = $iexplorerExePath
+                Arguments = 'https://github.com/PowerShell/xPSDesiredStateConfiguration'
+            }
+
+            @{
+                Description = 'Process Path Without Spaces, Arguments With Spaces'
+                Path = $powershellExePath
+                Arguments = "Start-Sleep -Seconds 30"
+            }
+
+            @{
+                Description = 'Process Path With Spaces, Arguments With Spaces'
+                Path = $iexplorerExePath
+                Arguments = "https://github.com/PowerShell/xPSDesiredStateConfiguration with spaces"
+            }
+        )
+
+        $credentialCombos = @(
+            @{
+                Description = 'No Credentials'
+                Credential = $null
+                ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsProcess.config.ps1'
+            }
+
+            @{
+                Description = 'With Credentials'
+                Credential = Get-TestAdministratorAccountCredential
+                ConfigFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xWindowsProcessWithCredential.config.ps1'
+            }
+        )
+
+        # Perform tests on each variable combination
+        foreach ($pathAndArgsCombo in $testPathAndArgsCombos)
+        {
+            foreach ($credentialCombo in $credentialCombos)
+            {
+                $params = @{
+                    Path = $pathAndArgsCombo.Path
+                    Arguments = $pathAndArgsCombo.Arguments
+                    Credential = $credentialCombo.Credential
+                    ConfigFile = $credentialCombo.ConfigFile
+                }
+
+                $params.Add('DescribeLabel', "$($pathAndArgsCombo.Description), $($credentialCombo.Description)")
+                $params.Remove('FolderDescription')
+                $params.Remove('CredentialDescription')
+
+                Invoke-CommonResourceTesting @params
+            }
         }
     }
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

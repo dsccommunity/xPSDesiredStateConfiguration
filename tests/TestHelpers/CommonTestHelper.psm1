@@ -280,7 +280,7 @@ function Invoke-GetTargetResourceUnitTest
     $getTargetResourceResult = Get-TargetResource @GetTargetResourceParameters
 
     It 'Should return a Hashtable' {
-        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
     }
 
     It "Should return a Hashtable with $($ExpectedReturnValue.Keys.Count) properties" {
@@ -658,13 +658,13 @@ function Test-SetTargetResourceWithWhatIf
 
         if ($null -eq $ExpectedOutput -or $ExpectedOutput.Count -eq 0)
         {
-            [System.String]::IsNullOrEmpty($transcriptContent) | Should -Be $true
+            [System.String]::IsNullOrEmpty($transcriptContent) | Should -BeTrue
         }
         else
         {
             foreach ($expectedOutputPiece in $ExpectedOutput)
             {
-                $transcriptContent.Contains($expectedOutputPiece) | Should -Be $true
+                $transcriptContent.Contains($expectedOutputPiece) | Should -BeTrue
             }
         }
     }

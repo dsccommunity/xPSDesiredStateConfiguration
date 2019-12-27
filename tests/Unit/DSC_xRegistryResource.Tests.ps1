@@ -91,7 +91,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return 5 hashtable properties' {
@@ -159,7 +159,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return 5 hashtable properties' {
@@ -237,7 +237,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return 5 hashtable properties' {
@@ -333,7 +333,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return 5 hashtable properties' {
@@ -426,7 +426,7 @@ try
                     $getTargetResourceResult = Get-TargetResource @getTargetResourceParameters
 
                     It 'Should return a hashtable' {
-                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -Be $true
+                        $getTargetResourceResult -is [System.Collections.Hashtable] | Should -BeTrue
                     }
 
                     It 'Should return 5 hashtable properties' {
@@ -1916,11 +1916,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return True' {
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
                 }
 
@@ -1957,11 +1957,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2018,11 +2018,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return True' {
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
                 }
 
@@ -2064,11 +2064,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2111,11 +2111,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2152,11 +2152,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return True' {
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
                 }
 
@@ -2198,11 +2198,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2245,11 +2245,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2292,11 +2292,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2338,11 +2338,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return True' {
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
                 }
 
@@ -2393,11 +2393,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return True' {
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
                 }
 
@@ -2457,11 +2457,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return True' {
-                        $testTargetResourceResult | Should -Be $true
+                        $testTargetResourceResult | Should -BeTrue
                     }
                 }
 
@@ -2512,11 +2512,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
 
@@ -2580,11 +2580,11 @@ try
                     $testTargetResourceResult = Test-TargetResource @testTargetResourceParameters
 
                     It 'Should return a boolean' {
-                        $testTargetResourceResult -is [System.Boolean] | Should -Be $true
+                        $testTargetResourceResult -is [System.Boolean] | Should -BeTrue
                     }
 
                     It 'Should return False' {
-                        $testTargetResourceResult | Should -Be $false
+                        $testTargetResourceResult | Should -BeFalse
                     }
                 }
             }
@@ -3505,7 +3505,7 @@ try
                         $testRegistryKeyValuesMatchResult = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters
 
                         It 'Should return true' {
-                            $testRegistryKeyValuesMatchResult | Should -Be $true
+                            $testRegistryKeyValuesMatchResult | Should -BeTrue
                         }
                     }
 
@@ -3523,7 +3523,7 @@ try
                         $testRegistryKeyValuesMatchResult = Test-RegistryKeyValuesMatch @testRegistryKeyValuesMatchParameters
 
                         It 'Should return false' {
-                            $testRegistryKeyValuesMatchResult | Should -Be $false
+                            $testRegistryKeyValuesMatchResult | Should -BeFalse
                         }
                     }
                 }

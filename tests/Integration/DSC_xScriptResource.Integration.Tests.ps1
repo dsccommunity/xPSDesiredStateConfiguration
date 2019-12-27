@@ -74,7 +74,7 @@ try
                 }
 
                 It 'Should have removed test file before config runs' {
-                    Test-Path -Path $resourceParameters.FilePath | Should -Be $false
+                    Test-Path -Path $resourceParameters.FilePath | Should -BeFalse
                 }
 
                 It 'Should compile and apply the MOF without throwing' {
@@ -86,7 +86,7 @@ try
                 }
 
                 It 'Should have created the test file' {
-                    Test-Path -Path $resourceParameters.FilePath | Should -Be $true
+                    Test-Path -Path $resourceParameters.FilePath | Should -BeTrue
                 }
 
                 It 'Should have set file content correctly' {
@@ -110,7 +110,7 @@ try
                 }
 
                 It 'Should have removed test file before config runs' {
-                    Test-Path -Path $resourceParameters.FilePath | Should -Be $false
+                    Test-Path -Path $resourceParameters.FilePath | Should -BeFalse
                 }
 
                 $configData = @{
@@ -132,7 +132,7 @@ try
                 }
 
                 It 'Should have created the test file' {
-                    Test-Path -Path $resourceParameters.FilePath | Should -Be $true
+                    Test-Path -Path $resourceParameters.FilePath | Should -BeTrue
                 }
 
                 It 'Should have set file content correctly' {

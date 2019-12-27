@@ -97,7 +97,7 @@ Describe PullServerInstallationTests {
             Set-DscLocalConfigurationManager -Path $script:dscTestMetaConfigPath -Verbose:$VerbosePreference -Force
 
             $DscLocalConfigNames = (Get-DscLocalConfigurationManager).ConfigurationDownloadManagers.ConfigurationNames
-            $DscLocalConfigNames -contains $DscTestConfigName | Should -Be $true
+            $DscLocalConfigNames -contains $DscTestConfigName | Should -BeTrue
         }
 
         It "Creates mof and checksum files in $DscConfigPath" {

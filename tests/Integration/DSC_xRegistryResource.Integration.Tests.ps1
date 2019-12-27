@@ -114,7 +114,7 @@ try
 
                     # Verify that the registry key has been created
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
-                    $registryKeyExists | Should -Be $true
+                    $registryKeyExists | Should -BeTrue
                 }
 
                 It 'Should create a new registry key tree' {
@@ -124,7 +124,7 @@ try
 
                     # Verify that the registry key has been created
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
-                    $registryKeyExists | Should -Be $true
+                    $registryKeyExists | Should -BeTrue
                 }
 
                 It 'Should remove a registry key' {
@@ -133,14 +133,14 @@ try
 
                     # Verify that the registry key exists before removal
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
-                    $registryKeyExists | Should -Be $true
+                    $registryKeyExists | Should -BeTrue
 
                     # Now remove the TestKey
                     Set-TargetResource -Key $script:registryKeyPath -ValueName '' -Ensure 'Absent'
 
                     # Verify that the registry key has been removed
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
-                    $registryKeyExists | Should -Be $false
+                    $registryKeyExists | Should -BeFalse
                 }
 
                 It 'Should remove a registry key (Common registry path)' {
@@ -151,14 +151,14 @@ try
 
                     # Verify that the registry key exists before removal
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
-                    $registryKeyExists | Should -Be $true
+                    $registryKeyExists | Should -BeTrue
 
                     # Now remove the TestKey
                     Set-TargetResource -Key $commonRegistryKeyPath -ValueName '' -Ensure 'Absent'
 
                     # Verify that the registry key has been removed
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $script:registryKeyPath
-                    $registryKeyExists | Should -Be $false
+                    $registryKeyExists | Should -BeFalse
                 }
 
                 It 'Should remove a registry key tree' {
@@ -169,14 +169,14 @@ try
 
                     # Verify that the registry key tree exists before removal
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
-                    $registryKeyExists | Should -Be $true
+                    $registryKeyExists | Should -BeTrue
 
                     # Remove the test registry key tree
                     Set-TargetResource -Key $registryKeyTreePath -ValueName '' -Ensure 'Absent'
 
                     # Verify that the registry key tree has been removed
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
-                    $registryKeyExists | Should -Be $false
+                    $registryKeyExists | Should -BeFalse
                 }
 
                 It 'Should remove a registry key tree (Common registry path)' {
@@ -188,14 +188,14 @@ try
 
                     # Verify that the registry key tree exists before removal
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
-                    $registryKeyExists | Should -Be $true
+                    $registryKeyExists | Should -BeTrue
 
                     # Remove the test registry key tree
                     Set-TargetResource -Key $commonRegistryKeyTreePath -ValueName '' -Ensure 'Absent'
 
                     # Verify that the registry key tree has been removed
                     $registryKeyExists = Test-RegistryKeyExists -KeyPath $registryKeyTreePath
-                    $registryKeyExists | Should -Be $false
+                    $registryKeyExists | Should -BeFalse
                 }
 
                 It 'Should create a new string registry key value' {
@@ -208,7 +208,7 @@ try
 
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $valueType
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
                 }
 
                 It 'Should create a new binary registry key value' {
@@ -221,7 +221,7 @@ try
 
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $valueType
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
                 }
 
                 It 'Should set the default value of a registry key' {
@@ -233,7 +233,7 @@ try
 
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName '(default)' -ValueData $valueData -ValueType 'String'
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
                 }
 
                 It 'Should remove a registry key value' {
@@ -246,14 +246,14 @@ try
 
                     # Verify that the registry key value exists before removal
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
 
                     # Remove the registry value
                     Set-TargetResource -Key $script:registryKeyPath -ValueName $valueName -Ensure 'Absent'
 
                     # Verify that the registry key value has been removed
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName
-                    $registryValueExists | Should -Be $false
+                    $registryValueExists | Should -BeFalse
                 }
 
                 It 'Should remove the default value for a registry key' {
@@ -266,14 +266,14 @@ try
 
                     # Verify that the registry key value exists before removal
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName '(default)'
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
 
                     # Remove the registry value
                     Set-TargetResource -Key $script:registryKeyPath -ValueName $valueName -Ensure 'Absent'
 
                     # Verify that the registry key value has been removed
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName '(default)'
-                    $registryValueExists | Should -Be $false
+                    $registryValueExists | Should -BeFalse
                 }
 
                 It 'Should create a new key and value with path containing forward slashes' {
@@ -286,46 +286,46 @@ try
 
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $registryKeyPathWithForwardSlashes -ValueName $valueName  -ValueData $valueData
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
                 }
 
                 # Test-TargetResource
                 It 'Should return true for an existing registry key' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName ''
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return false for a registry key that does not exist' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environmentally'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName ''
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
 
                 It 'Should return true for an existing registry value' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
                     $valueName = 'path'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName $valueName
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return false for a registry value that does not exist' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
                     $valueName = 'NonExisting'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName $valueName
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
 
                 It 'Should return true when Ensure is Absent and registry key does not exist' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environmentally'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName '' -Ensure 'Absent'
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return false when Ensure is Absent and registry key exists' {
                     $registryKeyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName '' -Ensure 'Absent'
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
 
                 It 'Should return false when Ensure is Absent and registry value exists with invalid data' {
@@ -334,7 +334,7 @@ try
                     $valueData = 'FakePath'
 
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName $valueName -ValueData $valueData -Ensure 'Absent'
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
 
                 It 'Should return true for a multi-string registry value' {
@@ -346,7 +346,7 @@ try
                     New-RegistryValue -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $valueType
 
                     $testTargetResourceResult = Test-TargetResource -Key $registryKeyPath -ValueName $valueName -ValueData $valueData
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return true for a binary registry value' {
@@ -358,7 +358,7 @@ try
                     New-RegistryValue -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $valueType
 
                     $testTargetResourceResult = Test-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return true for an empty binary registry value' {
@@ -371,10 +371,10 @@ try
 
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName  -ValueData $valueData -ValueType $valueType
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
 
                     $testTargetResourceResult = Test-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
 
                 It 'Should return true for binary registry value with zeroes' {
@@ -386,7 +386,7 @@ try
                     New-RegistryValue -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $valueType
 
                     $testTargetResourceResult = Test-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData
-                    $testTargetResourceResult | Should -Be $true
+                    $testTargetResourceResult | Should -BeTrue
                 }
             }
         }

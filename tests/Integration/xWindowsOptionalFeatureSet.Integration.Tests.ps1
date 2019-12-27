@@ -1,156 +1,115 @@
-$errorActionPreference = 'Stop'
-Set-StrictMode -Version 'Latest'
-
-# Import CommonTestHelper for Enter-DscResourceTestEnvironment, Exit-DscResourceTestEnvironment
-$script:testsFolderFilePath = Split-Path $PSScriptRoot -Parent
-$script:commonTestHelperFilePath = Join-Path -Path $testsFolderFilePath -ChildPath 'CommonTestHelper.psm1'
-Import-Module -Name $commonTestHelperFilePath
-
-if (Test-SkipContinuousIntegrationTask -Type 'Integration')
-{
-    return
-}
-
-$script:testEnvironment = Enter-DscResourceTestEnvironment `
-    -DscResourceModuleName 'xPSDesiredStateConfiguration' `
-    -DscResourceName 'xWindowsOptionalFeatureSet' `
-    -TestType 'Integration'
+$script:dscModuleName = 'xPSDesiredStateConfiguration'
+$script:dscResourceName = 'xWindowsOptionalFeatureSet'
 
 try
 {
-    Describe 'xWindowsOptionalFeatureSet Integration Tests' {
-        BeforeAll {
-            $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xWindowsOptionalFeatureSet.config.ps1'
+    Import-Module -Name DscResource.Test -Force
+}
+catch [System.IO.FileNotFoundException]
+{
+    throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -Tasks build" first.'
+}
 
-            $script:enabledStates = @( 'Enabled', 'EnablePending' )
-            $script:disabledStates = @( 'Disabled', 'DisablePending', 'DisabledWithPayloadRemoved' )
+$script:testEnvironment = Initialize-TestEnvironment `
+    -DSCModuleName $script:dscModuleName `
+    -DSCResourceName $script:dscResourceName `
+    -ResourceType 'Mof' `
+    -TestType 'Integration'
 
-            $script:validFeatureNames = @( 'RSAT-RDS-Tools-Feature', 'Xps-Foundation-Xps-Viewer' )
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 
-            $script:originalFeatures = @{}
+# Begin Testing
+try
+{
+    InModuleScope $script:dscResourceName {
+        Describe 'xWindowsOptionalFeatureSet Integration Tests' {
+            BeforeAll {
+                $script:confgurationFilePath = Join-Path -Path $PSScriptRoot -ChildPath 'xWindowsOptionalFeatureSet.config.ps1'
 
-            foreach ($validFeatureName in $script:validFeatureNames)
-            {
-                $script:originalFeatures[$validFeatureName] = Dism\Get-WindowsOptionalFeature -FeatureName $validFeatureName -Online
-            }
-        }
+                $script:enabledStates = @( 'Enabled', 'EnablePending' )
+                $script:disabledStates = @( 'Disabled', 'DisablePending', 'DisabledWithPayloadRemoved' )
 
-        AfterAll {
-            foreach ($validFeatureName in $script:originalFeatures.Keys)
-            {
-                $originalFeature = $script:originalFeatures[$validFeatureName]
+                $script:validFeatureNames = @( 'RSAT-RDS-Tools-Feature', 'Xps-Foundation-Xps-Viewer' )
 
-                if ($null -ne $originalFeature)
+                $script:originalFeatures = @{}
+
+                foreach ($validFeatureName in $script:validFeatureNames)
                 {
-                    if ($originalFeature.State -in $script:disabledStates)
+                    $script:originalFeatures[$validFeatureName] = Dism\Get-WindowsOptionalFeature -FeatureName $validFeatureName -Online
+                }
+            }
+
+            AfterAll {
+                foreach ($validFeatureName in $script:originalFeatures.Keys)
+                {
+                    $originalFeature = $script:originalFeatures[$validFeatureName]
+
+                    if ($null -ne $originalFeature)
                     {
-                        Dism\Disable-WindowsOptionalFeature -Online -FeatureName $validFeatureName -NoRestart
-                    }
-                    elseif ($originalFeature.State -in $script:enabledStates)
-                    {
-                        Dism\Enable-WindowsOptionalFeature -Online -FeatureName $validFeatureName -NoRestart
+                        if ($originalFeature.State -in $script:disabledStates)
+                        {
+                            Dism\Disable-WindowsOptionalFeature -Online -FeatureName $validFeatureName -NoRestart
+                        }
+                        elseif ($originalFeature.State -in $script:enabledStates)
+                        {
+                            Dism\Enable-WindowsOptionalFeature -Online -FeatureName $validFeatureName -NoRestart
+                        }
                     }
                 }
             }
-        }
 
-        Context 'Install two valid Windows optional features' {
-            $configurationName = 'InstallOptionalFeature'
+            Context 'Install two valid Windows optional features' {
+                $configurationName = 'InstallOptionalFeature'
 
-            $wofSetParameters = @{
-                WindowsOptionalFeatureNames = $script:validFeatureNames
-                Ensure = 'Present'
-                LogPath = Join-Path -Path $TestDrive -ChildPath 'InstallOptionalFeature.log'
-            }
-
-            foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
-            {
-                $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-
-                It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature | Should -Not -Be $null
+                $wofSetParameters = @{
+                    WindowsOptionalFeatureNames = $script:validFeatureNames
+                    Ensure = 'Present'
+                    LogPath = Join-Path -Path $TestDrive -ChildPath 'InstallOptionalFeature.log'
                 }
 
-                if ($windowsOptionalFeature.State -in $script:enabledStates)
+                foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
                 {
-                    Dism\Disable-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName -NoRestart
                     $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
 
-                    # May need to wait a moment for the correct state to populate
-                    $millisecondsElapsed = 0
-                    $startTime = Get-Date
-                    while (-not ($windowsOptionalFeature.State -in $script:disabledStates) -and $millisecondsElapsed -lt 3000)
+                    It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName before the configuration" {
+                        $windowsOptionalFeature | Should -Not -Be $null
+                    }
+
+                    if ($windowsOptionalFeature.State -in $script:enabledStates)
                     {
+                        Dism\Disable-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName -NoRestart
                         $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-                        $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+
+                        # May need to wait a moment for the correct state to populate
+                        $millisecondsElapsed = 0
+                        $startTime = Get-Date
+                        while (-not ($windowsOptionalFeature.State -in $script:disabledStates) -and $millisecondsElapsed -lt 3000)
+                        {
+                            $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+                            $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                        }
+                    }
+
+                    It "Should have disabled Windows optional feature $windowsOptionalFeatureName before the configuration" {
+                        $windowsOptionalFeature.State -in $script:disabledStates | Should -BeTrue
                     }
                 }
 
-                It "Should have disabled Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature.State -in $script:disabledStates | Should -Be $true
-                }
-            }
-
-            It 'Should compile and run configuration' {
-                {
-                    . $script:confgurationFilePath -ConfigurationName $configurationName
-                    & $configurationName -OutputPath $TestDrive @wofSetParameters
-                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
-
-            foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
-            {
-                $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-
-                It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the configuration" {
-                    $windowsOptionalFeature | Should -Not -Be $null
+                It 'Should compile and run configuration' {
+                    {
+                        . $script:confgurationFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @wofSetParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
                 }
 
-                # May need to wait a moment for the correct state to populate
-                $millisecondsElapsed = 0
-                $startTime = Get-Date
-                while (-not ($windowsOptionalFeature.State -in $script:enabledStates) -and $millisecondsElapsed -lt 3000)
+                foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
                 {
                     $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-                    $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
-                }
 
-                It "Should have enabled Windows optional feature $windowsOptionalFeatureName after the configuration" {
-                    $windowsOptionalFeature.State -in $script:enabledStates | Should -Be $true
-                }
-            }
-
-            It 'Should have created the log file' {
-                Test-Path -Path $wofSetParameters.LogPath | Should -Be $true
-            }
-
-            It 'Should have created content in the log file' {
-                Get-Content -Path $wofSetParameters.LogPath -Raw | Should -Not -Be $null
-            }
-        }
-
-        Context 'Uninstall two valid Windows optional features' {
-            $configurationName = 'UninstallOptionalFeature'
-
-            $wofSetParameters = @{
-                WindowsOptionalFeatureNames = $script:validFeatureNames
-                Ensure = 'Absent'
-                LogPath = Join-Path -Path $TestDrive -ChildPath 'UninstallOptionalFeature.log'
-            }
-
-            foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
-            {
-                $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-
-                It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature | Should -Not -Be $null
-                }
-
-                if ($windowsOptionalFeature.State -in $script:disabledStates)
-                {
-                    Dism\Enable-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName -NoRestart
-                    $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+                    It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the configuration" {
+                        $windowsOptionalFeature | Should -Not -Be $null
+                    }
 
                     # May need to wait a moment for the correct state to populate
                     $millisecondsElapsed = 0
@@ -160,54 +119,100 @@ try
                         $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
                         $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
                     }
+
+                    It "Should have enabled Windows optional feature $windowsOptionalFeatureName after the configuration" {
+                        $windowsOptionalFeature.State -in $script:enabledStates | Should -BeTrue
+                    }
                 }
 
-                It "Should have enabled Windows optional feature $windowsOptionalFeatureName before the configuration" {
-                    $windowsOptionalFeature.State -in $script:enabledStates | Should -Be $true
+                It 'Should have created the log file' {
+                    Test-Path -Path $wofSetParameters.LogPath | Should -BeTrue
+                }
+
+                It 'Should have created content in the log file' {
+                    Get-Content -Path $wofSetParameters.LogPath -Raw | Should -Not -Be $null
                 }
             }
 
-            It 'Should compile and run configuration' {
-                {
-                    . $script:confgurationFilePath -ConfigurationName $configurationName
-                    & $configurationName -OutputPath $TestDrive @wofSetParameters
-                    Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
-                } | Should -Not -Throw
-            }
+            Context 'Uninstall two valid Windows optional features' {
+                $configurationName = 'UninstallOptionalFeature'
 
-            foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
-            {
-                $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-
-                It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the confguration" {
-                    $windowsOptionalFeature | Should -Not -Be $null
+                $wofSetParameters = @{
+                    WindowsOptionalFeatureNames = $script:validFeatureNames
+                    Ensure = 'Absent'
+                    LogPath = Join-Path -Path $TestDrive -ChildPath 'UninstallOptionalFeature.log'
                 }
 
-                # May need to wait a moment for the correct state to populate
-                $millisecondsElapsed = 0
-                $startTime = Get-Date
-                while (-not ($windowsOptionalFeature.State -in $script:disabledStates) -and $millisecondsElapsed -lt 3000)
+                foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
                 {
                     $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
-                    $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+
+                    It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName before the configuration" {
+                        $windowsOptionalFeature | Should -Not -Be $null
+                    }
+
+                    if ($windowsOptionalFeature.State -in $script:disabledStates)
+                    {
+                        Dism\Enable-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName -NoRestart
+                        $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+
+                        # May need to wait a moment for the correct state to populate
+                        $millisecondsElapsed = 0
+                        $startTime = Get-Date
+                        while (-not ($windowsOptionalFeature.State -in $script:enabledStates) -and $millisecondsElapsed -lt 3000)
+                        {
+                            $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+                            $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                        }
+                    }
+
+                    It "Should have enabled Windows optional feature $windowsOptionalFeatureName before the configuration" {
+                        $windowsOptionalFeature.State -in $script:enabledStates | Should -BeTrue
+                    }
                 }
 
-                It "Should have disabled Windows optional feature $windowsOptionalFeatureName after the confguration" {
-                    $windowsOptionalFeature.State -in $script:disabledStates | Should -Be $true
+                It 'Should compile and run configuration' {
+                    {
+                        . $script:confgurationFilePath -ConfigurationName $configurationName
+                        & $configurationName -OutputPath $TestDrive @wofSetParameters
+                        Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
+                    } | Should -Not -Throw
                 }
-            }
 
-            It 'Should have created the log file' {
-                Test-Path -Path $wofSetParameters.LogPath | Should -Be $true
-            }
+                foreach ($windowsOptionalFeatureName in $wofSetParameters.WindowsOptionalFeatureNames)
+                {
+                    $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
 
-            It 'Should have created content in the log file' {
-                Get-Content -Path $wofSetParameters.LogPath -Raw | Should -Not -Be $null
+                    It "Should be able to retrieve Windows optional feature $windowsOptionalFeatureName after the confguration" {
+                        $windowsOptionalFeature | Should -Not -Be $null
+                    }
+
+                    # May need to wait a moment for the correct state to populate
+                    $millisecondsElapsed = 0
+                    $startTime = Get-Date
+                    while (-not ($windowsOptionalFeature.State -in $script:disabledStates) -and $millisecondsElapsed -lt 3000)
+                    {
+                        $windowsOptionalFeature = Dism\Get-WindowsOptionalFeature -Online -FeatureName $windowsOptionalFeatureName
+                        $millisecondsElapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                    }
+
+                    It "Should have disabled Windows optional feature $windowsOptionalFeatureName after the confguration" {
+                        $windowsOptionalFeature.State -in $script:disabledStates | Should -BeTrue
+                    }
+                }
+
+                It 'Should have created the log file' {
+                    Test-Path -Path $wofSetParameters.LogPath | Should -BeTrue
+                }
+
+                It 'Should have created content in the log file' {
+                    Get-Content -Path $wofSetParameters.LogPath -Raw | Should -Not -Be $null
+                }
             }
         }
     }
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

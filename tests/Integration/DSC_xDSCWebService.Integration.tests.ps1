@@ -86,7 +86,7 @@ try
         }
 
         It 'Should return $true when Test-DscConfiguration is run' {
-            Test-DscConfiguration | Should -Be $true
+            Test-DscConfiguration | Should -BeTrue
         }
     }
 
@@ -176,7 +176,7 @@ try
         {
             'Present' {
                 It 'Should create a web.config file at the web site root' {
-                    Test-Path -Path (Join-Path -Path $ConfigurationData.AllNodes.PhysicalPath -ChildPath 'web.config') | Should -Be $true
+                    Test-Path -Path (Join-Path -Path $ConfigurationData.AllNodes.PhysicalPath -ChildPath 'web.config') | Should -BeTrue
                 }
 
                 It ("Should exist a WebSite called $WebsiteName") {
@@ -190,7 +190,7 @@ try
                 }
 
                 It "IIS Application pool $ApplicationPoolName should exist" {
-                    Test-IISApplicationPool -ApplicationPoolName $ApplicationPoolName -ResourceState 'Present' | Should -Be $true
+                    Test-IISApplicationPool -ApplicationPoolName $ApplicationPoolName -ResourceState 'Present' | Should -BeTrue
                 }
 
                 It "WebSite $WebsiteName should be bound to IIS applicaiton pool $ApplicationPoolName" {
@@ -364,7 +364,7 @@ try
             Test-DSCPullServerFirewallRule -RuleName 'DSCPullServer_IIS_Port' -ResourceState 'Absent'
 
             It "Separately created IIS Application pool should still exist after cleanup" {
-                Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -ResourceState 'Present' | Should -Be $true
+                Test-IISApplicationPool -ApplicationPoolName 'PSDSCPullServer_PSDSCPullServer' -ResourceState 'Present' | Should -BeTrue
             }
         }
     }

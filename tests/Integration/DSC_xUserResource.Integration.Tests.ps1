@@ -83,7 +83,7 @@ try
                         $currentConfig.UserName | Should -Be $testUserName
                         $currentConfig.Ensure | Should -Be 'Present'
                         $currentConfig.Description | Should -Be $TestDescription
-                        $currentConfig.Disabled | Should -Be $false
+                        $currentConfig.Disabled | Should -BeFalse
                         $currentConfig.PasswordChangeRequired | Should -Be $null
                     }
                 }
@@ -136,7 +136,7 @@ try
                         $currentConfig.UserName | Should -Be $testUserName
                         $currentConfig.Ensure | Should -Be 'Present'
                         $currentConfig.Description | Should -Be $TestDescription
-                        $currentConfig.Disabled | Should -Be $false
+                        $currentConfig.Disabled | Should -BeFalse
                         $currentConfig.PasswordChangeRequired | Should -Be $null
                     }
                 }
