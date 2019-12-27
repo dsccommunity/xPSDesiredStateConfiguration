@@ -104,5 +104,3 @@ function Test-PullServerFirewallConfiguration
     $result = & $script:netsh advfirewall firewall show rule name=$ruleName | Select-String -Pattern "LocalPort:\s*$Port"
     return -not [string]::IsNullOrWhiteSpace($result)
 }
-
-Export-ModuleMember -Function '*-PullServerFirewallConfiguration'

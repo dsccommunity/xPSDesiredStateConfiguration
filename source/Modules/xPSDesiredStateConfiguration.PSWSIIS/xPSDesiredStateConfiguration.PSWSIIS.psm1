@@ -1020,13 +1020,3 @@ function Set-BindingRedirectSettingInWebConfig
         }
     }
 }
-
-Export-ModuleMember -Function @(
-        'New-ResourceSetConfigurationScriptBlock',
-        'New-PSWSEndpoint',
-        'Set-AppSettingsInWebconfig',
-        'Set-BindingRedirectSettingInWebConfig',
-        'Remove-PSWSEndpoint'
-    ) -Variable @(
-        'DscWebServiceDefaultAppPoolName'
-    )

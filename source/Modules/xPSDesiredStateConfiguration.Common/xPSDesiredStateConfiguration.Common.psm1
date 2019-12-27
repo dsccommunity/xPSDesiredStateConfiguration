@@ -826,19 +826,3 @@ function New-ResourceSetConfigurationScriptBlock
 }
 
 $script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.Common' -ScriptRoot $PSScriptRoot
-
-Export-ModuleMember -Function @(
-        'Test-IsNanoServer',
-        'Test-DscParameterState',
-        'New-InvalidArgumentException',
-        'New-InvalidDataException',
-        'New-InvalidOperationException',
-        'New-ObjectNotFoundException',
-        'New-InvalidResultException',
-        'New-NotImplementedException',
-        'Get-LocalizedData',
-        'Set-DscMachineRebootRequired',
-        'New-ResourceSetConfigurationScriptBlock'
-    ) -Variable @(
-        'DscWebServiceDefaultAppPoolName'
-    )
