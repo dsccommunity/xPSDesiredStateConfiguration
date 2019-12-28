@@ -16,6 +16,8 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -ResourceType 'Mof' `
     -TestType 'Integration'
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
+
 # Ensure that Powershell Module 'WebAdministration' is available
 if (-not (Install-WindowsFeatureAndVerify -Name Web-Mgmt-Tools))
 {
