@@ -42,9 +42,9 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
 
     # DSC resources to export from this module
     DscResourcesToExport  = @(
-        'xArchive', 'xDSCWebService', 'xEnvironmentResource','xGroupResource','xMsiPackage',
-        'xPackageResource','xPSSessionConfiguration','xRegistryResource','xRemoteFile',
-        'xScriptResource','xServiceResource','xUserResource','xWindowsFeature','xWindowsOptionalFeature',
+        'xArchive', 'xDSCWebService', 'xEnvironment','xGroup','xMsiPackage',
+        'xPackage','xPSSessionConfiguration','xRegistry','xRemoteFile',
+        'xScript','xService','xUser','xWindowsFeature','xWindowsOptionalFeature',
         'xWindowsPackageCab','xWindowsProcess'
     )
 

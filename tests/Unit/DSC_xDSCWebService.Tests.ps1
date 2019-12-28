@@ -169,7 +169,7 @@ try
 
                     It 'Should not throw' {
                         {
-                            $script:result = Get-TargetResource @testParameters
+                            $script:result = Get-TargetResource @script:testParameters
                         } | Should -Not -Throw
 
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-WebSite -Scope It
@@ -297,7 +297,7 @@ try
                     )
 
                     It 'Should not throw' {
-                        {$script:result = Get-TargetResource @testParameters} | Should -Not -Throw
+                        {$script:result = Get-TargetResource @script:testParameters} | Should -Not -Throw
                     }
 
                     It 'Should return <Variable> set to <Data>' -TestCases $testData {
@@ -348,7 +348,7 @@ try
                     )
 
                     It 'Should not throw' {
-                        {$script:result = Get-TargetResource @testParameters} | Should -Not -Throw
+                        {$script:result = Get-TargetResource @script:testParameters} | Should -Not -Throw
                     }
 
                     It 'Should return <Variable> set to <Data>' -TestCases $testData {
@@ -368,14 +368,14 @@ try
 
                     It 'Should call expected mocks' {
                         Assert-VerifiableMock
-                        Assert-MockCalled -Exactly -Times 1 -CommandName Get-WebConfigAppSetting -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'}
+                        Assert-MockCalled -Exactly -Times 1 -CommandName Get-WebConfigAppSetting -ParameterFilter { $AppSettingName -eq 'dbconnectionstr' }
                     }
                 }
 
                 #region Mocks
-                Mock -CommandName Get-WebSite -MockWith {return $script:websiteDataHTTPS}
-                Mock -CommandName Get-WebBinding -MockWith {return $script:websiteDataHTTPS.bindings.collection}
-                Mock -CommandName Get-ChildItem -ParameterFilter {$Path -eq 'Cert:\LocalMachine\My\'} -MockWith {return $script:certificateData[0]}
+                Mock -CommandName Get-WebSite -MockWith { return $script:websiteDataHTTPS }
+                Mock -CommandName Get-WebBinding -MockWith { return $script:websiteDataHTTPS.bindings.collection }
+                Mock -CommandName Get-ChildItem -ParameterFilter { $Path -eq 'Cert:\LocalMachine\My\'} -MockWith { return $script:certificateData[0] }
                 #endregion
 
                 Context -Name 'DSC Web Service is installed with certificate using thumbprint' -Fixture {
@@ -394,7 +394,9 @@ try
                         }
                         @{
                             Variable = 'CertificateTemplateName'
-                            Data     = $script:certificateData[0].Extensions.Where{$_.Oid.FriendlyName -eq 'Certificate Template Name'}.Format($false)
+                            Data     = $script:certificateData[0].Extensions.Where{
+                                $_.Oid.FriendlyName -eq 'Certificate Template Name'
+                            }.Format($false)
                         }
                     )
 
@@ -563,7 +565,7 @@ try
                     #endregion
 
                     It 'Should call expected mocks' {
-                        Set-TargetResource @testParameters -Ensure Absent
+                        Set-TargetResource @script:testParameters -Ensure Absent
 
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path
@@ -584,7 +586,7 @@ try
                     #endregion
 
                     It 'Should call expected mocks' {
-                        Set-TargetResource @testParameters -Ensure Absent
+                        Set-TargetResource @script:testParameters -Ensure Absent
 
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 0 -CommandName Get-Command
@@ -696,7 +698,7 @@ try
                         Mock -CommandName Get-Website -ModuleName xPSDesiredStateConfiguration.PSWSIIS
                         Mock -CommandName Add-PullServerFirewallConfiguration
 
-                        Set-TargetResource @testParameters @setTargetPaths -Ensure Present
+                        Set-TargetResource @script:testParameters @setTargetPaths -Ensure Present
 
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
@@ -729,7 +731,7 @@ try
                             $Value
                         )
 
-                        Set-TargetResource @testParameters @setTargetPaths -Ensure Present
+                        Set-TargetResource @script:testParameters @setTargetPaths -Ensure Present
 
                         Test-Path -Path $Value | Should -BeTrue
                     }
@@ -763,7 +765,7 @@ try
                             }
                         } -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
-                        Set-TargetResource @testParameters @setTargetPaths -Ensure Present
+                        Set-TargetResource @script:testParameters @setTargetPaths -Ensure Present
 
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
@@ -803,7 +805,7 @@ try
                             }
                         } -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
-                        Set-TargetResource @testParameters @setTargetPaths -Ensure Present
+                        Set-TargetResource @script:testParameters @setTargetPaths -Ensure Present
 
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
@@ -835,7 +837,7 @@ try
                             }
                         } -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
-                        Set-TargetResource @testParameters @setTargetPaths -Ensure Present -Enable32BitAppOnWin64 $true
+                        Set-TargetResource @script:testParameters @setTargetPaths -Ensure Present -Enable32BitAppOnWin64 $true
 
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
@@ -868,7 +870,7 @@ try
                             }
                         } -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
-                        Set-TargetResource @testParameters @setTargetPaths -Ensure Present -AcceptSelfSignedCertificates $false
+                        Set-TargetResource @script:testParameters @setTargetPaths -Ensure Present -AcceptSelfSignedCertificates $false
 
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
@@ -1168,11 +1170,11 @@ try
 
                 Context -Name 'DSC Service is not installed' -Fixture {
                     It 'Should return $true when Ensure is Absent' {
-                        Test-TargetResource @testParameters -Ensure Absent | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Absent | Should -BeTrue
                     }
 
                     It 'Should return $false when Ensure is Present' {
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
                     }
                 }
 
@@ -1183,11 +1185,11 @@ try
                     Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $false }
 
                     It 'Should return $false when Ensure is Absent' {
-                        Test-TargetResource @testParameters -Ensure Absent | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Absent | Should -BeFalse
                     }
 
                     It 'Should return $false if Port doesn''t match' {
-                        Test-TargetResource @testParameters -Ensure Present -Port 8081 | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present -Port 8081 | Should -BeFalse
                     }
 
                     It 'Should return $false if Certificate Thumbprint is set' {
@@ -1200,7 +1202,7 @@ try
                     It 'Should return $false if Physical Path doesn''t match' {
                         Mock -CommandName Test-WebsitePath -MockWith { $true } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1213,7 +1215,7 @@ try
                     Mock -CommandName Test-WebsitePath -MockWith { $false } -Verifiable
 
                     It 'Should return $false when State is set to Stopped' {
-                        Test-TargetResource @testParameters -Ensure Present -State Stopped | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present -State Stopped | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1221,7 +1223,7 @@ try
                     It 'Should return $false when dbProvider is not set' {
                         Mock -CommandName Get-WebConfigAppSetting -MockWith {''} -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1239,7 +1241,7 @@ try
                             $AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath  | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Present -DatabasePath $DatabasePath  | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1253,7 +1255,7 @@ try
                             $AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1269,7 +1271,7 @@ try
                             $AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -DatabasePath $DatabasePath | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Present -DatabasePath $DatabasePath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1281,7 +1283,7 @@ try
                             $false} -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1301,7 +1303,7 @@ try
                             $AppSettingName -eq 'ModulePath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -ModulePath $modulePath | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Present -ModulePath $modulePath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1314,7 +1316,7 @@ try
                             $AppSettingName -eq 'ModulePath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1333,7 +1335,7 @@ try
                             $AppSettingName -eq 'ConfigurationPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1348,7 +1350,7 @@ try
                             $AppSettingName -eq 'ConfigurationPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present -ConfigurationPath $configurationPath | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1367,7 +1369,7 @@ try
                             $AppSettingName -eq 'RegistrationKeyPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1382,7 +1384,7 @@ try
                             $AppSettingName -eq 'RegistrationKeyPath'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1398,7 +1400,7 @@ try
                             $ModuleName -eq 'IISSelfSignedCertModule(32bit)'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -BeTrue
+                        Test-TargetResource @script:testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -BeTrue
 
                         Assert-VerifiableMock
                     }
@@ -1414,7 +1416,7 @@ try
                             $ModuleName -eq 'IISSelfSignedCertModule(32bit)'
                         } -Verifiable
 
-                        Test-TargetResource @testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present -AcceptSelfSignedCertificates $acceptSelfSignedCertificates | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
@@ -1427,7 +1429,7 @@ try
                     #endregion
 
                     It 'Should return $false if Certificate Thumbprint is set to AllowUnencryptedTraffic' {
-                        Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
+                        Test-TargetResource @script:testParameters -Ensure Present | Should -BeFalse
                     }
 
                     It 'Should return $false if Certificate Subject does not match the current certificate' {
