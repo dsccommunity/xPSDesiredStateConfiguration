@@ -14,7 +14,7 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
     -ResourceType 'Mof' `
-    -TestType 'Unit'
+    -TestType 'Integration'
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xPackageResource.TestHelper.psm1')
@@ -22,98 +22,96 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DS
 # Begin Testing
 try
 {
-    InModuleScope $script:dscResourceName {
-        Describe 'xPackageResource Integration Tests' {
-            BeforeAll {
-                $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xPackageResourceTests'
+    Describe 'xPackageResource Integration Tests' {
+        BeforeAll {
+            $script:testDirectoryPath = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xPackageResourceTests'
 
-                if (Test-Path -Path $script:testDirectoryPath)
-                {
-                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
-                }
-
-                New-Item -Path $script:testDirectoryPath -ItemType 'Directory' | Out-Null
-
-                $script:msiName = 'DSCSetupProject.msi'
-                $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
-
-                $script:packageName = 'DSCUnitTestPackage'
-                $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
-
-                New-TestMsi -DestinationPath $script:msiLocation | Out-Null
-
-                Clear-PackageCache | Out-Null
+            if (Test-Path -Path $script:testDirectoryPath)
+            {
+                $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
             }
 
-            BeforeEach {
-                Clear-PackageCache | Out-Null
+            $null = New-Item -Path $script:testDirectoryPath -ItemType 'Directory'
 
-                if (Test-PackageInstalledByName -Name $script:packageName)
-                {
-                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                    Start-Sleep -Seconds 1 | Out-Null
-                }
+            $script:msiName = 'DSCSetupProject.msi'
+            $script:msiLocation = Join-Path -Path $script:testDirectoryPath -ChildPath $script:msiName
 
-                if (Test-PackageInstalledByName -Name $script:packageName)
-                {
-                    throw 'Package could not be removed.'
-                }
+            $script:packageName = 'DSCUnitTestPackage'
+            $script:packageId = '{deadbeef-80c6-41e6-a1b9-8bdb8a05027f}'
+
+            $null = New-TestMsi -DestinationPath $script:msiLocation
+
+            $null = Clear-PackageCache
+        }
+
+        BeforeEach {
+            $null = Clear-PackageCache
+
+            if (Test-PackageInstalledByName -Name $script:packageName)
+            {
+                $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                $null = Start-Sleep -Seconds 1
             }
 
-            AfterAll {
-                if (Test-Path -Path $script:testDirectoryPath)
-                {
-                    Remove-Item -Path $script:testDirectoryPath -Recurse -Force | Out-Null
-                }
+            if (Test-PackageInstalledByName -Name $script:packageName)
+            {
+                throw 'Package could not be removed.'
+            }
+        }
 
-                Clear-PackageCache | Out-Null
-
-                if (Test-PackageInstalledByName -Name $script:packageName)
-                {
-                    Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait | Out-Null
-                    Start-Sleep -Seconds 1 | Out-Null
-                }
-
-                if (Test-PackageInstalledByName -Name $script:packageName)
-                {
-                    throw 'Test output will not be valid - package could not be removed.'
-                }
+        AfterAll {
+            if (Test-Path -Path $script:testDirectoryPath)
+            {
+                $null = Remove-Item -Path $script:testDirectoryPath -Recurse -Force
             }
 
-            It 'Install a .msi package' {
-                $configurationName = 'EnsurePackageIsPresent'
-                $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+            $null = Clear-PackageCache
 
-                try
-                {
-                    $configurationScriptText = @"
+            if (Test-PackageInstalledByName -Name $script:packageName)
+            {
+                $null = Start-Process -FilePath 'msiexec.exe' -ArgumentList @("/x$script:packageId", '/passive') -Wait
+                $null = Start-Sleep -Seconds 1
+            }
+
+            if (Test-PackageInstalledByName -Name $script:packageName)
+            {
+                throw 'Test output will not be valid - package could not be removed.'
+            }
+        }
+
+        It 'Install a .msi package' {
+            $configurationName = 'EnsurePackageIsPresent'
+            $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
+
+            try
+            {
+                $configurationScriptText = @"
 Configuration $configurationName
 {
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
-    xPackage Package1
-    {
-        Path = '$script:msiLocation'
-        Ensure = "Present"
-        Name = '$script:packageName'
-        ProductId = '$script:packageId'
-    }
+xPackage Package1
+{
+    Path = '$script:msiLocation'
+    Ensure = "Present"
+    Name = '$script:packageName'
+    ProductId = '$script:packageId'
+}
 }
 "@
-                    .([System.Management.Automation.ScriptBlock]::Create($configurationScriptText))
+                .([System.Management.Automation.ScriptBlock]::Create($configurationScriptText))
 
-                    & $configurationName -OutputPath $configurationPath
+                & $configurationName -OutputPath $configurationPath
 
-                    Start-DscConfiguration -Path $configurationPath -Wait -Force
+                Start-DscConfiguration -Path $configurationPath -Wait -Force
 
-                    Test-PackageInstalledByName -Name $script:packageName | Should -BeTrue
-                }
-                finally
+                Test-PackageInstalledByName -Name $script:packageName | Should -BeTrue
+            }
+            finally
+            {
+                if (Test-Path -Path $configurationPath)
                 {
-                    if (Test-Path -Path $configurationPath)
-                    {
-                        Remove-Item -Path $configurationPath -Recurse -Force
-                    }
+                    Remove-Item -Path $configurationPath -Recurse -Force
                 }
             }
         }
