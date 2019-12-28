@@ -21,7 +21,7 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\Co
 # Begin Testing
 try
 {
-    Describe 'xEnvironmentResouce End to End Tests - with both Targets specified (default)' {
+    Describe 'xEnvironmentResouce End to End Tests' {
         BeforeAll {
             $script:testEnvironmentVarName = 'TestEnvironmentVariableName'
             $script:testPathEnvironmentVarName = 'TestPathEnvironmentVariableName'
