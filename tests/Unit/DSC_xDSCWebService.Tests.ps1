@@ -35,6 +35,7 @@ try
         Describe 'xDSCWebService Unit Tests' {
             BeforeAll {
                 $script:testParameters = @{
+                    ApplicationPoolName      = 'PSWS'
                     CertificateThumbPrint    = 'AllowUnencryptedTraffic'
                     EndpointName             = 'PesterTestSite'
                     UseSecurityBestPractices = $false
@@ -703,7 +704,7 @@ try
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName xPSDesiredStateConfiguration.PSWSIIS
-                        Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
+                        Assert-MockCalled -Exactly -Times 3 -CommandName Test-Path
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 0 -CommandName Add-PullServerFirewallConfiguration
                         Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
@@ -769,7 +770,7 @@ try
 
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
-                        Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
+                        Assert-MockCalled -Exactly -Times 3 -CommandName Test-Path
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                         Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
@@ -810,7 +811,7 @@ try
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName xPSDesiredStateConfiguration.PSWSIIS
-                        Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
+                        Assert-MockCalled -Exactly -Times 3 -CommandName Test-Path
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                         Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
@@ -842,7 +843,7 @@ try
                         Assert-MockCalled -Exactly -Times 3 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName xPSDesiredStateConfiguration.PSWSIIS
-                        Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
+                        Assert-MockCalled -Exactly -Times 3 -CommandName Test-Path
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                         Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
@@ -875,7 +876,7 @@ try
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName xPSDesiredStateConfiguration.PSWSIIS
-                        Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path
+                        Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-OSVersion
                         Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                         Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
@@ -1079,12 +1080,12 @@ try
                         } -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
                         Mock -CommandName Get-ChildItem `
-                        -ParameterFilter { $Path -eq 'TestDrive:\inetpub\PesterTestSite' } `
-                        -ModuleName xPSDesiredStateConfiguration.PSWSIIS
+                            -ParameterFilter { $Path -eq 'TestDrive:\inetpub\PesterTestSite' } `
+                            -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
                         Mock -CommandName Get-AppPoolBinding `
-                        -MockWith { "Default Web Site"} `
-                        -ModuleName xPSDesiredStateConfiguration.PSWSIIS
+                            -MockWith { "Default Web Site"} `
+                            -ModuleName xPSDesiredStateConfiguration.PSWSIIS
 
                         Set-TargetResource @altTestParameters @setTargetPaths
 
@@ -1096,11 +1097,16 @@ try
                         $altTestParameters.Ensure = 'Present'
                         $altTestParameters.ApplicationPoolName = 'NonExistingAppPool'
 
-                        Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'IIS:\AppPools\NonExistingAppPool' } -MockWith {
+                        Mock -CommandName Test-Path -ParameterFilter {
+                            $Path -eq 'IIS:\AppPools\NonExistingAppPool'
+                        } -MockWith {
                             $false
                         }
 
-                        { Set-TargetResource @altTestParameters @setTargetPaths } | Should -Throw
+                        {
+                            Set-TargetResource @altTestParameters @setTargetPaths
+                        } | Should -Throw
+
                         Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path -Scope It
                     }
 
@@ -1109,7 +1115,9 @@ try
                         $altTestParameters.Ensure = 'Present'
                         $altTestParameters.ApplicationPoolName = 'PullServer AppPool'
 
-                        Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'IIS:\AppPools\PullServer AppPool' } -MockWith {
+                        Mock -CommandName Test-Path -ParameterFilter {
+                            $Path -eq 'IIS:\AppPools\PullServer AppPool'
+                        } -MockWith {
                             $true
                         }
                         Mock -CommandName New-WebAppPool -ModuleName xPSDesiredStateConfiguration.PSWSIIS
@@ -1195,7 +1203,6 @@ try
                     It 'Should return $false if Certificate Thumbprint is set' {
                         $altTestParameters = $script:testParameters.Clone()
                         $altTestParameters.CertificateThumbprint = $script:certificateData[0].Thumbprint
-
                         Test-TargetResource @altTestParameters -Ensure Present | Should -BeFalse
                     }
 
