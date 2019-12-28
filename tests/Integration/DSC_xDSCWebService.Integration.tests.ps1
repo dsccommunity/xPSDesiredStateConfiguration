@@ -25,7 +25,7 @@ Import-Module -Name WebAdministration -ErrorAction:Stop -Force
 
 try
 {
-    $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath "$($script:dcsResourceName).config.ps1"
+    $configurationFile = Join-Path -Path $PSScriptRoot -ChildPath 'DSC_xDSCWebService.config.ps1'
 
     if ($env:CI -eq $false)
     {
