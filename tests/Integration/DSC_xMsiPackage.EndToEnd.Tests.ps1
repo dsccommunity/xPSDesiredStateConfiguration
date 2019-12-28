@@ -4,7 +4,7 @@
     also fail.
 #>
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
-$script:dscResourceName = 'DSC_xEnvironmentResource'
+$script:dscResourceName = 'DSC_xMsiPackage'
 
 try
 {

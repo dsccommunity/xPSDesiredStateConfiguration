@@ -323,5 +323,5 @@ try
 }
 finally
 {
-    Exit-DscResourceTestEnvironment -TestEnvironment $script:testEnvironment
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment
 }

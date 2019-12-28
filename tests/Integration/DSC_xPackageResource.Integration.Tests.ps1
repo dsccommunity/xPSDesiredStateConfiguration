@@ -1,5 +1,5 @@
 $script:dscModuleName = 'xPSDesiredStateConfiguration'
-$script:dscResourceName = 'DSC_xMsiPackage'
+$script:dscResourceName = 'DSC_xPackageResource'
 
 try
 {
