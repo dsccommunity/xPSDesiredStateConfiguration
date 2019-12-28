@@ -1,16 +1,12 @@
 trigger:
   branches:
     include:
-    - '*'
+    - master
   tags:
     include:
     - "v*"
     exclude:
     - "*-*"
-pr:
-  branches:
-    include:
-    - master
 
 stages:
   - stage: Build

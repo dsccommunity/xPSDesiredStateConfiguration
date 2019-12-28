@@ -109,6 +109,8 @@ try
             }
 
             Context 'Edit all possible properties of one service except BuiltInAccount' {
+                Clear-DscLcmConfiguration
+
                 $configData = @{
                     AllNodes = @(
                         @{
@@ -163,6 +165,8 @@ try
             }
 
             Context 'Edit BuiltInAccount of two services' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestEditTwoServiceSet'
                 $resourceParameters = @{
                     Name = @( $script:service1Properties.Name, $script:service2Properties.Name )
@@ -206,6 +210,8 @@ try
             }
 
             Context 'Remove two services' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestEditOneServiceSet'
                 $resourceParameters = @{
                     Name = @( $script:service1Properties.Name, $script:service2Properties.Name )

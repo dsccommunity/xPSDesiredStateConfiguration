@@ -1,4 +1,4 @@
-$modulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulePath = Split-Path -Path $PSScriptRoot -Parent
 
 # Import the shared modules
 Import-Module -Name (Join-Path -Path $modulePath `
@@ -6,7 +6,7 @@ Import-Module -Name (Join-Path -Path $modulePath `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
 # Import Localization Strings
-$script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.PSWSIIS'
+$script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.PSWSIIS' -ScriptRoot $PSScriptRoot
 
 New-Variable -Name DscWebServiceDefaultAppPoolName  -Value 'PSWS' -Option ReadOnly -Force -Scope Script
 

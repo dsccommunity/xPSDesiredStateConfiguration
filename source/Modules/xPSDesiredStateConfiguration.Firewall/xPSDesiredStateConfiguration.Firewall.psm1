@@ -1,4 +1,4 @@
-$modulePath = Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent
+$modulePath = Split-Path -Path $PSScriptRoot -Parent
 
 # Import the shared modules
 Import-Module -Name (Join-Path -Path $modulePath `
@@ -6,7 +6,7 @@ Import-Module -Name (Join-Path -Path $modulePath `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
 # Import Localization Strings
-$script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.Firewall'
+$script:localizedData = Get-LocalizedData -ResourceName 'xPSDesiredStateConfiguration.Firewall' -ScriptRoot $PSScriptRoot
 
 New-Variable -Name FireWallRuleDisplayName -Value 'DSCPullServer_IIS_Port' -Option ReadOnly -Scope Script -Force
 New-Variable -Name netsh -Value "$env:windir\system32\netsh.exe" -Option ReadOnly -Scope Script -Force

@@ -96,6 +96,8 @@ try
             }
 
             Context 'Create a service' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestCreateService'
                 $resourceParameters = $script:existingServiceProperties
 
@@ -157,6 +159,8 @@ try
             }
 
             Context 'Edit the service path, display name, description, and dependencies' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestCreateService'
                 $resourceParameters = $script:newServiceProperties
 
@@ -218,6 +222,8 @@ try
             }
 
             Context 'Edit the service startup type and state' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestCreateService'
                 $resourceParameters = @{
                     Name = $script:existingServiceProperties.Name
@@ -259,6 +265,8 @@ try
             }
 
             Context 'Edit the service start name and start password with Credential' {
+                Clear-DscLcmConfiguration
+
                 $configData = @{
                     AllNodes = @(
                         @{
@@ -310,6 +318,8 @@ try
             }
 
             Context 'Edit the service start name and start password with BuiltInAccount' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestCreateService'
                 $resourceParameters = @{
                     Name = 'TestService'
@@ -346,6 +356,8 @@ try
             }
 
             Context 'Remove the service' {
+                Clear-DscLcmConfiguration
+
                 $configurationName = 'TestCreateService'
                 $resourceParameters = @{
                     Name = $script:existingServiceProperties.Name

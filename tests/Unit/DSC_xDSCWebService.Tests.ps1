@@ -482,6 +482,7 @@ try
                             $script:result.$Variable  | Should -Be Null
                         }
                     }
+
                     It 'Should call expected mocks' {
                         Assert-VerifiableMock
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-WebSite
@@ -497,6 +498,7 @@ try
 
                         {$script:result = Get-TargetResource @altTestParameters} | Should -Throw
                     }
+
                     It 'Should throw if CertificateThumbprint and CertificateSubject are both specifed' {
                         $altTestParameters = $script:testParameters.Clone()
                         $altTestParameters.Add('CertificateSubject', $script:certificateData[0].Subject)
@@ -505,6 +507,7 @@ try
                     }
                 }
             }
+
             Describe -Name 'DSC_xDSCWebService\Set-TargetResource' -Fixture {
 
                 <# Create dummy functions so that Pester is able to mock them #>
@@ -973,7 +976,6 @@ try
                 }
 
                 Context -Name 'Verify Firewall handling' -Fixture {
-
                     $setTargetPaths = @{
                         DatabasePath        = 'TestDrive:\Database'
                         ConfigurationPath   = 'TestDrive:\Configuration'
@@ -1142,6 +1144,7 @@ try
                     }
                 }
             }
+
             Describe -Name 'DSC_xDSCWebService\Test-TargetResource' -Fixture {
                 function Get-Website {}
                 function Get-WebBinding {}
@@ -1167,6 +1170,7 @@ try
                     It 'Should return $true when Ensure is Absent' {
                         Test-TargetResource @testParameters -Ensure Absent | Should -BeTrue
                     }
+
                     It 'Should return $false when Ensure is Present' {
                         Test-TargetResource @testParameters -Ensure Present | Should -BeFalse
                     }
@@ -1349,14 +1353,18 @@ try
                         Assert-VerifiableMock
                     }
 
-                    Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {$AppSettingName -eq 'ConfigurationPath'} -Verifiable
+                    Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {
+                        $AppSettingName -eq 'ConfigurationPath'
+                    } -Verifiable
 
                     It 'Should return $true when RegistrationKeyPath is set the same as in web.config' {
                         $registrationKeyPath = 'TestDrive:\RegistrationKeyPath'
 
                         Mock -CommandName Test-WebConfigAppSetting -MockWith {
                             Write-Verbose -Message 'Test-WebConfigAppSetting - RegistrationKeyPath'
-                            $registrationKeyPath -eq $ExpectedAppSettingValue} -ParameterFilter {$AppSettingName -eq 'RegistrationKeyPath'
+                            $registrationKeyPath -eq $ExpectedAppSettingValue
+                        } -ParameterFilter {
+                            $AppSettingName -eq 'RegistrationKeyPath'
                         } -Verifiable
 
                         Test-TargetResource @testParameters -Ensure Present -RegistrationKeyPath $registrationKeyPath | Should -BeTrue
@@ -1414,7 +1422,7 @@ try
 
                 Context -Name 'DSC Web Service is installed as HTTPS' -Fixture {
                     #region Mocks
-                    Mock -CommandName Get-Website -MockWith {$script:websiteDataHTTPS}
+                    Mock -CommandName Get-Website -MockWith { $script:websiteDataHTTPS }
                     Mock -CommandName Test-PullServerFirewallConfiguration -MockWith { $false }
                     #endregion
 
@@ -1438,16 +1446,19 @@ try
                         $altTestParameters.UseSecurityBestPractices = $true
                         $altTestParameters.CertificateThumbprint    = $script:certificateData[0].Thumbprint
 
-                        Mock -CommandName Get-WebConfigAppSetting -MockWith {'ESENT'} -Verifiable
-                        Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {$AppSettingName -eq 'dbconnectionstr'} -Verifiable
-                        Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {$AppSettingName -eq 'ModulePath'} -Verifiable
+                        Mock -CommandName Get-WebConfigAppSetting -MockWith { 'ESENT' } -Verifiable
+                        Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {
+                            $AppSettingName -eq 'dbconnectionstr'
+                        } -Verifiable
+                        Mock -CommandName Test-WebConfigAppSetting -MockWith { $true } -ParameterFilter {
+                            $AppSettingName -eq 'ModulePath'
+                        } -Verifiable
                         Mock -CommandName Test-UseSecurityBestPractice -MockWith { $false } -Verifiable
 
                         Test-TargetResource @altTestParameters -Ensure Present | Should -BeFalse
 
                         Assert-VerifiableMock
                     }
-
                 }
 
                 Context -Name 'Function parameters contain invalid data' -Fixture {
@@ -1459,8 +1470,8 @@ try
                     }
                 }
             }
-            Describe -Name 'DSC_xDSCWebService\Test-WebsitePath' -Fixture {
 
+            Describe -Name 'DSC_xDSCWebService\Test-WebsitePath' -Fixture {
                 function Get-Website {}
                 function Get-WebBinding {}
                 function Stop-Website {}
@@ -1473,12 +1484,14 @@ try
 
                     Assert-VerifiableMock
                 }
+
                 It 'Should return $true if Endpoint PhysicalPath doesn''t match PhysicalPath' {
                     Test-WebsitePath -EndpointName 'PesterSite' -PhysicalPath $endpointPhysicalPath | Should -BeFalse
 
                     Assert-VerifiableMock
                 }
             }
+
             Describe -Name 'DSC_xDSCWebService\Test-WebConfigAppSetting' -Fixture {
 
                 function Get-Website {}
@@ -1516,6 +1529,7 @@ try
                     )
                     Test-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key -ExpectedAppSettingValue $Value | Should -BeTrue
                 }
+
                 It 'Should return $false when ExpectedAppSettingValue is not <Value> for <Key>.' -TestCases $testCases {
                     param
                     (
@@ -1530,8 +1544,8 @@ try
                     Test-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key -ExpectedAppSettingValue 'InvalidValue' | Should -BeFalse
                 }
             }
-            Describe -Name 'DSC_xDSCWebService\Get-WebConfigAppSetting' -Fixture {
 
+            Describe -Name 'DSC_xDSCWebService\Get-WebConfigAppSetting' -Fixture {
                 function Get-Website {}
                 function Get-WebBinding {}
                 function Stop-Website {}
@@ -1567,10 +1581,12 @@ try
                     )
                     Get-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName $Key | Should -Be $Value
                 }
+
                 It 'Should return Null if Key is not found' {
                     Get-WebConfigAppSetting -WebConfigFullPath $script:webConfigPath -AppSettingName 'InvalidKey' | Should -BeNullOrEmpty
                 }
             }
+
             Describe -Name 'DSC_xDSCWebService\Test-WebConfigModulesSetting' -Fixture {
 
                 function Get-Website {}
@@ -1583,18 +1599,21 @@ try
                 It 'Should return $true if Module is present in Web.config and expected to be installed.' {
                     Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' -ExpectedInstallationStatus $true | Should -BeTrue
                 }
+
                 It 'Should return $false if Module is present in Web.config and not expected to be installed.' {
                     Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' -ExpectedInstallationStatus $false | Should -BeFalse
                 }
+
                 It 'Should return $true if Module is not present in Web.config and not expected to be installed.' {
                     Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' -ExpectedInstallationStatus $false | Should -BeTrue
                 }
+
                 It 'Should return $false if Module is not present in Web.config and expected to be installed.' {
                     Test-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' -ExpectedInstallationStatus $true | Should -BeFalse
                 }
             }
-            Describe -Name 'DSC_xDSCWebService\Get-WebConfigModulesSetting' -Fixture {
 
+            Describe -Name 'DSC_xDSCWebService\Get-WebConfigModulesSetting' -Fixture {
                 function Get-Website {}
                 function Get-WebBinding {}
                 function Stop-Website {}
@@ -1605,13 +1624,13 @@ try
                 It 'Should return the Module name if it is present in Web.config.' {
                     Get-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'IISSelfSignedCertModule(32bit)' | Should -Be 'IISSelfSignedCertModule(32bit)'
                 }
+
                 It 'Should return an empty string if the module is not present in Web.config.' {
                     Get-WebConfigModulesSetting -WebConfigFullPath $script:webConfigPath -ModuleName 'FakeModule' | Should -Be ''
                 }
             }
 
             Describe -Name 'DSC_xDSCWebService\Update-LocationTagInApplicationHostConfigForAuthentication' -Fixture {
-
                 function Get-Website {}
                 function Get-WebBinding {}
                 function Stop-Website {}
@@ -1619,6 +1638,7 @@ try
                 $appHostConfigSection = [System.Management.Automation.PSObject] @{
                     OverrideMode = ''
                 }
+
                 $appHostConfig        = [System.Management.Automation.PSObject] @{}
                 $webAdminSrvMgr       = [System.Management.Automation.PSObject] @{}
 
@@ -1635,16 +1655,18 @@ try
                     Assert-MockCalled Get-IISServerManager -Exactly 1
                 }
             }
-            Describe -Name 'DSC_xDSCWebService\Find-CertificateThumbprintWithSubjectAndTemplateName' -Fixture {
 
+            Describe -Name 'DSC_xDSCWebService\Find-CertificateThumbprintWithSubjectAndTemplateName' -Fixture {
                 function Get-Website {}
                 function Get-WebBinding {}
                 function Stop-Website {}
 
                 Mock -CommandName Get-ChildItem -MockWith {,@($script:certificateData)}
+
                 It 'Should return the certificate thumbprint when the certificate is found' {
                     Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $script:certificateData[0].Subject -TemplateName 'WebServer' | Should -Be $script:certificateData[0].Thumbprint
                 }
+
                 It 'Should throw an error when the certificate is not found' {
                     $subject      = $script:certificateData[0].Subject
                     $templateName = 'Invalid Template Name'
@@ -1652,6 +1674,7 @@ try
                     $errorMessage = 'Certificate not found with subject containing {0} and using template "{1}".' -f $subject, $templateName
                     {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw -ExpectedMessage $errorMessage
                 }
+
                 It 'Should throw an error when the more than one certificate is found' {
                     $subject      = $script:certificateData[1].Subject
                     $templateName = 'WebServer'
@@ -1660,6 +1683,7 @@ try
                     {Find-CertificateThumbprintWithSubjectAndTemplateName -Subject $subject -TemplateName $templateName} | Should -Throw -ExpectedMessage $errorMessage
                 }
             }
+
             Describe -Name 'DSC_xDSCWebService\Get-OSVersion' -Fixture {
                 It 'Should return a System.Version object' {
                     Get-OSVersion | Should -BeOfType System.Version
