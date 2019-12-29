@@ -513,7 +513,7 @@ try
 
     # Setup test process paths.
     $notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
-    $powershellExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'WindowsPowershell', 'v1.0', 'powershell.exe'))
+    $certreqExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'certreq.exe'))
     $iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
     # Setup test combination variables
@@ -532,8 +532,8 @@ try
 
         @{
             Description = 'Process Path Without Spaces, Arguments Without Spaces'
-            Path = $powershellExePath
-            Arguments = "30|Start-Sleep"
+            Path = $certreqExePath
+            Arguments = "-submit"
         }
 
         @{
@@ -544,8 +544,8 @@ try
 
         @{
             Description = 'Process Path Without Spaces, Arguments With Spaces'
-            Path = $powershellExePath
-            Arguments = "Start-Sleep -Seconds 30"
+            Path = $certreqExePath
+            Arguments = "-submit -any"
         }
 
         @{
