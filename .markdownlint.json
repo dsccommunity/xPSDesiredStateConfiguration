@@ -4,7 +4,7 @@
         "style": "one"
     },
     "MD013": true,
-    "MD024": false,
-    "MD034": false,
+    "MD024": true,
+    "MD034": true,
     "no-hard-tabs": true
 }
