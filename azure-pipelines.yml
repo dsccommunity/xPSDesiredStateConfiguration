@@ -1,0 +1,247 @@
+trigger:
+  branches:
+    include:
+    - master
+  tags:
+    include:
+    - "v*"
+    exclude:
+    - "*-*"
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildModuleJob
+        pool:
+          vmImage: 'ubuntu 16.04'
+        steps:
+          - task: GitVersion@5
+            name: gitversion
+            inputs:
+              runtime: 'core'
+              configFilePath: 'GitVersion.yml'
+
+          - task: PowerShell@2
+            name: Build
+            inputs:
+              filePath: './build.ps1'
+              arguments: '-Tasks pack -ResolveDependency'
+              pwsh: true
+            env:
+              ModuleVersion: $(GitVersion.Informationalversion)
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'output/'
+              ArtifactName: 'output'
+              publishLocation: 'Container'
+
+  - stage: Test
+    dependsOn: Build
+    jobs:
+      - job: Test_HQRM
+        pool:
+          vmImage: 'windows-2019'
+        timeoutInMinutes: 0
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'output'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            name: Test
+            inputs:
+              filePath: './build.ps1'
+              arguments: '-Tasks hqrmtest'
+              pwsh: false
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: 'output/testResults/NUnit*.xml'
+            condition: succeededOrFailed()
+
+      - job: Test_Unit_2016
+        pool:
+          vmImage: 'vs2017-win2016'
+        timeoutInMinutes: 0
+        steps:
+          - powershell: |
+              $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
+              echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
+              echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
+            name: DscBuildVariable
+
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'output'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            name: Test
+            inputs:
+              filePath: './build.ps1'
+              arguments: "-Tasks test -PesterScript 'tests/Unit'"
+              pwsh: false
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: 'output/testResults/NUnit*.xml'
+            condition: succeededOrFailed()
+
+          - task: PublishCodeCoverageResults@1
+            condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: 'JaCoCo'
+              summaryFileLocation: 'output/testResults/CodeCov*.xml'
+              pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
+
+      - job: Test_Integration_2016
+        pool:
+          vmImage: 'vs2017-win2016'
+        timeoutInMinutes: 0
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'output'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            name: ConfigureWinRM
+            inputs:
+              targetType: 'inline'
+              script: 'winrm quickconfig -quiet'
+              pwsh: false
+
+          - task: PowerShell@2
+            name: Test
+            inputs:
+              filePath: './build.ps1'
+              arguments: "-Tasks test -PesterScript 'tests/Integration' -CodeCoverageThreshold 0"
+              pwsh: false
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: 'output/testResults/NUnit*.xml'
+            condition: succeededOrFailed()
+
+      - job: Test_Unit_2019
+        pool:
+          vmImage: 'windows-2019'
+        timeoutInMinutes: 0
+        steps:
+          - powershell: |
+              $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
+              echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
+              echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
+            name: DscBuildVariable
+
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'output'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            name: Test
+            inputs:
+              filePath: './build.ps1'
+              arguments: "-Tasks test -PesterScript 'tests/Unit'"
+              pwsh: false
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: 'output/testResults/NUnit*.xml'
+            condition: succeededOrFailed()
+
+          - task: PublishCodeCoverageResults@1
+            condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: 'JaCoCo'
+              summaryFileLocation: 'output/testResults/CodeCov*.xml'
+              pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
+
+      - job: Test_Integration_2019
+        pool:
+          vmImage: 'windows-2019'
+        timeoutInMinutes: 0
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'output'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            name: ConfigureWinRM
+            inputs:
+              targetType: 'inline'
+              script: 'winrm quickconfig -quiet'
+              pwsh: false
+
+          - task: PowerShell@2
+            name: Test
+            inputs:
+              filePath: './build.ps1'
+              arguments: "-Tasks test -PesterScript 'tests/Integration' -CodeCoverageThreshold 0"
+              pwsh: false
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'NUnit'
+              testResultsFiles: 'output/testResults/NUnit*.xml'
+            condition: succeededOrFailed()
+
+  - stage: Deploy
+    dependsOn: Test
+    # Only execute deploy stage if we're on master and previous stage succeeded
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+          startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+        )
+      )
+    jobs:
+      - job: Deploy_Artefact
+        pool:
+          vmImage: 'ubuntu 16.04'
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'output'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: PowerShell@2
+            name: publish_prerelease
+            inputs:
+              filePath: './build.ps1'
+              arguments: '-tasks publish'
+              pwsh: true
+            env:
+              GitHubToken: $(GitHubToken)
+              GalleryApiToken: $(GalleryApiToken)
+
+          - task: PowerShell@2
+            name: send_changelog_PR
+            inputs:
+              filePath: './build.ps1'
+              arguments: '-tasks Create_ChangeLog_GitHub_PR'
+              pwsh: true
+            env:
+              GitHubToken: $(GitHubToken)
