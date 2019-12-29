@@ -150,7 +150,7 @@ Configuration DSC_xDSCWebService_PullTestWithoutFirewall_Config
 Configuration DSC_xDSCWebService_PullTestWithSeparateFirewallRule_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
-    Import-DscResource -ModuleName 'NetworkingDsc'
+    Import-DscResource -ModuleName 'NetworkingDsc' -ModuleVersion 7.4.0.0
 
     node $AllNodes.NodeName
     {
@@ -196,7 +196,7 @@ Configuration DSC_xDSCWebService_PullTestWithSeparateFirewallRule_Config
 Configuration DSC_xDSCWebService_PullTestSeparateAppPool_Config
 {
     Import-DscResource -ModuleName 'xPSDesiredStateConfiguration'
-    Import-DscResource -ModuleName 'xWebAdministration'
+    Import-DscResource -ModuleName 'xWebAdministration' -ModuleVersion 3.0.0.0
 
     node $AllNodes.NodeName
     {
