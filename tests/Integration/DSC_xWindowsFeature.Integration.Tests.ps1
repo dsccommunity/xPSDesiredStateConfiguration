@@ -82,6 +82,8 @@ try
         }
 
         Context "Should Install the Windows Feature: $script:testFeatureName" {
+            Clear-DscLcmConfiguration
+
             $configurationName = 'DSC_xWindowsFeature_InstallFeature'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
@@ -134,6 +136,8 @@ try
         }
 
         Context "Should Uninstall the Windows Feature: $script:testFeatureName" {
+            Clear-DscLcmConfiguration
+
             $configurationName = 'DSC_xWindowsFeature_UninstallFeature'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
@@ -183,6 +187,8 @@ try
         }
 
         Context "Should Install the Windows Feature: $script:testFeatureWithSubFeaturesName" {
+            Clear-DscLcmConfiguration
+
             $configurationName = 'DSC_xWindowsFeature_InstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
@@ -228,6 +234,8 @@ try
         }
 
         Context "Should Uninstall the Windows Feature: $script:testFeatureWithSubFeaturesName" {
+            Clear-DscLcmConfiguration
+
             $configurationName = 'DSC_xWindowsFeature_UninstallFeatureWithSubFeatures'
             $configurationPath = Join-Path -Path $TestDrive -ChildPath $configurationName
 
