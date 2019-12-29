@@ -2,10 +2,12 @@ TOPIC
     about_xPSDesiredStateConfiguration
 
 SHORT DESCRIPTION
-    DSC resources for configuring WS-Man.
+    DSC resources for configuring common operating systems features, files and
+    settings.
 
 LONG DESCRIPTION
-    This module contains DSC resources for configuring WS-Man.
+    This module contains DSC resources for configuring common operating systems
+    features, files and settings.
 
 EXAMPLES
     PS C:\> Get-DscResource -Module xPSDesiredStateConfiguration

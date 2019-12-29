@@ -18,9 +18,7 @@
     Copyright         = 'Copyright the DSC Community contributors. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'The xPSDesiredStateConfiguration module is a part of the Windows PowerShell Desired State Configuration (DSC) Resource Kit, which is a collection of DSC Resources produced by the PowerShell Team. This module contains the xDscWebService, xWindowsProcess, xService, xPackage, xArchive, xRemoteFile, xPSEndpoint and xWindowsOptionalFeature resources. Please see the Details section for more information on the functionalities provided by these resources.
-
-All of the resources in the DSC Resource Kit are provided AS IS, and are not supported through any Microsoft standard support program or service. The "x" in xPSDesiredStateConfiguration stands for experimental, which means that these resources will be fix forward and monitored by the module owner(s).'
+    Description       = 'DSC resources for configuring common operating systems features, files and settings.'
 
     # Minimum version of the Windows PowerShell engine required by this module
     PowerShellVersion = '4.0'
@@ -43,7 +41,7 @@ All of the resources in the DSC Resource Kit are provided AS IS, and are not sup
     # DSC resources to export from this module
     DscResourcesToExport  = @(
         'xArchive', 'xDSCWebService', 'xEnvironment','xGroup','xMsiPackage',
-        'xPackage','xPSSessionConfiguration','xRegistry','xRemoteFile',
+        'xPackage','xPSEndpoint','xRegistry','xRemoteFile',
         'xScript','xService','xUser','xWindowsFeature','xWindowsOptionalFeature',
         'xWindowsPackageCab','xWindowsProcess'
     )

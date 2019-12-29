@@ -23,7 +23,7 @@ if (-not (Install-WindowsFeatureAndVerify -Name Web-Mgmt-Tools))
 {
     throw 'Failed to verify for required Windows Feature. Unable to continue ...'
 }
-Import-Module -Name WebAdministration -ErrorAction:Stop -Force
+Import-Module -Name WebAdministration -ErrorAction 'Stop' -Force
 
 try
 {

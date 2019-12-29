@@ -306,7 +306,7 @@ try
                 Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False"' {
                     It 'Returns "True"' {
                         $splat = $script:testSplatFile.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         Test-TargetResource @splat | Should -BeTrue
                     }
 
@@ -320,7 +320,7 @@ try
                 Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum matches' {
                     It 'Returns "True"' {
                         $splat = $script:testSplatFileChecksum.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         $splat.Checksum = $script:testFileHash.Hash
                         Test-TargetResource @splat | Should -BeTrue
                     }
@@ -336,7 +336,7 @@ try
                 Context 'URI is valid, DestinationPath is a File, file exists, matchsource is "False", Checksum does not match' {
                     It 'Returns "False"' {
                         $splat = $script:testSplatFileChecksum.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         $splat.Checksum = 'badHash'
                         Test-TargetResource @splat | Should -BeFalse
                     }
@@ -360,7 +360,7 @@ try
                 Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
                     It 'Returns "True"' {
                         $splat = $script:testSplatFolderFileExists.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         Test-TargetResource @splat | Should -BeTrue
                     }
 
@@ -384,7 +384,7 @@ try
                 Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False"' {
                     It 'Returns "False"' {
                         $splat = $script:testSplatFolderFileNotExist.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         Test-TargetResource @splat | Should -BeFalse
                     }
 
@@ -399,7 +399,7 @@ try
                 Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum matches' {
                     It 'Returns "True"' {
                         $splat = $script:testSplatFolderFileExistsChecksum.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         $splat.Checksum = $script:testFileHash.Hash
                         Test-TargetResource @splat | Should -BeTrue
                     }
@@ -415,7 +415,7 @@ try
                 Context 'URI is valid, DestinationPath is a Folder, file exists, matchsource is "False", checksum does not match' {
                     It 'Returns "False"' {
                         $splat = $script:testSplatFolderFileExistsChecksum.Clone()
-                        $splat.MatchSource = $False
+                        $splat.MatchSource = $false
                         $splat.Checksum = 'badHash'
                         Test-TargetResource @splat | Should -BeFalse
                     }
@@ -464,7 +464,7 @@ try
 
             Describe 'xRemoteFile\Get-Cache' {
                 Mock Import-CliXml -MockWith { 'Expected Content' }
-                Mock Test-Path -MockWith { $True }
+                Mock Test-Path -MockWith { $true }
 
                 Context "DestinationPath 'c:\' and Uri $script:testURI and Cached Content exists" {
                     $Result = Get-Cache -DestinationPath 'c:\' -Uri $script:testURI
@@ -479,7 +479,7 @@ try
                     }
                 }
 
-                Mock Test-Path -MockWith { $False }
+                Mock Test-Path -MockWith { $false }
 
                 Context "DestinationPath 'c:\' and Uri $script:testURI and Cached Content does not exist" {
                     $Result = Get-Cache -DestinationPath 'c:\' -Uri $script:testURI
@@ -497,7 +497,7 @@ try
 
             Describe 'xRemoteFile\Update-Cache' {
                 Mock Export-CliXml
-                Mock Test-Path -MockWith { $True }
+                Mock Test-Path -MockWith { $true }
                 Mock New-Item
 
                 Context "DestinationPath 'c:\' and Uri $script:testURI and CacheLocation Exists" {
@@ -512,7 +512,7 @@ try
                     }
                 }
 
-                Mock Test-Path -MockWith { $False }
+                Mock Test-Path -MockWith { $false }
 
                 Context "DestinationPath 'c:\' and Uri $script:testURI and CacheLocation does not exist" {
                     It 'Does Not Throw' {

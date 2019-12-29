@@ -40,7 +40,7 @@ param
 
     [Parameter()]
     [switch]
-    # Allow you to use a locally installed version of PowerShellGet older than 1.6.0 (not recommended, default to $False)
+    # Allow you to use a locally installed version of PowerShellGet older than 1.6.0 (not recommended, default to $false)
     $AllowOldPowerShellGetModule,
 
     [Parameter()]
@@ -152,7 +152,7 @@ try
         Write-Progress -Activity "Bootstrap:" -PercentComplete 40 -CurrentOperation "Installing newer version of PowerShellGet"
         $InstallPSGetParam = @{
             Name               = 'PowerShellGet'
-            Force              = $True
+            Force              = $true
             SkipPublisherCheck = $true
             AllowClobber       = $true
             Scope              = $Scope

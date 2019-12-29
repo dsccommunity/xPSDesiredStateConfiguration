@@ -1438,7 +1438,7 @@ function Get-IISAppCmd
     param ()
 
     Push-Location -Path "$env:windir\system32\inetsrv"
-    $appCmd = Get-Command -Name '.\appcmd.exe' -CommandType 'Application' -ErrorAction:Stop
+    $appCmd = Get-Command -Name '.\appcmd.exe' -CommandType 'Application' -ErrorAction 'Stop'
     Pop-Location
     $appCmd
 }
