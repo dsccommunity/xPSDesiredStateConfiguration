@@ -62,6 +62,7 @@ stages:
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
+              testRunTitle: 'HQRM'
             condition: succeededOrFailed()
 
       - job: Test_Unit_2016
@@ -93,6 +94,7 @@ stages:
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
+              testRunTitle: 'Unit (Windows Server 2016)'
             condition: succeededOrFailed()
 
           - task: PublishCodeCoverageResults@1
@@ -132,6 +134,7 @@ stages:
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
+              testRunTitle: 'Integration (Windows Server 2016)'
             condition: succeededOrFailed()
 
       - job: Test_Unit_2019
@@ -163,6 +166,7 @@ stages:
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
+              testRunTitle: 'Unit (Windows Server 2019)'
             condition: succeededOrFailed()
 
           - task: PublishCodeCoverageResults@1
@@ -202,6 +206,7 @@ stages:
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
+              testRunTitle: 'Integration (Windows Server 2019)'
             condition: succeededOrFailed()
 
   - stage: Deploy

@@ -67,6 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Corrected style violations.
 - Updated build badges to reflect correct Azure DevOps build Definition Id - fixes
   [issue #656](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/656).
+- Set `testRunTitle` for PublishTestResults steps so that a helpful name is
+  displayed in Azure DevOps for each test run.
 
 ### Deprecated
 
