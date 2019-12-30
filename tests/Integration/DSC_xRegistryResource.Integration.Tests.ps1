@@ -232,8 +232,8 @@ try
                     Set-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData
 
                     # Verify that the registry key value has been created with the correct data and type
-                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName '(default)' -ValueData $valueData -ValueType 'String'
-                    $registryValueExists | Should -BeTrue
+                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType 'String'
+                    $registryValueExists | Should -Be $true
                 }
 
                 It 'Should remove a registry key value' {
@@ -265,15 +265,15 @@ try
                     New-RegistryValue -KeyPath $script:registryKeyPath -ValueName '(default)' -ValueData $valueData -ValueType $valueType
 
                     # Verify that the registry key value exists before removal
-                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName '(default)'
-                    $registryValueExists | Should -BeTrue
+                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName
+                    $registryValueExists | Should -Be $true
 
                     # Remove the registry value
                     Set-TargetResource -Key $script:registryKeyPath -ValueName $valueName -Ensure 'Absent'
 
                     # Verify that the registry key value has been removed
-                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName '(default)'
-                    $registryValueExists | Should -BeFalse
+                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName
+                    $registryValueExists | Should -Be $false
                 }
 
                 It 'Should create a new key and value with path containing forward slashes' {
@@ -287,6 +287,23 @@ try
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $registryKeyPathWithForwardSlashes -ValueName $valueName  -ValueData $valueData
                     $registryValueExists | Should -BeTrue
+                }
+
+                It 'Should overwrite a existence key and value with desired value type' {
+                    $valueName = 'TestValue'
+                    $valueData = '123'
+                    $expectedValueType = 'Dword'
+                    $actualValueType = 'String'
+
+                    # Create the test registry value
+                    New-RegistryValue -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $actualValueType
+
+                    # Update the new registry key value
+                    Set-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $expectedValueType -Force $true
+
+                    # Verify that the registry key value has been updated with the correct data and type
+                    $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $expectedValueType
+                    $registryValueExists | Should -Be $true
                 }
 
                 # Test-TargetResource
@@ -387,6 +404,19 @@ try
 
                     $testTargetResourceResult = Test-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData
                     $testTargetResourceResult | Should -BeTrue
+                }
+
+                It 'Should return false when the specified registry value exists and matches but the type does not matches expected one' {
+                    $valueName = 'TestValue'
+                    $valueData = '123'
+                    $expectedValueType = 'Dword'
+                    $actualValueType = 'String'
+
+                    # Create the test registry value
+                    New-RegistryValue -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $actualValueType
+
+                    $testTargetResourceResult = Test-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $expectedValueType
+                    $testTargetResourceResult | Should -Be $false
                 }
             }
         }
