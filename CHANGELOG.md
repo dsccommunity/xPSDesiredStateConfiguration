@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fix minor style issues with missing spaces between `param` statements and '('.
   - MSFT_xDSCWebService:
     - Removal of commented out code.
-    - Updated to meet HQRM style guidelines - Fixes [issue #623](https://github.com/PowerShell/PSDscResources/issues/623)
+    - Updated to meet HQRM style guidelines - Fixes [issue #623](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/623)
     - Added MOF descriptions.
   - Corrected minor style issues.
   - Fix minor style issues in hashtable layout.
@@ -65,6 +65,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed markdown errors in README.MD.
   - Moved strings to Localization file.
   - Corrected style violations.
+- Updated build badges to reflect correct Azure DevOps build Definition Id - fixes
+  [issue #656](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/656).
+- Set `testRunTitle` for PublishTestResults steps so that a helpful name is
+  displayed in Azure DevOps for each test run.
 
 ### Deprecated
 
