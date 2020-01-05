@@ -1668,7 +1668,7 @@ try
                 Mock -CommandName 'Get-RegistryKeyValueType' -MockWith { return 'ValueTypeNotDesired' }
                 Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
 
-                Context 'Registry key exists, Ensure specified as Present, specified registry value exists, specified value type does not match actual value type, and Force specified as True' {
+                Context 'When registry key exists, Ensure specified as Present, specified registry value exists, specified value type does not match actual value type, and Force specified as True' {
                     $setTargetResourceParameters = @{
                         Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryValueName'

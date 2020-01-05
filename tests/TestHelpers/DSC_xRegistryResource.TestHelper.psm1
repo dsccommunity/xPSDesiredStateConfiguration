@@ -69,19 +69,19 @@ function Test-RegistryValueExists
         $registryKey = Get-Item -LiteralPath $KeyPath -ErrorAction 'Ignore'
         if ($null -eq $registryKey)
         {
-            Write-Verbose -Message "Test-RegistryValueExists - Registry key is not exist"
+            Write-Verbose -Message 'Test-RegistryValueExists - Registry key does not exist'
             return $false
         }
 
         $registryValue = $registryKey.GetValue($ValueName, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
         if ($null -eq $registryValue)
         {
-            Write-Verbose -Message "Test-RegistryValueExists - Registry value is not exist"
+            Write-Verbose -Message 'Test-RegistryValueExists - Registry value does not exist'
             return $false
         }
 
         $registryValueType = $registryKey.GetValueKind($ValueName)
-        Write-Verbose -Message "Test-RegistryValueExists - Registry value is exist"
+        Write-Verbose -Message 'Test-RegistryValueExists - Registry value exists'
 
         if ($PSBoundParameters.ContainsKey('ValueType'))
         {

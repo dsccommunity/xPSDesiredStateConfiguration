@@ -289,7 +289,7 @@ try
                     $registryValueExists | Should -BeTrue
                 }
 
-                It 'Should overwrite a existence key and value with desired value type' {
+                It 'Should overwrite an existing key and value with desired value type' {
                     $valueName = 'TestValue'
                     $valueData = '123'
                     $expectedValueType = 'Dword'

@@ -295,7 +295,7 @@ function Set-TargetResource
                         $ShouldOverwriteRegistryKeyValue = $true
                     }
 
-                    # Check if the registry key value should be overwrite
+                    # Check if the registry key value should be overwritten
                     if ($false -eq $ShouldOverwriteRegistryKeyValue)
                     {
                         # No change is needed
