@@ -233,7 +233,7 @@ try
 
                     # Verify that the registry key value has been created with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType 'String'
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
                 }
 
                 It 'Should remove a registry key value' {
@@ -266,14 +266,14 @@ try
 
                     # Verify that the registry key value exists before removal
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
 
                     # Remove the registry value
                     Set-TargetResource -Key $script:registryKeyPath -ValueName $valueName -Ensure 'Absent'
 
                     # Verify that the registry key value has been removed
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName
-                    $registryValueExists | Should -Be $false
+                    $registryValueExists | Should -BeFalse
                 }
 
                 It 'Should create a new key and value with path containing forward slashes' {
@@ -303,7 +303,7 @@ try
 
                     # Verify that the registry key value has been updated with the correct data and type
                     $registryValueExists = Test-RegistryValueExists -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $expectedValueType
-                    $registryValueExists | Should -Be $true
+                    $registryValueExists | Should -BeTrue
                 }
 
                 # Test-TargetResource
@@ -416,7 +416,7 @@ try
                     New-RegistryValue -KeyPath $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $actualValueType
 
                     $testTargetResourceResult = Test-TargetResource -Key $script:registryKeyPath -ValueName $valueName -ValueData $valueData -ValueType $expectedValueType
-                    $testTargetResourceResult | Should -Be $false
+                    $testTargetResourceResult | Should -BeFalse
                 }
             }
         }

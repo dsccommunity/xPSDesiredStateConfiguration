@@ -466,12 +466,16 @@ try
                 Mock -CommandName 'ConvertTo-Qword' -MockWith { return $RegistryKeyValue }
                 Mock -CommandName 'ConvertTo-String' -MockWith { return $RegistryKeyValue }
                 Mock -CommandName 'Get-RegistryKeyName' -MockWith { return $setTargetResourceParameters.Key }
-                Mock -CommandName 'Get-RegistryKeyValueType' -MockWith { if ($setTargetResourceParameters.ValueType)
-                    { $setTargetResourceParameters.ValueType
+                Mock -CommandName 'Get-RegistryKeyValueType' -MockWith {
+                    if ($setTargetResourceParameters.ValueType)
+                    {
+                        $setTargetResourceParameters.ValueType
                     }
                     else
-                    { 'String'
-                    } }
+                    {
+                        'String'
+                    }
+                }
                 Mock -CommandName 'Set-RegistryKeyValue' -MockWith { }
                 Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
                 Mock -CommandName 'Remove-RegistryKey' -MockWith { }
@@ -2850,19 +2854,24 @@ try
                         $expectedRegistryDriveName = switch ($validRegistryDriveRoot)
                         {
                             'HKEY_CLASSES_ROOT'
-                            { 'HKCR'
+                            {
+                                'HKCR'
                             }
                             'HKEY_CURRENT_USER'
-                            { 'HKCU'
+                            {
+                                'HKCU'
                             }
                             'HKEY_LOCAL_MACHINE'
-                            { 'HKLM'
+                            {
+                                'HKLM'
                             }
                             'HKEY_USERS'
-                            { 'HKUS'
+                            {
+                                'HKUS'
                             }
                             'HKEY_CURRENT_CONFIG'
-                            { 'HKCC'
+                            {
+                                'HKCC'
                             }
                         }
 
@@ -3674,44 +3683,56 @@ try
                     $expectedRegistryKeyValue = switch ($registryKeyValueType)
                     {
                         'String'
-                        { 'String1'
+                        {
+                            'String1'
                         }
                         'Binary'
-                        { [System.Byte[]] @( 12, 172, 17, 17 )
+                        {
+                            [System.Byte[]] @( 12, 172, 17, 17 )
                         }
                         'DWord'
-                        { 169
+                        {
+                            169
                         }
                         'QWord'
-                        { 92
+                        {
+                            92
                         }
                         'MultiString'
-                        { @( 'String1', 'String2' )
+                        {
+                            @( 'String1', 'String2' )
                         }
                         'ExpandString'
-                        { '$expandMe'
+                        {
+                            '$expandMe'
                         }
                     }
 
                     $mismatchingActualRegistryKeyValue = switch ($registryKeyValueType)
                     {
                         'String'
-                        { 'String2'
+                        {
+                            'String2'
                         }
                         'Binary'
-                        { [System.Byte[]] @( 11, 172, 17, 1 )
+                        {
+                            [System.Byte[]] @( 11, 172, 17, 1 )
                         }
                         'DWord'
-                        { 12
+                        {
+                            12
                         }
                         'QWord'
-                        { 64
+                        {
+                            64
                         }
                         'MultiString'
-                        { @( 'String3', 'String2' )
+                        {
+                            @( 'String3', 'String2' )
                         }
                         'ExpandString'
-                        { '$dontExpandMe'
+                        {
+                            '$dontExpandMe'
                         }
                     }
 
