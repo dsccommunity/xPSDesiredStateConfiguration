@@ -277,15 +277,33 @@ function Set-TargetResource
                 }
                 else
                 {
-                    # If the registry key value exists, check if the specified registry key value matches the retrieved registry key value
-                    if (Test-RegistryKeyValuesMatch -ExpectedRegistryKeyValue $expectedRegistryKeyValue -ActualRegistryKeyValue $actualRegistryKeyValue -RegistryKeyValueType $ValueType)
+                    # If the registry key value exists, retrieve its type
+                    $actualValueType = Get-RegistryKeyValueType -RegistryKey $registryKey -RegistryKeyValueName $ValueName
+
+                    $ShouldOverwriteRegistryKeyValue = $false
+
+                    # Check if the specified type of the registry key value matches the retrieved type of the registry key value
+                    if ($PSBoundParameters.ContainsKey('ValueType') -and ($ValueType -ne $actualValueType))
                     {
-                        # If the specified registry key value matches the retrieved registry key value, no change is needed
+                        # If the specified type of the registry key value does not matches the retrieved type of the registry key value, should overwrite the value
+                        $ShouldOverwriteRegistryKeyValue = $true
+                    }
+                    # Check if the specified registry key value matches the retrieved registry key value
+                    elseif (-not (Test-RegistryKeyValuesMatch -ExpectedRegistryKeyValue $expectedRegistryKeyValue -ActualRegistryKeyValue $actualRegistryKeyValue -RegistryKeyValueType $ValueType))
+                    {
+                        # If the specified registry key value does not matches the retrieved registry key value, should overwrite the value
+                        $ShouldOverwriteRegistryKeyValue = $true
+                    }
+
+                    # Check if the registry key value should be overwritten
+                    if ($false -eq $ShouldOverwriteRegistryKeyValue)
+                    {
+                        # No change is needed
                         Write-Verbose -Message ($script:localizedData.RegistryKeyValueAlreadySet -f $valueDisplayName, $Key)
                     }
                     else
                     {
-                        # If the specified registry key value matches the retrieved registry key value, check if the user wants to overwrite the value
+                        # Check if the user wants to overwrite the value
                         if (-not $Force)
                         {
                             # If the user does not want to overwrite the value, throw an error

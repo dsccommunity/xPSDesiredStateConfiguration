@@ -55,7 +55,7 @@ try
 
                 Context 'Registry key at specified path does not exist' {
                     $getTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                     }
 
@@ -123,7 +123,7 @@ try
 
                 Context 'Specified registry key exists, registry key value name specified as an empty string, and registry key value data and type not specified' {
                     $getTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                     }
 
@@ -189,7 +189,7 @@ try
 
                 Context 'Specified registry key exists and specified registry key value does not exist' {
                     $getTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestValueName'
                     }
 
@@ -272,7 +272,7 @@ try
 
                 Context 'Specified registry key exists and specified registry key value exists as a string' {
                     $getTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestValueName'
                     }
 
@@ -363,7 +363,7 @@ try
 
                 Context 'Specified registry key exists and registry key default value exists as a string' {
                     $getTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueType = 'String'
                         ValueData = 'TestValueData'
@@ -466,6 +466,16 @@ try
                 Mock -CommandName 'ConvertTo-Qword' -MockWith { return $RegistryKeyValue }
                 Mock -CommandName 'ConvertTo-String' -MockWith { return $RegistryKeyValue }
                 Mock -CommandName 'Get-RegistryKeyName' -MockWith { return $setTargetResourceParameters.Key }
+                Mock -CommandName 'Get-RegistryKeyValueType' -MockWith {
+                    if ($setTargetResourceParameters.ValueType)
+                    {
+                        $setTargetResourceParameters.ValueType
+                    }
+                    else
+                    {
+                        'String'
+                    }
+                }
                 Mock -CommandName 'Set-RegistryKeyValue' -MockWith { }
                 Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
                 Mock -CommandName 'Remove-RegistryKey' -MockWith { }
@@ -476,9 +486,9 @@ try
 
                 Context 'Registry key does not exist and Ensure specified as Absent' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
@@ -561,9 +571,9 @@ try
 
                 Context 'Registry key does not exist, Ensure specified as Present, registry value name specified as empty string, and registry value type and data not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
@@ -653,9 +663,9 @@ try
 
                 Context 'Registry key exists with no subkeys, Ensure specified as Absent, registry value name specified as empty string, and registry value type and data not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
@@ -750,9 +760,9 @@ try
 
                 Context 'Registry key exists with subkeys, Ensure specified as Absent, registry value name specified as empty string, registry value type and data not specified, and Force not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should throw error for removal of registry key with subkeys without specifying Force as True' {
@@ -764,10 +774,10 @@ try
 
                 Context 'Registry key exists with subkeys, Ensure specified as Absent, registry value name specified as empty string, registry value type and data not specified, and Force specified as True' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Absent'
-                        Force = $true
+                        Ensure    = 'Absent'
+                        Force     = $true
                     }
 
                     It 'Should not throw' {
@@ -860,9 +870,9 @@ try
 
                 Context 'Registry key exists, Ensure specified as Absent, specified registry value does not exist, and registry value type and data not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
@@ -955,9 +965,9 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, registry value name specified as empty string, and registry value type and data not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
@@ -1040,9 +1050,9 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, specified registry value does not exist, and registry value type and data not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
@@ -1154,11 +1164,11 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, default registry value does not exist, registry value type specified as binary, and value data specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueType = 'Binary'
                         ValueData = @( [System.Byte]::MinValue.ToString(), [System.Byte]::MaxValue.ToString() )
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
@@ -1272,11 +1282,11 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, specified registry value exists and matches specified multi-string value data' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryeyValueName'
                         ValueType = 'MultiString'
                         ValueData = @( 'TestValueData1', 'TestValueData2' )
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
@@ -1389,11 +1399,11 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, specified registry value exists and does not match specified expand string value data, and Force not specified' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryeyValueName'
                         ValueType = 'ExpandString'
                         ValueData = 'TestValueData1'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should throw error for trying to overwrite existing registry key value without specifying Force as True' {
@@ -1405,13 +1415,13 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, specified registry value exists and does not match specified dword value data, and Hex and Force specified as True' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryeyValueName'
                         ValueType = 'DWord'
                         ValueData = 'x9A'
-                        Ensure = 'Present'
-                        Hex = $true
-                        Force = $true
+                        Ensure    = 'Present'
+                        Hex       = $true
+                        Force     = $true
                     }
 
                     It 'Should not throw' {
@@ -1533,13 +1543,13 @@ try
 
                 Context 'Registry key exists, Ensure specified as Present, specified registry value exists and does not match specified qword value data, and Hex and Force specified as True' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryeyValueName'
                         ValueType = 'QWord'
                         ValueData = 'x9A'
-                        Ensure = 'Present'
-                        Hex = $true
-                        Force = $true
+                        Ensure    = 'Present'
+                        Hex       = $true
+                        Force     = $true
                     }
 
                     It 'Should not throw' {
@@ -1659,14 +1669,198 @@ try
                     }
                 }
 
+                Mock -CommandName 'Get-RegistryKeyValueType' -MockWith { return 'ValueTypeNotDesired' }
+                Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $true }
+
+                Context 'When registry key exists, Ensure specified as Present, specified registry value exists, specified value type does not match actual value type, and Force specified as True' {
+                    $setTargetResourceParameters = @{
+                        Key       = 'TestRegistryKey'
+                        ValueName = 'TestRegistryValueName'
+                        ValueType = 'Dword'
+                        ValueData = '123'
+                        Ensure    = 'Present'
+                        Force     = $true
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+                    }
+
+                    It 'Should retrieve the registry key' {
+                        $getRegistryKeyParameterFilter = {
+                            $registryKeyPathParameterCorrect = $RegistryKeyPath -eq $setTargetResourceParameters.Key
+                            return $registryKeyPathParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKey' -ParameterFilter $getRegistryKeyParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to create a new registry key' {
+                        Assert-MockCalled -CommandName 'New-RegistryKey' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should retrieve the registry key value display name' {
+                        $getRegistryKeyValueDisplayNameParameterFilter = {
+                            $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                            return $registryKeyValueNameParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKeyValueDisplayName' -ParameterFilter $getRegistryKeyValueDisplayNameParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should retrieve the registry key value' {
+                        $getRegistryKeyValueParameterFilter = {
+                            $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                            return $registryKeyParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKeyValue' -ParameterFilter $getRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should retrieve the type of the registry key value' {
+                        $getRegistryKeyValueTypeParameterFilter = {
+                            $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                            return $registryKeyValueNameParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKeyValueType' -ParameterFilter $getRegistryKeyValueTypeParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to test if the specified registry key value matches the retrieved registry key value' {
+                        Assert-MockCalled -CommandName 'Test-RegistryKeyValuesMatch' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should set the registry key value' {
+                        $setRegistryKeyValueParameterFilter = {
+                            $registryKeyNameParameterCorrect = $RegistryKeyName -eq $setTargetResourceParameters.Key
+                            $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                            $registryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $RegistryKeyValue)
+                            $valueTypeParameterCorrect = $ValueType -eq $setTargetResourceParameters.ValueType
+
+                            return $registryKeyNameParameterCorrect -and $registryKeyValueNameParameterCorrect -and $registryKeyValueParameterCorrect -and $valueTypeParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Set-RegistryKeyValue' -ParameterFilter $setRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to remove the registry key value' {
+                        Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to remove the default registry key value' {
+                        Assert-MockCalled -CommandName 'Remove-DefaultRegistryKeyValue' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to retrieve the registry key subkey count' {
+                        Assert-MockCalled -CommandName 'Get-RegistryKeySubKeyCount' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to remove the registry key' {
+                        Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not return' {
+                        Set-TargetResource @setTargetResourceParameters | Should -Be $null
+                    }
+                }
+
+                Context 'Registry key exists, Ensure specified as Present, specified registry value exists, ValueType not specified, and Force specified as True' {
+                    $setTargetResourceParameters = @{
+                        Key       = 'TestRegistryKey'
+                        ValueName = 'TestRegistryValueName'
+                        ValueData = '123'
+                        Ensure    = 'Present'
+                        Force     = $true
+                    }
+
+                    It 'Should not throw' {
+                        { Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
+                    }
+
+                    It 'Should retrieve the registry key' {
+                        $getRegistryKeyParameterFilter = {
+                            $registryKeyPathParameterCorrect = $RegistryKeyPath -eq $setTargetResourceParameters.Key
+                            return $registryKeyPathParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKey' -ParameterFilter $getRegistryKeyParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to create a new registry key' {
+                        Assert-MockCalled -CommandName 'New-RegistryKey' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should retrieve the registry key value display name' {
+                        $getRegistryKeyValueDisplayNameParameterFilter = {
+                            $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                            return $registryKeyValueNameParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKeyValueDisplayName' -ParameterFilter $getRegistryKeyValueDisplayNameParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should retrieve the registry key value' {
+                        $getRegistryKeyValueParameterFilter = {
+                            $registryKeyParameterCorrect = $null -eq (Compare-Object -ReferenceObject $script:testRegistryKey -DifferenceObject $RegistryKey)
+                            return $registryKeyParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKeyValue' -ParameterFilter $getRegistryKeyValueParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should retrieve the type of the registry key value' {
+                        $getRegistryKeyValueTypeParameterFilter = {
+                            $registryKeyValueNameParameterCorrect = $RegistryKeyValueName -eq $setTargetResourceParameters.ValueName
+                            return $registryKeyValueNameParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Get-RegistryKeyValueType' -ParameterFilter $getRegistryKeyValueTypeParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should test if the specified registry key value matches the retrieved registry key value' {
+                        $testRegistryKeyValuesMatchParameterFilter = {
+                            $expectedRegistryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $ExpectedRegistryKeyValue)
+                            $actualRegistryKeyValueParameterCorrect = $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.ValueData -DifferenceObject $ActualRegistryKeyValue)
+
+                            return $expectedRegistryKeyValueParameterCorrect -and $actualRegistryKeyValueParameterCorrect
+                        }
+
+                        Assert-MockCalled -CommandName 'Test-RegistryKeyValuesMatch' -ParameterFilter $testRegistryKeyValuesMatchParameterFilter -Times 1 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to set the registry key value' {
+                        Assert-MockCalled -CommandName 'Set-RegistryKeyValue' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to remove the registry key value' {
+                        Assert-MockCalled -CommandName 'Remove-RegistryKeyValue' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to remove the default registry key value' {
+                        Assert-MockCalled -CommandName 'Remove-DefaultRegistryKeyValue' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to retrieve the registry key subkey count' {
+                        Assert-MockCalled -CommandName 'Get-RegistryKeySubKeyCount' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not attempt to remove the registry key' {
+                        Assert-MockCalled -CommandName 'Remove-RegistryKey' -Times 0 -Scope 'Context'
+                    }
+
+                    It 'Should not return' {
+                        Set-TargetResource @setTargetResourceParameters | Should -Be $null
+                    }
+                }
+
                 Mock -CommandName 'Get-RegistryKeyValue' -MockWith { return 'NotNull' }
 
                 Context 'Registry key exists, Ensure specified as Absent specified registry value exists' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Absent'
-                        Force = $true
+                        Ensure    = 'Absent'
+                        Force     = $true
                     }
 
                     It 'Should not throw' {
@@ -1766,12 +1960,12 @@ try
 
                 Context 'Registry key exists, Ensure specified as Absent, default registry value exists, and Force specified as True' {
                     $setTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueType = 'String'
                         ValueData = 'TestValueData'
-                        Ensure = 'Absent'
-                        Force = $true
+                        Ensure    = 'Absent'
+                        Force     = $true
                     }
 
                     It 'Should not throw' {
@@ -1885,16 +2079,16 @@ try
 
                 Context 'Registry key does not exist and Ensure set to Absent' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -1926,16 +2120,16 @@ try
 
                 Context 'Registry key does not exist and Ensure set to Present' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -1982,9 +2176,9 @@ try
 
                 Context 'Registry key value does not exist and Ensure set to Absent' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
@@ -2000,7 +2194,7 @@ try
                         Assert-MockCalled -CommandName 'Get-RegistryKeyValueDisplayName' -ParameterFilter $getRegistryKeyValueDisplayNameParameterFilter -Times 1 -Scope 'Context'
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2028,16 +2222,16 @@ try
 
                 Context 'Registry key value does not exist and Ensure set to Present' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2080,16 +2274,16 @@ try
 
                 Context 'Registry key exists, Ensure set to Absent, and registry key value name, type, and data not specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2121,16 +2315,16 @@ try
 
                 Context 'Registry key exists, Ensure set to Present, and registry key value name, type, and data not specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2160,18 +2354,18 @@ try
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Absent, and registry key value name specified' {
+                Context 'Registry key value exists, Ensure set to Absent, and registry key value name specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2206,19 +2400,19 @@ try
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Absent, and registry key value type specified' {
+                Context 'Registry key value exists, Ensure set to Absent, and registry key value type specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueType = 'String'
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2253,19 +2447,19 @@ try
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Absent, and registry key value data specified' {
+                Context 'Registry key value exists, Ensure set to Absent, and registry key value data specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueData = 'TestValueData'
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2300,18 +2494,18 @@ try
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Present, and registry key value name specified' {
+                Context 'Registry key value exists, Ensure set to Present, and registry key value name specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = 'TestRegistryKeyValueName'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key and value name' {
+                    It 'Should retrieve the registry resource with the specified registry key and value name' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2348,24 +2542,24 @@ try
 
                 Mock -CommandName 'Get-TargetResource' -MockWith {
                     return @{
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                         ValueType = $testTargetResourceParameters.ValueType
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Present, and matching registry key value type specified' {
+                Context 'Registry key value exists, Ensure set to Present, and matching registry key value type specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueType = 'String'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key, value name, and value type' {
+                    It 'Should retrieve the registry resource with the specified registry key, value name, and value type' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2403,25 +2597,25 @@ try
 
                 Mock -CommandName 'Get-TargetResource' -MockWith {
                     return @{
-                        Ensure ='Present'
+                        Ensure    = 'Present'
                         ValueData = $testTargetResourceParameters.ValueData
                         ValueType = $null
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Present, and matching registry key value data specified' {
+                Context 'Registry key value exists, Ensure set to Present, and matching registry key value data specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueData = 'TestValueData'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key, value name, and value data' {
+                    It 'Should retrieve the registry resource with the specified registry key, value name, and value data' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2467,24 +2661,24 @@ try
 
                 Mock -CommandName 'Get-TargetResource' -MockWith {
                     return @{
-                        Ensure ='Present'
+                        Ensure    = 'Present'
                         ValueType = 'MismatchingValueType'
                     }
                 }
 
-                Context 'Registry key value exists, Enusre set to Present, and mismatching registry key value type specified' {
+                Context 'Registry key value exists, Ensure set to Present, and mismatching registry key value type specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueType = 'String'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key, value name, and value type' {
+                    It 'Should retrieve the registry resource with the specified registry key, value name, and value type' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2524,7 +2718,7 @@ try
 
                 Mock -CommandName 'Get-TargetResource' -MockWith {
                     return @{
-                        Ensure ='Present'
+                        Ensure    = 'Present'
                         ValueData = $mismatchingValueData
                         ValueType = $null
                     }
@@ -2532,19 +2726,19 @@ try
 
                 Mock -CommandName 'Test-RegistryKeyValuesMatch' -MockWith { return $false }
 
-                Context 'Registry key value exists, Enusre set to Present, and mismatching registry key value data specified' {
+                Context 'Registry key value exists, Ensure set to Present, and mismatching registry key value data specified' {
                     $testTargetResourceParameters = @{
-                        Key = 'TestRegistryKey'
+                        Key       = 'TestRegistryKey'
                         ValueName = ''
                         ValueData = 'TestValueData'
-                        Ensure = 'Present'
+                        Ensure    = 'Present'
                     }
 
                     It 'Should not throw' {
                         { $null = Test-TargetResource @testTargetResourceParameters } | Should -Not -Throw
                     }
 
-                    It 'Should retrieve the registry resource with the specified reigstry key, value name, and value data' {
+                    It 'Should retrieve the registry resource with the specified registry key, value name, and value data' {
                         $getTargetResourceParameterFilter = {
                             $keyParameterCorrect = $Key -eq $testTargetResourceParameters.Key
                             $valueNameParameterCorrect = $ValueName -eq $testTargetResourceParameters.ValueName
@@ -2657,19 +2851,34 @@ try
                             { $null = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters } | Should -Not -Throw
                         }
 
-                        $expcetedRegistryDriveName = switch ($validRegistryDriveRoot)
+                        $expectedRegistryDriveName = switch ($validRegistryDriveRoot)
                         {
-                            'HKEY_CLASSES_ROOT' { 'HKCR' }
-                            'HKEY_CURRENT_USER' { 'HKCU' }
-                            'HKEY_LOCAL_MACHINE' { 'HKLM' }
-                            'HKEY_USERS' { 'HKUS' }
-                            'HKEY_CURRENT_CONFIG' { 'HKCC' }
+                            'HKEY_CLASSES_ROOT'
+                            {
+                                'HKCR'
+                            }
+                            'HKEY_CURRENT_USER'
+                            {
+                                'HKCU'
+                            }
+                            'HKEY_LOCAL_MACHINE'
+                            {
+                                'HKLM'
+                            }
+                            'HKEY_USERS'
+                            {
+                                'HKUS'
+                            }
+                            'HKEY_CURRENT_CONFIG'
+                            {
+                                'HKCC'
+                            }
                         }
 
                         $convertToRegistryDriveNameResult = ConvertTo-RegistryDriveName @convertToRegistryDriveNameParameters
 
-                        It "Should return correct registry drive name $expcetedRegistryDriveName" {
-                            $convertToRegistryDriveNameResult | Should -Be $expcetedRegistryDriveName
+                        It "Should return correct registry drive name $expectedRegistryDriveName" {
+                            $convertToRegistryDriveNameResult | Should -Be $expectedRegistryDriveName
                         }
                     }
                 }
@@ -2854,16 +3063,16 @@ try
                     }
 
                     It 'Should retrieve the registry drive with specified name' {
-                        $getPSDriveParamterFilter = {
+                        $getPSDriveParameterFilter = {
                             $nameParameterCorrect = $Name -eq $mountRegistryDriveParameters.RegistryDriveName
                             return $nameParameterCorrect
                         }
 
-                        Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParamterFilter -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParameterFilter -Times 1 -Scope 'Context'
                     }
 
                     It 'Should create the registry drive with specified name' {
-                        $newPSDriveParamterFilter = {
+                        $newPSDriveParameterFilter = {
                             $nameParameterCorrect = $Name -eq $mountRegistryDriveParameters.RegistryDriveName
                             $rootParameterCorrect = $Root -eq $expectedRegistryDriveRoot
                             $psProviderParameterCorrect = $PSProvider -eq 'Registry'
@@ -2872,7 +3081,7 @@ try
                             return $nameParameterCorrect -and $rootParameterCorrect -and $psProviderParameterCorrect -and $scopeParameterCorrect
                         }
 
-                        Assert-MockCalled -CommandName 'New-PSDrive' -ParameterFilter $newPSDriveParamterFilter -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'New-PSDrive' -ParameterFilter $newPSDriveParameterFilter -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not return anything' {
@@ -2920,12 +3129,12 @@ try
                     }
 
                     It 'Should retrieve the registry drive with specified name' {
-                        $getPSDriveParamterFilter = {
+                        $getPSDriveParameterFilter = {
                             $nameParameterCorrect = $Name -eq $mountRegistryDriveParameters.RegistryDriveName
                             return $nameParameterCorrect
                         }
 
-                        Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParamterFilter -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Get-PSDrive' -ParameterFilter $getPSDriveParameterFilter -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not attempt to create a registry drive with specified name' {
@@ -2977,7 +3186,7 @@ try
 
                     It 'Should retrieve the registry drive key' {
                         $getItemParameterFilter = {
-                            $literalPathParameterCorrect = $LiteralPath -eq ($expectedRegistryDriveName  + ':')
+                            $literalPathParameterCorrect = $LiteralPath -eq ($expectedRegistryDriveName + ':')
                             return $literalPathParameterCorrect
                         }
 
@@ -3034,7 +3243,7 @@ try
 
                     It 'Should retrieve the registry drive key' {
                         $getItemParameterFilter = {
-                            $literalPathParameterCorrect = $LiteralPath -eq ($expectedRegistryDriveName  + ':')
+                            $literalPathParameterCorrect = $LiteralPath -eq ($expectedRegistryDriveName + ':')
                             return $literalPathParameterCorrect
                         }
 
@@ -3062,7 +3271,7 @@ try
 
                 Context 'Registry key at specified path exists and WriteAccessAllowed specified' {
                     $getRegistryKeyParameters = @{
-                        RegistryKeyPath = 'TestRegistryKeyPath\TestSubKey'
+                        RegistryKeyPath    = 'TestRegistryKeyPath\TestSubKey'
                         WriteAccessAllowed = $true
                     }
 
@@ -3090,7 +3299,7 @@ try
 
                     It 'Should retrieve the registry drive key' {
                         $getItemParameterFilter = {
-                            $literalPathParameterCorrect = $LiteralPath -eq ($expectedRegistryDriveName  + ':')
+                            $literalPathParameterCorrect = $LiteralPath -eq ($expectedRegistryDriveName + ':')
                             return $literalPathParameterCorrect
                         }
 
@@ -3224,7 +3433,7 @@ try
                 {
                     Context "Registry key value specified as null and registry key type specified as $registryKeyValueType" {
                         $convertToReadableStringParameters = @{
-                            RegistryKeyValue = $null
+                            RegistryKeyValue     = $null
                             RegistryKeyValueType = $registryKeyValueType
                         }
 
@@ -3245,7 +3454,7 @@ try
 
                     Context "Registry key value specified as an empty array and registry key type specified as $registryKeyValueType" {
                         $convertToReadableStringParameters = @{
-                            RegistryKeyValue = @()
+                            RegistryKeyValue     = @()
                             RegistryKeyValueType = $registryKeyValueType
                         }
 
@@ -3280,7 +3489,7 @@ try
 
                     Context "Registry key value specified as an array with a single element and registry key type specified as $registryKeyValueType" {
                         $convertToReadableStringParameters = @{
-                            RegistryKeyValue = @( 'String1' )
+                            RegistryKeyValue     = @( 'String1' )
                             RegistryKeyValueType = $registryKeyValueType
                         }
 
@@ -3315,7 +3524,7 @@ try
 
                     Context "Registry key value specified as an array with multiple elements and registry key type specified as $registryKeyValueType" {
                         $convertToReadableStringParameters = @{
-                            RegistryKeyValue = @( 'String1', 'String2' )
+                            RegistryKeyValue     = @( 'String1', 'String2' )
                             RegistryKeyValueType = $registryKeyValueType
                         }
 
@@ -3473,29 +3682,65 @@ try
                 {
                     $expectedRegistryKeyValue = switch ($registryKeyValueType)
                     {
-                        'String' { 'String1' }
-                        'Binary' { [System.Byte[]] @( 12, 172, 17, 17 ) }
-                        'DWord' { 169 }
-                        'QWord' { 92 }
-                        'MultiString' { @( 'String1', 'String2' ) }
-                        'ExpandString' { '$expandMe' }
+                        'String'
+                        {
+                            'String1'
+                        }
+                        'Binary'
+                        {
+                            [System.Byte[]] @( 12, 172, 17, 17 )
+                        }
+                        'DWord'
+                        {
+                            169
+                        }
+                        'QWord'
+                        {
+                            92
+                        }
+                        'MultiString'
+                        {
+                            @( 'String1', 'String2' )
+                        }
+                        'ExpandString'
+                        {
+                            '$expandMe'
+                        }
                     }
 
                     $mismatchingActualRegistryKeyValue = switch ($registryKeyValueType)
                     {
-                        'String' { 'String2' }
-                        'Binary' { [System.Byte[]] @( 11, 172, 17, 1 ) }
-                        'DWord' { 12 }
-                        'QWord' { 64 }
-                        'MultiString' { @( 'String3', 'String2' ) }
-                        'ExpandString' { '$dontExpandMe' }
+                        'String'
+                        {
+                            'String2'
+                        }
+                        'Binary'
+                        {
+                            [System.Byte[]] @( 11, 172, 17, 1 )
+                        }
+                        'DWord'
+                        {
+                            12
+                        }
+                        'QWord'
+                        {
+                            64
+                        }
+                        'MultiString'
+                        {
+                            @( 'String3', 'String2' )
+                        }
+                        'ExpandString'
+                        {
+                            '$dontExpandMe'
+                        }
                     }
 
                     Context "Registry key value type specified as $registryKeyValueType and registry key values match" {
                         $testRegistryKeyValuesMatchParameters = @{
                             ExpectedRegistryKeyValue = $expectedRegistryKeyValue
-                            ActualRegistryKeyValue = $expectedRegistryKeyValue
-                            RegistryKeyValueType = $registryKeyValueType
+                            ActualRegistryKeyValue   = $expectedRegistryKeyValue
+                            RegistryKeyValueType     = $registryKeyValueType
                         }
 
                         It 'Should not throw' {
@@ -3512,8 +3757,8 @@ try
                     Context "Registry key value type specified as $registryKeyValueType and registry key values do not match" {
                         $testRegistryKeyValuesMatchParameters = @{
                             ExpectedRegistryKeyValue = $expectedRegistryKeyValue
-                            ActualRegistryKeyValue = $mismatchingActualRegistryKeyValue
-                            RegistryKeyValueType = $registryKeyValueType
+                            ActualRegistryKeyValue   = $mismatchingActualRegistryKeyValue
+                            RegistryKeyValueType     = $registryKeyValueType
                         }
 
                         It 'Should not throw' {
@@ -3691,7 +3936,7 @@ try
                         { $null = ConvertTo-DWord @convertToDWordParameters } | Should -Not -Throw
                     }
 
-                    $convertToDWordResult =  ConvertTo-DWord @convertToDWordParameters
+                    $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                     It 'Should return 0 as an Int32' {
                         $convertToDWordResult | Should -Be ([System.Int32] 0)
@@ -3752,7 +3997,7 @@ try
                     $invalidHexDWord = 'InvalidInt32'
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $invalidHexDWord )
-                        Hex = $true
+                        Hex              = $true
                     }
 
                     It 'Should throw an error for the invalid dword string' {
@@ -3768,7 +4013,7 @@ try
 
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $validHexDWord.ToString() )
-                        Hex = $true
+                        Hex              = $true
                     }
 
                     It 'Should not throw' {
@@ -3788,7 +4033,7 @@ try
 
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $validHexDWord.ToString() )
-                        Hex = $true
+                        Hex              = $true
                     }
 
                     It 'Should not throw' {
@@ -3843,7 +4088,7 @@ try
                         { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                     }
 
-                    $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
+                    $convertToMultiStringResult = ConvertTo-MultiString @convertToMultiStringParameters
 
                     It 'Should return null' {
                         $convertToMultiStringResult | Should -Be $null
@@ -3859,7 +4104,7 @@ try
                         { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                     }
 
-                    $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
+                    $convertToMultiStringResult = ConvertTo-MultiString @convertToMultiStringParameters
 
                     It 'Should return an array containing null' {
                         Compare-Object -ReferenceObject ([System.String[]] @($null)) -DifferenceObject $convertToMultiStringResult | Should -Be $null
@@ -3875,7 +4120,7 @@ try
                         { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                     }
 
-                    $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
+                    $convertToMultiStringResult = ConvertTo-MultiString @convertToMultiStringParameters
 
                     It 'Should return an array containing the specified single string' {
                         Compare-Object -ReferenceObject $convertToMultiStringParameters.RegistryKeyValue -DifferenceObject $convertToMultiStringResult | Should -Be $null
@@ -3891,7 +4136,7 @@ try
                         { $null = ConvertTo-MultiString @convertToMultiStringParameters } | Should -Not -Throw
                     }
 
-                    $convertToMultiStringResult =  ConvertTo-MultiString @convertToMultiStringParameters
+                    $convertToMultiStringResult = ConvertTo-MultiString @convertToMultiStringParameters
 
                     It 'Should return an array containing the specified single string' {
                         Compare-Object -ReferenceObject $convertToMultiStringParameters.RegistryKeyValue -DifferenceObject $convertToMultiStringResult | Should -Be $null
@@ -3970,7 +4215,7 @@ try
                     $invalidHexDWord = 'InvalidInt32'
                     $convertToQWordParameters = @{
                         RegistryKeyValue = @( $invalidHexDWord )
-                        Hex = $true
+                        Hex              = $true
                     }
 
                     It 'Should throw an error for the invalid qword string' {
@@ -3986,7 +4231,7 @@ try
 
                     $convertToQWordParameters = @{
                         RegistryKeyValue = @( $validHexDWord.ToString() )
-                        Hex = $true
+                        Hex              = $true
                     }
 
                     It 'Should not throw' {
@@ -4006,7 +4251,7 @@ try
 
                     $convertToQWordParameters = @{
                         RegistryKeyValue = @( $validHexDWord.ToString() )
-                        Hex = $true
+                        Hex              = $true
                     }
 
                     It 'Should not throw' {

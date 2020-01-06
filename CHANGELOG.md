@@ -81,7 +81,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- None
+- MSFT_xRegistryResource
+  - Fixes issue that the `Set-TargetResource` does not determine
+    the type of registry value correctly.
+    [issue #436](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/436)
 
 ### Security
 

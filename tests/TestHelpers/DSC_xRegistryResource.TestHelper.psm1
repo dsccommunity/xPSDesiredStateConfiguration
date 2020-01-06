@@ -54,9 +54,11 @@ function Test-RegistryValueExists
         [System.String]
         $ValueName,
 
-        [System.String]
+        [Parameter()]
+        [System.String[]]
         $ValueData,
 
+        [Parameter()]
         [ValidateNotNullOrEmpty()]
         [System.String]
         $ValueType
@@ -64,43 +66,66 @@ function Test-RegistryValueExists
 
     try
     {
-        $registryValue = Get-ItemProperty -Path $KeyPath -Name $ValueName -ErrorAction 'SilentlyContinue'
-        Write-Verbose -Message "Test-RegistryValueExists - Registry key value: $registryKeyValue"
-
-        $registryValueExists = $null -ne $registryValue
-
-        Write-Verbose -Message "Test-RegistryValueExists - Registry value is not null: $registryValueExists"
-
-        if (-not $registryValueExists)
+        $registryKey = Get-Item -LiteralPath $KeyPath -ErrorAction 'Ignore'
+        if ($null -eq $registryKey)
         {
+            Write-Verbose -Message 'Test-RegistryValueExists - Registry key does not exist'
             return $false
         }
 
-        $registryValue = $registryValue.$ValueName
+        $registryValue = $registryKey.GetValue($ValueName, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+        if ($null -eq $registryValue)
+        {
+            Write-Verbose -Message 'Test-RegistryValueExists - Registry value does not exist'
+            return $false
+        }
+
+        $registryValueType = $registryKey.GetValueKind($ValueName)
+        Write-Verbose -Message 'Test-RegistryValueExists - Registry value exists'
 
         if ($PSBoundParameters.ContainsKey('ValueType'))
         {
-            Write-Verbose -Message "Test-RegistryValueExists - Registry value type: $($registryValue.GetType().Name)"
-
-            if ($ValueType -eq 'Binary')
+            Write-Verbose -Message "Test-RegistryValueExists - Registry value type: $registryValueType"
+            if ($ValueType -ne $registryValueType)
             {
-                $registryValueExists = $registryValueExists -and ($registryValue.GetType().Name -eq 'Byte[]')
-                $registryValue = Convert-ByteArrayToHexString -Data $registryValue
-            }
-            else
-            {
-                $registryValueExists = $registryValueExists -and ($registryValue.GetType().Name -eq $ValueType)
+                return $false
             }
         }
 
         if ($PSBoundParameters.ContainsKey('ValueData'))
         {
-            Write-Verbose -Message "Test-RegistryValueExists - Registry value data: $registryValue"
+            if ($registryValueType -eq 'MultiString')
+            {
+                # Array comparison
+                if ($registryValue.Length -ne $ValueData.Length)
+                {
+                    return $false
+                }
 
-            $registryValueExists = $registryValueExists -and ($ValueData -eq $registryValue)
+                for ($i = 0; $i -lt $registryValue.Length; $i++)
+                {
+                    if ($registryValue[$i] -cne $ValueData[$i])
+                    {
+                        return $false
+                    }
+                }
+            }
+            else
+            {
+                if ($registryValueType -eq 'Binary')
+                {
+                    $registryValue = Convert-ByteArrayToHexString $registryValue
+                }
+
+                #simple value comparison
+                if ($registryValue -cne $ValueData[0])
+                {
+                    return $false
+                }
+            }
         }
 
-        return $registryValueExists
+        return $true
     }
     catch
     {
