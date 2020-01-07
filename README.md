@@ -759,7 +759,7 @@ None
   value, otherwise the existing value will be replaced by the new value. When
   configured as a Path variable, multiple entries separated by semicolons are
   ensured to be either present or absent without affecting other Path entries
-  (see [Examples](/Examples)). The default value is False.
+  (see [Examples](/source/Examples)). The default value is False.
 * **[String[]] Target** _(Write)_: Indicates the target where the environment
   variable should be set. { Process | Machine | *Process, Machine* }.
 
