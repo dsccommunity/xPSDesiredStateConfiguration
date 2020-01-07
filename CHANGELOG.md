@@ -87,6 +87,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [issue #436](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/436)
 - Fixed Pull Server example links in `README.MD` - fixes
   [issue #659](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/659).
+- Fixed `GitVersion.yml` feature and fix Regex - fixes
+  [issue #660](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/660).
 
 ### Security
 
