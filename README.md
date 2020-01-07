@@ -217,16 +217,16 @@ is created by using the **Firewall** resource from the
 ##### Pull Server
 
 * [A Pull Server with a separately defined IIS Application Pool and firewall
-  rule](./Examples/Sample_xDscWebService_Preferred.ps1)
-* [A Pull Server using a SQL Server as backend](./Examples/Sample_xDscWebServiceRegistration_UseSQLProvider.ps1)
-* [A Pull Server default configuration](./Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1)
-* [A Pull Server with an enhanced security configuration and a firewall rule](./Examples/Sample_xDscWebServiceRegistration.ps1)
-* [A Pull Server using the security best practice configuration](./Examples/Sample_xDscWebServiceRegistrationWithSecurityBestPractices.ps1)
-* [Removing a Pull Server instance](./Examples/Sample_xDscWebServiceRemoval.ps1)
+  rule](/source/Examples/Sample_xDscWebService_Preferred.ps1)
+* [A Pull Server using a SQL Server as backend](/source/Examples/Sample_xDscWebServiceRegistration_UseSQLProvider.ps1)
+* [A Pull Server default configuration](/source/Examples/Sample_xDscWebServiceRegistration_Win2k12and2k12R2.ps1)
+* [A Pull Server with an enhanced security configuration and a firewall rule](/source/Examples/Sample_xDscWebServiceRegistration.ps1)
+* [A Pull Server using the security best practice configuration](/source/Examples/Sample_xDscWebServiceRegistrationWithSecurityBestPractices.ps1)
+* [Removing a Pull Server instance](/source/Examples/Sample_xDscWebServiceRemoval.ps1)
 
 ##### Client
 
-* [Common Client (Server) Configuration](./Examples/Sample_xDscWebService_Client.ps1)
+* [Common Client (Server) Configuration](/source/Examples/Sample_xDscWebService_Client.ps1)
 
 ### xGroup
 
@@ -750,7 +750,7 @@ None
   The default value is an empty string which either indicates that the variable
   should be removed entirely or that the value does not matter when testing its
   existence. Multiple entries can be entered and separated by semicolons (see
-  [Examples](./Examples)).
+  [Examples](/source/Examples)).
 * **[String] Ensure** _(Write)_: Specifies if the environment varaible should
   exist. { *Present* | Absent }.
 * **[Boolean] Path** _(Write)_: Indicates whether or not the environment
@@ -759,7 +759,7 @@ None
   value, otherwise the existing value will be replaced by the new value. When
   configured as a Path variable, multiple entries separated by semicolons are
   ensured to be either present or absent without affecting other Path entries
-  (see [Examples](./Examples)). The default value is False.
+  (see [Examples](/source/Examples)). The default value is False.
 * **[String[]] Target** _(Write)_: Indicates the target where the environment
   variable should be set. { Process | Machine | *Process, Machine* }.
 
