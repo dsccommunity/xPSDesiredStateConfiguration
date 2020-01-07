@@ -750,7 +750,7 @@ None
   The default value is an empty string which either indicates that the variable
   should be removed entirely or that the value does not matter when testing its
   existence. Multiple entries can be entered and separated by semicolons (see
-  [Examples](/Examples)).
+  [Examples](/source/Examples)).
 * **[String] Ensure** _(Write)_: Specifies if the environment varaible should
   exist. { *Present* | Absent }.
 * **[Boolean] Path** _(Write)_: Indicates whether or not the environment
