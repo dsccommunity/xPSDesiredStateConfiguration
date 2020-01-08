@@ -199,7 +199,7 @@ stages:
             inputs:
               codeCoverageTool: 'JaCoCo'
               summaryFileLocation: 'output/testResults/CodeCov*.xml'
-              pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
+              pathToSources: '$(Build.SourcesDirectory)/output/$(dscBuildVariable.RepositoryName)'
 
       - job: Test_Integration_2019
         displayName: 'Integration (Windows Server 2016)'
