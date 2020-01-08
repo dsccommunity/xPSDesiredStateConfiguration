@@ -11,18 +11,21 @@ trigger:
 stages:
   - stage: Build
     jobs:
-      - job: BuildModuleJob
+      - job: Package_Module
+        displayName: 'Package Module'
         pool:
           vmImage: 'ubuntu 16.04'
         steps:
           - task: GitVersion@5
             name: gitversion
+            displayName: 'Evaluate Next Version'
             inputs:
               runtime: 'core'
               configFilePath: 'GitVersion.yml'
 
           - task: PowerShell@2
-            name: Build
+            name: package
+            displayName: 'Build & Package Module'
             inputs:
               filePath: './build.ps1'
               arguments: '-Tasks pack -ResolveDependency'
@@ -31,6 +34,7 @@ stages:
               ModuleVersion: $(GitVersion.Informationalversion)
 
           - task: PublishBuildArtifacts@1
+            displayName: 'Publish Build Artifact'
             inputs:
               PathtoPublish: 'output/'
               ArtifactName: 'output'
@@ -40,11 +44,13 @@ stages:
     dependsOn: Build
     jobs:
       - job: Test_HQRM
+        displayName: 'HQRM'
         pool:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
           - task: DownloadBuildArtifacts@0
+            displayName: 'Download Build Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
@@ -52,13 +58,15 @@ stages:
               downloadPath: '$(Build.SourcesDirectory)'
 
           - task: PowerShell@2
-            name: Test
+            name: test
+            displayName: 'Run HQRM Test'
             inputs:
               filePath: './build.ps1'
               arguments: '-Tasks hqrmtest'
               pwsh: false
 
           - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
@@ -66,6 +74,7 @@ stages:
             condition: succeededOrFailed()
 
       - job: Test_Unit_2016
+        displayName: 'Unit (Windows Server 2016)'
         pool:
           vmImage: 'vs2017-win2016'
         timeoutInMinutes: 0
@@ -74,9 +83,11 @@ stages:
               $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
               echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
               echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
-            name: DscBuildVariable
+            name: dscBuildVariable
+            displayName: 'Set Environment Variables'
 
           - task: DownloadBuildArtifacts@0
+            displayName: 'Download Build Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
@@ -84,13 +95,15 @@ stages:
               downloadPath: '$(Build.SourcesDirectory)'
 
           - task: PowerShell@2
-            name: Test
+            name: test
+            displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Unit'"
               pwsh: false
 
           - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
@@ -98,6 +111,7 @@ stages:
             condition: succeededOrFailed()
 
           - task: PublishCodeCoverageResults@1
+            displayName: 'Publish Code Coverage'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
@@ -105,11 +119,13 @@ stages:
               pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
 
       - job: Test_Integration_2016
+        displayName: 'Integration (Windows Server 2016)'
         pool:
           vmImage: 'vs2017-win2016'
         timeoutInMinutes: 0
         steps:
           - task: DownloadBuildArtifacts@0
+            displayName: 'Download Build Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
@@ -117,20 +133,23 @@ stages:
               downloadPath: '$(Build.SourcesDirectory)'
 
           - task: PowerShell@2
-            name: ConfigureWinRM
+            name: configureWinRM
+            displayName: 'Configure WinRM'
             inputs:
               targetType: 'inline'
               script: 'winrm quickconfig -quiet'
               pwsh: false
 
           - task: PowerShell@2
-            name: Test
+            name: test
+            displayName: 'Run Integration Test'
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Integration' -CodeCoverageThreshold 0"
               pwsh: false
 
           - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
@@ -138,6 +157,7 @@ stages:
             condition: succeededOrFailed()
 
       - job: Test_Unit_2019
+        displayName: 'Unit (Windows Server 2019)'
         pool:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
@@ -146,9 +166,11 @@ stages:
               $repositoryOwner,$repositoryName = $env:BUILD_REPOSITORY_NAME -split '/'
               echo "##vso[task.setvariable variable=RepositoryOwner;isOutput=true]$repositoryOwner"
               echo "##vso[task.setvariable variable=RepositoryName;isOutput=true]$repositoryName"
-            name: DscBuildVariable
+            name: dscBuildVariable
+            displayName: 'Set Environment Variables'
 
           - task: DownloadBuildArtifacts@0
+            displayName: 'Download Build Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
@@ -156,13 +178,15 @@ stages:
               downloadPath: '$(Build.SourcesDirectory)'
 
           - task: PowerShell@2
-            name: Test
+            name: test
+            displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Unit'"
               pwsh: false
 
           - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
@@ -170,6 +194,7 @@ stages:
             condition: succeededOrFailed()
 
           - task: PublishCodeCoverageResults@1
+            displayName: 'Publish Code Coverage'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: 'JaCoCo'
@@ -177,11 +202,13 @@ stages:
               pathToSources: '$(Build.SourcesDirectory)/output/$(DscBuildVariable.RepositoryName)'
 
       - job: Test_Integration_2019
+        displayName: 'Integration (Windows Server 2016)'
         pool:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
         steps:
           - task: DownloadBuildArtifacts@0
+            displayName: 'Download Build Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
@@ -189,20 +216,23 @@ stages:
               downloadPath: '$(Build.SourcesDirectory)'
 
           - task: PowerShell@2
-            name: ConfigureWinRM
+            name: configureWinRM
+            displayName: 'Configure WinRM'
             inputs:
               targetType: 'inline'
               script: 'winrm quickconfig -quiet'
               pwsh: false
 
           - task: PowerShell@2
-            name: Test
+            name: test
+            displayName: 'Run Integration Test'
             inputs:
               filePath: './build.ps1'
               arguments: "-Tasks test -PesterScript 'tests/Integration' -CodeCoverageThreshold 0"
               pwsh: false
 
           - task: PublishTestResults@2
+            displayName: 'Publish Test Results'
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
@@ -221,11 +251,13 @@ stages:
         )
       )
     jobs:
-      - job: Deploy_Artefact
+      - job: Deploy_Module
+        displayName: 'Deploy Module'
         pool:
           vmImage: 'ubuntu 16.04'
         steps:
           - task: DownloadBuildArtifacts@0
+            displayName: 'Download Build Artifact'
             inputs:
               buildType: 'current'
               downloadType: 'single'
@@ -233,7 +265,8 @@ stages:
               downloadPath: '$(Build.SourcesDirectory)'
 
           - task: PowerShell@2
-            name: publish_prerelease
+            name: publishPrerelease
+            displayName: 'Publish Prerelease'
             inputs:
               filePath: './build.ps1'
               arguments: '-tasks publish'
@@ -243,7 +276,8 @@ stages:
               GalleryApiToken: $(GalleryApiToken)
 
           - task: PowerShell@2
-            name: send_changelog_PR
+            name: sendChangelogPR
+            displayName: 'Send Changelog PR'
             inputs:
               filePath: './build.ps1'
               arguments: '-tasks Create_ChangeLog_GitHub_PR'
