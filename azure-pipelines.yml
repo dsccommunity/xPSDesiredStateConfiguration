@@ -31,7 +31,7 @@ stages:
               arguments: '-Tasks pack -ResolveDependency'
               pwsh: true
             env:
-              ModuleVersion: $(GitVersion.Informationalversion)
+              ModuleVersion: $(gitVersion.Informationalversion)
 
           - task: PublishBuildArtifacts@1
             displayName: 'Publish Build Artifact'
