@@ -70,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set `testRunTitle` for PublishTestResults steps so that a helpful name is
   displayed in Azure DevOps for each test run.
 - Set a display name on all the jobs and tasks in the CI
-  pipeline - fixes [issue #663](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/663)
+  pipeline - fixes [issue #663](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/663).
 
 ### Deprecated
 
