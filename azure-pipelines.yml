@@ -266,7 +266,7 @@ stages:
 
           - task: PowerShell@2
             name: publishRelease
-            displayName: 'Publish Prerelease'
+            displayName: 'Publish Release'
             inputs:
               filePath: './build.ps1'
               arguments: '-tasks publish'
