@@ -202,7 +202,7 @@ stages:
               pathToSources: '$(Build.SourcesDirectory)/output/$(dscBuildVariable.RepositoryName)'
 
       - job: Test_Integration_2019
-        displayName: 'Integration (Windows Server 2016)'
+        displayName: 'Integration (Windows Server 2019)'
         pool:
           vmImage: 'windows-2019'
         timeoutInMinutes: 0
