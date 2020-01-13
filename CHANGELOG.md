@@ -91,6 +91,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [issue #659](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/659).
 - Fixed `GitVersion.yml` feature and fix Regex - fixes
   [issue #660](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/660).
+- Fix import statement in all tests, making sure it throws if module
+  DscResource.Test cannot be imported - fixes
+  [issue #666](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/666).
+- Fix deploy stage in CI pipeline to prevent it executing against forks
+  of the repository - fixes [issue #665](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/665).
 
 ### Security
 
