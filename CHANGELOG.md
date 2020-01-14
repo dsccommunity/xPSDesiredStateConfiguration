@@ -96,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [issue #666](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/666).
 - Fix deploy stage in CI pipeline to prevent it executing against forks
   of the repository - fixes [issue #665](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/665).
+- Fix deploy fork detection in CI pipeline - fixes [issue #668](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/668).
 
 ### Security
 
