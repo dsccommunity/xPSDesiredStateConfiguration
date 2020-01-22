@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- xPSDesiredStateConfiguration
+  - Export `Publish-*` functions in DscPullServerSetup module - Fixes
+    [issue #673](https://github.com/PowerShell/PSDscResources/issues/673).
+
 ## [9.0.0] - 2020-01-15
 
 ### Added

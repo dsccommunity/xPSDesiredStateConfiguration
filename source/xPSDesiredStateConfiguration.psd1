@@ -27,7 +27,13 @@
     CLRVersion        = '4.0'
 
     # Functions to export from this module
-    FunctionsToExport = @()
+    FunctionsToExport = @(
+        'Publish-DscModuleAndMof',
+        'Publish-ModulesAndChecksum',
+        'Publish-MofsInSource',
+        'Publish-ModuleToPullServer',
+        'Publish-MofToPullServer'
+    )
 
     # Cmdlets to export from this module
     CmdletsToExport   = @()

@@ -490,5 +490,3 @@ function Publish-MofToPullServer
         New-DscChecksum -Path $OutputFolderPath -Force
     }
 }
-
-Export-ModuleMember -Function Publish-*
