@@ -15,7 +15,7 @@
 .PRIVATEDATA 2016-Datacenter,2016-Datacenter-Server-Core
 #>
 
-#Requires -module @{ModuleName = 'xPSDesiredStateConfiguration';ModuleVersion = '8.2.0.0'}
+#Requires -module 'xPSDesiredStateConfiguration'
 
 <#
     .SYNOPSIS
