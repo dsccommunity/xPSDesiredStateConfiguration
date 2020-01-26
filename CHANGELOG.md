@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Examples
+  - Removed the version number of the xPSDesiredStateConfiguration module from the #Requires headers. -
+    [issue #653](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/653)
+
 ### Fixed
 
 - xPSDesiredStateConfiguration
