@@ -1876,6 +1876,11 @@ function Stop-ServiceWithTimeout
         Get the Failure Actions properties for a service from the registry
     .DESCRIPTION
         For the named service, read the registry and find its Failure Actions settings.
+
+        Most of the data this function needs to retrieve is from the FailureActions registry key.
+        This key is a binary field that encodes the contents of a SERVICE_FAILURE_ACTIONSA C++ struct.
+        The struct and how to read its contents are documented at the link below.
+        https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsa
     .EXAMPLE
         PS C:\> $serviceFailureActions = Get-ServiceFailureActions -Service $service
         Reads the failure actions from the binary data in the registry
@@ -1891,9 +1896,48 @@ function Get-ServiceFailureActions {
         $Service
     )
     process {
-        $registryData = Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Services\$service -Name FailureActions | Select-Object -ExpandProperty FailureActions
+        $registryData = Get-Item HKLM:\SYSTEM\CurrentControlSet\Services\$service
+        $failureActionsBinaryData = $registryData.GetValue('FailureActions')
 
-        $binaryResetPeriod = $registryData[0..4]
+        [PSCustomObject]@{
+            # The first four bytes represent the Reset Period. The bytes are little endian
+            # so they are reversed, converted to hex, and then cast to an integer.
+            resetPeriodSeconds = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 0
 
+            # The next four bytes represent a true or false indicating whether a reboot message exists.
+            # If one does exist, it's value is held in a different value.
+            hasRebootMessage = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 1
+
+            # The next four bytes indicate whether a failure action run command exists. This command
+            # would be run in the case one of the failure actions chosen is SC_ACTION_RUN_COMMAND
+            # If this value is true then the actual command string is stored in a different value.
+            hasRebootCommand = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 2
+
+            # These four bytes give the count of how many reboot failure actions have been defined.
+            # Up to three actions may be defined.
+            failureActionCount = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 3
+        }
+    }
+}
+
+function Convert-RegistryBinaryValueToInt
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [byte[]]
+        $Bytes,
+        [Parameter(Mandatory)]
+        [int]
+        $Offset,
+        [int]
+        $Size = 4
+    )
+
+    process {
+        $lastByte = 4 * ($offset + 1)
+        $firstByte = $lastbyte - ($size - 1)
+        # Bytes in the registry are little endian, so we reverse them before conversion.
+        [int]"0x$(($bytes[$lastByte..$firstByte] | %{"{0:x}" -f $_}) -join '' | out-string)"
     }
 }
