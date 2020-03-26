@@ -37,4 +37,5 @@ ConvertFrom-StringData @'
     CannotGetAccountAccessErrorMessage = Failed to get user policy rights.
     CannotSetAccountAccessErrorMessage = Failed to set user policy rights.
     CorruptDependency = Service '{0}' has a corrupt dependency. For more information, inspect the registry value at HKLM:\\SYSTEM\\CurrentControlSet\\Services\\{0}\\DependOnService.
+    FailureActionsMustBeSpecifiedInOrder = Failure actions must be specified in order from 1 to 3.
 '@
