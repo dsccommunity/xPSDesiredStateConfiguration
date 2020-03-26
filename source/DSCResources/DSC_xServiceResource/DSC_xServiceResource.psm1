@@ -78,6 +78,8 @@ function Get-TargetResource
             default { $serviceCimInstance.StartName }
         }
 
+        $serviceFailureActions = Get-ServiceFailureActions -Service $service.Name
+
         $serviceResource = @{
             Name            = $Name
             Ensure          = 'Present'
@@ -1867,4 +1869,31 @@ function Stop-ServiceWithTimeout
     Stop-Service -Name $ServiceName
     $waitTimeSpan = New-Object -TypeName 'TimeSpan' -ArgumentList (0, 0, 0, 0, $TerminateTimeout)
     Wait-ServiceStateWithTimeout -ServiceName $ServiceName -State 'Stopped' -WaitTimeSpan $waitTimeSpan
+}
+
+<#
+    .SYNOPSIS
+        Get the Failure Actions properties for a service from the registry
+    .DESCRIPTION
+        For the named service, read the registry and find its Failure Actions settings.
+    .EXAMPLE
+        PS C:\> $serviceFailureActions = Get-ServiceFailureActions -Service $service
+        Reads the failure actions from the binary data in the registry
+    .PARAMETER Service
+        The name of the service to retrieve properties for.
+#>
+
+function Get-ServiceFailureActions {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [String]
+        $Service
+    )
+    process {
+        $registryData = Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Services\$service -Name FailureActions | Select-Object -ExpandProperty FailureActions
+
+        $binaryResetPeriod = $registryData[0..4]
+
+    }
 }
