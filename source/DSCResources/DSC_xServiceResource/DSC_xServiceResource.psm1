@@ -16,6 +16,14 @@ Import-Module -Name (Join-Path -Path $modulePath `
 # Import Localization Strings
 $script:localizedData = Get-LocalizedData -ResourceName 'DSC_xServiceResource'
 
+# This type is documented here: https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-sc_action
+enum ACTION_TYPE {
+    NONE        = 0
+    RESTART     = 1
+    REBOOT      = 2
+    RUN_COMMAND = 3
+}
+
 <#
     .SYNOPSIS
         Retrieves the current status of the service resource with the given name.
@@ -81,16 +89,22 @@ function Get-TargetResource
         $serviceFailureActions = Get-ServiceFailureActions -Service $service.Name
 
         $serviceResource = @{
-            Name            = $Name
-            Ensure          = 'Present'
-            Path            = $serviceCimInstance.PathName
-            StartupType     = $startupType
-            BuiltInAccount  = $builtInAccount
-            State           = $service.Status.ToString()
-            DisplayName     = $service.DisplayName
-            Description     = $serviceCimInstance.Description
-            DesktopInteract = $serviceCimInstance.DesktopInteract
-            Dependencies    = $dependencies
+            Name               = $Name
+            Ensure             = 'Present'
+            Path               = $serviceCimInstance.PathName
+            StartupType        = $startupType
+            BuiltInAccount     = $builtInAccount
+            State              = $service.Status.ToString()
+            DisplayName        = $service.DisplayName
+            Description        = $serviceCimInstance.Description
+            DesktopInteract    = $serviceCimInstance.DesktopInteract
+            Dependencies       = $dependencies
+            ResetPeriodSeconds = $serviceFailureActions.resetPeriodSeconds
+            RebootCommand      = $serviceFailureActions.rebootCommand
+            RebootMessage      = $serviceFailureActions.rebootMessage
+            failureAction1     = $serviceFailureActions.failureAction1
+            failureAction2     = $serviceFailureActions.failureAction2
+            failureAction3     = $serviceFailureActions.failureAction3
         }
     }
     else
@@ -1899,7 +1913,7 @@ function Get-ServiceFailureActions {
         $registryData = Get-Item HKLM:\SYSTEM\CurrentControlSet\Services\$service
         $failureActionsBinaryData = $registryData.GetValue('FailureActions')
 
-        [PSCustomObject]@{
+        $failureActions = [PSCustomObject]@{
             # The first four bytes represent the Reset Period. The bytes are little endian
             # so they are reversed, converted to hex, and then cast to an integer.
             resetPeriodSeconds = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 0
@@ -1916,7 +1930,39 @@ function Get-ServiceFailureActions {
             # These four bytes give the count of how many reboot failure actions have been defined.
             # Up to three actions may be defined.
             failureActionCount = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 3
+            rebootCommand = $null
+            rebootMessage = $null
+            failureAction1 = @{actionType = $null; delay = $null}
+            failureAction2 = @{actionType = $null; delay = $null}
+            failureAction3 = @{actionType = $null; delay = $null}
         }
+
+        if($failureActions.failureActionCount -gt 0) {
+            foreach ($item in 1..$failureActions.failureActionCount) {
+
+                $offset = switch ($item) {
+                    1 { 5 }
+                    2 { 7 }
+                    3 { 9 }
+                    Default {-1}
+                }
+                # Occasionaly a service will store an array acount greater than 3. As far as I can tell
+                # A count greater than 3 has no meaning, so we only support 3.
+                if($offset -lt 0) { break }
+                $failureActions."failureAction$item".actionType = [ACTION_TYPE](Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -offset $offset)
+                $failureActions."failureAction$item".delay      = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -offset ($offset + 1)
+            }
+        }
+
+        if($failureActions.hasRebootCommand) {
+            $failureActions.rebootCommand = $registryData.GetValue('FailureCommand')
+        }
+
+        if($failureActions.hasRebootMessage) {
+            $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
+        }
+
+        $failureActions
     }
 }
 
@@ -1935,7 +1981,7 @@ function Convert-RegistryBinaryValueToInt
     )
 
     process {
-        $lastByte = 4 * ($offset + 1)
+        $lastByte = (($offset + 1) * 4) - 1
         $firstByte = $lastbyte - ($size - 1)
         # Bytes in the registry are little endian, so we reverse them before conversion.
         [int]"0x$(($bytes[$lastByte..$firstByte] | %{"{0:x}" -f $_}) -join '' | out-string)"
