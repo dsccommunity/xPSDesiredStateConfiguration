@@ -100,11 +100,14 @@ function Get-TargetResource
             DesktopInteract    = $serviceCimInstance.DesktopInteract
             Dependencies       = $dependencies
             ResetPeriodSeconds = $serviceFailureActions.resetPeriodSeconds
-            RebootCommand      = $serviceFailureActions.rebootCommand
+            FailureCommand     = $serviceFailureActions.failureCommand
             RebootMessage      = $serviceFailureActions.rebootMessage
-            failureAction1     = $serviceFailureActions.failureAction1
-            failureAction2     = $serviceFailureActions.failureAction2
-            failureAction3     = $serviceFailureActions.failureAction3
+            failure1Action     = $serviceFailureActions.failureAction1.actionType
+            failure1Delay      = $serviceFailureActions.failureAction1.delay
+            failure2Action     = $serviceFailureActions.failureAction2.actionType
+            failure2Delay      = $serviceFailureActions.failureAction2.delay
+            failure3Action     = $serviceFailureActions.failureAction3.actionType
+            failure3Delay      = $serviceFailureActions.failureAction3.delay
         }
     }
     else
@@ -514,6 +517,42 @@ function Test-TargetResource
         $TerminateTimeout = 30000,
 
         [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [ACTION_TYPE]
+        $Failure1Action,
+
+        [Parameter()]
+        [System.UInt32]
+        $Failure1Delay,
+
+        [Parameter()]
+        [ACTION_TYPE]
+        $Failure2Action,
+
+        [Parameter()]
+        [System.UInt32]
+        $Failure2Delay,
+
+        [Parameter()]
+        [ACTION_TYPE]
+        $Failure3Action,
+
+        [Parameter()]
+        [System.UInt32]
+        $Failure3Delay,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -532,6 +571,14 @@ function Test-TargetResource
     {
         $errorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $Name
         New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
+    }
+
+    if(($PSBoundParameters.ContainsKey('Failure3Action') -and (-not $PSBoundParameters.ContainsKey('Failure2Action'))) -or
+       ($PSBoundParameters.ContainsKey('Failure2Action') -and (-not $PSBoundParameters.ContainsKey('Failure1Action')))
+    )
+    {
+        $errorMessage = $script:localizedData.FailureActionsMustBeSpecifiedInOrder
+        New-InvalidArgumentException -ArgumentName 'Failure2Action / Failure3Action' -Message $errorMessage
     }
 
     $serviceResource = Get-TargetResource -Name $Name
@@ -652,6 +699,69 @@ function Test-TargetResource
         if ($State -ne 'Ignore' -and $serviceResource.State -ine $State)
         {
             Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'State', $Name, $State, $serviceResource.State)
+            return $false
+        }
+
+        # Check the reset period
+        if($PSBoundParameters.ContainsKey('ResetPeriodSeconds') -and $ResetPeriodSeconds -ine $serviceResource.ResetPeriodSeconds)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'ResetPeriodSeconds', $Name, $ResetPeriodSeconds, $serviceResource.ResetPeriodSeconds)
+            return $false
+        }
+
+        # Check the failure command
+        if($PSBoundParameters.ContainsKey('FailureCommand') -and $FailureCommand -ine $serviceResource.failureCommand)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureCommand', $Name, $FailureCommand, $serviceResource.failureCommand)
+            return $false
+        }
+
+        # Check the reboot message
+        if($PSBoundParameters.ContainsKey('RebootMessage') -and $RebootMessage -ine $serviceResource.rebootMessage)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'RebootMessage', $Name, $RebootMessage, $serviceResource.rebootMessage)
+            return $false
+        }
+
+        # Check the failure 1 action
+        if($PSBoundParameters.ContainsKey('Failure1Action') -and $Failure1Action -ine $serviceResource.failure1Action)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'Failure1Action', $Name, $Failure1Action, $serviceResource.failure1Action)
+            return $false
+        }
+
+        # Check failure 1 delay
+        if($PSBoundParameters.ContainsKey('Failure1Delay') -and $Failure1Delay -ine $serviceResource.failure1Delay)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'Failure1Delay', $Name, $Failure1Delay, $serviceResource.failure1Delay)
+            return $false
+        }
+
+        # Check the failure 2 action
+        if($PSBoundParameters.ContainsKey('Failure2Action') -and $Failure2Action -ine $serviceResource.failure2Action)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'Failure2Action', $Name, $Failure2Action, $serviceResource.failure2Action)
+            return $false
+        }
+
+        # Check failure 2 delay
+        if($PSBoundParameters.ContainsKey('Failure2Delay') -and $Failure2Delay -ine $serviceResource.failure2Delay)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'Failure2Delay', $Name, $Failure2Delay, $serviceResource.failure2Delay)
+            return $false
+        }
+
+        # Check the failure 3 action
+        if($PSBoundParameters.ContainsKey('Failure3Action') -and $Failure3Action -ine $serviceResource.failure3Action)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'Failure3Action', $Name, $Failure3Action, $serviceResource.failure3Action)
+            return $false
+        }
+
+        # Check failure 3 delay
+        if($PSBoundParameters.ContainsKey('Failure3Delay') -and $Failure3Delay -ine $serviceResource.failure3Delay)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'Failure3Delay', $Name, $Failure3Delay, $serviceResource.failure3Delay)
             return $false
         }
     }
@@ -1911,55 +2021,65 @@ function Get-ServiceFailureActions {
     )
     process {
         $registryData = Get-Item HKLM:\SYSTEM\CurrentControlSet\Services\$service
-        $failureActionsBinaryData = $registryData.GetValue('FailureActions')
 
         $failureActions = [PSCustomObject]@{
+            resetPeriodSeconds = $null
+            hasRebootMessage   = $null
+            hasFailureCommand  = $null
+            failureActionCount = $null
+            failureCommand     = $null
+            rebootMessage      = $null
+            failureAction1     = @{actionType = $null; delay = $null}
+            failureAction2     = @{actionType = $null; delay = $null}
+            failureAction3     = @{actionType = $null; delay = $null}
+        }
+
+        if($registryData.GetvalueNames() -match 'FailureCommand') {
+            $failureActions.failureCommand = $registryData.GetValue('FailureCommand')
+        }
+
+        if($registryData.GetValueNames() -match 'RebootMessage') {
+            $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
+        }
+
+        if($registryData.GetValueNames() -match 'FailureActions')
+        {
+            $failureActionsBinaryData = $registryData.GetValue('FailureActions')
+
             # The first four bytes represent the Reset Period. The bytes are little endian
             # so they are reversed, converted to hex, and then cast to an integer.
-            resetPeriodSeconds = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 0
+            $failureActions.resetPeriodSeconds = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 0
 
-            # The next four bytes represent a true or false indicating whether a reboot message exists.
-            # If one does exist, it's value is held in a different value.
-            hasRebootMessage = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 1
+            # Next found bytes indicate the presence of a reboot message in case one of the chosen failure actions is
+            # SC_ACTION_REBOOT. The actual value of the message is stored in the 'RebootMessage' property
+            $failureActions.hasRebootMessage = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 1
 
             # The next four bytes indicate whether a failure action run command exists. This command
             # would be run in the case one of the failure actions chosen is SC_ACTION_RUN_COMMAND
             # If this value is true then the actual command string is stored in a different value.
-            hasRebootCommand = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 2
+            $failureActions.hasFailureCommand = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 2
 
             # These four bytes give the count of how many reboot failure actions have been defined.
             # Up to three actions may be defined.
-            failureActionCount = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 3
-            rebootCommand = $null
-            rebootMessage = $null
-            failureAction1 = @{actionType = $null; delay = $null}
-            failureAction2 = @{actionType = $null; delay = $null}
-            failureAction3 = @{actionType = $null; delay = $null}
-        }
+            $failureActions.failureActionCount = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -Offset 3
 
-        if($failureActions.failureActionCount -gt 0) {
-            foreach ($item in 1..$failureActions.failureActionCount) {
+            if($failureActions.failureActionCount -gt 0) {
+                foreach ($item in 1..$failureActions.failureActionCount) {
 
-                $offset = switch ($item) {
-                    1 { 5 }
-                    2 { 7 }
-                    3 { 9 }
-                    Default {-1}
+                    # Manually counting the array offset is easier than implementing some weird array arithmetic.
+                    $offset = switch ($item) {
+                        1 { 5 }
+                        2 { 7 }
+                        3 { 9 }
+                        Default {-1}
+                    }
+                    # Occasionaly a service will store an array acount greater than 3. As far as I can tell
+                    # A count greater than 3 has no meaning, so we only support 3.
+                    if($offset -lt 0) { break }
+                    $failureActions."failureAction$item".actionType = [ACTION_TYPE](Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -offset $offset)
+                    $failureActions."failureAction$item".delay      = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -offset ($offset + 1)
                 }
-                # Occasionaly a service will store an array acount greater than 3. As far as I can tell
-                # A count greater than 3 has no meaning, so we only support 3.
-                if($offset -lt 0) { break }
-                $failureActions."failureAction$item".actionType = [ACTION_TYPE](Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -offset $offset)
-                $failureActions."failureAction$item".delay      = Convert-RegistryBinaryValueToInt -Bytes $failureActionsBinaryData -offset ($offset + 1)
             }
-        }
-
-        if($failureActions.hasRebootCommand) {
-            $failureActions.rebootCommand = $registryData.GetValue('FailureCommand')
-        }
-
-        if($failureActions.hasRebootMessage) {
-            $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
         }
 
         $failureActions
