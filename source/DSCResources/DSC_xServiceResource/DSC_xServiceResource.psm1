@@ -276,6 +276,22 @@ function Set-TargetResource
         $TerminateTimeout = 30000,
 
         [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [System.Object[]]
+        $FailureActionsCollection,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -341,7 +357,9 @@ function Set-TargetResource
         # Update the properties of the service if needed
         $setServicePropertyParameters = @{}
 
-        $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount', 'DesktopInteract', 'DisplayName', 'Description', 'Dependencies' )
+        $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount',
+                                            'DesktopInteract', 'DisplayName', 'Description', 'Dependencies',
+                                            'RestPeriodSeconds', 'RebootMessage', 'FailureCommand', 'FailureActionsCollection')
 
         foreach ($servicePropertyParameterName in $servicePropertyParameterNames)
         {
@@ -1713,6 +1731,22 @@ function Set-ServiceProperty
         $Dependencies,
 
         [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [System.Object[]]
+        $FailureActionsCollection,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -1769,6 +1803,34 @@ function Set-ServiceProperty
     if ($setServiceAccountPropertyParameters.Count -gt 0)
     {
         Set-ServiceAccountProperty -ServiceName $ServiceName @setServiceAccountPropertyParameters
+    }
+
+    # Update service failure actions properties if needed
+    $setServiceFailureActionsPropertyParameters = @{}
+
+    if ($PSBoundParameters.ContainsKey('ResetPeriodSeconds'))
+    {
+        $setServiceFailureActionsPropertyParameters['ResetPeriodSeconds'] = $ResetPeriodSeconds
+    }
+
+    if ($PSBoundParameters.ContainsKey('RebootMessage'))
+    {
+        $setServiceFailureActionsPropertyParameters['RebootMessage'] = $RebootMessage
+    }
+
+    if ($PSBoundParameters.ContainsKey('FailureCommand'))
+    {
+        $setServiceFailureActionsPropertyParameters['FailureCommand'] = $FailureCommand
+    }
+
+    if ($PSBoundParameters.ContainsKey('FailureActionsCollection'))
+    {
+        $setServiceFailureActionsPropertyParameters['FailureActionsCollection'] = $FailureActionsCollection
+    }
+
+    if($setServiceFailureActionsPropertyParameters.count -gt 0)
+    {
+        Set-ServiceFailureActionProperty -ServiceName $ServiceName @setServiceFailureActionsPropertyParameters
     }
 
     # Update startup type
@@ -1982,7 +2044,7 @@ function Get-ServiceFailureActions {
         $Service
     )
     process {
-        $registryData = Get-Item HKLM:\SYSTEM\CurrentControlSet\Services\$service
+        $registryData = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\$service
 
         $failureActions = [PSCustomObject]@{
             resetPeriodSeconds = $null
@@ -2023,7 +2085,8 @@ function Get-ServiceFailureActions {
             # Up to three actions may be defined.
             $failureActions.failureActionCount = Get-FailureActionsProperty -PropertyName FailureActionCount -Bytes $failureActionsBinaryData
 
-            if($failureActions.failureActionCount -gt 0) {
+            if($failureActions.failureActionCount -gt 0)
+            {
                 $failureActions.ActionsCollection = Get-FailureActionCollection -Bytes $failureActionsBinaryData -ActionsCount $failureActions.failureActionCount
             }
         }
@@ -2090,5 +2153,86 @@ function Get-FailureActionCollection
         }
 
         $actionsCollection
+    }
+}
+
+function Set-ServiceFailureActionProperty {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceName,
+
+        [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [System.Object[]]
+        $FailureActionsCollection
+    )
+
+    process {
+        $failureActions = Get-ServiceFailureActions -Service $ServiceName
+        $integerData = New-Object System.Collections.Generic.List[int32]
+
+        if ($PSBoundParameters.ContainsKey('ResetPeriodSeconds'))
+        {
+            $failureActions.resetPeriodSeconds = $ResetPeriodSeconds
+        }
+
+        $integerData.add($failureActions.resetPeriodSeconds) | Out-Null
+
+        if ($PSBoundParameters.ContainsKey('RebootMessage'))
+        {
+            if ($failureActions.hasRebootMessage)
+            {
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage
+            }
+            else
+            {
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage
+                $failureActions.hasRebootMessage = 1
+            }
+        }
+
+        $integerData.add($failureActions.hasRebootMessage) | Out-Null
+
+        if ($PSBoundParameters.ContainsKey('FailureCommand'))
+        {
+            if ($failureActions.hasFailureCommand)
+            {
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand
+            }
+            else
+            {
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand
+                $failureActions.hasFailureCommand = 1
+            }
+        }
+
+        $integerData.Add($failureActions.hasFailureCommand) | Out-Null
+
+        if ($PSBoundParameters.ContainsKey('FailureActionsCollection'))
+        {
+            $failureActions.ActionsCollection = $FailureActionsCollection
+        }
+
+        foreach ($action in $failureActions.ActionsCollection) {
+            $integerData.add($action.type) | Out-Null
+            $integerData.add($action.delay) | Out-Null
+        }
+
+        $bytes = $integerData | Format-Hex -raw | Select-Object -ExpandProperty bytes
+
+        Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActions' -Value $bytes
     }
 }
