@@ -359,7 +359,7 @@ function Set-TargetResource
 
         $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount',
                                             'DesktopInteract', 'DisplayName', 'Description', 'Dependencies',
-                                            'RestPeriodSeconds', 'RebootMessage', 'FailureCommand', 'FailureActionsCollection')
+                                            'ResetPeriodSeconds', 'RebootMessage', 'FailureCommand', 'FailureActionsCollection')
 
         foreach ($servicePropertyParameterName in $servicePropertyParameterNames)
         {
@@ -2226,9 +2226,12 @@ function Set-ServiceFailureActionProperty {
             $failureActions.ActionsCollection = $FailureActionsCollection
         }
 
+        $integerData.add($failureActions.ActionsCollection.count)
+        $integerData.Add(20)
+
         foreach ($action in $failureActions.ActionsCollection) {
             $integerData.add($action.type) | Out-Null
-            $integerData.add($action.delay) | Out-Null
+            $integerData.add($action.delaySeconds) | Out-Null
         }
 
         $bytes = $integerData | Format-Hex -raw | Select-Object -ExpandProperty bytes
