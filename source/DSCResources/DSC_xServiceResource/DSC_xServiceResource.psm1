@@ -89,20 +89,21 @@ function Get-TargetResource
         $serviceFailureActions = Get-ServiceFailureActions -Service $service.Name
 
         $serviceResource = @{
-            Name                     = $Name
-            Ensure                   = 'Present'
-            Path                     = $serviceCimInstance.PathName
-            StartupType              = $startupType
-            BuiltInAccount           = $builtInAccount
-            State                    = $service.Status.ToString()
-            DisplayName              = $service.DisplayName
-            Description              = $serviceCimInstance.Description
-            DesktopInteract          = $serviceCimInstance.DesktopInteract
-            Dependencies             = $dependencies
-            ResetPeriodSeconds       = $serviceFailureActions.resetPeriodSeconds
-            FailureCommand           = $serviceFailureActions.failureCommand
-            RebootMessage            = $serviceFailureActions.rebootMessage
-            FailureActionsCollection = $serviceFailureActions.ActionsCollection
+            Name                             = $Name
+            Ensure                           = 'Present'
+            Path                             = $serviceCimInstance.PathName
+            StartupType                      = $startupType
+            BuiltInAccount                   = $builtInAccount
+            State                            = $service.Status.ToString()
+            DisplayName                      = $service.DisplayName
+            Description                      = $serviceCimInstance.Description
+            DesktopInteract                  = $serviceCimInstance.DesktopInteract
+            Dependencies                     = $dependencies
+            ResetPeriodSeconds               = $serviceFailureActions.resetPeriodSeconds
+            FailureCommand                   = $serviceFailureActions.failureCommand
+            RebootMessage                    = $serviceFailureActions.rebootMessage
+            FailureActionsCollection         = $serviceFailureActions.ActionsCollection
+            FailureActionsOnNonCrashFailures = $serviceFailureActions.FailureActionsOnNonCrashFailures
         }
     }
     else
@@ -292,6 +293,10 @@ function Set-TargetResource
         $FailureActionsCollection,
 
         [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -359,7 +364,8 @@ function Set-TargetResource
 
         $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount',
                                             'DesktopInteract', 'DisplayName', 'Description', 'Dependencies',
-                                            'ResetPeriodSeconds', 'RebootMessage', 'FailureCommand', 'FailureActionsCollection')
+                                            'ResetPeriodSeconds', 'RebootMessage', 'FailureCommand', 'FailureActionsCollection',
+                                            'FailureActionsOnNonCrashFailures')
 
         foreach ($servicePropertyParameterName in $servicePropertyParameterNames)
         {
@@ -544,6 +550,10 @@ function Test-TargetResource
         [Parameter()]
         [System.Object[]]
         $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -744,6 +754,12 @@ function Test-TargetResource
             }
         }
 
+        # Check for service actions on non crash failures
+        if($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures') -and $FailureActionsOnNonCrashFailures -ne $serviceResource.failureActionsOnNonCrashFailures)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureActionsOnNonCrashFailures', $Name, $FailureActionsOnNonCrashFailures, $serviceResource.failureActionsOnNonCrashFailures)
+            return $false
+        }
     }
 
     return $true
@@ -2047,13 +2063,14 @@ function Get-ServiceFailureActions {
         $registryData = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\$service
 
         $failureActions = [PSCustomObject]@{
-            resetPeriodSeconds = $null
-            hasRebootMessage   = $null
-            hasFailureCommand  = $null
-            failureActionCount = $null
-            failureCommand     = $null
-            rebootMessage      = $null
-            ActionsCollection  = $null
+            resetPeriodSeconds                = $null
+            hasRebootMessage                  = $null
+            hasFailureCommand                 = $null
+            failureActionCount                = $null
+            failureCommand                    = $null
+            rebootMessage                     = $null
+            actionsCollection                 = $null
+            $FailureActionsOnNonCrashFailures = $false
         }
 
         if($registryData.GetvalueNames() -match 'FailureCommand') {
@@ -2062,6 +2079,10 @@ function Get-ServiceFailureActions {
 
         if($registryData.GetValueNames() -match 'RebootMessage') {
             $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
+        }
+
+        if($registryData.GetvalueNames() -match 'FailureActionsOnNonCrashFailures') {
+            $failureActions.FailureActionsOnNonCrashFailures = [System.Boolean]$registryData.GetValue('FailureActionsOnNonCrashFailures')
         }
 
         if($registryData.GetValueNames() -match 'FailureActions')
@@ -2177,7 +2198,11 @@ function Set-ServiceFailureActionProperty {
 
         [Parameter()]
         [System.Object[]]
-        $FailureActionsCollection
+        $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures
     )
 
     process {
@@ -2220,6 +2245,17 @@ function Set-ServiceFailureActionProperty {
         }
 
         $integerData.Add($failureActions.hasFailureCommand) | Out-Null
+
+        if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
+        {
+            if ($failureActions.FailureActionsOnNonCrashFailures) {
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures
+            }
+            else
+            {
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures
+            }
+        }
 
         if ($PSBoundParameters.ContainsKey('FailureActionsCollection'))
         {
