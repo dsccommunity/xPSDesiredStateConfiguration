@@ -192,19 +192,18 @@ function Get-TargetResource
         The default value is 30000 (30 seconds).
 
     .PARAMETER ResetPeriodSeconds
-        The length of the rolling window the service controller will use to count the number
-        of errors that a service has suffered. Any errors that occurr outside this window
-        are not counted for the purposes of determining which error action to take.
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
 
     .PARAMETER RebootMessage
-        A message to broadcast to the users logged into a service before the server reboots.
-        This option should only be configured if one of the failure actions for the service is REBOOT.
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
 
     .PARAMETER FailureCommand
-        If one of the configured failure actions is to restart the service, this property is an
-        alternative to the standard start commandline string configured for the service.
-        For example, if after suffering a failure a service executable needs to run a command
-        to do some cleanup before running the standard startup command, you would use this property.
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
 
     .PARAMETER FailureActionsCollection
         An array of hash tables representing the failure actions to take. Each hash table should have
@@ -489,6 +488,32 @@ function Set-TargetResource
 
     .PARAMETER TerminateTimeout
         Not used in Test-TargetResource.
+
+    .PARAMETER ResetPeriodSeconds
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
+
+    .PARAMETER RebootMessage
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
+
+    .PARAMETER FailureCommand
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
 
     .PARAMETER Credential
         The credential the service should be running under.
@@ -1722,6 +1747,32 @@ function Set-ServiceStartupType
     .PARAMETER StartupType
         The startup type the service should have.
 
+    .PARAMETER ResetPeriodSeconds
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
+
+    .PARAMETER RebootMessage
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
+
+    .PARAMETER FailureCommand
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
+
     .NOTES
         SupportsShouldProcess is enabled because Invoke-CimMethod calls ShouldProcess.
         Here are the paths through which Set-ServiceProperty calls Invoke-CimMethod:
@@ -1788,6 +1839,10 @@ function Set-ServiceProperty
         [Parameter()]
         [System.Object[]]
         $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -2072,13 +2127,16 @@ function Stop-ServiceWithTimeout
         This key is a binary field that encodes the contents of a SERVICE_FAILURE_ACTIONSA C++ struct.
         The struct and how to read its contents are documented at the link below.
         https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsa
+
+        It will also read the 'FailureCommand' and 'RebootMessage' property to get the string values for
+        those settings, and the 'FailureActionsOnNonCrashFailures' property to get the
+        flag value that stores the current state of the 'Enable Actions For Stops With Errors' checkbox.
     .EXAMPLE
         PS C:\> $serviceFailureActions = Get-ServiceFailureActions -Service $service
         Reads the failure actions from the binary data in the registry
     .PARAMETER Service
         The name of the service to retrieve properties for.
 #>
-
 function Get-ServiceFailureActions {
     [CmdletBinding()]
     param (
@@ -2116,21 +2174,19 @@ function Get-ServiceFailureActions {
         {
             $failureActionsBinaryData = $registryData.GetValue('FailureActions')
 
-            # The first four bytes represent the Reset Period. The bytes are little endian
-            # so they are reversed, converted to hex, and then cast to an integer.
+            # The first four bytes represent the Reset Period.
             $failureActions.resetPeriodSeconds = Get-FailureActionsProperty -PropertyName ResetPeriodSeconds -Bytes $failureActionsBinaryData
 
-            # Next found bytes indicate the presence of a reboot message in case one of the chosen failure actions is
+            # Next four bytes indicate the presence of a reboot message in case one of the chosen failure actions is
             # SC_ACTION_REBOOT. The actual value of the message is stored in the 'RebootMessage' property
             $failureActions.hasRebootMessage = Get-FailureActionsProperty -PropertyName HasRebootMsg -Bytes $failureActionsBinaryData
 
             # The next four bytes indicate whether a failure action run command exists. This command
             # would be run in the case one of the failure actions chosen is SC_ACTION_RUN_COMMAND
-            # If this value is true then the actual command string is stored in a different value.
+            # If this value is true then the actual command string is stored in the 'FailureCommand' property.
             $failureActions.hasFailureCommand = Get-FailureActionsProperty -PropertyName HasFailureCommand -Bytes $failureActionsBinaryData
 
             # These four bytes give the count of how many reboot failure actions have been defined.
-            # Up to three actions may be defined.
             $failureActions.failureActionCount = Get-FailureActionsProperty -PropertyName FailureActionCount -Bytes $failureActionsBinaryData
 
             if($failureActions.failureActionCount -gt 0)
@@ -2143,6 +2199,21 @@ function Get-ServiceFailureActions {
     }
 }
 
+<#
+    .SYNOPSIS
+        Translate the binary data from the registry into a property value
+
+    .DESCRIPTION
+        The binary data in the 'FailureActions' registry property encodes a _SERVICE_FAILURE_ACTIONSA struct.
+        This function translates human readable property names into the byte range encoded by the binary data.
+        Those bytes are then read and cast to the integer values they store.
+
+    .PARAMETER PropertyName
+        The name of the property to retrieve from the struct.
+
+    .PARAMETER Bytes
+        The raw binary data read out from the registry.
+#>
 function Get-FailureActionsProperty
 {
     [CmdletBinding()]
@@ -2169,6 +2240,23 @@ function Get-FailureActionsProperty
     }
 }
 
+<#
+    .SYNOPSIS
+        Retrieve and decode the array of service failure actions
+
+    .DESCRIPTION
+        The array of SC_ACTION structures that define each failure action is stored
+        in the same binary blob property as the struct that defines the rest of the
+        service failure actions settings. This function takes the binary data and a
+        count of how many actions to expect, and does the offset math to read each
+        action and decode it, and return the actions as an array of custom objects.
+
+    .PARAMETER Bytes
+        The binary data that stores the actions array.
+
+    .PARAMETER ActionsCount
+        The number of actions encoded in the data.
+#>
 function Get-FailureActionCollection
 {
     [CmdletBinding()]
