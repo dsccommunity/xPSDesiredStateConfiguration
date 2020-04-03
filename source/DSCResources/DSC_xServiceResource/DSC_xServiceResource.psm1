@@ -191,6 +191,33 @@ function Get-TargetResource
         The time to wait for the service to stop in milliseconds.
         The default value is 30000 (30 seconds).
 
+    .PARAMETER ResetPeriodSeconds
+        The length of the rolling window the service controller will use to count the number
+        of errors that a service has suffered. Any errors that occurr outside this window
+        are not counted for the purposes of determining which error action to take.
+
+    .PARAMETER RebootMessage
+        A message to broadcast to the users logged into a service before the server reboots.
+        This option should only be configured if one of the failure actions for the service is REBOOT.
+
+    .PARAMETER FailureCommand
+        If one of the configured failure actions is to restart the service, this property is an
+        alternative to the standard start commandline string configured for the service.
+        For example, if after suffering a failure a service executable needs to run a command
+        to do some cleanup before running the standard startup command, you would use this property.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
+
     .PARAMETER Credential
         The credential of the user account the service should start under.
 
@@ -2220,11 +2247,11 @@ function Set-ServiceFailureActionProperty {
         {
             if ($failureActions.hasRebootMessage)
             {
-                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage | Out-Null
             }
             else
             {
-                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage | Out-Null
                 $failureActions.hasRebootMessage = 1
             }
         }
@@ -2235,11 +2262,11 @@ function Set-ServiceFailureActionProperty {
         {
             if ($failureActions.hasFailureCommand)
             {
-                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand | Out-Null
             }
             else
             {
-                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand | Out-Null
                 $failureActions.hasFailureCommand = 1
             }
         }
@@ -2249,11 +2276,11 @@ function Set-ServiceFailureActionProperty {
         if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
         {
             if ($failureActions.FailureActionsOnNonCrashFailures) {
-                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures | Out-Null
             }
             else
             {
-                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures | Out-Null
             }
         }
 
@@ -2272,6 +2299,6 @@ function Set-ServiceFailureActionProperty {
 
         $bytes = $integerData | Format-Hex -raw | Select-Object -ExpandProperty bytes
 
-        Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActions' -Value $bytes
+        Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActions' -Value $bytes | Out-Null
     }
 }
