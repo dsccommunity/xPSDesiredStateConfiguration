@@ -217,6 +217,44 @@ try
                             $getTargetResourceResult.Dependencies | Should -Be $ExpectedValues.Dependencies
                         }
                     }
+
+                    if ($ExpectedValues.ContainsKey('ResetPeriodSeconds'))
+                    {
+                        it 'Should return the reset period in seconds' {
+                            $getTargetResourceResult.resetPeriodSeconds | Should -Be $ExpectedValues.resetPeriodSeconds
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('FailureCommand'))
+                    {
+                        it 'Should return the failure command' {
+                            $getTargetResourceResult.failureCommand | Should -Be $ExpectedValues.FailureCommand
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('RebootMessage'))
+                    {
+                        it 'Should return the reboot message' {
+                            $getTargetResourceResult.rebootMessage | Should -Be $ExpectedValues.RebootMessage
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('FailureActionsCollection'))
+                    {
+                        foreach ($index in 0..($ExpectedValues.failureActionsCollection.count - 1)) {
+                            it "Should return the correct failure action for index $index" {
+                                $getTargetResourceResult.failureActionsCollection[$index].type | Should -Be $ExpectedValues.FailureActionsCollection[$index].type
+                                $getTargetResourceResult.failureActionsCollection[$index].delaySeconds | Should -Be $ExpectedValues.FailureActionsCollection[$index].delaySeconds
+                            }
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('FailureActionsOnNonCrashFailures'))
+                    {
+                        it 'Should return the failure actions on non crash failures flag' {
+                            $getTargetResourceResult.failureActionsOnNonCrashFailures | Should -Be $ExpectedValues.failureActionsOnNonCrashFailures
+                        }
+                    }
                 }
 
                 Mock -CommandName 'Get-Service' -MockWith { }
@@ -265,23 +303,43 @@ try
                         DesktopInteract = $true
                     }
 
+                    $testServiceFailureActions = @{
+                        resetPeriodSeconds = 86400
+                        hasRebootMessage = 0
+                        hasFailureCommand = 0
+                        failureActionCount = 1
+                        failureCommand = $null
+                        rebootMessage = $null
+                        actionsCollection = @([PSCustomObject]@{
+                            type = 'RESTART'
+                            delaySeconds = 30000
+                        })
+                        failureActionsOnNonCrashFailures = $true
+                    }
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                    Mock -CommandName 'Get-ServiceFailureActions' -MockWith { return $testServiceFailureActions }
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $testServiceCimInstance.StartName
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $testServiceCimInstance.StartName
+                        State                            = $testService.Status
+                        DisplayName                      = $testService.DisplayName
+                        Description                      = $testServiceCimInstance.Description
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = [System.Object[]] $testService.ServicesDependedOn.Name
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -307,23 +365,43 @@ try
                         DesktopInteract = $false
                     }
 
+                    $testServiceFailureActions = @{
+                        resetPeriodSeconds = 86400
+                        hasRebootMessage = 0
+                        hasFailureCommand = 0
+                        failureActionCount = 1
+                        failureCommand = $null
+                        rebootMessage = $null
+                        actionsCollection = @([PSCustomObject]@{
+                            type = 'RESTART'
+                            delaySeconds = 30000
+                        })
+                        failureActionsOnNonCrashFailures = $true
+                    }
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                    Mock -CommandName 'Get-ServiceFailureActions' -MockWith { return $testServiceFailureActions }
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $expectedBuiltInAccountValue
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = $null
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $expectedBuiltInAccountValue
+                        State                            = $testService.Status
+                        DisplayName                      = $testService.DisplayName
+                        Description                      = $testServiceCimInstance.Description
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = $null
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -356,23 +434,43 @@ try
                         DesktopInteract = $false
                     }
 
+                    $testServiceFailureActions = @{
+                        resetPeriodSeconds = 86400
+                        hasRebootMessage = 0
+                        hasFailureCommand = 0
+                        failureActionCount = 1
+                        failureCommand = $null
+                        rebootMessage = $null
+                        actionsCollection = @([PSCustomObject]@{
+                            type = 'RESTART'
+                            delaySeconds = 30000
+                        })
+                        failureActionsOnNonCrashFailures = $true
+                    }
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                    Mock -CommandName 'Get-ServiceFailureActions' -MockWith { return $testServiceFailureActions }
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $expectedBuiltInAccountValue
-                        State           = $testService.Status
-                        DisplayName     = $null
-                        Description     = $null
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $expectedBuiltInAccountValue
+                        State                            = $testService.Status
+                        DisplayName                      = $null
+                        Description                      = $null
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = [System.Object[]] $testService.ServicesDependedOn.Name
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -442,10 +540,25 @@ try
                         DesktopInteract = $false
                     }
 
+                    $testServiceFailureActions = @{
+                        resetPeriodSeconds = 86400
+                        hasRebootMessage = 0
+                        hasFailureCommand = 0
+                        failureActionCount = 1
+                        failureCommand = $null
+                        rebootMessage = $null
+                        actionsCollection = @([PSCustomObject]@{
+                            type = 'RESTART'
+                            delaySeconds = 30000
+                        })
+                        failureActionsOnNonCrashFailures = $true
+                    }
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
                     Mock -CommandName 'Write-Warning'
+                    Mock -CommandName 'Get-ServiceFailureActions' -MockWith { return $testServiceFailureActions }
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
@@ -454,16 +567,21 @@ try
                     }
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $testServiceCimInstance.StartName
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] ($testService.ServicesDependedOn | Where-Object -FilterScript {![System.String]::IsNullOrEmpty($_.Name)}).Name
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $testServiceCimInstance.StartName
+                        State                            = $testService.Status
+                        DisplayName                      = $testService.DisplayName
+                        Description                      = $testServiceCimInstance.Description
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = [System.Object[]] ($testService.ServicesDependedOn | Where-Object -FilterScript {![System.String]::IsNullOrEmpty($_.Name)}).Name
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues

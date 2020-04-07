@@ -2145,57 +2145,58 @@ function Get-ServiceFailureActions {
         $Service
     )
     process {
-        $registryData = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\$service
-
-        $failureActions = [PSCustomObject]@{
-            resetPeriodSeconds                = $null
-            hasRebootMessage                  = $null
-            hasFailureCommand                 = $null
-            failureActionCount                = $null
-            failureCommand                    = $null
-            rebootMessage                     = $null
-            actionsCollection                 = $null
-            $FailureActionsOnNonCrashFailures = $false
-        }
-
-        if($registryData.GetvalueNames() -match 'FailureCommand') {
-            $failureActions.failureCommand = $registryData.GetValue('FailureCommand')
-        }
-
-        if($registryData.GetValueNames() -match 'RebootMessage') {
-            $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
-        }
-
-        if($registryData.GetvalueNames() -match 'FailureActionsOnNonCrashFailures') {
-            $failureActions.FailureActionsOnNonCrashFailures = [System.Boolean]$registryData.GetValue('FailureActionsOnNonCrashFailures')
-        }
-
-        if($registryData.GetValueNames() -match 'FailureActions')
+        if($registryData = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\$service -ErrorAction SilentlyContinue)
         {
-            $failureActionsBinaryData = $registryData.GetValue('FailureActions')
-
-            # The first four bytes represent the Reset Period.
-            $failureActions.resetPeriodSeconds = Get-FailureActionsProperty -PropertyName ResetPeriodSeconds -Bytes $failureActionsBinaryData
-
-            # Next four bytes indicate the presence of a reboot message in case one of the chosen failure actions is
-            # SC_ACTION_REBOOT. The actual value of the message is stored in the 'RebootMessage' property
-            $failureActions.hasRebootMessage = Get-FailureActionsProperty -PropertyName HasRebootMsg -Bytes $failureActionsBinaryData
-
-            # The next four bytes indicate whether a failure action run command exists. This command
-            # would be run in the case one of the failure actions chosen is SC_ACTION_RUN_COMMAND
-            # If this value is true then the actual command string is stored in the 'FailureCommand' property.
-            $failureActions.hasFailureCommand = Get-FailureActionsProperty -PropertyName HasFailureCommand -Bytes $failureActionsBinaryData
-
-            # These four bytes give the count of how many reboot failure actions have been defined.
-            $failureActions.failureActionCount = Get-FailureActionsProperty -PropertyName FailureActionCount -Bytes $failureActionsBinaryData
-
-            if($failureActions.failureActionCount -gt 0)
-            {
-                $failureActions.ActionsCollection = Get-FailureActionCollection -Bytes $failureActionsBinaryData -ActionsCount $failureActions.failureActionCount
+            $failureActions = [PSCustomObject]@{
+                resetPeriodSeconds                = $null
+                hasRebootMessage                  = $null
+                hasFailureCommand                 = $null
+                failureActionCount                = $null
+                failureCommand                    = $null
+                rebootMessage                     = $null
+                actionsCollection                 = $null
+                FailureActionsOnNonCrashFailures = $false
             }
-        }
 
-        $failureActions
+            if($registryData.GetvalueNames() -match 'FailureCommand') {
+                $failureActions.failureCommand = $registryData.GetValue('FailureCommand')
+            }
+
+            if($registryData.GetValueNames() -match 'RebootMessage') {
+                $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
+            }
+
+            if($registryData.GetvalueNames() -match 'FailureActionsOnNonCrashFailures') {
+                $failureActions.FailureActionsOnNonCrashFailures = [System.Boolean]$registryData.GetValue('FailureActionsOnNonCrashFailures')
+            }
+
+            if($registryData.GetValueNames() -match 'FailureActions')
+            {
+                $failureActionsBinaryData = $registryData.GetValue('FailureActions')
+
+                # The first four bytes represent the Reset Period.
+                $failureActions.resetPeriodSeconds = Get-FailureActionsProperty -PropertyName ResetPeriodSeconds -Bytes $failureActionsBinaryData
+
+                # Next four bytes indicate the presence of a reboot message in case one of the chosen failure actions is
+                # SC_ACTION_REBOOT. The actual value of the message is stored in the 'RebootMessage' property
+                $failureActions.hasRebootMessage = Get-FailureActionsProperty -PropertyName HasRebootMsg -Bytes $failureActionsBinaryData
+
+                # The next four bytes indicate whether a failure action run command exists. This command
+                # would be run in the case one of the failure actions chosen is SC_ACTION_RUN_COMMAND
+                # If this value is true then the actual command string is stored in the 'FailureCommand' property.
+                $failureActions.hasFailureCommand = Get-FailureActionsProperty -PropertyName HasFailureCommand -Bytes $failureActionsBinaryData
+
+                # These four bytes give the count of how many reboot failure actions have been defined.
+                $failureActions.failureActionCount = Get-FailureActionsProperty -PropertyName FailureActionCount -Bytes $failureActionsBinaryData
+
+                if($failureActions.failureActionCount -gt 0)
+                {
+                    $failureActions.ActionsCollection = Get-FailureActionCollection -Bytes $failureActionsBinaryData -ActionsCount $failureActions.failureActionCount
+                }
+            }
+
+            $failureActions
+        }
     }
 }
 
