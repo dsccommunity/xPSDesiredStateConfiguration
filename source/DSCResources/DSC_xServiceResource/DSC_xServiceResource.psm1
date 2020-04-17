@@ -628,12 +628,10 @@ function Test-TargetResource
         New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
     }
 
-    if(($PSBoundParameters.ContainsKey('Failure3Action') -and (-not $PSBoundParameters.ContainsKey('Failure2Action'))) -or
-       ($PSBoundParameters.ContainsKey('Failure2Action') -and (-not $PSBoundParameters.ContainsKey('Failure1Action')))
-    )
+    if ($PSBoundParameters.ContainsKey('FailureCommand') -and (-not (Test-HasRestartFailureAction -Collection $FailureActionsCollection)))
     {
-        $errorMessage = $script:localizedData.FailureActionsMustBeSpecifiedInOrder
-        New-InvalidArgumentException -ArgumentName 'Failure2Action / Failure3Action' -Message $errorMessage
+        $errorMessage = $script:localizedData.MustSpecifyRestartFailureAction
+        New-InvalidArgumentException -ArgumentName 'FailureCommand' -Message $errorMessage
     }
 
     $serviceResource = Get-TargetResource -Name $Name
@@ -2458,3 +2456,25 @@ function Set-ServiceFailureActionProperty {
         }
     }
 }
+
+function Test-HasRestartFailureAction
+    {
+        [CmdletBinding()]
+        param (
+            [Parameter()]
+            [System.Object[]]
+            $Collection
+        )
+
+        process {
+            $hasRestartAction = $false
+
+            foreach ($action in $collection) {
+                if ($action.type -eq 'RUN_COMMAND') {
+                    $hasRestartAction = $true
+                }
+            }
+
+            $hasRestartAction
+        }
+    }
