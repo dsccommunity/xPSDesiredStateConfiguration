@@ -257,6 +257,76 @@ try
                     }
                 }
 
+                function Get-MockFailureActionsData
+                {
+                    [CmdletBinding()]
+                    param (
+                        [Parameter()]
+                        [System.String]
+                        $DataSetName
+                    )
+
+                    switch ($DataSetName) {
+                        '1ActionNoCommandOrMessage' {
+                            $data = @{
+                                resetPeriodSeconds = 86400
+                                hasRebootMessage = 0
+                                hasFailureCommand = 0
+                                failureActionCount = 1
+                                failureCommand = $null
+                                rebootMessage = $null
+                                actionsCollection = @([PSCustomObject]@{
+                                    type = 'RESTART'
+                                    delaySeconds = 30000
+                                })
+                                failureActionsOnNonCrashFailures = $true
+                            }
+                        }
+                        Default {}
+                    }
+
+                    $keyData = New-Object 'System.Collections.Generic.List[int]'
+
+                    $keyData.add($data.resetPeriodSeconds) | Out-Null
+                    $keyData.add($data.hasRebootMessage) | Out-Null
+                    $keyData.add($data.hasFailureCommand) | Out-Null
+                    $keyData.add($data.failureActionCount) | Out-Null
+                    $keyData.add(20) | Out-Null
+
+                    foreach ($action in $data.ActionsCollection) {
+                        $keyData.add([ACTION_TYPE]$action.type) | Out-Null
+                        $keyData.add($action.delaySeconds) | Out-Null
+                    }
+
+                    $key = @{
+                        FailureActions = $keyData | Format-Hex -raw | Select-Object -ExpandProperty bytes
+                    }
+
+                    if ($data.failureActionsOnNonCrashFailures)
+                    {
+                        $key.failureActionsOnNonCrashFailures = 1
+                    }
+
+                    if ($data.hasRebootMessage)
+                    {
+                        $key.RebootMessage = 'Mocked Reboot Message'
+                    }
+
+                    if ($data.hasFailureCommand)
+                    {
+                        $key.FailureCommand = 'C:\new\command.exe'
+                    }
+
+                    $GetValueNames = {$this.keys}
+                    $GetValue = {param($key) $this[$key]}
+
+                    Add-Member -InputObject $key -MemberType ScriptMethod -Name GetValueNames -Value $GetValueNames
+                    Add-Member -InputObject $key -MemberType ScriptMethod -Name GetValue -Value $GetValue
+
+                    @([PSCustomObject]$data, $key)
+                }
+
+
                 Mock -CommandName 'Get-Service' -MockWith { }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { }
                 Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { }
@@ -303,24 +373,12 @@ try
                         DesktopInteract = $true
                     }
 
-                    $testServiceFailureActions = @{
-                        resetPeriodSeconds = 86400
-                        hasRebootMessage = 0
-                        hasFailureCommand = 0
-                        failureActionCount = 1
-                        failureCommand = $null
-                        rebootMessage = $null
-                        actionsCollection = @([PSCustomObject]@{
-                            type = 'RESTART'
-                            delaySeconds = 30000
-                        })
-                        failureActionsOnNonCrashFailures = $true
-                    }
+                    $testServiceFailureActions, $failureRegistryKey = Get-MockFailureActionsData -DataSetName '1ActionNoCommandOrMessage'
 
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
-                    Mock -CommandName 'Get-ServiceFailureActions' -MockWith { return $testServiceFailureActions }
+                    Mock -CommandName 'Get-Item' -ParameterFilter { $Path -eq "HKLM:\SYSTEM\CurrentControlSet\Services\$($testService.name)" } -MockWith { return $failureRegistryKey}
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
