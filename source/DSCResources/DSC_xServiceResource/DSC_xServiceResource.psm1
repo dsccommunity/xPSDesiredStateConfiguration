@@ -779,14 +779,14 @@ function Test-TargetResource
         # Check the failure actions collection
         if($PSBoundParameters.ContainsKey('FailureActionsCollection')) {
             $inSync = $true
-            if($FailureActionsCollection.count -ne $serviceResource.FailureActionsCollection.count) {
-                Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureActionsCollection.count', $Name, $FailureActionsCollection.count, $serviceResource.FailureActionsCollection.count)
+            if($FailureActionsCollection.count -ne @($serviceResource.FailureActionsCollection).count) {
+                Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureActionsCollection.count', $Name, @($FailureActionsCollection).count, @($serviceResource.FailureActionsCollection).count)
                 return $false
             }
 
-            foreach ($actionIndex in (0..($FailureActionsCollection.count - 1))) {
-                $parameterAction = $FailureActionsCollection[$actionIndex]
-                $serviceResourceAction = $serviceResource.FailureActionsCollection[$actionIndex]
+            foreach ($actionIndex in (0..(@($FailureActionsCollection).count - 1))) {
+                $parameterAction = @($FailureActionsCollection)[$actionIndex]
+                $serviceResourceAction = @($serviceResource.FailureActionsCollection)[$actionIndex]
 
                 if($parameterAction.type -ne $serviceResourceAction.type) {
                     Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f "FailureActionsCollection Action $actionIndex type", $Name, $parameterAction.type, $serviceResourceAction.type)
@@ -2287,7 +2287,7 @@ function Get-FailureActionCollection
             $actionsCollection.Add($currentAction) | Out-Null
         }
 
-        @($actionsCollection)
+        $actionsCollection
     }
 }
 
