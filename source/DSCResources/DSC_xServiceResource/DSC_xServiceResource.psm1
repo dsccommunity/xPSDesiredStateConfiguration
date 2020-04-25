@@ -315,7 +315,7 @@ function Set-TargetResource
         $FailureCommand,
 
         [Parameter()]
-        [System.Object[]]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $FailureActionsCollection,
 
         [Parameter()]
@@ -600,7 +600,7 @@ function Test-TargetResource
         $FailureCommand,
 
         [Parameter()]
-        [System.Object[]]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $FailureActionsCollection,
 
         [Parameter()]
@@ -1835,7 +1835,7 @@ function Set-ServiceProperty
         $FailureCommand,
 
         [Parameter()]
-        [System.Object[]]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $FailureActionsCollection,
 
         [Parameter()]
@@ -2349,7 +2349,7 @@ function Set-ServiceFailureActionProperty {
         $FailureCommand,
 
         [Parameter()]
-        [System.Object[]]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
         $FailureActionsCollection,
 
         [Parameter()]
@@ -2433,7 +2433,7 @@ function Set-ServiceFailureActionProperty {
 
         # Iterate over the actions and their properties to add the integers that they encode to the array.
         foreach ($action in $failureActions.ActionsCollection) {
-            $integerData.add($action.type) | Out-Null
+            $integerData.add([ACTION_TYPE]$action.type) | Out-Null
             $integerData.add($action.delaySeconds) | Out-Null
         }
 
