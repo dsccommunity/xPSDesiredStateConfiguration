@@ -2149,7 +2149,7 @@ function Get-ServiceFailureActions {
                 resetPeriodSeconds                = $null
                 hasRebootMessage                  = $null
                 hasFailureCommand                 = $null
-                failureActionCount                = $null
+                failureActionCount                = @()
                 failureCommand                    = $null
                 rebootMessage                     = $null
                 actionsCollection                 = $null
@@ -2287,7 +2287,7 @@ function Get-FailureActionCollection
             $actionsCollection.Add($currentAction) | Out-Null
         }
 
-        $actionsCollection
+        @($actionsCollection)
     }
 }
 
