@@ -1924,6 +1924,11 @@ function Set-ServiceProperty
         $setServiceFailureActionsPropertyParameters['FailureActionsCollection'] = $FailureActionsCollection
     }
 
+    if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
+    {
+        $setServiceFailureActionsPropertyParameters['FailureActionsOnNonCrashFailures'] = $FailureActionsOnNonCrashFailures
+    }
+
     if($setServiceFailureActionsPropertyParameters.count -gt 0)
     {
         Set-ServiceFailureActionProperty -ServiceName $ServiceName @setServiceFailureActionsPropertyParameters
