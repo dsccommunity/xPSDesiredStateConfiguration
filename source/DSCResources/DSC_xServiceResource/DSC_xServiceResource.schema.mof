@@ -26,5 +26,5 @@ class DSC_xServiceResource : OMI_BaseResource
 class DSC_xFailureAction
 {
   [Write, Description("The action to take on failure"), ValueMap{"NONE", "RESTART", "REBOOT", "RUN_COMMAND"}, Values{"NONE", "RESTART", "REBOOT", "RUN_COMMAND"}] String Type;
-  [Write, Description("Delay in seconds to wait before taking the specified action")] UInt32 DelaySeconds;
+  [Write, Description("Delay in milliseconds to wait before taking the specified action")] UInt32 DelayMilliSeconds;
 };

@@ -207,8 +207,8 @@ function Get-TargetResource
 
     .PARAMETER FailureActionsCollection
         An array of hash tables representing the failure actions to take. Each hash table should have
-        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
-        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
 
     .PARAMETER FailureActionsOnNonCrashFailures
         By default, failure actions are only queued if the service terminates without reporting
@@ -505,8 +505,8 @@ function Set-TargetResource
 
     .PARAMETER FailureActionsCollection
         An array of hash tables representing the failure actions to take. Each hash table should have
-        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
-        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
 
     .PARAMETER FailureActionsOnNonCrashFailures
         By default, failure actions are only queued if the service terminates without reporting
@@ -793,8 +793,8 @@ function Test-TargetResource
                     $inSync = $false
                 }
 
-                if($parameterAction.delaySeconds -ne $serviceResourceAction.delaySeconds) {
-                    Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f "FailureActionsCollection Action $actionIndex delaySeconds", $Name, $parameterAction.delaySeconds, $serviceResourceAction.delaySeconds)
+                if($parameterAction.delayMilliSeconds -ne $serviceResourceAction.delayMilliSeconds) {
+                    Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f "FailureActionsCollection Action $actionIndex delayMilliSeconds", $Name, $parameterAction.delayMilliSeconds, $serviceResourceAction.delayMilliSeconds)
                     $inSync = $false
                 }
             }
@@ -1761,8 +1761,8 @@ function Set-ServiceStartupType
 
     .PARAMETER FailureActionsCollection
         An array of hash tables representing the failure actions to take. Each hash table should have
-        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
-        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
 
     .PARAMETER FailureActionsOnNonCrashFailures
         By default, failure actions are only queued if the service terminates without reporting
@@ -2286,7 +2286,7 @@ function Get-FailureActionCollection
 
             $currentAction = [PSCustomObject]@{
                 type         = [ACTION_TYPE]([System.BitConverter]::ToInt32($Bytes[$actionTypeByteRange],0))
-                delaySeconds = [System.BitConverter]::ToInt32($Bytes[$actionDelayByteRange],0)
+                delayMilliSeconds = [System.BitConverter]::ToInt32($Bytes[$actionDelayByteRange],0)
             }
 
             $actionsCollection.Add($currentAction) | Out-Null
@@ -2324,8 +2324,8 @@ function Get-FailureActionCollection
 
     .PARAMETER FailureActionsCollection
         An array of hash tables representing the failure actions to take. Each hash table should have
-        two keys: type and delaySeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
-        The value for the delaySeconds key is an integer value of seconds to wait before applying the requested action.
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
 
     .PARAMETER FailureActionsOnNonCrashFailures
         By default, failure actions are only queued if the service terminates without reporting
@@ -2439,7 +2439,7 @@ function Set-ServiceFailureActionProperty {
         # Iterate over the actions and their properties to add the integers that they encode to the array.
         foreach ($action in $failureActions.ActionsCollection) {
             $integerData.add([ACTION_TYPE]$action.type) | Out-Null
-            $integerData.add($action.delaySeconds) | Out-Null
+            $integerData.add($action.delayMilliSeconds) | Out-Null
         }
 
         # Now that we finally have all of the data we need, we can convert it to a byte array.
