@@ -20,6 +20,7 @@ class DSC_xServiceResource : OMI_BaseResource
   [Write,Description("The command line to run if a service fails.")] String FailureCommand;
   [Write,EmbeddedInstance("DSC_xFailureAction"),Description("The actions to take when a service fails.")] String FailureActionsCollection[];
   [Write,Description("A flag indicating whether failure actions should be invoked on non-crash failures.")] Boolean FailureActionsOnNonCrashFailures;
+  [Write,Description("An optional broadcast message to send to logged in users if the machine reboots as a result of a failure action.")] String RebootMessage;
 };
 
 [ClassVersion("1.0.0")]

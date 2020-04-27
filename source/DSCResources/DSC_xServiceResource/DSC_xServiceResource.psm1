@@ -2393,7 +2393,7 @@ function Set-ServiceFailureActionProperty {
             # This setting is a combination a flag in the _SERVICE_FAILURE_ACTIONSA struct,
             # and the actual string value for the message stored in the 'RebootMessage' registry property.
             # If hasRebootMessage is already true, then we know the key exists and we can just set it.
-            if ($failureActions.hasRebootMessage)
+            if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -ErrorAction SilentlyContinue)
             {
                 Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage | Out-Null
             }
@@ -2411,7 +2411,7 @@ function Set-ServiceFailureActionProperty {
         # This is the same as the RebootMessage property above. It's a combination of a flag in the struct, and an external property that stores the value.
         if ($PSBoundParameters.ContainsKey('FailureCommand'))
         {
-            if ($failureActions.hasFailureCommand)
+            if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -ErrorAction SilentlyContinue)
             {
                 Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand | Out-Null
             }
@@ -2451,7 +2451,7 @@ function Set-ServiceFailureActionProperty {
         # if it doesn't already exist.
         if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
         {
-            if ($failureActions.FailureActionsOnNonCrashFailures) {
+            if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -ErrorAction SilentlyContinue) {
                 Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures | Out-Null
             }
             else
@@ -2463,23 +2463,23 @@ function Set-ServiceFailureActionProperty {
 }
 
 function Test-HasRestartFailureAction
-    {
-        [CmdletBinding()]
-        param (
-            [Parameter()]
-            [System.Object[]]
-            $Collection
-        )
+{
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [System.Object[]]
+        $Collection
+    )
 
-        process {
-            $hasRestartAction = $false
+    process {
+        $hasRestartAction = $false
 
-            foreach ($action in $collection) {
-                if ($action.type -eq 'RUN_COMMAND') {
-                    $hasRestartAction = $true
-                }
+        foreach ($action in $collection) {
+            if ($action.type -eq 'RUN_COMMAND') {
+                $hasRestartAction = $true
             }
-
-            $hasRestartAction
         }
+
+        $hasRestartAction
     }
+}
