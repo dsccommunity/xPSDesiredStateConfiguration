@@ -672,7 +672,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Test-IsNanoServer cmdlet to properly test for a Nano server rather
   than the core version of PowerShell
 
-## [6.0.0.0] - 2017-02-303
+## [6.0.0.0] - 2017-02-03
 
 ### Changed
 
