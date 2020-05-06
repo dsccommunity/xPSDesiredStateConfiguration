@@ -2451,13 +2451,7 @@ function Set-ServiceFailureActionProperty {
         # if it doesn't already exist.
         if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
         {
-            if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -ErrorAction SilentlyContinue) {
-                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures | Out-Null
-            }
-            else
-            {
-                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures' -Value $FailureActionsOnNonCrashFailures | Out-Null
-            }
+            Invoke-SCFailureFlag -ServiceName $ServiceName -Flag $FailureActionsOnNonCrashFailures
         }
     }
 }
@@ -2481,5 +2475,39 @@ function Test-HasRestartFailureAction
         }
 
         $hasRestartAction
+    }
+}
+
+<#
+.SYNOPSIS
+    Use sc.exe to set the failure flag
+.DESCRIPTION
+    The FailureActionsOnNonCrashFailures feature of the service controller
+    cannnot be reliably managed in code via anything but sc.exe. Managing the
+    registry key value on its own has proved inadequate. This cmdlet gives us
+    an easily mockable and testable way to invoke sc to manage this flag.
+.EXAMPLE
+    PS C:\> Invoke-SCFailureFlag -ServiceName WSearch -Flag 1
+    This will invoke the equivelent of '& sc.exe failureFlag WSearch 1'
+#>
+function Invoke-SCFailureFlag {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceName,
+        [Parameter(Mandatory = $true)]
+        [ValidateSet(0,1)]
+        [System.Int32]
+        $Flag
+    )
+
+    process {
+        & sc.exe @('failureFlag', $ServiceName, $Flag) | Out-Null
+        # A quick sanity check to make sure the value was set as expected without having to parse the string output of sc.
+        $failureFlag = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures').failureActionsOnNonCrashFailures
+        if ($failureFlag -ne $Flag) {
+            throw "sc.exe did not succesfully set the failure flag for $servicename"
+        }
     }
 }
