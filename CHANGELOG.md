@@ -5,6 +5,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- xPSDesiredStateConfiguration
+  - Fixed build failures caused by changes in `ModuleBuilder` module v1.7.0
+    by changing `CopyDirectories` to `CopyPaths` - Fixes [Issue #687](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/687).
+  - Pin `Pester` module to 4.10.1 because Pester 5.0 is missing code
+    coverage - Fixes [Issue #688](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/688).
+
 ## [9.1.0] - 2020-02-19
 
 ### Changed
