@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pin `Pester` module to 4.10.1 because Pester 5.0 is missing code
     coverage - Fixes [Issue #688](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/688).
 
+### Changed
+
+- xPSDesiredStateConfiguration
+  - Updated to use the common module _DscResource.Common_ - Fixes [Issue #685](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/685).
+
 ## [9.1.0] - 2020-02-19
 
 ### Changed
