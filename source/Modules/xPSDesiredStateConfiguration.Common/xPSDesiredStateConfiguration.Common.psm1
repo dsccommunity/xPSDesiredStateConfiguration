@@ -1,4 +1,4 @@
-$modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot -Parent) -Parent) -ChildPath 'Modules'
+$modulePath = Split-Path -Path $PSScriptRoot -Parent
 
 Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
