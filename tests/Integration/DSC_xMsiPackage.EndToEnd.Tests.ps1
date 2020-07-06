@@ -102,6 +102,7 @@ try
                     {
                         . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -147,6 +148,7 @@ try
                     {
                         . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -192,6 +194,7 @@ try
                     {
                         . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -237,6 +240,7 @@ try
                     {
                         . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -290,6 +294,7 @@ try
                     {
                         . $script:configurationFilePathLogPath -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -347,6 +352,7 @@ try
                     {
                         . $script:configurationFilePathLogPath -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -414,6 +420,7 @@ try
                         {
                             . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                             & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                            Reset-DscLcm
                             Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                         } | Should -Not -Throw
                     }
@@ -486,6 +493,7 @@ try
                         {
                             . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                             & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                            Reset-DscLcm
                             Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                         } | Should -Not -Throw
                     }
@@ -558,6 +566,7 @@ try
                         {
                             . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                             & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                            Reset-DscLcm
                             Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                         } | Should -Not -Throw
                     }
@@ -630,6 +639,7 @@ try
                         {
                             . $script:configurationFilePathNoOptionalParameters -ConfigurationName $configurationName
                             & $configurationName -OutputPath $TestDrive @msiPackageParameters
+                            Reset-DscLcm
                             Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                         } | Should -Not -Throw
                     }

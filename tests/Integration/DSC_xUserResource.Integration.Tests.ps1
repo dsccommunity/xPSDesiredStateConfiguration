@@ -37,7 +37,7 @@ try
         $ConfigData = @{
             AllNodes = @(
                 @{
-                    NodeName = '*'
+                    NodeName                    = '*'
                     PSDscAllowPlainTextPassword = $true
                 }
                 @{
@@ -64,11 +64,12 @@ try
                     {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -UserName $testUserName `
-                                            -Password $testCredential `
-                                            -Description $testDescription `
-                                            -OutputPath $configurationPath `
-                                            -ConfigurationData $ConfigData `
-                                            -ErrorAction Stop
+                            -Password $testCredential `
+                            -Description $testDescription `
+                            -OutputPath $configurationPath `
+                            -ConfigurationData $ConfigData `
+                            -ErrorAction Stop
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $configurationPath -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -88,7 +89,8 @@ try
             }
             finally
             {
-                if (Test-Path -Path $logPath) {
+                if (Test-Path -Path $logPath)
+                {
                     Remove-Item -Path $logPath -Recurse -Force
                 }
 
@@ -117,11 +119,12 @@ try
                     {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -UserName $testUserName `
-                                            -Password $testCredential `
-                                            -Description $testDescription `
-                                            -OutputPath $configurationPath `
-                                            -ConfigurationData $ConfigData `
-                                            -ErrorAction Stop
+                            -Password $testCredential `
+                            -Description $testDescription `
+                            -OutputPath $configurationPath `
+                            -ConfigurationData $ConfigData `
+                            -ErrorAction Stop
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $configurationPath -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -141,7 +144,8 @@ try
             }
             finally
             {
-                if (Test-Path -Path $logPath) {
+                if (Test-Path -Path $logPath)
+                {
                     Remove-Item -Path $logPath -Recurse -Force
                 }
 
@@ -169,11 +173,12 @@ try
                     {
                         . $configFile -ConfigurationName $configurationName
                         & $configurationName -UserName $testUserName `
-                                            -Password $testCredential `
-                                            -OutputPath $configurationPath `
-                                            -ConfigurationData $ConfigData `
-                                            -Ensure 'Absent' `
-                                            -ErrorAction Stop
+                            -Password $testCredential `
+                            -OutputPath $configurationPath `
+                            -ConfigurationData $ConfigData `
+                            -Ensure 'Absent' `
+                            -ErrorAction Stop
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $configurationPath -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -190,7 +195,8 @@ try
             }
             finally
             {
-                if (Test-Path -Path $logPath) {
+                if (Test-Path -Path $logPath)
+                {
                     Remove-Item -Path $logPath -Recurse -Force
                 }
 

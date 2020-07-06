@@ -148,6 +148,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -230,6 +231,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -301,6 +303,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -356,6 +359,7 @@ try
                     {
                         . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Throw
                 }
@@ -414,6 +418,7 @@ try
                     {
                         . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -472,6 +477,7 @@ try
                     {
                         . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -523,6 +529,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -611,6 +618,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -680,6 +688,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -720,6 +729,7 @@ try
                     {
                         . $script:confgurationFilePathValidateOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -770,6 +780,7 @@ try
                     {
                         . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -824,6 +835,7 @@ try
                     {
                         . $script:confgurationFilePathValidateAndChecksum -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @archiveParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction Stop -Wait -Force
                     } | Should -Not -Throw
                 }

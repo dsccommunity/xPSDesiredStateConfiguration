@@ -135,6 +135,7 @@ try
                 {
                     . $script:confgurationFilePathAllExceptBuiltInAccount -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive -ConfigurationData $configData @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -177,6 +178,7 @@ try
                 {
                     . $script:confgurationFilePathBuiltInAccountOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -222,6 +224,7 @@ try
                 {
                     . $script:confgurationFilePathBuiltInAccountOnly -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }

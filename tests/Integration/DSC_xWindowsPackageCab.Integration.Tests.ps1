@@ -78,14 +78,15 @@ try
             $configurationName = 'InstallWindowsPackageCab'
 
             $resourceParameters = @{
-                Name = $script:testPackageName
+                Name       = $script:testPackageName
                 SourcePath = $script:testSourcePath
-                Ensure = 'Present'
+                Ensure     = 'Present'
             }
 
             {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
+                Reset-DscLcm
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
             } | Should -Not -Throw
 
@@ -100,9 +101,9 @@ try
             $configurationName = 'UninstallWindowsPackageCab'
 
             $resourceParameters = @{
-                Name = $script:testPackageName
+                Name       = $script:testPackageName
                 SourcePath = $script:testSourcePath
-                Ensure = 'Absent'
+                Ensure     = 'Absent'
             }
 
             Dism\Add-WindowsPackage -PackagePath $resourceParameters.SourcePath -Online -NoRestart
@@ -112,6 +113,7 @@ try
             {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
+                Reset-DscLcm
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
             } | Should -Not -Throw
 
@@ -122,10 +124,10 @@ try
             $configurationName = 'InstallInvalidWindowsPackageCab'
 
             $resourceParameters = @{
-                Name = 'NonExistentWindowsPackageCab'
+                Name       = 'NonExistentWindowsPackageCab'
                 SourcePath = (Join-Path -Path $TestDrive -ChildPath 'FakePath.cab')
-                Ensure = 'Present'
-                LogPath = (Join-Path -Path $TestDrive -ChildPath 'InvalidWindowsPackageCab.log')
+                Ensure     = 'Present'
+                LogPath    = (Join-Path -Path $TestDrive -ChildPath 'InvalidWindowsPackageCab.log')
             }
 
             { Dism\Get-WindowsPackage -PackageName $resourceParameters.Name -Online } | Should -Throw
@@ -133,6 +135,7 @@ try
             {
                 . $script:confgurationFilePath -ConfigurationName $configurationName
                 & $configurationName -OutputPath $TestDrive @resourceParameters
+                Reset-DscLcm
                 Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
             } | Should -Throw
 

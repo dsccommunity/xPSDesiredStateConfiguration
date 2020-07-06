@@ -98,10 +98,11 @@ try
                     {
                         . $script:configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
-                                            -IncludeAllSubFeature $false `
-                                            -Ensure 'Present' `
-                                            -OutputPath $configurationPath `
-                                            -ErrorAction 'Stop'
+                            -IncludeAllSubFeature $false `
+                            -Ensure 'Present' `
+                            -OutputPath $configurationPath `
+                            -ErrorAction 'Stop'
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -111,10 +112,10 @@ try
                 }
 
                 It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Name | Should -Be $script:testFeatureName
-                $currentConfig.IncludeAllSubFeature | Should -BeFalse
-                $currentConfig.Ensure | Should -Be 'Present'
+                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                    $currentConfig.Name | Should -Be $script:testFeatureName
+                    $currentConfig.IncludeAllSubFeature | Should -BeFalse
+                    $currentConfig.Ensure | Should -Be 'Present'
                 }
 
                 It 'Should be Installed' {
@@ -124,7 +125,8 @@ try
             }
             finally
             {
-                if (Test-Path -Path $logPath) {
+                if (Test-Path -Path $logPath)
+                {
                     Remove-Item -Path $logPath -Recurse -Force
                 }
 
@@ -149,10 +151,11 @@ try
                     {
                         . $script:configFile -ConfigurationName $configurationName
                         & $configurationName -Name $script:testFeatureName `
-                                            -IncludeAllSubFeature $false `
-                                            -Ensure 'Absent' `
-                                            -OutputPath $configurationPath `
-                                            -ErrorAction 'Stop'
+                            -IncludeAllSubFeature $false `
+                            -Ensure 'Absent' `
+                            -OutputPath $configurationPath `
+                            -ErrorAction 'Stop'
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -162,10 +165,10 @@ try
                 }
 
                 It 'Should return the correct configuration' {
-                $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
-                $currentConfig.Name | Should -Be $script:testFeatureName
-                $currentConfig.IncludeAllSubFeature | Should -BeFalse
-                $currentConfig.Ensure | Should -Be 'Absent'
+                    $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
+                    $currentConfig.Name | Should -Be $script:testFeatureName
+                    $currentConfig.IncludeAllSubFeature | Should -BeFalse
+                    $currentConfig.Ensure | Should -Be 'Absent'
                 }
 
                 It 'Should not be installed' {
@@ -175,7 +178,8 @@ try
             }
             finally
             {
-                if (Test-Path -Path $logPath) {
+                if (Test-Path -Path $logPath)
+                {
                     Remove-Item -Path $logPath -Recurse -Force
                 }
 
@@ -202,10 +206,11 @@ try
                 {
                     . $script:configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
-                                            -IncludeAllSubFeature $true `
-                                            -Ensure 'Present' `
-                                            -OutputPath $configurationPath `
-                                            -ErrorAction 'Stop'
+                        -IncludeAllSubFeature $true `
+                        -Ensure 'Present' `
+                        -OutputPath $configurationPath `
+                        -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -243,10 +248,11 @@ try
                 {
                     . $script:configFile -ConfigurationName $configurationName
                     & $configurationName -Name $script:testFeatureWithSubFeaturesName `
-                                            -IncludeAllSubFeature $true `
-                                            -Ensure 'Absent' `
-                                            -OutputPath $configurationPath `
-                                            -ErrorAction 'Stop'
+                        -IncludeAllSubFeature $true `
+                        -Ensure 'Absent' `
+                        -OutputPath $configurationPath `
+                        -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -255,7 +261,7 @@ try
                 { Get-DscConfiguration -ErrorAction 'Stop' } | Should -Not -Throw
             }
 
-            It 'Should return the correct configuration' -Skip:$script:skipLongTests  {
+            It 'Should return the correct configuration' -Skip:$script:skipLongTests {
                 $currentConfig = Get-DscConfiguration -ErrorAction 'Stop'
                 $currentConfig.Name | Should -Be $script:testFeatureWithSubFeaturesName
                 $currentConfig.IncludeAllSubFeature | Should -BeFalse

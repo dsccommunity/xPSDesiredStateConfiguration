@@ -46,9 +46,10 @@ try
                 It 'Should compile and run configuration' {
                     {
                         . $script:confgurationDownloadFile -ConfigurationName $configurationName
-                            $script:testDestinationPath = Join-Path -Path $TestDrive -ChildPath 'xRemoteFileDestination1.txt'
+                        $script:testDestinationPath = Join-Path -Path $TestDrive -ChildPath 'xRemoteFileDestination1.txt'
 
                         & $configurationName -OutputPath $TestDrive @remoteFileParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -81,6 +82,7 @@ try
                     {
                         . $script:confgurationDownloadFileWithChecksum -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @remoteFileParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }

@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xPSDesiredStateConfiguration
   - Updated to use the common module _DscResource.Common_ - Fixes [Issue #685](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/685).
+    - Improved integration test reliability by resetting the DSC LCM
+      before executing each test using the `Reset-DscLcm`
+      function - Fixes [Issue #686](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/686).
 
 ## [9.1.0] - 2020-02-19
 
