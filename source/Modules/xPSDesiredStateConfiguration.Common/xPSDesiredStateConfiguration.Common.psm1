@@ -7,62 +7,6 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
     .SYNOPSIS
-        Creates and throws an invalid data exception.
-
-    .PARAMETER ErrorId
-        The error Id to assign to the exception.
-
-    .PARAMETER ErrorMessage
-        The error message to assign to the exception.
-#>
-function New-InvalidDataException
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $ErrorId,
-
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $ErrorMessage
-    )
-
-    $errorCategory = [System.Management.Automation.ErrorCategory]::InvalidData
-    $exception = New-Object `
-        -TypeName System.InvalidOperationException `
-        -ArgumentList $ErrorMessage
-    $errorRecord = New-Object `
-        -TypeName System.Management.Automation.ErrorRecord `
-        -ArgumentList $exception, $ErrorId, $errorCategory, $null
-
-    throw $errorRecord
-}
-
-<#
-    .SYNOPSIS
-        Sets the Global DSCMachineStatus variable to a value of 1.
-#>
-function Set-DscMachineRebootRequired
-{
-    # Suppressing this rule because $global:DSCMachineStatus is used to trigger a reboot.
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidGlobalVars', '')]
-    <#
-        Suppressing this rule because $global:DSCMachineStatus is only set,
-        never used (by design of Desired State Configuration).
-    #>
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
-    [CmdletBinding()]
-    param
-    (
-    )
-
-    $global:DSCMachineStatus = 1
-}
-
-<#
-    .SYNOPSIS
         Builds a string of the common parameters shared across all resources in a set.
 
     .PARAMETER KeyParameterName
