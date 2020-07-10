@@ -41,6 +41,10 @@ try
     InModuleScope $script:dscResourceName {
         Describe 'xMsiPackage Unit Tests' {
             BeforeAll {
+                function Set-DSCMachineRebootRequired
+                {
+                }
+
                 $script:testUsername = 'TestUsername'
                 $script:testPassword = 'TestPassword'
                 $script:secureTestPassword = ConvertTo-SecureString -String $script:testPassword -AsPlainText -Force
@@ -310,7 +314,7 @@ try
 
                 Context 'Reboot handling' {
                     Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
-                    Mock -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common' -MockWith {}
+                    Mock -CommandName 'Set-DscMachineRebootRequired' -MockWith {}
 
                     It 'Should request reboot by default' {
                         $setTargetResourceParameters.IgnoreReboot = $false
