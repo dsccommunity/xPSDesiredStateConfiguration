@@ -310,20 +310,20 @@ try
 
                 Context 'Reboot handling' {
                     Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
-                    Mock -CommandName 'Set-DSCMachineRebootRequired' -ModuleName 'DscResource.Common' -MockWith {}
+                    Mock -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common' -MockWith {}
 
                     It 'Should request reboot by default' {
                         $setTargetResourceParameters.IgnoreReboot = $false
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly 1
+                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -Exactly 1
                     }
 
                     It 'Should not request reboot if IgnoreReboot specified' {
                         $setTargetResourceParameters.IgnoreReboot = $true
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly 0
+                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -Exactly 0
                     }
                 }
 
