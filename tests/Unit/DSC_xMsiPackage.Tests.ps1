@@ -316,16 +316,15 @@ try
                         $setTargetResourceParameters.IgnoreReboot = $false
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly 1 -Scope 'It'
+                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly 1
                     }
 
                     It 'Should not request reboot if IgnoreReboot specified' {
                         $setTargetResourceParameters.IgnoreReboot = $true
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -Exactly 0 -Scope 'It'
+                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly 0
                     }
-
                 }
 
                 $setTargetResourceParameters.Ensure = 'Absent'
