@@ -316,7 +316,7 @@ function Set-TargetResource
         #>
         if ($restartNeeded)
         {
-            Set-DSCMachineRebootRequired
+            Set-DscMachineRebootRequired
         }
     }
 

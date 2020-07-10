@@ -695,7 +695,7 @@ function Set-TargetResource
         }
         else
         {
-            Set-DSCMachineRebootRequired
+            Set-DscMachineRebootRequired
         }
     }
     elseif ($Ensure -eq 'Present')

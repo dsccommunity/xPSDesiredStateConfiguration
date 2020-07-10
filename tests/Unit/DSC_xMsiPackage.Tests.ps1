@@ -309,12 +309,10 @@ try
                 }
 
                 Context 'When reboot required or not required' {
-                    BeforeEach {
+                    It 'Should request reboot by default' {
                         Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
                         Mock -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common'
-                    }
 
-                    It 'Should request reboot by default' {
                         $setTargetResourceParameters.IgnoreReboot = $false
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
@@ -322,6 +320,9 @@ try
                     }
 
                     It 'Should not request reboot if IgnoreReboot specified' {
+                        Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
+                        Mock -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common'
+
                         $setTargetResourceParameters.IgnoreReboot = $true
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
