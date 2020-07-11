@@ -310,23 +310,24 @@ try
                 }
 
                 Context 'When reboot required or not required' {
-                    BeforeEach {
-                        Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
-                        Mock -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common'
-                    }
+                    Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
 
                     It 'Should request reboot by default' {
+                        Mock -CommandName 'Set-DscMachineRebootRequired'
+
                         $setTargetResourceParameters.IgnoreReboot = $false
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly -Times 1
+                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -Exactly -Times 1 -Scope It
                     }
 
                     It 'Should not request reboot if IgnoreReboot specified' {
+                        Mock -CommandName 'Set-DscMachineRebootRequired'
+
                         $setTargetResourceParameters.IgnoreReboot = $true
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -ModuleName 'DscResource.Common' -Exactly -TImes 0
+                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -Exactly -Times 0 -Scope It
                     }
                 }
 

@@ -35,10 +35,6 @@ try
     InModuleScope $script:dscResourceName {
         Describe 'xPackageResource Unit Tests' {
             BeforeAll {
-                function Set-DscMachineRebootRequired
-                {
-                }
-
                 $script:skipHttpsTest = $true
 
                 $script:testDirectoryPath = Join-Path -Path $TestDrive -ChildPath 'MSFT_xPackageResource.Tests'
@@ -576,7 +572,7 @@ try
                         }
                         Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
                         Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
-                        Mock -CommandName 'Set-DscMachineRebootRequired' -MockWith { }
+                        Mock -CommandName 'Set-DscMachineRebootRequired'
 
                         $packageParameters = @{
                             Path      = $script:msiLocation
@@ -586,7 +582,7 @@ try
 
                         { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Set-DscMachineRebootRequired -Times 1 -Scope It
+                        Assert-MockCalled -CommandName Set-DscMachineRebootRequired -Exactly -Times 1 -Scope It
                     }
 
                     It 'Should not run Set-DscMachineRebootRequired if IgnoreReboot provided' {
@@ -597,7 +593,7 @@ try
                         }
                         Mock -CommandName 'Test-TargetResource' -MockWith { return $false }
                         Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
-                        Mock -CommandName 'Set-DscMachineRebootRequired' -MockWith { }
+                        Mock -CommandName 'Set-DscMachineRebootRequired'
 
                         $packageParameters = @{
                             Path         = $script:msiLocation
@@ -608,7 +604,7 @@ try
 
                         { Set-TargetResource -Ensure 'Present' @packageParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName Set-DscMachineRebootRequired -Times 0 -Scope It
+                        Assert-MockCalled -CommandName Set-DscMachineRebootRequired -Exactly -Times 0 -Scope It
                     }
 
                     It 'Should install package using user credentials when specified' {
