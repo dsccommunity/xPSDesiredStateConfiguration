@@ -354,6 +354,7 @@ function Set-TargetResource
     if (($serverFeatureData -and $serverFeatureData.RequiresReboot) -or $rebootRequired)
     {
         Write-Verbose $script:localizedData.MachineRequiresReboot
+
         if ($IgnoreReboot)
         {
             Write-Verbose $script:localizedData.IgnoreReboot
