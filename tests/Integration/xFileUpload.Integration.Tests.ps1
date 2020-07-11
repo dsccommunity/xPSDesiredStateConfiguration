@@ -71,7 +71,7 @@ try
                     & $script:configurationName `
                         -OutputPath $TestDrive `
                         -ConfigurationData $ConfigurationData
-
+                    Reset-DscLcm
                     Start-DscConfiguration `
                         -Path $TestDrive `
                         -ErrorAction 'Stop' `
@@ -105,7 +105,7 @@ try
                     & $script:configurationName `
                         -OutputPath $TestDrive `
                         -ConfigurationData $ConfigurationData
-
+                    Reset-DscLcm
                     Start-DscConfiguration `
                         -Path $TestDrive `
                         -ErrorAction 'Stop' `

@@ -33,9 +33,9 @@ try
             $configurationName = 'EnableWindowsOptionalFeature'
 
             $resourceParameters = @{
-                Name = 'TelnetClient'
-                Ensure = 'Present'
-                LogPath = Join-Path -Path $TestDrive -ChildPath 'EnableOptionalFeature.log'
+                Name                 = 'TelnetClient'
+                Ensure               = 'Present'
+                LogPath              = Join-Path -Path $TestDrive -ChildPath 'EnableOptionalFeature.log'
                 NoWindowsUpdateCheck = $true
             }
 
@@ -51,6 +51,7 @@ try
                 {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
 
@@ -81,9 +82,9 @@ try
             $configurationName = 'DisableWindowsOptionalFeature'
 
             $resourceParameters = @{
-                Name = 'TelnetClient'
-                Ensure = 'Absent'
-                LogPath = Join-Path -Path $TestDrive -ChildPath 'DisableOptionalFeature.log'
+                Name                 = 'TelnetClient'
+                Ensure               = 'Absent'
+                LogPath              = Join-Path -Path $TestDrive -ChildPath 'DisableOptionalFeature.log'
                 NoWindowsUpdateCheck = $true
                 RemoveFilesOnDisable = $false
             }
@@ -100,6 +101,7 @@ try
                 {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
 
@@ -130,9 +132,9 @@ try
             $configurationName = 'EnableIncorrectWindowsOptionalFeature'
 
             $resourceParameters = @{
-                Name = 'NonExistentWindowsOptionalFeature'
-                Ensure = 'Present'
-                LogPath = Join-Path -Path $TestDrive -ChildPath 'EnableIncorrectWindowsFeature.log'
+                Name                 = 'NonExistentWindowsOptionalFeature'
+                Ensure               = 'Present'
+                LogPath              = Join-Path -Path $TestDrive -ChildPath 'EnableIncorrectWindowsFeature.log'
                 NoWindowsUpdateCheck = $true
             }
 
@@ -143,6 +145,7 @@ try
                 {
                     . $script:confgurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Throw "Feature name $($resourceParameters.Name) is unknown."
 

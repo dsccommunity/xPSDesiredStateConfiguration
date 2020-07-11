@@ -77,6 +77,7 @@ try
             {
                 .$configFile -ConfigurationName $configurationName
                 & $configurationName @dscParams
+                Reset-DscLcm
                 Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
             } | Should -Not -Throw
         }
