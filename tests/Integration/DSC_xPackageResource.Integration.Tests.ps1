@@ -102,7 +102,7 @@ xPackage Package1
                 .([System.Management.Automation.ScriptBlock]::Create($configurationScriptText))
 
                 & $configurationName -OutputPath $configurationPath
-
+                Reset-DscLcm
                 Start-DscConfiguration -Path $configurationPath -Wait -Force
 
                 Test-PackageInstalledByName -Name $script:packageName | Should -BeTrue

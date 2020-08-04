@@ -80,6 +80,7 @@ try
                 {
                     . $script:configurationNoCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -126,6 +127,7 @@ try
                 {
                     . $script:configurationWithCredentialFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive -ConfigurationData $configData @resourceParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }

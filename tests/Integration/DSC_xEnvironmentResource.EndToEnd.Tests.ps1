@@ -71,6 +71,7 @@ try
                         -Ensure 'Present' `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -99,6 +100,7 @@ try
                         -Ensure 'Present' `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -127,6 +129,7 @@ try
                         -Ensure 'Absent' `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -155,6 +158,7 @@ try
                         -Ensure 'Absent' `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -195,6 +199,7 @@ try
                         -Path $true `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -226,6 +231,7 @@ try
                         -Path $true `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -257,6 +263,7 @@ try
                         -Path $true `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -286,6 +293,7 @@ try
                         -Path $true `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -315,6 +323,7 @@ try
                         -Path $true `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -377,6 +386,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -406,6 +416,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -435,6 +446,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -464,6 +476,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -499,6 +512,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -531,6 +545,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -563,6 +578,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -593,6 +609,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -623,6 +640,7 @@ try
                         -Target @('Process') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -688,6 +706,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -717,6 +736,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -746,6 +766,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -775,6 +796,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -813,6 +835,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -845,6 +868,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -877,6 +901,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -907,6 +932,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -937,6 +963,7 @@ try
                         -Target @('Machine') `
                         -OutputPath $configurationPath `
                         -ErrorAction 'Stop'
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $configurationPath -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }

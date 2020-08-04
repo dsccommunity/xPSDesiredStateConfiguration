@@ -69,24 +69,24 @@ try
                 }
 
                 $script:mockProductEntryInfo = @{
-                    Name = 'TestDisplayName'
-                    InstallSource = 'TestInstallSource'
-                    InstalledOn = [System.DateTime] '4/4/2017'
-                    Size = 2048
-                    Version = '1.2.3.4'
+                    Name               = 'TestDisplayName'
+                    InstallSource      = 'TestInstallSource'
+                    InstalledOn        = [System.DateTime] '4/4/2017'
+                    Size               = 2048
+                    Version            = '1.2.3.4'
                     PackageDescription = 'Test Description'
-                    Publisher = 'Test Publisher'
-                    Ensure = 'Present'
+                    Publisher          = 'Test Publisher'
+                    Ensure             = 'Present'
                 }
 
                 # Used to create the names of the tests that check to ensure the correct error is thrown.
                 $script:errorMessageTitles = @{
-                    CouldNotOpenLog = 'not being able to open the log path'
-                    InvalidId = 'the specified product ID not matching the actual product ID'
+                    CouldNotOpenLog      = 'not being able to open the log path'
+                    InvalidId            = 'the specified product ID not matching the actual product ID'
                     CouldNotOpenDestFile = 'not being able to open the destination file to write to'
-                    PathDoesNotExist = 'not being able to find the path'
+                    PathDoesNotExist     = 'not being able to find the path'
                     CouldNotStartProcess = 'not being able to start the process'
-                    PostValidationError = 'not being able to find the package after installation'
+                    PostValidationError  = 'not being able to find the package after installation'
                 }
             }
 
@@ -95,107 +95,108 @@ try
                 Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
                 Mock -CommandName 'Get-ProductEntryInfo' -MockWith { return $script:mockProductEntryInfo }
 
-                Context 'MSI package does not exist' {
+                Context 'When MSI package does not exist' {
                     $getTargetResourceParameters = @{
                         ProductId = $script:testProductId
-                        Path = $script:testPath
+                        Path      = $script:testPath
                     }
 
                     $mocksCalled = @(
                         @{
                             Command = 'Convert-ProductIdToIdentifyingNumber'
-                            Times = 1
+                            Times   = 1
                         }
                         @{
                             Command = 'Get-ProductEntry'
-                            Times = 1
+                            Times   = 1
                         }
                         @{
                             Command = 'Get-ProductEntryInfo'
-                            Times = 0
+                            Times   = 0
                         }
                     )
 
                     $expectedReturnValue = @{
-                        Ensure = 'Absent'
+                        Ensure    = 'Absent'
                         ProductId = $script:testIdentifyingNumber
                     }
 
                     Invoke-GetTargetResourceUnitTest -GetTargetResourceParameters $getTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ExpectedReturnValue $expectedReturnValue
+                        -MocksCalled $mocksCalled `
+                        -ExpectedReturnValue $expectedReturnValue
                 }
 
                 Mock -CommandName 'Get-ProductEntry' -MockWith { return $script:mockProductEntry }
 
-                Context 'MSI package does exist' {
+                Context 'When MSI package does exist' {
                     $getTargetResourceParameters = @{
                         ProductId = $script:testProductId
-                        Path = $script:testPath
+                        Path      = $script:testPath
                     }
 
                     $mocksCalled = @(
                         @{
                             Command = 'Convert-ProductIdToIdentifyingNumber'
-                            Times = 1
+                            Times   = 1
                         }
                         @{
                             Command = 'Get-ProductEntry'
-                            Times = 1
+                            Times   = 1
                         }
                         @{
                             Command = 'Get-ProductEntryInfo'
-                            Times = 1
+                            Times   = 1
                         }
                     )
 
                     $expectedReturnValue = $script:mockProductEntryInfo
 
                     Invoke-GetTargetResourceUnitTest -GetTargetResourceParameters $getTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ExpectedReturnValue $expectedReturnValue
+                        -MocksCalled $mocksCalled `
+                        -ExpectedReturnValue $expectedReturnValue
                 }
             }
 
             Describe 'xMsiPackage\Set-TargetResource' {
                 $setTargetResourceParameters = @{
-                    ProductId = 'TestProductId'
-                    Path = $script:testPath
-                    Ensure = 'Present'
-                    Arguments = 'TestArguments'
-                    LogPath = 'TestLogPath'
-                    FileHash = 'TestFileHash'
-                    HashAlgorithm = 'Sha256'
-                    SignerSubject = 'TestSignerSubject'
-                    SignerThumbprint = 'TestSignerThumbprint'
+                    ProductId                           = 'TestProductId'
+                    Path                                = $script:testPath
+                    Ensure                              = 'Present'
+                    Arguments                           = 'TestArguments'
+                    LogPath                             = 'TestLogPath'
+                    FileHash                            = 'TestFileHash'
+                    HashAlgorithm                       = 'Sha256'
+                    SignerSubject                       = 'TestSignerSubject'
+                    SignerThumbprint                    = 'TestSignerThumbprint'
                     ServerCertificateValidationCallback = 'TestValidationCallback'
-                    RunAsCredential = $script:testCredential
+                    RunAsCredential                     = $script:testCredential
+                    Verbose                             = $true
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriNonUnc }
                 Mock -CommandName 'Convert-ProductIdToIdentifyingNumber' -MockWith { return $script:testIdentifyingNumber }
-                Mock -CommandName 'Assert-PathExtensionValid' -MockWith {}
-                Mock -CommandName 'New-LogFile' -MockWith {}
+                Mock -CommandName 'Assert-PathExtensionValid' -MockWith { }
+                Mock -CommandName 'New-LogFile' -MockWith { }
                 Mock -CommandName 'New-PSDrive' -MockWith { return $script:mockPSDrive }
                 Mock -CommandName 'Test-Path' -MockWith { return $true }
-                Mock -CommandName 'New-Item' -MockWith {}
+                Mock -CommandName 'New-Item' -MockWith { }
                 Mock -CommandName 'New-Object' -MockWith { return $script:mockStream }
                 Mock -CommandName 'Get-WebRequestResponse' -MockWith { return $script:mockStream }
-                Mock -CommandName 'Copy-ResponseStreamToFileStream' -MockWith {}
-                Mock -CommandName 'Close-Stream' -MockWith {}
-                Mock -CommandName 'Assert-FileValid' -MockWith {}
+                Mock -CommandName 'Copy-ResponseStreamToFileStream' -MockWith { }
+                Mock -CommandName 'Close-Stream' -MockWith { }
+                Mock -CommandName 'Assert-FileValid' -MockWith { }
                 Mock -CommandName 'Get-MsiProductCode' -MockWith { return $script:testIdentifyingNumber }
                 Mock -CommandName 'Start-MsiProcess' -MockWith {
                     # Returns the exit code
                     return 0
                 }
-                Mock -CommandName 'Remove-PSDrive' -MockWith {}
-                Mock -CommandName 'Remove-Item' -MockWith {}
-                Mock -CommandName 'Invoke-CimMethod' -MockWith {}
+                Mock -CommandName 'Remove-PSDrive' -MockWith { }
+                Mock -CommandName 'Remove-Item' -MockWith { }
+                Mock -CommandName 'Invoke-CimMethod' -MockWith { }
                 Mock -CommandName 'Get-ItemProperty' -MockWith { return $null }
                 Mock -CommandName 'Get-ProductEntry' -MockWith { return $script:mockProductEntry }
 
-                Context 'Uri scheme is non-UNC file and installation succeeds' {
+                Context 'When URI scheme is non-UNC file and installation succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Convert-PathToUri'; Times = 1 }
                         @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
@@ -215,14 +216,14 @@ try
                     )
 
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ShouldThrow $false
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriFile }
                 $setTargetResourceParameters.Ensure = 'Present'
 
-                Context 'Uri scheme is UNC file and installation succeeds' {
+                Context 'When URI scheme is UNC file and installation succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Convert-PathToUri'; Times = 1 }
                         @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
@@ -242,13 +243,13 @@ try
                     )
 
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ShouldThrow $false
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriHttp }
 
-                Context 'Uri scheme is Http and installation succeeds' {
+                Context 'When URI scheme is Http and installation succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Convert-PathToUri'; Times = 1 }
                         @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
@@ -273,13 +274,13 @@ try
                     )
 
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ShouldThrow $false
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriHttps }
 
-                Context 'Uri scheme is Https and installation succeeds' {
+                Context 'When URI scheme is Https and installation succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Convert-PathToUri'; Times = 1 }
                         @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
@@ -304,34 +305,36 @@ try
                     )
 
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ShouldThrow $false
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
-                Context 'Reboot handling' {
+                Context 'When reboot required or not required' {
                     Mock -CommandName 'Start-MsiProcess' -MockWith { return 3010 }
-                    Mock -CommandName 'Set-DSCMachineRebootRequired' -MockWith {}
 
                     It 'Should request reboot by default' {
+                        Mock -CommandName 'Set-DscMachineRebootRequired'
+
                         $setTargetResourceParameters.IgnoreReboot = $false
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -Exactly 1 -Scope 'It'
+                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -Exactly -Times 1 -Scope It
                     }
 
                     It 'Should not request reboot if IgnoreReboot specified' {
+                        Mock -CommandName 'Set-DscMachineRebootRequired'
+
                         $setTargetResourceParameters.IgnoreReboot = $true
                         { $null = Set-TargetResource @setTargetResourceParameters } | Should -Not -Throw
 
-                        Assert-MockCalled -CommandName 'Set-DSCMachineRebootRequired' -Exactly 0 -Scope 'It'
+                        Assert-MockCalled -CommandName 'Set-DscMachineRebootRequired' -Exactly -Times 0 -Scope It
                     }
-
                 }
 
                 $setTargetResourceParameters.Ensure = 'Absent'
 
                 # The URI scheme doesn't matter for uninstallation - it will always do the same thing
-                Context 'Uninstallation succeeds' {
+                Context 'When uninstallation succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Convert-PathToUri'; Times = 1 }
                         @{ Command = 'Convert-ProductIdToIdentifyingNumber'; Times = 1 }
@@ -351,15 +354,15 @@ try
                     )
 
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ShouldThrow $false
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriQuery }
 
-                Context 'Path is a query path' {
+                Context 'When path is a query path' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -ShouldThrow $false
+                        -ShouldThrow $false
 
                     It 'Should assert that the file without the query string has a valid extension' {
                         Assert-MockCalled -CommandName 'Assert-PathExtensionValid' -Exactly 1 -Scope 'Context' -ParameterFilter { $Path -eq (Split-Path -Path $script:testuriQuery.LocalPath -Leaf) }
@@ -368,9 +371,9 @@ try
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriOnlyFile }
 
-                Context 'Converted URI does not have a local path' {
+                Context 'When converted URI does not have a local path' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -ShouldThrow $false
+                        -ShouldThrow $false
 
                     It 'Should assert that the original path has a valid extension' {
                         Assert-MockCalled -CommandName 'Assert-PathExtensionValid' -Exactly 1 -Scope 'Context' -ParameterFilter { $Path -eq $script:testPath }
@@ -379,59 +382,59 @@ try
 
                 $setTargetResourceParameters.Remove('LogPath')
 
-                Context 'Converted URI does not have a local path' {
+                Context 'When converted URI does not have a local path' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled @(@{ Command = 'New-LogFile'; Times = 0 }) `
-                                                -ShouldThrow $false
+                        -MocksCalled @(@{ Command = 'New-LogFile'; Times = 0 }) `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriHttp }
                 Mock -CommandName 'Test-Path' -MockWith { return $false } -ParameterFilter { $Path -eq $script:packageCacheLocation }
                 $setTargetResourceParameters.Ensure = 'Present'
 
-                Context 'URI scheme is Http and package cache location does not exist yet' {
+                Context 'When URI scheme is Http and package cache location does not exist yet' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -MocksCalled @(@{ Command = 'New-Item'; Times = 1; Custom = 'directory for the package cache' }) `
-                                                -ShouldThrow $false
+                        -MocksCalled @(@{ Command = 'New-Item'; Times = 1; Custom = 'directory for the package cache' }) `
+                        -ShouldThrow $false
                 }
 
                 # Error Tests
 
                 Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
 
-                Context 'Package could not be found after installation' {
+                Context 'When package could not be found after installation' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -ShouldThrow $true `
-                                                -ErrorMessage ($script:localizedData.PostValidationError -f $setTargetResourceParameters.Path) `
-                                                -ErrorTestName $script:errorMessageTitles.PostValidationError
+                        -ShouldThrow $true `
+                        -ErrorMessage ($script:localizedData.PostValidationError -f $setTargetResourceParameters.Path) `
+                        -ErrorTestName $script:errorMessageTitles.PostValidationError
                 }
 
                 Mock -CommandName 'Get-MsiProductCode' -MockWith { return $script:testWrongProductId }
 
-                Context 'Product code from downloaded MSI package does not match specified ID' {
+                Context 'When product code from downloaded MSI package does not match specified ID' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -ShouldThrow $true `
-                                                -ErrorMessage ($script:localizedData.InvalidId -f $script:testIdentifyingNumber, $script:testWrongProductId) `
-                                                -ErrorTestName $script:errorMessageTitles.InvalidId
+                        -ShouldThrow $true `
+                        -ErrorMessage ($script:localizedData.InvalidId -f $script:testIdentifyingNumber, $script:testWrongProductId) `
+                        -ErrorTestName $script:errorMessageTitles.InvalidId
                 }
 
                 Mock -CommandName 'New-Object' -MockWith { Throw }
 
-                Context 'Failure while creating the file stream object to download to' {
+                Context 'When failure while creating the file stream object to download to' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -ShouldThrow $true `
-                                                -ErrorMessage ($script:localizedData.CouldNotOpenDestFile -f $script:destinationPath) `
-                                                -ErrorTestName $script:errorMessageTitles.CouldNotOpenDestFile
+                        -ShouldThrow $true `
+                        -ErrorMessage ($script:localizedData.CouldNotOpenDestFile -f $script:destinationPath) `
+                        -ErrorTestName $script:errorMessageTitles.CouldNotOpenDestFile
                 }
 
                 Mock -CommandName 'Convert-PathToUri' -MockWith { return $script:testUriNonUnc }
                 Mock -CommandName 'Test-Path' -MockWith { return $false } -ParameterFilter { $Path -eq $script:testPath }
 
-                Context 'Invalid path was passed in' {
+                Context 'When invalid path was passed in' {
                     Invoke-SetTargetResourceUnitTest -SetTargetResourceParameters $setTargetResourceParameters `
-                                                -ShouldThrow $true `
-                                                -ErrorMessage ($script:localizedData.PathDoesNotExist -f $script:testPath) `
-                                                -ErrorTestName $script:errorMessageTitles.PathDoesNotExist
+                        -ShouldThrow $true `
+                        -ErrorMessage ($script:localizedData.PathDoesNotExist -f $script:testPath) `
+                        -ErrorTestName $script:errorMessageTitles.PathDoesNotExist
                 }
             }
 
@@ -440,11 +443,12 @@ try
                 Mock -CommandName 'Get-ProductEntry' -MockWith { return $script:mockProductEntry }
                 Mock -CommandName 'Get-ProductEntryValue' -MockWith { return $script:mockProductEntryInfo.Name }
 
-                Context 'Specified package is present and should be' {
+                Context 'When specified package is present and should be' {
                     $testTargetResourceParameters = @{
                         ProductId = $script:testProductId
-                        Path = $script:testPath
-                        Ensure = 'Present'
+                        Path      = $script:testPath
+                        Ensure    = 'Present'
+                        Verbose   = $true
                     }
 
                     $mocksCalled = @(
@@ -454,15 +458,15 @@ try
                     )
 
                     Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ExpectedReturnValue $true
+                        -MocksCalled $mocksCalled `
+                        -ExpectedReturnValue $true
                 }
 
-                Context 'Specified package is present but should not be' {
+                Context 'When specified package is present but should not be' {
                     $testTargetResourceParameters = @{
                         ProductId = $script:testProductId
-                        Path = $script:testPath
-                        Ensure = 'Absent'
+                        Path      = $script:testPath
+                        Ensure    = 'Absent'
                     }
 
                     $mocksCalled = @(
@@ -472,17 +476,17 @@ try
                     )
 
                     Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ExpectedReturnValue $false
+                        -MocksCalled $mocksCalled `
+                        -ExpectedReturnValue $false
                 }
 
                 Mock -CommandName 'Get-ProductEntry' -MockWith { return $null }
 
-                Context 'Specified package is Absent but should not be' {
+                Context 'When specified package is Absent but should not be' {
                     $testTargetResourceParameters = @{
                         ProductId = $script:testProductId
-                        Path = $script:testPath
-                        Ensure = 'Present'
+                        Path      = $script:testPath
+                        Ensure    = 'Present'
                     }
 
                     $mocksCalled = @(
@@ -492,15 +496,15 @@ try
                     )
 
                     Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ExpectedReturnValue $false
+                        -MocksCalled $mocksCalled `
+                        -ExpectedReturnValue $false
                 }
 
-                Context 'Specified package is Absent and should be' {
+                Context 'When specified package is Absent and should be' {
                     $testTargetResourceParameters = @{
                         ProductId = $script:testProductId
-                        Path = $script:testPath
-                        Ensure = 'Absent'
+                        Path      = $script:testPath
+                        Ensure    = 'Absent'
                     }
 
                     $mocksCalled = @(
@@ -510,19 +514,19 @@ try
                     )
 
                     Invoke-TestTargetResourceUnitTest -TestTargetResourceParameters $testTargetResourceParameters `
-                                                -MocksCalled $mocksCalled `
-                                                -ExpectedReturnValue $true
+                        -MocksCalled $mocksCalled `
+                        -ExpectedReturnValue $true
                 }
             }
 
             Describe 'xMsiPackage\Assert-PathExtensionValid' {
-                Context 'Path is a valid .msi path' {
+                Context 'When path is a valid .msi path' {
                     It 'Should not throw' {
                         { Assert-PathExtensionValid -Path 'testMsiFile.msi' } | Should -Not -Throw
                     }
                 }
 
-                Context 'Path is not a valid .msi path' {
+                Context 'When path is not a valid .msi path' {
                     It 'Should throw an invalid argument exception when an EXE file is passed in' {
                         $invalidPath = 'testMsiFile.exe'
                         $expectedErrorMessage = ($script:localizedData.InvalidBinaryType -f $invalidPath)
@@ -540,7 +544,7 @@ try
             }
 
             Describe 'xMsiPackage\Convert-PathToUri' {
-                Context 'Path has a valid URI scheme' {
+                Context 'When path has a valid URI scheme' {
                     It 'Should return the expected URI when scheme is a file' {
                         $filePath = (Join-Path -Path $PSScriptRoot -ChildPath 'testMsi.msi')
                         $expectedReturnValue = [System.Uri] $filePath
@@ -565,7 +569,7 @@ try
                     }
                 }
 
-                Context 'Invalid path passed in' {
+                Context 'When invalid path passed in' {
                     It 'Should throw an error when uri scheme is invalid' {
                         $filePath = 'ht://localhost/testMsi.msi'
                         $expectedErrorMessage = ($script:localizedData.InvalidPath -f $filePath)
@@ -583,7 +587,7 @@ try
             }
 
             Describe 'xMsiPackage\Convert-ProductIdToIdentifyingNumber' {
-                Context 'Valid Product ID is passed in' {
+                Context 'When valid product ID is passed in' {
                     It 'Should return the same value that is passed in when the Product ID is already in the correct format' {
                         Convert-ProductIdToIdentifyingNumber -ProductId $script:testIdentifyingNumber | Should -Be $script:testIdentifyingNumber
                     }
@@ -593,7 +597,7 @@ try
                     }
                 }
 
-                Context 'Invalid Product ID is passed in' {
+                Context 'When invalid Product ID is passed in' {
                     It 'Should throw an exception when an invalid product ID is passed in' {
                         $expectedErrorMessage = ($script:localizedData.InvalidIdentifyingNumber -f $script:testWrongProductId)
                         { Convert-ProductIdToIdentifyingNumber -ProductId $script:testWrongProductId } | Should -Throw -ExpectedMessage $expectedErrorMessage
@@ -608,7 +612,7 @@ try
                 Mock -CommandName 'Get-Item' -MockWith { return $script:mockProductEntry } -ParameterFilter { $Path -eq $uninstallRegistryKeyLocation }
                 Mock -CommandName 'Get-Item' -MockWith { return $script:mockProductEntry } -ParameterFilter { $Path -eq $uninstallRegistryKeyWow64Location }
 
-                Context 'Product entry is found in the expected location' {
+                Context 'When product entry is found in the expected location' {
                     It 'Should return the expected product entry' {
                         Get-ProductEntry -IdentifyingNumber $script:testIdentifyingNumber | Should -Be $script:mockProductEntry
                     }
@@ -620,7 +624,7 @@ try
 
                 Mock -CommandName 'Get-Item' -MockWith { return $null } -ParameterFilter { $Path -eq $uninstallRegistryKeyLocation }
 
-                Context 'Product entry is found under Wow6432Node' {
+                Context 'When product entry is found under Wow6432Node' {
                     It 'Should return the expected product entry' {
                         Get-ProductEntry -IdentifyingNumber $script:testIdentifyingNumber | Should -Be $script:mockProductEntry
                     }
@@ -632,7 +636,7 @@ try
 
                 Mock -CommandName 'Get-Item' -MockWith { return $null } -ParameterFilter { $Path -eq $uninstallRegistryKeyWow64Location }
 
-                Context 'Product entry is not found' {
+                Context 'When product entry is not found' {
                     It 'Should return $null' {
                         Get-ProductEntry -IdentifyingNumber $script:testIdentifyingNumber | Should -Be $null
                     }
@@ -652,7 +656,7 @@ try
                 Mock -CommandName Get-ProductEntryValue -MockWith { return $script:mockProductEntryInfo.Name } -ParameterFilter { $Property -eq 'DisplayName' }
                 Mock -CommandName Get-ProductEntryValue -MockWith { return $script:mockProductEntryInfo.InstallSource } -ParameterFilter { $Property -eq 'InstallSource' }
 
-                Context 'All properties are retrieved successfully' {
+                Context 'When all properties are retrieved successfully' {
                     $getProductEntryInfoResult = Get-ProductEntryInfo -ProductEntry $script:mockProductEntry
 
                     It 'Should return the expected installed date' {
@@ -690,7 +694,7 @@ try
 
                 Mock -CommandName Get-ProductEntryValue -MockWith { return '4/4/2017' } -ParameterFilter { $Property -eq 'InstallDate' }
 
-                Context 'Install date is in incorrect format' {
+                Context 'When install date is in incorrect format' {
                     $getProductEntryInfoResult = Get-ProductEntryInfo -ProductEntry $script:mockProductEntry
 
                     It 'Should return $null for InstalledOn' {
@@ -701,10 +705,10 @@ try
 
             Describe 'xMsiPackage\New-LogFile' {
                 Mock -CommandName 'Test-Path' -MockWith { return $true }
-                Mock -CommandName 'Remove-Item' -MockWith {}
-                Mock -CommandName 'New-Item' -MockWith {}
+                Mock -CommandName 'Remove-Item' -MockWith { }
+                Mock -CommandName 'New-Item' -MockWith { }
 
-                Context 'File with name of given log file already exists and creation of new log file succeeds' {
+                Context 'When file with name of given log file already exists and creation of new log file succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Test-Path'; Times = 1; Custom = 'to the log file' }
                         @{ Command = 'Remove-Item'; Times = 1; Custom = 'any file with the same name as the log file' }
@@ -712,14 +716,14 @@ try
                     )
 
                     Invoke-GenericUnitTest -Function { Param($script:testPath) New-LogFile $script:testPath } `
-                                        -FunctionParameters @{ LogPath = $script:testPath } `
-                                        -MocksCalled $mocksCalled `
-                                        -ShouldThrow $false
+                        -FunctionParameters @{ LogPath = $script:testPath } `
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Test-Path' -MockWith { return $false }
 
-                Context 'File with name of given log file does not exist and creation of new log file succeeds' {
+                Context 'When file with name of given log file does not exist and creation of new log file succeeds' {
                     $mocksCalled = @(
                         @{ Command = 'Test-Path'; Times = 1; Custom = 'to the log file' }
                         @{ Command = 'Remove-Item'; Times = 0; Custom = 'any file with the same name as the log file' }
@@ -727,19 +731,19 @@ try
                     )
 
                     Invoke-GenericUnitTest -Function { Param($script:testPath) New-LogFile $script:testPath } `
-                                        -FunctionParameters @{ LogPath = $script:testPath } `
-                                        -MocksCalled $mocksCalled `
-                                        -ShouldThrow $false
+                        -FunctionParameters @{ LogPath = $script:testPath } `
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'New-Item' -MockWith { Throw }
 
-                Context 'Creation of new log file fails' {
+                Context 'When creation of new log file fails' {
                     Invoke-GenericUnitTest -Function { Param($script:testPath) New-LogFile $script:testPath } `
-                                        -FunctionParameters @{ LogPath = $script:testPath } `
-                                        -ShouldThrow $true `
-                                        -ErrorMessage ($script:localizedData.CouldNotOpenLog -f $script:testPath) `
-                                        -ErrorTestName $script:errorMessageTitles.CouldNotOpenLog
+                        -FunctionParameters @{ LogPath = $script:testPath } `
+                        -ShouldThrow $true `
+                        -ErrorMessage ($script:localizedData.CouldNotOpenLog -f $script:testPath) `
+                        -ErrorTestName $script:errorMessageTitles.CouldNotOpenLog
                 }
             }
 
@@ -748,7 +752,7 @@ try
                 Mock -CommandName 'Get-ScriptBlock' -MockWith { return { Write-Verbose 'Hello World' } }
                 Mock -CommandName 'Get-WebRequestResponseStream' -MockWith { return $script:mockStream }
 
-                Context 'URI scheme is Http and response is successfully retrieved' {
+                Context 'When URI scheme is Http and response is successfully retrieved' {
                     $mocksCalled = @(
                         @{ Command = 'Get-WebRequest'; Times = 1 }
                         @{ Command = 'Get-ScriptBlock'; Times = 0 }
@@ -762,7 +766,7 @@ try
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'URI scheme is Https with no callback and response is successfully retrieved' {
+                Context 'When URI scheme is Https with no callback and response is successfully retrieved' {
                     $mocksCalled = @(
                         @{ Command = 'Get-WebRequest'; Times = 1 }
                         @{ Command = 'Get-ScriptBlock'; Times = 0 }
@@ -776,7 +780,7 @@ try
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'URI scheme is Https with callback and response is successfully retrieved' {
+                Context 'When URI scheme is Https with callback and response is successfully retrieved' {
                     $mocksCalled = @(
                         @{ Command = 'Get-WebRequest'; Times = 1 }
                         @{ Command = 'Get-ScriptBlock'; Times = 1 }
@@ -792,7 +796,7 @@ try
 
                 Mock -CommandName 'Get-WebRequestResponseStream' -MockWith { Throw }
 
-                Context 'Error occurred during while retrieving the response' {
+                Context 'When error occurred during while retrieving the response' {
                     It 'Should throw the expected exception' {
                         $expectedErrorMessage = ($script:localizedData.CouldNotGetResponseFromWebRequest -f $script:testUriHttp.Scheme, $script:testUriHttp.OriginalString)
                         { Get-WebRequestResponse -Uri $script:testUriHttp } | Should -Throw -ExpectedMessage $expectedErrorMessage
@@ -801,10 +805,10 @@ try
             }
 
             Describe 'xMsiPackage\Assert-FileValid' {
-                Mock -CommandName 'Assert-FileHashValid' -MockWith {}
-                Mock -CommandName 'Assert-FileSignatureValid' -MockWith {}
+                Mock -CommandName 'Assert-FileHashValid' -MockWith { }
+                Mock -CommandName 'Assert-FileSignatureValid' -MockWith { }
 
-                Context 'FileHash is passed in and SignerThumbprint and SignerSubject are not' {
+                Context 'When FileHash is passed in and SignerThumbprint and SignerSubject are not' {
                     $mocksCalled = @(
                         @{ Command = 'Assert-FileHashValid'; Times = 1 }
                         @{ Command = 'Assert-FileSignatureValid'; Times = 0 }
@@ -817,7 +821,7 @@ try
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'FileHash and SignerThumbprint are passed in but SignerSubject is not' {
+                Context 'When FileHash and SignerThumbprint are passed in but SignerSubject is not' {
                     $mocksCalled = @(
                         @{ Command = 'Assert-FileHashValid'; Times = 1 }
                         @{ Command = 'Assert-FileSignatureValid'; Times = 1 }
@@ -830,7 +834,7 @@ try
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'Only Path and SignerSubject are passed in' {
+                Context 'When only Path and SignerSubject are passed in' {
                     $mocksCalled = @(
                         @{ Command = 'Assert-FileHashValid'; Times = 0 }
                         @{ Command = 'Assert-FileSignatureValid'; Times = 1 }
@@ -843,7 +847,7 @@ try
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'FileHash, SignerThumbprint, and SignerSubject are passed in' {
+                Context 'When FileHash, SignerThumbprint, and SignerSubject are passed in' {
                     $mocksCalled = @(
                         @{ Command = 'Assert-FileHashValid'; Times = 1 }
                         @{ Command = 'Assert-FileSignatureValid'; Times = 1 }
@@ -851,15 +855,15 @@ try
 
                     It 'Should not throw' {
                         { Assert-FileValid -Path $script:testPath -FileHash 'mockFileHash' `
-                                                                -SignerThumbprint 'mockSignerThumbprint' `
-                                                                -SignerSubject 'mockSignerSubject'
+                                -SignerThumbprint 'mockSignerThumbprint' `
+                                -SignerSubject 'mockSignerSubject'
                         } | Should -Not -Throw
                     }
 
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'SignerThumbprint and SignerSubject are passed in but FileHash is not' {
+                Context 'When SignerThumbprint and SignerSubject are passed in but FileHash is not' {
                     $mocksCalled = @(
                         @{ Command = 'Assert-FileHashValid'; Times = 0 }
                         @{ Command = 'Assert-FileSignatureValid'; Times = 1 }
@@ -867,14 +871,14 @@ try
 
                     It 'Should not throw' {
                         { Assert-FileValid -Path $script:testPath -SignerThumbprint 'mockSignerThumbprint' `
-                                                                -SignerSubject 'mockSignerSubject'
+                                -SignerSubject 'mockSignerSubject'
                         } | Should -Not -Throw
                     }
 
                     Invoke-ExpectedMocksAreCalledTest -MocksCalled $mocksCalled
                 }
 
-                Context 'Only path is passed in' {
+                Context 'When only path is passed in' {
                     $mocksCalled = @(
                         @{ Command = 'Assert-FileHashValid'; Times = 0 }
                         @{ Command = 'Assert-FileSignatureValid'; Times = 0 }
@@ -892,7 +896,7 @@ try
                 $mockHash = @{ Hash = 'testHash' }
                 Mock -CommandName 'Get-FileHash' -MockWith { return $mockHash }
 
-                Context 'File hash is valid' {
+                Context 'When file hash is valid' {
                     It 'Should not throw when hashes match' {
                         { Assert-FileHashValid -Path $script:testPath -Hash $mockHash.Hash -Algorithm 'SHA256' } | Should -Not -Throw
                     }
@@ -902,7 +906,7 @@ try
                     }
                 }
 
-                Context 'File hash is invalid' {
+                Context 'When file hash is invalid' {
                     $badHash = 'BadHash'
                     $expectedErrorMessage = ($script:localizedData.InvalidFileHash -f $script:testPath, $badHash, 'SHA256')
 
@@ -916,37 +920,37 @@ try
                 $mockThumbprint = 'mockThumbprint'
                 $mockSubject = 'mockSubject'
                 $mockSignature = @{
-                    Status = [System.Management.Automation.SignatureStatus]::Valid
+                    Status            = [System.Management.Automation.SignatureStatus]::Valid
                     SignerCertificate = @{ Thumbprint = $mockThumbprint; Subject = $mockSubject }
                 }
 
                 Mock -CommandName 'Get-AuthenticodeSignature' -MockWith { return $mockSignature }
 
-                Context 'File signature status, thumbprint and subject are valid' {
+                Context 'When file signature status, thumbprint and subject are valid' {
                     It 'Should not throw' {
                         { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $mockThumbprint -Subject $mockSubject } | Should -Not -Throw
                     }
                 }
 
-                Context 'File signature status and thumbprint are valid and Subject not passed in' {
+                Context 'When file signature status and thumbprint are valid and Subject not passed in' {
                     It 'Should not throw' {
                         { Assert-FileSignatureValid -Path $script:testPath -Thumbprint $mockThumbprint } | Should -Not -Throw
                     }
                 }
 
-                Context 'File signature status and subject are valid and Thumbprint not passed in' {
+                Context 'When file signature status and subject are valid and Thumbprint not passed in' {
                     It 'Should not throw' {
                         { Assert-FileSignatureValid -Path $script:testPath -Subject $mockSubject } | Should -Not -Throw
                     }
                 }
 
-                Context 'Only Path is passed in' {
+                Context 'When only path is passed in' {
                     It 'Should not throw' {
                         { Assert-FileSignatureValid -Path $script:testPath } | Should -Not -Throw
                     }
                 }
 
-                Context 'File signature status and thumbprint are valid and subject is invalid' {
+                Context 'When File signature status and thumbprint are valid and subject is invalid' {
                     $badSubject = 'BadSubject'
                     $expectedErrorMessage = ($script:localizedData.WrongSignerSubject -f $script:testPath, $badSubject)
 
@@ -955,7 +959,7 @@ try
                     }
                 }
 
-                Context 'File signature status and subject are valid and thumbprint is invalid' {
+                Context 'When file signature status and subject are valid and thumbprint is invalid' {
                     $badThumbprint = 'BadThumbprint'
                     $expectedErrorMessage = ($script:localizedData.WrongSignerThumbprint -f $script:testPath, $badThumbprint)
 
@@ -964,7 +968,7 @@ try
                     }
                 }
 
-                Context 'File signature status is invalid and subject and thumbprint are valid' {
+                Context 'When file signature status is invalid and subject and thumbprint are valid' {
                     $mockSignature.Status = 'Invalid'
                     $expectedErrorMessage = ($script:localizedData.InvalidFileSignature -f $script:testPath, $mockSignature.Status)
 
@@ -983,14 +987,14 @@ try
 
                 $startMsiProcessParameters = @{
                     IdentifyingNumber = $script:testIdentifyingNumber
-                    Path = $script:testPath
-                    Ensure = 'Present'
-                    Arguments = 'TestArguments'
-                    LogPath = 'TestLogPath'
-                    RunAsCredential = $script:testCredential
+                    Path              = $script:testPath
+                    Ensure            = 'Present'
+                    Arguments         = 'TestArguments'
+                    LogPath           = 'TestLogPath'
+                    RunAsCredential   = $script:testCredential
                 }
 
-                Context 'Install MSI package with RunAsCredential specified' {
+                Context 'When install MSI package with RunAsCredential specified' {
                     $mocksCalled = @(
                         @{ Command = 'New-Object'; Times = 1; Custom = 'process start info object' }
                         @{ Command = 'Get-ProductEntry'; Times = 0 }
@@ -999,14 +1003,14 @@ try
                     )
 
                     Invoke-GenericUnitTest -Function { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters } `
-                                        -FunctionParameters $startMsiProcessParameters `
-                                        -MocksCalled $mocksCalled `
-                                        -ShouldThrow $false
+                        -FunctionParameters $startMsiProcessParameters `
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 $startMsiProcessParameters.Ensure = 'Absent'
 
-                Context 'Uninstall MSI package with RunAsCredential specified' {
+                Context 'When Uninstall MSI package with RunAsCredential specified' {
                     $mocksCalled = @(
                         @{ Command = 'New-Object'; Times = 1; Custom = 'process start info object' }
                         @{ Command = 'Get-ProductEntry'; Times = 1 }
@@ -1015,15 +1019,15 @@ try
                     )
 
                     Invoke-GenericUnitTest -Function { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters } `
-                                        -FunctionParameters $startMsiProcessParameters `
-                                        -MocksCalled $mocksCalled `
-                                        -ShouldThrow $false
+                        -FunctionParameters $startMsiProcessParameters `
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 $startMsiProcessParameters.Ensure = 'Present'
                 $startMsiProcessParameters.Remove('RunAsCredential')
 
-                Context 'Install MSI package without RunAsCredential' {
+                Context 'When install MSI package without RunAsCredential' {
                     $mocksCalled = @(
                         @{ Command = 'New-Object'; Times = 2; Custom = 'process start info object and process' }
                         @{ Command = 'Get-ProductEntry'; Times = 0 }
@@ -1032,14 +1036,14 @@ try
                     )
 
                     Invoke-GenericUnitTest -Function { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters } `
-                                        -FunctionParameters $startMsiProcessParameters `
-                                        -MocksCalled $mocksCalled `
-                                        -ShouldThrow $false
+                        -FunctionParameters $startMsiProcessParameters `
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 $startMsiProcessParameters.Ensure = 'Absent'
 
-                Context 'Uninstall MSI package without RunAsCredential' {
+                Context 'When uninstall MSI package without RunAsCredential' {
                     $mocksCalled = @(
                         @{ Command = 'New-Object'; Times = 2; Custom = 'process start info object and process object' }
                         @{ Command = 'Get-ProductEntry'; Times = 1 }
@@ -1048,19 +1052,19 @@ try
                     )
 
                     Invoke-GenericUnitTest -Function { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters } `
-                                        -FunctionParameters $startMsiProcessParameters `
-                                        -MocksCalled $mocksCalled `
-                                        -ShouldThrow $false
+                        -FunctionParameters $startMsiProcessParameters `
+                        -MocksCalled $mocksCalled `
+                        -ShouldThrow $false
                 }
 
                 Mock -CommandName 'Invoke-Process' -MockWith { Throw }
 
-                Context 'Error occurred while trying to invoke the process' {
+                Context 'When error occurred while trying to invoke the process' {
                     Invoke-GenericUnitTest -Function { Param($startMsiProcessParameters) Start-MsiProcess @startMsiProcessParameters } `
-                                        -FunctionParameters $startMsiProcessParameters `
-                                        -ShouldThrow $true `
-                                        -ErrorMessage ($script:localizedData.CouldNotStartProcess -f $script:testPath) `
-                                        -ErrorTestName $script:errorMessageTitles.CouldNotStartProcess
+                        -FunctionParameters $startMsiProcessParameters `
+                        -ShouldThrow $true `
+                        -ErrorMessage ($script:localizedData.CouldNotStartProcess -f $script:testPath) `
+                        -ErrorTestName $script:errorMessageTitles.CouldNotStartProcess
                 }
             }
         }

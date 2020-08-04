@@ -69,6 +69,8 @@ try
 
                 & $configurationName @configurationParameters
 
+                Reset-DscLcm
+
                 $startDscConfigurationParameters = @{
                     Path         = $TestDrive
                     ComputerName = 'localhost'

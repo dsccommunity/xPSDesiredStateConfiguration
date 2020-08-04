@@ -13,8 +13,10 @@ Import-Module -Name (Join-Path -Path $modulePath `
     -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 # Import Localization Strings
-$script:localizedData = Get-LocalizedData -ResourceName 'DSC_xServiceResource'
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 # This type is documented here: https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-sc_action
 enum ACTION_TYPE {

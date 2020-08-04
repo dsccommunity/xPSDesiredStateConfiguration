@@ -54,6 +54,7 @@ try
                     {
                         . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -86,6 +87,7 @@ try
                     {
                         . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -124,6 +126,7 @@ try
                     {
                         . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -184,6 +187,7 @@ try
                         {
                             . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                             & $configurationName -OutputPath $TestDrive @registryParameters
+                            Reset-DscLcm
                             Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                         } | Should -Not -Throw
                     }
@@ -225,6 +229,7 @@ try
                     {
                         . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -261,6 +266,7 @@ try
                     {
                         . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -295,6 +301,7 @@ try
                     {
                         . $script:confgurationFilePathWithDataAndType -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }
@@ -327,6 +334,7 @@ try
                     {
                         . $script:confgurationFilePathKeyAndNameOnly -ConfigurationName $configurationName
                         & $configurationName -OutputPath $TestDrive @registryParameters
+                        Reset-DscLcm
                         Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                     } | Should -Not -Throw
                 }

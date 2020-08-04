@@ -92,6 +92,7 @@ try
                 {
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @windowsFeatureSetParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }
@@ -171,6 +172,7 @@ try
                 {
                     . $script:configurationFilePath -ConfigurationName $configurationName
                     & $configurationName -OutputPath $TestDrive @windowsFeatureSetParameters
+                    Reset-DscLcm
                     Start-DscConfiguration -Path $TestDrive -ErrorAction 'Stop' -Wait -Force
                 } | Should -Not -Throw
             }

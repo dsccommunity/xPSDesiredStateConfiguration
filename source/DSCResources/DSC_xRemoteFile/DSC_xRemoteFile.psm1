@@ -8,8 +8,10 @@ Import-Module -Name (Join-Path -Path $modulePath `
     -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 # Import Localization Strings
-$script:localizedData = Get-LocalizedData -ResourceName 'DSC_xRemoteFile'
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 # Path where cache will be stored. It's cleared whenever LCM gets new configuration.
 $script:cacheLocation = "$env:ProgramData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\DSC_xRemoteFile"

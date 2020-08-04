@@ -8,8 +8,10 @@ Import-Module -Name (Join-Path -Path $modulePath `
     -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
         -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
+Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
+
 # Import Localization Strings
-$script:localizedData = Get-LocalizedData -ResourceName 'DSC_xWindowsFeature'
+$script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
 <#
     .SYNOPSIS
@@ -239,7 +241,7 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-                Set-DSCMachineRebootRequired
+                Set-DscMachineRebootRequired
             }
         }
         else
@@ -290,7 +292,7 @@ function Set-TargetResource
             if ($feature.RestartNeeded -eq 'Yes')
             {
                 Write-Verbose -Message $script:localizedData.RestartNeeded
-                Set-DSCMachineRebootRequired
+                Set-DscMachineRebootRequired
             }
         }
         else

@@ -1,5 +1,4 @@
 @{
-    # Set up a mini virtual environment...
     PSDependOptions             = @{
         AddToPath  = $true
         Target     = 'output\RequiredModules'
@@ -16,6 +15,7 @@
     Sampler                     = 'latest'
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
+    'DscResource.Common'        = 'latest'
     xDscResourceDesigner        = 'latest'
     NetworkingDsc               = '7.4.0.0'
     xWebAdministration          = '3.0.0.0'
