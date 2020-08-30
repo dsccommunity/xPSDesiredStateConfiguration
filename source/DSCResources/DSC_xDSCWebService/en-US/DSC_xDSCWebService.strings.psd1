@@ -54,8 +54,8 @@ ConvertFrom-StringData -StringData @'
     PullServerWebSiteModuleEnabledAndShouldBe            = Pull Server web site '{0}' self-signed IIS module enabled and should be.
     IisSelfSignedModuleNotInstalledButShouldBe           = Self-signed module not installed into IIS but should be.
     AcceptSelfSignedCertificatesDisabled                 = AcceptSelfSignedCertificates is disabled. Checking self-signed IIS module is not configured for Pull Server web site at '{0}'.
-    PullServerWebSiteModuleEnabledButShouldNotBe         = Pull Server web site '{0}' self-signed IIS module not enabled but should not be.
-    PullServerWebSiteModuleNotEnabledAndShouldNotBe      = Pull Server web site '{0}' self-signed IIS module enabled and should not be.
+    PullServerWebSiteModuleEnabledButShouldNotBe         = Pull Server web site '{0}' self-signed IIS module enabled and should not be.
+    PullServerWebSiteModuleNotEnabledAndShouldNotBe      = Pull Server web site '{0}' self-signed IIS module not enabled but should not be.
     IisSelfSignedModuleNotInstalledAndShouldNotBe        = Self-signed module not installed into IIS and should not be.
     TestingPullServerWebSiteUseSecurityBestPractices     = Testing the Pull Server web site UseSecurityBestPractices.
     PullServerWebSiteSecuritySettingsMismatch            = Pull Server web site '{0}' UseSecurityBestPractices does not match the desired state.

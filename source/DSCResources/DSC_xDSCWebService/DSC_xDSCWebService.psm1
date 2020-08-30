@@ -1018,7 +1018,7 @@ function Test-TargetResource
                 }
                 else
                 {
-                    Write-Verbose -Message ($script:localizedData.IisSelfSignedModuleNotInstalledButShouldBe -f $EndpointName)
+                    Write-Verbose -Message $script:localizedData.IisSelfSignedModuleNotInstalledButShouldBe
                     $desiredConfigurationMatch = $false
                 }
             }
@@ -1041,7 +1041,7 @@ function Test-TargetResource
                 }
                 else
                 {
-                    Write-Verbose -Message ($script:localizedData.IisSelfSignedModuleNotInstalledAndShouldNotBe -f $EndpointName)
+                    Write-Verbose -Message $script:localizedData.IisSelfSignedModuleNotInstalledAndShouldNotBe
                 }
             }
         }
