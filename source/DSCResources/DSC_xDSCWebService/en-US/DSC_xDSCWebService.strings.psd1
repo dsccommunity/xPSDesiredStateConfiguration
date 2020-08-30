@@ -12,7 +12,6 @@ ConvertFrom-StringData -StringData @'
     PullServerNotFound                                   = Pull Server web site with endpoint '{0}' not found.
     PullServerAllowUnencryptedTraffic                    = Pull Server web site configuration allows unencrypted traffic.
     PullServerCertificateFound                           = Pull Server web site certificate '{0}' found.
-    PullServerCertificateNotFound                        = Pull Server web site certificate '{0}' was not found.
     ProcessingPullServerBindings                         = Processing bindings for Pull Server web site '{0}'.
     RemovingPullServerWebSite                            = Removing Pull Server web site '{0}'.
     CreatingPullServerWebSite                            = Creating Pull Server web site '{0}'.
@@ -43,7 +42,7 @@ ConvertFrom-StringData -StringData @'
     TestingPullServerWebSitePhysicalPath                 = Testing the Pull Server web site physical path.
     PullServerWebSitePhysicalPathMismatch                = Pull Server web site '{0}' physical path '{1}' does not match the desired state.
     TestingPullServerWebSiteState                        = Testing the Pull Server web site state.
-    PullServerWebSiteState                               = Pull Server web site '{0}' state '{1}' does not match the desired state '{2}'.
+    PullServerWebSiteStateMismatch                       = Pull Server web site '{0}' state '{1}' does not match the desired state '{2}'.
     TestingPullServerWebSiteDatabasePath                 = Testing the Pull Server web site database path.
     CurrentDatabaseProviderInvalid                       = The current database provider does not have a valid value. It should be either 'ESENT' or 'System.Data.OleDb'.
     TestingPullServerWebSiteModulePath                   = Testing the Pull Server web site module path.

@@ -225,11 +225,6 @@ function Get-TargetResource
                 $_.Thumbprint -eq $webBinding.CertificateHash
             }
 
-        if (-not $certificate)
-        {
-            throw ($script:localizedData.PullServerCertificateNotFound -f $webBinding.CertificateHash)
-        }
-
         Write-Verbose -Message ($script:localizedData.PullServerCertificateFound -f $certificate.Thumbprint)
 
         <#
@@ -831,7 +826,7 @@ function Test-TargetResource
         if ($Port -ne $actualPort)
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message ($script:localizedData.PullServerWebSiteDoesNotExistAndShouldNot -f $EndpointName, $actualPort, $Port)
+            Write-Verbose -Message ($script:localizedData.PullServerWebSitePortMismatch -f $EndpointName, $actualPort, $Port)
             break
         }
 
@@ -840,7 +835,7 @@ function Test-TargetResource
         if ($ApplicationPoolName -ne $website.applicationPool)
         {
             $desiredConfigurationMatch = $false
-            Write-Verbose -Message ($script:localizedData.PullServerWebSite -f $EndpointName, $website.applicationPool, $ApplicationPoolName)
+            Write-Verbose -Message ($script:localizedData.PullServerWebSiteApplicationPoolMismatch -f $EndpointName, $website.applicationPool, $ApplicationPoolName)
             break
         }
 
