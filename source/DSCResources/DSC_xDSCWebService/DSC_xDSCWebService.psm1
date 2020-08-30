@@ -109,10 +109,9 @@ function Get-TargetResource
         CertificateThumbprint must be explicitly set instead. The
         Mof schema doesn't allow for a mandatory parameter in a parameter set.
     #>
-    if ($PScmdlet.ParameterSetName -eq 'CertificateThumbprint' `
-            -and $PSBoundParameters.ContainsKey('CertificateThumbprint') -ne $true)
+    if ($PScmdlet.ParameterSetName -eq 'CertificateThumbprint' -and $PSBoundParameters.ContainsKey('CertificateThumbprint') -ne $true)
     {
-        throw $script:localizedData.ThrowCertificateThumbprint
+        throw $script:localizedData.InvalidCertificateThumbprint
     }
 
     $webSite = Get-Website -Name $EndpointName
