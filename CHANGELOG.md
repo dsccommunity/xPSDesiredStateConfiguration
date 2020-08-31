@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Improved integration test reliability by resetting the DSC LCM
       before executing each test using the `Reset-DscLcm`
       function - Fixes [Issue #686](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/686).
+- xDSCWebService:
+  - Moved strings into localization file - Fixes [Issue #622](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/622).
+  - Corrected case of `CertificateThumbPrint` to `CertificateThumbprint`.
 
 ## [9.1.0] - 2020-02-19
 
