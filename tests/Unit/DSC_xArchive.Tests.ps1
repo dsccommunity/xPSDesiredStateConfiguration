@@ -1700,11 +1700,11 @@ try
 
                     It 'Should create a new PSDrive' {
                         $newPSDriveParameterFilter = {
-                            $nameParameterCorrect = $Parameters.Name -eq $script:testGuid
-                            $psProviderParameterCorrect = $Parameters.PSProvider -eq 'FileSystem'
-                            $rootParameterCorrect = $Parameters.Root -eq $mountPSDriveWithCredentialParameters.Path
-                            $scopeParameterCorrect = $Parameters.Scope -eq 'Script'
-                            $credentialParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mountPSDriveWithCredentialParameters.Credential -DifferenceObject $Parameters.Credential)
+                            $nameParameterCorrect = $Name -eq $script:testGuid
+                            $psProviderParameterCorrect = $PSProvider -eq 'FileSystem'
+                            $rootParameterCorrect = $Root -eq $mountPSDriveWithCredentialParameters.Path
+                            $scopeParameterCorrect = $Scope -eq 'Script'
+                            $credentialParameterCorrect = $null -eq (Compare-Object -ReferenceObject $mountPSDriveWithCredentialParameters.Credential -DifferenceObject $Credential)
 
                             return $nameParameterCorrect -and $psProviderParameterCorrect -and $rootParameterCorrect -and $scopeParameterCorrect -and $credentialParameterCorrect
                         }
