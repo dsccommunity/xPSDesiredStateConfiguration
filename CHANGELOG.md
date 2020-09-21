@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     by changing `CopyDirectories` to `CopyPaths` - Fixes [Issue #687](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/687).
   - Pin `Pester` module to 4.10.1 because Pester 5.0 is missing code
     coverage - Fixes [Issue #688](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/688).
+- xArchive
+  - Removed `Invoke-NewPSDrive` function because it is no longer needed as
+    Pester issue has been resolved - Fixes [Issue #698](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/698).
 
 ### Changed
 
