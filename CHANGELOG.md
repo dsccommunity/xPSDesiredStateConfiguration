@@ -4,9 +4,9 @@ The format is based on and uses the types of changes according to [Keep a Change
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- xPSDesiredStateConfiguration
-  - xPackage
-    - Fixed a bug not allowing using the file hash of an installer (#702).
+
+- xPackage
+  - Fixed a bug not allowing using the file hash of an installer (#702).
 
 ### Fixed
 
