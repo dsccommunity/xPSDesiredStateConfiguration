@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- xPackage
+  - Uninstalling software (Ensure = Absent) did not work due to improper handling of arguments. This fixes #704.
+
 ### Fixed
 
 - xPSDesiredStateConfiguration
