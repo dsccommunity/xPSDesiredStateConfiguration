@@ -539,18 +539,33 @@ function Set-TargetResource
             else
             {
                 # Absent case
-                $uninstallString = $productEntry.GetValue('UninstallString')
-                $startInfo.FileName = $uninstallString
+                try {
+                    $startInfo.FileName = $productEntry.GetValue('UninstallString')
+
+                    if ($Arguments)
+                    {
+                        # Append the specified arguments with a space (#195)
+                        $startInfo.Arguments = " $Arguments"
+                    }
+                }
+                catch {
+                    # We may have used the Name earlier, now we need the actual ID
+                    if ($null -eq $productEntry -or $null -eq $productEntry.Name)
+                    {
+                        $id = $Path
+                    }
+                    else
+                    {
+                        $id = Split-Path -Path $productEntry.Name -Leaf
+                    }
+
+                    $startInfo.FileName = "$env:winDir\system32\msiexec.exe"
+                    $startInfo.Arguments = "/x `"$id`" /quiet /norestart"
+                }
 
                 if ($LogPath)
                 {
                     $startInfo.Arguments += ' /log "{0}"' -f $LogPath
-                }
-
-                if ($Arguments)
-                {
-                    # Append the specified arguments with a space (#195)
-                    $startInfo.Arguments = " $Arguments"
                 }
             }
         }
