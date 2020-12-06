@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- xPackage
+  - Fixed a bug not allowing using the file hash of an installer [Issue #702](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/702).
+
 ### Fixed
 
 - xPSDesiredStateConfiguration
