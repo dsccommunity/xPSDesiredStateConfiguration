@@ -1347,7 +1347,6 @@ function Assert-FileHashValid
         [System.String]
         $Path,
 
-        [Parameter()]
         [Parameter(Mandatory = $true)]
         [System.String]
         $Hash,

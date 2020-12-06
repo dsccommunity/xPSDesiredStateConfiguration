@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xPackage
   - Uninstalling software (Ensure = Absent) did not work due to improper handling of arguments. This fixes #704.
+  - Fixed a bug not allowing using the file hash of an installer [Issue #702](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/702).
 
 ### Fixed
 
