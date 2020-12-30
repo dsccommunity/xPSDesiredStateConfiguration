@@ -1,7 +1,7 @@
 # PSDesiredStateConfiguration High Quality Resource Module Plan
 
 Any comments or questions about this plan can be submitted under issue
-[#160](https://github.com/PowerShell/xPSDesiredStateConfiguration/issues/160)
+[#160](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/160)
 
 ## Goals
 
@@ -231,9 +231,9 @@ if-statements will make the resources difficult to maintain.
 We will update the resouces, tests, exmaples, and documentation to ensure that
 the xPSDesiredStateConfiguration resource module meets the requirements to be a
 High Quality Resource Module (HQRM). These requirements can be found in the DSC
-Resource Kit High Quality Plan (not yet published publicly, sorry).  
+Resource Kit High Quality Plan (not yet published publicly, sorry).
 
-Here are the basic steps we will have to take based on this plan:  
+Here are the basic steps we will have to take based on this plan:
 
 1. Fix PSSA issues per the DSC Resource Kit PSSA Rule Severity List (not yet
    published publicly, sorry).

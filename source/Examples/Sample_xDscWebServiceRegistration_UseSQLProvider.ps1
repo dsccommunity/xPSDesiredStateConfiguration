@@ -5,8 +5,8 @@
 .COMPANYNAME Microsoft Corporation
 .COPYRIGHT
 .TAGS DSCConfiguration
-.LICENSEURI https://github.com/PowerShell/xPSDesiredStateConfiguration/blob/master/LICENSE
-.PROJECTURI https://github.com/PowerShell/xPSDesiredStateConfiguration
+.LICENSEURI https://github.com/dsccommunity/xPSDesiredStateConfiguration/blob/main/LICENSE
+.PROJECTURI https://github.com/dsccommunity/xPSDesiredStateConfiguration
 .ICONURI
 .EXTERNALMODULEDEPENDENCIES NetworkingDsc, xPSDesiredStateConfiguration
 .REQUIREDSCRIPTS

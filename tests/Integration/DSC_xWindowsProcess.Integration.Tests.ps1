@@ -540,7 +540,7 @@ try
         @{
             Description = 'Process Path With Spaces, Arguments Without Spaces'
             Path = $iexplorerExePath
-            Arguments = 'https://github.com/PowerShell/xPSDesiredStateConfiguration'
+            Arguments = 'https://github.com/dsccommunity/xPSDesiredStateConfiguration'
         }
 
         @{
@@ -552,7 +552,7 @@ try
         @{
             Description = 'Process Path With Spaces, Arguments With Spaces'
             Path = $iexplorerExePath
-            Arguments = "https://github.com/PowerShell/xPSDesiredStateConfiguration with spaces"
+            Arguments = "https://github.com/dsccommunity/xPSDesiredStateConfiguration with spaces"
         }
     )
 

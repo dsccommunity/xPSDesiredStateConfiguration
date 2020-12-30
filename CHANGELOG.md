@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - xDSCWebService:
   - Moved strings into localization file - Fixes [Issue #622](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/622).
   - Corrected case of `CertificateThumbPrint` to `CertificateThumbprint`.
+- Renamed `master` branch to `main` - Fixes [Issue #696](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/696).
 
 ## [9.1.0] - 2020-02-19
 

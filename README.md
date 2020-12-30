@@ -1,8 +1,8 @@
 # xPSDesiredStateConfiguration
 
-[![Build Status](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_apis/build/status/dsccommunity.xPSDesiredStateConfiguration?branchName=master)](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_build/latest?definitionId=8&branchName=master)
-![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/xPSDesiredStateConfiguration/8/master)
-[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xPSDesiredStateConfiguration/8/master)](https://dsccommunity.visualstudio.com/xPSDesiredStateConfiguration/_test/analytics?definitionId=8&contextType=build)
+[![Build Status](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_apis/build/status/dsccommunity.xPSDesiredStateConfiguration?branchName=main)](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_build/latest?definitionId=8&branchName=main)
+![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/xPSDesiredStateConfiguration/8/main)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xPSDesiredStateConfiguration/8/main)](https://dsccommunity.visualstudio.com/xPSDesiredStateConfiguration/_test/analytics?definitionId=8&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration%20Preview)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 
@@ -26,7 +26,7 @@ This project has adopted [this code of conduct](CODE_OF_CONDUCT.md).
 
 ## Releases
 
-For each merge to the branch `master` a preview release will be
+For each merge to the branch `main` a preview release will be
 deployed to [PowerShell Gallery](https://www.powershellgallery.com/).
 Periodically a release version tag will be pushed which will deploy a
 full release to [PowerShell Gallery](https://www.powershellgallery.com/).
