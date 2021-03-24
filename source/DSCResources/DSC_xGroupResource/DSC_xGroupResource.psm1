@@ -2409,7 +2409,8 @@ function Find-Principal
         {
             $identitySid = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier])
         }
-        catch {
+        catch
+        {
             $identitySid = $null
         }
 
@@ -2418,8 +2419,8 @@ function Find-Principal
             return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, [System.DirectoryServices.AccountManagement.IdentityType]::Sid, $identitySid.Value)
         }
         else {
-        return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, $IdentityValue)
-    }
+            return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, $IdentityValue)
+        }
     }
 }
 
