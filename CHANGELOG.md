@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `master` branch to `main` - Fixes [Issue #696](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/696).
 - Updated `GitVersion.yml` to latest pattern - Fixes [Issue #707](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/707).
 - Updated build to use `Sampler.GitHubTasks` - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
+- Added support for publishing code coverage to `CodeCov.io` and
+  Azure Pipelines - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
 
 ## [9.1.0] - 2020-02-19
 
