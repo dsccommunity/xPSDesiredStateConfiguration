@@ -16,7 +16,7 @@ coverage:
     project:
       default:
         # Set the overall project code coverage requirement to 70%
-        target: 80
+        target: 70
     patch:
       default:
         # Set the pull request requirement to not regress overall coverage by more than 5%

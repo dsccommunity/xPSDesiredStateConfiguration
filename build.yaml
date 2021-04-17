@@ -65,7 +65,7 @@ Pester:
   Tag:
   CodeCoverageOutputFile: JaCoCo_coverage.xml
   CodeCoverageOutputFileEncoding: ascii
-  CodeCoverageThreshold: 80
+  CodeCoverageThreshold: 70
 
 DscTest:
   OutputFormat: NUnitXML
