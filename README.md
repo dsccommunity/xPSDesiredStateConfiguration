@@ -6,7 +6,6 @@
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration%20Preview)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![codecov](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration)
-![Azure DevOps coverage (main)](https://img.shields.io/azure-devops/coverage/dsccommunity/xPSDesiredStateConfiguration/14/main)
 
 The **xPSDesiredStateConfiguration** module is a more recent, experimental
 version of the PSDesiredStateConfiguration module that ships in Windows as part
