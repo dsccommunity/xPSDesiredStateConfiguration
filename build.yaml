@@ -47,9 +47,8 @@ BuildWorkflow:
     - Pester_if_Code_Coverage_Under_Threshold
 
   publish:
-    - Publish_release_to_GitHub
-    - publish_module_to_gallery
-
+    - Publish_Release_To_GitHub
+    - Publish_Module_To_gallery
 
 ####################################################
 #       PESTER Configuration                       #
@@ -64,6 +63,8 @@ Pester:
     - tests/Integration
   ExcludeTag:
   Tag:
+  CodeCoverageOutputFile: JaCoCo_coverage.xml
+  CodeCoverageOutputFileEncoding: ascii
   CodeCoverageThreshold: 70
 
 DscTest:
