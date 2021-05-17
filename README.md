@@ -247,6 +247,7 @@ None
   remove a group, set this property to Absent. The default value is Present.
   { *Present* | Absent }.
 * **[String] Description** _(Write)_: The description the group should have.
+* **[String] NewName** _(Write)_: The new name the group should have. When setting this property, the GroupName property must be set appropriately to uniquely identify the group both before and after setting the SamAccountName, e.g. by SID.
 * **[String[]] Members** _(Write)_: The members the group should have. This
   property will replace all the current group members with the specified
   members. Members should be specified as strings in the format of their domain
@@ -886,6 +887,8 @@ None
   * Default Value: Present
 * **[String] FullName** _(Write)_: Represents a string with the full name you
   want to use for the user account.
+* **[String] NewName** _(Write)_: Represents a string with the new name you
+  want to use for the user account. When setting this property, the UserName property must be set appropriately to uniquely identify the user both before and after setting the SamAccountName, e.g. by SID.
 * **[PSCredential] Password** _(Write)_: Indicates the password you want to use
   for this account.
 * **[Boolean] PasswordChangeNotAllowed** _(Write)_: Indicates if the user can
