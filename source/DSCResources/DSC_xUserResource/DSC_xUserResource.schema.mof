@@ -4,6 +4,7 @@ class DSC_xUserResource : OMI_BaseResource
   [Key,Description("The name of the User to Create/Modify/Delete")] String UserName;
   [Write,Description("An enumerated value that describes if the user is expected to exist on the machine"),ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] String Ensure;
   [Write,Description("The display name of the user")] String FullName;
+  [Write,Description("Specifies the new name of the user")] String NewName;
   [Write,Description("A description for the user")] String Description;
   [Write,Description("The password for the user"),EmbeddedInstance("MSFT_Credential")] String Password;
   [Write,Description("Value used to disable/enable a user account")] Boolean Disabled;
