@@ -139,6 +139,9 @@ function Get-TargetResource
     .PARAMETER Description
         The description the group should have.
 
+    .PARAMETER NewName
+        The name the group should have.
+
     .PARAMETER Members
         The members the group should have.
 
@@ -204,6 +207,10 @@ function Set-TargetResource
         $Description,
 
         [Parameter()]
+        [System.String]
+        $NewName,
+
+        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -253,6 +260,9 @@ function Set-TargetResource
 
     .PARAMETER Description
         The description of the group to test for.
+
+    .PARAMETER NewName
+        The name of the group to test for.
 
     .PARAMETER Members
         The list of members the group should have.
@@ -306,6 +316,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $Description,
+
+        [Parameter()]
+        [System.String]
+        $NewName,
 
         [Parameter()]
         [System.String[]]
@@ -493,6 +507,9 @@ function Get-TargetResourceOnNanoServer
     .PARAMETER Description
         The description of the group.
 
+    .PARAMETER NewName
+        The name the group should have.
+
     .PARAMETER Members
         Use this property to replace the current group membership with the specified members.
 
@@ -548,6 +565,10 @@ function Set-TargetResourceOnFullSKU
         $Description,
 
         [Parameter()]
+        [System.String]
+        $NewName,
+
+        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -596,6 +617,7 @@ function Set-TargetResourceOnFullSKU
             if ($whatIfShouldProcess)
             {
                 $saveChanges = $false
+                $needsRename = $false
 
                 if (-not $groupOriginallyExists)
                 {
@@ -616,6 +638,13 @@ function Set-TargetResourceOnFullSKU
                 {
                     $group.Description = $Description
                     $saveChanges = $true
+                }
+
+                if ($PSBoundParameters.ContainsKey('NewName') -and (($groupOriginallyExists) -and ($NewName -ne $group.SamAccountName)))
+                {
+                    $group.SamAccountName = $NewName
+                    $saveChanges = $true
+                    $needsRename = $true
                 }
 
                 $actualMembersAsPrincipals = $null
@@ -790,6 +819,13 @@ function Set-TargetResourceOnFullSKU
                 {
                     Save-Group -Group $group
 
+                    if ($needsRename)
+                    {
+                        $dirEntry = [System.DirectoryServices.DirectoryEntry]($group.GetUnderlyingObject())
+                        $dirEntry.Rename($newName);
+                        $dirEntry.CommitChanges();
+                    }
+
                     # Send an operation success verbose message.
                     if ($groupOriginallyExists)
                     {
@@ -851,6 +887,9 @@ function Set-TargetResourceOnFullSKU
     .PARAMETER Description
         The description of the group.
 
+    .PARAMETER NewName
+        The name the group should have.
+
     .PARAMETER Members
         Use this property to replace the current group membership with the specified members.
 
@@ -903,6 +942,10 @@ function Set-TargetResourceOnNanoServer
         [Parameter()]
         [System.String]
         $Description,
+
+        [Parameter()]
+        [System.String]
+        $NewName,
 
         [Parameter()]
         [System.String[]]
@@ -969,6 +1012,12 @@ function Set-TargetResourceOnNanoServer
                 ((-not $groupOriginallyExists) -or ($Description -ne $group.Description)))
             {
                 Set-LocalGroup -Name $GroupName -Description $Description
+            }
+
+            if ($PSBoundParameters.ContainsKey('NewName') -and
+                ((-not $groupOriginallyExists) -or ($NewName -ne $group.SamAccountName)))
+            {
+                Rename-LocalGroup -Sid $GroupName -NewName $NewName
             }
 
             if ($PSBoundParameters.ContainsKey('Members'))
@@ -1087,6 +1136,9 @@ function Set-TargetResourceOnNanoServer
     .PARAMETER Description
         The description of the group to test for.
 
+    .PARAMETER $NewName
+        The name of the group to test for.
+
     .PARAMETER Members
         Use this property to test if the existing membership of the group matches
         the list provided.
@@ -1144,6 +1196,10 @@ function Test-TargetResourceOnFullSKU
         $Description,
 
         [Parameter()]
+        [System.String]
+        $NewName,
+
+        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -1193,6 +1249,12 @@ function Test-TargetResourceOnFullSKU
         if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $group.Description)
         {
             Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
+            return $false
+        }
+
+        if ($PSBoundParameters.ContainsKey('NewName') -and $NewName -ne $group.SamAccountName)
+        {
+            Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'NewName', $NewName, $group.SamAccountName)
             return $false
         }
 
@@ -1354,6 +1416,9 @@ function Test-TargetResourceOnFullSKU
     .PARAMETER Description
         The description of the group to test for.
 
+    .PARAMETER NewName
+        The name of the group to test for.
+
     .PARAMETER Members
         Use this property to test if the existing membership of the group matches
         the list provided.
@@ -1411,6 +1476,10 @@ function Test-TargetResourceOnNanoServer
         $Description,
 
         [Parameter()]
+        [System.String]
+        $NewName,
+
+        [Parameter()]
         [System.String[]]
         $Members,
 
@@ -1459,6 +1528,12 @@ function Test-TargetResourceOnNanoServer
     if ($PSBoundParameters.ContainsKey('Description') -and $Description -ne $group.Description)
     {
         Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Description', $Description, $group.Description)
+        return $false
+    }
+
+    if ($PSBoundParameters.ContainsKey('NewName') -and $NewName -ne $group.SamAccountName)
+    {
+        Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'NewName', $NewName, $group.SamAccountName)
         return $false
     }
 
