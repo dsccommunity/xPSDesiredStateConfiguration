@@ -67,6 +67,9 @@ function Get-TargetResource
         The (optional) full name or display name of the user.
         If not provided this value will remain blank.
 
+    .PARAMETER NewName
+        Specifies the new name of the user.
+
     .PARAMETER Description
         Optional description for the user.
 
@@ -112,6 +115,10 @@ function Set-TargetResource
         [Parameter()]
         [System.String]
         $FullName,
+
+        [Parameter()]
+        [System.String]
+        $NewName,
 
         [Parameter()]
         [System.String]
@@ -165,6 +172,9 @@ function Set-TargetResource
         The full name/display name that the user should have.
         If not provided, this value will not be tested.
 
+    .PARAMETER NewName
+        Specifies the new name of the user.
+
     .PARAMETER Description
         The description that the user should have.
         If not provided, this value will not be tested.
@@ -203,6 +213,10 @@ function Test-TargetResource
         [Parameter()]
         [System.String]
         $FullName,
+
+        [Parameter()]
+        [System.String]
+        $NewName,
 
         [Parameter()]
         [System.String]
@@ -328,6 +342,9 @@ function Get-TargetResourceOnFullSKU
         The (optional) full name or display name of the user.
         If not provided this value will remain blank.
 
+    .PARAMETER NewName
+        Specifies the new name of the user.
+
     .PARAMETER Description
         Optional description for the user.
 
@@ -374,6 +391,10 @@ function Set-TargetResourceOnFullSKU
 
         [Parameter()]
         [System.String]
+        $NewName,
+
+        [Parameter()]
+        [System.String]
         $Description,
 
         [Parameter()]
@@ -404,6 +425,10 @@ function Set-TargetResourceOnFullSKU
     Write-Verbose -Message ($script:localizedData.ConfigurationStarted -f $UserName)
 
     Assert-UserNameValid -UserName $UserName
+    if ($newName)
+    {
+        Assert-UserNameValid -UserName $NewName
+    }
 
     # Try to find a user by name.
     $principalContext = New-Object `
@@ -426,6 +451,7 @@ function Set-TargetResourceOnFullSKU
             $whatIfShouldProcess = $true
             $userExists = $false
             $saveChanges = $false
+            $needsRename = $false
 
             if ($null -eq $user)
             {
@@ -474,6 +500,13 @@ function Set-TargetResourceOnFullSKU
                     $saveChanges = $true
                 }
 
+                if ($PSBoundParameters.ContainsKey('NewName') -and (($userExists) -and ($NewName -ne $user.SamAccountName)))
+                {
+                    $user.SamAccountName = $NewName
+                    $saveChanges = $true
+                    $needsRename = $true
+                }
+
                 # Set the password regardless of the state of the user
                 if ($PSBoundParameters.ContainsKey('Password'))
                 {
@@ -513,6 +546,13 @@ function Set-TargetResourceOnFullSKU
                 if ($saveChanges)
                 {
                     $user.Save()
+
+                    if ($needsRename)
+                    {
+                        $dirEntry = [System.DirectoryServices.DirectoryEntry]($user.GetUnderlyingObject())
+                        $dirEntry.Rename($newName);
+                        $dirEntry.CommitChanges();
+                    }
 
                     # Send an operation success verbose message
                     if ($userExists)
@@ -582,6 +622,9 @@ function Set-TargetResourceOnFullSKU
         The full name/display name that the user should have.
         If not provided, this value will not be tested.
 
+    .PARAMETER NewName
+        Specifies the new name of the user.
+
     .PARAMETER Description
         The description that the user should have.
         If not provided, this value will not be tested.
@@ -623,6 +666,10 @@ function Test-TargetResourceOnFullSKU
 
         [Parameter()]
         [System.String]
+        $NewName,
+
+        [Parameter()]
+        [System.String]
         $Description,
 
         [Parameter()]
@@ -651,6 +698,10 @@ function Test-TargetResourceOnFullSKU
     Set-StrictMode -Version Latest
 
     Assert-UserNameValid -UserName $UserName
+    if ($newName)
+    {
+        Assert-UserNameValid -UserName $NewName
+    }
 
     # Try to find a user by a name
     $principalContext = New-Object System.DirectoryServices.AccountManagement.PrincipalContext `
@@ -696,6 +747,13 @@ function Test-TargetResourceOnFullSKU
         {
             # The Description property does not match
             Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Description', $Description, $user.Description)
+            return $false
+        }
+
+        if ($PSBoundParameters.ContainsKey('NewName') -and $NewName -ne $user.SamAccountName)
+        {
+            # The Name property does not match
+            Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'NewName', $NewName, $user.SamAccountName)
             return $false
         }
 
@@ -833,6 +891,9 @@ function Get-TargetResourceOnNanoServer
         The (optional) full name or display name of the user.
         If not provided this value will remain blank.
 
+    .PARAMETER NewName
+        Specifies the new name of the user.
+
     .PARAMETER Description
         Optional description for the user.
 
@@ -878,6 +939,10 @@ function Set-TargetResourceOnNanoServer
 
         [Parameter()]
         [System.String]
+        $NewName,
+
+        [Parameter()]
+        [System.String]
         $Description,
 
         [Parameter()]
@@ -908,6 +973,10 @@ function Set-TargetResourceOnNanoServer
     Write-Verbose -Message ($script:localizedData.ConfigurationStarted -f $UserName)
 
     Assert-UserNameValid -UserName $UserName
+    if ($newName)
+    {
+        Assert-UserNameValid -UserName $NewName
+    }
 
     # Try to find a user by a name.
     $userExists = $false
@@ -974,6 +1043,14 @@ function Set-TargetResourceOnNanoServer
             else
             {
                 Set-LocalUser -Name $UserName -Description $Description
+            }
+        }
+
+        if ($PSBoundParameters.ContainsKey('NewName') -and ((-not $userExists) -or ($NewName -ne $user.SamAccountName)))
+        {
+            if ($null -ne $NewName)
+            {
+                Rename-LocalUser -Sid $UserName -NewName $NewName
             }
         }
 
@@ -1054,6 +1131,9 @@ function Set-TargetResourceOnNanoServer
         The full name/display name that the user should have.
         If not provided, this value will not be tested.
 
+    .PARAMETER NewName
+        Specifies the new name of the user.
+
     .PARAMETER Description
         The description that the user should have.
         If not provided, this value will not be tested.
@@ -1095,6 +1175,10 @@ function Test-TargetResourceOnNanoServer
 
         [Parameter()]
         [System.String]
+        $NewName,
+
+        [Parameter()]
+        [System.String]
         $Description,
 
         [Parameter()]
@@ -1123,6 +1207,10 @@ function Test-TargetResourceOnNanoServer
     Set-StrictMode -Version Latest
 
     Assert-UserNameValid -UserName $UserName
+    if ($newName)
+    {
+        Assert-UserNameValid -UserName $NewName
+    }
 
     # Try to find a user by a name
     try
@@ -1168,6 +1256,13 @@ function Test-TargetResourceOnNanoServer
     {
         # The Description property does not match
         Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'Description', $Description, $user.Description)
+        return $false
+    }
+
+    if ($PSBoundParameters.ContainsKey('NewName') -and $NewName -ne $user.SamAccountName)
+    {
+        # The Name property does not match
+        Write-Verbose -Message ($script:localizedData.PropertyMismatch -f 'NewName', $NewName, $user.SamAccountName)
         return $false
     }
 
