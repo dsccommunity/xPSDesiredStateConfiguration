@@ -472,6 +472,15 @@ function Set-TargetResourceOnFullSKU
                 if (-not $userExists)
                 {
                     # The user with the provided name does not exist so add a new user
+                    foreach ($incompatibleParameterName in @( 'NewName' ))
+                    {
+                        if ($PSBoundParameters.ContainsKey($incompatibleParameterName))
+                        {
+                            New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
+                                -Message ($script:localizedData.NewUserNewNameConflict -f 'NewName', $incompatibleParameterName)
+                        }
+                    }
+
                     $user = New-Object `
                         -TypeName System.DirectoryServices.AccountManagement.UserPrincipal `
                         -ArgumentList $principalContext
