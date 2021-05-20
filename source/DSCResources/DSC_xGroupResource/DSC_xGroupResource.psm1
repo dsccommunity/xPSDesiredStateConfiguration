@@ -621,6 +621,15 @@ function Set-TargetResourceOnFullSKU
 
                 if (-not $groupOriginallyExists)
                 {
+                    foreach ($incompatibleParameterName in @( 'NewName' ))
+                    {
+                        if ($PSBoundParameters.ContainsKey($incompatibleParameterName))
+                        {
+                            New-InvalidArgumentException -ArgumentName $incompatibleParameterName `
+                                -Message ($script:localizedData.NewGroupNewNameConflict -f 'NewName', $incompatibleParameterName)
+                        }
+                    }
+
                     $localPrincipalContext = Get-PrincipalContext -PrincipalContextCache $principalContextCache `
                         -Disposables $disposables -Scope $env:COMPUTERNAME
 
