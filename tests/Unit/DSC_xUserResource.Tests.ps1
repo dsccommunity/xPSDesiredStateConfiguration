@@ -134,6 +134,20 @@ try
                         Test-User -UserName $script:newUserName2 | Should -BeTrue
                     }
 
+                    It 'Should rename the user' {
+                        Test-User -UserName $script:newUserName1 | Should -BeFalse
+                        Set-TargetResource -UserName $script:newUserName2 `
+                                            -NewName $script:newUserName1
+                        Test-User -UserName $script:newUserName1 | Should -BeTrue
+                    }
+
+                    It 'Should rename the user again' {
+                        Test-User -UserName $script:newUserName2 | Should -BeFalse
+                        Set-TargetResource -UserName $script:newUserName1 `
+                                            -NewName $script:newUserName2
+                        Test-User -UserName $script:newUserName2 | Should -BeTrue
+                    }
+
                     It 'Should update the user' {
                         $disabled = $false
                         $passwordNeverExpires = $true
@@ -209,6 +223,20 @@ try
 
                         It 'Should add the new user' -Skip:$script:skipMe {
                             Set-TargetResource -UserName $script:newUserName2 -Password $script:newCredential2 -Ensure 'Present'
+                            Test-User -UserName $script:newUserName2 | Should -BeTrue
+                        }
+
+                        It 'Should rename the user' -Skip:$script:skipMe {
+                            Test-User -UserName $script:newUserName1 | Should -BeFalse
+                            Set-TargetResource -UserName $script:newUserName2 `
+                                                -NewName $script:newUserName1
+                            Test-User -UserName $script:newUserName1 | Should -BeTrue
+                        }
+
+                        It 'Should rename the user again' -Skip:$script:skipMe {
+                            Test-User -UserName $script:newUserName2 | Should -BeFalse
+                            Set-TargetResource -UserName $script:newUserName1 `
+                                                -NewName $script:newUserName2
                             Test-User -UserName $script:newUserName2 | Should -BeTrue
                         }
 
