@@ -12,6 +12,7 @@ ConvertFrom-StringData @'
     UserRemoved = User {0} removed successfully.
     NoConfigurationRequired = User {0} exists on this node with the desired properties. No action required.
     NoConfigurationRequiredUserDoesNotExist = User {0} does not exist on this node. No action required.
+    NewUserNewNameConflict = The {0} parameter cannot be used when creating a new user.
     InvalidUserName = The name {0} cannot be used. Names may not consist entirely of periods and/or spaces, or contain these characters: {1}
     UserExists = A user with the name {0} exists.
     UserDoesNotExist = A user with the name {0} does not exist.
