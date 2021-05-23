@@ -18,6 +18,14 @@ Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common'
 # Import Localization Strings
 $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 
+# This type is documented here: https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-sc_action
+enum ACTION_TYPE {
+    NONE        = 0
+    RESTART     = 1
+    REBOOT      = 2
+    RUN_COMMAND = 3
+}
+
 <#
     .SYNOPSIS
         Retrieves the current status of the service resource with the given name.
@@ -80,17 +88,24 @@ function Get-TargetResource
             default { $serviceCimInstance.StartName }
         }
 
+        $serviceFailureActions = Get-ServiceFailureActions -Service $service.Name
+
         $serviceResource = @{
-            Name            = $Name
-            Ensure          = 'Present'
-            Path            = $serviceCimInstance.PathName
-            StartupType     = $startupType
-            BuiltInAccount  = $builtInAccount
-            State           = $service.Status.ToString()
-            DisplayName     = $service.DisplayName
-            Description     = $serviceCimInstance.Description
-            DesktopInteract = $serviceCimInstance.DesktopInteract
-            Dependencies    = $dependencies
+            Name                             = $Name
+            Ensure                           = 'Present'
+            Path                             = $serviceCimInstance.PathName
+            StartupType                      = $startupType
+            BuiltInAccount                   = $builtInAccount
+            State                            = $service.Status.ToString()
+            DisplayName                      = $service.DisplayName
+            Description                      = $serviceCimInstance.Description
+            DesktopInteract                  = $serviceCimInstance.DesktopInteract
+            Dependencies                     = $dependencies
+            ResetPeriodSeconds               = $serviceFailureActions.resetPeriodSeconds
+            FailureCommand                   = $serviceFailureActions.failureCommand
+            RebootMessage                    = $serviceFailureActions.rebootMessage
+            FailureActionsCollection         = $serviceFailureActions.ActionsCollection
+            FailureActionsOnNonCrashFailures = $serviceFailureActions.FailureActionsOnNonCrashFailures
         }
     }
     else
@@ -178,6 +193,32 @@ function Get-TargetResource
         The time to wait for the service to stop in milliseconds.
         The default value is 30000 (30 seconds).
 
+    .PARAMETER ResetPeriodSeconds
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
+
+    .PARAMETER RebootMessage
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
+
+    .PARAMETER FailureCommand
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
+
     .PARAMETER Credential
         The credential of the user account the service should start under.
 
@@ -264,6 +305,26 @@ function Set-TargetResource
         $TerminateTimeout = 30000,
 
         [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -329,7 +390,10 @@ function Set-TargetResource
         # Update the properties of the service if needed
         $setServicePropertyParameters = @{}
 
-        $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount', 'DesktopInteract', 'DisplayName', 'Description', 'Dependencies' )
+        $servicePropertyParameterNames = @( 'StartupType', 'BuiltInAccount', 'Credential', 'GroupManagedServiceAccount',
+                                            'DesktopInteract', 'DisplayName', 'Description', 'Dependencies',
+                                            'ResetPeriodSeconds', 'RebootMessage', 'FailureCommand', 'FailureActionsCollection',
+                                            'FailureActionsOnNonCrashFailures')
 
         foreach ($servicePropertyParameterName in $servicePropertyParameterNames)
         {
@@ -427,6 +491,32 @@ function Set-TargetResource
     .PARAMETER TerminateTimeout
         Not used in Test-TargetResource.
 
+    .PARAMETER ResetPeriodSeconds
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
+
+    .PARAMETER RebootMessage
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
+
+    .PARAMETER FailureCommand
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
+
     .PARAMETER Credential
         The credential the service should be running under.
 
@@ -500,6 +590,26 @@ function Test-TargetResource
         $TerminateTimeout = 30000,
 
         [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures,
+
+        [Parameter()]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.Credential()]
@@ -518,6 +628,12 @@ function Test-TargetResource
     {
         $errorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $Name
         New-InvalidArgumentException -ArgumentName 'BuiltInAccount / Credential / GroupManagedServiceAccount' -Message $errorMessage
+    }
+
+    if ($PSBoundParameters.ContainsKey('FailureCommand') -and (-not (Test-HasRestartFailureAction -Collection $FailureActionsCollection)))
+    {
+        $errorMessage = $script:localizedData.MustSpecifyRestartFailureAction
+        New-InvalidArgumentException -ArgumentName 'FailureCommand' -Message $errorMessage
     }
 
     $serviceResource = Get-TargetResource -Name $Name
@@ -638,6 +754,62 @@ function Test-TargetResource
         if ($State -ne 'Ignore' -and $serviceResource.State -ine $State)
         {
             Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'State', $Name, $State, $serviceResource.State)
+            return $false
+        }
+
+        # Check the reset period
+        if($PSBoundParameters.ContainsKey('ResetPeriodSeconds') -and $ResetPeriodSeconds -ine $serviceResource.ResetPeriodSeconds)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'ResetPeriodSeconds', $Name, $ResetPeriodSeconds, $serviceResource.ResetPeriodSeconds)
+            return $false
+        }
+
+        # Check the failure command
+        if($PSBoundParameters.ContainsKey('FailureCommand') -and $FailureCommand -ine $serviceResource.failureCommand)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureCommand', $Name, $FailureCommand, $serviceResource.failureCommand)
+            return $false
+        }
+
+        # Check the reboot message
+        if($PSBoundParameters.ContainsKey('RebootMessage') -and $RebootMessage -ine $serviceResource.rebootMessage)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'RebootMessage', $Name, $RebootMessage, $serviceResource.rebootMessage)
+            return $false
+        }
+
+        # Check the failure actions collection
+        if($PSBoundParameters.ContainsKey('FailureActionsCollection')) {
+            $inSync = $true
+            if($FailureActionsCollection.count -ne @($serviceResource.FailureActionsCollection).count) {
+                Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureActionsCollection.count', $Name, @($FailureActionsCollection).count, @($serviceResource.FailureActionsCollection).count)
+                return $false
+            }
+
+            foreach ($actionIndex in (0..(@($FailureActionsCollection).count - 1))) {
+                $parameterAction = @($FailureActionsCollection)[$actionIndex]
+                $serviceResourceAction = @($serviceResource.FailureActionsCollection)[$actionIndex]
+
+                if($parameterAction.type -ne $serviceResourceAction.type) {
+                    Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f "FailureActionsCollection Action $actionIndex type", $Name, $parameterAction.type, $serviceResourceAction.type)
+                    $inSync = $false
+                }
+
+                if($parameterAction.delayMilliSeconds -ne $serviceResourceAction.delayMilliSeconds) {
+                    Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f "FailureActionsCollection Action $actionIndex delayMilliSeconds", $Name, $parameterAction.delayMilliSeconds, $serviceResourceAction.delayMilliSeconds)
+                    $inSync = $false
+                }
+            }
+
+            if(-not $inSync) {
+                return $inSync
+            }
+        }
+
+        # Check for service actions on non crash failures
+        if($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures') -and $FailureActionsOnNonCrashFailures -ne $serviceResource.failureActionsOnNonCrashFailures)
+        {
+            Write-Verbose -Message ($script:localizedData.ServicePropertyDoesNotMatch -f 'FailureActionsOnNonCrashFailures', $Name, $FailureActionsOnNonCrashFailures, $serviceResource.failureActionsOnNonCrashFailures)
             return $false
         }
     }
@@ -1575,6 +1747,32 @@ function Set-ServiceStartupType
     .PARAMETER StartupType
         The startup type the service should have.
 
+    .PARAMETER ResetPeriodSeconds
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
+
+    .PARAMETER RebootMessage
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
+
+    .PARAMETER FailureCommand
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
+
     .NOTES
         SupportsShouldProcess is enabled because Invoke-CimMethod calls ShouldProcess.
         Here are the paths through which Set-ServiceProperty calls Invoke-CimMethod:
@@ -1625,6 +1823,26 @@ function Set-ServiceProperty
         [System.String[]]
         [AllowEmptyCollection()]
         $Dependencies,
+
+        [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures,
 
         [Parameter()]
         [ValidateNotNull()]
@@ -1683,6 +1901,39 @@ function Set-ServiceProperty
     if ($setServiceAccountPropertyParameters.Count -gt 0)
     {
         Set-ServiceAccountProperty -ServiceName $ServiceName @setServiceAccountPropertyParameters
+    }
+
+    # Update service failure actions properties if needed
+    $setServiceFailureActionsPropertyParameters = @{}
+
+    if ($PSBoundParameters.ContainsKey('ResetPeriodSeconds'))
+    {
+        $setServiceFailureActionsPropertyParameters['ResetPeriodSeconds'] = $ResetPeriodSeconds
+    }
+
+    if ($PSBoundParameters.ContainsKey('RebootMessage'))
+    {
+        $setServiceFailureActionsPropertyParameters['RebootMessage'] = $RebootMessage
+    }
+
+    if ($PSBoundParameters.ContainsKey('FailureCommand'))
+    {
+        $setServiceFailureActionsPropertyParameters['FailureCommand'] = $FailureCommand
+    }
+
+    if ($PSBoundParameters.ContainsKey('FailureActionsCollection'))
+    {
+        $setServiceFailureActionsPropertyParameters['FailureActionsCollection'] = $FailureActionsCollection
+    }
+
+    if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
+    {
+        $setServiceFailureActionsPropertyParameters['FailureActionsOnNonCrashFailures'] = $FailureActionsOnNonCrashFailures
+    }
+
+    if($setServiceFailureActionsPropertyParameters.count -gt 0)
+    {
+        Set-ServiceFailureActionProperty -ServiceName $ServiceName @setServiceFailureActionsPropertyParameters
     }
 
     # Update startup type
@@ -1869,4 +2120,396 @@ function Stop-ServiceWithTimeout
     Stop-Service -Name $ServiceName
     $waitTimeSpan = New-Object -TypeName 'TimeSpan' -ArgumentList (0, 0, 0, 0, $TerminateTimeout)
     Wait-ServiceStateWithTimeout -ServiceName $ServiceName -State 'Stopped' -WaitTimeSpan $waitTimeSpan
+}
+
+<#
+    .SYNOPSIS
+        Get the Failure Actions properties for a service from the registry
+    .DESCRIPTION
+        For the named service, read the registry and find its Failure Actions settings.
+
+        Most of the data this function needs to retrieve is from the FailureActions registry key.
+        This key is a binary field that encodes the contents of a SERVICE_FAILURE_ACTIONSA C++ struct.
+        The struct and how to read its contents are documented at the link below.
+        https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsa
+
+        It will also read the 'FailureCommand' and 'RebootMessage' property to get the string values for
+        those settings, and the 'FailureActionsOnNonCrashFailures' property to get the
+        flag value that stores the current state of the 'Enable Actions For Stops With Errors' checkbox.
+    .EXAMPLE
+        PS C:\> $serviceFailureActions = Get-ServiceFailureActions -Service $service
+        Reads the failure actions from the binary data in the registry
+    .PARAMETER Service
+        The name of the service to retrieve properties for.
+#>
+function Get-ServiceFailureActions {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [String]
+        $Service
+    )
+    process {
+        if($registryData = Get-Item -Path HKLM:\SYSTEM\CurrentControlSet\Services\$service -ErrorAction SilentlyContinue)
+        {
+            $failureActions = [PSCustomObject]@{
+                resetPeriodSeconds                = $null
+                hasRebootMessage                  = $null
+                hasFailureCommand                 = $null
+                failureActionCount                = @()
+                failureCommand                    = $null
+                rebootMessage                     = $null
+                actionsCollection                 = $null
+                FailureActionsOnNonCrashFailures = $false
+            }
+
+            if($registryData.GetvalueNames() -match 'FailureCommand') {
+                $failureActions.failureCommand = $registryData.GetValue('FailureCommand')
+            }
+
+            if($registryData.GetValueNames() -match 'RebootMessage') {
+                $failureActions.rebootMessage = $registryData.GetValue('RebootMessage')
+            }
+
+            if($registryData.GetvalueNames() -match 'FailureActionsOnNonCrashFailures') {
+                $failureActions.FailureActionsOnNonCrashFailures = [System.Boolean]$registryData.GetValue('FailureActionsOnNonCrashFailures')
+            }
+
+            if($registryData.GetValueNames() -match 'FailureActions')
+            {
+                $failureActionsBinaryData = $registryData.GetValue('FailureActions')
+
+                # The first four bytes represent the Reset Period.
+                $failureActions.resetPeriodSeconds = Get-FailureActionsProperty -PropertyName ResetPeriodSeconds -Bytes $failureActionsBinaryData
+
+                # Next four bytes indicate the presence of a reboot message in case one of the chosen failure actions is
+                # SC_ACTION_REBOOT. The actual value of the message is stored in the 'RebootMessage' property
+                $failureActions.hasRebootMessage = Get-FailureActionsProperty -PropertyName HasRebootMsg -Bytes $failureActionsBinaryData
+
+                # The next four bytes indicate whether a failure action run command exists. This command
+                # would be run in the case one of the failure actions chosen is SC_ACTION_RUN_COMMAND
+                # If this value is true then the actual command string is stored in the 'FailureCommand' property.
+                $failureActions.hasFailureCommand = Get-FailureActionsProperty -PropertyName HasFailureCommand -Bytes $failureActionsBinaryData
+
+                # These four bytes give the count of how many reboot failure actions have been defined.
+                $failureActions.failureActionCount = Get-FailureActionsProperty -PropertyName FailureActionCount -Bytes $failureActionsBinaryData
+
+                if($failureActions.failureActionCount -gt 0)
+                {
+                    $failureActions.ActionsCollection = Get-FailureActionCollection -Bytes $failureActionsBinaryData -ActionsCount $failureActions.failureActionCount
+                }
+            }
+
+            $failureActions
+        }
+    }
+}
+
+<#
+    .SYNOPSIS
+        Translate the binary data from the registry into a property value
+
+    .DESCRIPTION
+        The binary data in the 'FailureActions' registry property encodes a _SERVICE_FAILURE_ACTIONSA struct.
+        This function translates human readable property names into the byte range encoded by the binary data.
+        Those bytes are then read and cast to the integer values they store.
+
+    .PARAMETER PropertyName
+        The name of the property to retrieve from the struct.
+
+    .PARAMETER Bytes
+        The raw binary data read out from the registry.
+#>
+function Get-FailureActionsProperty
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [ValidateSet('ResetPeriodSeconds','HasRebootMsg','HasFailureCommand','FailureActionCount')]
+        [System.String]
+        $PropertyName,
+        [Parameter(Mandatory)]
+        [System.Byte[]]
+        $Bytes
+    )
+
+    process {
+        $byteRange = switch ($PropertyName) {
+            ResetPeriodSeconds { 0..3 }
+            HasRebootMsg       { 4..7 }
+            HasFailureCommand  { 8..11 }
+            FailureActionCount { 12..15 }
+            Default {}
+        }
+
+        [System.BitConverter]::ToInt32($Bytes[$byteRange],0)
+    }
+}
+
+<#
+    .SYNOPSIS
+        Retrieve and decode the array of service failure actions
+
+    .DESCRIPTION
+        The array of SC_ACTION structures that define each failure action is stored
+        in the same binary blob property as the struct that defines the rest of the
+        service failure actions settings. This function takes the binary data and a
+        count of how many actions to expect, and does the offset math to read each
+        action and decode it, and return the actions as an array of custom objects.
+
+    .PARAMETER Bytes
+        The binary data that stores the actions array.
+
+    .PARAMETER ActionsCount
+        The number of actions encoded in the data.
+#>
+function Get-FailureActionCollection
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [System.Byte[]]
+        $Bytes,
+        [Parameter(Mandatory)]
+        [System.UInt32]
+        $ActionsCount
+    )
+
+    process {
+        $actionsCollection = New-Object System.Collections.Generic.List[PSObject]
+
+        foreach($action in 0..($ActionsCount - 1)) {
+
+            # The structure of the _SERVICE_FAILURE_ACTIONS struct encoded in this registry key
+            # dictates that the array of _SC_ACTION structs will always start at byte 20.
+            # The 8 is because each _SC_ACTION is a 8 byte struct.
+            $actionTypeByteRange  = (20 + (8 * $action))..(20 + (8 * $action) + 3)
+            $actionDelayByteRange = (20 + (8 * $action) + 4)..(20 + (8 * $action) + 7)
+
+            $currentAction = [PSCustomObject]@{
+                type         = [ACTION_TYPE]([System.BitConverter]::ToInt32($Bytes[$actionTypeByteRange],0))
+                delayMilliSeconds = [System.BitConverter]::ToInt32($Bytes[$actionDelayByteRange],0)
+            }
+
+            $actionsCollection.Add($currentAction) | Out-Null
+        }
+
+        $actionsCollection
+    }
+}
+
+<#
+    .SYNOPSIS
+        Set a failure actions settings registry value.
+
+    .DESCRIPTION
+        Set all of the settings that are stored in the 'FailureActions' binary registry property
+        as well as some of the settings stored in other properties like 'RebootMessage',
+        'FailureCommand', and 'FailureActionsOnNonCrashFailures'.
+
+    .PARAMETER ServiceName
+        The name of the service to set
+
+    .PARAMETER ResetPeriodSeconds
+        The time after which to reset the failure count to zero if there are no failures, in seconds.
+        Specify INFINITE to indicate that this value should never be reset.
+
+    .PARAMETER RebootMessage
+        The message to be broadcast to server users before rebooting in response to the SC_ACTION_REBOOT service controller action.
+        If this value is NULL, the reboot message is unchanged. If the value is an empty string (""), the reboot message is deleted
+        and no message is broadcast.
+
+    .PARAMETER FailureCommand
+        The command line of the process for the CreateProcess function to execute in response to the SC_ACTION_RUN_COMMAND service controller action.
+        This process runs under the same account as the service. If this value is NULL, the command is unchanged.
+        If the value is an empty string (""), the command is deleted and no program is run when the service fails.
+
+    .PARAMETER FailureActionsCollection
+        An array of hash tables representing the failure actions to take. Each hash table should have
+        two keys: type and delayMilliSeconds. The value for the type key should be one of RESTART, RUN_COMMAND, REBOOT, or NONE.
+        The value for the delayMilliSeconds key is an integer value of seconds to wait before applying the requested action.
+
+    .PARAMETER FailureActionsOnNonCrashFailures
+        By default, failure actions are only queued if the service terminates without reporting
+        a status of SERVICE_STOPPED. Setting this to true will queue actions in that case, as well
+        as if the SERVICE_STOPPED state is reported but the exit code is non-zero. This property
+        correspones to the 'Enable Actions For Stops With Errors' check box in the 'Recovery' tab
+        of the service properties GUI.
+#>
+function Set-ServiceFailureActionProperty {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceName,
+
+        [Parameter()]
+        [System.UInt32]
+        $ResetPeriodSeconds,
+
+        [Parameter()]
+        [System.String]
+        $RebootMessage,
+
+        [Parameter()]
+        [System.String]
+        $FailureCommand,
+
+        [Parameter()]
+        [Microsoft.Management.Infrastructure.CimInstance[]]
+        $FailureActionsCollection,
+
+        [Parameter()]
+        [System.Boolean]
+        $FailureActionsOnNonCrashFailures
+    )
+
+    process {
+        $failureActions = Get-ServiceFailureActions -Service $ServiceName
+
+        <#
+        This integer array will store the cumulative value that should be stored
+        in the 'FailureActions' registry property. This property must always be set as
+        one large byte array, so the way this works is as follows:
+        1. Get the settings as they exist now.
+        2. Check each of the available values to see if something has changed.
+           If it has, modify the value in the $failureActions object.
+        3. Once that check as been run add the value from the $failureActions object to the
+           $integerData array.
+        4. Once all values have been checked, the integer array can be turned into a
+           byte array of hex values and then that is written to the registry.
+        #>
+        $integerData = New-Object System.Collections.Generic.List[int32]
+
+        # Check to see if we need to modify the existing value.
+        if ($PSBoundParameters.ContainsKey('ResetPeriodSeconds'))
+        {
+            $failureActions.resetPeriodSeconds = $ResetPeriodSeconds
+        }
+
+        # Add the value to the integer array.
+        $integerData.add($failureActions.resetPeriodSeconds) | Out-Null
+
+        if ($PSBoundParameters.ContainsKey('RebootMessage'))
+        {
+            # This setting is a combination a flag in the _SERVICE_FAILURE_ACTIONSA struct,
+            # and the actual string value for the message stored in the 'RebootMessage' registry property.
+            # If hasRebootMessage is already true, then we know the key exists and we can just set it.
+            if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -ErrorAction SilentlyContinue)
+            {
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage | Out-Null
+            }
+            else
+            {
+                # If hasRebootMessage was false, we both have to create the key with the string value, and set the flag to true in the struct.
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'RebootMessage' -Value $RebootMessage | Out-Null
+                $failureActions.hasRebootMessage = 1
+            }
+        }
+
+        # Add the current value of the flag to the array.
+        $integerData.add($failureActions.hasRebootMessage) | Out-Null
+
+        # This is the same as the RebootMessage property above. It's a combination of a flag in the struct, and an external property that stores the value.
+        if ($PSBoundParameters.ContainsKey('FailureCommand'))
+        {
+            if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -ErrorAction SilentlyContinue)
+            {
+                Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand | Out-Null
+            }
+            else
+            {
+                New-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureCommand' -Value $FailureCommand | Out-Null
+                $failureActions.hasFailureCommand = 1
+            }
+        }
+
+        # Add the current value of the flag to the array.
+        $integerData.Add($failureActions.hasFailureCommand) | Out-Null
+
+        if ($PSBoundParameters.ContainsKey('FailureActionsCollection'))
+        {
+            $failureActions.ActionsCollection = $FailureActionsCollection
+        }
+
+        # Even if we didn't change anything about the failure actions, we still have to build the array
+        $integerData.add($failureActions.ActionsCollection.count)
+
+        # This element of the array is a pointer to the array of actions. It's always going to be 0x14 or 20 in decimal.
+        $integerData.Add(20)
+
+        # Iterate over the actions and their properties to add the integers that they encode to the array.
+        foreach ($action in $failureActions.ActionsCollection) {
+            $integerData.add([ACTION_TYPE]$action.type) | Out-Null
+            $integerData.add($action.delayMilliSeconds) | Out-Null
+        }
+
+        # Now that we finally have all of the data we need, we can convert it to a byte array.
+        $bytes = $integerData | Format-Hex -raw | Select-Object -ExpandProperty bytes
+
+        Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActions' -Value $bytes | Out-Null
+
+        # This flag is stored in it's own registry property, so we don't have to add a flag value to the struct, but we do have to create the key
+        # if it doesn't already exist.
+        if ($PSBoundParameters.ContainsKey('FailureActionsOnNonCrashFailures'))
+        {
+            Invoke-SCFailureFlag -ServiceName $ServiceName -Flag $FailureActionsOnNonCrashFailures
+        }
+    }
+}
+
+function Test-HasRestartFailureAction
+{
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [System.Object[]]
+        $Collection
+    )
+
+    process {
+        $hasRestartAction = $false
+
+        foreach ($action in $collection) {
+            if ($action.type -eq 'RUN_COMMAND') {
+                $hasRestartAction = $true
+            }
+        }
+
+        $hasRestartAction
+    }
+}
+
+<#
+.SYNOPSIS
+    Use sc.exe to set the failure flag
+.DESCRIPTION
+    The FailureActionsOnNonCrashFailures feature of the service controller
+    cannnot be reliably managed in code via anything but sc.exe. Managing the
+    registry key value on its own has proved inadequate. This cmdlet gives us
+    an easily mockable and testable way to invoke sc to manage this flag.
+.EXAMPLE
+    PS C:\> Invoke-SCFailureFlag -ServiceName WSearch -Flag 1
+    This will invoke the equivelent of '& sc.exe failureFlag WSearch 1'
+#>
+function Invoke-SCFailureFlag {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $ServiceName,
+        [Parameter(Mandatory = $true)]
+        [ValidateSet(0,1)]
+        [System.Int32]
+        $Flag
+    )
+
+    process {
+        & sc.exe @('failureFlag', $ServiceName, $Flag) | Out-Null
+        # A quick sanity check to make sure the value was set as expected without having to parse the string output of sc.
+        $failureFlag = (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\$serviceName -Name 'FailureActionsOnNonCrashFailures').failureActionsOnNonCrashFailures
+        if ($failureFlag -ne $Flag) {
+            throw "sc.exe did not succesfully set the failure flag for $servicename"
+        }
+    }
 }

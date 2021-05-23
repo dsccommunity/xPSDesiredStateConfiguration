@@ -217,7 +217,136 @@ try
                             $getTargetResourceResult.Dependencies | Should -Be $ExpectedValues.Dependencies
                         }
                     }
+
+                    if ($ExpectedValues.ContainsKey('ResetPeriodSeconds'))
+                    {
+                        it 'Should return the reset period in seconds' {
+                            $getTargetResourceResult.resetPeriodSeconds | Should -Be $ExpectedValues.resetPeriodSeconds
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('FailureCommand'))
+                    {
+                        it 'Should return the failure command' {
+                            $getTargetResourceResult.failureCommand | Should -Be $ExpectedValues.FailureCommand
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('RebootMessage'))
+                    {
+                        it 'Should return the reboot message' {
+                            $getTargetResourceResult.rebootMessage | Should -Be $ExpectedValues.RebootMessage
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('FailureActionsCollection'))
+                    {
+                        foreach ($index in 0..($ExpectedValues.failureActionsCollection.count - 1)) {
+                            it "Should return the correct failure action for index $index" {
+                                $getTargetResourceResult.failureActionsCollection[$index].type | Should -Be $ExpectedValues.FailureActionsCollection[$index].type
+                                $getTargetResourceResult.failureActionsCollection[$index].delaySeconds | Should -Be $ExpectedValues.FailureActionsCollection[$index].delaySeconds
+                            }
+                        }
+                    }
+
+                    if ($ExpectedValues.ContainsKey('FailureActionsOnNonCrashFailures'))
+                    {
+                        it 'Should return the failure actions on non crash failures flag' {
+                            $getTargetResourceResult.failureActionsOnNonCrashFailures | Should -Be $ExpectedValues.failureActionsOnNonCrashFailures
+                        }
+                    }
                 }
+
+                function Get-MockFailureActionsData
+                {
+                    [CmdletBinding()]
+                    param (
+                        [Parameter()]
+                        [System.String]
+                        $DataSetName
+                    )
+
+                    switch ($DataSetName) {
+                        '1ActionNoCommandOrMessage' {
+                            $data = @{
+                                resetPeriodSeconds = 86400
+                                hasRebootMessage = 0
+                                hasFailureCommand = 0
+                                failureActionCount = 1
+                                failureCommand = $null
+                                rebootMessage = $null
+                                actionsCollection = @(@{
+                                    type = 'RESTART'
+                                    delaySeconds = 30000
+                                })
+                                failureActionsOnNonCrashFailures = $true
+                            }
+                        }
+                        '3ActionsCommandAndMessage' {
+                            $data = @{
+                                resetPeriodSeconds = 172800
+                                hasRebootMessage = 1
+                                hasFailureCommand = 1
+                                failureActionCount = 3
+                                failureCommand = 'C:\new\command.exe'
+                                rebootMessage = 'Mocked Reboot Message'
+                                actionsCollection = @(@{
+                                    type = 'RESTART'
+                                    delaySeconds = 30000
+                                },@{
+                                    type = 'RUN_COMMAND'
+                                    delaySeconds = 30000
+                                },@{
+                                    type = 'REBOOT'
+                                    delaySeconds = 30000
+                                })
+                                failureActionsOnNonCrashFailures = $true
+                            }
+                        }
+                        Default {}
+                    }
+
+                    $keyData = New-Object 'System.Collections.Generic.List[int]'
+
+                    $keyData.add($data.resetPeriodSeconds) | Out-Null
+                    $keyData.add($data.hasRebootMessage) | Out-Null
+                    $keyData.add($data.hasFailureCommand) | Out-Null
+                    $keyData.add($data.failureActionCount) | Out-Null
+                    $keyData.add(20) | Out-Null
+
+                    foreach ($action in $data.ActionsCollection) {
+                        $keyData.add([ACTION_TYPE]$action.type) | Out-Null
+                        $keyData.add($action.delaySeconds) | Out-Null
+                    }
+
+                    $key = @{
+                        FailureActions = $keyData | Format-Hex -raw | Select-Object -ExpandProperty bytes
+                    }
+
+                    if ($data.failureActionsOnNonCrashFailures)
+                    {
+                        $key.failureActionsOnNonCrashFailures = 1
+                    }
+
+                    if ($data.hasRebootMessage)
+                    {
+                        $key.RebootMessage = 'Mocked Reboot Message'
+                    }
+
+                    if ($data.hasFailureCommand)
+                    {
+                        $key.FailureCommand = 'C:\new\command.exe'
+                    }
+
+                    $GetValueNames = {$this.keys}
+                    $GetValue = {param($key) $this[$key]}
+
+                    Add-Member -InputObject $key -MemberType ScriptMethod -Name GetValueNames -Value $GetValueNames
+                    Add-Member -InputObject $key -MemberType ScriptMethod -Name GetValue -Value $GetValue
+
+                    @([PSCustomObject]$data, $key)
+                }
+
 
                 Mock -CommandName 'Get-Service' -MockWith { }
                 Mock -CommandName 'Get-ServiceCimInstance' -MockWith { }
@@ -265,23 +394,31 @@ try
                         DesktopInteract = $true
                     }
 
+                    $testServiceFailureActions, $failureRegistryKey = Get-MockFailureActionsData -DataSetName '1ActionNoCommandOrMessage'
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                    Mock -CommandName 'Get-Item' -ParameterFilter { $Path -eq "HKLM:\SYSTEM\CurrentControlSet\Services\$($testService.name)" } -MockWith { return $failureRegistryKey}
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $testServiceCimInstance.StartName
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $testServiceCimInstance.StartName
+                        State                            = $testService.Status
+                        DisplayName                      = $testService.DisplayName
+                        Description                      = $testServiceCimInstance.Description
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = [System.Object[]] $testService.ServicesDependedOn.Name
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -307,23 +444,31 @@ try
                         DesktopInteract = $false
                     }
 
+                    $testServiceFailureActions, $failureRegistryKey = Get-MockFailureActionsData -DataSetName '3ActionsCommandAndMessage'
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                    Mock -CommandName 'Get-Item' -ParameterFilter { $Path -eq "HKLM:\SYSTEM\CurrentControlSet\Services\$($testService.name)" } -MockWith { return $failureRegistryKey}
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $expectedBuiltInAccountValue
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = $null
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $expectedBuiltInAccountValue
+                        State                            = $testService.Status
+                        DisplayName                      = $testService.DisplayName
+                        Description                      = $testServiceCimInstance.Description
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = $null
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -356,23 +501,31 @@ try
                         DesktopInteract = $false
                     }
 
+                    $testServiceFailureActions, $failureRegistryKey = Get-MockFailureActionsData -DataSetName '1ActionNoCommandOrMessage'
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
+                    Mock -CommandName 'Get-Item' -ParameterFilter { $Path -eq "HKLM:\SYSTEM\CurrentControlSet\Services\$($testService.name)" } -MockWith { return $failureRegistryKey}
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $expectedBuiltInAccountValue
-                        State           = $testService.Status
-                        DisplayName     = $null
-                        Description     = $null
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $expectedBuiltInAccountValue
+                        State                            = $testService.Status
+                        DisplayName                      = $null
+                        Description                      = $null
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = [System.Object[]] $testService.ServicesDependedOn.Name
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -442,10 +595,13 @@ try
                         DesktopInteract = $false
                     }
 
+                    $testServiceFailureActions, $failureRegistryKey = Get-MockFailureActionsData -DataSetName '1ActionNoCommandOrMessage'
+
                     Mock -CommandName 'Get-Service' -MockWith { return $testService }
                     Mock -CommandName 'Get-ServiceCimInstance' -MockWith { return $testServiceCimInstance }
                     Mock -CommandName 'ConvertTo-StartupTypeString' -MockWith { return $convertToStartupTypeStringResult }
                     Mock -CommandName 'Write-Warning'
+                    Mock -CommandName 'Get-Item' -ParameterFilter { $Path -eq "HKLM:\SYSTEM\CurrentControlSet\Services\$($testService.name)" } -MockWith { return $failureRegistryKey}
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
@@ -454,16 +610,21 @@ try
                     }
 
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $testServiceCimInstance.StartName
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] ($testService.ServicesDependedOn | Where-Object -FilterScript {![System.String]::IsNullOrEmpty($_.Name)}).Name
+                        Name                             = $getTargetResourceParameters.Name
+                        Ensure                           = 'Present'
+                        Path                             = $testServiceCimInstance.PathName
+                        StartupType                      = $convertToStartupTypeStringResult
+                        BuiltInAccount                   = $testServiceCimInstance.StartName
+                        State                            = $testService.Status
+                        DisplayName                      = $testService.DisplayName
+                        Description                      = $testServiceCimInstance.Description
+                        DesktopInteract                  = $testServiceCimInstance.DesktopInteract
+                        Dependencies                     = [System.Object[]] ($testService.ServicesDependedOn | Where-Object -FilterScript {![System.String]::IsNullOrEmpty($_.Name)}).Name
+                        ResetPeriodSeconds               = $testServiceFailureActions.resetPeriodSeconds
+                        FailureCommand                   = $testServiceFailureActions.failureCommand
+                        RebootMessage                    = $testServiceFailureActions.rebootMessage
+                        FailureActionsCollection         = $testServiceFailureActions.actionsCollection
+                        failureActionsOnNonCrashFailures = $testServiceFailureActions.failureActionsOnNonCrashFailures
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
@@ -629,6 +790,14 @@ try
                         DisplayName = 'TestDisplayName'
                         Description = 'Test device description'
                         Dependencies = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+                        ResetPeriodSeconds = 86400
+                        RebootMessage = 'RebootMessage'
+                        FailureCommand = 'C:\Path\To\Command.exe'
+                        FailureActionsCollection = @(@{
+                            type = 'RESTART'
+                            delaySeconds = 500
+                        })
+                        FailureActionsOnNonCrashFailures = $true
                     }
 
                     It 'Should not throw' {
@@ -656,7 +825,20 @@ try
                     }
 
                     It 'Should change all service properties except Credential' {
-                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $BuiltInAccount -eq $setTargetResourceParameters.BuiltInAccount -and $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and $DisplayName -eq $setTargetResourceParameters.DisplayName -and $Description -eq $setTargetResourceParameters.Description -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies) } -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter {
+                            $ServiceName -eq $setTargetResourceParameters.Name -and
+                            $StartupType -eq $setTargetResourceParameters.StartupType -and
+                            $BuiltInAccount -eq $setTargetResourceParameters.BuiltInAccount -and
+                            $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and
+                            $DisplayName -eq $setTargetResourceParameters.DisplayName -and
+                            $Description -eq $setTargetResourceParameters.Description -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies) -and
+                            $ResetPeriodSeconds -eq $setTargetResourceParameters.resetPeriodSeconds -and
+                            $RebootMessage -eq $setTargetResourceParameters.rebootMessage -and
+                            $FailureCommand -eq $setTargetResourceParameters.failureCommand -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.failureActionsCollection -DifferenceObject $FailureActionsCollection) -and
+                            $FailureActionsOnNonCrashFailures -eq $setTargetResourceParameters.failureActionsOnNonCrashFailures
+                        } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should start the service' {
@@ -680,6 +862,14 @@ try
                         DisplayName = 'TestDisplayName'
                         Description = 'Test device description'
                         Dependencies = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+                        ResetPeriodSeconds = 86400
+                        RebootMessage = 'RebootMessage'
+                        FailureCommand = 'C:\Path\To\Command.exe'
+                        FailureActionsCollection = @(@{
+                            type = 'RESTART'
+                            delaySeconds = 500
+                        })
+                        FailureActionsOnNonCrashFailures = $true
                     }
 
                     It 'Should not throw' {
@@ -707,7 +897,20 @@ try
                     }
 
                     It 'Should change all service properties except BuiltInAccount' {
-                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Credential -DifferenceObject $Credential) -and $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and $DisplayName -eq $setTargetResourceParameters.DisplayName -and $Description -eq $setTargetResourceParameters.Description -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies) } -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter {
+                            $ServiceName -eq $setTargetResourceParameters.Name -and
+                            $StartupType -eq $setTargetResourceParameters.StartupType -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Credential -DifferenceObject $Credential) -and
+                            $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and
+                            $DisplayName -eq $setTargetResourceParameters.DisplayName -and
+                            $Description -eq $setTargetResourceParameters.Description -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies)
+                            $ResetPeriodSeconds -eq $setTargetResourceParameters.resetPeriodSeconds -and
+                            $RebootMessage -eq $setTargetResourceParameters.rebootMessage -and
+                            $FailureCommand -eq $setTargetResourceParameters.failureCommand -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.failureActionsCollection -DifferenceObject $FailureActionsCollection) -and
+                            $FailureActionsOnNonCrashFailures -eq $setTargetResourceParameters.failureActionsOnNonCrashFailures
+                        } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not attempt to start the service' {
@@ -758,7 +961,9 @@ try
                     }
 
                     It 'Should set the service to start with the GroupManagedServiceAccount' {
-                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $GroupManagedServiceAccount -eq $setTargetResourceParameters.GroupManagedServiceAccount } -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter {
+                            $ServiceName -eq $setTargetResourceParameters.Name -and$StartupType -eq $setTargetResourceParameters.StartupType -and$GroupManagedServiceAccount -eq $setTargetResourceParameters.GroupManagedServiceAccount
+                        } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not attempt to start the service' {
@@ -929,6 +1134,14 @@ try
                         DisplayName = 'TestDisplayName'
                         Description = 'Test device description'
                         Dependencies = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+                        ResetPeriodSeconds = 86400
+                        RebootMessage = 'RebootMessage'
+                        FailureCommand = 'C:\Path\To\Command.exe'
+                        FailureActionsCollection = @(@{
+                            type = 'RESTART'
+                            delaySeconds = 500
+                        })
+                        FailureActionsOnNonCrashFailures = $true
                     }
 
                     It 'Should not throw' {
@@ -956,7 +1169,20 @@ try
                     }
 
                     It 'Should change all service properties except Credential' {
-                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $BuiltInAccount -eq $setTargetResourceParameters.BuiltInAccount -and $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and $DisplayName -eq $setTargetResourceParameters.DisplayName -and $Description -eq $setTargetResourceParameters.Description -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies) } -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter {
+                            $ServiceName -eq $setTargetResourceParameters.Name -and
+                            $StartupType -eq $setTargetResourceParameters.StartupType -and
+                            $BuiltInAccount -eq $setTargetResourceParameters.BuiltInAccount -and
+                            $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and
+                            $DisplayName -eq $setTargetResourceParameters.DisplayName -and
+                            $Description -eq $setTargetResourceParameters.Description -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies)
+                            $ResetPeriodSeconds -eq $setTargetResourceParameters.resetPeriodSeconds -and
+                            $RebootMessage -eq $setTargetResourceParameters.rebootMessage -and
+                            $FailureCommand -eq $setTargetResourceParameters.failureCommand -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.failureActionsCollection -DifferenceObject $FailureActionsCollection) -and
+                            $FailureActionsOnNonCrashFailures -eq $setTargetResourceParameters.failureActionsOnNonCrashFailures
+                        } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not attempt to start the service' {
@@ -979,6 +1205,14 @@ try
                         DisplayName = 'TestDisplayName'
                         Description = 'Test device description'
                         Dependencies = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+                        ResetPeriodSeconds = 86400
+                        RebootMessage = 'RebootMessage'
+                        FailureCommand = 'C:\Path\To\Command.exe'
+                        FailureActionsCollection = @(@{
+                            type = 'RESTART'
+                            delaySeconds = 500
+                        })
+                        FailureActionsOnNonCrashFailures = $true
                     }
 
                     It 'Should not throw' {
@@ -1006,7 +1240,19 @@ try
                     }
 
                     It 'Should change all service properties except BuiltInAccount' {
-                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and $StartupType -eq $setTargetResourceParameters.StartupType -and $BuiltInAccount -eq $setTargetResourceParameters.BuiltInAccount -and $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and $DisplayName -eq $setTargetResourceParameters.DisplayName -and $Description -eq $setTargetResourceParameters.Description -and $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies) } -Times 1 -Scope 'Context'
+                        Assert-MockCalled -CommandName 'Set-ServiceProperty' -ParameterFilter { $ServiceName -eq $setTargetResourceParameters.Name -and
+                            $StartupType -eq $setTargetResourceParameters.StartupType -and
+                            $BuiltInAccount -eq $setTargetResourceParameters.BuiltInAccount -and
+                            $DesktopInteract -eq $setTargetResourceParameters.DesktopInteract -and
+                            $DisplayName -eq $setTargetResourceParameters.DisplayName -and
+                            $Description -eq $setTargetResourceParameters.Description -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.Dependencies -DifferenceObject $Dependencies)
+                            $ResetPeriodSeconds -eq $setTargetResourceParameters.resetPeriodSeconds -and
+                            $RebootMessage -eq $setTargetResourceParameters.rebootMessage -and
+                            $FailureCommand -eq $setTargetResourceParameters.failureCommand -and
+                            $null -eq (Compare-Object -ReferenceObject $setTargetResourceParameters.failureActionsCollection -DifferenceObject $FailureActionsCollection) -and
+                            $FailureActionsOnNonCrashFailures -eq $setTargetResourceParameters.failureActionsOnNonCrashFailures
+                        } -Times 1 -Scope 'Context'
                     }
 
                     It 'Should not attempt to start the service' {
@@ -1151,6 +1397,17 @@ try
 
                     It 'Should throw an error for Credential and GroupManagedServiceAccount conflict' {
                         $expectedErrorMessage = $script:localizedData.CredentialParametersAreMutallyExclusive -f $testTargetResourceParameters.Name
+                        { Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
+                    }
+
+                    $testTargetResourceParameters = @{
+                        Name = $script:testServiceName
+                        FailureCommand = 'C:\Path\To\Command.exe'
+                        FailureActionsCollection = @{Type = 'RESTART'; Delay = 180}
+                    }
+
+                    It 'Should throw an error for invalid use of FailureCommand parameter' {
+                        $expectedErrorMessage = $script:localizedData.MustSpecifyRestartFailureAction
                         { Test-TargetResource @testTargetResourceParameters } | Should -Throw -ExpectedMessage $expectedErrorMessage
                     }
                 }

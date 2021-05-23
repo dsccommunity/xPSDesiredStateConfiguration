@@ -1,0 +1,10 @@
+1. When the current collection of failure actions has only a single item, and perhaps also if it has zero items, there is a problem somewhere in Test-TargetResource, and the `count` property cannot be found on an object.
+   Make sure that the collection of actions on both sides is always cast to an array so that the count of actions can be found.
+
+    PowerShell DSC resource DSC_xServiceResource  failed to execute Test-TargetResource functionality with error message: The property 'count' cannot be found on this object.
+    Verify that the property exists.
+      + CategoryInfo          : InvalidOperation: (:) [], CimException
+      + FullyQualifiedErrorId : ProviderOperationExecutionFailure
+      + PSComputerName        : localhost
+
+2. Ensure that the unit and acceptance testing suites account for the possibility of the above.
