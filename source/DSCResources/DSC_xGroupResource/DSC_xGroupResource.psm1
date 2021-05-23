@@ -830,9 +830,9 @@ function Set-TargetResourceOnFullSKU
 
                     if ($needsRename)
                     {
-                        $dirEntry = [System.DirectoryServices.DirectoryEntry]($group.GetUnderlyingObject())
-                        $dirEntry.Rename($newName);
-                        $dirEntry.CommitChanges();
+                        $dirEntry = $group.GetUnderlyingObject()
+                        $dirEntry.Rename($newName)
+                        $dirEntry.CommitChanges()
                     }
 
                     # Send an operation success verbose message.
