@@ -12,6 +12,7 @@ ConvertFrom-StringData @'
     NoConfigurationRequiredGroupDoesNotExist = Group {0} does not exist on this node. No action required.
     CouldNotFindPrincipal = Could not find a principal with the provided name {0}.
     MembersAndIncludeExcludeConflict = The {0} and {1} parameters conflict. The {0} parameter should not be used in any combination with the {1} parameter.
+    NewGroupNewNameConflict = The {0} parameter cannot be used when creating a new group.
     GroupAndMembersEmpty = Members is empty and group {0} has no members. No change to group members is needed.
     MemberIsNotALocalUser = {0} is not a local user. User's principal source is {1}.
     MemberNotValid = The group member {0} does not exist or cannot be resolved.

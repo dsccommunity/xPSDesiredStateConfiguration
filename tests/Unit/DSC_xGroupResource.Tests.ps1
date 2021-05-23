@@ -41,6 +41,7 @@ try
                 $script:disposableObjects = @()
 
                 $script:testGroupName = 'TestGroup'
+                $script:testGroupName2= 'TestGroup2'
                 $script:testGroupDescription = 'A group for testing'
 
                 $script:localDomain = $env:computerName
@@ -437,6 +438,24 @@ try
                         Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'New-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName }
                         Assert-MockCalled -CommandName 'Set-LocalGroup' -ParameterFilter { $Name -eq $script:testGroupName -and $Description -eq $script:testGroupDescription }
+                    }
+
+                    It 'Should change the name of an existing group' {
+                        Set-TargetResourceOnNanoServer -GroupName $script:testGroupName `
+                                                    -NewName $script:testGroupName2
+                        #Assert-MockCalled -CommandName 'Get-PrincipalContext'
+                        #Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $GroupName -eq $script:testGroupName2 }
+                        Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Sid -eq $script:testGroupName }
+                        Assert-MockCalled -CommandName 'Rename-LocalGroup' -ParameterFilter { $Group.Sid -eq $script:testGroupName -and $Group.NewName -eq $script:testGroupName2 }
+                    }
+
+                    It 'Should change the name of an existing group again' {
+                        Set-TargetResourceOnNanoServer -GroupName $script:testGroupName2 `
+                                                    -NewName $script:testGroupName
+                        #Assert-MockCalled -CommandName 'Get-PrincipalContext'
+                        #Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $GroupName -eq $script:testGroupName }
+                        Assert-MockCalled -CommandName 'Get-LocalGroup' -ParameterFilter { $Sid -eq $script:testGroupName2 }
+                        Assert-MockCalled -CommandName 'Rename-LocalGroup' -ParameterFilter { $Group.Sid -eq $script:testGroupName2 -and $Group.NewName -eq $script:testGroupName }
                     }
 
                     It 'Should create a group with one local member using Members' {
@@ -1088,7 +1107,32 @@ try
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
                     }
 
-                     Mock -CommandName 'Get-Group' -MockWith { return $script:testGroup }
+                    Mock -CommandName 'Get-Group' -MockWith { return $script:testGroup }
+
+                    It 'Should change the name of an existing group' {
+                        Mock -CommandName 'New-Object' -ParameterFilter { $TypeName -eq 'System.DirectoryServices.AccountManagement.GroupPrincipal' } -MockWith { return $testGroup }
+
+                        Set-TargetResourceOnFullSKU -GroupName $script:testGroupName `
+                                                    -NewName $script:testGroupName2
+
+                        Assert-MockCalled -CommandName 'Get-PrincipalContext'
+                        #Assert-MockCalled -CommandName 'Get-Group' -ParameterFilter { $GroupName -eq $script:testGroupName2 }
+                        Assert-MockCalled -CommandName 'Get-Group' -ParameterFilter { $GroupName -eq $script:testGroupName }
+                        Assert-MockCalled -CommandName 'New-Object' -ParameterFilter { $TypeName -eq 'System.DirectoryServices.AccountManagement.GroupPrincipal' }
+                        Assert-MockCalled -CommandName 'Save-Group' -ParameterFilter { $Group.Name -eq $script:testGroupName -and $Group.NewName -eq $script:testGroupName2 }
+                    }
+
+                    It 'Should change the name of an existing group again' {
+                        Mock -CommandName 'New-Object' -ParameterFilter { $TypeName -eq 'System.DirectoryServices.AccountManagement.GroupPrincipal' } -MockWith { return $testGroup }
+
+                        Set-TargetResourceOnFullSKU -GroupName $script:testGroupName2 `
+                                                    -NewName $script:testGroupName
+
+                        Assert-MockCalled -CommandName 'Get-PrincipalContext'
+                        #Assert-MockCalled -CommandName 'Get-Group' -ParameterFilter { $GroupName -eq $script:testGroupName }
+                        Assert-MockCalled -CommandName 'Get-Group' -ParameterFilter { $GroupName -eq $script:testGroupName2 }
+                        Assert-MockCalled -CommandName 'Save-Group' -ParameterFilter { $Group.Name -eq $script:testGroupName2 -and $Group.NewName -eq $script:testGroupName }
+                    }
 
                     It 'Should add a member to an existing group with no members using Members' {
                         $testMembers = @( $script:testUserPrincipal1.Name )

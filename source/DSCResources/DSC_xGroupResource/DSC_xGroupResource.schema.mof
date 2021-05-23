@@ -5,6 +5,7 @@ class DSC_xGroupResource : OMI_BaseResource
   [Key, Description("The name of the group to create, modify, or remove.")] String GroupName;
   [Write, ValueMap{"Present", "Absent"}, Values{"Present", "Absent"}, Description("Indicates if the group should exist or not.")] String Ensure;
   [Write, Description("The description the group should have.")] String Description;
+  [Write, Description("Specifies the new name of the group.")] String NewName;
   [Write, Description("The members the group should have.")] String Members[];
   [Write, Description("The members the group should include.")] String MembersToInclude[];
   [Write, Description("The members the group should exclude.")] String MembersToExclude[];
