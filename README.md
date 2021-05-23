@@ -886,6 +886,8 @@ None
   * Default Value: Present
 * **[String] FullName** _(Write)_: Represents a string with the full name you
   want to use for the user account.
+* **[String] NewName** _(Write)_: Represents a string with the new name you
+  want to use for the user account. When setting this property, the UserName property must be set appropriately to uniquely identify the user both before and after setting the SamAccountName, e.g. by SID.
 * **[PSCredential] Password** _(Write)_: Indicates the password you want to use
   for this account.
 * **[Boolean] PasswordChangeNotAllowed** _(Write)_: Indicates if the user can
