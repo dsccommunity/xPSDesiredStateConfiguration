@@ -120,6 +120,7 @@ try
                     }
 
                     Mock -CommandName Test-IsNanoServer -MockWith { return $false }
+                    #Mock -CommandName New-Object
 
                     New-User -Credential $script:newCredential1 -Description $script:newUserDescription1
 
