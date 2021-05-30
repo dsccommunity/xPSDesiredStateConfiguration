@@ -539,9 +539,9 @@ function Set-TargetResource
             else
             {
                 # Absent case
-                try
-                {
-                    $startInfo.FileName = $productEntry.GetValue('UninstallString')
+                $uninstallString = $productEntry.GetValue('UninstallString')
+                if ($uninstallString) {
+                    $startInfo.FileName = $uninstallString
 
                     if ($Arguments)
                     {
@@ -549,8 +549,7 @@ function Set-TargetResource
                         $startInfo.Arguments = " $Arguments"
                     }
                 }
-                catch
-                {
+                else {
                     # We may have used the Name earlier, now we need the actual ID
                     if ($null -eq $productEntry -or $null -eq $productEntry.Name)
                     {
