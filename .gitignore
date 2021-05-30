@@ -2,8 +2,8 @@
 *.user
 *.coverage
 .vs
+.vscode
 .psproj
 .sln
 markdownissues.txt
-TestResults.xml
 output/

@@ -27,7 +27,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Prefix of the WCF SVC file.
 
     .PARAMETER ApplicationPoolName
-        The IIS ApplicationPool to use for the Pull Server. If not specified a
+        The IIS Application Pool to use for the Pull Server. If not specified a
         pool with name 'PSWS' will be created.
 
     .PARAMETER CertificateSubject
@@ -41,7 +41,7 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         The thumbprint of the Certificate in CERT:\LocalMachine\MY\ for Pull Server.
 
     .PARAMETER ConfigureFirewall
-        Enable incomming firewall exceptions for the configured DSC Pull Server
+        Enable incoming firewall exceptions for the configured DSC Pull Server
         port. Defaults to true.
 
     .PARAMETER DisableSecurityBestPractices
@@ -259,7 +259,7 @@ function Get-TargetResource
         Specifies is self-signed certs will be accepted for client authentication.
 
     .PARAMETER ApplicationPoolName
-        The IIS ApplicationPool to use for the Pull Server. If not specified a
+        The IIS Application Pool to use for the Pull Server. If not specified a
         pool with name 'PSWS' will be created.
 
     .PARAMETER CertificateSubject
@@ -276,7 +276,7 @@ function Get-TargetResource
         The location on the disk where the Configuration is stored.
 
     .PARAMETER ConfigureFirewall
-        Enable incomming firewall exceptions for the configured DSC Pull Server
+        Enable incoming firewall exceptions for the configured DSC Pull Server
         port. Defaults to true.
 
     .PARAMETER DatabasePath
@@ -622,7 +622,7 @@ function Set-TargetResource
         Specifies is self-signed certs will be accepted for client authentication.
 
     .PARAMETER ApplicationPoolName
-        The IIS ApplicationPool to use for the Pull Server. If not specified a
+        The IIS Application Pool to use for the Pull Server. If not specified a
         pool with name 'PSWS' will be created.
 
     .PARAMETER CertificateSubject
@@ -639,7 +639,7 @@ function Set-TargetResource
         The location on the disk where the Configuration is stored.
 
     .PARAMETER ConfigureFirewall
-        Enable incomming firewall exceptions for the configured DSC Pull Server
+        Enable incoming firewall exceptions for the configured DSC Pull Server
         port. Defaults to true.
 
     .PARAMETER DatabasePath
