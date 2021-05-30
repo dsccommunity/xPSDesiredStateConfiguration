@@ -28,7 +28,7 @@ if (-not (Test-IsNanoServer))
         Retrieves the user with the given username
 
     .PARAMETER UserName
-        The name of the user to retrieve.
+        Indicates the account name for which you want to ensure a specific state.
 #>
 function Get-TargetResource
 {
@@ -57,37 +57,38 @@ function Get-TargetResource
         Creates, modifies, or deletes a user.
 
     .PARAMETER UserName
-        The name of the user to create, modify, or delete.
+        Indicates the account name for which you want to ensure a specific state.
 
     .PARAMETER Ensure
-        Specifies whether the user should exist or not.
-        By default this is set to Present.
+        Specified if the user account is present or absent.
 
     .PARAMETER FullName
-        The (optional) full name or display name of the user.
-        If not provided this value will remain blank.
+        The full name of the user account.
 
     .PARAMETER Description
-        Optional description for the user.
+        Indicates the description you want to use for the user account.
 
     .PARAMETER Password
-        The desired password for the user.
+        Indicates the password you want to use for this account.
 
     .PARAMETER Disabled
-        Specifies whether the user should be disabled or not.
-        By default this is set to $false
+        Indicates if the account is enabled. Set this property to $true to ensure
+        that this account is disabled, and set it to $false to ensure that it is
+        enabled. Defaults to $false.
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the password should ever expire or not.
-        By default this is set to $false
+        Indicates if the password will expire. To ensure that the password for this
+        account will never expire, set this property to $true, and set it to $false
+        if the password will expire.
 
     .PARAMETER PasswordChangeRequired
-        Specifies whether the user must reset their password or not.
-        By default this is set to $false
+        Indicates if the user must change the password at the next sign in. Set
+        this property to $true if the user must change the password.
 
     .PARAMETER PasswordChangeNotAllowed
-        Specifies whether the user is allowed to change their password or not.
-        By default this is set to $false
+        Indicates if the user can change the password. Set this property to $true
+        to ensure that the user cannot change the password, and set it to $false
+        to allow the user to change the password.
 
     .NOTES
         If Ensure is set to 'Present' then the password parameter is required.
@@ -155,34 +156,38 @@ function Set-TargetResource
         Tests if a user is in the desired state.
 
     .PARAMETER UserName
-        The name of the user to test the state of.
+        Indicates the account name for which you want to ensure a specific state.
 
     .PARAMETER Ensure
-        Specifies whether the user should exist or not.
-        By default this is set to Present
+        Specified if the user account is present or absent.
 
     .PARAMETER FullName
-        The full name/display name that the user should have.
-        If not provided, this value will not be tested.
+        The full name of the user account.
 
     .PARAMETER Description
-        The description that the user should have.
-        If not provided, this value will not be tested.
+        Indicates the description you want to use for the user account.
 
     .PARAMETER Password
-        The password the user should have.
+        Indicates the password you want to use for this account.
 
     .PARAMETER Disabled
-        Specifies whether the user account should be disabled or not.
+        Indicates if the account is enabled. Set this property to $true to ensure
+        that this account is disabled, and set it to $false to ensure that it is
+        enabled. Defaults to $false.
 
     .PARAMETER PasswordNeverExpires
-        Specifies whether the password should ever expire or not.
+        Indicates if the password will expire. To ensure that the password for this
+        account will never expire, set this property to $true, and set it to $false
+        if the password will expire.
 
     .PARAMETER PasswordChangeRequired
-        Not used in Test-TargetResource as there is no easy way to test this value.
+        Indicates if the user must change the password at the next sign in. Set
+        this property to $true if the user must change the password.
 
     .PARAMETER PasswordChangeNotAllowed
-        Specifies whether the user should be allowed to change their password or not.
+        Indicates if the user can change the password. Set this property to $true
+        to ensure that the user cannot change the password, and set it to $false
+        to allow the user to change the password.
 #>
 function Test-TargetResource
 {
