@@ -92,10 +92,14 @@ function Get-TargetResource
         Enter the fully qualified path of a Windows PowerShell script.
 
     .PARAMETER RunAsCredential
-        Specifies the credential for commands of this session configuration.
+        Specifies the credential for commands of this session configuration. By default, commands
+        run with the permissions of the current user.
 
     .PARAMETER SecurityDescriptorSDDL
         Specifies the Security Descriptor Definition Language (SDDL) string for the configuration.
+        This string determines the permissions that are required to use the new session configuration.
+        To use a session configuration in a session, users must have at least Execute(Invoke)
+        permission for the configuration.
 
     .PARAMETER AccessMode
         Enables and disables the session configuration and determines whether it can be used for
@@ -335,10 +339,14 @@ function Set-TargetResource
         Enter the fully qualified path of a Windows PowerShell script.
 
     .PARAMETER RunAsCredential
-        Specifies the credential for commands of this session configuration.
+        Specifies the credential for commands of this session configuration. By default, commands
+        run with the permissions of the current user.
 
     .PARAMETER SecurityDescriptorSDDL
         Specifies the Security Descriptor Definition Language (SDDL) string for the configuration.
+        This string determines the permissions that are required to use the new session configuration.
+        To use a session configuration in a session, users must have at least Execute(Invoke)
+        permission for the configuration.
 
     .PARAMETER AccessMode
         Enables and disables the session configuration and determines whether it can be used for
