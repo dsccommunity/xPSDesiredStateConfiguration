@@ -15,7 +15,8 @@
 
 <#
     .DESCRIPTION
-        This configuration registers a DSC client node with the pull server.
+        This meta configuration configures the LCM to registers a node with the
+        pull server.
 
     .PARAMETER RegistrationKey
         This key will be used by client nodes as a shared key to authenticate
@@ -33,10 +34,10 @@
     .EXAMPLE
         $registrationKey = [System.Guid]::NewGuid()
 
-        xDscWebService_Client_Config -RegistrationKey $registrationKey
+        LCM_Register_Node_Config -RegistrationKey $registrationKey
 #>
 [DSCLocalConfigurationManager()]
-Configuration xDscWebService_Client_Config
+Configuration LCM_Register_Node_Config
 {
     param
     (

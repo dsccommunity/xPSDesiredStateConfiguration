@@ -56,8 +56,6 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 - **xFileUpload** is a composite resource which ensures that local files exist
   on an SMB share.
 - **xGroup** provides a mechanism to manage local groups on a target node.
-- **xGroupSet** provides a mechanism to configure and manage multiple xGroup
-  resources with common settings but different names.
 - **xMsiPackage** provides a mechanism to install and uninstall .msi packages.
 - **xPackage** manages the installation of .msi and .exe packages.
 - **xRegistry** provides a mechanism to manage registry keys and values on a
@@ -66,24 +64,31 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 - **xScript** provides a mechanism to run PowerShell script blocks on a target
   node.
 - **xService** provides a mechanism to configure and manage Windows services.
-- **xServiceSet** provides a mechanism to configure and manage multiple
-  xService resources with common settings but different names.
 - **xUser** provides a mechanism to manage local users on the target node.
 - **xWindowsFeature** provides a mechanism to install or uninstall Windows
   roles or features on a target node.
-- **xWindowsFeatureSet** provides a mechanism to configure and manage multiple
-  xWindowsFeature resources on a target node.
 - **xWindowsOptionalFeature** provides a mechanism to enable or disable
   optional features on a target node.
-- **xWindowsOptionalFeatureSet** provides a mechanism to configure and manage
-  multiple xWindowsOptionalFeature resources on a target node.
 - **xWindowsPackageCab** provides a mechanism to install or uninstall a package
   from a Windows cabinet (cab) file on a target node.
 - **xWindowsProcess** provides a mechanism to start and stop a Windows process.
+
+## Composite Resources
+
+- **xGroupSet** provides a mechanism to configure and manage multiple xGroup
+  resources with common settings but different names.
 - **xProcessSet** allows starting and stopping of a group of windows processes
   with no arguments.
+- **xServiceSet** provides a mechanism to configure and manage multiple
+  xService resources with common settings but different names.
+- **xWindowsFeatureSet** provides a mechanism to configure and manage multiple
+  xWindowsFeature resources on a target node.
+- **xWindowsOptionalFeatureSet** provides a mechanism to configure and manage
+  multiple xWindowsOptionalFeature resources on a target node.
 
-Resources that work on Nano Server:
+## Nano Server Support
+
+The following resources and composite resources work on Nano Server:
 
 - xGroup
 - xService
@@ -93,7 +98,17 @@ Resources that work on Nano Server:
 - xWindowsOptionalFeatureSet
 - xWindowsPackageCab
 
+## Register a Node with DSC Pull Server
+
+This module contains an example meta configuration that can be used to configure
+the Local Configuration Manager to register with a DSC Pull Server.
+
+[LCM Register Node](\source\Examples\LCM\LCM_Register_Node_Config.ps1)
+
 ## Functions
+
+This resource also contains support functions that can be used to manage a deployed
+DSC pull server.
 
 ### Publish-ModuleToPullServer
 
