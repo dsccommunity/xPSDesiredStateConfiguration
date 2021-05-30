@@ -49,7 +49,7 @@ ConvertFrom-StringData @'
     PathDoesNotContainValidPSDriveRoot = The path "{0}" cannot be accessed because it does not contain any directories to use as the root of a PSDrive.
     ErrorCreatingPSDrive = An error occurred while attempting to create a PSDrive to access the path "{0}" under the user "{1}".
     PathDoesNotExistAsLeaf = The path "{0}" does not exist or is not a path leaf.
-    DestinationExistsAsFile = A file exists at the desintation path "{0}".
+    DestinationExistsAsFile = A file exists at the destination path "{0}".
     ErrorOpeningArchive = An error occurred while attempting to open the archive at path "{0}".
     ErrorCopyingFromArchiveToDestination = An error occurred while attempting copy from the archive to the destination path "{0}".
     DirectoryIsNotEmpty = The directory at path "{0}" is not empty, so it will not be removed.

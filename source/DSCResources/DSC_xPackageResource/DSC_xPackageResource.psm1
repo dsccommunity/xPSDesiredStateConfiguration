@@ -19,6 +19,35 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
 $script:packageCacheLocation = "$env:programData\Microsoft\Windows\PowerShell\Configuration\BuiltinProvCache\DSC_xPackageResource"
 $script:msiTools = $null
 
+<#
+    .SYNOPSIS
+        Retrieves the current installation state of the package.
+
+    .PARAMETER Name
+        The name of the package to be added or removed.
+
+    .PARAMETER ProductId
+        The identifying number used to uniquely identify this package.
+
+    .PARAMETER Path
+        The path, URL or UNC path to the package.
+
+    .PARAMETER CreateCheckRegValue
+        Specifies if a registry value should be created when the packages is installed.
+
+    .PARAMETER InstalledCheckRegHive
+        The hive in which to create the registry key. Defaults to 'LocalMachine'.
+
+    .PARAMETER InstalledCheckRegKey
+        The registry key to validate the package is installed.
+
+    .PARAMETER InstalledCheckRegValueName
+        The registry value name to validate the package is installed.
+
+    .PARAMETER InstalledCheckRegValueData
+        The registry value to validate the package is installed.
+#>
+
 function Get-TargetResource
 {
     [OutputType([System.Collections.Hashtable])]
@@ -31,14 +60,14 @@ function Get-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
         [System.String]
         $ProductId,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.Boolean]
@@ -177,6 +206,77 @@ function Get-TargetResource
     return $packageResourceResult
 }
 
+<#
+    .SYNOPSIS
+        Installs or uninstalls a package.
+
+    .PARAMETER Ensure
+        Indicates whether to Ensure that the package is 'Present' or 'Absent'.
+        Defaults to 'Present'.
+
+    .PARAMETER Name
+        The name of the package to be added or removed.
+
+    .PARAMETER ProductId
+        The identifying number used to uniquely identify this package.
+
+    .PARAMETER Path
+        The path, URL or UNC path to the package.
+
+    .PARAMETER Arguments
+        The arguments to be passed to the package during addition or removal.
+
+        When installing MSI packages, the `/quiet` and `/norestart` arguments are
+        automatically applied.
+
+    .PARAMETER IgnoreReboot
+        Ignore a pending reboot if requested by package installation. The default
+        value is $false and DSC will try to reboot the system.
+
+    .PARAMETER Credential
+        The credentials to be used for mounting the UNC path (if applicable).
+
+    .PARAMETER ReturnCode
+        The list of possible valid return codes for this install or removal.
+
+    .PARAMETER LogPath
+        The path to log the output of the MSI or EXE.
+
+    .PARAMETER FileHash
+        The expected hash value of the file found in the Path location.
+
+    .PARAMETER HashAlgorithm
+        The algorithm used to generate the FileHash value. Defaults to 'SHA256'.
+
+    .PARAMETER SignerSubject
+        The subject that must match the signer certificate of the digital signature.
+        Wildcards are allowed.
+
+    .PARAMETER SignerThumbprint
+        The certificate thumbprint which must match the signer certificate of the
+        digital signature.
+
+    .PARAMETER ServerCertificateValidationCallback
+        PowerShell code used to validate SSL certificates of HTTPS url assigned to Path.
+
+    .PARAMETER RunAsCredential
+        The credentials under which to run the installation.
+
+    .PARAMETER CreateCheckRegValue
+        Specifies if a registry value should be created when the packages is installed.
+
+    .PARAMETER InstalledCheckRegHive
+        The hive in which to create the registry key. Defaults to 'LocalMachine'.
+
+    .PARAMETER InstalledCheckRegKey
+        The registry key to validate the package is installed.
+
+    .PARAMETER InstalledCheckRegValueName
+        The registry value name to validate the package is installed.
+
+    .PARAMETER InstalledCheckRegValueData
+        The registry value to validate the package is installed.
+#>
 function Set-TargetResource
 {
     [CmdletBinding(SupportsShouldProcess = $true)]
@@ -193,14 +293,14 @@ function Set-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
         [System.String]
         $ProductId,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]
@@ -730,6 +830,78 @@ function Set-TargetResource
     Write-Verbose -Message $script:localizedData.PackageConfigurationComplete
 }
 
+<#
+    .SYNOPSIS
+        Tests the current state of the installed package.
+
+    .PARAMETER Ensure
+        Indicates whether to Ensure that the package is 'Present' or 'Absent'.
+        Defaults to 'Present'.
+
+    .PARAMETER Name
+        The name of the package to be added or removed.
+
+    .PARAMETER ProductId
+        The identifying number used to uniquely identify this package.
+
+    .PARAMETER Path
+        The path, URL or UNC path to the package.
+
+    .PARAMETER Arguments
+        The arguments to be passed to the package during addition or removal.
+
+        When installing MSI packages, the '/quiet' and '/norestart' arguments are
+        automatically applied.
+
+    .PARAMETER IgnoreReboot
+        Ignore a pending reboot if requested by package installation. The default
+        value is $false and DSC will try to reboot the system.
+
+    .PARAMETER Credential
+        The credentials to be used for mounting the UNC path (if applicable).
+
+    .PARAMETER ReturnCode
+        The list of possible valid return codes for this install or removal.
+
+    .PARAMETER LogPath
+        The path to log the output of the MSI or EXE.
+
+    .PARAMETER FileHash
+        The expected hash value of the file found in the Path location.
+
+    .PARAMETER HashAlgorithm
+        The algorithm used to generate the FileHash value. Defaults to 'SHA256'.
+
+    .PARAMETER SignerSubject
+        The subject that must match the signer certificate of the digital signature.
+        Wildcards are allowed.
+
+    .PARAMETER SignerThumbprint
+        The certificate thumbprint which must match the signer certificate of the
+        digital signature.
+
+    .PARAMETER ServerCertificateValidationCallback
+        PowerShell code used to validate SSL certificates of HTTPS url assigned to Path.
+
+    .PARAMETER RunAsCredential
+        The credentials under which to run the installation.
+
+    .PARAMETER CreateCheckRegValue
+        Specifies if a registry value should be created when the packages is installed.
+
+    .PARAMETER InstalledCheckRegHive
+        The hive in which to create the registry key. Defaults to 'LocalMachine'.
+
+    .PARAMETER InstalledCheckRegKey
+        The registry key to validate the package is installed.
+
+    .PARAMETER InstalledCheckRegValueName
+        The registry value name to validate the package is installed.
+
+    .PARAMETER InstalledCheckRegValueData
+        The registry value to validate the package is installed.
+#>
+
 function Test-TargetResource
 {
     [OutputType([System.Boolean])]
@@ -747,14 +919,14 @@ function Test-TargetResource
         $Name,
 
         [Parameter(Mandatory = $true)]
-        [ValidateNotNullOrEmpty()]
-        [System.String]
-        $Path,
-
-        [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
         [System.String]
         $ProductId,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $Path,
 
         [Parameter()]
         [System.String]

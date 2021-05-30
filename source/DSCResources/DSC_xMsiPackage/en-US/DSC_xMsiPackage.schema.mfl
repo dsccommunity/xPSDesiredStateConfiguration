@@ -1,4 +1,4 @@
-[Description("The xMsiPackage resource is used to manage MSI files.") : Amended,AMENDMENT, LOCALE("MS_409")]
+[Description("Provides a mechanism to install and uninstall .msi packages.") : Amended,AMENDMENT, LOCALE("MS_409")]
 class DSC_xMsiPackage : OMI_BaseResource
 {
   [Key,Description("The identifying number used to uniquely identify this package") : Amended] String ProductId;

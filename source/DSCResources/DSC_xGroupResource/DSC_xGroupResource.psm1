@@ -131,11 +131,6 @@ function Get-TargetResource
     .PARAMETER Ensure
         Specifies whether the group should exist or not.
 
-        To ensure that the group does exist, set this property to present.
-        To ensure that the group does not exist, set this property to Absent.
-
-        The default value is Present.
-
     .PARAMETER Description
         The description the group should have.
 
@@ -243,49 +238,53 @@ function Set-TargetResource
         Tests if the group with the specified name is in the desired state.
 
     .PARAMETER GroupName
-        The name of the group to test the state of.
+        The name of the group to create, modify, or remove.
 
     .PARAMETER Ensure
-        Indicates if the group should exist or not.
-
-        Set this property to "Absent" to test that the group does not exist.
-        Setting it to "Present" (the default value) tests that the group exists.
+        Specifies whether the group should exist or not.
 
     .PARAMETER Description
-        The description of the group to test for.
+        The description the group should have.
 
     .PARAMETER Members
-        The list of members the group should have.
+        The members the group should have.
 
-        The value of this property is an array of strings of the formats domain qualified name
-        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts.
+        This property will replace all the current group members with the specified members.
 
-        If you set this property in a configuration, do not use either the MembersToExclude or
-        MembersToInclude property. Doing so will generate an error.
+        Members should be specified as strings in the format of their domain qualified name
+        (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...),
+        or their username (for local machine accounts).
+
+        Using either the MembersToExclude or MembersToInclude properties in the same configuration
+        as this property will generate an error.
 
     .PARAMETER MembersToInclude
-        A list of members that should be in the group.
+        The members the group should include.
 
-        The value of this property is an array of strings of the formats domain qualified name
-        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts.
+        This property will only add members to a group.
 
-        If you set this property in a configuration, do not use the Members property.
-        Doing so will generate an error.
+        Members should be specified as strings in the format of their domain qualified name
+        (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...),
+        or their username (for local machine accounts).
+
+        Using the Members property in the same configuration as this property will generate an error.
 
     .PARAMETER MembersToExclude
-        A list of members that should not be in the group.
+        The members the group should exclude.
 
-        The value of this property is an array of strings of the formats domain qualified name
-        (domain\username), UPN (username@domainname), distinguished name (CN=username,DC=...) and/or
-        a unqualified (username) for local machine accounts.
+        This property will only remove members from a group.
 
-        If you set this property in a configuration, do not use the Members property.
-        Doing so will generate an error.
+        Members should be specified as strings in the format of their domain qualified name
+        (domain\username), their UPN (username@domainname), their distinguished name (CN=username,DC=...),
+        or their username (for local machine accounts).
+
+        Using the Members property in the same configuration as this property will generate an error.
 
     .PARAMETER Credential
-        The credentials required to resolve non-local group members
+        A credential to resolve and add non-local group members.
+
+        An error will occur if this account does not have the appropriate Active Directory permissions to add all
+        non-local accounts to the group.
 #>
 function Test-TargetResource
 {
