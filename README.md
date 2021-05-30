@@ -53,8 +53,6 @@ A full list of changes in each version can be found in the [change log](CHANGELO
   node a DSC pull server.
 - **xEnvironment** provides a mechanism to configure and manage environment
   variables for a machine or process.
-- **xFileUpload** is a composite resource which ensures that local files exist
-  on an SMB share.
 - **xGroup** provides a mechanism to manage local groups on a target node.
 - **xMsiPackage** provides a mechanism to install and uninstall .msi packages.
 - **xPackage** manages the installation of .msi and .exe packages.
@@ -75,6 +73,8 @@ A full list of changes in each version can be found in the [change log](CHANGELO
 
 ## Composite Resources
 
+- **xFileUpload** is a composite resource which ensures that local files exist
+  on an SMB share.
 - **xGroupSet** provides a mechanism to configure and manage multiple xGroup
   resources with common settings but different names.
 - **xProcessSet** allows starting and stopping of a group of windows processes
