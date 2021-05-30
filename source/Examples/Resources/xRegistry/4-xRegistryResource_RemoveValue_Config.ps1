@@ -28,12 +28,12 @@
         The name of the value to remove.
 
     .EXAMPLE
-        xRegistryResource_RemoveValueConfig -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -ValueName 'MyValue'
+        xRegistry_RemoveValueConfig -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -ValueName 'MyValue'
 
         Compiles a configuration that removes the registry value MyValue from
         the key 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'.
 #>
-Configuration xRegistryResource_RemoveValue_Config
+Configuration xRegistry_RemoveValue_Config
 {
     [CmdletBinding()]
     param

@@ -25,12 +25,12 @@
         The path to the key in the registry that should be removed.
 
     .EXAMPLE
-        xRegistryResource_AddKey_Config -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\MyNewKey'
+        xRegistry_AddKey_Config -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\MyNewKey'
 
         Compiles a configuration that removes the registry key called MyNewKey under
         the parent key 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'.
 #>
-Configuration xRegistryResource_RemoveKey_Config
+Configuration xRegistry_RemoveKey_Config
 {
     [CmdletBinding()]
     param

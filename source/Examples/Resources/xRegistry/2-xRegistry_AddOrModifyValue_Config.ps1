@@ -48,7 +48,7 @@
          The default value is $false.
 
     .EXAMPLE
-        xRegistryResource_AddOrModifyValue_Config -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -ValueName 'MyValue' -ValueType 'Binary' -ValueData @('0x00') -OverwriteExisting $true
+        xRegistry_AddOrModifyValue_Config -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' -ValueName 'MyValue' -ValueType 'Binary' -ValueData @('0x00') -OverwriteExisting $true
 
         Compiles a configuration that creates a new registry value called MyValue under
         the parent key 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment'.
@@ -75,7 +75,7 @@
 
         Replace the <resource-group> and <automation-account> with correct values.
 #>
-Configuration xRegistryResource_AddOrModifyValue_Config
+Configuration xRegistry_AddOrModifyValue_Config
 {
     [CmdletBinding()]
     param
