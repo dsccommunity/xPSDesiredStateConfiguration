@@ -157,7 +157,7 @@ function Get-TargetResource
 
     .PARAMETER LogPath
         Indicates the path to a log file to log the operation.
-        If not specified, the default log path will be used (%windir%\logs\ServerManager.log).
+        If not specified, the default log path will be used (%WINDIR%\logs\ServerManager.log).
 #>
 function Set-TargetResource
 {
