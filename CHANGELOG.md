@@ -42,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated build to use `Sampler.GitHubTasks` - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
 - Added support for publishing code coverage to `CodeCov.io` and
   Azure Pipelines - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
+- Updated vmImage used for build stage of CI to use `Windows-2022`. This is because
+  of issues with Wiki Generation of xUploadFile composite resource on Linux agents.
 - xFileUpload:
   - Changed this composite resource to use `xScript` in this DSC Resource module
     rather than the built-in `PSDesiredStateConfiguration` module.
