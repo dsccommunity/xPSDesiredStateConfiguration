@@ -103,7 +103,7 @@ The following resources and composite resources work on Nano Server:
 This module contains an example meta configuration that can be used to configure
 the Local Configuration Manager to register with a DSC Pull Server.
 
-[LCM Register Node](\source\Examples\LCM\LCM_Register_Node_Config.ps1)
+[LCM Register Node](\source\Examples\LCM\1-LCM_RegisterNode_Config.ps1)
 
 ## Functions
 
