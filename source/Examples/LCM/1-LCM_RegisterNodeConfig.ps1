@@ -34,10 +34,10 @@
     .EXAMPLE
         $registrationKey = [System.Guid]::NewGuid()
 
-        LCM_Register_Node_Config -RegistrationKey $registrationKey
+        LCM_RegisterNodeConfig -RegistrationKey $registrationKey
 #>
 [DSCLocalConfigurationManager()]
-Configuration LCM_Register_Node_Config
+Configuration LCM_RegisterNodeConfig
 {
     param
     (
