@@ -24,7 +24,7 @@ stages:
       - job: Package_Module
         displayName: 'Package Module'
         pool:
-          vmImage: 'windows-2022'
+          vmImage: 'windows-2019'
         steps:
           - task: GitVersion@5
             name: gitversion
