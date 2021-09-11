@@ -79,9 +79,7 @@ configuration xFileUpload
             -ArgumentList $Credential, $CertificateThumbprint
     }
 
-    Import-DscResource -ModuleName xPSDesiredStateConfiguration
-
-    xScript FileUpload
+    Script FileUpload
     {
         # Get script is not implemented cause reusing Script resource's schema does not make sense
         GetScript  = {

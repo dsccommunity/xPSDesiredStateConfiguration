@@ -44,9 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Azure Pipelines - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
 - Updated vmImage used for build stage of CI to use `Windows-2019` to resolve
   issues with Wiki Generation of `xUploadFile` composite resource on Linux agents.
-- xFileUpload:
-  - Changed this composite resource to use `xScript` in this DSC Resource module
-    rather than the built-in `PSDesiredStateConfiguration` module.
 
 ## [9.1.0] - 2020-02-19
 
