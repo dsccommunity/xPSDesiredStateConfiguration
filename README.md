@@ -117,7 +117,7 @@ provided path. It accepts its input from a pipeline so it can be used in
 conjunction with Get-Module as in 'Get-Module -Name ModuleName' |
 Publish-Module
 
-### Publish-MOFToPullServer
+### Publish-MofToPullServer
 
 Publishes a 'FileInfo' object(s) to the pull server configuration repository. It
 accepts FileInfo input from a pipeline so it can be used in conjunction with
