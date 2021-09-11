@@ -33,6 +33,17 @@ stages:
               runtime: 'core'
               configFilePath: 'GitVersion.yml'
 
+          - script: |
+              wget https://github.com/microsoft/omi/releases/download/v1.6.8-0/omi-1.6.8-0.ssl_100.ulinux.x64.deb
+              wget https://github.com/microsoft/PowerShell-DSC-for-Linux/releases/download/v1.2.1-0/dsc-1.2.1-0.ssl_100.x64.deb
+
+              sudo dpkg -i omi-1.6.8-0.ssl_100.ulinux.x64.deb dsc-1.2.1-0.ssl_100.x64.deb
+
+              # This is a fix to the following DSC for Linux issue: https://github.com/microsoft/PowerShell-DSC-for-Linux/issues/674
+              sudo mv /etc/opt/omi/conf/dsc/configuration/baseregistration /etc/opt/omi/conf/dsc/configuration/BaseRegistration
+              sudo mv /etc/opt/omi/conf/dsc/configuration/BaseRegistration/baseresource.schema.mof /etc/opt/omi/conf/dsc/configuration/BaseRegistration/BaseResource.schema.mof
+            displayName: 'Install DSC for Linux'
+
           - task: PowerShell@2
             name: package
             displayName: 'Build & Package Module'
