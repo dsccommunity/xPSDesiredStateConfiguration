@@ -16,7 +16,7 @@ The supported version of this module is available as
 
 > Note: New features are no longer being added to the **PSDscResource`** module.
 > If you require new features, please migrate to **xPSDesiredStateConfiguration**
-> and request the features against that module.
+> and request the features against this module.
 
 This module is automatically tested using PowerShell 5.1 on servers running
 Windows 2012 R2 and Windows 2016, and is expected to work on other operating

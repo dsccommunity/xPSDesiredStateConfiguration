@@ -99,7 +99,7 @@ Configuration xUser_CreateUserDetailed_Config
         $Disabled
     )
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {

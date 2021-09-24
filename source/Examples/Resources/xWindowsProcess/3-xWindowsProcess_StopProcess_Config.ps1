@@ -55,7 +55,7 @@ Configuration xWindowsProcess_StopProcess_Config
         $Argument
     )
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {

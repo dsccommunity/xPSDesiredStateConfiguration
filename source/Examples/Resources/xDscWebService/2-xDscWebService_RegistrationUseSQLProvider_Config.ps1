@@ -74,7 +74,7 @@ Configuration xDscWebService_RegistrationUseSQLProvider_Config
         $Port = 8080
     )
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName NetworkingDsc -ModuleVersion 7.4.0.0
     # To explicitly import the resource WindowsFeature and File.
     Import-DscResource -ModuleName PSDesiredStateConfiguration

@@ -21,7 +21,7 @@
 #>
 configuration xDscWebService_Removal_Config
 {
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {

@@ -84,7 +84,7 @@ Configuration xDscWebService_Preferred_Config
         $ApplicationPoolName
     )
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
     Import-DscResource -ModuleName NetworkingDsc -ModuleVersion 7.4.0.0
     Import-DscResource -ModuleName xWebAdministration -ModuleVersion 3.0.0.0
 

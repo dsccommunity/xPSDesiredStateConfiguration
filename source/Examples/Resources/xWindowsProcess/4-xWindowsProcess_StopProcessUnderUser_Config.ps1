@@ -68,7 +68,7 @@ Configuration xWindowsProcess_StopProcessUnderUser_Config
         $Credential
     )
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {

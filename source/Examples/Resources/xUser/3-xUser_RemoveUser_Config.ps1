@@ -39,7 +39,7 @@ Configuration xUser_RemoveUser_Config
         $UserName
     )
 
-    Import-DSCResource -ModuleName xPSDesiredStateConfiguration
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
 
     Node localhost
     {

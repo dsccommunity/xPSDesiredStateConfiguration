@@ -1,5 +1,4 @@
-[Description("The xMsiPackage resource is used to manage MSI files.") : Amended,AMENDMENT, LOCALE("MS_409")]
-[Description("The xMsiPackage resource is used to manage MSI files.") : Amended,AMENDMENT, LOCALE("MS_409")]
+[Description("The xPackage resource is used to install or uninstall a package on the host.") : Amended,AMENDMENT, LOCALE("MS_409")]
 class DSC_xPackageResource : OMI_BaseResource
 {
   [Key, Description("The name of the package to be added or removed.") : Amended] string Name;
