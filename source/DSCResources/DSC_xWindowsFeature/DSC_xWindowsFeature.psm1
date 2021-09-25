@@ -18,11 +18,12 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         Retrieves the status of the role or feature with the given name on the target machine.
 
     .PARAMETER Name
-        The name of the role or feature to retrieve
+        Indicates the name of the role or feature that you want to ensure is added or removed.
+        This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the
+        display name of the role or feature.
 
     .PARAMETER Credential
-        The credential (if required) to retrieve the role or feature.
-        Optional.
+        Indicates the credential to use to add or remove the role or feature if needed.
 
     .NOTES
         If the specified role or feature does not contain any subfeatures then
@@ -139,27 +140,24 @@ function Get-TargetResource
         with the option of installing or uninstalling all subfeatures as well.
 
     .PARAMETER Name
-        The name of the role or feature to install or uninstall.
+        Indicates the name of the role or feature that you want to ensure is added or removed.
+        This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the
+        display name of the role or feature.
 
     .PARAMETER Ensure
-        Specifies whether the role or feature should be installed ('Present')
-        or uninstalled ('Absent').
-        By default this is set to Present.
+        Specifies whether the feature should be installed (Present) or uninstalled (Absent).
+        Defaults to 'Present'.
 
     .PARAMETER IncludeAllSubFeature
-        Specifies whether or not all subfeatures should be installed or uninstalled with
-        the specified role or feature. Default is false.
-        If this property is true and Ensure is set to Present, all subfeatures will be installed.
-        If this property is false and Ensure is set to Present, subfeatures will not be installed or uninstalled.
-        If Ensure is set to Absent, all subfeatures will be uninstalled.
+        Set this property to $true to ensure the state of all required subfeatures with the
+        state of the feature you specify with the Name property. The default value is $false.
 
     .PARAMETER Credential
-        The credential (if required) to install or uninstall the role or feature.
-        Optional.
+        Indicates the credential to use to add or remove the role or feature if needed.
 
     .PARAMETER LogPath
-        The custom path to the log file to log this operation.
-        If not passed in, the default log path will be used (%windir%\logs\ServerManager.log).
+        Indicates the path to a log file to log the operation.
+        If not specified, the default log path will be used (%WINDIR%\logs\ServerManager.log).
 #>
 function Set-TargetResource
 {
@@ -309,28 +307,23 @@ function Set-TargetResource
         Tests if the role or feature with the given name is in the desired state.
 
     .PARAMETER Name
-        The name of the role or feature to test the state of.
+        Indicates the name of the role or feature that you want to ensure is added or removed.
+        This is the same as the Name property from the Get-WindowsFeature cmdlet, and not the
+        display name of the role or feature.
 
     .PARAMETER Ensure
-        Specifies whether the role or feature should be installed ('Present')
-        or uninstalled ('Absent').
-        By default this is set to Present.
+        Specifies whether the feature should be installed (Present) or uninstalled (Absent).
+        Defaults to 'Present'.
 
     .PARAMETER IncludeAllSubFeature
-        Specifies whether the subfeatures of the indicated role or feature should also be checked
-        to ensure they are in the desired state. If Ensure is set to 'Present' and this is set to
-        $true then each subfeature is checked to ensure it is installed as well. If Ensure is set to
-        Absent and this is set to $true, then each subfeature is checked to ensure it is uninstalled.
-        As of now, this test can't be used to check if a feature is Installed but all of its
-        subfeatures are uninstalled.
-        By default this is set to $false.
+        Set this property to $true to ensure the state of all required subfeatures with the
+        state of the feature you specify with the Name property. The default value is $false.
 
     .PARAMETER Credential
-        The Credential (if required) to test the status of the role or feature.
-        Optional.
+        Indicates the credential to use to add or remove the role or feature if needed.
 
     .PARAMETER LogPath
-        The path to the log file to log this operation.
+        Indicates the path to a log file to log the operation.
         Not used in Test-TargetResource.
 
 #>

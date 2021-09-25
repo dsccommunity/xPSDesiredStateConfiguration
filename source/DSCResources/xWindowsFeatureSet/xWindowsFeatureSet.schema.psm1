@@ -34,7 +34,7 @@ Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common'
 
     .PARAMETER LogPath
         The custom file path to which to log this operation.
-        If not passed in, the default log path will be used (%windir%\logs\ServerManager.log).
+        If not passed in, the default log path will be used (%WINDIR%\logs\ServerManager.log).
 #>
 configuration xWindowsFeatureSet
 {

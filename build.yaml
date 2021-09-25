@@ -34,6 +34,8 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
+    - Generate_Conceptual_Help
+    - Generate_Wiki_Content
 
   pack:
     - build
@@ -87,6 +89,8 @@ ModuleBuildTasks:
     - '*.build.Sampler.ib.tasks'
   Sampler.GitHubTasks:
     - '*.ib.tasks'
+  DscResource.DocGenerator:
+    - 'Task.*'
 
 TaskHeader: |
   param($Path)

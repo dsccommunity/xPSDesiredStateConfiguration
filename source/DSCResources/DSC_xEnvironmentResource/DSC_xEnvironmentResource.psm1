@@ -25,12 +25,10 @@ $script:maxUserEnvVariableLength = 255
         specified, only the machine value will be returned.
 
     .PARAMETER Name
-        The name of the environment variable to retrieve.
+        he name of the environment variable for which you want to ensure a specific state.
 
     .PARAMETER Target
-        Indicates where to retrieve the variable: The machine or the process. If both are indicated
-        then only the value from the machine is returned.
-        The default is both since that is the default for the rest of the resource.
+        Indicates the target where the environment variable should be set.
 #>
 function Get-TargetResource
 {
@@ -54,11 +52,11 @@ function Get-TargetResource
 
     if ($Target -contains 'Machine')
     {
-        $environmentVaraible = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
+        $environmentVariable = Get-EnvironmentVariableWithoutExpanding -Name $Name -ErrorAction 'SilentlyContinue'
 
-        if ($null -ne $environmentVaraible)
+        if ($null -ne $environmentVariable)
         {
-            $valueToReturn = $environmentVaraible.$Name
+            $valueToReturn = $environmentVariable.$Name
         }
     }
     else
@@ -91,32 +89,26 @@ function Get-TargetResource
         Creates, modifies, or removes an environment variable.
 
     .PARAMETER Name
-        The name of the environment variable to create, modify, or remove.
+        he name of the environment variable for which you want to ensure a specific state.
 
     .PARAMETER Value
-        The value to set the environment variable to.
-        If a value is not provided, the variable cannot be created.
-        If Ensure is set to Present, the variable does not already exist, and a value is not
-        specified, an error will be thrown indicating that the variable cannot be created without
-        a specified value. If Ensure is set to Present, the variable already exists, and no value
-        is specified, nothing will be changed.
+        The desired value for the environment variable. The default value is an empty string
+        which either indicates that the variable should be removed entirely or that the value
+        does not matter when testing its existence. Multiple entries can be entered and
+        separated by semicolons.
 
     .PARAMETER Ensure
         Specifies whether the variable should exist or not.
-        To ensure that the variable or value does exist, set this property to Present.
-        To ensure that the variable or value does not exist, set this property to Absent.
-        The default value is Present.
 
     .PARAMETER Path
-        Indicates whether or not this is a path variable. If this property is set to True,
-        the value provided through the Value property will be appended to (or removed from if
-        Ensure is set to Absent) the existing value.
-        If this property is set to False, the existing value will be replaced by the new Value.
-        The default value is False.
+        Indicates whether or not the environment variable is a path variable. If the variable
+        being configured is a path variable, the value provided will be appended to or removed
+        from the existing value, otherwise the existing value will be replaced by the new value.
+        When configured as a Path variable, multiple entries separated by semicolons are ensured
+        to be either present or absent without affecting other Path entries.
 
     .PARAMETER Target
-        Indicates where to set the environment variable: The machine, the process, or both.
-        The default is both: ('Process', 'Machine')
+        Indicates the target where the environment variable should be set.
 #>
 function Set-TargetResource
 {
@@ -405,28 +397,26 @@ function Set-TargetResource
         Tests if the environment variable is in the desired state.
 
     .PARAMETER Name
-        The name of the environment variable to test.
+        he name of the environment variable for which you want to ensure a specific state.
 
     .PARAMETER Value
-        The value of the environment variable to test. If no value is specified then only the
-        existence of the variable will be checked.
+        The desired value for the environment variable. The default value is an empty string
+        which either indicates that the variable should be removed entirely or that the value
+        does not matter when testing its existence. Multiple entries can be entered and
+        separated by semicolons.
 
     .PARAMETER Ensure
         Specifies whether the variable should exist or not.
-        To test that the variable does exist, set this property to Present.
-        To test that the variable does not exist, set this property to Absent.
-        The default value is Present.
 
     .PARAMETER Path
-        Indicates whether or not this is a path variable. If this property is set to True,
-        the value(s) provided through the Value property will be checked against all existing
-        values already set in this variable.
-        If this property is set to False, the value will be compared directly to the existing value.
-        The default value is False.
+        Indicates whether or not the environment variable is a path variable. If the variable
+        being configured is a path variable, the value provided will be appended to or removed
+        from the existing value, otherwise the existing value will be replaced by the new value.
+        When configured as a Path variable, multiple entries separated by semicolons are ensured
+        to be either present or absent without affecting other Path entries.
 
     .PARAMETER Target
-        Indicates where to test the environment variable: The machine, the process, or both.
-        The default is both: ('Process', 'Machine')
+        Indicates the target where the environment variable should be set.
 #>
 function Test-TargetResource
 {

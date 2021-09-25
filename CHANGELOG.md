@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Improved integration test reliability by resetting the DSC LCM
       before executing each test using the `Reset-DscLcm`
       function - Fixes [Issue #686](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/686).
+  - Added build task `Generate_Conceptual_Help` to generate conceptual help
+    for the DSC resource - Fixes [Issue #677](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/677).
+  - Added build task `Generate_Wiki_Content` to generate the wiki content
+    that can be used to update the GitHub Wiki - Fixes [Issue #677](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/677).
 - xDSCWebService:
   - Moved strings into localization file - Fixes [Issue #622](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/622).
   - Corrected case of `CertificateThumbPrint` to `CertificateThumbprint`.
@@ -38,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated build to use `Sampler.GitHubTasks` - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
 - Added support for publishing code coverage to `CodeCov.io` and
   Azure Pipelines - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
+- Updated vmImage used for build stage of CI to use `Windows-2019` to resolve
+  issues with Wiki Generation of `xUploadFile` composite resource on Linux agents.
 
 ## [9.1.0] - 2020-02-19
 
