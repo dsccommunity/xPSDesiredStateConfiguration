@@ -12,7 +12,7 @@ the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
 but also includes bugfixes and new features, including additional resources.
 Some resources in this module uses the prefix 'x' to not collide with the
 (older) built-in resources (in Windows PowerShell) and the module PSDscResources.
-The prefix 'x' has no other meaning that just that.
+The prefix 'x' has no other meaning than just that.
 
 This module is no longer comparable with the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
 as they are completely separate modules and they have different lifecycle,
