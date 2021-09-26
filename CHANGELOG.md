@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- xPSDesiredStateConfiguration
+  - Update description in README.md.
 - xRemoteFile
   - Fixed message inconsistencies in `DSC_xRemoteFile.strings.psd1` - Fixes [Issue #716](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/716).
 - xPSDesiredStateConfiguration
