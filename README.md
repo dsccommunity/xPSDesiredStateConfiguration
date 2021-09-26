@@ -12,11 +12,11 @@ the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
 but also includes bugfixes and new features, including additional resources.
 Some resources in this module uses the prefix 'x' to not collide with the
 (older) built-in resources (in Windows PowerShell) and the module PSDscResources.
-It prefix 'x' has no other meaning that just that.
+The prefix 'x' has no other meaning that just that.
 
 This module is no longer comparable with the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
-as they have completely separate modules and has different lifecycles, where
-**xPSDesiredStateConfiguration** surpasses PSDscResources.
+as they are completely separate modules and they have different lifecycle,
+where **xPSDesiredStateConfiguration** surpasses PSDscResources.
 
 The module xPSDesiredStateConfiguration is supported by the DSC community
 who fixes bugs and adds features.
@@ -25,7 +25,7 @@ who fixes bugs and adds features.
 > is supported by Microsoft and is meant to be 1:1 replacement for the
 > built-in resources (in Windows PowerShell), with the exception for the
 > File resource. For that reason new features are no longer being added to
-> the PSDscResource module and bugfixes must be approved (most likely through
+> the PSDscResource module, and bugfixes must be approved (most likely through
 > a Microsoft Support case) to be merged. If you require new features or
 > missing bugfixes, please migrate to **xPSDesiredStateConfiguration** and
 > request/add the features or bugfixes against this module.
