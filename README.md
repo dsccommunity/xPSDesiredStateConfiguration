@@ -7,16 +7,28 @@
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![codecov](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration)
 
-The **xPSDesiredStateConfiguration** module is a more recent, experimental
-version of the PSDesiredStateConfiguration module that ships in Windows as part
-of PowerShell 4.0.
+The **xPSDesiredStateConfiguration** module contain the same resources as
+the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
+but also includes bugfixes and new features, including additional resources.
+Some resources in this module uses the prefix 'x' to not collide with the
+(older) built-in resources (in Windows PowerShell) and the module PSDscResources.
+It prefix 'x' has no other meaning that just that.
 
-The supported version of this module is available as
-[PSDscResources](https://github.com/PowerShell/PSDscResources).
+This module is no longer comparable with the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
+as they have completely separate modules and has different lifecycles, where
+**xPSDesiredStateConfiguration** surpasses PSDscResources.
 
-> Note: New features are no longer being added to the **PSDscResource`** module.
-> If you require new features, please migrate to **xPSDesiredStateConfiguration**
-> and request the features against this module.
+The module xPSDesiredStateConfiguration is supported by the DSC community
+who fixes bugs and adds features.
+
+> The module [PSDscResources](https://github.com/PowerShell/PSDscResources)
+> is supported by Microsoft and is meant to be 1:1 replacement for the
+> built-in resources (in Windows PowerShell), with the exception for the
+> File resource. For that reason new features are no longer being added to
+> the PSDscResource module and bugfixes must be approved (most likely through
+> a Microsoft Support case) to be merged. If you require new features or
+> missing bugfixes, please migrate to **xPSDesiredStateConfiguration** and
+> request/add the features or bugfixes against this module.
 
 This module is automatically tested using PowerShell 5.1 on servers running
 Windows 2012 R2 and Windows 2016, and is expected to work on other operating
