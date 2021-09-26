@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Azure Pipelines - Fixes [Issue #711](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/711).
 - Updated vmImage used for build stage of CI to use `Windows-2019` to resolve
   issues with Wiki Generation of `xUploadFile` composite resource on Linux agents.
+- Added `Publish_GitHub_Wiki_Content` task to `publish` stage of build
+  pipeline - Fixes [Issue #729](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/729).
 
 ## [9.1.0] - 2020-02-19
 
