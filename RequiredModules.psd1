@@ -3,7 +3,6 @@
         AddToPath  = $true
         Target     = 'output\RequiredModules'
         Parameters = @{
-           Repository = 'PSGallery'
         }
     }
 
@@ -14,14 +13,13 @@
     ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
-    'Sampler.GitHubTasks'       = 'latest'
     MarkdownLinkCheck           = 'latest'
+    'Sampler.GitHubTasks'       = 'latest'
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
-    xDscResourceDesigner        = 'latest'
     'DscResource.DocGenerator'  = 'latest'
-
-     # Prerequisites modules needed for examples or integration tests
-    'xPendingReboot'            = '0.4.0'
-    'xWebAdministration'        = '3.1.1'
+    'DscResource.Common'        = 'latest'
+    xDscResourceDesigner        = 'latest'
+    NetworkingDsc               = '7.4.0.0'
+    xWebAdministration          = '3.0.0.0'
 }
