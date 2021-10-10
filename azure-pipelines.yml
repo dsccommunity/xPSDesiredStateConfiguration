@@ -17,6 +17,7 @@ variables:
   testResultFolderName: testResults
   testArtifactName: testResults
   sourceFolderName: source
+  defaultBranch: main
 
 stages:
   - stage: Build
@@ -288,8 +289,8 @@ stages:
             env:
               GitHubToken: $(GitHubToken)
               GalleryApiToken: $(GalleryApiToken)
-              ReleaseBranch: main
-              MainGitBranch: main
+              ReleaseBranch: $(defaultBranch)
+              MainGitBranch: $(defaultBranch)
 
           - task: PowerShell@2
             name: sendChangelogPR
@@ -300,5 +301,5 @@ stages:
               pwsh: true
             env:
               GitHubToken: $(GitHubToken)
-              ReleaseBranch: main
-              MainGitBranch: main
+              ReleaseBranch: $(defaultBranch)
+              MainGitBranch: $(defaultBranch)
