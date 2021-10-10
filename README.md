@@ -7,16 +7,18 @@
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![codecov](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration)
 
-The **xPSDesiredStateConfiguration** module contain the same resources as
+The **xPSDesiredStateConfiguration** module contains the same resources as
 the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
 but also includes bugfixes and new features, including additional resources.
-Some resources in this module uses the prefix 'x' to not collide with the
-(older) built-in resources (in Windows PowerShell) and the module PSDscResources.
-The prefix 'x' has no other meaning than just that.
+Some resources in this module use the prefix 'x' to not conflict with the
+older built-in resources in the Windows PowerShell `PSDesiredStateConfiguration`
+module and the newer `PSDscResources` module. The prefix 'x' has no other
+meaning and does not indicate that these are experimental resources.
 
 This module is no longer comparable with the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
-as they are completely separate modules and they have different lifecycle,
-where **xPSDesiredStateConfiguration** surpasses PSDscResources.
+as they are completely separate modules and they have a different lifecycle.
+The `xPSDesiredStateConfiguration` module surpasses the `PSDscResources`
+module in both features and bugfixes.
 
 The module xPSDesiredStateConfiguration is supported by the DSC community
 who fixes bugs and adds features.
@@ -31,7 +33,7 @@ who fixes bugs and adds features.
 > request/add the features or bugfixes against this module.
 
 This module is automatically tested using PowerShell 5.1 on servers running
-Windows 2012 R2 and Windows 2016, and is expected to work on other operating
+Windows 2016 and Windows 2019, and is expected to work on other operating
 systems running PowerShell 5.1. While this module may work with PowerShell
 versions going back to PowerShell 4, there is no automatic testing performed
 for these versions, and thus no guarantee that the module will work as
