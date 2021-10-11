@@ -59,19 +59,6 @@ body:
     validations:
       required: true
   - type: textarea
-    id: exchangeVersion
-    attributes:
-      label: Exchange Server edition and version the target node is running
-      description: |
-        Please provide as much as possible about the Exchange Server that runs on the target node, for example edition, version, build, and language. _Will be automatically formatted as plain text._
-
-        The following command can help get this information: `Get-ExchangeServer | ft ServerRole, Edition, AdminDisplayVersion`
-      placeholder: |
-        Add Exchange Server information here
-      render: text
-    validations:
-      required: true
-  - type: textarea
     id: targetNodePS
     attributes:
       label: PowerShell version and build the target node is running
