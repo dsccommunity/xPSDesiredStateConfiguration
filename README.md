@@ -12,7 +12,7 @@ the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
 but also includes bugfixes and new features, including additional resources.
 Some resources in this module use the prefix 'x' to not conflict with the
 older built-in resources in the Windows PowerShell `PSDesiredStateConfiguration`
-module and the newer `PSDscResources` module. The prefix 'x' has no other
+module and the `PSDscResources` module. The prefix 'x' has no other
 meaning and does not indicate that these are experimental resources.
 
 This module is no longer comparable with the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
