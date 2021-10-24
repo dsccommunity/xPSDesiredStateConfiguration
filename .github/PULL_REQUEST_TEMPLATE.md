@@ -11,7 +11,9 @@
     You may remove this comment block, and the other comment blocks, but please
     keep the headers and the task list.
 -->
+
 #### Pull Request (PR) description
+
 <!--
     Replace this comment block with a description of your PR.
     Also, make sure you have updated the CHANGELOG.md, see the
@@ -20,6 +22,7 @@
 -->
 
 #### This Pull Request (PR) fixes the following issues
+
 <!--
     If this PR does not fix an open issue, replace this comment block with None.
     If this PR resolves one or more open issues, replace this comment block with
@@ -30,6 +33,7 @@
 -->
 
 #### Task list
+
 <!--
     To aid community reviewers in reviewing and merging your PR, please take
     the time to run through the below checklist and make sure your PR has
@@ -38,6 +42,7 @@
     Change to [x] for each task in the task list that applies to your PR.
     For those task that don't apply to you PR, leave those as is.
 -->
+
 - [ ] Added an entry to the change log under the Unreleased section of the
       file CHANGELOG.md. Entry should say what was changed and how that
       affects users (if applicable), and reference the issue being resolved

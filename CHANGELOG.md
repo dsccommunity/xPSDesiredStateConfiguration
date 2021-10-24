@@ -46,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   issues with Wiki Generation of `xUploadFile` composite resource on Linux agents.
 - Added `Publish_GitHub_Wiki_Content` task to `publish` stage of build
   pipeline - Fixes [Issue #729](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/729).
+- Updated `.github` issue templates to standard - Fixes [Issue #732](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/732).
+- Added `Create_ChangeLog_GitHub_PR` task to `publish` stage of build
+  pipeline.
+- Added `SECURITY.md`.
 
 ## [9.1.0] - 2020-02-19
 
