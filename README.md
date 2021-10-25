@@ -7,19 +7,33 @@
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![codecov](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration)
 
-The **xPSDesiredStateConfiguration** module is a more recent, experimental
-version of the PSDesiredStateConfiguration module that ships in Windows as part
-of PowerShell 4.0.
+The **xPSDesiredStateConfiguration** module contains the same resources as
+the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
+but also includes bugfixes and new features, including additional resources.
+Some resources in this module use the prefix 'x' to not conflict with the
+older built-in resources in the Windows PowerShell `PSDesiredStateConfiguration`
+module and the `PSDscResources` module. The prefix 'x' has no other
+meaning and does not indicate that these are experimental resources.
 
-The supported version of this module is available as
-[PSDscResources](https://github.com/PowerShell/PSDscResources).
+This module is no longer comparable with the module [PSDscResources](https://github.com/PowerShell/PSDscResources)
+as they are completely separate modules and they have a different lifecycle.
+The `xPSDesiredStateConfiguration` module surpasses the `PSDscResources`
+module in both features and bugfixes.
 
-> Note: New features are no longer being added to the **PSDscResource`** module.
-> If you require new features, please migrate to **xPSDesiredStateConfiguration**
-> and request the features against this module.
+The module xPSDesiredStateConfiguration is supported by the DSC community
+who fixes bugs and adds features.
+
+> The module [PSDscResources](https://github.com/PowerShell/PSDscResources)
+> is supported by Microsoft and is meant to be 1:1 replacement for the
+> built-in resources (in Windows PowerShell), with the exception for the
+> File resource. For that reason new features are no longer being added to
+> the PSDscResource module, and bugfixes must be approved (most likely through
+> a Microsoft Support case) to be merged. If you require new features or
+> missing bugfixes, please migrate to **xPSDesiredStateConfiguration** and
+> request/add the features or bugfixes against this module.
 
 This module is automatically tested using PowerShell 5.1 on servers running
-Windows 2012 R2 and Windows 2016, and is expected to work on other operating
+Windows 2016 and Windows 2019, and is expected to work on other operating
 systems running PowerShell 5.1. While this module may work with PowerShell
 versions going back to PowerShell 4, there is no automatic testing performed
 for these versions, and thus no guarantee that the module will work as
