@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `Create_ChangeLog_GitHub_PR` task to `publish` stage of build
   pipeline.
 - Added `SECURITY.md`.
+- Updated pipeline `Deploy_Module` anb `Code_Coverage` jobs to use `ubuntu-latest`
+  images - Partially fixes - Fixes [Issue #735](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/735).
 
 ## [9.1.0] - 2020-02-19
 
