@@ -42,10 +42,10 @@ stages:
             displayName: 'Build & Package Module'
             inputs:
               filePath: './build.ps1'
-              arguments: '-Tasks pack -ResolveDependency'
+              arguments: '-ResolveDependency -tasks pack'
               pwsh: true
             env:
-              ModuleVersion: $(gitVersion.Informationalversion)
+              ModuleVersion: $(NuGetVersionV2)
 
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Pipeline Artifact'
