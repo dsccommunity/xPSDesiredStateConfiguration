@@ -54,6 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `SECURITY.md`.
 - Updated pipeline `Deploy_Module` anb `Code_Coverage` jobs to use `ubuntu-latest`
   images - Partially fixes - Fixes [Issue #735](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/735).
+- Replaced the GitVersion task in the `azure-pipelines.yml` with
+  script - Fixes [Issue #746](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/746).
 
 ## [9.1.0] - 2020-02-19
 
