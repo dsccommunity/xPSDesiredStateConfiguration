@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xPackage
   - Fixed a bug not allowing using the file hash of an installer [Issue #702](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/702).
+- xGroup
+  - Workaround added for the [Issue #750](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/750) The resource could fail with the 'Exception calling "Add" with "1" argument(s): "The network path was not found."' The workaround is to catch the exception and try to use another programmatic method to update group members.
+
 
 ### Fixed
 
