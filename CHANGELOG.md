@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - xPackage
   - Fixed a bug not allowing using the file hash of an installer [Issue #702](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/702).
+<<<<<<< HEAD
 - xPSDesiredStateConfiguration
   - Updated CI pipeline to remove Azure DevOps deprecated Windows Server 2016
     image and add Windows Server 2022 - Fixes [Issue #752](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/752).
+=======
+- xGroup
+  - Workaround added for the [Issue #750](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/750) The resource could fail with the 'Exception calling "Add" with "1" argument(s): "The network path was not found."' The workaround is to catch the exception and try to use another programmatic method to update group members.
+
+>>>>>>> ab67d1a4b2ee5ca2a7407c6882b9d92c8b6b8039
 
 ### Fixed
 
