@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - xPSDesiredStateConfiguration
   - Updated CI pipeline to remove Azure DevOps deprecated Windows Server 2016
     image and add Windows Server 2022 - Fixes [Issue #752](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/752).
+- xGroup
+   - Workaround added for the [Issue #750](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/750) The resource could fail with the 'Exception calling "Add" with "1" argument(s): "The network path was not found."' The workaround is to catch the exception and try to use another programmatic method to update group members.
 
 ### Fixed
 
