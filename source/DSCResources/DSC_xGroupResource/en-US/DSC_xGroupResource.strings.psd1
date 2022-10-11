@@ -32,4 +32,6 @@ ConvertFrom-StringData @'
     SetTargetResourceEndMessage = End executing Set functionality on the group {0}.
     MembersToIncludeEmpty = MembersToInclude is empty. No group member additions are needed.
     MembersToExcludeEmpty = MembersToExclude is empty. No group member removals are needed.
+    PrincipalCollectionAddMethodException = The Add method of the System.DirectoryServices.AccountManagement.PrincipalCollection class has thrown an exception.
+    WinNTProviderFallback = Falling back to ADSI WinNT provider.
 '@
