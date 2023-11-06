@@ -5,13 +5,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- xGroup
+  - Fixed a bug where the resource would fail if any of the group members were
+    local, virtual accounts.
+  - Fixed a bug where members with distinguished names that contained multiple
+    domain components would only have the first domain component included in
+    the account scope.
+  - Fixed a bug where members with distinguished names that contained an
+    escaped comma would not be parsed correctly.
 - xPackage
   - Fixed a bug not allowing using the file hash of an installer [Issue #702](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/702).
 - xPSDesiredStateConfiguration
   - Updated CI pipeline to remove Azure DevOps deprecated Windows Server 2016
     image and add Windows Server 2022 - Fixes [Issue #752](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/752).
 - xDSCWebService
-  - Fixed a bug where the variable ```DscWebServiceDefaultAppPoolName``` is not set in the resource xDSCWebService since version 9.0.0 as a result of module refactoring.
+  - Fixed a bug where the variable ```DscWebServiceDefaultAppPoolName``` is not set in the resource xDSCWebService since version 9.0.0 as a result of module refactoring
 ### Fixed
 
 - xPSDesiredStateConfiguration
