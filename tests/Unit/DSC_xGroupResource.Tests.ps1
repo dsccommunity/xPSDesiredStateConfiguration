@@ -276,9 +276,7 @@ try
                     $testMemberName = 'domain\username'
                     $splitMemberNameResult = Split-MemberName -MemberName $testMemberName
 
-                    Assert-MockCalled -CommandName 'Test-IsLocalMachine'
-
-                    $splitMemberNameResult | Should -Be @( $script:localDomain, 'username' )
+                    $splitMemberNameResult | Should -Be @( 'domain', 'username' )
                 }
 
                 Mock -CommandName 'Test-IsLocalMachine' -MockWith { return $false }
@@ -286,8 +284,6 @@ try
                 It 'Should split a member name in the domain\username format with a custom domain' {
                     $testMemberName = 'domain\username'
                     $splitMemberNameResult = Split-MemberName -MemberName $testMemberName
-
-                    Assert-MockCalled -CommandName 'Test-IsLocalMachine'
 
                     $splitMemberNameResult | Should -Be @( 'domain', 'username' )
                 }
@@ -303,14 +299,14 @@ try
                     $testMemberName = 'CN=username,DC=domain'
                     $splitMemberNameResult = Split-MemberName -MemberName $testMemberName
 
-                    $splitMemberNameResult | Should -Be @( $script:localDomain, $testMemberName )
+                    $splitMemberNameResult | Should -Be @( 'domain', $testMemberName )
                 }
 
-                It 'Should split a member name in the CN=username,DC=domain format with outisde domain' {
+                It 'Should split a member name in the CN=username,DC=domain,DC=com format with outside domain' {
                     $testMemberName = 'CN=username,DC=domain,DC=com'
                     $splitMemberNameResult = Split-MemberName -MemberName $testMemberName
 
-                    $splitMemberNameResult | Should -Be @( 'domain', $testMemberName )
+                    $splitMemberNameResult | Should -Be @( 'domain.com', $testMemberName )
                 }
 
                 It 'Should split a member name in the local username format' {
@@ -319,6 +315,38 @@ try
 
                     $splitMemberNameResult | Should -Be @( $script:localDomain, 'username' )
                 }
+            }
+
+            Context 'xGroupResource\Get-ScopeFromDistinguishedName' {
+
+                It 'when given a valid distinguished name it returns the correct domain name' {
+                    $distinguishedName = 'CN=John Doe,OU=Users,DC=example,DC=com'
+                    $expectedDomain = 'example.com'
+                    $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
+                    $result | Should -Be $expectedDomain
+                }
+
+                It 'when given a distinguished name with escaped characters, it returns the correct domain name' {
+                    $distinguishedName = 'CN=Jane\, Doe,OU=Users,DC=example,DC=com'
+                    $expectedDomain = 'example.com'
+                    $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
+                    $result | Should -Be $expectedDomain
+                }
+
+                It 'when given a distinguished name with multiple domain components, returns the correct domain name' {
+                    $distinguishedName = 'CN=John Doe,OU=Users,DC=example,DC=org'
+                    $expectedDomain = 'example.org'
+                    $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
+                    $result | Should -Be $expectedDomain
+                }
+
+                It 'when given a distinguished name with no domain components, it returns an empty string' {
+                    $distinguishedName = 'CN=John Doe,OU=Users'
+                    $expectedDomain = ''
+                    $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
+                    $result | Should -Be $expectedDomain
+                }
+
             }
 
             if ($script:onNanoServer)
@@ -1088,7 +1116,7 @@ try
                         Assert-MockCalled -CommandName 'Remove-DisposableObject'
                     }
 
-                     Mock -CommandName 'Get-Group' -MockWith { return $script:testGroup }
+                    Mock -CommandName 'Get-Group' -MockWith { return $script:testGroup }
 
                     It 'Should add a member to an existing group with no members using Members' {
                         $testMembers = @( $script:testUserPrincipal1.Name )
@@ -1902,9 +1930,9 @@ try
                         $errorMessage = ($script:localizedData.CouldNotFindPrincipal -f $script:testUserPrincipal1.Name)
 
                         { $null = ConvertTo-Principal `
-                            -MemberName $script:testUserPrincipal1.Name `
-                            -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables } | Should -Throw -ExpectedMessage $errorMessage
+                                -MemberName $script:testUserPrincipal1.Name `
+                                -PrincipalContextCache $principalContextCache `
+                                -Disposables $disposables } | Should -Throw -ExpectedMessage $errorMessage
                     }
                 }
 
