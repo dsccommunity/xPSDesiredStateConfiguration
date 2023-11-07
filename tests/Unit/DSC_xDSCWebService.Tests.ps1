@@ -888,7 +888,7 @@ try
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Command
                         Assert-MockCalled -Exactly -Times 1 -CommandName Get-Culture
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-Website -ModuleName xPSDesiredStateConfiguration.PSWSIIS
-                        Assert-MockCalled -Exactly -Times 2 -CommandName Test-Path
+                        Assert-MockCalled -Exactly -Times 1 -CommandName Test-Path
                         Assert-MockCalled -Exactly -Times 2 -CommandName Get-OsVersion
                         Assert-MockCalled -Exactly -Times 3 -CommandName Update-LocationTagInApplicationHostConfigForAuthentication
                         Assert-MockCalled -Exactly -Times 5 -CommandName Set-AppSettingsInWebconfig
