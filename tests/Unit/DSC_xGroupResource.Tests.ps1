@@ -318,29 +318,28 @@ try
             }
 
             Context 'xGroupResource\Get-ScopeFromDistinguishedName' {
-
-                It 'when given a valid distinguished name it returns the correct domain name' {
+                It 'Should return the correct domain when given a valid distinguished name' {
                     $distinguishedName = 'CN=John Doe,OU=Users,DC=example,DC=com'
                     $expectedDomain = 'example.com'
                     $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
                     $result | Should -Be $expectedDomain
                 }
 
-                It 'when given a distinguished name with escaped characters, it returns the correct domain name' {
-                    $distinguishedName = 'CN=Jane\, Doe,OU=Users,DC=example,DC=com'
+                It 'Should return the correct domain when given a valid distinguished name containing escaped characters' {
+                    $distinguishedName = 'CN=Doe\, Jane,OU=Users,DC=example,DC=com'
                     $expectedDomain = 'example.com'
                     $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
                     $result | Should -Be $expectedDomain
                 }
 
-                It 'when given a distinguished name with multiple domain components, returns the correct domain name' {
+                It 'Should return the correct domain when given a valid distinguished name containing multiple domain components' {
                     $distinguishedName = 'CN=John Doe,OU=Users,DC=example,DC=org'
                     $expectedDomain = 'example.org'
                     $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName
                     $result | Should -Be $expectedDomain
                 }
 
-                It 'when given a distinguished name with no domain components, it returns an empty string' {
+                It 'Should return an empty string when given a valid distinguished name with no domain components' {
                     $distinguishedName = 'CN=John Doe,OU=Users'
                     $expectedDomain = ''
                     $result = Get-ScopeFromDistinguishedName -DistinguishedName $distinguishedName

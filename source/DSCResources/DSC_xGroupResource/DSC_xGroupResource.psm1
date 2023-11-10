@@ -2255,19 +2255,23 @@ function Test-IsLocalMachine
 .PARAMETER DistinguishedName
     Specifies the distinguished name string from which the scope is to be extracted.
 .EXAMPLE
-    Get-ScopeFromDistinguishedName -DistinguishedName "CN=John Doe,OU=Users,DC=example,DC=com"
-    This example extracts the scope "example.com" from the distinguished name string "CN=John Doe,OU=Users,DC=example,DC=com".
+    Get-ScopeFromDistinguishedName -DistinguishedName 'CN=John Doe,OU=Users,DC=example,DC=com'
+    This example extracts the scope 'example.com' from the distinguished name string 'CN=John Doe,OU=Users,DC=example,DC=com'.
+
+    Get-ScopeFromDistinguishedName -DistinguishedName 'CN=Doe\, Jane,OU=Users,DC=example,DC=com'
+    This example extracts the scope 'example.com' from the distinguished name string 'CN=Doe\, Jane,OU=Users,DC=example,DC=com'.
 #>
 function Get-ScopeFromDistinguishedName
 {
     param (
         [Parameter(Mandatory = $true)]
-        [string]$DistinguishedName
+        [System.String]
+        $DistinguishedName
     )
 
     $domainComponents = @()
     $escaped = $false
-    $currentComponent = ""
+    $currentComponent = ''
 
     foreach ($char in $DistinguishedName.ToCharArray())
     {
@@ -2287,7 +2291,7 @@ function Get-ScopeFromDistinguishedName
             {
                 $domainComponents += $currentComponent
             }
-            $currentComponent = ""
+            $currentComponent = ''
         }
         else
         {
@@ -2427,7 +2431,7 @@ function Find-Principal
         $PrincipalContext,
 
         [Parameter(Mandatory = $true)]
-        [string]
+        [System.String]
         $Scope,
 
         [Parameter(Mandatory = $true)]
@@ -2444,10 +2448,12 @@ function Find-Principal
     if ($ntAccountScopes -icontains $Scope -and $IdentityValue -notlike 'S-*')
     {
         $fullIdentityValue = "$Scope\$IdentityValue"
-        $ntAccount = New-Object System.Security.Principal.NTAccount($fullIdentityValue)
+        $ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' `
+        -ArgumentList @($fullIdentityValue)
         $sid = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
         return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, [System.DirectoryServices.AccountManagement.IdentityType]::Sid, $sid)
     }
+
     if ($PSBoundParameters.ContainsKey('IdentityType'))
     {
         return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, $IdentityType, $IdentityValue)
