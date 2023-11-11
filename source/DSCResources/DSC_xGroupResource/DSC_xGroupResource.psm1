@@ -67,8 +67,8 @@ $modulePath = Join-Path -Path (Split-Path -Path (Split-Path -Path $PSScriptRoot 
 
 # Import the shared modules
 Import-Module -Name (Join-Path -Path $modulePath `
-    -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
-        -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
+        -ChildPath (Join-Path -Path 'xPSDesiredStateConfiguration.Common' `
+            -ChildPath 'xPSDesiredStateConfiguration.Common.psm1'))
 
 Import-Module -Name (Join-Path -Path $modulePath -ChildPath 'DscResource.Common')
 
@@ -647,10 +647,10 @@ function Set-TargetResourceOnFullSKU
                     if ($groupOriginallyExists)
                     {
                         $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
-                            -Group $group `
-                            -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables `
-                            -Credential $Credential
+                                -Group $group `
+                                -PrincipalContextCache $principalContextCache `
+                                -Disposables $disposables `
+                                -Credential $Credential
                         )
                     }
 
@@ -666,10 +666,10 @@ function Set-TargetResourceOnFullSKU
 
                         # Resolve the names to actual principal objects.
                         $membersAsPrincipals = @( ConvertTo-UniquePrincipalsList `
-                            -MemberNames $uniqueMembers `
-                            -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables `
-                            -Credential $Credential )
+                                -MemberNames $uniqueMembers `
+                                -PrincipalContextCache $principalContextCache `
+                                -Disposables $disposables `
+                                -Credential $Credential )
 
                         if ($null -ne $actualMembersAsPrincipals -and $actualMembersAsPrincipals.Count -gt 0)
                         {
@@ -684,20 +684,20 @@ function Set-TargetResourceOnFullSKU
 
                             foreach ($actualMemberAsPrincipal in $actualMembersAsPrincipals)
                             {
-                                    if ($membersAsPrincipals -notcontains $actualMemberAsPrincipal)
-                                    {
-                                        Remove-GroupMember -Group $group -MemberAsPrincipal $actualMemberAsPrincipal
-                                        $saveChanges = $true
-                                    }
+                                if ($membersAsPrincipals -notcontains $actualMemberAsPrincipal)
+                                {
+                                    Remove-GroupMember -Group $group -MemberAsPrincipal $actualMemberAsPrincipal
+                                    $saveChanges = $true
                                 }
+                            }
                         }
                         else
                         {
                             # Set the members of the group
                             foreach ($memberAsPrincipal in $membersAsPrincipals)
                             {
-                                    Add-GroupMember -Group $group -MemberAsPrincipal $memberAsPrincipal
-                                }
+                                Add-GroupMember -Group $group -MemberAsPrincipal $memberAsPrincipal
+                            }
 
                             $saveChanges = $true
                         }
@@ -712,10 +712,10 @@ function Set-TargetResourceOnFullSKU
                     if ($groupOriginallyExists)
                     {
                         $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
-                            -Group $group `
-                            -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables `
-                            -Credential $Credential
+                                -Group $group `
+                                -PrincipalContextCache $principalContextCache `
+                                -Disposables $disposables `
+                                -Credential $Credential
                         )
                     }
 
@@ -730,10 +730,10 @@ function Set-TargetResourceOnFullSKU
                     {
                         # Resolve the names to actual principal objects.
                         $membersToIncludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
-                            -MemberNames $uniqueMembersToInclude `
-                            -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables `
-                            -Credential $Credential
+                                -MemberNames $uniqueMembersToInclude `
+                                -PrincipalContextCache $principalContextCache `
+                                -Disposables $disposables `
+                                -Credential $Credential
                         )
                     }
 
@@ -748,10 +748,10 @@ function Set-TargetResourceOnFullSKU
                     {
                         # Resolve the names to actual principal objects.
                         $membersToExcludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
-                            -MemberNames $uniqueMembersToExclude `
-                            -PrincipalContextCache $principalContextCache `
-                            -Disposables $disposables `
-                            -Credential $Credential
+                                -MemberNames $uniqueMembersToExclude `
+                                -PrincipalContextCache $principalContextCache `
+                                -Disposables $disposables `
+                                -Credential $Credential
                         )
                     }
 
@@ -765,7 +765,7 @@ function Set-TargetResourceOnFullSKU
                         {
                             New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
                                 -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,
-                                    'MembersToInclude', 'MembersToExclude')
+                                'MembersToInclude', 'MembersToExclude')
                         }
 
                         if ($actualMembersAsPrincipals -notcontains $includedPrincipal)
@@ -944,16 +944,16 @@ function Set-TargetResourceOnNanoServer
     if ($Ensure -eq 'Present')
     {
         $whatIfShouldProcess =
-            if ($groupOriginallyExists)
-            {
-                $PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName),
-                    $script:localizedData.SetOperation)
-            }
-            else
-            {
-                $PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName),
-                    $script:localizedData.AddOperation)
-            }
+        if ($groupOriginallyExists)
+        {
+            $PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName),
+                $script:localizedData.SetOperation)
+        }
+        else
+        {
+            $PSCmdlet.ShouldProcess(($script:localizedData.GroupWithName -f $GroupName),
+                $script:localizedData.AddOperation)
+        }
 
         if ($whatIfShouldProcess)
         {
@@ -1023,7 +1023,7 @@ function Set-TargetResourceOnNanoServer
                         {
                             New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
                                 -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedMember, 'MembersToInclude',
-                                    'MembersToExclude')
+                                'MembersToExclude')
                         }
                     }
                 }
@@ -1207,10 +1207,10 @@ function Test-TargetResourceOnFullSKU
             }
 
             $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
-                -Group $group `
-                -PrincipalContextCache $principalContextCache `
-                -Disposables $disposables `
-                -Credential $Credential
+                    -Group $group `
+                    -PrincipalContextCache $principalContextCache `
+                    -Disposables $disposables `
+                    -Credential $Credential
             )
 
             $uniqueMembers = $Members | Select-Object -Unique
@@ -1228,10 +1228,10 @@ function Test-TargetResourceOnFullSKU
 
                 # Resolve the names to actual principal objects.
                 $expectedMembersAsPrincipals = @( ConvertTo-UniquePrincipalsList `
-                    -MemberNames $uniqueMembers `
-                    -PrincipalContextCache $principalContextCache `
-                    -Disposables $disposables `
-                    -Credential $Credential
+                        -MemberNames $uniqueMembers `
+                        -PrincipalContextCache $principalContextCache `
+                        -Disposables $disposables `
+                        -Credential $Credential
                 )
 
                 if ($expectedMembersAsPrincipals.Count -ne $actualMembersAsPrincipals.Count)
@@ -1256,10 +1256,10 @@ function Test-TargetResourceOnFullSKU
         elseif ($PSBoundParameters.ContainsKey('MembersToInclude') -or $PSBoundParameters.ContainsKey('MembersToExclude'))
         {
             $actualMembersAsPrincipals = @( Get-MembersAsPrincipalsList `
-                -Group $group `
-                -PrincipalContextCache $principalContextCache `
-                -Disposables $disposables `
-                -Credential $Credential
+                    -Group $group `
+                    -PrincipalContextCache $principalContextCache `
+                    -Disposables $disposables `
+                    -Credential $Credential
             )
 
             $membersToIncludeAsPrincipals = $null
@@ -1273,10 +1273,10 @@ function Test-TargetResourceOnFullSKU
             {
                 # Resolve the names to actual principal objects.
                 $membersToIncludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
-                    -MemberNames $uniqueMembersToInclude `
-                    -PrincipalContextCache $principalContextCache `
-                    -Disposables $disposables `
-                    -Credential $Credential
+                        -MemberNames $uniqueMembersToInclude `
+                        -PrincipalContextCache $principalContextCache `
+                        -Disposables $disposables `
+                        -Credential $Credential
                 )
             }
 
@@ -1291,10 +1291,10 @@ function Test-TargetResourceOnFullSKU
             {
                 # Resolve the names to actual principal objects.
                 $membersToExcludeAsPrincipals = @( ConvertTo-UniquePrincipalsList `
-                    -MemberNames $uniqueMembersToExclude `
-                    -PrincipalContextCache $principalContextCache `
-                    -Disposables $disposables `
-                    -Credential $Credential
+                        -MemberNames $uniqueMembersToExclude `
+                        -PrincipalContextCache $principalContextCache `
+                        -Disposables $disposables `
+                        -Credential $Credential
                 )
             }
 
@@ -1308,7 +1308,7 @@ function Test-TargetResourceOnFullSKU
                 {
                     New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
                         -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedPrincipal.SamAccountName,
-                            'MembersToInclude', 'MembersToExclude')
+                        'MembersToInclude', 'MembersToExclude')
                 }
 
                 if ($actualMembersAsPrincipals -notcontains $includedPrincipal)
@@ -1516,7 +1516,7 @@ function Test-TargetResourceOnNanoServer
                 {
                     New-InvalidArgumentException -ArgumentName 'MembersToInclude and MembersToExclude' `
                         -Message ($script:localizedData.IncludeAndExcludeConflict -f $includedMember, 'MembersToInclude',
-                            'MembersToExclude')
+                        'MembersToExclude')
                 }
             }
         }
@@ -1633,10 +1633,10 @@ function Get-MembersOnFullSKU
     $members = New-Object -TypeName 'System.Collections.ArrayList'
 
     $membersAsPrincipals = @( Get-MembersAsPrincipalsList `
-        -Group $Group `
-        -PrincipalContextCache $PrincipalContextCache `
-        -Disposables $Disposables `
-        -Credential $Credential
+            -Group $Group `
+            -PrincipalContextCache $PrincipalContextCache `
+            -Disposables $Disposables `
+            -Credential $Credential
     )
 
     foreach ($memberAsPrincipal in $membersAsPrincipals)
@@ -2019,7 +2019,7 @@ function ConvertTo-Principal
 
     try
     {
-        $principal = Find-Principal -PrincipalContext $principalContext -IdentityValue $identityValue
+        $principal = Find-Principal -Scope $scope -PrincipalContext $principalContext -IdentityValue $identityValue
     }
     catch [System.Runtime.InteropServices.COMException]
     {
@@ -2069,7 +2069,7 @@ function Resolve-SidToPrincipal
         $Scope
     )
 
-    $principal = Find-Principal -PrincipalContext $PrincipalContext -IdentityValue $Sid.Value -IdentityType ([System.DirectoryServices.AccountManagement.IdentityType]::Sid)
+    $principal = Find-Principal -Scope $Scope -PrincipalContext $PrincipalContext -IdentityValue $Sid.Value -IdentityType ([System.DirectoryServices.AccountManagement.IdentityType]::Sid)
 
     if ($null -eq $principal)
     {
@@ -2176,7 +2176,7 @@ function Get-PrincipalContext
 
         $principalContext = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' `
             -ArgumentList @( [System.DirectoryServices.AccountManagement.ContextType]::Domain, $Scope,
-                $principalContextName, $Credential.GetNetworkCredential().Password )
+            $principalContextName, $Credential.GetNetworkCredential().Password )
 
         # Cache the PrincipalContext for this scope for subsequent calls.
         $null = $PrincipalContextCache.Add($Scope, $principalContext)
@@ -2215,7 +2215,7 @@ function Test-IsLocalMachine
         $Scope
     )
 
-    $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1', 'NT Authority', 'NT Service', 'BuiltIn' )
+    $localMachineScopes = @( '.', $env:computerName, 'localhost', '127.0.0.1', 'NT Authority', 'NT Service', 'BuiltIn', 'IIS APPPOOL', 'NT Virtual Machine' )
 
     if ($localMachineScopes -icontains $Scope)
     {
@@ -2245,6 +2245,66 @@ function Test-IsLocalMachine
     }
 
     return $false
+}
+
+<#
+.SYNOPSIS
+    This function extracts the scope from a distinguished name string.
+.DESCRIPTION
+    This function takes a distinguished name string as input and extracts the scope from it.
+.PARAMETER DistinguishedName
+    Specifies the distinguished name string from which the scope is to be extracted.
+.EXAMPLE
+    Get-ScopeFromDistinguishedName -DistinguishedName 'CN=John Doe,OU=Users,DC=example,DC=com'
+    This example extracts the scope 'example.com' from the distinguished name string 'CN=John Doe,OU=Users,DC=example,DC=com'.
+
+    Get-ScopeFromDistinguishedName -DistinguishedName 'CN=Doe\, Jane,OU=Users,DC=example,DC=com'
+    This example extracts the scope 'example.com' from the distinguished name string 'CN=Doe\, Jane,OU=Users,DC=example,DC=com'.
+#>
+function Get-ScopeFromDistinguishedName
+{
+    param (
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $DistinguishedName
+    )
+
+    $domainComponents = @()
+    $escaped = $false
+    $currentComponent = ''
+
+    foreach ($char in $DistinguishedName.ToCharArray())
+    {
+        if (-not $escaped -and $char -eq '\')
+        {
+            $escaped = $true
+            $currentComponent += $char
+        }
+        elseif ($escaped)
+        {
+            $currentComponent += $char
+            $escaped = $false
+        }
+        elseif ($char -eq ',')
+        {
+            if ($currentComponent.StartsWith('DC='))
+            {
+                $domainComponents += $currentComponent
+            }
+            $currentComponent = ''
+        }
+        else
+        {
+            $currentComponent += $char
+        }
+    }
+    if ($currentComponent.StartsWith('DC='))
+    {
+        $domainComponents += $currentComponent
+    }
+
+    $scope = ($domainComponents -replace '^DC=') -join '.'
+    return $scope
 }
 
 <#
@@ -2312,11 +2372,6 @@ function Split-MemberName
     {
         $scope = $MemberName.Substring(0, $separatorIndex)
 
-        if (Test-IsLocalMachine -Scope $scope)
-        {
-            $scope = $env:computerName
-        }
-
         $accountName = $MemberName.Substring($separatorIndex + 1)
 
         return [System.String[]] @( $scope, $accountName )
@@ -2333,9 +2388,9 @@ function Split-MemberName
     }
 
     # Parse distinguished name for the scope
-    $distinguishedNamePrefix = 'DC='
+    $domainComponentPrefix = 'DC='
 
-    $separatorIndex = $MemberName.IndexOf($distinguishedNamePrefix, [System.StringComparison]::OrdinalIgnoreCase)
+    $separatorIndex = $MemberName.IndexOf($domainComponentPrefix, [System.StringComparison]::OrdinalIgnoreCase)
     if ($separatorIndex -ne -1)
     {
         <#
@@ -2344,16 +2399,8 @@ function Split-MemberName
             See the initialization of $accountName above.
         #>
 
-        $startScopeIndex = $separatorIndex + $distinguishedNamePrefix.Length
-        $endScopeIndex = $MemberName.IndexOf(',', $startScopeIndex)
-
-        if ($endScopeIndex -gt $startScopeIndex)
-        {
-            $scopeLength = $endScopeIndex - $separatorIndex - $distinguishedNamePrefix.Length
-            $scope = $MemberName.Substring($startScopeIndex, $scopeLength)
-
-            return [System.String[]] @( $scope, $accountName )
-        }
+        $scope = Get-ScopeFromDistinguishedName -DistinguishedName $MemberName
+        return [System.String[]] @( $scope, $accountName )
     }
 
     return [System.String[]] @( $scope, $accountName )
@@ -2385,12 +2432,27 @@ function Find-Principal
 
         [Parameter(Mandatory = $true)]
         [System.String]
+        $Scope,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
         $IdentityValue,
 
         [Parameter()]
         [System.DirectoryServices.AccountManagement.IdentityType]
         $IdentityType
     )
+
+    $ntAccountScopes = @( 'NT Authority', 'NT Service', 'IIS APPPOOL', 'NT Virtual Machine' )
+
+    if ($ntAccountScopes -icontains $Scope -and $IdentityValue -notlike 'S-*')
+    {
+        $fullIdentityValue = "$Scope\$IdentityValue"
+        $ntAccount = New-Object -TypeName 'System.Security.Principal.NTAccount' `
+        -ArgumentList @($fullIdentityValue)
+        $sid = $ntAccount.Translate([System.Security.Principal.SecurityIdentifier]).Value
+        return [System.DirectoryServices.AccountManagement.Principal]::FindByIdentity($PrincipalContext, [System.DirectoryServices.AccountManagement.IdentityType]::Sid, $sid)
+    }
 
     if ($PSBoundParameters.ContainsKey('IdentityType'))
     {

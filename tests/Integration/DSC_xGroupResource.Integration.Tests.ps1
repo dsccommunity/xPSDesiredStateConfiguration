@@ -19,6 +19,7 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -ResourceType 'Mof' `
     -TestType 'Integration'
 
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\..\output\xPSDesiredStateConfiguration\*\DSCResources\DSC_xGroupResource\DSC_xGroupResource.psm1')
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xGroupResource.TestHelper.psm1')
 
@@ -83,6 +84,25 @@ try
                     DSC_xGroupResource.TestHelper\Remove-Group -GroupName $testGroupName
                 }
             }
+        }
+
+        $accounts = @(
+            # Not every computer will have these accounts, so we'll skip them for now
+            # @{accountName = 'IIS APPPOOL\DefaultAppPool' },
+            # @{accountName = 'NT SERVICE\MSSQL$SQLEXPRESS' },
+            # @{accountName = 'NT Virtual Machine\Virtual Machines'},
+            @{accountName = 'BuiltIn\Users' },
+            @{accountName = 'NT AUTHORITY\NETWORK SERVICE' },
+            @{accountName = 'NT AUTHORITY\LOCAL SERVICE' },
+            @{accountName = 'NT AUTHORITY\SYSTEM' }
+        )
+
+        It 'Should succeed when calling ConvertTo-Principal with account: <accountName>' -TestCases $accounts {
+            param($accountName)
+
+            $result = DSC_xGroupResource\ConvertTo-Principal -MemberName $accountName -PrincipalContextCache @{} -Disposables @()
+
+            $result | Should -Not -BeNullOrEmpty
         }
 
         It 'Should not change the state of the present built-in Users group when no Members specified' {
