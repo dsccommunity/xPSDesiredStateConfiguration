@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     for the DSC resource - Fixes [Issue #677](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/677).
   - Added build task `Generate_Wiki_Content` to generate the wiki content
     that can be used to update the GitHub Wiki - Fixes [Issue #677](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/677).
+  - Updated `azure-pipelines.yml`, `build.yml`, `GitVersion.yml`, `Resolve-Dependency.ps1` and `Resolve-Dependency.psd1` to latest versions/patterns.
 - xDSCWebService:
   - Moved strings into localization file - Fixes [Issue #622](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/622).
   - Corrected case of `CertificateThumbPrint` to `CertificateThumbprint`.
