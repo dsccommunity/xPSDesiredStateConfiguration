@@ -40,7 +40,7 @@ BuildWorkflow:
     - Generate_Wiki_Content
     - Generate_Conceptual_Help
     - Generate_Markdown_For_Public_Commands
-    - Generate_External_Help_File_For_Public_Commands
+    #- Generate_External_Help_File_For_Public_Commands
     - Clean_Markdown_Of_Public_Commands
     - Generate_Wiki_Sidebar
     - Clean_Markdown_Metadata
@@ -101,6 +101,8 @@ ModuleBuildTasks:
     - '*.ib.tasks'
   DscResource.DocGenerator:
     - 'Task.*'
+  DscResource.Test:
+    - 'Task.*'
 
 TaskHeader: |
   param($Path)
@@ -132,3 +134,18 @@ DscResource.DocGenerator:
       - '_(.+?)_' # Match Italic (underscore)
       - '\*\*(.+?)\*\*' # Match bold
       - '\*(.+?)\*' # Match Italic (asterisk)
+  Publish_GitHub_Wiki_Content:
+    Debug: true
+  Generate_Wiki_Content:
+    MofResourceMetadata:
+      Type: MofResource
+      Category: Resources
+    ClassResourceMetadata:
+      Type: ClassResource
+      Category: Resources
+    CompositeResourceMetadata:
+      Type: CompositeResource
+      Category: Resources
+  Generate_Wiki_Sidebar:
+    Debug: false
+    AlwaysOverwrite: true
