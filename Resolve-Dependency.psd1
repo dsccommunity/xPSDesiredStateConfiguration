@@ -3,7 +3,7 @@
     AllowPrerelease                            = $false
     WithYAML                                   = $true
 
-    UseModuleFast                              = $true
+    #UseModuleFast                              = $true
     #ModuleFastVersion = '0.1.2'
     #ModuleFastBleedingEdge = $true
 
