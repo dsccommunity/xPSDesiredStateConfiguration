@@ -40,10 +40,11 @@ BuildWorkflow:
     - Generate_Wiki_Content
     - Generate_Conceptual_Help
     - Generate_Markdown_For_Public_Commands
-    #- Generate_External_Help_File_For_Public_Commands
+    - Generate_External_Help_File_For_Public_Commands
     - Clean_Markdown_Of_Public_Commands
     - Generate_Wiki_Sidebar
     - Clean_Markdown_Metadata
+    - Add_newline_to_helpxml
 
   pack:
     - build
@@ -61,6 +62,13 @@ BuildWorkflow:
     - Publish_Release_To_GitHub
     - Publish_Module_To_gallery
     - Publish_GitHub_Wiki_Content
+
+  # Temporary workaround due to DocGenerator not adding the line to a help.xml that does not match the module name
+  Add_newline_to_helpxml: |
+    {
+        $file = Get-Item 'output/builtModule/*/*/en-US/DscPullServerSetup-help.xml'
+        Add-NewLine -FileInfo $file -AtEndOfFile
+    }
 
 ####################################################
 #       PESTER Configuration                       #
