@@ -9,6 +9,7 @@ CopyPaths:
   - ResourceDesignerScripts
 Encoding: UTF8
 VersionedOutputDirectory: true
+BuiltModuleSubdirectory: builtModule
 
 ####################################################
 #   ModuleBuilder Dependent Modules Configuration  #
@@ -34,11 +35,19 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
-    - Generate_Conceptual_Help
+
+  docs:
     - Generate_Wiki_Content
+    - Generate_Conceptual_Help
+    - Generate_Markdown_For_Public_Commands
+    - Generate_External_Help_File_For_Public_Commands
+    - Clean_Markdown_Of_Public_Commands
+    - Generate_Wiki_Sidebar
+    - Clean_Markdown_Metadata
 
   pack:
     - build
+    - docs
     - package_module_nupkg
 
   hqrmtest:
@@ -52,7 +61,6 @@ BuildWorkflow:
     - Publish_Release_To_GitHub
     - Publish_Module_To_gallery
     - Publish_GitHub_Wiki_Content
-    - Create_ChangeLog_GitHub_PR
 
 ####################################################
 #       PESTER Configuration                       #
