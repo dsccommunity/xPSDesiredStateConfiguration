@@ -17,9 +17,12 @@
     'Sampler.GitHubTasks'       = 'latest'
     'DscResource.Test'          = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
-    'DscResource.DocGenerator'  = 'latest'
     'DscResource.Common'        = 'latest'
     xDscResourceDesigner        = 'latest'
     NetworkingDsc               = '7.4.0.0'
     xWebAdministration          = '3.0.0.0'
+
+    # Prerequisite modules for documentation.
+    'DscResource.DocGenerator'  = 'latest'
+    PlatyPS                     = 'latest'
 }
