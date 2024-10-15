@@ -9,6 +9,7 @@ CopyPaths:
   - ResourceDesignerScripts
 Encoding: UTF8
 VersionedOutputDirectory: true
+BuiltModuleSubdirectory: builtModule
 
 ####################################################
 #   ModuleBuilder Dependent Modules Configuration  #
@@ -34,11 +35,20 @@ BuildWorkflow:
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
     - Create_changelog_release_output
-    - Generate_Conceptual_Help
+
+  docs:
     - Generate_Wiki_Content
+    - Generate_Conceptual_Help
+    - Generate_Markdown_For_Public_Commands
+    - Generate_External_Help_File_For_Public_Commands
+    - Clean_Markdown_Of_Public_Commands
+    - Generate_Wiki_Sidebar
+    - Clean_Markdown_Metadata
+    - Add_newline_to_helpxml
 
   pack:
     - build
+    - docs
     - package_module_nupkg
 
   hqrmtest:
@@ -52,7 +62,13 @@ BuildWorkflow:
     - Publish_Release_To_GitHub
     - Publish_Module_To_gallery
     - Publish_GitHub_Wiki_Content
-    - Create_ChangeLog_GitHub_PR
+
+  # Temporary workaround due to DocGenerator not adding the line to a help.xml that does not match the module name
+  Add_newline_to_helpxml: |
+    {
+        $file = Get-Item 'output/builtModule/*/*/en-US/DscPullServerSetup-help.xml'
+        Add-NewLine -FileInfo $file -AtEndOfFile
+    }
 
 ####################################################
 #       PESTER Configuration                       #
@@ -93,6 +109,8 @@ ModuleBuildTasks:
     - '*.ib.tasks'
   DscResource.DocGenerator:
     - 'Task.*'
+  DscResource.Test:
+    - 'Task.*'
 
 TaskHeader: |
   param($Path)
@@ -124,3 +142,18 @@ DscResource.DocGenerator:
       - '_(.+?)_' # Match Italic (underscore)
       - '\*\*(.+?)\*\*' # Match bold
       - '\*(.+?)\*' # Match Italic (asterisk)
+  Publish_GitHub_Wiki_Content:
+    Debug: true
+  Generate_Wiki_Content:
+    MofResourceMetadata:
+      Type: MofResource
+      Category: Resources
+    ClassResourceMetadata:
+      Type: ClassResource
+      Category: Resources
+    CompositeResourceMetadata:
+      Type: CompositeResource
+      Category: Resources
+  Generate_Wiki_Sidebar:
+    Debug: false
+    AlwaysOverwrite: true

@@ -5,33 +5,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
 - xGroup
   - Fixed a bug where the resource would fail if any of the group members were local, virtual accounts. - Fixes [Issue #763](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/763)
   - Fixed a bug where members with distinguished names that contained multiple domain components would only have the first domain component included in the account scope.
   - Fixed a bug where members with distinguished names that contained an escaped comma would not be parsed correctly.
+  - Ensure group membership is always returned as an array - Fixes [Issue #353](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/353).
 - xPackage
   - Fixed a bug not allowing using the file hash of an installer [Issue #702](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/702).
 - xPSDesiredStateConfiguration
   - Updated CI pipeline to remove Azure DevOps deprecated Windows Server 2016
     image and add Windows Server 2022 - Fixes [Issue #752](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/752).
-- xDSCWebService
-  - Fixed a bug where the variable ```DscWebServiceDefaultAppPoolName``` is not set in the resource xDSCWebService since version 9.0.0 as a result of module refactoring
-### Fixed
-
-- xPSDesiredStateConfiguration
   - Update description in README.md.
-- xRemoteFile
-  - Fixed message inconsistencies in `DSC_xRemoteFile.strings.psd1` - Fixes [Issue #716](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/716).
-- xPSDesiredStateConfiguration
   - Fixed build failures caused by changes in `ModuleBuilder` module v1.7.0
     by changing `CopyDirectories` to `CopyPaths` - Fixes [Issue #687](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/687).
   - Pin `Pester` module to 4.10.1 because Pester 5.0 is missing code
     coverage - Fixes [Issue #688](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/688).
+- xDSCWebService
+  - Fixed a bug where the variable ```DscWebServiceDefaultAppPoolName``` is not set in the resource xDSCWebService since version 9.0.0 as a result of module refactoring
+- xRemoteFile
+  - Fixed message inconsistencies in `DSC_xRemoteFile.strings.psd1` - Fixes [Issue #716](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/716).
 - xArchive
   - Removed `Invoke-NewPSDrive` function because it is no longer needed as
     Pester issue has been resolved - Fixes [Issue #698](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/698).
-- xGroup
-  - Ensure group membership is always returned as an array - Fixes [Issue #353](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/353).
 
 ### Changed
 
@@ -44,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     for the DSC resource - Fixes [Issue #677](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/677).
   - Added build task `Generate_Wiki_Content` to generate the wiki content
     that can be used to update the GitHub Wiki - Fixes [Issue #677](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/677).
+  - Updated `azure-pipelines.yml`, `build.yml`, `GitVersion.yml`, `Resolve-Dependency.ps1` and `Resolve-Dependency.psd1` to latest versions/patterns.
 - xDSCWebService:
   - Moved strings into localization file - Fixes [Issue #622](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/622).
   - Corrected case of `CertificateThumbPrint` to `CertificateThumbprint`.

@@ -19,7 +19,7 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -ResourceType 'Mof' `
     -TestType 'Integration'
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\..\output\xPSDesiredStateConfiguration\*\DSCResources\DSC_xGroupResource\DSC_xGroupResource.psm1')
+Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\..\output\builtModule\xPSDesiredStateConfiguration\*\DSCResources\DSC_xGroupResource\DSC_xGroupResource.psm1')
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\CommonTestHelper.psm1')
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '..\TestHelpers\DSC_xGroupResource.TestHelper.psm1')
 
