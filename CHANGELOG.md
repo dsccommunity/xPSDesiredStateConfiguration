@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- xGroup
+  - Fixed a bug where the get resource would fail if group members is empty [Issue #772](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/772)
+
 ## [9.2.0] - 2024-10-15
 
 ### Fixed
