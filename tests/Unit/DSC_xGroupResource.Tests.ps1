@@ -944,7 +944,7 @@ try
                         $getTargetResourceResult.GroupName | Should -Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
                         $getTargetResourceResult.Description | Should -Be $script:testGroupDescription
-                        $getTargetResourceResult.Members | Should -Be $null
+                        $getTargetResourceResult.Members | Should -Be 0
                     }
 
                     It 'Should return correct hashtable values when Get-Group returns a valid, existing group with a single member' {
