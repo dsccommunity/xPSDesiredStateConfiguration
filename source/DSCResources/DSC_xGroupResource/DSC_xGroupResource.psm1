@@ -383,8 +383,8 @@ function Get-TargetResourceOnFullSKU
             $null = $disposables.Add($group)
 
             # The group was found. Find the group members.
-            [System.Array] $members = Get-MembersOnFullSKU -Group $group -PrincipalContextCache $principalContextCache `
-                -Credential $Credential -Disposables $disposables
+            [System.String[]] $members = @(Get-MembersOnFullSKU -Group $group -PrincipalContextCache $principalContextCache `
+                -Credential $Credential -Disposables $disposables)
 
             return @{
                 GroupName = $group.Name
@@ -454,7 +454,7 @@ function Get-TargetResourceOnNanoServer
     }
 
     # The group was found. Find the group members.
-    [System.Array] $members = Get-MembersOnNanoServer -Group $group
+    [System.String[]] $members = @(Get-MembersOnNanoServer -Group $group)
 
     return @{
         GroupName = $group.Name

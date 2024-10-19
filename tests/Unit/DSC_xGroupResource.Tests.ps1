@@ -944,6 +944,7 @@ try
                         $getTargetResourceResult.GroupName | Should -Be $script:testGroupName
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
                         $getTargetResourceResult.Description | Should -Be $script:testGroupDescription
+                        $getTargetResourceResult.Members -is [System.String[]] | Should -BeTrue
                         $getTargetResourceResult.Members.Count | Should -Be 0
                     }
 
@@ -965,7 +966,8 @@ try
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
                         $getTargetResourceResult.Description | Should -Be $script:testGroupDescription
                         $getTargetResourceResult.Members | Should -Be $testMembersSingle
-                        $getTargetResourceResult.Members -is [System.Object[]] | Should -BeTrue
+                        $getTargetResourceResult.Members -is [System.String[]] | Should -BeTrue
+                        $getTargetResourceResult.Members.Count | Should -Be 1
                     }
 
                     It 'Should return correct hashtable values when Get-Group returns a valid, existing group with multiple members' {
@@ -986,6 +988,8 @@ try
                         $getTargetResourceResult.Ensure | Should -Be 'Present'
                         $getTargetResourceResult.Description | Should -Be $script:testGroupDescription
                         $getTargetResourceResult.Members | Should -Be $testMembersMultiple
+                        $getTargetResourceResult.Members -is [System.String[]] | Should -BeTrue
+                        $getTargetResourceResult.Members.Count | Should -BeGreaterThan 1
                     }
                 }
 
