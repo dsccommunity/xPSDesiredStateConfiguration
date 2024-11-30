@@ -3958,7 +3958,7 @@ try
                     $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                     It 'Should return 0 as an Int32' {
-                        $convertToDWordResult | Should -Be ([System.Int32] 0)
+                        $convertToDWordResult | Should -Be ([System.UInt32] 0)
                     }
                 }
 
@@ -3974,7 +3974,7 @@ try
                     $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                     It 'Should return 0 as an Int32' {
-                        $convertToDWordResult | Should -Be ([System.Int32] 0)
+                        $convertToDWordResult | Should -Be ([System.UInt32] 0)
                     }
                 }
 
@@ -3990,11 +3990,11 @@ try
                     $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                     It 'Should return 0 as an Int32' {
-                        $convertToDWordResult | Should -Be ([System.Int32] 0)
+                        $convertToDWordResult | Should -Be ([System.UInt32] 0)
                     }
                 }
 
-                $testDWord1 = [System.Int32]::MaxValue
+                $testDWord1 = [System.UInt32]::MaxValue
 
                 Context 'Specified registry key value is an array containing a valid single string and Hex not specified' {
                     $convertToDWordParameters = @{
@@ -4013,7 +4013,7 @@ try
                 }
 
                 Context 'Specified registry key value is an array containing an invalid single string and Hex specified as True' {
-                    $invalidHexDWord = 'InvalidInt32'
+                    $invalidHexDWord = 'InvalidUInt32'
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $invalidHexDWord )
                         Hex              = $true
@@ -4028,7 +4028,7 @@ try
 
                 Context 'Specified registry key value is an array containing a valid single string and Hex specified as True' {
                     $validHexDWord = '0xA9'
-                    $expectedInt32Value = 169
+                    $expectedUInt32Value = 169
 
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $validHexDWord.ToString() )
@@ -4042,13 +4042,13 @@ try
                     $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                     It 'Should return the specified double word converted from a Hex value' {
-                        $convertToDWordResult | Should -Be $expectedInt32Value
+                        $convertToDWordResult | Should -Be $expectedUInt32Value
                     }
                 }
 
                 Context 'Specified registry key value is an array containing a valid single string of 0x00 and Hex specified as True' {
                     $validHexDWord = '0x00'
-                    $expectedInt32Value = 0
+                    $expectedUInt32Value = 0
 
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $validHexDWord.ToString() )
@@ -4062,12 +4062,12 @@ try
                     $convertToDWordResult = ConvertTo-DWord @convertToDWordParameters
 
                     It 'Should return the specified double word converted from a Hex value' {
-                        $convertToDWordResult | Should -Be $expectedInt32Value
+                        $convertToDWordResult | Should -Be $expectedUInt32Value
                     }
                 }
 
                 Context 'Specified registry key value is an array with more than one string' {
-                    $testDWord2 = [System.Int32]::MinValue
+                    $testDWord2 = [System.UInt32]::MinValue
 
                     $convertToDWordParameters = @{
                         RegistryKeyValue = @( $testDWord1.ToString(), $testDWord2.ToString() )
