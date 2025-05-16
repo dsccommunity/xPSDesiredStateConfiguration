@@ -5,6 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- xService
+  - Fixed user type returned by Get-TargetResource [Issue #759](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/759)
+
+
 ## [9.2.1] - 2024-11-11
 
 ### Fixed
