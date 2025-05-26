@@ -272,16 +272,16 @@ try
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
                     $expectedValues = @{
-                        Name                = $getTargetResourceParameters.Name
-                        Ensure              = 'Present'
-                        Path                = $testServiceCimInstance.PathName
-                        StartupType         = $convertToStartupTypeStringResult
-                        Credential.Username = $testService.StartName
-                        State               = $testService.Status
-                        DisplayName         = $testService.DisplayName
-                        Description         = $testServiceCimInstance.Description
-                        DesktopInteract     = $testServiceCimInstance.DesktopInteract
-                        Dependencies        = [System.Object[]] $testService.ServicesDependedOn.Name
+                        Name            = $getTargetResourceParameters.Name
+                        Ensure          = 'Present'
+                        Path            = $testServiceCimInstance.PathName
+                        StartupType     = $convertToStartupTypeStringResult
+                        Credential      = New-Object PSCredential $testServiceCimInstance.StartName, (ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force)
+                        State           = $testService.Status
+                        DisplayName     = $testService.DisplayName
+                        Description     = $testServiceCimInstance.Description
+                        DesktopInteract = $testServiceCimInstance.DesktopInteract
+                        Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
