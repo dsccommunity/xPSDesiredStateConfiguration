@@ -271,22 +271,17 @@ try
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
-                    # Password cannot be null
-                    $Password = ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force
-                    # Create a PSCredential object for the custom startup account
-                    $testServiceCredential = New-Object System.Management.Automation.PSCredential($testServiceCimInstance.StartName, $Password)
-
                     $expectedValues = @{
-                        Name            = $getTargetResourceParameters.Name
-                        Ensure          = 'Present'
-                        Path            = $testServiceCimInstance.PathName
-                        StartupType     = $convertToStartupTypeStringResult
-                        Credential      = $testServiceCredential
-                        State           = $testService.Status
-                        DisplayName     = $testService.DisplayName
-                        Description     = $testServiceCimInstance.Description
-                        DesktopInteract = $testServiceCimInstance.DesktopInteract
-                        Dependencies    = [System.Object[]] $testService.ServicesDependedOn.Name
+                        Name                = $getTargetResourceParameters.Name
+                        Ensure              = 'Present'
+                        Path                = $testServiceCimInstance.PathName
+                        StartupType         = $convertToStartupTypeStringResult
+                        Credential.Username = $testService.StartName
+                        State               = $testService.Status
+                        DisplayName         = $testService.DisplayName
+                        Description         = $testServiceCimInstance.Description
+                        DesktopInteract     = $testServiceCimInstance.DesktopInteract
+                        Dependencies        = [System.Object[]] $testService.ServicesDependedOn.Name
                     }
 
                     Test-GetTargetResourceResult -GetTargetResourceParameters $getTargetResourceParameters -ExpectedValues $expectedValues
