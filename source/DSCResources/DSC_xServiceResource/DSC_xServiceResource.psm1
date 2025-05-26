@@ -632,7 +632,7 @@ function Test-TargetResource
         {
             $expectedStartName = ConvertTo-StartName -Username $Credential.UserName
 
-            if ($serviceResource.BuiltInAccount -ine $expectedStartName)
+            if ($serviceResource.Credential.UserName -ine $expectedStartName)
             {
                 Write-Verbose -Message ($script:localizedData.ServiceCredentialDoesNotMatch -f $Name, $Credential.UserName, $serviceResource.BuiltInAccount)
                 return $false
