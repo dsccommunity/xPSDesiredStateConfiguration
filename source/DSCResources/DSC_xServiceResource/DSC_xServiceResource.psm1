@@ -79,6 +79,11 @@ function Get-TargetResource
             default { $serviceCimInstance.StartName }
         }
 
+        # Initialize variables
+        $builtInAccount = $null
+        $GroupManagedServiceAccount = $null
+        $Credential = $null
+
         # Evaluate user type only based on the format of the string (as stated in the note)
         if (($serviceAccount -eq 'LocalSystem') -or ($serviceAccount -eq 'LocalService') -or ($serviceAccount -eq 'NetworkService'))
         {
@@ -91,7 +96,7 @@ function Get-TargetResource
         else
         {
             # Password cannot be null
-            $Password = ConvertTo-SecureString '' -AsPlainText -Force
+            $Password = ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force
             $Credential = New-Object System.Management.Automation.PSCredential($serviceAccount, $Password)
         }
 
