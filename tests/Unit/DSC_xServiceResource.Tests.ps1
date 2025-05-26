@@ -271,12 +271,17 @@ try
 
                     Test-GetTargetResourceDoesntThrow -GetTargetResourceParameters $getTargetResourceParameters -TestServiceCimInstance $testServiceCimInstance
 
+                    # Password cannot be null
+                    $Password = ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force
+                    # Create a PSCredential object for the custom startup account
+                    $testServiceCredential = New-Object System.Management.Automation.PSCredential($testServiceCimInstance.StartName, $Password)
+
                     $expectedValues = @{
                         Name            = $getTargetResourceParameters.Name
                         Ensure          = 'Present'
                         Path            = $testServiceCimInstance.PathName
                         StartupType     = $convertToStartupTypeStringResult
-                        BuiltInAccount  = $testServiceCimInstance.StartName
+                        Credential      = $testServiceCredential.Username
                         State           = $testService.Status
                         DisplayName     = $testService.DisplayName
                         Description     = $testServiceCimInstance.Description
