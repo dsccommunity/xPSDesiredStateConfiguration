@@ -281,7 +281,7 @@ try
                         Ensure          = 'Present'
                         Path            = $testServiceCimInstance.PathName
                         StartupType     = $convertToStartupTypeStringResult
-                        Credential      = $testServiceCredential.Username
+                        Credential      = $testServiceCredential
                         State           = $testService.Status
                         DisplayName     = $testService.DisplayName
                         Description     = $testServiceCimInstance.Description
