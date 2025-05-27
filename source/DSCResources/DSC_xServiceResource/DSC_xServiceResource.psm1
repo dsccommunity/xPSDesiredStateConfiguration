@@ -89,7 +89,7 @@ function Get-TargetResource
         {
             $builtInAccount = $serviceAccount
         }
-        elseif ($serviceAccount -match '^[a-zA-Z0-9]+\\[a-zA-Z0-9]+\$$')
+        elseif ($serviceAccount -match '^[\w-]+\\[\w-]+\$$')
         {
             $GroupManagedServiceAccount = $serviceAccount
         }
