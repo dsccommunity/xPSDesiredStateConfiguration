@@ -622,9 +622,9 @@ function Test-TargetResource
         {
             $expectedStartName = ConvertTo-StartName -Username $GroupManagedServiceAccount
 
-            if ($serviceResource.BuiltInAccount -ine $expectedStartName)
+            if ($serviceResource.GroupManagedServiceAccount -ine $expectedStartName)
             {
-                Write-Verbose -Message ($script:localizedData.GroupManagedServiceCredentialDoesNotMatch -f $Name, $GroupManagedServiceAccount, $serviceResource.BuiltInAccount)
+                Write-Verbose -Message ($script:localizedData.GroupManagedServiceCredentialDoesNotMatch -f $Name, $GroupManagedServiceAccount, $serviceResource.GroupManagedServiceAccount)
                 return $false
             }
         }
@@ -633,7 +633,11 @@ function Test-TargetResource
             $expectedStartName = ConvertTo-StartName -Username $Credential.UserName
 
             # Check that credential resource exist
-            if ($serviceResource.Credential)
+            if ($null -eq $serviceResource.Credential)
+            {
+                Write-Verbose -Message ($script:localizedData.ServiceCredentialIsEmpty -f $Name, $Credential.UserName)
+                return $false
+            } else 
             {
                 # Check that the username matches the expected start name
                 if ($serviceResource.Credential.UserName -ine $expectedStartName)
@@ -641,10 +645,6 @@ function Test-TargetResource
                     Write-Verbose -Message ($script:localizedData.ServiceCredentialDoesNotMatch -f $Name, $Credential.UserName, $serviceResource.Credential.UserName)
                     return $false
                 }
-            } else 
-            {
-                Write-Verbose -Message ($script:localizedData.ServiceCredentialIsEmpty -f $Name, $Credential.UserName)
-                return $false
             }
         }
 
