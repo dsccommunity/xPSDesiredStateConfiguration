@@ -632,9 +632,17 @@ function Test-TargetResource
         {
             $expectedStartName = ConvertTo-StartName -Username $Credential.UserName
 
-            if ($serviceResource.Credential.UserName -ine $expectedStartName)
+            # Check that credential resource exist and that the username matches the expected start name
+            if ($serviceResource.Credential)
             {
-                Write-Verbose -Message ($script:localizedData.ServiceCredentialDoesNotMatch -f $Name, $Credential.UserName, $serviceResource.BuiltInAccount)
+                if ($serviceResource.Credential.UserName -ine $expectedStartName)
+                {
+                    Write-Verbose -Message ($script:localizedData.ServiceCredentialDoesNotMatch -f $Name, $Credential.UserName, $serviceResource.Credential.UserName)
+                    return $false
+                }
+            } else 
+            {
+                Write-Verbose -Message ($script:localizedData.ServiceCredentialIsEmpty -f $Name, $Credential.UserName)
                 return $false
             }
         }
