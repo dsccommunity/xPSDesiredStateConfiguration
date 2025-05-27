@@ -1446,7 +1446,7 @@ try
                     Name            = $script:testServiceName
                     Ensure          = 'Present'
                     State           = 'Running'
-                    BuiltInAccount  = $script:testCredential1.UserName
+                    Credential      = $script:testCredential1
                     DisplayName     = 'TestDisplayName'
                     Description     = 'Test service description'
                     Dependencies    = @( 'TestServiceDependency1', 'TestServiceDependency2' )
@@ -1678,13 +1678,13 @@ try
                 }
 
                 $serviceResourceWithGroupManagedServiceAccount = @{
-                    Name            = $script:testServiceName
-                    Ensure          = 'Present'
-                    State           = 'Running'
-                    BuiltInAccount  = $script:gMSAUser1
-                    DisplayName     = 'TestDisplayName'
-                    Description     = 'Test service description'
-                    Dependencies    = @( 'TestServiceDependency1', 'TestServiceDependency2' )
+                    Name                       = $script:testServiceName
+                    Ensure                     = 'Present'
+                    State                      = 'Running'
+                    GroupManagedServiceAccount = $script:gMSAUser1
+                    DisplayName                = 'TestDisplayName'
+                    Description                = 'Test service description'
+                    Dependencies               = @( 'TestServiceDependency1', 'TestServiceDependency2' )
                 }
 
                 Mock -CommandName 'Get-TargetResource' -MockWith { return $serviceResourceWithGroupManagedServiceAccount }
