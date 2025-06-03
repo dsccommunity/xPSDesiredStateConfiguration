@@ -513,7 +513,7 @@ try
     }
 
     # Setup test process paths.
-    $notepadExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'notepad.exe'))
+    $msinfoExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'msinfo32.exe'))
     $certreqExePath = Resolve-Path -Path ([System.IO.Path]::Combine($env:SystemRoot, 'System32', 'certreq.exe'))
     $iexplorerExePath = Resolve-Path -Path ([System.IO.Path]::Combine( $env:ProgramFiles, 'internet explorer', 'iexplore.exe'))
 
@@ -521,7 +521,7 @@ try
     $testPathAndArgsCombos = @(
         @{
             Description = 'Process Path Without Spaces, No Arguments'
-            Path = $notepadExePath
+            Path = $msinfoExePath
             Arguments = ''
         }
 
