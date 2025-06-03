@@ -389,7 +389,7 @@ try
 
     <#
         .SYNOPSIS
-            Performs commmon sets of tests using
+            Performs common sets of tests using
             Start, Get, Set, and Test - DscConfiguration.
 
         .PARAMETER Path
