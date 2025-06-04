@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [9.2.1] - 2024-11-11
 
+### Changed
+
+- `azure-pipelines.yml`
+  - Remove `windows-2019` images fixes [#780](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/780).
+  - Add `windows-2022` images.
+
 ### Fixed
 
 - xGroup
