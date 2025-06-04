@@ -20,6 +20,7 @@ ConvertFrom-StringData @'
     ServiceStartupTypeMatches = The start mode of service {0} matches the expected start mode.
     ServiceStartupTypeDoesNotMatch = The start mode of service {0} does not match the expected start mode.
     ServicePropertyDoesNotMatch = The service property {0} of service {1} does not match the expected value. The expected value is {2}. The actual value is {3}.
+    ServiceCredentialIsEmpty = The start name of service {0} does not match the expected username from the given credential. The expected value is {1}. The actual value is empty.
     ServiceCredentialDoesNotMatch = The start name of service {0} does not match the expected username from the given credential. The expected value is {1}. The actual value is {2}.
     GroupManagedServiceCredentialDoesNotMatch = The start name of service {0} does not match the expected username from the given Group Managed Service Account. The expected value is {1}. The actual value is {2}.
     ServiceDeletionSucceeded = The service {0} has been successfully deleted.

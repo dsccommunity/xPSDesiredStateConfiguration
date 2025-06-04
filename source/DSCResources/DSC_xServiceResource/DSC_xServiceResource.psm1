@@ -30,12 +30,11 @@ $script:localizedData = Get-LocalizedData -DefaultUICulture 'en-US'
         cmdlet.
 
     .NOTES
-        BuiltInAccount, Credential and GroupManagedServiceAccount parameters output the user used
-        to run the service to the BuiltinAccount property, Evaluating if the account is a gMSA would
-        mean doing a call to active directory to verify, as the property returned by the ciminstance
-        is just a string. In a production scenario that would mean that every xService test will check
-        with AD every 15 minutes if the account is a gMSA. That's not desireable, so we output Credential
-        and GroupManagedServiceAccount without evaluating what kind of user is supplied.
+        Evaluating if the account is a gMSA would mean doing a call to active directory to verify,
+        as the property returned by the ciminstance is just a string.
+        In a production scenario that would mean that every xService test will check
+        with AD every 15 minutes if the account is a gMSA. That's not desireable, so we evaluate
+        what kind of user is supplied only based on the format of the string.
 #>
 function Get-TargetResource
 {
@@ -73,24 +72,47 @@ function Get-TargetResource
 
         $startupType = ConvertTo-StartupTypeString -StartMode $serviceCimInstance.StartMode
 
-        $builtInAccount = switch ($serviceCimInstance.StartName)
+        $serviceAccount = switch ($serviceCimInstance.StartName)
         {
             'NT Authority\NetworkService' { 'NetworkService'; break }
             'NT Authority\LocalService' { 'LocalService'; break }
             default { $serviceCimInstance.StartName }
         }
 
+        # Initialize variables
+        $builtInAccount = $null
+        $GroupManagedServiceAccount = $null
+        $Credential = $null
+
+        # Evaluate user type only based on the format of the string (as stated in the note)
+        if (($serviceAccount -eq 'LocalSystem') -or ($serviceAccount -eq 'LocalService') -or ($serviceAccount -eq 'NetworkService'))
+        {
+            $builtInAccount = $serviceAccount
+        }
+        elseif ($serviceAccount -match '^[\w-]+\\[\w-]+\$$')
+        {
+            $GroupManagedServiceAccount = $serviceAccount
+        }
+        else
+        {
+            # Password cannot be null
+            $Password = ConvertTo-SecureString 'DummyPassword' -AsPlainText -Force
+            $Credential = New-Object System.Management.Automation.PSCredential($serviceAccount, $Password)
+        }
+
         $serviceResource = @{
-            Name            = $Name
-            Ensure          = 'Present'
-            Path            = $serviceCimInstance.PathName
-            StartupType     = $startupType
-            BuiltInAccount  = $builtInAccount
-            State           = $service.Status.ToString()
-            DisplayName     = $service.DisplayName
-            Description     = $serviceCimInstance.Description
-            DesktopInteract = $serviceCimInstance.DesktopInteract
-            Dependencies    = $dependencies
+            Name                       = $Name
+            Ensure                     = 'Present'
+            Path                       = $serviceCimInstance.PathName
+            StartupType                = $startupType
+            BuiltInAccount             = $builtInAccount
+            GroupManagedServiceAccount = $GroupManagedServiceAccount
+            Credential                 = $Credential
+            State                      = $service.Status.ToString()
+            DisplayName                = $service.DisplayName
+            Description                = $serviceCimInstance.Description
+            DesktopInteract            = $serviceCimInstance.DesktopInteract
+            Dependencies               = $dependencies
         }
     }
     else
@@ -600,9 +622,9 @@ function Test-TargetResource
         {
             $expectedStartName = ConvertTo-StartName -Username $GroupManagedServiceAccount
 
-            if ($serviceResource.BuiltInAccount -ine $expectedStartName)
+            if ($serviceResource.GroupManagedServiceAccount -ine $expectedStartName)
             {
-                Write-Verbose -Message ($script:localizedData.GroupManagedServiceCredentialDoesNotMatch -f $Name, $GroupManagedServiceAccount, $serviceResource.BuiltInAccount)
+                Write-Verbose -Message ($script:localizedData.GroupManagedServiceCredentialDoesNotMatch -f $Name, $GroupManagedServiceAccount, $serviceResource.GroupManagedServiceAccount)
                 return $false
             }
         }
@@ -610,10 +632,19 @@ function Test-TargetResource
         {
             $expectedStartName = ConvertTo-StartName -Username $Credential.UserName
 
-            if ($serviceResource.BuiltInAccount -ine $expectedStartName)
+            # Check that credential resource exist
+            if ($null -eq $serviceResource.Credential)
             {
-                Write-Verbose -Message ($script:localizedData.ServiceCredentialDoesNotMatch -f $Name, $Credential.UserName, $serviceResource.BuiltInAccount)
+                Write-Verbose -Message ($script:localizedData.ServiceCredentialIsEmpty -f $Name, $Credential.UserName)
                 return $false
+            } else 
+            {
+                # Check that the username matches the expected start name
+                if ($serviceResource.Credential.UserName -ine $expectedStartName)
+                {
+                    Write-Verbose -Message ($script:localizedData.ServiceCredentialDoesNotMatch -f $Name, $Credential.UserName, $serviceResource.Credential.UserName)
+                    return $false
+                }
             }
         }
 
