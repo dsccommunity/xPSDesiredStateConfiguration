@@ -5,6 +5,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- xPSDesiredStateConfiguration.Security
+  - SChannelProtocols enabled value should be 1 and not 0xffffffff [Issue #740](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/740).
+
 ## [9.2.1] - 2024-11-11
 
 ### Changed
