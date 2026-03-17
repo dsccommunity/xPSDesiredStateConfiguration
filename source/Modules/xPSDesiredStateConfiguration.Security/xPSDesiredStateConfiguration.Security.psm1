@@ -76,7 +76,7 @@ function Set-SChannelProtocol
     {
         $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$protocol\Server"
         $null = New-Item -Path $registryPath -Force
-        $null = New-ItemProperty -Path $registryPath -Name Enabled -Value '0xffffffff' -PropertyType 'DWord' -Force
+        $null = New-ItemProperty -Path $registryPath -Name Enabled -Value 1 -PropertyType 'DWord' -Force
         $null = New-ItemProperty -Path $registryPath -Name DisabledByDefault -Value 0 -PropertyType 'DWord' -Force
     }
 }
