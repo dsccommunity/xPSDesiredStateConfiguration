@@ -5,10 +5,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- DocGeneration
+  - Use latest tasks to generate docs.
+
 ### Fixed
 
 - xPSDesiredStateConfiguration.Security
   - SChannelProtocols enabled value should be 1 and not 0xffffffff [Issue #740](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/740).
+- Update generate markdown config key [Issue #784](https://github.com/dsccommunity/xPSDesiredStateConfiguration/issues/784).
 
 ## [9.2.1] - 2024-11-11
 
