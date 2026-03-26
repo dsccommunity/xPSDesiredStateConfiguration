@@ -37,11 +37,11 @@ BuildWorkflow:
     - Create_changelog_release_output
 
   docs:
-    - Generate_Wiki_Content
     - Generate_Conceptual_Help
     - Generate_Wiki_Content
     - Generate_Wiki_Sidebar
     - Clean_Markdown_Metadata
+    - Add_newline_to_helpxml
     - Package_Wiki_Content
 
   pack:
