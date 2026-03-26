@@ -3,7 +3,7 @@
 [![Build Status](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_apis/build/status/dsccommunity.xPSDesiredStateConfiguration?branchName=main)](https://dev.azure.com/dsccommunity/xPSDesiredStateConfiguration/_build/latest?definitionId=8&branchName=main)
 ![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/xPSDesiredStateConfiguration/8/main)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/xPSDesiredStateConfiguration/8/main)](https://dsccommunity.visualstudio.com/xPSDesiredStateConfiguration/_test/analytics?definitionId=8&contextType=build)
-[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration%20Preview)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration%20Preview&include_prereleases)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/xPSDesiredStateConfiguration?label=xPSDesiredStateConfiguration)](https://www.powershellgallery.com/packages/xPSDesiredStateConfiguration/)
 [![codecov](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/xPSDesiredStateConfiguration)
 
