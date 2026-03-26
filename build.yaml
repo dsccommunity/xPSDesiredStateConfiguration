@@ -44,7 +44,7 @@ BuildWorkflow:
     - Clean_Markdown_Of_Public_Commands
     - Generate_Wiki_Sidebar
     - Clean_Markdown_Metadata
-    - Add_newline_to_helpxml
+    - Package_Wiki_Content
 
   pack:
     - build
