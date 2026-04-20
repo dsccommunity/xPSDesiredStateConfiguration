@@ -1128,7 +1128,7 @@ function ConvertTo-Binary
 
 <#
     .SYNOPSIS
-        Converts the specified registry key value to an Int32 for the DWord registry type.
+        Converts the specified registry key value to an UInt32 for the DWord registry type.
 
     .PARAMETER RegistryKeyValue
         The registry key value to convert.
@@ -1155,7 +1155,7 @@ function ConvertTo-DWord
         New-InvalidArgumentException -ArgumentName 'ValueData' -Message ($script:localizedData.ArrayNotAllowedForExpectedType -f 'Dword')
     }
 
-    $dwordRegistryKeyValue = [System.Int32] 0
+    $dwordRegistryKeyValue = [System.UInt32] 0
 
     if (($null -ne $RegistryKeyValue) -and ($RegistryKeyValue.Count -eq 1) -and (-not [System.String]::IsNullOrEmpty($RegistryKeyValue[0])))
     {
@@ -1171,7 +1171,7 @@ function ConvertTo-DWord
             $currentCultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
             $referenceValue = $null
 
-            if ([System.Int32]::TryParse($singleRegistryKeyValue, 'HexNumber', $currentCultureInfo, [ref] $referenceValue))
+            if ([System.UInt32]::TryParse($singleRegistryKeyValue, 'HexNumber', $currentCultureInfo, [ref] $referenceValue))
             {
                 $dwordRegistryKeyValue = $referenceValue
             }
@@ -1182,7 +1182,7 @@ function ConvertTo-DWord
         }
         else
         {
-            $dwordRegistryKeyValue = [System.Int32]::Parse($singleRegistryKeyValue)
+            $dwordRegistryKeyValue = [System.UInt32]::Parse($singleRegistryKeyValue)
         }
     }
 
